@@ -12,8 +12,8 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    height: 600,
-    width: 800,
+    height: 800,
+    width: 1600,
   });
 
   // and load the index.html of the app.
@@ -22,9 +22,7 @@ const createWindow = () => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  setContent('content was set')
-  log('log panel works')
-  visualizeFile('testfile.txt')
+  visualizeDirectory("./src")
 };
 
 // This method will be called when Electron has finished
@@ -52,34 +50,64 @@ app.on('activate', () => {
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
 
-function visualizeFile(fileName: string): void {
-  log("visualizeFile")
-  fs.readFile(fileName, 'utf-8', (err, data) => {
-      log('listFiles2')
+function visualizeDirectory(relativePath: string): void {
+  log('visualizeDirectory')
+  fs.readdirSync(relativePath).forEach(file => {
+    log(file);
+    visualizeFile(relativePath, file)
+  });
+}
+
+function visualizeFile(directoryPath: string, fileName: string): void {
+  let filePath: string = directoryPath + '/' + fileName;
+  log("visualizeFile " + filePath)
+  fs.readFile(filePath, 'utf-8', (err, data) => {
       if(err) {
-          log('An error occurred reading the file :' + err.message)
+        log('visualizeFile ' + filePath + ': interpret error as directory:' + err.message)
+        addContent(formDirectoryBox(fileName))
       } else {
-        log('listFiles success, file length is ' + data.length)
+        log('visualizeFile ' + filePath + ': file length of is ' + data.length)
         let fileContent: string = convertFileDataToHtmlString(data)
-        setContent(createFileBox(fileName, fileContent))
+        addContent(formFileBox(fileName, fileContent))
       }
   })
 }
 
 function convertFileDataToHtmlString(fileData: string): string {
-  var string = '';
+  var content: string = '';
   for (let i = 0; i < fileData.length-1; i++) {
-    if (fileData[i] === '\n') {
-      string += '<br/>'
-    } else {
-      string += fileData[i]
-    }
+    content += escapeCharForHtml(fileData[i])
   }
-  return string
+  return '<pre style="margin:0px">' + content + '</pre>'
 }
 
-function createFileBox(name: string, content: string): string {
+function escapeCharForHtml(c: string): string {
+  switch (c) {
+    case '\n':
+      return '<br/>'
+    case '\'':
+      return '&#39;'
+    case '"':
+      return '&quot;'
+    case '<':
+      return '&lt;'
+    case '>':
+      return '&gt;'
+    default:
+      return c
+  }
+}
+
+function formDirectoryBox(name: string) {
+  return '<div style="display:inline-block;border:dotted;border-color:skyblue">' + name + '</div>'
+}
+
+function formFileBox(name: string, content: string): string {
   return '<div style="display:inline-block">' + name + '<div style="border:solid;border-color:skyblue">' + content + '</div></div>'
+}
+
+function addContent(content: string): void {
+  mainWindow.webContents.executeJavaScript("document.getElementById('content').innerHTML += '" + content + "'")
 }
 
 function setContent(content: string): void {

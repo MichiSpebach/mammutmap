@@ -1,0 +1,14 @@
+following two lines should match character-wise, html tags should not be interpreted:
+'&lt;div style=&quot;display:inline-block;border:dotted;border-color:skyblue&quot;&gt;' + name + '&lt;/div&gt;'
+'<div style="display:inline-block;border:dotted;border-color:skyblue">' + name + '</div>'
+
+following two lines should have same length, spaces should be displayes:
+5spaces->     <-5spaces
+5spaces->_____<-5spaces
+
+following lines should be tab-indented, tabulator should be displayed:
+function logNumbers(): void {
+  for (var i:number = 0; i < 10; i++) {
+    console.log(i)
+  }
+}
