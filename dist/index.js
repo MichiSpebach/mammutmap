@@ -82,6 +82,8 @@ function escapeCharForHtml(c) {
             return '&lt;';
         case '>':
             return '&gt;';
+        case '&':
+            return '&amp';
         default:
             return c;
     }
