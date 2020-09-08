@@ -1,5 +1,8 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
+import * as fs from 'fs';
+
+var mainWindow: BrowserWindow
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -8,7 +11,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 const createWindow = () => {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     height: 600,
     width: 800,
   });
@@ -18,6 +21,10 @@ const createWindow = () => {
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
+
+  setContent('content was set')
+  log('log panel works')
+  visualizeFile('testfile.txt')
 };
 
 // This method will be called when Electron has finished
@@ -44,3 +51,42 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+function visualizeFile(fileName: string): void {
+  log("visualizeFile")
+  fs.readFile(fileName, 'utf-8', (err, data) => {
+      log('listFiles2')
+      if(err) {
+          log('An error occurred reading the file :' + err.message)
+      } else {
+        log('listFiles success, file length is ' + data.length)
+        let fileContent: string = convertFileDataToHtmlString(data)
+        setContent(createFileBox(fileName, fileContent))
+      }
+  })
+}
+
+function convertFileDataToHtmlString(fileData: string): string {
+  var string = '';
+  for (let i = 0; i < fileData.length-1; i++) {
+    if (fileData[i] === '\n') {
+      string += '<br/>'
+    } else {
+      string += fileData[i]
+    }
+  }
+  return string
+}
+
+function createFileBox(name: string, content: string): string {
+  return '<div style="display:inline-block">' + name + '<div style="border:solid;border-color:skyblue">' + content + '</div></div>'
+}
+
+function setContent(content: string): void {
+  mainWindow.webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'")
+}
+
+function log(log: string): void {
+  console.log(log)
+  mainWindow.webContents.executeJavaScript("document.getElementById('log').innerHTML += '<br/>" + log + "'")
+}
