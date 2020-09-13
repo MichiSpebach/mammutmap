@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
+import * as util from './util'
 import { Box } from './Box'
 
 var mainWindow: BrowserWindow
@@ -17,12 +18,14 @@ const createWindow = () => {
   });
 
   // and load the index.html of the app.
-  mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
+  mainWindow.loadFile(path.join(__dirname, '../src/index.html'))
 
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  let box = new Box("./src", mainWindow);
+  util.initUtil(mainWindow.webContents)
+
+  let box = new Box("./src")
   box.visualizeDirectory()
 };
 

@@ -2,6 +2,7 @@
 exports.__esModule = true;
 var electron_1 = require("electron");
 var path = require("path");
+var util = require("./util");
 var Box_1 = require("./Box");
 var mainWindow;
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -18,7 +19,8 @@ var createWindow = function () {
     mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
-    var box = new Box_1.Box("./src", mainWindow);
+    util.initUtil(mainWindow.webContents);
+    var box = new Box_1.Box("./src");
     box.visualizeDirectory();
 };
 // This method will be called when Electron has finished

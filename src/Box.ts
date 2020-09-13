@@ -1,34 +1,32 @@
-import { BrowserWindow } from 'electron';
 import * as fs from 'fs';
+import * as util from './util'
 
 export class Box {
   private path: string
-  private mainWindow: BrowserWindow
 
-  public constructor(directoryPath: string, mainWindow: BrowserWindow) {
+  public constructor(directoryPath: string) {
     this.path = directoryPath
-    this.mainWindow = mainWindow
   }
 
   public visualizeDirectory(): void {
-    this.log('visualizeDirectory')
+    util.log('visualizeDirectory')
     fs.readdirSync(this.path).forEach(file => {
-      this.log(file);
+      util.log(file);
       this.visualizeFile(this.path, file)
     });
   }
 
   private visualizeFile(directoryPath: string, fileName: string): void {
     let filePath: string = directoryPath + '/' + fileName;
-    this.log("visualizeFile " + filePath)
+    util.log("visualizeFile " + filePath)
     fs.readFile(filePath, 'utf-8', (err, data) => {
         if(err) {
-          this.log('visualizeFile ' + filePath + ': interpret error as directory:' + err.message)
-          this.addContent(this.formDirectory(fileName))
+          util.log('visualizeFile ' + filePath + ': interpret error as directory:' + err.message)
+          util.addContent(this.formDirectory(fileName))
         } else {
-          this.log('visualizeFile ' + filePath + ': file length of is ' + data.length)
+          util.log('visualizeFile ' + filePath + ': file length of is ' + data.length)
           let fileContent: string = this.convertFileDataToHtmlString(data)
-          this.addContent(this.formFile(fileName, fileContent))
+          util.addContent(this.formFile(fileName, fileContent))
         }
     })
   }
@@ -66,18 +64,5 @@ export class Box {
 
   private formFile(name: string, content: string): string {
     return '<div style="display:inline-block">' + name + '<div style="border:solid;border-color:skyblue">' + content + '</div></div>'
-  }
-
-  private addContent(content: string): void {
-    this.mainWindow.webContents.executeJavaScript("document.getElementById('content').innerHTML += '" + content + "'")
-  }
-
-  private setContent(content: string): void {
-    this.mainWindow.webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'")
-  }
-
-  private log(log: string): void {
-    console.log(log)
-    this.mainWindow.webContents.executeJavaScript("document.getElementById('log').innerHTML += '<br/>" + log + "'")
   }
 }

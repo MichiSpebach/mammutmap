@@ -2,32 +2,32 @@
 exports.__esModule = true;
 exports.Box = void 0;
 var fs = require("fs");
+var util = require("./util");
 var Box = /** @class */ (function () {
-    function Box(directoryPath, mainWindow) {
+    function Box(directoryPath) {
         this.path = directoryPath;
-        this.mainWindow = mainWindow;
     }
     Box.prototype.visualizeDirectory = function () {
         var _this = this;
-        this.log('visualizeDirectory');
+        util.log('visualizeDirectory');
         fs.readdirSync(this.path).forEach(function (file) {
-            _this.log(file);
+            util.log(file);
             _this.visualizeFile(_this.path, file);
         });
     };
     Box.prototype.visualizeFile = function (directoryPath, fileName) {
         var _this = this;
         var filePath = directoryPath + '/' + fileName;
-        this.log("visualizeFile " + filePath);
+        util.log("visualizeFile " + filePath);
         fs.readFile(filePath, 'utf-8', function (err, data) {
             if (err) {
-                _this.log('visualizeFile ' + filePath + ': interpret error as directory:' + err.message);
-                _this.addContent(_this.formDirectory(fileName));
+                util.log('visualizeFile ' + filePath + ': interpret error as directory:' + err.message);
+                util.addContent(_this.formDirectory(fileName));
             }
             else {
-                _this.log('visualizeFile ' + filePath + ': file length of is ' + data.length);
+                util.log('visualizeFile ' + filePath + ': file length of is ' + data.length);
                 var fileContent = _this.convertFileDataToHtmlString(data);
-                _this.addContent(_this.formFile(fileName, fileContent));
+                util.addContent(_this.formFile(fileName, fileContent));
             }
         });
     };
@@ -61,16 +61,6 @@ var Box = /** @class */ (function () {
     };
     Box.prototype.formFile = function (name, content) {
         return '<div style="display:inline-block">' + name + '<div style="border:solid;border-color:skyblue">' + content + '</div></div>';
-    };
-    Box.prototype.addContent = function (content) {
-        this.mainWindow.webContents.executeJavaScript("document.getElementById('content').innerHTML += '" + content + "'");
-    };
-    Box.prototype.setContent = function (content) {
-        this.mainWindow.webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'");
-    };
-    Box.prototype.log = function (log) {
-        console.log(log);
-        this.mainWindow.webContents.executeJavaScript("document.getElementById('log').innerHTML += '<br/>" + log + "'");
     };
     return Box;
 }());
