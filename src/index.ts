@@ -1,6 +1,6 @@
-import { app, BrowserWindow } from 'electron';
-import * as path from 'path';
-import * as fs from 'fs';
+import { app, BrowserWindow } from 'electron'
+import * as path from 'path'
+import { Box } from './Box'
 
 var mainWindow: BrowserWindow
 
@@ -22,7 +22,8 @@ const createWindow = () => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  visualizeDirectory("./src")
+  let box = new Box("./src", mainWindow);
+  box.visualizeDirectory()
 };
 
 // This method will be called when Electron has finished
@@ -49,74 +50,3 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
-
-function visualizeDirectory(relativePath: string): void {
-  log('visualizeDirectory')
-  fs.readdirSync(relativePath).forEach(file => {
-    log(file);
-    visualizeFile(relativePath, file)
-  });
-}
-
-function visualizeFile(directoryPath: string, fileName: string): void {
-  let filePath: string = directoryPath + '/' + fileName;
-  log("visualizeFile " + filePath)
-  fs.readFile(filePath, 'utf-8', (err, data) => {
-      if(err) {
-        log('visualizeFile ' + filePath + ': interpret error as directory:' + err.message)
-        addContent(formDirectoryBox(fileName))
-      } else {
-        log('visualizeFile ' + filePath + ': file length of is ' + data.length)
-        let fileContent: string = convertFileDataToHtmlString(data)
-        addContent(formFileBox(fileName, fileContent))
-      }
-  })
-}
-
-function convertFileDataToHtmlString(fileData: string): string {
-  var content: string = '';
-  for (let i = 0; i < fileData.length-1; i++) {
-    content += escapeCharForHtml(fileData[i])
-  }
-  return '<pre style="margin:0px">' + content + '</pre>'
-}
-
-function escapeCharForHtml(c: string): string {
-  switch (c) {
-    case '\n':
-      return '<br/>'
-    case '\'':
-      return '&#39;'
-    case '"':
-      return '&quot;'
-    case '<':
-      return '&lt;'
-    case '>':
-      return '&gt;'
-    case '&':
-      return '&amp'
-    default:
-      return c
-  }
-}
-
-function formDirectoryBox(name: string) {
-  return '<div style="display:inline-block;border:dotted;border-color:skyblue">' + name + '</div>'
-}
-
-function formFileBox(name: string, content: string): string {
-  return '<div style="display:inline-block">' + name + '<div style="border:solid;border-color:skyblue">' + content + '</div></div>'
-}
-
-function addContent(content: string): void {
-  mainWindow.webContents.executeJavaScript("document.getElementById('content').innerHTML += '" + content + "'")
-}
-
-function setContent(content: string): void {
-  mainWindow.webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'")
-}
-
-function log(log: string): void {
-  console.log(log)
-  mainWindow.webContents.executeJavaScript("document.getElementById('log').innerHTML += '<br/>" + log + "'")
-}
