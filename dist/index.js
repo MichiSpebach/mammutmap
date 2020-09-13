@@ -21,7 +21,7 @@ var createWindow = function () {
     mainWindow.webContents.openDevTools();
     util.initUtil(mainWindow.webContents);
     var box = new Box_1.Box("./src");
-    box.visualizeDirectory();
+    box.visualize();
 };
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

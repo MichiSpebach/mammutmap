@@ -1,4 +1,6 @@
-import { WebContents } from 'electron';
+import { WebContents } from 'electron'
+import * as fs from 'fs'
+import { Dirent } from 'fs'
 
 var webContents: WebContents
 
@@ -14,7 +16,60 @@ export function setContent(content: string): void {
   webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'")
 }
 
-export function log(log: string): void {
-  console.log(log)
-  webContents.executeJavaScript("document.getElementById('log').innerHTML += '<br/>" + log + "'")
+export function logInfo(message: string) {
+    log('Info: ' + message, 'grey')
+}
+
+export function logError(message: string) {
+    log('ERROR: ' + message, 'red')
+}
+
+function log(message: string, color: string): void {
+  console.log(message)
+  let division: string = '<div style="color:' + color + '">' + message + '</div>'
+  webContents.executeJavaScript("document.getElementById('log').innerHTML += '" + division + "'")
+}
+
+export function readdirSync(path: string): Dirent[] {
+  return fs.readdirSync(path, { withFileTypes: true })
+}
+
+export function readFile(path: string, callback: (dataConvertedToHtml: string) => void): void {
+  fs.readFile(path, 'utf-8', (err: NodeJS.ErrnoException | null, data: string) => {
+    if(err) {
+      logError('util::readFile, ' + path + ', ' + err.message)
+    } else {
+      callback(convertFileDataToHtmlString(data))
+    }
+  })
+}
+
+export function convertFileDataToHtmlString(fileData: string): string {
+  var content: string = '';
+  for (let i = 0; i < fileData.length-1; i++) {
+    // TODO this is maybe very inefficient
+    content += escapeCharForHtml(fileData[i])
+  }
+  return content
+}
+
+function escapeCharForHtml(c: string): string {
+  switch (c) {
+    case '\\':
+      return '&#92;'
+    case '\n':
+      return '<br/>'
+    case '\'':
+      return '&#39;'
+    case '"':
+      return '&quot;'
+    case '<':
+      return '&lt;'
+    case '>':
+      return '&gt;'
+    case '&':
+      return '&amp'
+    default:
+      return c
+  }
 }

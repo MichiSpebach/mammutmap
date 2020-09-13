@@ -14,3 +14,9 @@ function logNumbers(): void {
     console.log(i)
   }
 }
+
+one backslash: \
+two backslashes: \\
+three backslashes: \\\
+
+backslash n (\_n) should be displayed here ->\n<- and there should be _no_ linebreak
