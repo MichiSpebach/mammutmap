@@ -5,13 +5,15 @@ export class FileBox {
   private parent: Box
   private name: string
   private id: string
-  private targetWidth: number
-  private targetHeight: number
+  private widthInPercent: number
+  private heightInPercent: number
 
-  public constructor(parent: Box, name: string, id: string) {
+  public constructor(parent: Box, name: string, id: string, widthInPercent: number, heightInPercent: number) {
     this.parent = parent
     this.name = name
     this.id = id
+    this.widthInPercent = widthInPercent
+    this.heightInPercent = heightInPercent
   }
 
   public getPath(): string {
@@ -25,9 +27,14 @@ export class FileBox {
   }
 
   private renderDiv(content: string):void {
-    let preformattedContent: string = '<pre style="margin:0px">' + content + '</pre>'
-    let contentDivision: string = '<div style="border:solid;border-color:skyblue">' + preformattedContent + '</div>'
-    util.setContentTo(this.id, this.name + contentDivision)
+    let basicStyle: string = 'display:inline-block;overflow:auto;'
+    let scaleStyle:string = 'width:' + this.widthInPercent + '%;height:' + this.heightInPercent + '%;'
+    let borderStyle:string = 'border:solid;border-color:skyblue;'
+    util.setStyleTo(this.id, basicStyle + scaleStyle + borderStyle)
+
+    let nameElement: string = '<div style="background-color:skyblue;">' + this.name + '</div>'
+    let contentElement: string = '<pre style="margin:0px;">' + content + '</pre>'
+    util.setContentTo(this.id, nameElement + contentElement)
   }
 
 }

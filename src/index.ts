@@ -25,8 +25,8 @@ const createWindow = () => {
 
   util.initUtil(mainWindow.webContents)
 
-  let box = new Box("./src")
-  box.visualize()
+  let box = new Box('./src', 'content')
+  box.render()
 };
 
 // This method will be called when Electron has finished

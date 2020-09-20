@@ -1,12 +1,12 @@
 "use strict";
 exports.__esModule = true;
-exports.generateDivId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.setContent = exports.addContent = exports.initUtil = void 0;
+exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.setContent = exports.addContent = exports.initUtil = void 0;
 var fs = require("fs");
 var webContents;
-var divIdCounter;
+var elementIdCounter;
 function initUtil(webContentsToRender) {
     webContents = webContentsToRender;
-    divIdCounter = 0;
+    elementIdCounter = 0;
 }
 exports.initUtil = initUtil;
 function addContent(content) {
@@ -82,9 +82,9 @@ function escapeCharForHtml(c) {
             return c;
     }
 }
-function generateDivId() {
-    divIdCounter += 1;
-    return 'division' + divIdCounter;
+function generateElementId() {
+    elementIdCounter += 1;
+    return 'division' + elementIdCounter;
 }
-exports.generateDivId = generateDivId;
+exports.generateElementId = generateElementId;
 //# sourceMappingURL=util.js.map

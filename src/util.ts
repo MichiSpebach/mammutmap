@@ -3,11 +3,11 @@ import * as fs from 'fs'
 import { Dirent } from 'fs'
 
 var webContents: WebContents
-var divIdCounter: number
+var elementIdCounter: number
 
 export function initUtil(webContentsToRender: WebContents) {
   webContents = webContentsToRender
-  divIdCounter = 0
+  elementIdCounter = 0
 }
 
 export function addContent(content: string): void {
@@ -84,7 +84,7 @@ function escapeCharForHtml(c: string): string {
   }
 }
 
-export function generateDivId(): string {
-  divIdCounter += 1
-  return 'division' + divIdCounter
+export function generateElementId(): string {
+  elementIdCounter += 1
+  return 'division' + elementIdCounter
 }
