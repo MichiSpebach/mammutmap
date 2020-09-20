@@ -1,10 +1,18 @@
 import * as util from './util'
+import { FileBox } from './FileBox'
 
 export class Box {
   private path: string
+  private id: string
+  private targetWidth: number
+  private targetHeight: number
 
   public constructor(directoryPath: string) {
     this.path = directoryPath
+  }
+
+  public getPath(): string {
+    return this.path
   }
 
   public visualize(): void {
@@ -28,23 +36,14 @@ export class Box {
   }
 
   private visualizeDirectory(name: string) {
-    util.addContent(this.formDirectoryBox(name))
+    util.addContent('<div style="display:inline-block;border:dotted;border-color:skyblue">' + name + '</div>')
   }
 
   private visualizeFile(name: string): void {
-    let filePath: string = this.path + '/' + name;
-    util.readFile(filePath, (dataConvertedToHtml: string) => {
-      util.addContent(this.formFileBox(name, dataConvertedToHtml))
-    })
+    let boxId: string = util.generateDivId()
+    util.addContent('<div id="' + boxId + '" style="display:inline-block">' + name + '</div>')
+    let box: FileBox = new FileBox(this, name, boxId)
+    box.render()
   }
 
-  private formDirectoryBox(name: string): string {
-    return '<div style="display:inline-block;border:dotted;border-color:skyblue">' + name + '</div>'
-  }
-
-  private formFileBox(name: string, content: string): string {
-    let preformattedContent: string = '<pre style="margin:0px">' + content + '</pre>'
-    let contentDivision: string = '<div style="border:solid;border-color:skyblue">' + preformattedContent + '</div>'
-    return '<div style="display:inline-block">' + name + contentDivision + '</div>'
-  }
 }

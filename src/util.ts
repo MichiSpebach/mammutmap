@@ -3,9 +3,11 @@ import * as fs from 'fs'
 import { Dirent } from 'fs'
 
 var webContents: WebContents
+var divIdCounter: number
 
 export function initUtil(webContentsToRender: WebContents) {
   webContents = webContentsToRender
+  divIdCounter = 0
 }
 
 export function addContent(content: string): void {
@@ -14,6 +16,14 @@ export function addContent(content: string): void {
 
 export function setContent(content: string): void {
   webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'")
+}
+
+export function setContentTo(id: string, content: string) {
+  webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML = '" + content + "'")
+}
+
+export function setStyleTo(id: string, style: string) {
+  webContents.executeJavaScript("document.getElementById('" + id + "').style = '" + style + "'")
 }
 
 export function logInfo(message: string) {
@@ -72,4 +82,9 @@ function escapeCharForHtml(c: string): string {
     default:
       return c
   }
+}
+
+export function generateDivId(): string {
+  divIdCounter += 1
+  return 'division' + divIdCounter
 }

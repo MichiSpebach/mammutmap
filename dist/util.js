@@ -1,10 +1,12 @@
 "use strict";
 exports.__esModule = true;
-exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setContent = exports.addContent = exports.initUtil = void 0;
+exports.generateDivId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.setContent = exports.addContent = exports.initUtil = void 0;
 var fs = require("fs");
 var webContents;
+var divIdCounter;
 function initUtil(webContentsToRender) {
     webContents = webContentsToRender;
+    divIdCounter = 0;
 }
 exports.initUtil = initUtil;
 function addContent(content) {
@@ -15,6 +17,14 @@ function setContent(content) {
     webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'");
 }
 exports.setContent = setContent;
+function setContentTo(id, content) {
+    webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML = '" + content + "'");
+}
+exports.setContentTo = setContentTo;
+function setStyleTo(id, style) {
+    webContents.executeJavaScript("document.getElementById('" + id + "').style = '" + style + "'");
+}
+exports.setStyleTo = setStyleTo;
 function logInfo(message) {
     log('Info: ' + message, 'grey');
 }
@@ -72,4 +82,9 @@ function escapeCharForHtml(c) {
             return c;
     }
 }
+function generateDivId() {
+    divIdCounter += 1;
+    return 'division' + divIdCounter;
+}
+exports.generateDivId = generateDivId;
 //# sourceMappingURL=util.js.map

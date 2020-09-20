@@ -2,10 +2,14 @@
 exports.__esModule = true;
 exports.Box = void 0;
 var util = require("./util");
+var FileBox_1 = require("./FileBox");
 var Box = /** @class */ (function () {
     function Box(directoryPath) {
         this.path = directoryPath;
     }
+    Box.prototype.getPath = function () {
+        return this.path;
+    };
     Box.prototype.visualize = function () {
         var _this = this;
         util.logInfo('Box::visualize ' + this.path);
@@ -26,22 +30,13 @@ var Box = /** @class */ (function () {
         });
     };
     Box.prototype.visualizeDirectory = function (name) {
-        util.addContent(this.formDirectoryBox(name));
+        util.addContent('<div style="display:inline-block;border:dotted;border-color:skyblue">' + name + '</div>');
     };
     Box.prototype.visualizeFile = function (name) {
-        var _this = this;
-        var filePath = this.path + '/' + name;
-        util.readFile(filePath, function (dataConvertedToHtml) {
-            util.addContent(_this.formFileBox(name, dataConvertedToHtml));
-        });
-    };
-    Box.prototype.formDirectoryBox = function (name) {
-        return '<div style="display:inline-block;border:dotted;border-color:skyblue">' + name + '</div>';
-    };
-    Box.prototype.formFileBox = function (name, content) {
-        var preformattedContent = '<pre style="margin:0px">' + content + '</pre>';
-        var contentDivision = '<div style="border:solid;border-color:skyblue">' + preformattedContent + '</div>';
-        return '<div style="display:inline-block">' + name + contentDivision + '</div>';
+        var boxId = util.generateDivId();
+        util.addContent('<div id="' + boxId + '" style="display:inline-block">' + name + '</div>');
+        var box = new FileBox_1.FileBox(this, name, boxId);
+        box.render();
     };
     return Box;
 }());
