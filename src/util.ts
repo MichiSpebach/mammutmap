@@ -86,5 +86,5 @@ function escapeCharForHtml(c: string): string {
 
 export function generateElementId(): string {
   elementIdCounter += 1
-  return 'division' + elementIdCounter
+  return 'element' + elementIdCounter
 }

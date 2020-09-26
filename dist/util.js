@@ -84,7 +84,7 @@ function escapeCharForHtml(c) {
 }
 function generateElementId() {
     elementIdCounter += 1;
-    return 'division' + elementIdCounter;
+    return 'element' + elementIdCounter;
 }
 exports.generateElementId = generateElementId;
 //# sourceMappingURL=util.js.map

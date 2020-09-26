@@ -5,6 +5,7 @@ var util = require("./util");
 var FileBox_1 = require("./FileBox");
 var Box = /** @class */ (function () {
     function Box(directoryPath, id) {
+        this.boxes = [];
         this.path = directoryPath;
         this.id = id;
     }
@@ -23,21 +24,23 @@ var Box = /** @class */ (function () {
             }
             else if (file.isFile()) {
                 util.logInfo('Box::render file ' + filePath);
-                _this.renderFile(fileName);
+                _this.boxes.push(_this.createFileBox(fileName));
             }
             else {
                 util.logError('Box::render ' + filePath + ' is neither file nor directory.');
             }
         });
+        this.boxes.forEach(function (box) {
+            box.render(49, 2 * 80 / _this.boxes.length);
+        });
     };
     Box.prototype.renderDirectory = function (name) {
         util.addContent('<div style="display:inline-block;border:dotted;border-color:skyblue;">' + name + '</div>');
     };
-    Box.prototype.renderFile = function (name) {
+    Box.prototype.createFileBox = function (name) {
         var elementId = util.generateElementId();
         util.addContent('<div id="' + elementId + '" style="display:inline-block;">loading...' + name + '</div>');
-        var box = new FileBox_1.FileBox(this, name, elementId, 100, 10);
-        box.render();
+        return new FileBox_1.FileBox(this, name, elementId);
     };
     return Box;
 }());

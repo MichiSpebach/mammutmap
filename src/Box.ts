@@ -6,6 +6,7 @@ export class Box {
   private id: string
   private widthInPercent: number
   private heightInPercent: number
+  private boxes: FileBox[] = []
 
   public constructor(directoryPath: string, id: string) {
     this.path = directoryPath
@@ -28,11 +29,15 @@ export class Box {
 
       } else if (file.isFile()) {
         util.logInfo('Box::render file ' + filePath)
-        this.renderFile(fileName)
+        this.boxes.push(this.createFileBox(fileName))
 
       } else {
         util.logError('Box::render ' + filePath + ' is neither file nor directory.')
       }
+    });
+
+    this.boxes.forEach(box => {
+      box.render(49, 2*80 / this.boxes.length)
     });
   }
 
@@ -40,11 +45,10 @@ export class Box {
     util.addContent('<div style="display:inline-block;border:dotted;border-color:skyblue;">' + name + '</div>')
   }
 
-  private renderFile(name: string): void {
+  private createFileBox(name: string): FileBox {
     let elementId: string = util.generateElementId()
     util.addContent('<div id="' + elementId + '" style="display:inline-block;">loading...' + name + '</div>')
-    let box: FileBox = new FileBox(this, name, elementId, 100, 10)
-    box.render()
+    return new FileBox(this, name, elementId)
   }
 
 }

@@ -3,18 +3,18 @@ exports.__esModule = true;
 exports.FileBox = void 0;
 var util = require("./util");
 var FileBox = /** @class */ (function () {
-    function FileBox(parent, name, id, widthInPercent, heightInPercent) {
+    function FileBox(parent, name, id) {
         this.parent = parent;
         this.name = name;
         this.id = id;
-        this.widthInPercent = widthInPercent;
-        this.heightInPercent = heightInPercent;
     }
     FileBox.prototype.getPath = function () {
         return this.parent.getPath() + '/' + this.name;
     };
-    FileBox.prototype.render = function () {
+    FileBox.prototype.render = function (widthInPercent, heightInPercent) {
         var _this = this;
+        this.widthInPercent = widthInPercent;
+        this.heightInPercent = heightInPercent;
         util.readFile(this.getPath(), function (dataConvertedToHtml) {
             _this.renderDiv(dataConvertedToHtml);
         });

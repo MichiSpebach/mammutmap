@@ -8,19 +8,19 @@ export class FileBox {
   private widthInPercent: number
   private heightInPercent: number
 
-  public constructor(parent: Box, name: string, id: string, widthInPercent: number, heightInPercent: number) {
+  public constructor(parent: Box, name: string, id: string) {
     this.parent = parent
     this.name = name
     this.id = id
-    this.widthInPercent = widthInPercent
-    this.heightInPercent = heightInPercent
   }
 
   public getPath(): string {
     return this.parent.getPath() + '/' + this.name
   }
 
-  public render():void {
+  public render(widthInPercent: number, heightInPercent: number):void {
+    this.widthInPercent = widthInPercent
+    this.heightInPercent = heightInPercent
     util.readFile(this.getPath(), (dataConvertedToHtml: string) => {
       this.renderDiv(dataConvertedToHtml)
     })
@@ -28,8 +28,8 @@ export class FileBox {
 
   private renderDiv(content: string):void {
     let basicStyle: string = 'display:inline-block;overflow:auto;'
-    let scaleStyle:string = 'width:' + this.widthInPercent + '%;height:' + this.heightInPercent + '%;'
-    let borderStyle:string = 'border:solid;border-color:skyblue;'
+    let scaleStyle: string = 'width:' + this.widthInPercent + '%;height:' + this.heightInPercent + '%;'
+    let borderStyle: string = 'border:solid;border-color:skyblue;'
     util.setStyleTo(this.id, basicStyle + scaleStyle + borderStyle)
 
     let nameElement: string = '<div style="background-color:skyblue;">' + this.name + '</div>'
