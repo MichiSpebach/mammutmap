@@ -3,24 +3,38 @@ import { Box } from './Box'
 import { FileBox } from './FileBox'
 
 export class DirectoryBox extends Box {
-  private boxes: FileBox[] = []
+  private boxes: Box[] = []
 
-  public constructor(directoryPath: string, id: string) {
-    super(null, directoryPath, id)
+  public constructor(parent: Box|null, name: string, id: string) {
+    super(parent, name, id)
   }
 
-  public render(widthInPercent: number, heightInPercent: number): void {
+  public render(widthInPercent: number, heightInPercent: number): void { // TODO: move to super
     super.setWidthInPercent(widthInPercent)
     super.setHeightInPercent(heightInPercent)
 
     util.logInfo('Box::render ' + super.getPath())
+    this.renderStyle()
+    super.renderHeader()
+    this.renderBody()
+  }
+
+  private renderStyle(): void { // TODO: move to super
+    let basicStyle: string = 'display:inline-block;overflow:auto;'
+    let scaleStyle: string = 'width:' + super.getWidthInPercent() + '%;height:' + super.getHeightInPercent() + '%;'
+    let borderStyle: string = 'border:dotted;border-color:skyblue;'
+
+    util.setStyleTo(super.getId(), basicStyle + scaleStyle + borderStyle)
+  }
+
+  private renderBody(): void {
     util.readdirSync(super.getPath()).forEach(file => {
       let fileName: string = file.name
       let filePath: string = super.getPath() + '/' + fileName
 
       if (file.isDirectory()) {
         util.logInfo('Box::render directory ' + filePath)
-        this.renderDirectory(fileName)
+        this.boxes.push(this.createDirectoryBox(fileName))
 
       } else if (file.isFile()) {
         util.logInfo('Box::render file ' + filePath)
@@ -36,14 +50,20 @@ export class DirectoryBox extends Box {
     });
   }
 
-  private renderDirectory(name: string) {
-    util.addContent('<div style="display:inline-block;border:dotted;border-color:skyblue;">' + name + '</div>')
+  private createDirectoryBox(name: string): DirectoryBox {
+    let elementId: string = this.renderBoxPlaceholderAndReturnId(name)
+    return new DirectoryBox(this, name, elementId)
   }
 
   private createFileBox(name: string): FileBox {
-    let elementId: string = util.generateElementId()
-    util.addContent('<div id="' + elementId + '" style="display:inline-block;">loading...' + name + '</div>')
+    let elementId: string = this.renderBoxPlaceholderAndReturnId(name)
     return new FileBox(this, name, elementId)
+  }
+
+  private renderBoxPlaceholderAndReturnId(name: string): string {
+    let elementId: string = util.generateElementId()
+    util.addContentTo(super.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
+    return elementId
   }
 
 }

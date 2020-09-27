@@ -1,6 +1,6 @@
 "use strict";
 exports.__esModule = true;
-exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.setContent = exports.addContent = exports.initUtil = void 0;
+exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.initUtil = void 0;
 var fs = require("fs");
 var webContents;
 var elementIdCounter;
@@ -17,6 +17,10 @@ function setContent(content) {
     webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'");
 }
 exports.setContent = setContent;
+function addContentTo(id, content) {
+    webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML += '" + content + "'");
+}
+exports.addContentTo = addContentTo;
 function setContentTo(id, content) {
     webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML = '" + content + "'");
 }

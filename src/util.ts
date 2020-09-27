@@ -18,6 +18,10 @@ export function setContent(content: string): void {
   webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'")
 }
 
+export function addContentTo(id: string, content: string) {
+  webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML += '" + content + "'")
+}
+
 export function setContentTo(id: string, content: string) {
   webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML = '" + content + "'")
 }

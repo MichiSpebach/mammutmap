@@ -22,21 +22,24 @@ var FileBox = /** @class */ (function (_super) {
         return _super.call(this, parent, name, id) || this;
     }
     FileBox.prototype.render = function (widthInPercent, heightInPercent) {
-        var _this = this;
         _super.prototype.setWidthInPercent.call(this, widthInPercent);
         _super.prototype.setHeightInPercent.call(this, heightInPercent);
-        util.readFile(this.getPath(), function (dataConvertedToHtml) {
-            _this.renderDiv(dataConvertedToHtml);
-        });
+        this.renderStyle();
+        _super.prototype.renderHeader.call(this);
+        this.renderBody();
     };
-    FileBox.prototype.renderDiv = function (content) {
+    FileBox.prototype.renderStyle = function () {
         var basicStyle = 'display:inline-block;overflow:auto;';
         var scaleStyle = 'width:' + _super.prototype.getWidthInPercent.call(this) + '%;height:' + _super.prototype.getHeightInPercent.call(this) + '%;';
         var borderStyle = 'border:solid;border-color:skyblue;';
         util.setStyleTo(_super.prototype.getId.call(this), basicStyle + scaleStyle + borderStyle);
-        var nameElement = '<div style="background-color:skyblue;">' + _super.prototype.getName.call(this) + '</div>';
-        var contentElement = '<pre style="margin:0px;">' + content + '</pre>';
-        util.setContentTo(_super.prototype.getId.call(this), nameElement + contentElement);
+    };
+    FileBox.prototype.renderBody = function () {
+        var _this = this;
+        util.readFile(this.getPath(), function (dataConvertedToHtml) {
+            var content = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>';
+            util.addContentTo(_super.prototype.getId.call(_this), content);
+        });
     };
     return FileBox;
 }(Box_1.Box));

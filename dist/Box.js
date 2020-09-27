@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
 exports.Box = void 0;
+var util = require("./util");
 var Box = /** @class */ (function () {
     function Box(parent, name, id) {
         this.widthInPercent = 0;
@@ -32,6 +33,10 @@ var Box = /** @class */ (function () {
             return this.name;
         }
         return this.parent.getPath() + '/' + this.name;
+    };
+    Box.prototype.renderHeader = function () {
+        var headerElement = '<div style="background-color:skyblue;">' + this.getName() + '</div>';
+        util.setContentTo(this.getId(), headerElement);
     };
     return Box;
 }());

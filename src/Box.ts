@@ -1,5 +1,7 @@
+import * as util from './util'
+
 export abstract class Box {
-  private parent: Box|null
+  private parent: Box|null // TODO: introduce Path instead of parent and name
   private name: string
   private id: string
   private widthInPercent: number = 0
@@ -42,6 +44,11 @@ export abstract class Box {
     return this.parent.getPath() + '/' + this.name
   }
 
-  protected abstract render(widthInPercent: number, heightInPercent: number): void
+  public abstract render(widthInPercent: number, heightInPercent: number): void
+
+  protected renderHeader(): void {
+    let headerElement: string = '<div style="background-color:skyblue;">' + this.getName() + '</div>'
+    util.setContentTo(this.getId(), headerElement)
+  }
 
 }

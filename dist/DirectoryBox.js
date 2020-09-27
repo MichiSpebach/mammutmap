@@ -19,22 +19,33 @@ var Box_1 = require("./Box");
 var FileBox_1 = require("./FileBox");
 var DirectoryBox = /** @class */ (function (_super) {
     __extends(DirectoryBox, _super);
-    function DirectoryBox(directoryPath, id) {
-        var _this = _super.call(this, null, directoryPath, id) || this;
+    function DirectoryBox(parent, name, id) {
+        var _this = _super.call(this, parent, name, id) || this;
         _this.boxes = [];
         return _this;
     }
     DirectoryBox.prototype.render = function (widthInPercent, heightInPercent) {
-        var _this = this;
         _super.prototype.setWidthInPercent.call(this, widthInPercent);
         _super.prototype.setHeightInPercent.call(this, heightInPercent);
         util.logInfo('Box::render ' + _super.prototype.getPath.call(this));
+        this.renderStyle();
+        _super.prototype.renderHeader.call(this);
+        this.renderBody();
+    };
+    DirectoryBox.prototype.renderStyle = function () {
+        var basicStyle = 'display:inline-block;overflow:auto;';
+        var scaleStyle = 'width:' + _super.prototype.getWidthInPercent.call(this) + '%;height:' + _super.prototype.getHeightInPercent.call(this) + '%;';
+        var borderStyle = 'border:dotted;border-color:skyblue;';
+        util.setStyleTo(_super.prototype.getId.call(this), basicStyle + scaleStyle + borderStyle);
+    };
+    DirectoryBox.prototype.renderBody = function () {
+        var _this = this;
         util.readdirSync(_super.prototype.getPath.call(this)).forEach(function (file) {
             var fileName = file.name;
             var filePath = _super.prototype.getPath.call(_this) + '/' + fileName;
             if (file.isDirectory()) {
                 util.logInfo('Box::render directory ' + filePath);
-                _this.renderDirectory(fileName);
+                _this.boxes.push(_this.createDirectoryBox(fileName));
             }
             else if (file.isFile()) {
                 util.logInfo('Box::render file ' + filePath);
@@ -48,13 +59,18 @@ var DirectoryBox = /** @class */ (function (_super) {
             box.render(49, 2 * 80 / _this.boxes.length);
         });
     };
-    DirectoryBox.prototype.renderDirectory = function (name) {
-        util.addContent('<div style="display:inline-block;border:dotted;border-color:skyblue;">' + name + '</div>');
+    DirectoryBox.prototype.createDirectoryBox = function (name) {
+        var elementId = this.renderBoxPlaceholderAndReturnId(name);
+        return new DirectoryBox(this, name, elementId);
     };
     DirectoryBox.prototype.createFileBox = function (name) {
-        var elementId = util.generateElementId();
-        util.addContent('<div id="' + elementId + '" style="display:inline-block;">loading...' + name + '</div>');
+        var elementId = this.renderBoxPlaceholderAndReturnId(name);
         return new FileBox_1.FileBox(this, name, elementId);
+    };
+    DirectoryBox.prototype.renderBoxPlaceholderAndReturnId = function (name) {
+        var elementId = util.generateElementId();
+        util.addContentTo(_super.prototype.getId.call(this), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>');
+        return elementId;
     };
     return DirectoryBox;
 }(Box_1.Box));
