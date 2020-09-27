@@ -1,23 +1,37 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 exports.__esModule = true;
 exports.DirectoryBox = void 0;
 var util = require("./util");
+var Box_1 = require("./Box");
 var FileBox_1 = require("./FileBox");
-var DirectoryBox = /** @class */ (function () {
+var DirectoryBox = /** @class */ (function (_super) {
+    __extends(DirectoryBox, _super);
     function DirectoryBox(directoryPath, id) {
-        this.boxes = [];
-        this.path = directoryPath;
-        this.id = id;
+        var _this = _super.call(this, null, directoryPath, id) || this;
+        _this.boxes = [];
+        return _this;
     }
-    DirectoryBox.prototype.getPath = function () {
-        return this.path;
-    };
-    DirectoryBox.prototype.render = function () {
+    DirectoryBox.prototype.render = function (widthInPercent, heightInPercent) {
         var _this = this;
-        util.logInfo('Box::render ' + this.path);
-        util.readdirSync(this.path).forEach(function (file) {
+        _super.prototype.setWidthInPercent.call(this, widthInPercent);
+        _super.prototype.setHeightInPercent.call(this, heightInPercent);
+        util.logInfo('Box::render ' + _super.prototype.getPath.call(this));
+        util.readdirSync(_super.prototype.getPath.call(this)).forEach(function (file) {
             var fileName = file.name;
-            var filePath = _this.path + '/' + fileName;
+            var filePath = _super.prototype.getPath.call(_this) + '/' + fileName;
             if (file.isDirectory()) {
                 util.logInfo('Box::render directory ' + filePath);
                 _this.renderDirectory(fileName);
@@ -40,9 +54,9 @@ var DirectoryBox = /** @class */ (function () {
     DirectoryBox.prototype.createFileBox = function (name) {
         var elementId = util.generateElementId();
         util.addContent('<div id="' + elementId + '" style="display:inline-block;">loading...' + name + '</div>');
-        return new FileBox_1.FileBox(null, name, elementId); // TODO: use strict in tsconfig.json
+        return new FileBox_1.FileBox(this, name, elementId);
     };
     return DirectoryBox;
-}());
+}(Box_1.Box));
 exports.DirectoryBox = DirectoryBox;
 //# sourceMappingURL=DirectoryBox.js.map

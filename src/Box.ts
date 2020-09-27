@@ -36,14 +36,10 @@ export abstract class Box {
   }
 
   public getPath(): string {
-    let parentPath: string
     if (this.parent == null) {
-      parentPath = './src' // TODO: refactor
-    } else {
-      parentPath = this.parent.getPath()
+      return this.name
     }
-
-    return parentPath + '/' + this.name
+    return this.parent.getPath() + '/' + this.name
   }
 
   protected abstract render(widthInPercent: number, heightInPercent: number): void

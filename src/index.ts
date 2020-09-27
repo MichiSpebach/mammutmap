@@ -26,7 +26,7 @@ const createWindow = () => {
   util.initUtil(mainWindow.webContents)
 
   let box = new DirectoryBox('./src', 'content')
-  box.render()
+  box.render(100, 100)
 };
 
 // This method will be called when Electron has finished

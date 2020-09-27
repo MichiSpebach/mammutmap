@@ -10,6 +10,7 @@ export class FileBox extends Box {
   public render(widthInPercent: number, heightInPercent: number):void {
     super.setWidthInPercent(widthInPercent)
     super.setHeightInPercent(heightInPercent)
+
     util.readFile(this.getPath(), (dataConvertedToHtml: string) => {
       this.renderDiv(dataConvertedToHtml)
     })

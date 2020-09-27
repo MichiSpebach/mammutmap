@@ -28,14 +28,10 @@ var Box = /** @class */ (function () {
         this.heightInPercent = heightInPercent;
     };
     Box.prototype.getPath = function () {
-        var parentPath;
         if (this.parent == null) {
-            parentPath = './src'; // TODO: refactor
+            return this.name;
         }
-        else {
-            parentPath = this.parent.getPath();
-        }
-        return parentPath + '/' + this.name;
+        return this.parent.getPath() + '/' + this.name;
     };
     return Box;
 }());

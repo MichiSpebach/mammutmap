@@ -1,27 +1,22 @@
 import * as util from './util'
+import { Box } from './Box'
 import { FileBox } from './FileBox'
 
-export class DirectoryBox {
-  private path: string
-  private id: string
-  private widthInPercent: number
-  private heightInPercent: number
+export class DirectoryBox extends Box {
   private boxes: FileBox[] = []
 
   public constructor(directoryPath: string, id: string) {
-    this.path = directoryPath
-    this.id = id
+    super(null, directoryPath, id)
   }
 
-  public getPath(): string {
-    return this.path
-  }
+  public render(widthInPercent: number, heightInPercent: number): void {
+    super.setWidthInPercent(widthInPercent)
+    super.setHeightInPercent(heightInPercent)
 
-  public render(): void {
-    util.logInfo('Box::render ' + this.path)
-    util.readdirSync(this.path).forEach(file => {
+    util.logInfo('Box::render ' + super.getPath())
+    util.readdirSync(super.getPath()).forEach(file => {
       let fileName: string = file.name
-      let filePath: string = this.path + '/' + fileName
+      let filePath: string = super.getPath() + '/' + fileName
 
       if (file.isDirectory()) {
         util.logInfo('Box::render directory ' + filePath)
@@ -48,7 +43,7 @@ export class DirectoryBox {
   private createFileBox(name: string): FileBox {
     let elementId: string = util.generateElementId()
     util.addContent('<div id="' + elementId + '" style="display:inline-block;">loading...' + name + '</div>')
-    return new FileBox(null, name, elementId) // TODO: use strict in tsconfig.json
+    return new FileBox(this, name, elementId)
   }
 
 }
