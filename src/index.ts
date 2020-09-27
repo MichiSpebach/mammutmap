@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
 import * as util from './util'
-import { Box } from './Box'
+import { DirectoryBox } from './DirectoryBox'
 
 var mainWindow: BrowserWindow
 
@@ -25,7 +25,7 @@ const createWindow = () => {
 
   util.initUtil(mainWindow.webContents)
 
-  let box = new Box('./src', 'content')
+  let box = new DirectoryBox('./src', 'content')
   box.render()
 };
 

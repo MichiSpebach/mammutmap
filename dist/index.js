@@ -3,7 +3,7 @@ exports.__esModule = true;
 var electron_1 = require("electron");
 var path = require("path");
 var util = require("./util");
-var Box_1 = require("./Box");
+var DirectoryBox_1 = require("./DirectoryBox");
 var mainWindow;
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -20,7 +20,7 @@ var createWindow = function () {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
     util.initUtil(mainWindow.webContents);
-    var box = new Box_1.Box('./src', 'content');
+    var box = new DirectoryBox_1.DirectoryBox('./src', 'content');
     box.render();
 };
 // This method will be called when Electron has finished
