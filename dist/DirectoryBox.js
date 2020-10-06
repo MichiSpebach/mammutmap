@@ -24,19 +24,8 @@ var DirectoryBox = /** @class */ (function (_super) {
         _this.boxes = [];
         return _this;
     }
-    DirectoryBox.prototype.render = function (widthInPercent, heightInPercent) {
-        _super.prototype.setWidthInPercent.call(this, widthInPercent);
-        _super.prototype.setHeightInPercent.call(this, heightInPercent);
-        util.logInfo('Box::render ' + _super.prototype.getPath.call(this));
-        this.renderStyle();
-        _super.prototype.renderHeader.call(this);
-        this.renderBody();
-    };
-    DirectoryBox.prototype.renderStyle = function () {
-        var basicStyle = 'display:inline-block;overflow:auto;';
-        var scaleStyle = 'width:' + _super.prototype.getWidthInPercent.call(this) + '%;height:' + _super.prototype.getHeightInPercent.call(this) + '%;';
-        var borderStyle = 'border:dotted;border-color:skyblue;';
-        util.setStyleTo(_super.prototype.getId.call(this), basicStyle + scaleStyle + borderStyle);
+    DirectoryBox.prototype.getBorderStyle = function () {
+        return 'border:dotted;border-color:skyblue;';
     };
     DirectoryBox.prototype.renderBody = function () {
         var _this = this;

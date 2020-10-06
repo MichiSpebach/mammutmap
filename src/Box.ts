@@ -17,26 +17,6 @@ export abstract class Box {
     return this.id
   }
 
-  protected getName(): string {
-    return this.name
-  }
-
-  protected getWidthInPercent(): number {
-    return this.widthInPercent
-  }
-
-  protected setWidthInPercent(widthInPercent: number): void {
-    this.widthInPercent = widthInPercent
-  }
-
-  protected getHeightInPercent(): number {
-    return this.heightInPercent
-  }
-
-  protected setHeightInPercent(heightInPercent: number): void {
-    this.heightInPercent = heightInPercent
-  }
-
   public getPath(): string {
     if (this.parent == null) {
       return this.name
@@ -44,11 +24,36 @@ export abstract class Box {
     return this.parent.getPath() + '/' + this.name
   }
 
-  public abstract render(widthInPercent: number, heightInPercent: number): void
+  public render(widthInPercent: number, heightInPercent: number): void {
+    this.widthInPercent = widthInPercent
+    this.heightInPercent = heightInPercent
 
-  protected renderHeader(): void {
-    let headerElement: string = '<div style="background-color:skyblue;">' + this.getName() + '</div>'
+    this.renderStyle()
+    this.renderHeader()
+    this.renderBody()
+  }
+
+  private renderStyle(): void {
+    let basicStyle: string = 'display:inline-block;overflow:auto;'
+    let scaleStyle: string = 'width:' + this.widthInPercent + '%;height:' + this.heightInPercent + '%;'
+    let borderStyle: string = this.getBorderStyle()
+
+    util.setStyleTo(this.getId(), basicStyle + scaleStyle + borderStyle)
+  }
+
+  protected abstract getBorderStyle(): string
+
+  private renderHeader(): void {
+    let headerElement: string = '<div style="background-color:skyblue;">' + this.name + '</div>'
     util.setContentTo(this.getId(), headerElement)
   }
+
+  protected abstract renderBody(): void
+
+  /*private renderBody(): void {
+    util.addContentTo(this.getId(), this.formBody())
+  }
+
+  protected abstract formBody(): string*/
 
 }

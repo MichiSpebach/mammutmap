@@ -7,25 +7,12 @@ export class FileBox extends Box {
     super(parent, name, id)
   }
 
-  public render(widthInPercent: number, heightInPercent: number): void { // TODO: move to super
-    super.setWidthInPercent(widthInPercent)
-    super.setHeightInPercent(heightInPercent)
-
-    this.renderStyle()
-    super.renderHeader()
-    this.renderBody()
+  protected getBorderStyle(): string {
+    return 'border:solid;border-color:skyblue;'
   }
 
-  private renderStyle(): void { // TODO: move to super
-    let basicStyle: string = 'display:inline-block;overflow:auto;'
-    let scaleStyle: string = 'width:' + super.getWidthInPercent() + '%;height:' + super.getHeightInPercent() + '%;'
-    let borderStyle: string = 'border:solid;border-color:skyblue;'
-
-    util.setStyleTo(super.getId(), basicStyle + scaleStyle + borderStyle)
-  }
-
-  private renderBody(): void {
-    util.readFile(this.getPath(), (dataConvertedToHtml: string) => {
+  protected renderBody(): void {
+    util.readFile(super.getPath(), (dataConvertedToHtml: string) => {
       let content: string = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>'
       util.addContentTo(super.getId(), content)
     })

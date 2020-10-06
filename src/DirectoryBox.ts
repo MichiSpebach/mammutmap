@@ -9,25 +9,11 @@ export class DirectoryBox extends Box {
     super(parent, name, id)
   }
 
-  public render(widthInPercent: number, heightInPercent: number): void { // TODO: move to super
-    super.setWidthInPercent(widthInPercent)
-    super.setHeightInPercent(heightInPercent)
-
-    util.logInfo('Box::render ' + super.getPath())
-    this.renderStyle()
-    super.renderHeader()
-    this.renderBody()
+  protected getBorderStyle(): string {
+    return 'border:dotted;border-color:skyblue;'
   }
 
-  private renderStyle(): void { // TODO: move to super
-    let basicStyle: string = 'display:inline-block;overflow:auto;'
-    let scaleStyle: string = 'width:' + super.getWidthInPercent() + '%;height:' + super.getHeightInPercent() + '%;'
-    let borderStyle: string = 'border:dotted;border-color:skyblue;'
-
-    util.setStyleTo(super.getId(), basicStyle + scaleStyle + borderStyle)
-  }
-
-  private renderBody(): void {
+  protected renderBody(): void {
     util.readdirSync(super.getPath()).forEach(file => {
       let fileName: string = file.name
       let filePath: string = super.getPath() + '/' + fileName
