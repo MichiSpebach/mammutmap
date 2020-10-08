@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
-exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.initUtil = void 0;
+exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.addWheelListenerTo = exports.initUtil = void 0;
+var electron_1 = require("electron");
 var fs = require("fs");
 var webContents;
 var elementIdCounter;
@@ -9,6 +10,16 @@ function initUtil(webContentsToRender) {
     elementIdCounter = 0;
 }
 exports.initUtil = initUtil;
+function addWheelListenerTo(id, callback) {
+    var ipcChannelName = 'wheel' + id;
+    var rendererFunction = '(event) => {';
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;';
+    rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY);';
+    rendererFunction += '}';
+    webContents.executeJavaScript("document.getElementById('" + id + "').addEventListener('wheel', " + rendererFunction + ")");
+    electron_1.ipcMain.on(ipcChannelName, function (_, delta) { return callback(delta); });
+}
+exports.addWheelListenerTo = addWheelListenerTo;
 function addContent(content) {
     webContents.executeJavaScript("document.getElementById('content').innerHTML += '" + content + "'");
 }
@@ -40,7 +51,7 @@ exports.logError = logError;
 function log(message, color) {
     console.log(message);
     var division = '<div style="color:' + color + '">' + message + '</div>';
-    webContents.executeJavaScript("document.getElementById('log').innerHTML += '" + division + "'");
+    webContents.executeJavaScript("document.getElementById('log').innerHTML = '" + division + "' + document.getElementById('log').innerHTML");
 }
 function readdirSync(path) {
     return fs.readdirSync(path, { withFileTypes: true });

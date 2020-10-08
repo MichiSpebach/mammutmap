@@ -1,4 +1,4 @@
-import { WebContents } from 'electron'
+import { WebContents, ipcMain, IpcMainEvent } from 'electron'
 import * as fs from 'fs'
 import { Dirent } from 'fs'
 
@@ -8,6 +8,19 @@ var elementIdCounter: number
 export function initUtil(webContentsToRender: WebContents) {
   webContents = webContentsToRender
   elementIdCounter = 0
+}
+
+export function addWheelListenerTo(id: string, callback: (delta: number) => void): void {
+  let ipcChannelName = 'wheel' + id
+
+  var rendererFunction: string = '(event) => {'
+  rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY);'
+  rendererFunction += '}'
+
+  webContents.executeJavaScript("document.getElementById('" + id + "').addEventListener('wheel', " + rendererFunction + ")")
+
+  ipcMain.on(ipcChannelName, (_: IpcMainEvent, delta: number) => callback(delta))
 }
 
 export function addContent(content: string): void {
@@ -41,7 +54,7 @@ export function logError(message: string) {
 function log(message: string, color: string): void {
   console.log(message)
   let division: string = '<div style="color:' + color + '">' + message + '</div>'
-  webContents.executeJavaScript("document.getElementById('log').innerHTML += '" + division + "'")
+  webContents.executeJavaScript("document.getElementById('log').innerHTML = '" + division + "' + document.getElementById('log').innerHTML")
 }
 
 export function readdirSync(path: string): Dirent[] {

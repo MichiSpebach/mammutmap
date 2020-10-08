@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
 import * as util from './util'
-import { DirectoryBox } from './DirectoryBox'
+import { Map } from './Map'
 
 var mainWindow: BrowserWindow
 
@@ -15,6 +15,9 @@ const createWindow = () => {
   mainWindow = new BrowserWindow({
     height: 800,
     width: 1600,
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
 
   // and load the index.html of the app.
@@ -25,8 +28,7 @@ const createWindow = () => {
 
   util.initUtil(mainWindow.webContents)
 
-  let box = new DirectoryBox(null, './src', 'content')
-  box.render(99, 83)
+  new Map()
 };
 
 // This method will be called when Electron has finished

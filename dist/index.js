@@ -3,7 +3,7 @@ exports.__esModule = true;
 var electron_1 = require("electron");
 var path = require("path");
 var util = require("./util");
-var DirectoryBox_1 = require("./DirectoryBox");
+var Map_1 = require("./Map");
 var mainWindow;
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -13,15 +13,17 @@ var createWindow = function () {
     // Create the browser window.
     mainWindow = new electron_1.BrowserWindow({
         height: 800,
-        width: 1600
+        width: 1600,
+        webPreferences: {
+            nodeIntegration: true
+        }
     });
     // and load the index.html of the app.
     mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
     util.initUtil(mainWindow.webContents);
-    var box = new DirectoryBox_1.DirectoryBox(null, './src', 'content');
-    box.render(99, 83);
+    new Map_1.Map();
 };
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
