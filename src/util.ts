@@ -10,17 +10,34 @@ export function initUtil(webContentsToRender: WebContents) {
   elementIdCounter = 0
 }
 
-export function addWheelListenerTo(id: string, callback: (delta: number) => void): void {
+export async function getSizeOf(id: string): Promise<{width: number; height: number} > {
+  let widthPromise: Promise<number> = getWidthOf(id)
+  let heightPromise: Promise<number> = getHeightOf(id)
+  let width: number = await widthPromise
+  let height: number = await heightPromise
+  return {width, height}
+}
+
+export function getWidthOf(id: string): Promise<number> {
+  return webContents.executeJavaScript("document.getElementById('" + id + "').offsetWidth")
+}
+
+export function getHeightOf(id: string): Promise<number> {
+  return webContents.executeJavaScript("document.getElementById('" + id + "').offsetHeight")
+}
+
+export function addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): void {
   let ipcChannelName = 'wheel' + id
 
   var rendererFunction: string = '(event) => {'
   rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY);'
+  rendererFunction += 'console.log(event);'
+  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY, event.clientX, event.clientY);'
   rendererFunction += '}'
 
   webContents.executeJavaScript("document.getElementById('" + id + "').addEventListener('wheel', " + rendererFunction + ")")
 
-  ipcMain.on(ipcChannelName, (_: IpcMainEvent, delta: number) => callback(delta))
+  ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
 }
 
 export function addContent(content: string): void {
