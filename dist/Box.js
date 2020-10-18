@@ -27,7 +27,7 @@ var Box = /** @class */ (function () {
         this.renderBody();
     };
     Box.prototype.renderStyle = function () {
-        var basicStyle = 'display:inline-block;overflow:auto;';
+        var basicStyle = 'display:inline-block;overflow:hidden;'; //auto;'
         var scaleStyle = 'width:' + this.widthInPercent + '%;height:' + this.heightInPercent + '%;';
         var borderStyle = this.getBorderStyle();
         util.setStyleTo(this.getId(), basicStyle + scaleStyle + borderStyle);

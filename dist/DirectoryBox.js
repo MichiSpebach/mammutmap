@@ -45,7 +45,7 @@ var DirectoryBox = /** @class */ (function (_super) {
             }
         });
         this.boxes.forEach(function (box) {
-            box.render(49, 2 * 80 / _this.boxes.length);
+            box.render(45, 2 * 80 / _this.boxes.length);
         });
     };
     DirectoryBox.prototype.createDirectoryBox = function (name) {

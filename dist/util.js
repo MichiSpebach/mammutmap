@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.addWheelListenerTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.initUtil = void 0;
+exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.stringify = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.addWheelListenerTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.initUtil = void 0;
 var electron_1 = require("electron");
 var fs = require("fs");
 var webContents;
@@ -46,6 +46,15 @@ function initUtil(webContentsToRender) {
     elementIdCounter = 0;
 }
 exports.initUtil = initUtil;
+function getClientRectOf(id) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            // doesn't work, maybe object cannot be transferred from render thread
+            return [2 /*return*/, webContents.executeJavaScript("document.getElementById('" + id + "').getBoundingClientRect()")];
+        });
+    });
+}
+exports.getClientRectOf = getClientRectOf;
 function getSizeOf(id) {
     return __awaiter(this, void 0, void 0, function () {
         var widthPromise, heightPromise, width, height;
@@ -78,7 +87,7 @@ function addWheelListenerTo(id, callback) {
     var ipcChannelName = 'wheel' + id;
     var rendererFunction = '(event) => {';
     rendererFunction += 'let ipc = require("electron").ipcRenderer;';
-    rendererFunction += 'console.log(event);';
+    //rendererFunction += 'console.log(event);'
     rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY, event.clientX, event.clientY);';
     rendererFunction += '}';
     webContents.executeJavaScript("document.getElementById('" + id + "').addEventListener('wheel', " + rendererFunction + ")");
@@ -118,6 +127,16 @@ function log(message, color) {
     var division = '<div style="color:' + color + '">' + message + '</div>';
     webContents.executeJavaScript("document.getElementById('log').innerHTML = '" + division + "' + document.getElementById('log').innerHTML");
 }
+function stringify(object) {
+    var stringifiedObject = object + ': ';
+    for (var key in object) {
+        //if(typeof rect[key] !== 'function') {
+        stringifiedObject += key + '=' + object[key] + '; ';
+        //}
+    }
+    return stringifiedObject;
+}
+exports.stringify = stringify;
 function readdirSync(path) {
     return fs.readdirSync(path, { withFileTypes: true });
 }

@@ -10,6 +10,11 @@ export function initUtil(webContentsToRender: WebContents) {
   elementIdCounter = 0
 }
 
+export async function getClientRectOf(id: string): Promise<DOMRect> {
+  // doesn't work, maybe object cannot be transferred from render thread
+  return webContents.executeJavaScript("document.getElementById('" + id + "').getBoundingClientRect()")
+}
+
 export async function getSizeOf(id: string): Promise<{width: number; height: number} > {
   let widthPromise: Promise<number> = getWidthOf(id)
   let heightPromise: Promise<number> = getHeightOf(id)
@@ -31,7 +36,7 @@ export function addWheelListenerTo(id: string, callback: (delta: number, clientX
 
   var rendererFunction: string = '(event) => {'
   rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-  rendererFunction += 'console.log(event);'
+  //rendererFunction += 'console.log(event);'
   rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY, event.clientX, event.clientY);'
   rendererFunction += '}'
 
@@ -72,6 +77,16 @@ function log(message: string, color: string): void {
   console.log(message)
   let division: string = '<div style="color:' + color + '">' + message + '</div>'
   webContents.executeJavaScript("document.getElementById('log').innerHTML = '" + division + "' + document.getElementById('log').innerHTML")
+}
+
+export function stringify(object: any): string {
+  var stringifiedObject: string = object + ': '
+  for (var key in object) {
+    //if(typeof rect[key] !== 'function') {
+      stringifiedObject += key + '=' + object[key] + '; '
+    //}
+  }
+  return stringifiedObject
 }
 
 export function readdirSync(path: string): Dirent[] {

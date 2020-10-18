@@ -38,45 +38,59 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.Map = void 0;
 var util = require("./util");
+var DirectoryBox_1 = require("./DirectoryBox");
 var Map = /** @class */ (function () {
     function Map() {
         var _this = this;
         this.scalePercent = 100;
-        this.marginTop = 0;
-        this.marginLeft = 0;
+        this.marginTopPercent = 0;
+        this.marginLeftPercent = 0;
+        this.mapRatioAdjusterSizePx = 500;
         util.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>');
-        //util.setContentTo('map', '<div id="mapRatioAdjuster" style="width:500px; height:500px;"></div>')
-        util.setContentTo('map', '<div id="mapRatioAdjuster" style="width:100%; height:100%;"></div>');
-        util.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>');
-        util.setContentTo('mapMover', '<div id="root"></div>');
+        util.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>');
+        util.setContentTo('mapRatioAdjuster', '<div id="mapMover" style="width:100%; height:100%;"></div>');
+        util.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>');
         this.updateStyle();
-        this.addBox('display:inline-block;width:25%;height:800px;background-color:green;');
-        this.addBox('display:inline-block;width:25%;height:800px;background-color:blue;');
-        this.addBox('display:inline-block;width:25%;height:800px;background-color:green;');
-        this.addBox('display:inline-block;width:25%;height:800px;background-color:blue;');
-        //this.rootDirectory = new DirectoryBox(null, './src', 'root')
-        //this.rootDirectory.render(99, 99)
+        //this.addBoxes()
+        this.rootDirectory = new DirectoryBox_1.DirectoryBox(null, './src', 'root');
+        this.rootDirectory.render(99, 99);
         util.addWheelListenerTo('map', function (delta, clientX, clientY) { return _this.zoom(-delta, clientX, clientY); });
     }
-    Map.prototype.addBox = function (style) {
-        util.addContentTo('root', '<div style="' + style + '"><div>');
+    Map.prototype.addBoxes = function () {
+        this.addBox('green');
+        this.addBox('blue');
+        this.addBox('green');
+        this.addBox('blue');
+        this.addBox('blue');
+        this.addBox('green');
+        this.addBox('blue');
+        this.addBox('green');
+        this.addBox('green');
+        this.addBox('blue');
+        this.addBox('green');
+        this.addBox('blue');
+        this.addBox('blue');
+        this.addBox('green');
+        this.addBox('blue');
+        this.addBox('green');
+    };
+    Map.prototype.addBox = function (color) {
+        util.addContentTo('root', '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>');
     };
     Map.prototype.zoom = function (delta, clientX, clientY) {
-        var scaleChange = this.scalePercent * (delta / 1000);
-        var clientXPercent = 100 * clientX / this.size.width;
-        util.logInfo('clientX: ' + clientX + ' marginLeft: ' + this.marginLeft + ' scale: ' + this.scalePercent + ' scaleChange: ' + scaleChange);
-        util.logInfo("mapWidth: " + this.size.width);
-        this.marginLeft -= scaleChange * ((clientXPercent - this.marginLeft) / this.scalePercent);
+        var clientYPercent = 100 * clientY / this.mapRatioAdjusterSizePx;
+        var clientXPercent = 100 * clientX / this.mapRatioAdjusterSizePx;
+        var scaleChange = this.scalePercent * (delta / 500);
+        this.marginTopPercent -= scaleChange * (clientYPercent - this.marginTopPercent) / this.scalePercent;
+        this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent;
         this.scalePercent += scaleChange;
         this.updateStyle();
     };
     Map.prototype.updateStyle = function () {
         return __awaiter(this, void 0, void 0, function () {
             var offsetStyle, scaleStyle;
-            var _this = this;
             return __generator(this, function (_a) {
-                util.getSizeOf('map').then(function (size) { return _this.size = size; });
-                offsetStyle = 'margin-top:' + this.marginTop + '%;margin-left:' + this.marginLeft + '%;';
+                offsetStyle = 'margin-top:' + this.marginTopPercent + '%;margin-left:' + this.marginLeftPercent + '%;';
                 scaleStyle = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;';
                 util.setStyleTo('mapMover', offsetStyle + scaleStyle);
                 return [2 /*return*/];

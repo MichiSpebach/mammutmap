@@ -34,7 +34,7 @@ export abstract class Box {
   }
 
   private renderStyle(): void {
-    let basicStyle: string = 'display:inline-block;overflow:auto;'
+    let basicStyle: string = 'display:inline-block;overflow:hidden;'//auto;'
     let scaleStyle: string = 'width:' + this.widthInPercent + '%;height:' + this.heightInPercent + '%;'
     let borderStyle: string = this.getBorderStyle()
 

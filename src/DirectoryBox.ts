@@ -32,7 +32,7 @@ export class DirectoryBox extends Box {
     });
 
     this.boxes.forEach(box => {
-      box.render(49, 2*80 / this.boxes.length)
+      box.render(45, 2*80 / this.boxes.length)
     });
   }
 
