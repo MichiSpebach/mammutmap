@@ -1,36 +1,39 @@
 import * as util from './util'
+import { Path } from './Path'
+import { BoxData } from './BoxData'
 
 export abstract class Box {
-  private parent: Box|null // TODO: introduce Path instead of parent and name
-  private name: string
-  private id: string
+  private readonly path: Path
+  private readonly id: string
   private widthInPercent: number = 0
   private heightInPercent: number = 0
+  private metaData: BoxData|null = null
 
-  public constructor(parent: Box|null, name: string, id: string) {
-    this.parent = parent
-    this.name = name
+  public constructor(path: Path, id: string) {
+    this.path = path
     this.id = id
+  }
+
+  protected getPath(): Path {
+    return this.path
   }
 
   protected getId(): string {
     return this.id
   }
 
-  public getPath(): string {
-    if (this.parent == null) {
-      return this.name
-    }
-    return this.parent.getPath() + '/' + this.name
-  }
-
   public render(widthInPercent: number, heightInPercent: number): void {
     this.widthInPercent = widthInPercent
     this.heightInPercent = heightInPercent
 
-    this.renderStyle()
+    this.loadAndProcessMetaData()
     this.renderHeader()
     this.renderBody()
+  }
+
+  private async loadAndProcessMetaData():Promise<void> {
+    //let data: string = await util.readFile('wip')
+    this.renderStyle()
   }
 
   private renderStyle(): void {
@@ -44,7 +47,7 @@ export abstract class Box {
   protected abstract getBorderStyle(): string
 
   private renderHeader(): void {
-    let headerElement: string = '<div style="background-color:skyblue;">' + this.name + '</div>'
+    let headerElement: string = '<div style="background-color:skyblue;">' + this.path.getSrcName() + '</div>'
     util.setContentTo(this.getId(), headerElement)
   }
 

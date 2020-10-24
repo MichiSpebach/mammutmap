@@ -16,11 +16,12 @@ exports.__esModule = true;
 exports.DirectoryBox = void 0;
 var util = require("./util");
 var Box_1 = require("./Box");
+var Path_1 = require("./Path");
 var FileBox_1 = require("./FileBox");
 var DirectoryBox = /** @class */ (function (_super) {
     __extends(DirectoryBox, _super);
-    function DirectoryBox(parent, name, id) {
-        var _this = _super.call(this, parent, name, id) || this;
+    function DirectoryBox(path, id) {
+        var _this = _super.call(this, path, id) || this;
         _this.boxes = [];
         return _this;
     }
@@ -29,9 +30,9 @@ var DirectoryBox = /** @class */ (function (_super) {
     };
     DirectoryBox.prototype.renderBody = function () {
         var _this = this;
-        util.readdirSync(_super.prototype.getPath.call(this)).forEach(function (file) {
+        util.readdirSync(_super.prototype.getPath.call(this).getSrcPath()).forEach(function (file) {
             var fileName = file.name;
-            var filePath = _super.prototype.getPath.call(_this) + '/' + fileName;
+            var filePath = _super.prototype.getPath.call(_this).getSrcPath() + '/' + fileName;
             if (file.isDirectory()) {
                 util.logInfo('Box::render directory ' + filePath);
                 _this.boxes.push(_this.createDirectoryBox(fileName));
@@ -50,11 +51,11 @@ var DirectoryBox = /** @class */ (function (_super) {
     };
     DirectoryBox.prototype.createDirectoryBox = function (name) {
         var elementId = this.renderBoxPlaceholderAndReturnId(name);
-        return new DirectoryBox(this, name, elementId);
+        return new DirectoryBox(Path_1.Path.buildDirEntry(_super.prototype.getPath.call(this), name), elementId);
     };
     DirectoryBox.prototype.createFileBox = function (name) {
         var elementId = this.renderBoxPlaceholderAndReturnId(name);
-        return new FileBox_1.FileBox(this, name, elementId);
+        return new FileBox_1.FileBox(Path_1.Path.buildDirEntry(_super.prototype.getPath.call(this), name), elementId);
     };
     DirectoryBox.prototype.renderBoxPlaceholderAndReturnId = function (name) {
         var elementId = util.generateElementId();

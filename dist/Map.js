@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.Map = void 0;
 var util = require("./util");
+var Path_1 = require("./Path");
 var DirectoryBox_1 = require("./DirectoryBox");
 var Map = /** @class */ (function () {
     function Map() {
@@ -52,7 +53,8 @@ var Map = /** @class */ (function () {
         util.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>');
         this.updateStyle();
         //this.addBoxes()
-        this.rootDirectory = new DirectoryBox_1.DirectoryBox(null, './src', 'root');
+        var rootPath = Path_1.Path.buildRoot('./src', './map');
+        this.rootDirectory = new DirectoryBox_1.DirectoryBox(rootPath, 'root');
         this.rootDirectory.render(99, 99);
         util.addWheelListenerTo('map', function (delta, clientX, clientY) { return _this.zoom(-delta, clientX, clientY); });
     }

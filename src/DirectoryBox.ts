@@ -1,12 +1,13 @@
 import * as util from './util'
 import { Box } from './Box'
+import { Path } from './Path'
 import { FileBox } from './FileBox'
 
 export class DirectoryBox extends Box {
   private boxes: Box[] = []
 
-  public constructor(parent: Box|null, name: string, id: string) {
-    super(parent, name, id)
+  public constructor(path: Path, id: string) {
+    super(path, id)
   }
 
   protected getBorderStyle(): string {
@@ -14,9 +15,9 @@ export class DirectoryBox extends Box {
   }
 
   protected renderBody(): void {
-    util.readdirSync(super.getPath()).forEach(file => {
+    util.readdirSync(super.getPath().getSrcPath()).forEach(file => {
       let fileName: string = file.name
-      let filePath: string = super.getPath() + '/' + fileName
+      let filePath: string = super.getPath().getSrcPath() + '/' + fileName
 
       if (file.isDirectory()) {
         util.logInfo('Box::render directory ' + filePath)
@@ -38,12 +39,12 @@ export class DirectoryBox extends Box {
 
   private createDirectoryBox(name: string): DirectoryBox {
     let elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new DirectoryBox(this, name, elementId)
+    return new DirectoryBox(Path.buildDirEntry(super.getPath(), name), elementId)
   }
 
   private createFileBox(name: string): FileBox {
     let elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new FileBox(this, name, elementId)
+    return new FileBox(Path.buildDirEntry(super.getPath(), name), elementId)
   }
 
   private renderBoxPlaceholderAndReturnId(name: string): string {

@@ -36,9 +36,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFile = exports.readdirSync = exports.stringify = exports.logError = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.addWheelListenerTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.initUtil = void 0;
+exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFileAndConvertToHtml = exports.readFile = exports.readdirSync = exports.stringify = exports.logError = exports.logWarning = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.addWheelListenerTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.initUtil = void 0;
 var electron_1 = require("electron");
 var fs = require("fs");
+var fs_1 = require("fs");
 var webContents;
 var elementIdCounter;
 function initUtil(webContentsToRender) {
@@ -118,6 +119,10 @@ function logInfo(message) {
     log('Info: ' + message, 'grey');
 }
 exports.logInfo = logInfo;
+function logWarning(message) {
+    log('WARNING: ' + message, 'orange');
+}
+exports.logWarning = logWarning;
 function logError(message) {
     log('ERROR: ' + message, 'red');
 }
@@ -141,7 +146,11 @@ function readdirSync(path) {
     return fs.readdirSync(path, { withFileTypes: true });
 }
 exports.readdirSync = readdirSync;
-function readFile(path, callback) {
+function readFile(path) {
+    return fs_1.promises.readFile(path, 'utf-8');
+}
+exports.readFile = readFile;
+function readFileAndConvertToHtml(path, callback) {
     fs.readFile(path, 'utf-8', function (err, data) {
         if (err) {
             logError('util::readFile, ' + path + ', ' + err.message);
@@ -151,7 +160,7 @@ function readFile(path, callback) {
         }
     });
 }
-exports.readFile = readFile;
+exports.readFileAndConvertToHtml = readFileAndConvertToHtml;
 function convertFileDataToHtmlString(fileData) {
     var content = '';
     for (var i = 0; i < fileData.length - 1; i++) {

@@ -1,10 +1,11 @@
 import * as util from './util'
-import { Box } from "./Box"
+import { Box } from './Box'
+import { Path } from './Path'
 
 export class FileBox extends Box {
 
-  public constructor(parent: Box, name: string, id: string) {
-    super(parent, name, id)
+  public constructor(path: Path, id: string) {
+    super(path, id)
   }
 
   protected getBorderStyle(): string {
@@ -12,7 +13,7 @@ export class FileBox extends Box {
   }
 
   protected renderBody(): void {
-    util.readFile(super.getPath(), (dataConvertedToHtml: string) => {
+    util.readFileAndConvertToHtml(super.getPath().getSrcPath(), (dataConvertedToHtml: string) => {
       let content: string = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>'
       util.addContentTo(super.getId(), content)
     })

@@ -1,6 +1,6 @@
 import { WebContents, ipcMain, IpcMainEvent } from 'electron'
 import * as fs from 'fs'
-import { Dirent } from 'fs'
+import { Dirent, promises as fsPromises } from 'fs'
 
 var webContents: WebContents
 var elementIdCounter: number
@@ -69,6 +69,10 @@ export function logInfo(message: string) {
     log('Info: ' + message, 'grey')
 }
 
+export function logWarning(message: string) {
+    log('WARNING: ' + message, 'orange')
+}
+
 export function logError(message: string) {
     log('ERROR: ' + message, 'red')
 }
@@ -93,7 +97,11 @@ export function readdirSync(path: string): Dirent[] {
   return fs.readdirSync(path, { withFileTypes: true })
 }
 
-export function readFile(path: string, callback: (dataConvertedToHtml: string) => void): void {
+export function readFile(path: string): Promise<string> {
+  return fsPromises.readFile(path, 'utf-8')
+}
+
+export function readFileAndConvertToHtml(path: string, callback: (dataConvertedToHtml: string) => void): void {
   fs.readFile(path, 'utf-8', (err: NodeJS.ErrnoException | null, data: string) => {
     if(err) {
       logError('util::readFile, ' + path + ', ' + err.message)
