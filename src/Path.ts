@@ -1,6 +1,6 @@
 
 export class Path { // TODO: extract readonly interface "PathReader" asa setters are added
-  private parent: Path | null
+  private parent: Path | null //{srcRootPath: string, mapRootPath: string}
   private srcName: string
   private mapName: string
 
@@ -23,11 +23,11 @@ export class Path { // TODO: extract readonly interface "PathReader" asa setters
   }
 
   public getSrcPath(): string {
-    return this.getPath(this.srcName, () => this.parent.getSrcPath())
+    return this.getPath(this.srcName, () => this.parent!.getSrcPath())
   }
 
   public getMapPath(): string {
-    return this.getPath(this.mapName, () => this.parent.getMapPath())
+    return this.getPath(this.mapName, () => this.parent!.getMapPath())
   }
 
   private getPath(name: string, getParentPath: () => string): string {

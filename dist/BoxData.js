@@ -14,6 +14,9 @@ var BoxData = /** @class */ (function () {
         this.warnIf(this.y == undefined, 'y is undefined');
         this.warnIf(this.width == undefined, 'width is undefined');
         this.warnIf(this.height == undefined, 'height is undefined');
+        if (this.x == null || this.y == null || this.width == null || this.height == null) {
+            return;
+        }
         this.warnIf(this.x < 0, 'x is less than 0');
         this.warnIf(this.y < 0, 'y is less than 0');
         this.warnIf(this.width <= 0, 'width is not positive');
