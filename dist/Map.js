@@ -49,13 +49,13 @@ var Map = /** @class */ (function () {
         this.mapRatioAdjusterSizePx = 500;
         util.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>');
         util.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>');
-        util.setContentTo('mapRatioAdjuster', '<div id="mapMover" style="width:100%; height:100%;"></div>');
+        util.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>');
         util.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>');
         this.updateStyle();
         //this.addBoxes()
         var rootPath = Path_1.Path.buildRoot('./src', './map');
         this.rootDirectory = new DirectoryBox_1.DirectoryBox(rootPath, 'root');
-        this.rootDirectory.render(99, 99);
+        this.rootDirectory.render();
         util.addWheelListenerTo('map', function (delta, clientX, clientY) { return _this.zoom(-delta, clientX, clientY); });
     }
     Map.prototype.addBoxes = function () {
@@ -90,11 +90,12 @@ var Map = /** @class */ (function () {
     };
     Map.prototype.updateStyle = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var offsetStyle, scaleStyle;
+            var basicStyle, offsetStyle, scaleStyle;
             return __generator(this, function (_a) {
+                basicStyle = 'position:relative;';
                 offsetStyle = 'margin-top:' + this.marginTopPercent + '%;margin-left:' + this.marginLeftPercent + '%;';
                 scaleStyle = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;';
-                util.setStyleTo('mapMover', offsetStyle + scaleStyle);
+                util.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle);
                 return [2 /*return*/];
             });
         });

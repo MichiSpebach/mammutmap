@@ -38,11 +38,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.Box = void 0;
 var util = require("./util");
+var BoxMapData_1 = require("./BoxMapData");
 var Box = /** @class */ (function () {
     function Box(path, id) {
-        this.widthInPercent = 0;
-        this.heightInPercent = 0;
-        this.metaData = null;
+        this.mapData = BoxMapData_1.BoxMapData.buildDefault();
         this.path = path;
         this.id = id;
     }
@@ -52,30 +51,39 @@ var Box = /** @class */ (function () {
     Box.prototype.getId = function () {
         return this.id;
     };
-    Box.prototype.render = function (widthInPercent, heightInPercent) {
-        this.widthInPercent = widthInPercent;
-        this.heightInPercent = heightInPercent;
-        this.loadAndProcessMetaData();
+    Box.prototype.render = function () {
+        this.loadAndProcessMapData();
         this.renderHeader();
         this.renderBody();
     };
-    Box.prototype.loadAndProcessMetaData = function () {
+    Box.prototype.loadAndProcessMapData = function () {
         return __awaiter(this, void 0, void 0, function () {
+            var _this = this;
             return __generator(this, function (_a) {
-                //let data: string = await util.readFile('wip')
-                this.renderStyle();
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        if (!!this.getPath().isRoot()) return [3 /*break*/, 2];
+                        return [4 /*yield*/, util.readFile(this.getPath().getMapPath() + '.json')
+                                .then(function (json) { return _this.mapData = BoxMapData_1.BoxMapData.buildFromJson(json); })["catch"](function (error) { return util.logWarning('error while loading ' + _this.getPath().getMapPath() + '.json: ' + error); })];
+                    case 1:
+                        _a.sent();
+                        _a.label = 2;
+                    case 2:
+                        this.renderStyle();
+                        return [2 /*return*/];
+                }
             });
         });
     };
     Box.prototype.renderStyle = function () {
-        var basicStyle = 'display:inline-block;overflow:hidden;'; //auto;'
-        var scaleStyle = 'width:' + this.widthInPercent + '%;height:' + this.heightInPercent + '%;';
+        var basicStyle = 'display:inline-block;position:absolute;overflow:hidden;'; //auto;'
+        var scaleStyle = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;';
+        var positionStyle = 'margin-left:' + this.mapData.x + '%;margin-top:' + this.mapData.y + '%;';
         var borderStyle = this.getBorderStyle();
-        util.setStyleTo(this.getId(), basicStyle + scaleStyle + borderStyle);
+        util.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
     };
     Box.prototype.renderHeader = function () {
-        var headerElement = '<div style="background-color:skyblue;">' + this.path.getSrcName() + '</div>';
+        var headerElement = '<div style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
         util.setContentTo(this.getId(), headerElement);
     };
     return Box;

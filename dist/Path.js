@@ -13,6 +13,9 @@ var Path = /** @class */ (function () {
     Path.buildDirEntry = function (parent, name) {
         return new Path(parent, name, name);
     };
+    Path.prototype.isRoot = function () {
+        return this.parent == null;
+    };
     Path.prototype.getSrcName = function () {
         return this.srcName;
     };

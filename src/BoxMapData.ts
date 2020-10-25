@@ -1,10 +1,32 @@
 import * as util from './util'
 
-export class BoxData {
+export class BoxMapData {
   public x: number | null | undefined
   public y: number | null | undefined
   public width: number | null | undefined
   public height: number | null | undefined
+
+  public static buildDefault(): BoxMapData {
+    return new BoxMapData(0, 0, 100, 100)
+  }
+
+  public static buildFromJson(json: string ): BoxMapData /*| SyntaxError*/ {
+    let parsedData: BoxMapData = JSON.parse(json) // parsed object has no functions
+    return new BoxMapData(parsedData.x, parsedData.y, parsedData.width, parsedData.height)
+  }
+
+  private constructor(
+      x: number | null | undefined,
+      y: number | null | undefined,
+      width: number | null | undefined,
+      height: number | null | undefined) {
+    this.x = x
+    this.y = y
+    this.width = width
+    this.height = height
+
+    this.validate()
+  }
 
   public validate(): void {
     this.warnIf(this.x == null, 'x is null')

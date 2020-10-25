@@ -12,14 +12,14 @@ export class Map {
   public constructor() {
     util.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
     util.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>')
-    util.setContentTo('mapRatioAdjuster', '<div id="mapMover" style="width:100%; height:100%;"></div>')
+    util.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
     util.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>')
     this.updateStyle()
 
     //this.addBoxes()
     let rootPath: Path = Path.buildRoot('./src', './map')
     this.rootDirectory = new DirectoryBox(rootPath, 'root')
-    this.rootDirectory.render(99, 99)
+    this.rootDirectory.render()
 
     util.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
   }
@@ -48,10 +48,11 @@ export class Map {
   }
 
   private async updateStyle() {
+    let basicStyle: string = 'position:relative;'
     let offsetStyle: string = 'margin-top:' + this.marginTopPercent + '%;margin-left:' + this.marginLeftPercent + '%;'
     let scaleStyle: string = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;'
 
-    util.setStyleTo('mapMover', offsetStyle + scaleStyle)
+    util.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle)
   }
 
 }
