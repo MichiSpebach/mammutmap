@@ -1,10 +1,10 @@
 import * as util from './util'
 
 export class BoxMapData {
-  public x: number | null | undefined
-  public y: number | null | undefined
-  public width: number | null | undefined
-  public height: number | null | undefined
+  public x: number
+  public y: number
+  public width: number
+  public height: number
 
   public static buildDefault(): BoxMapData {
     return new BoxMapData(0, 0, 100, 100)
@@ -15,11 +15,7 @@ export class BoxMapData {
     return new BoxMapData(parsedData.x, parsedData.y, parsedData.width, parsedData.height)
   }
 
-  private constructor(
-      x: number | null | undefined,
-      y: number | null | undefined,
-      width: number | null | undefined,
-      height: number | null | undefined) {
+  private constructor(x: number, y: number, width: number, height: number) {
     this.x = x
     this.y = y
     this.width = width
@@ -38,10 +34,7 @@ export class BoxMapData {
     this.warnIf(this.y == undefined, 'y is undefined')
     this.warnIf(this.width == undefined, 'width is undefined')
     this.warnIf(this.height == undefined, 'height is undefined')
-
-    if (this.x == null || this.y == null || this.width == null || this.height == null) {
-      return
-    }
+    
     this.warnIf(this.x < 0, 'x is less than 0')
     this.warnIf(this.y < 0, 'y is less than 0')
     this.warnIf(this.width <= 0, 'width is not positive')
