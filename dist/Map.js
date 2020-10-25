@@ -39,14 +39,14 @@ exports.__esModule = true;
 exports.Map = void 0;
 var dom = require("./domAdapter");
 var Path_1 = require("./Path");
-var DirectoryBox_1 = require("./DirectoryBox");
+var DirectoryBox_1 = require("./box/DirectoryBox");
 var Map = /** @class */ (function () {
     function Map() {
         var _this = this;
         this.scalePercent = 100;
         this.marginTopPercent = 0;
         this.marginLeftPercent = 0;
-        this.mapRatioAdjusterSizePx = 500;
+        this.mapRatioAdjusterSizePx = 600;
         dom.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>');
         dom.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>');
         dom.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>');

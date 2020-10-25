@@ -1,6 +1,6 @@
-import * as util from './util'
-import * as dom from './domAdapter'
-import { Path } from './Path'
+import * as util from '../util'
+import * as dom from '../domAdapter'
+import { Path } from '../Path'
 import { BoxMapData } from './BoxMapData'
 
 export abstract class Box {

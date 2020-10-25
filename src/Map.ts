@@ -1,13 +1,13 @@
 import * as dom from './domAdapter'
 import { Path } from './Path'
-import { DirectoryBox } from './DirectoryBox'
+import { DirectoryBox } from './box/DirectoryBox'
 
 export class Map {
   private rootDirectory: DirectoryBox
   private scalePercent: number = 100
   private marginTopPercent: number = 0
   private marginLeftPercent: number = 0
-  private readonly mapRatioAdjusterSizePx: number = 500
+  private readonly mapRatioAdjusterSizePx: number = 600
 
   public constructor() {
     dom.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
