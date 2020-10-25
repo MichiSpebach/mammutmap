@@ -7,7 +7,7 @@ export class BoxMapData {
   public height: number
 
   public static buildDefault(): BoxMapData {
-    return new BoxMapData(0, 0, 100, 100)
+    return new BoxMapData(10, 10, 80, 80)
   }
 
   public static buildFromJson(json: string ): BoxMapData /*| SyntaxError*/ {
@@ -34,7 +34,7 @@ export class BoxMapData {
     this.warnIf(this.y == undefined, 'y is undefined')
     this.warnIf(this.width == undefined, 'width is undefined')
     this.warnIf(this.height == undefined, 'height is undefined')
-    
+
     this.warnIf(this.x < 0, 'x is less than 0')
     this.warnIf(this.y < 0, 'y is less than 0')
     this.warnIf(this.width <= 0, 'width is not positive')

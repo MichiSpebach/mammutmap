@@ -1,4 +1,5 @@
 import * as util from './util'
+import * as dom from './domAdapter'
 import { Path } from './Path'
 import { BoxMapData } from './BoxMapData'
 
@@ -41,14 +42,14 @@ export abstract class Box {
     let positionStyle: string = 'margin-left:' + this.mapData.x + '%;margin-top:' + this.mapData.y + '%;'
     let borderStyle: string = this.getBorderStyle()
 
-    util.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle)
+    dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle)
   }
 
   protected abstract getBorderStyle(): string
 
   private renderHeader(): void {
     let headerElement: string = '<div style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
-    util.setContentTo(this.getId(), headerElement)
+    dom.setContentTo(this.getId(), headerElement)
   }
 
   protected abstract renderBody(): void

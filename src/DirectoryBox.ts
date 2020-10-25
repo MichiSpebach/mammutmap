@@ -1,4 +1,5 @@
 import * as util from './util'
+import * as dom from './domAdapter'
 import { Box } from './Box'
 import { Path } from './Path'
 import { FileBox } from './FileBox'
@@ -48,8 +49,8 @@ export class DirectoryBox extends Box {
   }
 
   private renderBoxPlaceholderAndReturnId(name: string): string {
-    let elementId: string = util.generateElementId()
-    util.addContentTo(super.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
+    let elementId: string = dom.generateElementId()
+    dom.addContentTo(super.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
     return elementId
   }
 

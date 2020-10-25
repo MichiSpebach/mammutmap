@@ -37,7 +37,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 exports.Map = void 0;
-var util = require("./util");
+var dom = require("./domAdapter");
 var Path_1 = require("./Path");
 var DirectoryBox_1 = require("./DirectoryBox");
 var Map = /** @class */ (function () {
@@ -47,16 +47,16 @@ var Map = /** @class */ (function () {
         this.marginTopPercent = 0;
         this.marginLeftPercent = 0;
         this.mapRatioAdjusterSizePx = 500;
-        util.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>');
-        util.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>');
-        util.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>');
-        util.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>');
+        dom.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>');
+        dom.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>');
+        dom.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>');
+        dom.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>');
         this.updateStyle();
         //this.addBoxes()
         var rootPath = Path_1.Path.buildRoot('./src', './map');
         this.rootDirectory = new DirectoryBox_1.DirectoryBox(rootPath, 'root');
         this.rootDirectory.render();
-        util.addWheelListenerTo('map', function (delta, clientX, clientY) { return _this.zoom(-delta, clientX, clientY); });
+        dom.addWheelListenerTo('map', function (delta, clientX, clientY) { return _this.zoom(-delta, clientX, clientY); });
     }
     Map.prototype.addBoxes = function () {
         this.addBox('green');
@@ -77,7 +77,7 @@ var Map = /** @class */ (function () {
         this.addBox('green');
     };
     Map.prototype.addBox = function (color) {
-        util.addContentTo('root', '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>');
+        dom.addContentTo('root', '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>');
     };
     Map.prototype.zoom = function (delta, clientX, clientY) {
         var clientYPercent = 100 * clientY / this.mapRatioAdjusterSizePx;
@@ -95,7 +95,7 @@ var Map = /** @class */ (function () {
                 basicStyle = 'position:relative;';
                 offsetStyle = 'margin-top:' + this.marginTopPercent + '%;margin-left:' + this.marginLeftPercent + '%;';
                 scaleStyle = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;';
-                util.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle);
+                dom.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle);
                 return [2 /*return*/];
             });
         });

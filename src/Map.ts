@@ -1,4 +1,4 @@
-import * as util from './util'
+import * as dom from './domAdapter'
 import { Path } from './Path'
 import { DirectoryBox } from './DirectoryBox'
 
@@ -10,10 +10,10 @@ export class Map {
   private readonly mapRatioAdjusterSizePx: number = 500
 
   public constructor() {
-    util.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
-    util.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>')
-    util.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
-    util.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>')
+    dom.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
+    dom.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>')
+    dom.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
+    dom.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>')
     this.updateStyle()
 
     //this.addBoxes()
@@ -21,7 +21,7 @@ export class Map {
     this.rootDirectory = new DirectoryBox(rootPath, 'root')
     this.rootDirectory.render()
 
-    util.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
+    dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
   }
 
   private addBoxes(): void {
@@ -32,7 +32,7 @@ export class Map {
   }
 
   private addBox(color: string) {
-    util.addContentTo('root', '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>')
+    dom.addContentTo('root', '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>')
   }
 
   private zoom(delta: number, clientX: number, clientY: number): void {
@@ -52,7 +52,7 @@ export class Map {
     let offsetStyle: string = 'margin-top:' + this.marginTopPercent + '%;margin-left:' + this.marginLeftPercent + '%;'
     let scaleStyle: string = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;'
 
-    util.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle)
+    dom.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle)
   }
 
 }

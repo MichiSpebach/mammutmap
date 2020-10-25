@@ -11,7 +11,7 @@ var BoxMapData = /** @class */ (function () {
         this.validate();
     }
     BoxMapData.buildDefault = function () {
-        return new BoxMapData(0, 0, 100, 100);
+        return new BoxMapData(10, 10, 80, 80);
     };
     BoxMapData.buildFromJson = function (json) {
         var parsedData = JSON.parse(json); // parsed object has no functions

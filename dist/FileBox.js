@@ -15,6 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 exports.__esModule = true;
 exports.FileBox = void 0;
 var util = require("./util");
+var dom = require("./domAdapter");
 var Box_1 = require("./Box");
 var FileBox = /** @class */ (function (_super) {
     __extends(FileBox, _super);
@@ -28,7 +29,7 @@ var FileBox = /** @class */ (function (_super) {
         var _this = this;
         util.readFileAndConvertToHtml(_super.prototype.getPath.call(this).getSrcPath(), function (dataConvertedToHtml) {
             var content = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>';
-            util.addContentTo(_super.prototype.getId.call(_this), content);
+            dom.addContentTo(_super.prototype.getId.call(_this), content);
         });
     };
     return FileBox;

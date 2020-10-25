@@ -15,6 +15,7 @@ var __extends = (this && this.__extends) || (function () {
 exports.__esModule = true;
 exports.DirectoryBox = void 0;
 var util = require("./util");
+var dom = require("./domAdapter");
 var Box_1 = require("./Box");
 var Path_1 = require("./Path");
 var FileBox_1 = require("./FileBox");
@@ -58,8 +59,8 @@ var DirectoryBox = /** @class */ (function (_super) {
         return new FileBox_1.FileBox(Path_1.Path.buildDirEntry(_super.prototype.getPath.call(this), name), elementId);
     };
     DirectoryBox.prototype.renderBoxPlaceholderAndReturnId = function (name) {
-        var elementId = util.generateElementId();
-        util.addContentTo(_super.prototype.getId.call(this), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>');
+        var elementId = dom.generateElementId();
+        dom.addContentTo(_super.prototype.getId.call(this), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>');
         return elementId;
     };
     return DirectoryBox;

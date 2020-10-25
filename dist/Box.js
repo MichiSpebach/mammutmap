@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.Box = void 0;
 var util = require("./util");
+var dom = require("./domAdapter");
 var BoxMapData_1 = require("./BoxMapData");
 var Box = /** @class */ (function () {
     function Box(path, id) {
@@ -80,11 +81,11 @@ var Box = /** @class */ (function () {
         var scaleStyle = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;';
         var positionStyle = 'margin-left:' + this.mapData.x + '%;margin-top:' + this.mapData.y + '%;';
         var borderStyle = this.getBorderStyle();
-        util.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
+        dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
     };
     Box.prototype.renderHeader = function () {
         var headerElement = '<div style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
-        util.setContentTo(this.getId(), headerElement);
+        dom.setContentTo(this.getId(), headerElement);
     };
     return Box;
 }());

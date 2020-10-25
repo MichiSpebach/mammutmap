@@ -2,7 +2,7 @@
 exports.__esModule = true;
 var electron_1 = require("electron");
 var path = require("path");
-var util = require("./util");
+var dom = require("./domAdapter");
 var Map_1 = require("./Map");
 var mainWindow;
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -22,7 +22,7 @@ var createWindow = function () {
     mainWindow.loadFile(path.join(__dirname, '../src/index.html'));
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
-    util.initUtil(mainWindow.webContents);
+    dom.init(mainWindow.webContents);
     new Map_1.Map();
 };
 // This method will be called when Electron has finished
