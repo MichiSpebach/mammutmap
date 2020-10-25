@@ -79,7 +79,7 @@ export function logError(message: string) {
 
 function log(message: string, color: string): void {
   console.log(message)
-  let division: string = '<div style="color:' + color + '">' + message + '</div>'
+  let division: string = '<div style="color:' + color + '">' + escapeForHtml(message) + '</div>'
   webContents.executeJavaScript("document.getElementById('log').innerHTML = '" + division + "' + document.getElementById('log').innerHTML")
 }
 
@@ -106,16 +106,16 @@ export function readFileAndConvertToHtml(path: string, callback: (dataConvertedT
     if(err) {
       logError('util::readFile, ' + path + ', ' + err.message)
     } else {
-      callback(convertFileDataToHtmlString(data))
+      callback(escapeForHtml(data))
     }
   })
 }
 
-export function convertFileDataToHtmlString(fileData: string): string {
+export function escapeForHtml(text: string): string {
   var content: string = '';
-  for (let i = 0; i < fileData.length-1; i++) {
+  for (let i = 0; i < text.length-1; i++) {
     // TODO this is maybe very inefficient
-    content += escapeCharForHtml(fileData[i])
+    content += escapeCharForHtml(text[i])
   }
   return content
 }

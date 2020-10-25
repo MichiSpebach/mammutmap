@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.generateElementId = exports.convertFileDataToHtmlString = exports.readFileAndConvertToHtml = exports.readFile = exports.readdirSync = exports.stringify = exports.logError = exports.logWarning = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.addWheelListenerTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.initUtil = void 0;
+exports.generateElementId = exports.escapeForHtml = exports.readFileAndConvertToHtml = exports.readFile = exports.readdirSync = exports.stringify = exports.logError = exports.logWarning = exports.logInfo = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.addWheelListenerTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.initUtil = void 0;
 var electron_1 = require("electron");
 var fs = require("fs");
 var fs_1 = require("fs");
@@ -129,7 +129,7 @@ function logError(message) {
 exports.logError = logError;
 function log(message, color) {
     console.log(message);
-    var division = '<div style="color:' + color + '">' + message + '</div>';
+    var division = '<div style="color:' + color + '">' + escapeForHtml(message) + '</div>';
     webContents.executeJavaScript("document.getElementById('log').innerHTML = '" + division + "' + document.getElementById('log').innerHTML");
 }
 function stringify(object) {
@@ -156,20 +156,20 @@ function readFileAndConvertToHtml(path, callback) {
             logError('util::readFile, ' + path + ', ' + err.message);
         }
         else {
-            callback(convertFileDataToHtmlString(data));
+            callback(escapeForHtml(data));
         }
     });
 }
 exports.readFileAndConvertToHtml = readFileAndConvertToHtml;
-function convertFileDataToHtmlString(fileData) {
+function escapeForHtml(text) {
     var content = '';
-    for (var i = 0; i < fileData.length - 1; i++) {
+    for (var i = 0; i < text.length - 1; i++) {
         // TODO this is maybe very inefficient
-        content += escapeCharForHtml(fileData[i]);
+        content += escapeCharForHtml(text[i]);
     }
     return content;
 }
-exports.convertFileDataToHtmlString = convertFileDataToHtmlString;
+exports.escapeForHtml = escapeForHtml;
 function escapeCharForHtml(c) {
     switch (c) {
         case '\\':

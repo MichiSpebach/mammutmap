@@ -64,7 +64,7 @@ var Box = /** @class */ (function () {
                     case 0:
                         if (!!this.getPath().isRoot()) return [3 /*break*/, 2];
                         return [4 /*yield*/, util.readFile(this.getPath().getMapPath() + '.json')
-                                .then(function (json) { return _this.mapData = BoxMapData_1.BoxMapData.buildFromJson(json); })["catch"](function (error) { return util.logWarning('error while loading ' + _this.getPath().getMapPath() + '.json: ' + error); })];
+                                .then(function (json) { return _this.mapData = BoxMapData_1.BoxMapData.buildFromJson(json); })["catch"](function (error) { return util.logWarning('failed to load ' + _this.getPath().getMapPath() + '.json: ' + error); })];
                     case 1:
                         _a.sent();
                         _a.label = 2;

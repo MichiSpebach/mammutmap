@@ -30,7 +30,7 @@ export abstract class Box {
     if (!this.getPath().isRoot()) {
       await util.readFile(this.getPath().getMapPath() + '.json')
       .then(json => this.mapData = BoxMapData.buildFromJson(json))
-      .catch(error => util.logWarning('error while loading ' + this.getPath().getMapPath() + '.json: ' + error))
+      .catch(error => util.logWarning('failed to load ' + this.getPath().getMapPath() + '.json: ' + error))
     }
     this.renderStyle()
   }
