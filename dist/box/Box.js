@@ -79,7 +79,7 @@ var Box = /** @class */ (function () {
     Box.prototype.renderStyle = function () {
         var basicStyle = 'display:inline-block;position:absolute;overflow:hidden;'; //auto;'
         var scaleStyle = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;';
-        var positionStyle = 'margin-left:' + this.mapData.x + '%;margin-top:' + this.mapData.y + '%;';
+        var positionStyle = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;';
         var borderStyle = this.getBorderStyle();
         dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
     };

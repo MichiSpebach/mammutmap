@@ -39,7 +39,7 @@ export abstract class Box {
   private renderStyle(): void {
     let basicStyle: string = 'display:inline-block;position:absolute;overflow:hidden;'//auto;'
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
-    let positionStyle: string = 'margin-left:' + this.mapData.x + '%;margin-top:' + this.mapData.y + '%;'
+    let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
     let borderStyle: string = this.getBorderStyle()
 
     dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle)

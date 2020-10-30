@@ -93,7 +93,7 @@ var Map = /** @class */ (function () {
             var basicStyle, offsetStyle, scaleStyle;
             return __generator(this, function (_a) {
                 basicStyle = 'position:relative;';
-                offsetStyle = 'margin-top:' + this.marginTopPercent + '%;margin-left:' + this.marginLeftPercent + '%;';
+                offsetStyle = 'top:' + this.marginTopPercent + '%;left:' + this.marginLeftPercent + '%;';
                 scaleStyle = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;';
                 dom.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle);
                 return [2 /*return*/];

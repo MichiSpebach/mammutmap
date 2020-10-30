@@ -49,7 +49,7 @@ export class Map {
 
   private async updateStyle() {
     let basicStyle: string = 'position:relative;'
-    let offsetStyle: string = 'margin-top:' + this.marginTopPercent + '%;margin-left:' + this.marginLeftPercent + '%;'
+    let offsetStyle: string = 'top:' + this.marginTopPercent + '%;left:' + this.marginLeftPercent + '%;'
     let scaleStyle: string = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;'
 
     dom.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle)
