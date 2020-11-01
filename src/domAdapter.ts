@@ -15,10 +15,10 @@ export function generateElementId(): string {
 
 export async function getClientRectOf(id: string): Promise<DOMRect> {
   // doesn't work, maybe object cannot be transferred from render thread
-  return webContents.executeJavaScript("document.getElementById('" + id + "').getBoundingClientRect()")
+  return executeJsOnElement(id, "getBoundingClientRect()")
 }
 
-export async function getSizeOf(id: string): Promise<{width: number; height: number} > {
+export async function getSizeOf(id: string): Promise<{width: number; height: number}> {
   let widthPromise: Promise<number> = getWidthOf(id)
   let heightPromise: Promise<number> = getHeightOf(id)
   let width: number = await widthPromise
@@ -27,11 +27,35 @@ export async function getSizeOf(id: string): Promise<{width: number; height: num
 }
 
 export function getWidthOf(id: string): Promise<number> {
-  return webContents.executeJavaScript("document.getElementById('" + id + "').offsetWidth")
+  return executeJsOnElement(id, "offsetWidth")
 }
 
 export function getHeightOf(id: string): Promise<number> {
-  return webContents.executeJavaScript("document.getElementById('" + id + "').offsetHeight")
+  return executeJsOnElement(id, "offsetHeight")
+}
+
+export function addContent(content: string): void {
+  addContentTo('content', content)
+}
+
+export function setContent(content: string): void {
+  setContentTo('content', content)
+}
+
+export function addContentTo(id: string, content: string): void {
+  executeJsOnElement(id, "innerHTML += '" + content + "'")
+}
+
+export function insertContentTo(id: string, content: string): void {
+  executeJsOnElement(id, "innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML")
+}
+
+export function setContentTo(id: string, content: string): void {
+  executeJsOnElement(id, "innerHTML = '" + content + "'")
+}
+
+export function setStyleTo(id: string, style: string): void {
+  executeJsOnElement(id, "style = '" + style + "'")
 }
 
 export function addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): void {
@@ -43,31 +67,19 @@ export function addWheelListenerTo(id: string, callback: (delta: number, clientX
   rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY, event.clientX, event.clientY);'
   rendererFunction += '}'
 
-  webContents.executeJavaScript("document.getElementById('" + id + "').addEventListener('wheel', " + rendererFunction + ")")
+  executeJsOnElement(id, "addEventListener('wheel', " + rendererFunction + ")")
 
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
 }
 
-export function addContent(content: string): void {
-  webContents.executeJavaScript("document.getElementById('content').innerHTML += '" + content + "'")
+export function addDragListenerTo(id: string): void {
+  var rendererFunction: string = '(event) => {'
+  rendererFunction += 'console.log(event);'
+  rendererFunction += '}'
+
+  executeJsOnElement(id, "addEventListener('dragstart', " + rendererFunction + ")")
 }
 
-export function setContent(content: string): void {
-  webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'")
-}
-
-export function addContentTo(id: string, content: string) {
-  webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML += '" + content + "'")
-}
-
-export function insertContentTo(id: string, content: string): void {
-  webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML")
-}
-
-export function setContentTo(id: string, content: string) {
-  webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML = '" + content + "'")
-}
-
-export function setStyleTo(id: string, style: string) {
-  webContents.executeJavaScript("document.getElementById('" + id + "').style = '" + style + "'")
+function executeJsOnElement(elementId: string, jsToExectue: string): Promise<any> {
+  return webContents.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExectue)
 }

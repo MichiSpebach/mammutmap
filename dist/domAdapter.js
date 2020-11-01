@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.setStyleTo = exports.setContentTo = exports.insertContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.addWheelListenerTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
+exports.addDragListenerTo = exports.addWheelListenerTo = exports.setStyleTo = exports.setContentTo = exports.insertContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
 var electron_1 = require("electron");
 var webContents;
 var elementIdCounter;
@@ -54,7 +54,7 @@ function getClientRectOf(id) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
             // doesn't work, maybe object cannot be transferred from render thread
-            return [2 /*return*/, webContents.executeJavaScript("document.getElementById('" + id + "').getBoundingClientRect()")];
+            return [2 /*return*/, executeJsOnElement(id, "getBoundingClientRect()")];
         });
     });
 }
@@ -80,13 +80,37 @@ function getSizeOf(id) {
 }
 exports.getSizeOf = getSizeOf;
 function getWidthOf(id) {
-    return webContents.executeJavaScript("document.getElementById('" + id + "').offsetWidth");
+    return executeJsOnElement(id, "offsetWidth");
 }
 exports.getWidthOf = getWidthOf;
 function getHeightOf(id) {
-    return webContents.executeJavaScript("document.getElementById('" + id + "').offsetHeight");
+    return executeJsOnElement(id, "offsetHeight");
 }
 exports.getHeightOf = getHeightOf;
+function addContent(content) {
+    addContentTo('content', content);
+}
+exports.addContent = addContent;
+function setContent(content) {
+    setContentTo('content', content);
+}
+exports.setContent = setContent;
+function addContentTo(id, content) {
+    executeJsOnElement(id, "innerHTML += '" + content + "'");
+}
+exports.addContentTo = addContentTo;
+function insertContentTo(id, content) {
+    executeJsOnElement(id, "innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML");
+}
+exports.insertContentTo = insertContentTo;
+function setContentTo(id, content) {
+    executeJsOnElement(id, "innerHTML = '" + content + "'");
+}
+exports.setContentTo = setContentTo;
+function setStyleTo(id, style) {
+    executeJsOnElement(id, "style = '" + style + "'");
+}
+exports.setStyleTo = setStyleTo;
 function addWheelListenerTo(id, callback) {
     var ipcChannelName = 'wheel' + id;
     var rendererFunction = '(event) => {';
@@ -94,32 +118,18 @@ function addWheelListenerTo(id, callback) {
     //rendererFunction += 'console.log(event);'
     rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY, event.clientX, event.clientY);';
     rendererFunction += '}';
-    webContents.executeJavaScript("document.getElementById('" + id + "').addEventListener('wheel', " + rendererFunction + ")");
+    executeJsOnElement(id, "addEventListener('wheel', " + rendererFunction + ")");
     electron_1.ipcMain.on(ipcChannelName, function (_, deltaY, clientX, clientY) { return callback(deltaY, clientX, clientY); });
 }
 exports.addWheelListenerTo = addWheelListenerTo;
-function addContent(content) {
-    webContents.executeJavaScript("document.getElementById('content').innerHTML += '" + content + "'");
+function addDragListenerTo(id) {
+    var rendererFunction = '(event) => {';
+    rendererFunction += 'console.log(event);';
+    rendererFunction += '}';
+    executeJsOnElement(id, "addEventListener('dragstart', " + rendererFunction + ")");
 }
-exports.addContent = addContent;
-function setContent(content) {
-    webContents.executeJavaScript("document.getElementById('content').innerHTML = '" + content + "'");
+exports.addDragListenerTo = addDragListenerTo;
+function executeJsOnElement(elementId, jsToExectue) {
+    return webContents.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExectue);
 }
-exports.setContent = setContent;
-function addContentTo(id, content) {
-    webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML += '" + content + "'");
-}
-exports.addContentTo = addContentTo;
-function insertContentTo(id, content) {
-    webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML");
-}
-exports.insertContentTo = insertContentTo;
-function setContentTo(id, content) {
-    webContents.executeJavaScript("document.getElementById('" + id + "').innerHTML = '" + content + "'");
-}
-exports.setContentTo = setContentTo;
-function setStyleTo(id, style) {
-    webContents.executeJavaScript("document.getElementById('" + id + "').style = '" + style + "'");
-}
-exports.setStyleTo = setStyleTo;
 //# sourceMappingURL=domAdapter.js.map
