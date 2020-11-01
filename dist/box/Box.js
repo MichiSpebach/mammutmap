@@ -84,8 +84,11 @@ var Box = /** @class */ (function () {
         dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
     };
     Box.prototype.renderHeader = function () {
-        var headerElement = '<div style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
+        var headerId = this.getId() + 'header';
+        var headerElement = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
         dom.setContentTo(this.getId(), headerElement);
+        dom.addDragListenerTo(this.getId());
+        //dom.getClientRectOf(this.getId())
     };
     return Box;
 }());

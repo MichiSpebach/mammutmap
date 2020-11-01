@@ -38,6 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.addDragListenerTo = exports.addWheelListenerTo = exports.setStyleTo = exports.setContentTo = exports.insertContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
 var electron_1 = require("electron");
+var util = require("./util");
 var webContents;
 var elementIdCounter;
 function init(webContentsToRender) {
@@ -52,9 +53,11 @@ function generateElementId() {
 exports.generateElementId = generateElementId;
 function getClientRectOf(id) {
     return __awaiter(this, void 0, void 0, function () {
+        var rect;
         return __generator(this, function (_a) {
-            // doesn't work, maybe object cannot be transferred from render thread
-            return [2 /*return*/, executeJsOnElement(id, "getBoundingClientRect()")];
+            rect = executeJsOnElement(id, "getBoundingClientRect()");
+            util.logInfo(util.stringify(rect));
+            return [2 /*return*/, rect];
         });
     });
 }
