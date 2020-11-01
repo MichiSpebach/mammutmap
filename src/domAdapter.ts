@@ -1,4 +1,6 @@
 import { WebContents, ipcMain, IpcMainEvent } from 'electron'
+import * as util from './util'
+import { Rect } from './Rect'
 
 var webContents: WebContents
 var elementIdCounter: number
@@ -13,9 +15,23 @@ export function generateElementId(): string {
   return 'element' + elementIdCounter
 }
 
-export async function getClientRectOf(id: string): Promise<DOMRect> {
-  // doesn't work, maybe object cannot be transferred from render thread
-  return executeJsOnElement(id, "getBoundingClientRect()")
+export async function getClientRectOf(id: string): Promise<Rect> {
+  // implemented workaround because following line doesn't work, because 'Error: An object could not be cloned.'
+  //return await executeJsOnElement(id, "getBoundingClientRect()").catch(reason => util.logError(reason))
+
+  let ipcChannelName = 'getClientRectOf_' + id
+
+  var rendererCode = '{'
+  rendererCode += 'let ipc = require("electron").ipcRenderer;'
+  rendererCode += 'let rect = document.getElementById("' + id + '").getBoundingClientRect();'
+  rendererCode += 'ipc.send("' + ipcChannelName + '", {x: rect.x, y: rect.y, width: rect.width, height: rect.height});' // manual copy because DOMRect could not be cloned
+  rendererCode += '}'
+
+  webContents.executeJavaScript(rendererCode)
+
+  return new Promise<Rect>(resolve => {
+    ipcMain.once(ipcChannelName, (_: IpcMainEvent, rect) => resolve(rect))
+  })
 }
 
 export async function getSizeOf(id: string): Promise<{width: number; height: number}> {

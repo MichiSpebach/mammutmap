@@ -47,9 +47,12 @@ export abstract class Box {
 
   protected abstract getBorderStyle(): string
 
-  private renderHeader(): void {
-    let headerElement: string = '<div style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
+  private async renderHeader(): Promise<void> {
+    let headerId: string = this.getId() + 'header'
+    let headerElement: string = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
     dom.setContentTo(this.getId(), headerElement)
+    dom.addDragListenerTo(this.getId())
+    util.logInfo(util.stringify(await dom.getClientRectOf(this.getId())))
   }
 
   protected abstract renderBody(): void

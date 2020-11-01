@@ -38,7 +38,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 exports.addDragListenerTo = exports.addWheelListenerTo = exports.setStyleTo = exports.setContentTo = exports.insertContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
 var electron_1 = require("electron");
-var util = require("./util");
 var webContents;
 var elementIdCounter;
 function init(webContentsToRender) {
@@ -53,11 +52,18 @@ function generateElementId() {
 exports.generateElementId = generateElementId;
 function getClientRectOf(id) {
     return __awaiter(this, void 0, void 0, function () {
-        var rect;
+        var ipcChannelName, rendererCode;
         return __generator(this, function (_a) {
-            rect = executeJsOnElement(id, "getBoundingClientRect()");
-            util.logInfo(util.stringify(rect));
-            return [2 /*return*/, rect];
+            ipcChannelName = 'getClientRectOf_' + id;
+            rendererCode = '{';
+            rendererCode += 'let ipc = require("electron").ipcRenderer;';
+            rendererCode += 'let rect = document.getElementById("' + id + '").getBoundingClientRect();';
+            rendererCode += 'ipc.send("' + ipcChannelName + '", {x: rect.x, y: rect.y, width: rect.width, height: rect.height});'; // manual copy because DOMRect could not be cloned
+            rendererCode += '}';
+            webContents.executeJavaScript(rendererCode);
+            return [2 /*return*/, new Promise(function (resolve) {
+                    electron_1.ipcMain.once(ipcChannelName, function (_, rect) { return resolve(rect); });
+                })];
         });
     });
 }

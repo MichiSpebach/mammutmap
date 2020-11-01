@@ -84,11 +84,24 @@ var Box = /** @class */ (function () {
         dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
     };
     Box.prototype.renderHeader = function () {
-        var headerId = this.getId() + 'header';
-        var headerElement = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
-        dom.setContentTo(this.getId(), headerElement);
-        dom.addDragListenerTo(this.getId());
-        //dom.getClientRectOf(this.getId())
+        return __awaiter(this, void 0, void 0, function () {
+            var headerId, headerElement, _a, _b, _c, _d;
+            return __generator(this, function (_e) {
+                switch (_e.label) {
+                    case 0:
+                        headerId = this.getId() + 'header';
+                        headerElement = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
+                        dom.setContentTo(this.getId(), headerElement);
+                        dom.addDragListenerTo(this.getId());
+                        _b = (_a = util).logInfo;
+                        _d = (_c = util).stringify;
+                        return [4 /*yield*/, dom.getClientRectOf(this.getId())];
+                    case 1:
+                        _b.apply(_a, [_d.apply(_c, [_e.sent()])]);
+                        return [2 /*return*/];
+                }
+            });
+        });
     };
     return Box;
 }());
