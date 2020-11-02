@@ -52,18 +52,17 @@ function generateElementId() {
 exports.generateElementId = generateElementId;
 function getClientRectOf(id) {
     return __awaiter(this, void 0, void 0, function () {
-        var ipcChannelName, rendererCode;
+        var rendererCode;
         return __generator(this, function (_a) {
-            ipcChannelName = 'getClientRectOf_' + id;
-            rendererCode = '{';
-            rendererCode += 'let ipc = require("electron").ipcRenderer;';
-            rendererCode += 'let rect = document.getElementById("' + id + '").getBoundingClientRect();';
-            rendererCode += 'ipc.send("' + ipcChannelName + '", {x: rect.x, y: rect.y, width: rect.width, height: rect.height});'; // manual copy because DOMRect could not be cloned
-            rendererCode += '}';
-            webContents.executeJavaScript(rendererCode);
-            return [2 /*return*/, new Promise(function (resolve) {
-                    electron_1.ipcMain.once(ipcChannelName, function (_, rect) { return resolve(rect); });
-                })];
+            switch (_a.label) {
+                case 0:
+                    rendererCode = '(() => {';
+                    rendererCode += 'let rect = document.getElementById("' + id + '").getBoundingClientRect();';
+                    rendererCode += 'return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};'; // manual copy because DOMRect could not be cloned
+                    rendererCode += '}).call()';
+                    return [4 /*yield*/, webContents.executeJavaScript(rendererCode)];
+                case 1: return [2 /*return*/, _a.sent()];
+            }
         });
     });
 }

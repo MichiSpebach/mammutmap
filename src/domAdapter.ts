@@ -1,5 +1,4 @@
 import { WebContents, ipcMain, IpcMainEvent } from 'electron'
-import * as util from './util'
 import { Rect } from './Rect'
 
 var webContents: WebContents
@@ -19,19 +18,12 @@ export async function getClientRectOf(id: string): Promise<Rect> {
   // implemented workaround because following line doesn't work, because 'Error: An object could not be cloned.'
   //return await executeJsOnElement(id, "getBoundingClientRect()").catch(reason => util.logError(reason))
 
-  let ipcChannelName = 'getClientRectOf_' + id
-
-  var rendererCode = '{'
-  rendererCode += 'let ipc = require("electron").ipcRenderer;'
+  var rendererCode = '(() => {'
   rendererCode += 'let rect = document.getElementById("' + id + '").getBoundingClientRect();'
-  rendererCode += 'ipc.send("' + ipcChannelName + '", {x: rect.x, y: rect.y, width: rect.width, height: rect.height});' // manual copy because DOMRect could not be cloned
-  rendererCode += '}'
+  rendererCode += 'return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};' // manual copy because DOMRect could not be cloned
+  rendererCode += '}).call()'
 
-  webContents.executeJavaScript(rendererCode)
-
-  return new Promise<Rect>(resolve => {
-    ipcMain.once(ipcChannelName, (_: IpcMainEvent, rect) => resolve(rect))
-  })
+  return await webContents.executeJavaScript(rendererCode)
 }
 
 export async function getSizeOf(id: string): Promise<{width: number; height: number}> {
