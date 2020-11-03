@@ -49,10 +49,22 @@ export abstract class Box {
 
   private async renderHeader(): Promise<void> {
     let headerId: string = this.getId() + 'header'
+
     let headerElement: string = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
-    dom.setContentTo(this.getId(), headerElement)
-    dom.addDragListenerTo(this.getId())
-    util.logInfo(util.stringify(await dom.getClientRectOf(this.getId())))
+    await dom.setContentTo(this.getId(), headerElement)
+
+    dom.addDragListenerTo(headerId, (x:number, y: number) => this.changePosition(x, y))
+  }
+
+  private async changePosition(x: number, y: number): Promise<void> {
+    let rect = await dom.getClientRectOf(this.getId()) // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+
+    util.logInfo('x=' + x)
+
+    this.mapData.x = x
+    this.mapData.y = y
+
+    this.renderStyle()
   }
 
   protected abstract renderBody(): void

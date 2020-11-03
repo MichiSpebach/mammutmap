@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addDragListenerTo = exports.addWheelListenerTo = exports.setStyleTo = exports.setContentTo = exports.insertContentTo = exports.addContentTo = exports.setContent = exports.addContent = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
+exports.addDragListenerTo = exports.addWheelListenerTo = exports.setStyleTo = exports.setContentTo = exports.insertContentTo = exports.addContentTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
 var electron_1 = require("electron");
 var webContents;
 var elementIdCounter;
@@ -95,32 +95,24 @@ function getHeightOf(id) {
     return executeJsOnElement(id, "offsetHeight");
 }
 exports.getHeightOf = getHeightOf;
-function addContent(content) {
-    addContentTo('content', content);
-}
-exports.addContent = addContent;
-function setContent(content) {
-    setContentTo('content', content);
-}
-exports.setContent = setContent;
 function addContentTo(id, content) {
-    executeJsOnElement(id, "innerHTML += '" + content + "'");
+    return executeJsOnElement(id, "innerHTML += '" + content + "'");
 }
 exports.addContentTo = addContentTo;
 function insertContentTo(id, content) {
-    executeJsOnElement(id, "innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML");
+    return executeJsOnElement(id, "innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML");
 }
 exports.insertContentTo = insertContentTo;
 function setContentTo(id, content) {
-    executeJsOnElement(id, "innerHTML = '" + content + "'");
+    return executeJsOnElement(id, "innerHTML = '" + content + "'");
 }
 exports.setContentTo = setContentTo;
 function setStyleTo(id, style) {
-    executeJsOnElement(id, "style = '" + style + "'");
+    return executeJsOnElement(id, "style = '" + style + "'");
 }
 exports.setStyleTo = setStyleTo;
 function addWheelListenerTo(id, callback) {
-    var ipcChannelName = 'wheel' + id;
+    var ipcChannelName = 'wheel_' + id;
     var rendererFunction = '(event) => {';
     rendererFunction += 'let ipc = require("electron").ipcRenderer;';
     //rendererFunction += 'console.log(event);'
@@ -130,11 +122,15 @@ function addWheelListenerTo(id, callback) {
     electron_1.ipcMain.on(ipcChannelName, function (_, deltaY, clientX, clientY) { return callback(deltaY, clientX, clientY); });
 }
 exports.addWheelListenerTo = addWheelListenerTo;
-function addDragListenerTo(id) {
+function addDragListenerTo(id, callback) {
+    var ipcChannelName = 'drag_' + id;
     var rendererFunction = '(event) => {';
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;';
     rendererFunction += 'console.log(event);';
+    rendererFunction += 'ipc.send("' + ipcChannelName + '", event.x, event.y);';
     rendererFunction += '}';
-    executeJsOnElement(id, "addEventListener('dragstart', " + rendererFunction + ")");
+    executeJsOnElement(id, "addEventListener('drag', " + rendererFunction + ")");
+    electron_1.ipcMain.on(ipcChannelName, function (_, x, y) { return callback(x, y); });
 }
 exports.addDragListenerTo = addDragListenerTo;
 function executeJsOnElement(elementId, jsToExectue) {

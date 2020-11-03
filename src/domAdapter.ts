@@ -42,32 +42,24 @@ export function getHeightOf(id: string): Promise<number> {
   return executeJsOnElement(id, "offsetHeight")
 }
 
-export function addContent(content: string): void {
-  addContentTo('content', content)
+export function addContentTo(id: string, content: string): Promise<void> {
+  return executeJsOnElement(id, "innerHTML += '" + content + "'")
 }
 
-export function setContent(content: string): void {
-  setContentTo('content', content)
+export function insertContentTo(id: string, content: string): Promise<void> {
+  return executeJsOnElement(id, "innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML")
 }
 
-export function addContentTo(id: string, content: string): void {
-  executeJsOnElement(id, "innerHTML += '" + content + "'")
+export function setContentTo(id: string, content: string): Promise<void> {
+  return executeJsOnElement(id, "innerHTML = '" + content + "'")
 }
 
-export function insertContentTo(id: string, content: string): void {
-  executeJsOnElement(id, "innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML")
-}
-
-export function setContentTo(id: string, content: string): void {
-  executeJsOnElement(id, "innerHTML = '" + content + "'")
-}
-
-export function setStyleTo(id: string, style: string): void {
-  executeJsOnElement(id, "style = '" + style + "'")
+export function setStyleTo(id: string, style: string): Promise<void> {
+  return executeJsOnElement(id, "style = '" + style + "'")
 }
 
 export function addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): void {
-  let ipcChannelName = 'wheel' + id
+  let ipcChannelName = 'wheel_' + id
 
   var rendererFunction: string = '(event) => {'
   rendererFunction += 'let ipc = require("electron").ipcRenderer;'
@@ -80,12 +72,18 @@ export function addWheelListenerTo(id: string, callback: (delta: number, clientX
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
 }
 
-export function addDragListenerTo(id: string): void {
+export function addDragListenerTo(id: string, callback: (clientX: number, clientY: number) => void): void {
+  let ipcChannelName = 'drag_' + id
+
   var rendererFunction: string = '(event) => {'
+  rendererFunction += 'let ipc = require("electron").ipcRenderer;'
   rendererFunction += 'console.log(event);'
+  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.x, event.y);'
   rendererFunction += '}'
 
-  executeJsOnElement(id, "addEventListener('dragstart', " + rendererFunction + ")")
+  executeJsOnElement(id, "addEventListener('drag', " + rendererFunction + ")")
+
+  ipcMain.on(ipcChannelName, (_: IpcMainEvent, x:number, y: number) => callback(x, y))
 }
 
 function executeJsOnElement(elementId: string, jsToExectue: string): Promise<any> {

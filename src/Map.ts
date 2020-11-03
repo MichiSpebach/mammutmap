@@ -10,7 +10,7 @@ export class Map {
   private readonly mapRatioAdjusterSizePx: number = 600
 
   public constructor() {
-    dom.setContent('<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
+    dom.setContentTo('content', '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
     dom.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>')
     dom.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
     dom.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>')

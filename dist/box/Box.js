@@ -85,19 +85,35 @@ var Box = /** @class */ (function () {
     };
     Box.prototype.renderHeader = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var headerId, headerElement, _a, _b, _c, _d;
-            return __generator(this, function (_e) {
-                switch (_e.label) {
+            var headerId, headerElement;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         headerId = this.getId() + 'header';
                         headerElement = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
-                        dom.setContentTo(this.getId(), headerElement);
-                        dom.addDragListenerTo(this.getId());
-                        _b = (_a = util).logInfo;
-                        _d = (_c = util).stringify;
-                        return [4 /*yield*/, dom.getClientRectOf(this.getId())];
+                        return [4 /*yield*/, dom.setContentTo(this.getId(), headerElement)];
                     case 1:
-                        _b.apply(_a, [_d.apply(_c, [_e.sent()])]);
+                        _a.sent();
+                        dom.addDragListenerTo(headerId, function (x, y) { return _this.changePosition(x, y); });
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Box.prototype.changePosition = function (x, y) {
+        return __awaiter(this, void 0, void 0, function () {
+            var rect;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, dom.getClientRectOf(this.getId())]; // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+                    case 1:
+                        rect = _a.sent() // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+                        ;
+                        util.logInfo('x=' + x);
+                        this.mapData.x = x;
+                        this.mapData.y = y;
+                        this.renderStyle();
                         return [2 /*return*/];
                 }
             });
