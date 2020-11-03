@@ -59,7 +59,10 @@ export abstract class Box {
   private async changePosition(x: number, y: number): Promise<void> {
     let rect = await dom.getClientRectOf(this.getId()) // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
 
-    util.logInfo('x=' + x)
+    if (x == 0 || y == 0 || (this.mapData.x == x && this.mapData.y == y)) {
+      return
+    }
+    util.logInfo('x=' + x + ', y=' + y)
 
     this.mapData.x = x
     this.mapData.y = y

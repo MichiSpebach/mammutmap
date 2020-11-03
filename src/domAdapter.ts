@@ -46,16 +46,16 @@ export function addContentTo(id: string, content: string): Promise<void> {
   return executeJsOnElement(id, "innerHTML += '" + content + "'")
 }
 
-export function insertContentTo(id: string, content: string): Promise<void> {
-  return executeJsOnElement(id, "innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML")
-}
-
 export function setContentTo(id: string, content: string): Promise<void> {
   return executeJsOnElement(id, "innerHTML = '" + content + "'")
 }
 
 export function setStyleTo(id: string, style: string): Promise<void> {
   return executeJsOnElement(id, "style = '" + style + "'")
+}
+
+export function scrollToBottom(id: string): void {
+  executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER")
 }
 
 export function addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): void {

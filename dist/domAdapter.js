@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addDragListenerTo = exports.addWheelListenerTo = exports.setStyleTo = exports.setContentTo = exports.insertContentTo = exports.addContentTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
+exports.addDragListenerTo = exports.addWheelListenerTo = exports.scrollToBottom = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
 var electron_1 = require("electron");
 var webContents;
 var elementIdCounter;
@@ -99,10 +99,6 @@ function addContentTo(id, content) {
     return executeJsOnElement(id, "innerHTML += '" + content + "'");
 }
 exports.addContentTo = addContentTo;
-function insertContentTo(id, content) {
-    return executeJsOnElement(id, "innerHTML = '" + content + "' + document.getElementById('" + id + "').innerHTML");
-}
-exports.insertContentTo = insertContentTo;
 function setContentTo(id, content) {
     return executeJsOnElement(id, "innerHTML = '" + content + "'");
 }
@@ -111,6 +107,10 @@ function setStyleTo(id, style) {
     return executeJsOnElement(id, "style = '" + style + "'");
 }
 exports.setStyleTo = setStyleTo;
+function scrollToBottom(id) {
+    executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER");
+}
+exports.scrollToBottom = scrollToBottom;
 function addWheelListenerTo(id, callback) {
     var ipcChannelName = 'wheel_' + id;
     var rendererFunction = '(event) => {';

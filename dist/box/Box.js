@@ -110,7 +110,10 @@ var Box = /** @class */ (function () {
                     case 1:
                         rect = _a.sent() // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
                         ;
-                        util.logInfo('x=' + x);
+                        if (x == 0 || y == 0 || (this.mapData.x == x && this.mapData.y == y)) {
+                            return [2 /*return*/];
+                        }
+                        util.logInfo('x=' + x + ', y=' + y);
                         this.mapData.x = x;
                         this.mapData.y = y;
                         this.renderStyle();

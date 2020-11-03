@@ -14,10 +14,11 @@ export function logError(message: string) {
     log('ERROR: ' + message, 'red')
 }
 
-function log(message: string, color: string): void {
+async function log(message: string, color: string): Promise<void> {
   console.log(message)
   let division: string = '<div style="color:' + color + '">' + escapeForHtml(message) + '</div>'
-  dom.insertContentTo('log', division)
+  await dom.addContentTo('log', division)
+  dom.scrollToBottom('log')
 }
 
 export function stringify(object: any): string {
