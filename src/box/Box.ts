@@ -62,7 +62,7 @@ export abstract class Box {
     if (x == 0 || y == 0 || (this.mapData.x == x && this.mapData.y == y)) {
       return
     }
-    util.logInfo('x=' + x + ', y=' + y)
+    util.logInfo(util.stringify(rect) + '; x=' + x + ', y=' + y)
 
     this.mapData.x = x
     this.mapData.y = y

@@ -100,7 +100,7 @@ function readFileAndConvertToHtml(path, callback) {
 exports.readFileAndConvertToHtml = readFileAndConvertToHtml;
 function escapeForHtml(text) {
     var content = '';
-    for (var i = 0; i < text.length - 1; i++) {
+    for (var i = 0; i < text.length; i++) {
         // TODO this is maybe very inefficient
         content += escapeCharForHtml(text[i]);
     }

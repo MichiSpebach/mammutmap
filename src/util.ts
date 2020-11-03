@@ -51,7 +51,7 @@ export function readFileAndConvertToHtml(path: string, callback: (dataConvertedT
 
 export function escapeForHtml(text: string): string {
   var content: string = '';
-  for (let i = 0; i < text.length-1; i++) {
+  for (let i = 0; i < text.length; i++) {
     // TODO this is maybe very inefficient
     content += escapeCharForHtml(text[i])
   }
