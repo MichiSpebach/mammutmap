@@ -7,6 +7,7 @@ export abstract class Box {
   private readonly path: Path
   private readonly id: string
   private mapData: BoxMapData = BoxMapData.buildDefault()
+  private dragOffset: {x: number, y: number} = {x:0 , y:0}
 
   public constructor(path: Path, id: string) {
     this.path = path
@@ -53,19 +54,23 @@ export abstract class Box {
     let headerElement: string = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
     await dom.setContentTo(this.getId(), headerElement)
 
-    dom.addDragListenerTo(headerId, (x:number, y: number) => this.changePosition(x, y))
+    dom.addDragListenerTo(headerId, 'dragstart', (clientX:number, clientY: number) => this.setDragOffset(clientX, clientY))
+    dom.addDragListenerTo(headerId, 'drag', (clientX:number, clientY: number) => this.changePosition(clientX, clientY))
   }
 
-  private async changePosition(x: number, y: number): Promise<void> {
-    let rect = await dom.getClientRectOf(this.getId()) // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+  private async setDragOffset(clientX: number, clientY: number): Promise<void> {
+    let clientRect = await dom.getClientRectOf(this.getId()) // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+    util.logInfo('dragstart, clientRect:' + util.stringify(clientRect) + '; clientX=' + clientX + ', clientY=' + clientY)
+    this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
+  }
 
-    if (x == 0 || y == 0 || (this.mapData.x == x && this.mapData.y == y)) {
-      return
-    }
-    util.logInfo(util.stringify(rect) + '; x=' + x + ', y=' + y)
+  private async changePosition(clientX: number, clientY: number): Promise<void> {
+    let parentClientRect = await dom.getClientRectOf('root') // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
 
-    this.mapData.x = x
-    this.mapData.y = y
+    //util.logInfo('parent:' + util.stringify(parentClientRect) + '; this:' + util.stringify(clientRect) + '; x=' + clientX + ', y=' + clientY)
+
+    this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
+    this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
 
     this.renderStyle()
   }

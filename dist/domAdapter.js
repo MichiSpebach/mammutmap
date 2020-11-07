@@ -122,15 +122,17 @@ function addWheelListenerTo(id, callback) {
     electron_1.ipcMain.on(ipcChannelName, function (_, deltaY, clientX, clientY) { return callback(deltaY, clientX, clientY); });
 }
 exports.addWheelListenerTo = addWheelListenerTo;
-function addDragListenerTo(id, callback) {
-    var ipcChannelName = 'drag_' + id;
+function addDragListenerTo(id, eventType, callback) {
+    var ipcChannelName = eventType + '_' + id;
     var rendererFunction = '(event) => {';
     rendererFunction += 'let ipc = require("electron").ipcRenderer;';
     rendererFunction += 'console.log(event);';
-    rendererFunction += 'ipc.send("' + ipcChannelName + '", event.x, event.y);';
+    rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {';
+    rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);';
     rendererFunction += '}';
-    executeJsOnElement(id, "addEventListener('drag', " + rendererFunction + ")");
-    electron_1.ipcMain.on(ipcChannelName, function (_, x, y) { return callback(x, y); });
+    rendererFunction += '}';
+    executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")");
+    electron_1.ipcMain.on(ipcChannelName, function (_, clientX, clientY) { return callback(clientX, clientY); });
 }
 exports.addDragListenerTo = addDragListenerTo;
 function executeJsOnElement(elementId, jsToExectue) {

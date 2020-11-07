@@ -43,6 +43,7 @@ var BoxMapData_1 = require("./BoxMapData");
 var Box = /** @class */ (function () {
     function Box(path, id) {
         this.mapData = BoxMapData_1.BoxMapData.buildDefault();
+        this.dragOffset = { x: 0, y: 0 };
         this.path = path;
         this.id = id;
     }
@@ -95,27 +96,43 @@ var Box = /** @class */ (function () {
                         return [4 /*yield*/, dom.setContentTo(this.getId(), headerElement)];
                     case 1:
                         _a.sent();
-                        dom.addDragListenerTo(headerId, function (x, y) { return _this.changePosition(x, y); });
+                        dom.addDragListenerTo(headerId, 'dragstart', function (clientX, clientY) { return _this.setDragOffset(clientX, clientY); });
+                        dom.addDragListenerTo(headerId, 'drag', function (clientX, clientY) { return _this.changePosition(clientX, clientY); });
                         return [2 /*return*/];
                 }
             });
         });
     };
-    Box.prototype.changePosition = function (x, y) {
+    Box.prototype.setDragOffset = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
-            var rect;
+            var clientRect;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, dom.getClientRectOf(this.getId())]; // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
                     case 1:
-                        rect = _a.sent() // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+                        clientRect = _a.sent() // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
                         ;
-                        if (x == 0 || y == 0 || (this.mapData.x == x && this.mapData.y == y)) {
-                            return [2 /*return*/];
-                        }
-                        util.logInfo(util.stringify(rect) + '; x=' + x + ', y=' + y);
-                        this.mapData.x = x;
-                        this.mapData.y = y;
+                        util.logInfo('dragstart, clientRect:' + util.stringify(clientRect) + '; clientX=' + clientX + ', clientY=' + clientY);
+                        this.dragOffset = { x: clientX - clientRect.x, y: clientY - clientRect.y };
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Box.prototype.changePosition = function (clientX, clientY) {
+        return __awaiter(this, void 0, void 0, function () {
+            var parentClientRect;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, dom.getClientRectOf('root')
+                        //util.logInfo('parent:' + util.stringify(parentClientRect) + '; this:' + util.stringify(clientRect) + '; x=' + clientX + ', y=' + clientY)
+                    ]; // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+                    case 1:
+                        parentClientRect = _a.sent() // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+                        ;
+                        //util.logInfo('parent:' + util.stringify(parentClientRect) + '; this:' + util.stringify(clientRect) + '; x=' + clientX + ', y=' + clientY)
+                        this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
+                        this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
                         this.renderStyle();
                         return [2 /*return*/];
                 }
