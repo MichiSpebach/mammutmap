@@ -26,6 +26,9 @@ var DirectoryBox = /** @class */ (function (_super) {
         _this.boxes = [];
         return _this;
     }
+    DirectoryBox.prototype.getOverflow = function () {
+        return 'visible';
+    };
     DirectoryBox.prototype.getBorderStyle = function () {
         return 'border:dotted;border-color:skyblue;';
     };

@@ -9,6 +9,10 @@ export class FileBox extends Box {
     super(path, id, parent)
   }
 
+  protected getOverflow(): 'hidden' {
+    return 'hidden'
+  }
+
   protected getBorderStyle(): string {
     return 'border:solid;border-color:skyblue;'
   }

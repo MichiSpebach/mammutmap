@@ -22,6 +22,9 @@ var FileBox = /** @class */ (function (_super) {
     function FileBox(path, id, parent) {
         return _super.call(this, path, id, parent) || this;
     }
+    FileBox.prototype.getOverflow = function () {
+        return 'hidden';
+    };
     FileBox.prototype.getBorderStyle = function () {
         return 'border:solid;border-color:skyblue;';
     };

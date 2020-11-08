@@ -47,13 +47,15 @@ export abstract class Box {
   }
 
   private renderStyle(): Promise<void> {
-    let basicStyle: string = 'display:inline-block;position:absolute;overflow:hidden;'//auto;'
+    let basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
     let borderStyle: string = this.getBorderStyle()
 
     return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle)
   }
+
+  protected abstract getOverflow(): 'hidden'|'visible'
 
   protected abstract getBorderStyle(): string
 

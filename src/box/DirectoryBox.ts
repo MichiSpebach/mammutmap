@@ -11,6 +11,10 @@ export class DirectoryBox extends Box {
     super(path, id, parent)
   }
 
+  protected getOverflow(): 'visible' {
+    return 'visible'
+  }
+
   protected getBorderStyle(): string {
     return 'border:dotted;border-color:skyblue;'
   }

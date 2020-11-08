@@ -93,7 +93,7 @@ var Box = /** @class */ (function () {
         });
     };
     Box.prototype.renderStyle = function () {
-        var basicStyle = 'display:inline-block;position:absolute;overflow:hidden;'; //auto;'
+        var basicStyle = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';';
         var scaleStyle = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;';
         var positionStyle = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;';
         var borderStyle = this.getBorderStyle();
