@@ -7,7 +7,7 @@ import { Rect } from '../Rect'
 export abstract class Box {
   private readonly path: Path
   private readonly id: string
-  private parent: Box | null
+  private parent: Box|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
   private dragOffset: {x: number, y: number} = {x:0 , y:0}
 
@@ -23,6 +23,13 @@ export abstract class Box {
 
   protected getId(): string {
     return this.id
+  }
+
+  private getParent(): Box|never {
+    if (this.parent == null) {
+      util.logError('Box.getParent() cannot be called on root.')
+    }
+    return this.parent
   }
 
   private async getClientRect(): Promise<Rect> {
@@ -75,11 +82,7 @@ export abstract class Box {
   }
 
   private async changePosition(clientX: number, clientY: number): Promise<void> {
-    if (this.parent == null) {
-      util.logError('Box.parent is null')
-      return
-    }
-    let parentClientRect = await this.parent.getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
+    let parentClientRect = await this.getParent().getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
 
     this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100

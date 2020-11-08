@@ -2,16 +2,17 @@ import * as dom from './domAdapter'
 import * as fs from 'fs'
 import { Dirent, promises as fsPromises } from 'fs'
 
-export function logInfo(message: string) {
+export function logInfo(message: string): void {
     log('Info: ' + message, 'grey')
 }
 
-export function logWarning(message: string) {
+export function logWarning(message: string): void {
     log('WARNING: ' + message, 'orange')
 }
 
-export function logError(message: string) {
+export function logError(message: string): never {
     log('ERROR: ' + message, 'red')
+    throw new Error(message)
 }
 
 async function log(message: string, color: string): Promise<void> {
@@ -39,7 +40,7 @@ export function readFile(path: string): Promise<string> {
   return fsPromises.readFile(path, 'utf-8')
 }
 
-export function readFileAndConvertToHtml(path: string, callback: (dataConvertedToHtml: string) => void): void {
+export function readFileAndConvertToHtml(path: string, callback: (dataConvertedToHtml: string) => void): void|never {
   fs.readFile(path, 'utf-8', (err: NodeJS.ErrnoException | null, data: string) => {
     if(err) {
       logError('util::readFile, ' + path + ', ' + err.message)

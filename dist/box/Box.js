@@ -54,6 +54,12 @@ var Box = /** @class */ (function () {
     Box.prototype.getId = function () {
         return this.id;
     };
+    Box.prototype.getParent = function () {
+        if (this.parent == null) {
+            util.logError('Box.getParent() cannot be called on root.');
+        }
+        return this.parent;
+    };
     Box.prototype.getClientRect = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
@@ -137,12 +143,7 @@ var Box = /** @class */ (function () {
             var parentClientRect;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        if (this.parent == null) {
-                            util.logError('Box.parent is null');
-                            return [2 /*return*/];
-                        }
-                        return [4 /*yield*/, this.parent.getClientRect()]; // TODO: cache for better responsivity, as long as dragging is in progress
+                    case 0: return [4 /*yield*/, this.getParent().getClientRect()]; // TODO: cache for better responsivity, as long as dragging is in progress
                     case 1:
                         parentClientRect = _a.sent() // TODO: cache for better responsivity, as long as dragging is in progress
                         ;

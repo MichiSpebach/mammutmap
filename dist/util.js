@@ -50,6 +50,7 @@ function logWarning(message) {
 exports.logWarning = logWarning;
 function logError(message) {
     log('ERROR: ' + message, 'red');
+    throw new Error(message);
 }
 exports.logError = logError;
 function log(message, color) {

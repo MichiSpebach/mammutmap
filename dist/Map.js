@@ -39,7 +39,7 @@ exports.__esModule = true;
 exports.Map = void 0;
 var dom = require("./domAdapter");
 var Path_1 = require("./Path");
-var DirectoryBox_1 = require("./box/DirectoryBox");
+var RootDirectoryBox_1 = require("./box/RootDirectoryBox");
 var Map = /** @class */ (function () {
     function Map() {
         var _this = this;
@@ -54,7 +54,7 @@ var Map = /** @class */ (function () {
         this.updateStyle();
         //this.addBoxes()
         var rootPath = Path_1.Path.buildRoot('./src', './map');
-        this.rootDirectory = new DirectoryBox_1.DirectoryBox(rootPath, 'root', null);
+        this.rootDirectory = new RootDirectoryBox_1.RootDirectoryBox(rootPath, 'root');
         this.rootDirectory.render();
         dom.addWheelListenerTo('map', function (delta, clientX, clientY) { return _this.zoom(-delta, clientX, clientY); });
     }
