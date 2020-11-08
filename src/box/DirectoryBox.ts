@@ -7,8 +7,8 @@ import { FileBox } from './FileBox'
 export class DirectoryBox extends Box {
   private boxes: Box[] = []
 
-  public constructor(path: Path, id: string) {
-    super(path, id)
+  public constructor(path: Path, id: string, parent: Box|null) {
+    super(path, id, parent)
   }
 
   protected getBorderStyle(): string {
@@ -40,12 +40,12 @@ export class DirectoryBox extends Box {
 
   private createDirectoryBox(name: string): DirectoryBox {
     let elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new DirectoryBox(Path.buildDirEntry(super.getPath(), name), elementId)
+    return new DirectoryBox(Path.buildDirEntry(super.getPath(), name), elementId, this)
   }
 
   private createFileBox(name: string): FileBox {
     let elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new FileBox(Path.buildDirEntry(super.getPath(), name), elementId)
+    return new FileBox(Path.buildDirEntry(super.getPath(), name), elementId, this)
   }
 
   private renderBoxPlaceholderAndReturnId(name: string): string {

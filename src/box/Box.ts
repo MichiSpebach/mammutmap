@@ -2,16 +2,19 @@ import * as util from '../util'
 import * as dom from '../domAdapter'
 import { Path } from '../Path'
 import { BoxMapData } from './BoxMapData'
+import { Rect } from '../Rect'
 
 export abstract class Box {
   private readonly path: Path
   private readonly id: string
+  private parent: Box | null
   private mapData: BoxMapData = BoxMapData.buildDefault()
   private dragOffset: {x: number, y: number} = {x:0 , y:0}
 
-  public constructor(path: Path, id: string) {
+  public constructor(path: Path, id: string, parent: Box|null) {
     this.path = path
     this.id = id
+    this.parent = parent
   }
 
   protected getPath(): Path {
@@ -20,6 +23,12 @@ export abstract class Box {
 
   protected getId(): string {
     return this.id
+  }
+
+  private async getClientRect(): Promise<Rect> {
+    // TODO: cache rect for better responsivity?
+    // TODO: but then more complex, needs to be updated on many changes, also when parent boxes change
+    return await dom.getClientRectOf(this.getId())
   }
 
   public render(): void {
@@ -34,16 +43,16 @@ export abstract class Box {
       .then(json => this.mapData = BoxMapData.buildFromJson(json))
       .catch(error => util.logWarning('failed to load ' + this.getPath().getMapPath() + '.json: ' + error))
     }
-    this.renderStyle()
+    await this.renderStyle()
   }
 
-  private renderStyle(): void {
+  private renderStyle(): Promise<void> {
     let basicStyle: string = 'display:inline-block;position:absolute;overflow:hidden;'//auto;'
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
     let borderStyle: string = this.getBorderStyle()
 
-    dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle)
+    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle)
   }
 
   protected abstract getBorderStyle(): string
@@ -59,15 +68,16 @@ export abstract class Box {
   }
 
   private async setDragOffset(clientX: number, clientY: number): Promise<void> {
-    let clientRect = await dom.getClientRectOf(this.getId()) // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
-    util.logInfo('dragstart, clientRect:' + util.stringify(clientRect) + '; clientX=' + clientX + ', clientY=' + clientY)
+    let clientRect: Rect = await this.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
   }
 
   private async changePosition(clientX: number, clientY: number): Promise<void> {
-    let parentClientRect = await dom.getClientRectOf('root') // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
-
-    //util.logInfo('parent:' + util.stringify(parentClientRect) + '; this:' + util.stringify(clientRect) + '; x=' + clientX + ', y=' + clientY)
+    if (this.parent == null) {
+      util.logError('Box.parent is null')
+      return
+    }
+    let parentClientRect = await this.parent.getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
 
     this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100

@@ -19,8 +19,8 @@ var dom = require("../domAdapter");
 var Box_1 = require("./Box");
 var FileBox = /** @class */ (function (_super) {
     __extends(FileBox, _super);
-    function FileBox(path, id) {
-        return _super.call(this, path, id) || this;
+    function FileBox(path, id, parent) {
+        return _super.call(this, path, id, parent) || this;
     }
     FileBox.prototype.getBorderStyle = function () {
         return 'border:solid;border-color:skyblue;';

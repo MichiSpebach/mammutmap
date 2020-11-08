@@ -41,17 +41,31 @@ var util = require("../util");
 var dom = require("../domAdapter");
 var BoxMapData_1 = require("./BoxMapData");
 var Box = /** @class */ (function () {
-    function Box(path, id) {
+    function Box(path, id, parent) {
         this.mapData = BoxMapData_1.BoxMapData.buildDefault();
         this.dragOffset = { x: 0, y: 0 };
         this.path = path;
         this.id = id;
+        this.parent = parent;
     }
     Box.prototype.getPath = function () {
         return this.path;
     };
     Box.prototype.getId = function () {
         return this.id;
+    };
+    Box.prototype.getClientRect = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, dom.getClientRectOf(this.getId())];
+                    case 1: 
+                    // TODO: cache rect for better responsivity?
+                    // TODO: but then more complex, needs to be updated on many changes, also when parent boxes change
+                    return [2 /*return*/, _a.sent()];
+                }
+            });
+        });
     };
     Box.prototype.render = function () {
         this.loadAndProcessMapData();
@@ -70,8 +84,9 @@ var Box = /** @class */ (function () {
                     case 1:
                         _a.sent();
                         _a.label = 2;
-                    case 2:
-                        this.renderStyle();
+                    case 2: return [4 /*yield*/, this.renderStyle()];
+                    case 3:
+                        _a.sent();
                         return [2 /*return*/];
                 }
             });
@@ -82,7 +97,7 @@ var Box = /** @class */ (function () {
         var scaleStyle = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;';
         var positionStyle = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;';
         var borderStyle = this.getBorderStyle();
-        dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
+        return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
     };
     Box.prototype.renderHeader = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -108,11 +123,9 @@ var Box = /** @class */ (function () {
             var clientRect;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, dom.getClientRectOf(this.getId())]; // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+                    case 0: return [4 /*yield*/, this.getClientRect()];
                     case 1:
-                        clientRect = _a.sent() // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
-                        ;
-                        util.logInfo('dragstart, clientRect:' + util.stringify(clientRect) + '; clientX=' + clientX + ', clientY=' + clientY);
+                        clientRect = _a.sent();
                         this.dragOffset = { x: clientX - clientRect.x, y: clientY - clientRect.y };
                         return [2 /*return*/];
                 }
@@ -124,13 +137,15 @@ var Box = /** @class */ (function () {
             var parentClientRect;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, dom.getClientRectOf('root')
-                        //util.logInfo('parent:' + util.stringify(parentClientRect) + '; this:' + util.stringify(clientRect) + '; x=' + clientX + ', y=' + clientY)
-                    ]; // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+                    case 0:
+                        if (this.parent == null) {
+                            util.logError('Box.parent is null');
+                            return [2 /*return*/];
+                        }
+                        return [4 /*yield*/, this.parent.getClientRect()]; // TODO: cache for better responsivity, as long as dragging is in progress
                     case 1:
-                        parentClientRect = _a.sent() // TODO: accelerate, increase responsivity, dont't wait, cache previous rect
+                        parentClientRect = _a.sent() // TODO: cache for better responsivity, as long as dragging is in progress
                         ;
-                        //util.logInfo('parent:' + util.stringify(parentClientRect) + '; this:' + util.stringify(clientRect) + '; x=' + clientX + ', y=' + clientY)
                         this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
                         this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
                         this.renderStyle();

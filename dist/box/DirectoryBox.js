@@ -21,8 +21,8 @@ var Path_1 = require("../Path");
 var FileBox_1 = require("./FileBox");
 var DirectoryBox = /** @class */ (function (_super) {
     __extends(DirectoryBox, _super);
-    function DirectoryBox(path, id) {
-        var _this = _super.call(this, path, id) || this;
+    function DirectoryBox(path, id, parent) {
+        var _this = _super.call(this, path, id, parent) || this;
         _this.boxes = [];
         return _this;
     }
@@ -52,11 +52,11 @@ var DirectoryBox = /** @class */ (function (_super) {
     };
     DirectoryBox.prototype.createDirectoryBox = function (name) {
         var elementId = this.renderBoxPlaceholderAndReturnId(name);
-        return new DirectoryBox(Path_1.Path.buildDirEntry(_super.prototype.getPath.call(this), name), elementId);
+        return new DirectoryBox(Path_1.Path.buildDirEntry(_super.prototype.getPath.call(this), name), elementId, this);
     };
     DirectoryBox.prototype.createFileBox = function (name) {
         var elementId = this.renderBoxPlaceholderAndReturnId(name);
-        return new FileBox_1.FileBox(Path_1.Path.buildDirEntry(_super.prototype.getPath.call(this), name), elementId);
+        return new FileBox_1.FileBox(Path_1.Path.buildDirEntry(_super.prototype.getPath.call(this), name), elementId, this);
     };
     DirectoryBox.prototype.renderBoxPlaceholderAndReturnId = function (name) {
         var elementId = dom.generateElementId();

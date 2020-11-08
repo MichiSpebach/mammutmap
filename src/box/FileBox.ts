@@ -5,8 +5,8 @@ import { Path } from '../Path'
 
 export class FileBox extends Box {
 
-  public constructor(path: Path, id: string) {
-    super(path, id)
+  public constructor(path: Path, id: string, parent: Box) {
+    super(path, id, parent)
   }
 
   protected getBorderStyle(): string {

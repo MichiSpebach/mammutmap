@@ -72,7 +72,7 @@ export function addWheelListenerTo(id: string, callback: (delta: number, clientX
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
 }
 
-export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag', callback: (clientX: number, clientY: number) => void): void {
+export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag'|'dragend', callback: (clientX: number, clientY: number) => void): void {
   let ipcChannelName = eventType + '_' + id
 
   var rendererFunction: string = '(event) => {'

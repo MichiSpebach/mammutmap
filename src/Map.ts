@@ -18,7 +18,7 @@ export class Map {
 
     //this.addBoxes()
     let rootPath: Path = Path.buildRoot('./src', './map')
-    this.rootDirectory = new DirectoryBox(rootPath, 'root')
+    this.rootDirectory = new DirectoryBox(rootPath, 'root', null)
     this.rootDirectory.render()
 
     dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))

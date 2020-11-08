@@ -54,7 +54,7 @@ var Map = /** @class */ (function () {
         this.updateStyle();
         //this.addBoxes()
         var rootPath = Path_1.Path.buildRoot('./src', './map');
-        this.rootDirectory = new DirectoryBox_1.DirectoryBox(rootPath, 'root');
+        this.rootDirectory = new DirectoryBox_1.DirectoryBox(rootPath, 'root', null);
         this.rootDirectory.render();
         dom.addWheelListenerTo('map', function (delta, clientX, clientY) { return _this.zoom(-delta, clientX, clientY); });
     }
