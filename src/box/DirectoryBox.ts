@@ -20,9 +20,16 @@ export class DirectoryBox extends Box {
     var backgroundStyle: string = '' // TODO: move to better place
     if (this.dragOver) {
       backgroundStyle = 'background-color:#0000FF88'
+    } else {
+      backgroundStyle = 'background-color:#00000000'
     }
 
     return 'border:dotted;border-color:skyblue;' + backgroundStyle
+  }
+
+  public setDragOverStyle(value: boolean) {
+    this.dragOver = value
+    super.renderStyle()
   }
 
   protected renderBody(): void {
@@ -46,15 +53,6 @@ export class DirectoryBox extends Box {
     this.boxes.forEach(box => {
       box.render()
     });
-
-    /*dom.addDragEnterListenerTo(super.getId(), 'dragenter', super.getId()+'header', () => {
-      this.dragOver = true
-      super.renderStyle()
-    })
-    dom.addDragEnterListenerTo(super.getId(), 'dragleave', super.getId()+'header', () => {
-      this.dragOver = false
-      super.renderStyle()
-    })*/
   }
 
   private createDirectoryBox(name: string): DirectoryBox {
@@ -73,21 +71,15 @@ export class DirectoryBox extends Box {
     return elementId
   }
 
-  public dragEnter(box: Box): void {
-    this.dragOver = true
-    super.renderStyle()
+  public addBox(box: Box): void {
     // TODO: if box already contained return here
     this.boxes.push(box)
     dom.appendChildTo(super.getId(), box.getId())
-
-    // TODO: wip
-    //box.getParent().boxes.remove(box) // TODO: has to be done with splice
-    //box.getParent().dragOver = false
-    //box.getParent().renderStyle()
   }
 
-  public dragLeave(box: Box): void {
-    // TODO: call from child?
+  public removeBox(box: Box): void {
+    //box.boxes.remove(box) // TODO: has to be done with splice
+    // TODO: try to remove from dom?
   }
 
 }

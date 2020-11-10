@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addDragEnterListenerTo = exports.addDragListenerTo = exports.addWheelListenerTo = exports.scrollToBottom = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.appendChildTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
+exports.addDragListenerTo = exports.addWheelListenerTo = exports.scrollToBottom = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.appendChildTo = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
 var electron_1 = require("electron");
 var Rect_1 = require("./Rect");
 var webContents;
@@ -70,36 +70,12 @@ function getClientRectOf(id) {
     });
 }
 exports.getClientRectOf = getClientRectOf;
-function getSizeOf(id) {
-    return __awaiter(this, void 0, void 0, function () {
-        var widthPromise, heightPromise, width, height;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    widthPromise = getWidthOf(id);
-                    heightPromise = getHeightOf(id);
-                    return [4 /*yield*/, widthPromise];
-                case 1:
-                    width = _a.sent();
-                    return [4 /*yield*/, heightPromise];
-                case 2:
-                    height = _a.sent();
-                    return [2 /*return*/, { width: width, height: height }];
-            }
-        });
-    });
-}
-exports.getSizeOf = getSizeOf;
-function getWidthOf(id) {
-    return executeJsOnElement(id, "offsetWidth");
-}
-exports.getWidthOf = getWidthOf;
-function getHeightOf(id) {
-    return executeJsOnElement(id, "offsetHeight");
-}
-exports.getHeightOf = getHeightOf;
 function appendChildTo(parentId, childId) {
-    return executeJsOnElement(parentId, "appendChild(document.getElementById('" + childId + "'))");
+    // otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
+    var rendererCode = '(() => {';
+    rendererCode += 'document.getElementById("' + parentId + '").appendChild(document.getElementById("' + childId + '"))';
+    rendererCode += '}).call()';
+    return webContents.executeJavaScript(rendererCode);
 }
 exports.appendChildTo = appendChildTo;
 function addContentTo(id, content) {
@@ -142,20 +118,6 @@ function addDragListenerTo(id, eventType, callback) {
     electron_1.ipcMain.on(ipcChannelName, function (_, clientX, clientY) { return callback(clientX, clientY); });
 }
 exports.addDragListenerTo = addDragListenerTo;
-function addDragEnterListenerTo(id, eventType, elementToIgnoreId, callback) {
-    var ipcChannelName = eventType + '_' + id;
-    var rendererFunction = '(event) => {';
-    rendererFunction += 'let ipc = require("electron").ipcRenderer;';
-    rendererFunction += 'console.log(event);';
-    rendererFunction += 'if (event.toElement.id == ' + elementToIgnoreId + ') {';
-    rendererFunction += 'event.stopPropagation();';
-    rendererFunction += '}';
-    rendererFunction += 'ipc.send("' + ipcChannelName + '");';
-    rendererFunction += '}';
-    executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")");
-    electron_1.ipcMain.on(ipcChannelName, function (_) { return callback(); });
-}
-exports.addDragEnterListenerTo = addDragEnterListenerTo;
 function executeJsOnElement(elementId, jsToExectue) {
     return webContents.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExectue);
 }

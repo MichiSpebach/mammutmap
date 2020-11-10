@@ -35,7 +35,14 @@ var DirectoryBox = /** @class */ (function (_super) {
         if (this.dragOver) {
             backgroundStyle = 'background-color:#0000FF88';
         }
+        else {
+            backgroundStyle = 'background-color:#00000000';
+        }
         return 'border:dotted;border-color:skyblue;' + backgroundStyle;
+    };
+    DirectoryBox.prototype.setDragOverStyle = function (value) {
+        this.dragOver = value;
+        _super.prototype.renderStyle.call(this);
     };
     DirectoryBox.prototype.renderBody = function () {
         var _this = this;
@@ -57,14 +64,6 @@ var DirectoryBox = /** @class */ (function (_super) {
         this.boxes.forEach(function (box) {
             box.render();
         });
-        /*dom.addDragEnterListenerTo(super.getId(), 'dragenter', super.getId()+'header', () => {
-          this.dragOver = true
-          super.renderStyle()
-        })
-        dom.addDragEnterListenerTo(super.getId(), 'dragleave', super.getId()+'header', () => {
-          this.dragOver = false
-          super.renderStyle()
-        })*/
     };
     DirectoryBox.prototype.createDirectoryBox = function (name) {
         var elementId = this.renderBoxPlaceholderAndReturnId(name);
@@ -79,19 +78,14 @@ var DirectoryBox = /** @class */ (function (_super) {
         dom.addContentTo(_super.prototype.getId.call(this), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>');
         return elementId;
     };
-    DirectoryBox.prototype.dragEnter = function (box) {
-        this.dragOver = true;
-        _super.prototype.renderStyle.call(this);
+    DirectoryBox.prototype.addBox = function (box) {
         // TODO: if box already contained return here
         this.boxes.push(box);
         dom.appendChildTo(_super.prototype.getId.call(this), box.getId());
-        // TODO: wip
-        //box.getParent().boxes.remove(box) // TODO: has to be done with splice
-        //box.getParent().dragOver = false
-        //box.getParent().renderStyle()
     };
-    DirectoryBox.prototype.dragLeave = function (box) {
-        // TODO: call from child?
+    DirectoryBox.prototype.removeBox = function (box) {
+        //box.boxes.remove(box) // TODO: has to be done with splice
+        // TODO: try to remove from dom?
     };
     return DirectoryBox;
 }(Box_1.Box));

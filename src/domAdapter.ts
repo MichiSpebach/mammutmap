@@ -27,24 +27,13 @@ export async function getClientRectOf(id: string): Promise<Rect> {
   return new Rect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
 }
 
-export async function getSizeOf(id: string): Promise<{width: number; height: number}> {
-  let widthPromise: Promise<number> = getWidthOf(id)
-  let heightPromise: Promise<number> = getHeightOf(id)
-  let width: number = await widthPromise
-  let height: number = await heightPromise
-  return {width, height}
-}
-
-export function getWidthOf(id: string): Promise<number> {
-  return executeJsOnElement(id, "offsetWidth")
-}
-
-export function getHeightOf(id: string): Promise<number> {
-  return executeJsOnElement(id, "offsetHeight")
-}
-
 export function appendChildTo(parentId: string, childId: string): Promise<void> {
-  return executeJsOnElement(parentId, "appendChild(document.getElementById('" + childId + "'))")
+  // otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
+  var rendererCode = '(() => {'
+  rendererCode += 'document.getElementById("' + parentId + '").appendChild(document.getElementById("' + childId + '"))'
+  rendererCode += '}).call()'
+
+  return webContents.executeJavaScript(rendererCode)
 }
 
 export function addContentTo(id: string, content: string): Promise<void> {
@@ -91,23 +80,6 @@ export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag'|'dra
   executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
 
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
-}
-
-export function addDragEnterListenerTo(id: string, eventType: 'dragenter'|'dragleave', elementToIgnoreId: string, callback: () => void): void {
-  let ipcChannelName = eventType + '_' + id
-
-  var rendererFunction: string = '(event) => {'
-  rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-  rendererFunction += 'console.log(event);'
-  rendererFunction += 'if (event.toElement.id == ' + elementToIgnoreId + ') {'
-  rendererFunction += 'event.stopPropagation();'
-  rendererFunction += '}'
-  rendererFunction += 'ipc.send("' + ipcChannelName + '");'
-  rendererFunction += '}'
-
-  executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
-
-  ipcMain.on(ipcChannelName, (_: IpcMainEvent) => callback())
 }
 
 function executeJsOnElement(elementId: string, jsToExectue: string): Promise<any> {
