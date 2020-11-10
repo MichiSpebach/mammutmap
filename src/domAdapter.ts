@@ -23,7 +23,8 @@ export async function getClientRectOf(id: string): Promise<Rect> {
   rendererCode += 'return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};' // manual copy because DOMRect could not be cloned
   rendererCode += '}).call()'
 
-  return await webContents.executeJavaScript(rendererCode)
+  let rect = await webContents.executeJavaScript(rendererCode)
+  return new Rect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
 }
 
 export async function getSizeOf(id: string): Promise<{width: number; height: number}> {
@@ -40,6 +41,10 @@ export function getWidthOf(id: string): Promise<number> {
 
 export function getHeightOf(id: string): Promise<number> {
   return executeJsOnElement(id, "offsetHeight")
+}
+
+export function appendChildTo(parentId: string, childId: string): Promise<void> {
+  return executeJsOnElement(parentId, "appendChild(document.getElementById('" + childId + "'))")
 }
 
 export function addContentTo(id: string, content: string): Promise<void> {
@@ -77,7 +82,7 @@ export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag'|'dra
 
   var rendererFunction: string = '(event) => {'
   rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-  rendererFunction += 'console.log(event);'
+//  rendererFunction += 'console.log(event);'
   rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {'
   rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);'
   rendererFunction += '}'
@@ -86,6 +91,23 @@ export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag'|'dra
   executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
 
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
+}
+
+export function addDragEnterListenerTo(id: string, eventType: 'dragenter'|'dragleave', elementToIgnoreId: string, callback: () => void): void {
+  let ipcChannelName = eventType + '_' + id
+
+  var rendererFunction: string = '(event) => {'
+  rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+  rendererFunction += 'console.log(event);'
+  rendererFunction += 'if (event.toElement.id == ' + elementToIgnoreId + ') {'
+  rendererFunction += 'event.stopPropagation();'
+  rendererFunction += '}'
+  rendererFunction += 'ipc.send("' + ipcChannelName + '");'
+  rendererFunction += '}'
+
+  executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
+
+  ipcMain.on(ipcChannelName, (_: IpcMainEvent) => callback())
 }
 
 function executeJsOnElement(elementId: string, jsToExectue: string): Promise<any> {

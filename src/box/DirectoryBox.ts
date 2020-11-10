@@ -1,13 +1,14 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
-import { Path } from '../Path'
 import { FileBox } from './FileBox'
+import { Path } from '../Path'
 
 export class DirectoryBox extends Box {
   private boxes: Box[] = []
+  private dragOver: boolean = false
 
-  public constructor(path: Path, id: string, parent: Box|null) {
+  public constructor(path: Path, id: string, parent: DirectoryBox|null) {
     super(path, id, parent)
   }
 
@@ -16,7 +17,12 @@ export class DirectoryBox extends Box {
   }
 
   protected getBorderStyle(): string {
-    return 'border:dotted;border-color:skyblue;'
+    var backgroundStyle: string = '' // TODO: move to better place
+    if (this.dragOver) {
+      backgroundStyle = 'background-color:#0000FF88'
+    }
+
+    return 'border:dotted;border-color:skyblue;' + backgroundStyle
   }
 
   protected renderBody(): void {
@@ -40,6 +46,15 @@ export class DirectoryBox extends Box {
     this.boxes.forEach(box => {
       box.render()
     });
+
+    /*dom.addDragEnterListenerTo(super.getId(), 'dragenter', super.getId()+'header', () => {
+      this.dragOver = true
+      super.renderStyle()
+    })
+    dom.addDragEnterListenerTo(super.getId(), 'dragleave', super.getId()+'header', () => {
+      this.dragOver = false
+      super.renderStyle()
+    })*/
   }
 
   private createDirectoryBox(name: string): DirectoryBox {
@@ -56,6 +71,23 @@ export class DirectoryBox extends Box {
     let elementId: string = dom.generateElementId()
     dom.addContentTo(super.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
     return elementId
+  }
+
+  public dragEnter(box: Box): void {
+    this.dragOver = true
+    super.renderStyle()
+    // TODO: if box already contained return here
+    this.boxes.push(box)
+    dom.appendChildTo(super.getId(), box.getId())
+
+    // TODO: wip
+    //box.getParent().boxes.remove(box) // TODO: has to be done with splice
+    //box.getParent().dragOver = false
+    //box.getParent().renderStyle()
+  }
+
+  public dragLeave(box: Box): void {
+    // TODO: call from child?
   }
 
 }

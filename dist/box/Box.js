@@ -117,14 +117,14 @@ var Box = /** @class */ (function () {
                         return [4 /*yield*/, dom.setContentTo(this.getId(), headerElement)];
                     case 1:
                         _a.sent();
-                        dom.addDragListenerTo(headerId, 'dragstart', function (clientX, clientY) { return _this.setDragOffset(clientX, clientY); });
-                        dom.addDragListenerTo(headerId, 'drag', function (clientX, clientY) { return _this.changePosition(clientX, clientY); });
+                        dom.addDragListenerTo(headerId, 'dragstart', function (clientX, clientY) { return _this.dragStart(clientX, clientY); });
+                        dom.addDragListenerTo(headerId, 'drag', function (clientX, clientY) { return _this.drag(clientX, clientY); });
                         return [2 /*return*/];
                 }
             });
         });
     };
-    Box.prototype.setDragOffset = function (clientX, clientY) {
+    Box.prototype.dragStart = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
             var clientRect;
             return __generator(this, function (_a) {
@@ -133,20 +133,28 @@ var Box = /** @class */ (function () {
                     case 1:
                         clientRect = _a.sent();
                         this.dragOffset = { x: clientX - clientRect.x, y: clientY - clientRect.y };
+                        this.getParent().dragEnter(this);
                         return [2 /*return*/];
                 }
             });
         });
     };
-    Box.prototype.changePosition = function (clientX, clientY) {
+    Box.prototype.drag = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
-            var parentClientRect;
+            var parentClientRect, newParent;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.getParent().getClientRect()]; // TODO: cache for better responsivity, as long as dragging is in progress
                     case 1:
                         parentClientRect = _a.sent() // TODO: cache for better responsivity, as long as dragging is in progress
                         ;
+                        if (!parentClientRect.isPositionInside(clientX, clientY)) {
+                            newParent = this.getParent().getParent();
+                            newParent.dragEnter(this);
+                            this.parent = newParent;
+                            this.drag(clientX, clientY);
+                            return [2 /*return*/];
+                        }
                         this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
                         this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
                         this.renderStyle();

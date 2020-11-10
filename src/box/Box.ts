@@ -3,29 +3,30 @@ import * as dom from '../domAdapter'
 import { Path } from '../Path'
 import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
+import { DirectoryBox } from './DirectoryBox'
 
 export abstract class Box {
   private readonly path: Path
   private readonly id: string
-  private parent: Box|null
+  private parent: DirectoryBox|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
   private dragOffset: {x: number, y: number} = {x:0 , y:0}
 
-  public constructor(path: Path, id: string, parent: Box|null) {
+  public constructor(path: Path, id: string, parent: DirectoryBox|null) {
     this.path = path
     this.id = id
     this.parent = parent
   }
 
-  protected getPath(): Path {
+  public getPath(): Path {
     return this.path
   }
 
-  protected getId(): string {
+  public getId(): string {
     return this.id
   }
 
-  private getParent(): Box|never {
+  public getParent(): DirectoryBox|never {
     if (this.parent == null) {
       util.logError('Box.getParent() cannot be called on root.')
     }
@@ -53,7 +54,7 @@ export abstract class Box {
     await this.renderStyle()
   }
 
-  private renderStyle(): Promise<void> {
+  protected renderStyle(): Promise<void> {
     let basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
@@ -72,17 +73,26 @@ export abstract class Box {
     let headerElement: string = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
     await dom.setContentTo(this.getId(), headerElement)
 
-    dom.addDragListenerTo(headerId, 'dragstart', (clientX:number, clientY: number) => this.setDragOffset(clientX, clientY))
-    dom.addDragListenerTo(headerId, 'drag', (clientX:number, clientY: number) => this.changePosition(clientX, clientY))
+    dom.addDragListenerTo(headerId, 'dragstart', (clientX:number, clientY: number) => this.dragStart(clientX, clientY))
+    dom.addDragListenerTo(headerId, 'drag', (clientX:number, clientY: number) => this.drag(clientX, clientY))
   }
 
-  private async setDragOffset(clientX: number, clientY: number): Promise<void> {
+  private async dragStart(clientX: number, clientY: number): Promise<void> {
     let clientRect: Rect = await this.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
+    this.getParent().dragEnter(this)
   }
 
-  private async changePosition(clientX: number, clientY: number): Promise<void> {
-    let parentClientRect = await this.getParent().getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
+  private async drag(clientX: number, clientY: number): Promise<void> {
+    let parentClientRect: Rect = await this.getParent().getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
+
+    if (!parentClientRect.isPositionInside(clientX, clientY)) {
+      let newParent: DirectoryBox = this.getParent().getParent()
+      newParent.dragEnter(this)
+      this.parent = newParent
+      this.drag(clientX, clientY)
+      return
+    }
 
     this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100

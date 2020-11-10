@@ -36,8 +36,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addDragListenerTo = exports.addWheelListenerTo = exports.scrollToBottom = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
+exports.addDragEnterListenerTo = exports.addDragListenerTo = exports.addWheelListenerTo = exports.scrollToBottom = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.appendChildTo = exports.getHeightOf = exports.getWidthOf = exports.getSizeOf = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
 var electron_1 = require("electron");
+var Rect_1 = require("./Rect");
 var webContents;
 var elementIdCounter;
 function init(webContentsToRender) {
@@ -52,7 +53,7 @@ function generateElementId() {
 exports.generateElementId = generateElementId;
 function getClientRectOf(id) {
     return __awaiter(this, void 0, void 0, function () {
-        var rendererCode;
+        var rendererCode, rect;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -61,7 +62,9 @@ function getClientRectOf(id) {
                     rendererCode += 'return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};'; // manual copy because DOMRect could not be cloned
                     rendererCode += '}).call()';
                     return [4 /*yield*/, webContents.executeJavaScript(rendererCode)];
-                case 1: return [2 /*return*/, _a.sent()];
+                case 1:
+                    rect = _a.sent();
+                    return [2 /*return*/, new Rect_1.Rect(rect.x, rect.y, rect.width, rect.height)]; // manual copy because object from renderer has no functions
             }
         });
     });
@@ -95,6 +98,10 @@ function getHeightOf(id) {
     return executeJsOnElement(id, "offsetHeight");
 }
 exports.getHeightOf = getHeightOf;
+function appendChildTo(parentId, childId) {
+    return executeJsOnElement(parentId, "appendChild(document.getElementById('" + childId + "'))");
+}
+exports.appendChildTo = appendChildTo;
 function addContentTo(id, content) {
     return executeJsOnElement(id, "innerHTML += '" + content + "'");
 }
@@ -126,7 +133,7 @@ function addDragListenerTo(id, eventType, callback) {
     var ipcChannelName = eventType + '_' + id;
     var rendererFunction = '(event) => {';
     rendererFunction += 'let ipc = require("electron").ipcRenderer;';
-    rendererFunction += 'console.log(event);';
+    //  rendererFunction += 'console.log(event);'
     rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {';
     rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);';
     rendererFunction += '}';
@@ -135,6 +142,20 @@ function addDragListenerTo(id, eventType, callback) {
     electron_1.ipcMain.on(ipcChannelName, function (_, clientX, clientY) { return callback(clientX, clientY); });
 }
 exports.addDragListenerTo = addDragListenerTo;
+function addDragEnterListenerTo(id, eventType, elementToIgnoreId, callback) {
+    var ipcChannelName = eventType + '_' + id;
+    var rendererFunction = '(event) => {';
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;';
+    rendererFunction += 'console.log(event);';
+    rendererFunction += 'if (event.toElement.id == ' + elementToIgnoreId + ') {';
+    rendererFunction += 'event.stopPropagation();';
+    rendererFunction += '}';
+    rendererFunction += 'ipc.send("' + ipcChannelName + '");';
+    rendererFunction += '}';
+    executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")");
+    electron_1.ipcMain.on(ipcChannelName, function (_) { return callback(); });
+}
+exports.addDragEnterListenerTo = addDragEnterListenerTo;
 function executeJsOnElement(elementId, jsToExectue) {
     return webContents.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExectue);
 }

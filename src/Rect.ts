@@ -11,4 +11,8 @@ export class Rect {
     this.width = width
     this.height = height
   }
+
+  public isPositionInside(x: number, y: number): boolean {
+    return x >= this.x && y >= this.y && x <= this.x + this.width && y <= this.y + this.height
+  }
 }

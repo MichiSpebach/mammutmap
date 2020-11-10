@@ -1,11 +1,12 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
+import { DirectoryBox } from './DirectoryBox'
 import { Path } from '../Path'
 
 export class FileBox extends Box {
 
-  public constructor(path: Path, id: string, parent: Box) {
+  public constructor(path: Path, id: string, parent: DirectoryBox) {
     super(path, id, parent)
   }
 
