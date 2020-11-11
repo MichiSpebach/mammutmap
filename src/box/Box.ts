@@ -88,17 +88,7 @@ export abstract class Box {
     let parentClientRect: Rect = await this.getParent().getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
 
     if (!parentClientRect.isPositionInside(clientX, clientY)) {
-      let oldParent: DirectoryBox = this.getParent()
-      let newParent: DirectoryBox = oldParent.getParent()
-
-      // TODO: scale mapData
-
-      newParent.addBox(this)
-      newParent.setDragOverStyle(true)
-      oldParent.removeBox(this)
-      oldParent.setDragOverStyle(false)
-
-      this.parent = newParent
+      this.moveOut()
       this.drag(clientX, clientY)
       return
     }
@@ -111,6 +101,27 @@ export abstract class Box {
 
   private async dragend(): Promise<void> {
     return this.getParent().setDragOverStyle(false)
+  }
+
+  private async moveOut(): Promise<void> {
+    let oldParent: DirectoryBox = this.getParent()
+    let newParent: DirectoryBox = oldParent.getParent()
+
+    let oldParentClientRectPromise = oldParent.getClientRect()
+    let newParentClientRectPromise = newParent.getClientRect()
+    let oldParentClientRect:Rect = await oldParentClientRectPromise
+    let newParentClientRect:Rect = await newParentClientRectPromise
+
+    this.mapData.width *= oldParentClientRect.width / newParentClientRect.width
+    this.mapData.height *= oldParentClientRect.height / newParentClientRect.height
+
+    newParent.addBox(this)
+    newParent.setDragOverStyle(true)
+    oldParent.removeBox(this)
+    oldParent.setDragOverStyle(false)
+
+    this.parent = newParent
+    this.renderStyle() // TODO: add await to prevent flickering
   }
 
   protected abstract renderBody(): void

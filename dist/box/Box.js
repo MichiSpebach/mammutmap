@@ -142,7 +142,7 @@ var Box = /** @class */ (function () {
     };
     Box.prototype.drag = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
-            var parentClientRect, oldParent, newParent;
+            var parentClientRect;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.getParent().getClientRect()]; // TODO: cache for better responsivity, as long as dragging is in progress
@@ -150,14 +150,7 @@ var Box = /** @class */ (function () {
                         parentClientRect = _a.sent() // TODO: cache for better responsivity, as long as dragging is in progress
                         ;
                         if (!parentClientRect.isPositionInside(clientX, clientY)) {
-                            oldParent = this.getParent();
-                            newParent = oldParent.getParent();
-                            // TODO: scale mapData
-                            newParent.addBox(this);
-                            newParent.setDragOverStyle(true);
-                            oldParent.removeBox(this);
-                            oldParent.setDragOverStyle(false);
-                            this.parent = newParent;
+                            this.moveOut();
                             this.drag(clientX, clientY);
                             return [2 /*return*/];
                         }
@@ -173,6 +166,35 @@ var Box = /** @class */ (function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 return [2 /*return*/, this.getParent().setDragOverStyle(false)];
+            });
+        });
+    };
+    Box.prototype.moveOut = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var oldParent, newParent, oldParentClientRectPromise, newParentClientRectPromise, oldParentClientRect, newParentClientRect;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        oldParent = this.getParent();
+                        newParent = oldParent.getParent();
+                        oldParentClientRectPromise = oldParent.getClientRect();
+                        newParentClientRectPromise = newParent.getClientRect();
+                        return [4 /*yield*/, oldParentClientRectPromise];
+                    case 1:
+                        oldParentClientRect = _a.sent();
+                        return [4 /*yield*/, newParentClientRectPromise];
+                    case 2:
+                        newParentClientRect = _a.sent();
+                        this.mapData.width *= oldParentClientRect.width / newParentClientRect.width;
+                        this.mapData.height *= oldParentClientRect.height / newParentClientRect.height;
+                        newParent.addBox(this);
+                        newParent.setDragOverStyle(true);
+                        oldParent.removeBox(this);
+                        oldParent.setDragOverStyle(false);
+                        this.parent = newParent;
+                        this.renderStyle(); // TODO: add await to prevent flickering
+                        return [2 /*return*/];
+                }
             });
         });
     };
