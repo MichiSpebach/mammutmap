@@ -71,14 +71,23 @@ export class DirectoryBox extends Box {
     return elementId
   }
 
+  private containsBox(box: Box): boolean {
+    return this.boxes.includes(box)
+  }
+
   public addBox(box: Box): void {
-    // TODO: if box already contained return here
+    if (this.containsBox(box)) {
+      util.logWarning('DirectoryBox.addBox: trying to add box that is already contained')
+    }
     this.boxes.push(box)
     dom.appendChildTo(super.getId(), box.getId())
   }
 
   public removeBox(box: Box): void {
-    //box.boxes.remove(box) // TODO: has to be done with splice
+    if (!this.containsBox(box)) {
+      util.logWarning('DirectoryBox.removeBox: trying to remove box that is not contained')
+    }
+    this.boxes.splice(this.boxes.indexOf(box), 1)
     // TODO: try to remove from dom?
   }
 

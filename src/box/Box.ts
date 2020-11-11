@@ -88,7 +88,7 @@ export abstract class Box {
     let parentClientRect: Rect = await this.getParent().getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
 
     if (!parentClientRect.isPositionInside(clientX, clientY)) {
-      this.moveOut()
+      await this.moveOut()
       this.drag(clientX, clientY)
       return
     }

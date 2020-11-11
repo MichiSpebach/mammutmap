@@ -149,11 +149,13 @@ var Box = /** @class */ (function () {
                     case 1:
                         parentClientRect = _a.sent() // TODO: cache for better responsivity, as long as dragging is in progress
                         ;
-                        if (!parentClientRect.isPositionInside(clientX, clientY)) {
-                            this.moveOut();
-                            this.drag(clientX, clientY);
-                            return [2 /*return*/];
-                        }
+                        if (!!parentClientRect.isPositionInside(clientX, clientY)) return [3 /*break*/, 3];
+                        return [4 /*yield*/, this.moveOut()];
+                    case 2:
+                        _a.sent();
+                        this.drag(clientX, clientY);
+                        return [2 /*return*/];
+                    case 3:
                         this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
                         this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
                         this.renderStyle();

@@ -78,13 +78,21 @@ var DirectoryBox = /** @class */ (function (_super) {
         dom.addContentTo(_super.prototype.getId.call(this), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>');
         return elementId;
     };
+    DirectoryBox.prototype.containsBox = function (box) {
+        return this.boxes.includes(box);
+    };
     DirectoryBox.prototype.addBox = function (box) {
-        // TODO: if box already contained return here
+        if (this.containsBox(box)) {
+            util.logWarning('DirectoryBox.addBox: trying to add box that is already contained');
+        }
         this.boxes.push(box);
         dom.appendChildTo(_super.prototype.getId.call(this), box.getId());
     };
     DirectoryBox.prototype.removeBox = function (box) {
-        //box.boxes.remove(box) // TODO: has to be done with splice
+        if (!this.containsBox(box)) {
+            util.logWarning('DirectoryBox.removeBox: trying to remove box that is not contained');
+        }
+        this.boxes.splice(this.boxes.indexOf(box), 1);
         // TODO: try to remove from dom?
     };
     return DirectoryBox;
