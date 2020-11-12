@@ -91,4 +91,18 @@ export class DirectoryBox extends Box {
     // TODO: try to remove from dom?
   }
 
+  public async getBoxesAt(clientX: number, clientY: number): Promise<Box[]> {
+    let boxesAtPostion:Box[] = []
+
+    for (var i: number = 0; i < this.boxes.length; i++) {
+      let box = this.boxes[i]
+      let clientRect = await box.getClientRect() // TODO: parallelize, getBoxesAt(..) is called often
+      if (clientRect.isPositionInside(clientX, clientY)) {
+        boxesAtPostion.push(box)
+      }
+    }
+
+    return boxesAtPostion
+  }
+
 }

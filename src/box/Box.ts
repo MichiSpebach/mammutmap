@@ -33,7 +33,7 @@ export abstract class Box {
     return this.parent
   }
 
-  private async getClientRect(): Promise<Rect> {
+  public async getClientRect(): Promise<Rect> {
     // TODO: cache rect for better responsivity?
     // TODO: but then more complex, needs to be updated on many changes, also when parent boxes change
     return await dom.getClientRectOf(this.getId())
@@ -90,6 +90,25 @@ export abstract class Box {
     if (!parentClientRect.isPositionInside(clientX, clientY)) {
       await this.moveOut()
       this.drag(clientX, clientY)
+      return
+    }
+    let boxesAtPostion = await this.getParent().getBoxesAt(clientX, clientY)
+    let boxToMoveInside: DirectoryBox|null = null
+    for (let i:number = 0; i < boxesAtPostion.length; i++) {
+      let box = boxesAtPostion[i]
+      if (box != this && box instanceof DirectoryBox) {
+        boxToMoveInside = box
+        break
+      }
+    }
+    if (boxToMoveInside != null) {
+      boxToMoveInside.addBox(this)
+      boxToMoveInside.setDragOverStyle(true)
+      this.getParent().removeBox(this)
+      this.getParent().setDragOverStyle(false)
+
+      this.parent = boxToMoveInside
+      this.renderStyle()
       return
     }
 

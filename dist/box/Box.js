@@ -40,6 +40,7 @@ exports.Box = void 0;
 var util = require("../util");
 var dom = require("../domAdapter");
 var BoxMapData_1 = require("./BoxMapData");
+var DirectoryBox_1 = require("./DirectoryBox");
 var Box = /** @class */ (function () {
     function Box(path, id, parent) {
         this.mapData = BoxMapData_1.BoxMapData.buildDefault();
@@ -142,7 +143,7 @@ var Box = /** @class */ (function () {
     };
     Box.prototype.drag = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
-            var parentClientRect;
+            var parentClientRect, boxesAtPostion, boxToMoveInside, i, box;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0: return [4 /*yield*/, this.getParent().getClientRect()]; // TODO: cache for better responsivity, as long as dragging is in progress
@@ -155,7 +156,26 @@ var Box = /** @class */ (function () {
                         _a.sent();
                         this.drag(clientX, clientY);
                         return [2 /*return*/];
-                    case 3:
+                    case 3: return [4 /*yield*/, this.getParent().getBoxesAt(clientX, clientY)];
+                    case 4:
+                        boxesAtPostion = _a.sent();
+                        boxToMoveInside = null;
+                        for (i = 0; i < boxesAtPostion.length; i++) {
+                            box = boxesAtPostion[i];
+                            if (box != this && box instanceof DirectoryBox_1.DirectoryBox) {
+                                boxToMoveInside = box;
+                                break;
+                            }
+                        }
+                        if (boxToMoveInside != null) {
+                            boxToMoveInside.addBox(this);
+                            boxToMoveInside.setDragOverStyle(true);
+                            this.getParent().removeBox(this);
+                            this.getParent().setDragOverStyle(false);
+                            this.parent = boxToMoveInside;
+                            this.renderStyle();
+                            return [2 /*return*/];
+                        }
                         this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
                         this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
                         this.renderStyle();
