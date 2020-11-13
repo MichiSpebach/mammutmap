@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.addDragListenerTo = exports.addWheelListenerTo = exports.scrollToBottom = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.appendChildTo = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
+exports.addDragEnterListenerTo = exports.addDragListenerTo = exports.addWheelListenerTo = exports.scrollToBottom = exports.setStyleTo = exports.setContentTo = exports.addContentTo = exports.appendChildTo = exports.getClientRectOf = exports.generateElementId = exports.init = void 0;
 var electron_1 = require("electron");
 var Rect_1 = require("./Rect");
 var webContents;
@@ -118,6 +118,20 @@ function addDragListenerTo(id, eventType, callback) {
     electron_1.ipcMain.on(ipcChannelName, function (_, clientX, clientY) { return callback(clientX, clientY); });
 }
 exports.addDragListenerTo = addDragListenerTo;
+function addDragEnterListenerTo(id, eventType, elementToIgnoreId, callback) {
+    var ipcChannelName = eventType + '_' + id;
+    var rendererFunction = '(event) => {';
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;';
+    rendererFunction += 'console.log(event);';
+    rendererFunction += 'if (event.toElement.id != ' + elementToIgnoreId + ') {';
+    rendererFunction += 'event.stopPropagation();';
+    rendererFunction += '}';
+    rendererFunction += 'ipc.send("' + ipcChannelName + '");';
+    rendererFunction += '}';
+    executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")");
+    electron_1.ipcMain.on(ipcChannelName, function (_) { return callback(); });
+}
+exports.addDragEnterListenerTo = addDragEnterListenerTo;
 function executeJsOnElement(elementId, jsToExectue) {
     return webContents.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExectue);
 }
