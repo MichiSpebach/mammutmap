@@ -122,7 +122,13 @@ export abstract class Box {
     this.renderStyle()
   }
 
-  public async dragend(): Promise<void> {
+  public async dragEnd(clientX: number, clientY: number): Promise<void> {
+    let parentClientRect: Rect = await this.getParent().getClientRect()
+
+    this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
+    this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
+
+    this.renderStyle()
     // TODO: wip
   }
 

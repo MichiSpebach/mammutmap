@@ -16,9 +16,9 @@ var DragManager = /** @class */ (function () {
             _this.draggingBox = elementToDrag;
         });
         //dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => elementToDrag.drag(clientX, clientY))
-        dom.addDragListenerTo(draggableId, 'dragend', function (_) {
+        dom.addDragListenerTo(draggableId, 'dragend', function (clientX, clientY) {
             //dom.addDragEnterListenerTo(draggableId)
-            elementToDrag.dragend();
+            elementToDrag.dragEnd(clientX, clientY);
             _this.draggingBox = null;
             _this.dragOverBox = null;
         });

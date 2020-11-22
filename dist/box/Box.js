@@ -208,10 +208,19 @@ var Box = /** @class */ (function () {
             });
         });
     };
-    Box.prototype.dragend = function () {
+    Box.prototype.dragEnd = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
+            var parentClientRect;
             return __generator(this, function (_a) {
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.getParent().getClientRect()];
+                    case 1:
+                        parentClientRect = _a.sent();
+                        this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
+                        this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
+                        this.renderStyle();
+                        return [2 /*return*/];
+                }
             });
         });
     };

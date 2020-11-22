@@ -20,9 +20,9 @@ export class DragManager {
 
     //dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => elementToDrag.drag(clientX, clientY))
 
-    dom.addDragListenerTo(draggableId, 'dragend', (_) => {
+    dom.addDragListenerTo(draggableId, 'dragend', (clientX: number, clientY: number) => {
       //dom.addDragEnterListenerTo(draggableId)
-      elementToDrag.dragend()
+      elementToDrag.dragEnd(clientX, clientY)
       this.draggingBox = null
       this.dragOverBox = null
     })

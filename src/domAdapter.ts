@@ -72,6 +72,7 @@ export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag'|'dra
   var rendererFunction: string = '(event) => {'
   rendererFunction += 'let ipc = require("electron").ipcRenderer;'
 //  rendererFunction += 'console.log(event);'
+  rendererFunction += 'event.stopPropagation();'
   rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {'
   rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);'
   rendererFunction += '}'
@@ -88,11 +89,11 @@ export function addDragEnterListenerTo(id: string, eventType: 'dragenter'|'drago
   var rendererFunction: string = '(event) => {'
   rendererFunction += 'let ipc = require("electron").ipcRenderer;'
   rendererFunction += 'console.log(event);'
-  rendererFunction += 'console.log(event.target.id + " " + "' + elementToIgnoreId + '");'
-  rendererFunction += 'if (event.target.id != "' + elementToIgnoreId + '") {'
+  //rendererFunction += 'console.log(event.target.id + " " + "' + elementToIgnoreId + '");'
+  //rendererFunction += 'if (event.target.id != "' + elementToIgnoreId + '") {'
   rendererFunction += 'event.stopPropagation();'
   rendererFunction += 'ipc.send("' + ipcChannelName + '");'
-  rendererFunction += '}'
+  //rendererFunction += '}'
   rendererFunction += '}'
 
   executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
