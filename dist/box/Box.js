@@ -40,7 +40,7 @@ exports.Box = void 0;
 var util = require("../util");
 var dom = require("../domAdapter");
 var BoxMapData_1 = require("./BoxMapData");
-var DirectoryBox_1 = require("./DirectoryBox");
+var DragManager_1 = require("../DragManager");
 var Box = /** @class */ (function () {
     function Box(path, id, parent) {
         this.mapData = BoxMapData_1.BoxMapData.buildDefault();
@@ -54,6 +54,9 @@ var Box = /** @class */ (function () {
     };
     Box.prototype.getId = function () {
         return this.id;
+    };
+    Box.prototype.getHeaderId = function () {
+        return this.getId() + 'header';
     };
     Box.prototype.getParent = function () {
         if (this.parent == null) {
@@ -108,23 +111,22 @@ var Box = /** @class */ (function () {
     };
     Box.prototype.renderHeader = function () {
         return __awaiter(this, void 0, void 0, function () {
-            var headerId, headerElement;
-            var _this = this;
+            var headerElement;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        headerId = this.getId() + 'header';
-                        headerElement = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
+                        headerElement = '<div id="' + this.getHeaderId() + '" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>';
                         return [4 /*yield*/, dom.setContentTo(this.getId(), headerElement)];
                     case 1:
                         _a.sent();
-                        dom.addDragListenerTo(headerId, 'dragstart', function (clientX, clientY) { return _this.dragStart(clientX, clientY); });
-                        dom.addDragListenerTo(headerId, 'drag', function (clientX, clientY) { return _this.drag(clientX, clientY); });
-                        dom.addDragListenerTo(headerId, 'dragend', function (_) { return _this.dragend(); });
+                        DragManager_1.DragManager.addDraggable(this); // TODO: move to other method
                         return [2 /*return*/];
                 }
             });
         });
+    };
+    Box.prototype.getDraggableId = function () {
+        return this.getHeaderId();
     };
     Box.prototype.dragStart = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
@@ -135,7 +137,6 @@ var Box = /** @class */ (function () {
                     case 1:
                         clientRect = _a.sent();
                         this.dragOffset = { x: clientX - clientRect.x, y: clientY - clientRect.y };
-                        this.getParent().setDragOverStyle(true);
                         return [2 /*return*/];
                 }
             });
@@ -143,39 +144,62 @@ var Box = /** @class */ (function () {
     };
     Box.prototype.drag = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
-            var parentClientRect, boxesAtPostion, boxToMoveInside, i, box;
+            var parentClientRect;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getParent().getClientRect()]; // TODO: cache for better responsivity, as long as dragging is in progress
+                    case 0: return [4 /*yield*/, this.getParent().getClientRect()
+                        /*if (!parentClientRect.isPositionInside(clientX, clientY)) {
+                          await this.moveOut()
+                          this.drag(clientX, clientY)
+                          return
+                        }
+                        let boxesAtPostion = await this.getParent().getBoxesAt(clientX, clientY)
+                        let boxToMoveInside: DirectoryBox|null = null
+                        for (let i:number = 0; i < boxesAtPostion.length; i++) {
+                          let box = boxesAtPostion[i]
+                          if (box != this && box instanceof DirectoryBox) {
+                            boxToMoveInside = box
+                            break
+                          }
+                        }
+                        if (boxToMoveInside != null) {
+                          boxToMoveInside.addBox(this)
+                          boxToMoveInside.setDragOverStyle(true)
+                          this.getParent().removeBox(this)
+                          this.getParent().setDragOverStyle(false)
+                    
+                          this.parent = boxToMoveInside
+                          this.renderStyle()
+                          return
+                        }*/
+                    ]; // TODO: cache for better responsivity, as long as dragging is in progress
                     case 1:
                         parentClientRect = _a.sent() // TODO: cache for better responsivity, as long as dragging is in progress
                         ;
-                        if (!!parentClientRect.isPositionInside(clientX, clientY)) return [3 /*break*/, 3];
-                        return [4 /*yield*/, this.moveOut()];
-                    case 2:
-                        _a.sent();
-                        this.drag(clientX, clientY);
-                        return [2 /*return*/];
-                    case 3: return [4 /*yield*/, this.getParent().getBoxesAt(clientX, clientY)];
-                    case 4:
-                        boxesAtPostion = _a.sent();
-                        boxToMoveInside = null;
-                        for (i = 0; i < boxesAtPostion.length; i++) {
-                            box = boxesAtPostion[i];
-                            if (box != this && box instanceof DirectoryBox_1.DirectoryBox) {
-                                boxToMoveInside = box;
-                                break;
-                            }
+                        /*if (!parentClientRect.isPositionInside(clientX, clientY)) {
+                          await this.moveOut()
+                          this.drag(clientX, clientY)
+                          return
+                        }
+                        let boxesAtPostion = await this.getParent().getBoxesAt(clientX, clientY)
+                        let boxToMoveInside: DirectoryBox|null = null
+                        for (let i:number = 0; i < boxesAtPostion.length; i++) {
+                          let box = boxesAtPostion[i]
+                          if (box != this && box instanceof DirectoryBox) {
+                            boxToMoveInside = box
+                            break
+                          }
                         }
                         if (boxToMoveInside != null) {
-                            boxToMoveInside.addBox(this);
-                            boxToMoveInside.setDragOverStyle(true);
-                            this.getParent().removeBox(this);
-                            this.getParent().setDragOverStyle(false);
-                            this.parent = boxToMoveInside;
-                            this.renderStyle();
-                            return [2 /*return*/];
-                        }
+                          boxToMoveInside.addBox(this)
+                          boxToMoveInside.setDragOverStyle(true)
+                          this.getParent().removeBox(this)
+                          this.getParent().setDragOverStyle(false)
+                    
+                          this.parent = boxToMoveInside
+                          this.renderStyle()
+                          return
+                        }*/
                         this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
                         this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
                         this.renderStyle();
@@ -187,7 +211,7 @@ var Box = /** @class */ (function () {
     Box.prototype.dragend = function () {
         return __awaiter(this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                return [2 /*return*/, this.getParent().setDragOverStyle(false)];
+                return [2 /*return*/];
             });
         });
     };

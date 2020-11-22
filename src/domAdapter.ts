@@ -82,16 +82,17 @@ export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag'|'dra
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
 }
 
-export function addDragEnterListenerTo(id: string, eventType: 'dragenter', elementToIgnoreId: string, callback: () => void): void {
+export function addDragEnterListenerTo(id: string, eventType: 'dragenter'|'dragover'|'dragleave', elementToIgnoreId: string, callback: () => void): void {
   let ipcChannelName = eventType + '_' + id
 
   var rendererFunction: string = '(event) => {'
   rendererFunction += 'let ipc = require("electron").ipcRenderer;'
   rendererFunction += 'console.log(event);'
-  rendererFunction += 'if (event.toElement.id != ' + elementToIgnoreId + ') {'
+  rendererFunction += 'console.log(event.target.id + " " + "' + elementToIgnoreId + '");'
+  rendererFunction += 'if (event.target.id != "' + elementToIgnoreId + '") {'
   rendererFunction += 'event.stopPropagation();'
-  rendererFunction += '}'
   rendererFunction += 'ipc.send("' + ipcChannelName + '");'
+  rendererFunction += '}'
   rendererFunction += '}'
 
   executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")

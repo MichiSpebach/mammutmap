@@ -123,10 +123,11 @@ function addDragEnterListenerTo(id, eventType, elementToIgnoreId, callback) {
     var rendererFunction = '(event) => {';
     rendererFunction += 'let ipc = require("electron").ipcRenderer;';
     rendererFunction += 'console.log(event);';
-    rendererFunction += 'if (event.toElement.id != ' + elementToIgnoreId + ') {';
+    rendererFunction += 'console.log(event.target.id + " " + "' + elementToIgnoreId + '");';
+    rendererFunction += 'if (event.target.id != "' + elementToIgnoreId + '") {';
     rendererFunction += 'event.stopPropagation();';
-    rendererFunction += '}';
     rendererFunction += 'ipc.send("' + ipcChannelName + '");';
+    rendererFunction += '}';
     rendererFunction += '}';
     executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")");
     electron_1.ipcMain.on(ipcChannelName, function (_) { return callback(); });

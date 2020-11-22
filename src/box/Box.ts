@@ -3,6 +3,7 @@ import * as dom from '../domAdapter'
 import { Path } from '../Path'
 import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
+import { DragManager } from '../DragManager'
 import { DirectoryBox } from './DirectoryBox'
 
 export abstract class Box {
@@ -24,6 +25,10 @@ export abstract class Box {
 
   public getId(): string {
     return this.id
+  }
+
+  public getHeaderId(): string {
+    return this.getId() + 'header'
   }
 
   public getParent(): DirectoryBox|never {
@@ -68,26 +73,25 @@ export abstract class Box {
   protected abstract getBorderStyle(): string
 
   private async renderHeader(): Promise<void> {
-    let headerId: string = this.getId() + 'header'
-
-    let headerElement: string = '<div id="' + headerId + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
+    let headerElement: string = '<div id="' + this.getHeaderId() + '" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
     await dom.setContentTo(this.getId(), headerElement)
 
-    dom.addDragListenerTo(headerId, 'dragstart', (clientX:number, clientY: number) => this.dragStart(clientX, clientY))
-    dom.addDragListenerTo(headerId, 'drag', (clientX:number, clientY: number) => this.drag(clientX, clientY))
-    dom.addDragListenerTo(headerId, 'dragend', (_) => this.dragend())
+    DragManager.addDraggable(this) // TODO: move to other method
   }
 
-  private async dragStart(clientX: number, clientY: number): Promise<void> {
+  public getDraggableId(): string {
+    return this.getHeaderId()
+  }
+
+  public async dragStart(clientX: number, clientY: number): Promise<void> {
     let clientRect: Rect = await this.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
-    this.getParent().setDragOverStyle(true)
   }
 
-  private async drag(clientX: number, clientY: number): Promise<void> {
+  public async drag(clientX: number, clientY: number): Promise<void> {
     let parentClientRect: Rect = await this.getParent().getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
 
-    if (!parentClientRect.isPositionInside(clientX, clientY)) {
+    /*if (!parentClientRect.isPositionInside(clientX, clientY)) {
       await this.moveOut()
       this.drag(clientX, clientY)
       return
@@ -110,7 +114,7 @@ export abstract class Box {
       this.parent = boxToMoveInside
       this.renderStyle()
       return
-    }
+    }*/
 
     this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
@@ -118,8 +122,8 @@ export abstract class Box {
     this.renderStyle()
   }
 
-  private async dragend(): Promise<void> {
-    return this.getParent().setDragOverStyle(false)
+  public async dragend(): Promise<void> {
+    // TODO: wip
   }
 
   private async moveOut(): Promise<void> {

@@ -1,21 +1,41 @@
 "use strict";
 exports.__esModule = true;
 exports.DragManager = void 0;
+var util = require("./util");
+var dom = require("./domAdapter");
 // TODO: rename to BoxDragManager?
 var DragManager = /** @class */ (function () {
     function DragManager() {
     }
-    DragManager.addDragListenerTo = function () {
-        // TODO: wip or delete
-    };
-    DragManager.addDragEnterListenerTo = function () {
-        // TODO: wip or delete
-    };
-    DragManager.addDraggable = function (elementIdForListener, elementToDrag) {
-        // TODO: wip
+    DragManager.addDraggable = function (elementToDrag) {
+        var _this = this;
+        var draggableId = elementToDrag.getId(); //elementToDrag.getDraggableId()
+        dom.addDragListenerTo(draggableId, 'dragstart', function (clientX, clientY) {
+            //dom.removeDragEnterListenerFrom(draggableId)
+            elementToDrag.dragStart(clientX, clientY);
+            _this.draggingBox = elementToDrag;
+        });
+        //dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => elementToDrag.drag(clientX, clientY))
+        dom.addDragListenerTo(draggableId, 'dragend', function (_) {
+            //dom.addDragEnterListenerTo(draggableId)
+            elementToDrag.dragend();
+            _this.draggingBox = null;
+            _this.dragOverBox = null;
+        });
     };
     DragManager.addDropTarget = function (targetElement) {
-        // TODO: wip
+        var _this = this;
+        dom.addDragEnterListenerTo(targetElement.getId(), 'dragenter', targetElement.getDraggableId(), function () {
+            if (_this.dragOverBox == targetElement) {
+                return;
+            }
+            util.logInfo('addDropTarget ' + targetElement.getId());
+            if (_this.dragOverBox != null) {
+                _this.dragOverBox.setDragOverStyle(false);
+            }
+            _this.dragOverBox = targetElement;
+            _this.dragOverBox.setDragOverStyle(true);
+        });
     };
     DragManager.draggingBox = null;
     DragManager.dragOverBox = null;

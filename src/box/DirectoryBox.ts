@@ -3,6 +3,7 @@ import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
 import { Path } from '../Path'
+import { DragManager } from '../DragManager'
 
 export class DirectoryBox extends Box {
   private boxes: Box[] = []
@@ -53,6 +54,8 @@ export class DirectoryBox extends Box {
     this.boxes.forEach(box => {
       box.render()
     });
+
+    DragManager.addDropTarget(this) // TODO: move to other method
   }
 
   private createDirectoryBox(name: string): DirectoryBox {
@@ -67,7 +70,7 @@ export class DirectoryBox extends Box {
 
   private renderBoxPlaceholderAndReturnId(name: string): string {
     let elementId: string = dom.generateElementId()
-    dom.addContentTo(super.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
+    dom.addContentTo(super.getId(), '<div id="' + elementId + '" draggable="true" style="display:inline-block;">loading... ' + name + '</div>')
     return elementId
   }
 

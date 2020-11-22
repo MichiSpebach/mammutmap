@@ -55,6 +55,7 @@ var dom = require("../domAdapter");
 var Box_1 = require("./Box");
 var FileBox_1 = require("./FileBox");
 var Path_1 = require("../Path");
+var DragManager_1 = require("../DragManager");
 var DirectoryBox = /** @class */ (function (_super) {
     __extends(DirectoryBox, _super);
     function DirectoryBox(path, id, parent) {
@@ -100,6 +101,7 @@ var DirectoryBox = /** @class */ (function (_super) {
         this.boxes.forEach(function (box) {
             box.render();
         });
+        DragManager_1.DragManager.addDropTarget(this); // TODO: move to other method
     };
     DirectoryBox.prototype.createDirectoryBox = function (name) {
         var elementId = this.renderBoxPlaceholderAndReturnId(name);
@@ -111,7 +113,7 @@ var DirectoryBox = /** @class */ (function (_super) {
     };
     DirectoryBox.prototype.renderBoxPlaceholderAndReturnId = function (name) {
         var elementId = dom.generateElementId();
-        dom.addContentTo(_super.prototype.getId.call(this), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>');
+        dom.addContentTo(_super.prototype.getId.call(this), '<div id="' + elementId + '" draggable="true" style="display:inline-block;">loading... ' + name + '</div>');
         return elementId;
     };
     DirectoryBox.prototype.containsBox = function (box) {
