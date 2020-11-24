@@ -12,6 +12,7 @@ export abstract class Box {
   private parent: DirectoryBox|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
   private dragOffset: {x: number, y: number} = {x:0 , y:0}
+  private hide: boolean = false
 
   public constructor(path: Path, id: string, parent: DirectoryBox|null) {
     this.path = path
@@ -60,12 +61,20 @@ export abstract class Box {
   }
 
   protected renderStyle(): Promise<void> {
-    let basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
+    let basicStyle: string = this.getDisplayStyle() + 'position:absolute;overflow:' + this.getOverflow() + ';'
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
     let borderStyle: string = this.getBorderStyle()
 
     return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle)
+  }
+
+  private getDisplayStyle(): string {
+    if (this.hide) {
+      return 'display:none;'
+    } else {
+      return 'display:inline-block;'
+    }
   }
 
   protected abstract getOverflow(): 'hidden'|'visible'
@@ -86,11 +95,12 @@ export abstract class Box {
   public async dragStart(clientX: number, clientY: number): Promise<void> {
     let clientRect: Rect = await this.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
+
+    this.hide = true
+    this.renderStyle()
   }
 
   public async drag(clientX: number, clientY: number): Promise<void> {
-    let parentClientRect: Rect = await this.getParent().getClientRect() // TODO: cache for better responsivity, as long as dragging is in progress
-
     /*if (!parentClientRect.isPositionInside(clientX, clientY)) {
       await this.moveOut()
       this.drag(clientX, clientY)
@@ -115,11 +125,6 @@ export abstract class Box {
       this.renderStyle()
       return
     }*/
-
-    this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
-    this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
-
-    this.renderStyle()
   }
 
   public async dragEnd(clientX: number, clientY: number): Promise<void> {
@@ -128,8 +133,8 @@ export abstract class Box {
     this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
 
+    this.hide = false
     this.renderStyle()
-    // TODO: wip
   }
 
   private async moveOut(): Promise<void> {

@@ -1,12 +1,23 @@
 "use strict";
 exports.__esModule = true;
 exports.DragManager = void 0;
-var util = require("./util");
 var dom = require("./domAdapter");
 // TODO: rename to BoxDragManager?
 var DragManager = /** @class */ (function () {
     function DragManager() {
     }
+    DragManager.setDragOverBox = function (box) {
+        if (this.dragOverBox == box) {
+            return;
+        }
+        if (this.dragOverBox != null) {
+            this.dragOverBox.setDragOverStyle(false);
+        }
+        if (box != null) {
+            box.setDragOverStyle(true);
+        }
+        this.dragOverBox = box;
+    };
     DragManager.addDraggable = function (elementToDrag) {
         var _this = this;
         var draggableId = elementToDrag.getId(); //elementToDrag.getDraggableId()
@@ -15,26 +26,18 @@ var DragManager = /** @class */ (function () {
             elementToDrag.dragStart(clientX, clientY);
             _this.draggingBox = elementToDrag;
         });
-        //dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => elementToDrag.drag(clientX, clientY))
+        dom.addDragListenerTo(draggableId, 'drag', function (clientX, clientY) { return elementToDrag.drag(clientX, clientY); });
         dom.addDragListenerTo(draggableId, 'dragend', function (clientX, clientY) {
             //dom.addDragEnterListenerTo(draggableId)
             elementToDrag.dragEnd(clientX, clientY);
             _this.draggingBox = null;
-            _this.dragOverBox = null;
+            _this.setDragOverBox(null);
         });
     };
     DragManager.addDropTarget = function (targetElement) {
         var _this = this;
         dom.addDragEnterListenerTo(targetElement.getId(), 'dragenter', targetElement.getDraggableId(), function () {
-            if (_this.dragOverBox == targetElement) {
-                return;
-            }
-            util.logInfo('addDropTarget ' + targetElement.getId());
-            if (_this.dragOverBox != null) {
-                _this.dragOverBox.setDragOverStyle(false);
-            }
-            _this.dragOverBox = targetElement;
-            _this.dragOverBox.setDragOverStyle(true);
+            _this.setDragOverBox(targetElement);
         });
     };
     DragManager.draggingBox = null;

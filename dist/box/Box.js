@@ -45,6 +45,7 @@ var Box = /** @class */ (function () {
     function Box(path, id, parent) {
         this.mapData = BoxMapData_1.BoxMapData.buildDefault();
         this.dragOffset = { x: 0, y: 0 };
+        this.hide = false;
         this.path = path;
         this.id = id;
         this.parent = parent;
@@ -103,11 +104,19 @@ var Box = /** @class */ (function () {
         });
     };
     Box.prototype.renderStyle = function () {
-        var basicStyle = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';';
+        var basicStyle = this.getDisplayStyle() + 'position:absolute;overflow:' + this.getOverflow() + ';';
         var scaleStyle = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;';
         var positionStyle = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;';
         var borderStyle = this.getBorderStyle();
         return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
+    };
+    Box.prototype.getDisplayStyle = function () {
+        if (this.hide) {
+            return 'display:none;';
+        }
+        else {
+            return 'display:inline-block;';
+        }
     };
     Box.prototype.renderHeader = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -137,6 +146,8 @@ var Box = /** @class */ (function () {
                     case 1:
                         clientRect = _a.sent();
                         this.dragOffset = { x: clientX - clientRect.x, y: clientY - clientRect.y };
+                        this.hide = true;
+                        this.renderStyle();
                         return [2 /*return*/];
                 }
             });
@@ -144,67 +155,8 @@ var Box = /** @class */ (function () {
     };
     Box.prototype.drag = function (clientX, clientY) {
         return __awaiter(this, void 0, void 0, function () {
-            var parentClientRect;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getParent().getClientRect()
-                        /*if (!parentClientRect.isPositionInside(clientX, clientY)) {
-                          await this.moveOut()
-                          this.drag(clientX, clientY)
-                          return
-                        }
-                        let boxesAtPostion = await this.getParent().getBoxesAt(clientX, clientY)
-                        let boxToMoveInside: DirectoryBox|null = null
-                        for (let i:number = 0; i < boxesAtPostion.length; i++) {
-                          let box = boxesAtPostion[i]
-                          if (box != this && box instanceof DirectoryBox) {
-                            boxToMoveInside = box
-                            break
-                          }
-                        }
-                        if (boxToMoveInside != null) {
-                          boxToMoveInside.addBox(this)
-                          boxToMoveInside.setDragOverStyle(true)
-                          this.getParent().removeBox(this)
-                          this.getParent().setDragOverStyle(false)
-                    
-                          this.parent = boxToMoveInside
-                          this.renderStyle()
-                          return
-                        }*/
-                    ]; // TODO: cache for better responsivity, as long as dragging is in progress
-                    case 1:
-                        parentClientRect = _a.sent() // TODO: cache for better responsivity, as long as dragging is in progress
-                        ;
-                        /*if (!parentClientRect.isPositionInside(clientX, clientY)) {
-                          await this.moveOut()
-                          this.drag(clientX, clientY)
-                          return
-                        }
-                        let boxesAtPostion = await this.getParent().getBoxesAt(clientX, clientY)
-                        let boxToMoveInside: DirectoryBox|null = null
-                        for (let i:number = 0; i < boxesAtPostion.length; i++) {
-                          let box = boxesAtPostion[i]
-                          if (box != this && box instanceof DirectoryBox) {
-                            boxToMoveInside = box
-                            break
-                          }
-                        }
-                        if (boxToMoveInside != null) {
-                          boxToMoveInside.addBox(this)
-                          boxToMoveInside.setDragOverStyle(true)
-                          this.getParent().removeBox(this)
-                          this.getParent().setDragOverStyle(false)
-                    
-                          this.parent = boxToMoveInside
-                          this.renderStyle()
-                          return
-                        }*/
-                        this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
-                        this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
-                        this.renderStyle();
-                        return [2 /*return*/];
-                }
+                return [2 /*return*/];
             });
         });
     };
@@ -218,6 +170,7 @@ var Box = /** @class */ (function () {
                         parentClientRect = _a.sent();
                         this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
                         this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
+                        this.hide = false;
                         this.renderStyle();
                         return [2 /*return*/];
                 }
