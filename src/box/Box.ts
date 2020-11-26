@@ -11,8 +11,8 @@ export abstract class Box {
   private readonly id: string
   private parent: DirectoryBox|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
-  private dragOffset: {x: number, y: number} = {x:0 , y:0}
-  private hide: boolean = false
+  private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
+  private hide: boolean = false // TODO: don't hide, use pointer-events: none; in style instead
 
   public constructor(path: Path, id: string, parent: DirectoryBox|null) {
     this.path = path
@@ -101,61 +101,32 @@ export abstract class Box {
   }
 
   public async drag(clientX: number, clientY: number): Promise<void> {
-    /*if (!parentClientRect.isPositionInside(clientX, clientY)) {
-      await this.moveOut()
-      this.drag(clientX, clientY)
-      return
-    }
-    let boxesAtPostion = await this.getParent().getBoxesAt(clientX, clientY)
-    let boxToMoveInside: DirectoryBox|null = null
-    for (let i:number = 0; i < boxesAtPostion.length; i++) {
-      let box = boxesAtPostion[i]
-      if (box != this && box instanceof DirectoryBox) {
-        boxToMoveInside = box
-        break
-      }
-    }
-    if (boxToMoveInside != null) {
-      boxToMoveInside.addBox(this)
-      boxToMoveInside.setDragOverStyle(true)
-      this.getParent().removeBox(this)
-      this.getParent().setDragOverStyle(false)
 
-      this.parent = boxToMoveInside
-      this.renderStyle()
-      return
-    }*/
   }
 
-  public async dragEnd(clientX: number, clientY: number): Promise<void> {
-    let parentClientRect: Rect = await this.getParent().getClientRect()
+  public async dragEnd(clientX: number, clientY: number, dropTarget: DirectoryBox): Promise<void> {
+    let parent: DirectoryBox = this.getParent()
+    let parentClientRect: Rect = await parent.getClientRect()
+
+    if (parent != dropTarget) {
+      const oldParent: DirectoryBox = parent
+      const oldParentClientRect: Rect = parentClientRect
+      parent = dropTarget
+      this.parent = dropTarget
+      parentClientRect = await parent.getClientRect()
+
+      oldParent.removeBox(this)
+      parent.addBox(this)
+
+      this.mapData.width *= oldParentClientRect.width / parentClientRect.width
+      this.mapData.height *= oldParentClientRect.height / parentClientRect.height
+    }
 
     this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
 
     this.hide = false
     this.renderStyle()
-  }
-
-  private async moveOut(): Promise<void> {
-    let oldParent: DirectoryBox = this.getParent()
-    let newParent: DirectoryBox = oldParent.getParent()
-
-    let oldParentClientRectPromise = oldParent.getClientRect()
-    let newParentClientRectPromise = newParent.getClientRect()
-    let oldParentClientRect:Rect = await oldParentClientRectPromise
-    let newParentClientRect:Rect = await newParentClientRectPromise
-
-    this.mapData.width *= oldParentClientRect.width / newParentClientRect.width
-    this.mapData.height *= oldParentClientRect.height / newParentClientRect.height
-
-    newParent.addBox(this)
-    newParent.setDragOverStyle(true)
-    oldParent.removeBox(this)
-    oldParent.setDragOverStyle(false)
-
-    this.parent = newParent
-    this.renderStyle() // TODO: add await to prevent flickering
   }
 
   protected abstract renderBody(): void

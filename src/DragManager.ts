@@ -28,25 +28,26 @@ export class DragManager {
     let draggableId: string = elementToDrag.getId()//elementToDrag.getDraggableId()
 
     dom.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
-      //dom.removeDragEnterListenerFrom(draggableId)
       elementToDrag.dragStart(clientX, clientY)
       this.draggingBox = elementToDrag
     })
 
     dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => elementToDrag.drag(clientX, clientY))
 
+    // TODO: addDragCancelListener
+
     dom.addDragListenerTo(draggableId, 'dragend', (clientX: number, clientY: number) => {
-      //dom.addDragEnterListenerTo(draggableId)
-      elementToDrag.dragEnd(clientX, clientY)
+      if (this.dragOverBox == null) {
+        util.logError("DragManager: dragOverBox is null although dragging was in progress")
+      }
+      elementToDrag.dragEnd(clientX, clientY, this.dragOverBox)
       this.draggingBox = null
       this.setDragOverBox(null)
     })
   }
 
   public static addDropTarget(targetElement: DirectoryBox): void {
-    dom.addDragEnterListenerTo(targetElement.getId(), 'dragenter', targetElement.getDraggableId(), () => {
-      this.setDragOverBox(targetElement)
-    })
+    dom.addDragListenerTo(targetElement.getId(), 'dragenter', (_) => this.setDragOverBox(targetElement))
   }
 
 }

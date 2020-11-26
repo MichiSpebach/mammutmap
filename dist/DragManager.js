@@ -1,6 +1,7 @@
 "use strict";
 exports.__esModule = true;
 exports.DragManager = void 0;
+var util = require("./util");
 var dom = require("./domAdapter");
 // TODO: rename to BoxDragManager?
 var DragManager = /** @class */ (function () {
@@ -22,23 +23,23 @@ var DragManager = /** @class */ (function () {
         var _this = this;
         var draggableId = elementToDrag.getId(); //elementToDrag.getDraggableId()
         dom.addDragListenerTo(draggableId, 'dragstart', function (clientX, clientY) {
-            //dom.removeDragEnterListenerFrom(draggableId)
             elementToDrag.dragStart(clientX, clientY);
             _this.draggingBox = elementToDrag;
         });
         dom.addDragListenerTo(draggableId, 'drag', function (clientX, clientY) { return elementToDrag.drag(clientX, clientY); });
+        // TODO: addDragCancelListener
         dom.addDragListenerTo(draggableId, 'dragend', function (clientX, clientY) {
-            //dom.addDragEnterListenerTo(draggableId)
-            elementToDrag.dragEnd(clientX, clientY);
+            if (_this.dragOverBox == null) {
+                util.logError("DragManager: dragOverBox is null although dragging was in progress");
+            }
+            elementToDrag.dragEnd(clientX, clientY, _this.dragOverBox);
             _this.draggingBox = null;
             _this.setDragOverBox(null);
         });
     };
     DragManager.addDropTarget = function (targetElement) {
         var _this = this;
-        dom.addDragEnterListenerTo(targetElement.getId(), 'dragenter', targetElement.getDraggableId(), function () {
-            _this.setDragOverBox(targetElement);
-        });
+        dom.addDragListenerTo(targetElement.getId(), 'dragenter', function (_) { return _this.setDragOverBox(targetElement); });
     };
     DragManager.draggingBox = null;
     DragManager.dragOverBox = null;

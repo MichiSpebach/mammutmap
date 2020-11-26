@@ -44,8 +44,8 @@ var DragManager_1 = require("../DragManager");
 var Box = /** @class */ (function () {
     function Box(path, id, parent) {
         this.mapData = BoxMapData_1.BoxMapData.buildDefault();
-        this.dragOffset = { x: 0, y: 0 };
-        this.hide = false;
+        this.dragOffset = { x: 0, y: 0 }; // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
+        this.hide = false; // TODO: don't hide, use pointer-events: none; in style instead
         this.path = path;
         this.id = id;
         this.parent = parent;
@@ -160,47 +160,34 @@ var Box = /** @class */ (function () {
             });
         });
     };
-    Box.prototype.dragEnd = function (clientX, clientY) {
+    Box.prototype.dragEnd = function (clientX, clientY, dropTarget) {
         return __awaiter(this, void 0, void 0, function () {
-            var parentClientRect;
+            var parent, parentClientRect, oldParent, oldParentClientRect;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.getParent().getClientRect()];
+                    case 0:
+                        parent = this.getParent();
+                        return [4 /*yield*/, parent.getClientRect()];
                     case 1:
                         parentClientRect = _a.sent();
+                        if (!(parent != dropTarget)) return [3 /*break*/, 3];
+                        oldParent = parent;
+                        oldParentClientRect = parentClientRect;
+                        parent = dropTarget;
+                        this.parent = dropTarget;
+                        return [4 /*yield*/, parent.getClientRect()];
+                    case 2:
+                        parentClientRect = _a.sent();
+                        oldParent.removeBox(this);
+                        parent.addBox(this);
+                        this.mapData.width *= oldParentClientRect.width / parentClientRect.width;
+                        this.mapData.height *= oldParentClientRect.height / parentClientRect.height;
+                        _a.label = 3;
+                    case 3:
                         this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100;
                         this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
                         this.hide = false;
                         this.renderStyle();
-                        return [2 /*return*/];
-                }
-            });
-        });
-    };
-    Box.prototype.moveOut = function () {
-        return __awaiter(this, void 0, void 0, function () {
-            var oldParent, newParent, oldParentClientRectPromise, newParentClientRectPromise, oldParentClientRect, newParentClientRect;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        oldParent = this.getParent();
-                        newParent = oldParent.getParent();
-                        oldParentClientRectPromise = oldParent.getClientRect();
-                        newParentClientRectPromise = newParent.getClientRect();
-                        return [4 /*yield*/, oldParentClientRectPromise];
-                    case 1:
-                        oldParentClientRect = _a.sent();
-                        return [4 /*yield*/, newParentClientRectPromise];
-                    case 2:
-                        newParentClientRect = _a.sent();
-                        this.mapData.width *= oldParentClientRect.width / newParentClientRect.width;
-                        this.mapData.height *= oldParentClientRect.height / newParentClientRect.height;
-                        newParent.addBox(this);
-                        newParent.setDragOverStyle(true);
-                        oldParent.removeBox(this);
-                        oldParent.setDragOverStyle(false);
-                        this.parent = newParent;
-                        this.renderStyle(); // TODO: add await to prevent flickering
                         return [2 /*return*/];
                 }
             });
