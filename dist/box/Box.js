@@ -160,6 +160,15 @@ var Box = /** @class */ (function () {
             });
         });
     };
+    Box.prototype.dragCancel = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                this.hide = false;
+                this.renderStyle();
+                return [2 /*return*/];
+            });
+        });
+    };
     Box.prototype.dragEnd = function (clientX, clientY, dropTarget) {
         return __awaiter(this, void 0, void 0, function () {
             var parent, parentClientRect, oldParent, oldParentClientRect;

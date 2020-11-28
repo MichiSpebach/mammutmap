@@ -27,11 +27,13 @@ var DragManager = /** @class */ (function () {
             _this.draggingBox = elementToDrag;
         });
         dom.addDragListenerTo(draggableId, 'drag', function (clientX, clientY) { return elementToDrag.drag(clientX, clientY); });
-        // TODO: addDragCancelListener
         dom.addDragListenerTo(draggableId, 'dragend', function (clientX, clientY) {
             if (_this.dragOverBox == null) {
-                util.logError("DragManager: dragOverBox is null although dragging was in progress");
+                util.logWarning("DragManager: dragOverBox is null although dragging was in progress");
+                elementToDrag.dragCancel();
+                return;
             }
+            // TODO: call elementToDrag.dragCancel() if esc is pressed
             elementToDrag.dragEnd(clientX, clientY, _this.dragOverBox);
             _this.draggingBox = null;
             _this.setDragOverBox(null);

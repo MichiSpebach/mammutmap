@@ -104,6 +104,11 @@ export abstract class Box {
 
   }
 
+  public async dragCancel(): Promise<void> {
+    this.hide = false
+    this.renderStyle()
+  }
+
   public async dragEnd(clientX: number, clientY: number, dropTarget: DirectoryBox): Promise<void> {
     let parent: DirectoryBox = this.getParent()
     let parentClientRect: Rect = await parent.getClientRect()

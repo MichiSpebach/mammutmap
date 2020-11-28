@@ -34,12 +34,13 @@ export class DragManager {
 
     dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => elementToDrag.drag(clientX, clientY))
 
-    // TODO: addDragCancelListener
-
     dom.addDragListenerTo(draggableId, 'dragend', (clientX: number, clientY: number) => {
       if (this.dragOverBox == null) {
-        util.logError("DragManager: dragOverBox is null although dragging was in progress")
+        util.logWarning("DragManager: dragOverBox is null although dragging was in progress")
+        elementToDrag.dragCancel()
+        return
       }
+      // TODO: call elementToDrag.dragCancel() if esc is pressed
       elementToDrag.dragEnd(clientX, clientY, this.dragOverBox)
       this.draggingBox = null
       this.setDragOverBox(null)
