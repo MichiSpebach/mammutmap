@@ -52,4 +52,8 @@ export class BoxMapData {
   private warn(message: string): void {
     util.logWarning('BoxData: ' + message)
   }
+
+  public toJson(): string {
+    return JSON.stringify(this)
+  }
 }

@@ -13,7 +13,7 @@
   },
   "keywords": [],
   "author": "michael",
-  "license": "MIT",
+  "license": "",
   "config": {
     "forge": {
       "packagerConfig": {},

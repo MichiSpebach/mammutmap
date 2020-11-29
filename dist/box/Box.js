@@ -44,6 +44,7 @@ var DragManager_1 = require("../DragManager");
 var Box = /** @class */ (function () {
     function Box(path, id, parent) {
         this.mapData = BoxMapData_1.BoxMapData.buildDefault();
+        this.unsavedChanges = false;
         this.dragOffset = { x: 0, y: 0 }; // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
         this.hide = false; // TODO: don't hide, use pointer-events: none; in style instead
         this.path = path;
@@ -52,6 +53,9 @@ var Box = /** @class */ (function () {
     }
     Box.prototype.getPath = function () {
         return this.path;
+    };
+    Box.prototype.getMapDataFilePath = function () {
+        return this.getPath().getMapPath() + '.json';
     };
     Box.prototype.getId = function () {
         return this.id;
@@ -90,13 +94,29 @@ var Box = /** @class */ (function () {
                 switch (_a.label) {
                     case 0:
                         if (!!this.getPath().isRoot()) return [3 /*break*/, 2];
-                        return [4 /*yield*/, util.readFile(this.getPath().getMapPath() + '.json')
-                                .then(function (json) { return _this.mapData = BoxMapData_1.BoxMapData.buildFromJson(json); })["catch"](function (error) { return util.logWarning('failed to load ' + _this.getPath().getMapPath() + '.json: ' + error); })];
+                        return [4 /*yield*/, util.readFile(this.getMapDataFilePath())
+                                .then(function (json) { return _this.mapData = BoxMapData_1.BoxMapData.buildFromJson(json); })["catch"](function (error) { return util.logWarning('failed to load ' + _this.getMapDataFilePath() + ': ' + error); })];
                     case 1:
                         _a.sent();
                         _a.label = 2;
                     case 2: return [4 /*yield*/, this.renderStyle()];
                     case 3:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    Box.prototype.saveMapData = function () {
+        return __awaiter(this, void 0, void 0, function () {
+            var mapDataFilePath;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        mapDataFilePath = this.getMapDataFilePath();
+                        return [4 /*yield*/, util.writeFile(mapDataFilePath, this.mapData.toJson())
+                                .then(function () { return util.logInfo('saved ' + mapDataFilePath); })["catch"](function (error) { return util.logWarning('failed to save ' + mapDataFilePath + ': ' + error); })];
+                    case 1:
                         _a.sent();
                         return [2 /*return*/];
                 }
@@ -197,6 +217,7 @@ var Box = /** @class */ (function () {
                         this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100;
                         this.hide = false;
                         this.renderStyle();
+                        this.saveMapData();
                         return [2 /*return*/];
                 }
             });

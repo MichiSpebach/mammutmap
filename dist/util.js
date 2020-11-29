@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-exports.escapeForHtml = exports.readFileAndConvertToHtml = exports.readFile = exports.readdirSync = exports.stringify = exports.logError = exports.logWarning = exports.logInfo = void 0;
+exports.writeFile = exports.escapeForHtml = exports.readFileAndConvertToHtml = exports.readFile = exports.readdirSync = exports.stringify = exports.logError = exports.logWarning = exports.logInfo = void 0;
 var dom = require("./domAdapter");
 var fs = require("fs");
 var fs_1 = require("fs");
@@ -128,4 +128,12 @@ function escapeCharForHtml(c) {
             return c;
     }
 }
+function writeFile(path, data) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            return [2 /*return*/, fs_1.promises.writeFile(path, data)];
+        });
+    });
+}
+exports.writeFile = writeFile;
 //# sourceMappingURL=util.js.map

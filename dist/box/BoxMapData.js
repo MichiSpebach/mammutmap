@@ -41,6 +41,9 @@ var BoxMapData = /** @class */ (function () {
     BoxMapData.prototype.warn = function (message) {
         util.logWarning('BoxData: ' + message);
     };
+    BoxMapData.prototype.toJson = function () {
+        return JSON.stringify(this);
+    };
     return BoxMapData;
 }());
 exports.BoxMapData = BoxMapData;

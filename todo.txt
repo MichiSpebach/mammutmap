@@ -1,0 +1,9 @@
+
+improve box header, should not overlap content
+
+use pointer-events: none; and display boxes while they are dragged
+
+use fs.watchFile(filename[, options], listener) to be notified when files are changed
+  - usable for source files because they are changed from arbitrary editor
+  - also usable for map files because they can be changed through git
+  - notice: fs.unwatchFile(filename[, listener])

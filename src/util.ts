@@ -79,3 +79,7 @@ function escapeCharForHtml(c: string): string {
       return c
   }
 }
+
+export async function writeFile(path: string, data: string): Promise<void> {
+  return fsPromises.writeFile(path, data)
+}

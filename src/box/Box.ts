@@ -11,6 +11,7 @@ export abstract class Box {
   private readonly id: string
   private parent: DirectoryBox|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
+  private unsavedChanges: boolean = false
   private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
   private hide: boolean = false // TODO: don't hide, use pointer-events: none; in style instead
 
@@ -22,6 +23,10 @@ export abstract class Box {
 
   public getPath(): Path {
     return this.path
+  }
+
+  public getMapDataFilePath(): string {
+    return this.getPath().getMapPath() + '.json'
   }
 
   public getId(): string {
@@ -53,11 +58,18 @@ export abstract class Box {
 
   private async loadAndProcessMapData():Promise<void> {
     if (!this.getPath().isRoot()) {
-      await util.readFile(this.getPath().getMapPath() + '.json')
-      .then(json => this.mapData = BoxMapData.buildFromJson(json))
-      .catch(error => util.logWarning('failed to load ' + this.getPath().getMapPath() + '.json: ' + error))
+      await util.readFile(this.getMapDataFilePath())
+        .then(json => this.mapData = BoxMapData.buildFromJson(json))
+        .catch(error => util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error))
     }
     await this.renderStyle()
+  }
+
+  private async saveMapData(): Promise<void> {
+    const mapDataFilePath: string = this.getMapDataFilePath()
+    await util.writeFile(mapDataFilePath, this.mapData.toJson())
+      .then(() => util.logInfo('saved ' + mapDataFilePath))
+      .catch(error => util.logWarning('failed to save ' + mapDataFilePath + ': ' + error))
   }
 
   protected renderStyle(): Promise<void> {
@@ -132,6 +144,7 @@ export abstract class Box {
 
     this.hide = false
     this.renderStyle()
+    this.saveMapData()
   }
 
   protected abstract renderBody(): void
