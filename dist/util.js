@@ -130,8 +130,20 @@ function escapeCharForHtml(c) {
 }
 function writeFile(path, data) {
     return __awaiter(this, void 0, void 0, function () {
+        var directory, fileEntries, i;
         return __generator(this, function (_a) {
-            return [2 /*return*/, fs_1.promises.writeFile(path, data)];
+            switch (_a.label) {
+                case 0:
+                    directory = '';
+                    fileEntries = path.split('/');
+                    for (i = 0; i < fileEntries.length - 1; i++) {
+                        directory += fileEntries[i] + '/';
+                    }
+                    return [4 /*yield*/, fs_1.promises.mkdir(directory, { recursive: true })];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/, fs_1.promises.writeFile(path, data)];
+            }
         });
     });
 }

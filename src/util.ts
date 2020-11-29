@@ -81,5 +81,12 @@ function escapeCharForHtml(c: string): string {
 }
 
 export async function writeFile(path: string, data: string): Promise<void> {
+  let directory = ''
+  const fileEntries: string[] = path.split('/')
+  for (let i = 0; i < fileEntries.length - 1; i++) {
+    directory += fileEntries[i] + '/'
+  }
+
+  await fsPromises.mkdir(directory, {recursive: true})
   return fsPromises.writeFile(path, data)
 }
