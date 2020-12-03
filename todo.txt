@@ -1,5 +1,11 @@
 
+load style from css file, use html/css classes
+
 improve box header, should not overlap content
+
+delete mapDataFile when box is moved out of directory
+
+check when directory is loaded that sourceFiles and mapFiles match
 
 use pointer-events: none; and display boxes while they are dragged
 
@@ -7,3 +13,5 @@ use fs.watchFile(filename[, options], listener) to be notified when files are ch
   - usable for source files because they are changed from arbitrary editor
   - also usable for map files because they can be changed through git
   - notice: fs.unwatchFile(filename[, listener])
+
+improve DragManager to only have one eventListener for each eventType and simply add css-class when draggable is added?

@@ -41,12 +41,14 @@ var util = require("../util");
 var dom = require("../domAdapter");
 var BoxMapData_1 = require("./BoxMapData");
 var DragManager_1 = require("../DragManager");
+var BoxBorder_1 = require("./BoxBorder");
 var Box = /** @class */ (function () {
     function Box(path, id, parent) {
         this.mapData = BoxMapData_1.BoxMapData.buildDefault();
         this.unsavedChanges = false;
         this.dragOffset = { x: 0, y: 0 }; // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
         this.hide = false; // TODO: don't hide, use pointer-events: none; in style instead
+        this.border = new BoxBorder_1.BoxBorder(this);
         this.path = path;
         this.id = id;
         this.parent = parent;
@@ -86,6 +88,7 @@ var Box = /** @class */ (function () {
         this.loadAndProcessMapData();
         this.renderHeader();
         this.renderBody();
+        this.border.render();
     };
     Box.prototype.loadAndProcessMapData = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -127,8 +130,7 @@ var Box = /** @class */ (function () {
         var basicStyle = this.getDisplayStyle() + 'position:absolute;overflow:' + this.getOverflow() + ';';
         var scaleStyle = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;';
         var positionStyle = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;';
-        var borderStyle = this.getBorderStyle();
-        return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle);
+        return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle);
     };
     Box.prototype.getDisplayStyle = function () {
         if (this.hide) {

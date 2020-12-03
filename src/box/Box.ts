@@ -5,6 +5,7 @@ import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
 import { DragManager } from '../DragManager'
 import { DirectoryBox } from './DirectoryBox'
+import { BoxBorder } from './BoxBorder'
 
 export abstract class Box {
   private readonly path: Path
@@ -14,6 +15,7 @@ export abstract class Box {
   private unsavedChanges: boolean = false
   private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
   private hide: boolean = false // TODO: don't hide, use pointer-events: none; in style instead
+  private readonly border: BoxBorder = new BoxBorder(this)
 
   public constructor(path: Path, id: string, parent: DirectoryBox|null) {
     this.path = path
@@ -54,6 +56,7 @@ export abstract class Box {
     this.loadAndProcessMapData()
     this.renderHeader()
     this.renderBody()
+    this.border.render()
   }
 
   private async loadAndProcessMapData():Promise<void> {
@@ -76,9 +79,8 @@ export abstract class Box {
     let basicStyle: string = this.getDisplayStyle() + 'position:absolute;overflow:' + this.getOverflow() + ';'
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
-    let borderStyle: string = this.getBorderStyle()
 
-    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + borderStyle)
+    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle)
   }
 
   private getDisplayStyle(): string {
