@@ -8,12 +8,14 @@ var BoxBorder = /** @class */ (function () {
         this.referenceBox = referenceBox;
     }
     BoxBorder.prototype.render = function () {
-        var top = '<rect width="100%" height="2px" style="fill:skyblue;"/>';
-        var bottom = '<rect width="100%" height="2px" alignment-baseline="middle" style="fill:skyblue;"/>';
-        var right = '<rect width="2px" height="100%" alignment-baseline="middle" style="fill:skyblue;"/>';
-        var left = '<rect width="2px" height="100%" style="fill:skyblue;"/>';
-        var style = 'position:absolute;width:100%;height:100%;pointer-events: none;';
-        return dom.addContentTo(this.referenceBox.getId(), '<svg style="' + style + '">' + top + bottom + right + left + '</svg>');
+        var top = this.formLine('width:100%;height:2px;top:0px;');
+        var bottom = this.formLine('width:100%;height:2px;bottom:0px;');
+        var right = this.formLine('width:2px;height:100%;top:0px;right:0px;');
+        var left = this.formLine('width:2px;height:100%;top:0px;');
+        return dom.addContentTo(this.referenceBox.getId(), top + bottom + right + left);
+    };
+    BoxBorder.prototype.formLine = function (sizeAndPositionStyle) {
+        return '<div style="position:absolute;' + sizeAndPositionStyle + 'background-color:lightskyblue;"></div>';
     };
     return BoxBorder;
 }());

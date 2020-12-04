@@ -55,8 +55,8 @@ export abstract class Box {
   public render(): void {
     this.loadAndProcessMapData()
     this.renderHeader()
-    this.renderBody()
     this.border.render()
+    this.renderBody()
   }
 
   private async loadAndProcessMapData():Promise<void> {
@@ -80,7 +80,7 @@ export abstract class Box {
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
-    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle)
+    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getAdditionalStyle())
   }
 
   private getDisplayStyle(): string {
@@ -93,7 +93,7 @@ export abstract class Box {
 
   protected abstract getOverflow(): 'hidden'|'visible'
 
-  protected abstract getBorderStyle(): string
+  protected abstract getAdditionalStyle(): string|null
 
   private async renderHeader(): Promise<void> {
     let headerElement: string = '<div id="' + this.getHeaderId() + '" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'

@@ -25,8 +25,8 @@ var FileBox = /** @class */ (function (_super) {
     FileBox.prototype.getOverflow = function () {
         return 'hidden';
     };
-    FileBox.prototype.getBorderStyle = function () {
-        return 'border:solid;border-color:skyblue;';
+    FileBox.prototype.getAdditionalStyle = function () {
+        return null;
     };
     FileBox.prototype.renderBody = function () {
         var _this = this;

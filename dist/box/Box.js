@@ -87,8 +87,8 @@ var Box = /** @class */ (function () {
     Box.prototype.render = function () {
         this.loadAndProcessMapData();
         this.renderHeader();
-        this.renderBody();
         this.border.render();
+        this.renderBody();
     };
     Box.prototype.loadAndProcessMapData = function () {
         return __awaiter(this, void 0, void 0, function () {
@@ -130,7 +130,7 @@ var Box = /** @class */ (function () {
         var basicStyle = this.getDisplayStyle() + 'position:absolute;overflow:' + this.getOverflow() + ';';
         var scaleStyle = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;';
         var positionStyle = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;';
-        return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle);
+        return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getAdditionalStyle());
     };
     Box.prototype.getDisplayStyle = function () {
         if (this.hide) {

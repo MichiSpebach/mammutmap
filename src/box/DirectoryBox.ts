@@ -17,15 +17,12 @@ export class DirectoryBox extends Box {
     return 'visible'
   }
 
-  protected getBorderStyle(): string {
-    var backgroundStyle: string = '' // TODO: move to better place
+  protected getAdditionalStyle(): string {
     if (this.dragOver) {
-      backgroundStyle = 'background-color:#0000FF88'
+      return 'background-color:#33F6'
     } else {
-      backgroundStyle = 'background-color:#00000000'
+      return 'background-color:#0000'
     }
-
-    return 'border:dotted;border-color:skyblue;' + backgroundStyle
   }
 
   public setDragOverStyle(value: boolean) {

@@ -13,12 +13,15 @@ export class BoxBorder {
   }
 
   public render(): Promise<void> {
-    const top: string = '<rect width="100%" height="2px" style="fill:skyblue;"/>'
-    const bottom: string = '<rect width="100%" height="2px" style="fill:skyblue;"/>'
-    const right: string = '<rect width="2px" height="100%" style="fill:skyblue;"/>'
-    const left: string = '<rect width="2px" height="100%" style="fill:skyblue;"/>' // float right or bottom:0 does not work, seems to be difficult achieve same effect -> use div
-    const style: string = 'position:absolute;width:100%;height:100%;pointer-events: none;'
-    return dom.addContentTo(this.referenceBox.getId(), '<svg style="'+style+'">'+top+bottom+right+left+'</svg>')
+    const top: string = this.formLine('width:100%;height:2px;top:0px;')
+    const bottom: string = this.formLine('width:100%;height:2px;bottom:0px;')
+    const right: string = this.formLine('width:2px;height:100%;top:0px;right:0px;')
+    const left: string = this.formLine('width:2px;height:100%;top:0px;')
+    return dom.addContentTo(this.referenceBox.getId(), top + bottom + right + left)
+  }
+
+  private formLine(sizeAndPositionStyle: string): string {
+    return '<div style="position:absolute;' + sizeAndPositionStyle + 'background-color:lightskyblue;"></div>'
   }
 
 }

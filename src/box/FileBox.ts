@@ -14,8 +14,8 @@ export class FileBox extends Box {
     return 'hidden'
   }
 
-  protected getBorderStyle(): string {
-    return 'border:solid;border-color:skyblue;'
+  protected getAdditionalStyle(): null {
+    return null
   }
 
   protected renderBody(): void {

@@ -1,9 +1,13 @@
 
+different header-color for folders and files
+
+delete mapDataFile when box is moved out of directory and update path and refactor path before
+
 load style from css file, use html/css classes
 
-improve box header, should not overlap content
+settings to adapt zoom out
 
-delete mapDataFile when box is moved out of directory
+improve box header, should not overlap content
 
 check when directory is loaded that sourceFiles and mapFiles match
 

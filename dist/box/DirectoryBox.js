@@ -67,15 +67,13 @@ var DirectoryBox = /** @class */ (function (_super) {
     DirectoryBox.prototype.getOverflow = function () {
         return 'visible';
     };
-    DirectoryBox.prototype.getBorderStyle = function () {
-        var backgroundStyle = ''; // TODO: move to better place
+    DirectoryBox.prototype.getAdditionalStyle = function () {
         if (this.dragOver) {
-            backgroundStyle = 'background-color:#0000FF88';
+            return 'background-color:#33F6';
         }
         else {
-            backgroundStyle = 'background-color:#00000000';
+            return 'background-color:#0000';
         }
-        return 'border:dotted;border-color:skyblue;' + backgroundStyle;
     };
     DirectoryBox.prototype.setDragOverStyle = function (value) {
         this.dragOver = value;
