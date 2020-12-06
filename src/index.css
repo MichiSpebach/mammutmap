@@ -4,3 +4,11 @@ body {
   max-width: 38rem;
   padding: 2rem;
 }
+
+.nsResize {
+  cursor:ns-resize;
+}
+
+.ewResize {
+  cursor:ew-resize;
+}

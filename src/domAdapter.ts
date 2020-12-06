@@ -48,6 +48,10 @@ export function setStyleTo(id: string, style: string): Promise<void> {
   return executeJsOnElement(id, "style = '" + style + "'")
 }
 
+export function addClassTo(id: string, className: string): Promise<void> {
+  return executeJsOnElement(id, "classList.add('" + className + "')")
+}
+
 export function scrollToBottom(id: string): void {
   executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER")
 }
@@ -66,7 +70,11 @@ export function addWheelListenerTo(id: string, callback: (delta: number, clientX
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
 }
 
-export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag'|'dragend'|'dragenter', callback: (clientX: number, clientY: number) => void): void {
+export function addDragListenerTo(
+    id: string,
+    eventType: 'dragstart'|'drag'|'dragend'|'dragenter',
+    callback: (clientX: number, clientY: number, targetId: string) => void
+  ): void {
   let ipcChannelName = eventType + '_' + id
 
   var rendererFunction: string = '(event) => {'
@@ -74,13 +82,13 @@ export function addDragListenerTo(id: string, eventType: 'dragstart'|'drag'|'dra
 //  rendererFunction += 'console.log(event);'
   rendererFunction += 'event.stopPropagation();'
   rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {'
-  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);'
+  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY, event.target.id);'
   rendererFunction += '}'
   rendererFunction += '}'
 
   executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
 
-  ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
+  ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number, targetId: string) => callback(clientX, clientY, targetId))
 }
 
 function executeJsOnElement(elementId: string, jsToExectue: string): Promise<any> {

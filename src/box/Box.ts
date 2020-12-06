@@ -15,12 +15,13 @@ export abstract class Box {
   private unsavedChanges: boolean = false
   private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
   private hide: boolean = false // TODO: don't hide, use pointer-events: none; in style instead
-  private readonly border: BoxBorder = new BoxBorder(this)
+  private readonly border: BoxBorder
 
   public constructor(path: Path, id: string, parent: DirectoryBox|null) {
     this.path = path
     this.id = id
     this.parent = parent
+    this.border = new BoxBorder(this)
   }
 
   public getPath(): Path {

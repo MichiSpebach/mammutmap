@@ -1,4 +1,6 @@
 
+add padding to BoxBorder lines, to make them easier to grab
+
 different header-color for folders and files
 
 delete mapDataFile when box is moved out of directory and update path and refactor path before
