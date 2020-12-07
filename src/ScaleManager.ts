@@ -9,8 +9,26 @@ export class ScaleManager {
 
   private static scalables: Map<string, BoxBorder> = new Map() // TODO: introduce interface Scalable
   private static scaling: BoxBorder|null = null
+  private static initialized: boolean = false
+
+  public static init(listenerElementId: string): void {
+    // TODO: drag event is captured by box, change dragging of boxes before, or use mousedown events
+    dom.addDragListenerTo('map', 'dragstart', (clientX: number, clientY:number, targetId: string): void => {
+      util.logInfo('resize start, targetId: ' + targetId)
+    })
+
+    dom.addDragListenerTo('map', 'drag', (clientX: number, clientY:number, targetId: string): void => {
+      util.logInfo('resize continue, targetId: ' + targetId)
+    })
+
+    dom.addDragListenerTo('map', 'dragend', (clientX: number, clientY:number, targetId: string): void => {
+      util.logInfo('resize end, targetId: ' + targetId)
+    })
+  }
 
   public static addScalable(scalable: BoxBorder) {
+    // TODO: set element draggable="true" or use mousedown instead of drag events
+
     dom.addClassTo(scalable.getTopId(), this.verticalStyleClass)
     dom.addClassTo(scalable.getBottomId(), this.verticalStyleClass)
     dom.addClassTo(scalable.getRightId(), this.horizontalStyleClass)
