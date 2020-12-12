@@ -25,7 +25,7 @@ export class DragManager {
   }
 
   public static addDraggable(elementToDrag: Box): void {
-    let draggableId: string = elementToDrag.getId()//elementToDrag.getDraggableId()
+    const draggableId: string = elementToDrag.getDraggableId()
 
     dom.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
       elementToDrag.dragStart(clientX, clientY)

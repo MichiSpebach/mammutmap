@@ -52,6 +52,10 @@ export function addClassTo(id: string, className: string): Promise<void> {
   return executeJsOnElement(id, "classList.add('" + className + "')")
 }
 
+export function getClassesOf(id: string): Promise<string[]> {
+  return executeJsOnElement(id, "classList")  // throws error: object could not be cloned
+}
+
 export function scrollToBottom(id: string): void {
   executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER")
 }

@@ -97,7 +97,7 @@ export abstract class Box {
   protected abstract getAdditionalStyle(): string|null
 
   private async renderHeader(): Promise<void> {
-    let headerElement: string = '<div id="' + this.getHeaderId() + '" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
+    let headerElement: string = '<div id="' + this.getHeaderId() + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
     await dom.setContentTo(this.getId(), headerElement)
 
     DragManager.addDraggable(this) // TODO: move to other method
@@ -148,6 +148,12 @@ export abstract class Box {
     this.hide = false
     this.renderStyle()
     this.saveMapData()
+  }
+
+  public async updateWidth(newWidthPercent: number): Promise<void> {
+    this.mapData.width = newWidthPercent
+
+    this.renderStyle()
   }
 
   protected abstract renderBody(): void

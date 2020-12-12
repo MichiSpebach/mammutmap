@@ -6,7 +6,7 @@ import { Rect } from '../Rect'
 import { ScaleManager } from '../ScaleManager'
 
 export class BoxBorder {
-  private readonly referenceBox: Box // TODO: use interface instead?
+  public readonly referenceBox: Box // TODO: use interface instead?
 
   private readonly topId: string
   private readonly bottomId: string
@@ -49,7 +49,7 @@ export class BoxBorder {
   }
 
   private formLine(id: string, sizeAndPositionStyle: string): string {
-    return '<div id="' + id + '" style="position:absolute;' + sizeAndPositionStyle + 'background-color:lightskyblue;"></div>'
+    return '<div id="' + id + '" draggable="true" style="position:absolute;' + sizeAndPositionStyle + 'background-color:lightskyblue;"></div>'
   }
 
 }
