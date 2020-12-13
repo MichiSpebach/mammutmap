@@ -58,41 +58,103 @@ export class ScaleManager {
     dom.addClassTo(scalable.getRightId(), this.horizontalStyleClass)
     dom.addClassTo(scalable.getLeftId(), this.horizontalStyleClass)
 
-    dom.addDragListenerTo(scalable.getRightId(), 'dragstart', async (clientX: number, clientY:number): Promise<void> => {
-      util.logInfo('resize start, targetId: ' + scalable.getRightId())
-
-      let parentClientRect: Promise<Rect> = scalable.referenceBox.getParent().getClientRect()
-      let clientRect: Promise<Rect> = scalable.referenceBox.getClientRect()
-
-      this.state = {
-        scaling: scalable,
-        startParentClientRect: await parentClientRect,
-        startClientRect: await clientRect,
-        startClientX: clientX,
-        startClientY: clientY
-      }
-    })
-
-    dom.addDragListenerTo(scalable.getRightId(), 'drag', (clientX: number, clientY:number): void => {
-      //util.logInfo('resize continue, targetId: ' + scalable.getRightId())
-      if (this.state == null) {
-        util.logWarning("ScaleManager: state is null")
-        return
-      }
-
-      const newWidthPercent: number = (this.state.startClientRect.width + clientX - this.state.startClientX) / this.state.startParentClientRect.width * 100
-      this.state.scaling.referenceBox.updateWidth(newWidthPercent)
-    })
-
-    dom.addDragListenerTo(scalable.getRightId(), 'dragend', (clientX: number, clientY:number): void => {
-      util.logInfo('resize end, targetId: ' + scalable.getRightId())
-      this.state = null
-    })
+    this.addListenersForSide(scalable, scalable.getRightId(), (x: number, y:number) => this.dragEastBorder(x, y))
+    this.addListenersForSide(scalable, scalable.getBottomId(), (x: number, y:number) => this.dragSouthBorder(x, y))
+    this.addListenersForSide(scalable, scalable.getTopId(), (x: number, y:number) => this.dragNorthBorder(x, y))
+    this.addListenersForSide(scalable, scalable.getLeftId(), (x: number, y:number) => this.dragWestBorder(x, y))
 
     //this.scalables.set(scalable.getTopId(), scalable)
     //this.scalables.set(scalable.getBottomId(), scalable)
     //this.scalables.set(scalable.getRightId(), scalable)
     //this.scalables.set(scalable.getLeftId(), scalable)
+  }
+
+  private static addListenersForSide(scalable: BoxBorder, id: string, drag: (clientX: number, clientY:number) => void): void {
+    dom.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
+      this.dragstart(scalable, clientX, clientY)
+    })
+
+    dom.addDragListenerTo(id, 'drag', (clientX: number, clientY:number): void => {
+      drag(clientX, clientY)
+    })
+
+    dom.addDragListenerTo(id, 'dragend', (clientX: number, clientY:number): void => {
+      this.dragEnd()
+    })
+  }
+
+  private static async dragstart(scalable: BoxBorder, clientX: number, clientY: number): Promise<void> {
+    let parentClientRect: Promise<Rect> = scalable.referenceBox.getParent().getClientRect()
+    let clientRect: Promise<Rect> = scalable.referenceBox.getClientRect()
+
+    this.state = {
+      scaling: scalable,
+      startParentClientRect: await parentClientRect,
+      startClientRect: await clientRect,
+      startClientX: clientX,
+      startClientY: clientY
+    }
+  }
+
+  private static dragEastBorder(clientX: number, clientY: number): void {
+    if (this.state == null) {
+      util.logWarning("ScaleManager: state is null while resizing")
+      return
+    }
+
+    const newWidthInPixel: number = this.state.startClientRect.width + clientX - this.state.startClientX
+    const newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
+
+    this.state.scaling.referenceBox.updateMeasures({width: newWidthInPercent})
+  }
+
+  private static dragSouthBorder(clientX: number, clientY: number): void {
+    if (this.state == null) {
+      util.logWarning("ScaleManager: state is null while resizing")
+      return
+    }
+
+    const newHeightInPixel: number = this.state.startClientRect.height + clientY - this.state.startClientY
+    const newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
+
+    this.state.scaling.referenceBox.updateMeasures({height: newHeightInPercent})
+  }
+
+  private static dragNorthBorder(clientX: number, clientY: number): void {
+    if (this.state == null) {
+      util.logWarning("ScaleManager: state is null while resizing")
+      return
+    }
+
+    const dragDistanceInPixel: number = clientY - this.state.startClientY
+    const newYInPixel: number = this.state.startClientRect.y - this.state.startParentClientRect.y + dragDistanceInPixel
+    const newHeightInPixel: number = this.state.startClientRect.height - dragDistanceInPixel
+
+    const newYInPercent: number = newYInPixel / this.state.startParentClientRect.height * 100
+    const newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
+
+    this.state.scaling.referenceBox.updateMeasures({y: newYInPercent, height: newHeightInPercent})
+  }
+
+  private static dragWestBorder(clientX: number, clientY: number): void {
+    if (this.state == null) {
+      util.logWarning("ScaleManager: state is null while resizing")
+      return
+    }
+
+    const dragDistanceInPixel: number = clientX - this.state.startClientX
+    const newXInPixel: number = this.state.startClientRect.x - this.state.startParentClientRect.x + dragDistanceInPixel
+    const newWidthInPixel: number = this.state.startClientRect.width - dragDistanceInPixel
+
+    const newXInPercent: number = newXInPixel / this.state.startParentClientRect.width * 100
+    const newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
+
+    this.state.scaling.referenceBox.updateMeasures({x: newXInPercent, width: newWidthInPercent})
+  }
+
+  private static dragEnd(): void {
+    // TODO: notify scalable?
+    this.state = null
   }
 
 }

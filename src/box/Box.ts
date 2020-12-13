@@ -150,8 +150,19 @@ export abstract class Box {
     this.saveMapData()
   }
 
-  public async updateWidth(newWidthPercent: number): Promise<void> {
-    this.mapData.width = newWidthPercent
+  public async updateMeasures(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
+    if (measuresInPercentIfChanged.x != null) {
+      this.mapData.x = measuresInPercentIfChanged.x
+    }
+    if (measuresInPercentIfChanged.y != null) {
+      this.mapData.y = measuresInPercentIfChanged.y
+    }
+    if (measuresInPercentIfChanged.width != null) {
+      this.mapData.width = measuresInPercentIfChanged.width
+    }
+    if (measuresInPercentIfChanged.height != null) {
+      this.mapData.height = measuresInPercentIfChanged.height
+    }
 
     this.renderStyle()
   }
