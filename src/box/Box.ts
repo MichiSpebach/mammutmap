@@ -14,7 +14,7 @@ export abstract class Box {
   private mapData: BoxMapData = BoxMapData.buildDefault()
   private unsavedChanges: boolean = false
   private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
-  private hide: boolean = false // TODO: don't hide, use pointer-events: none; in style instead
+  private draggingInProgress: boolean = false
   private readonly border: BoxBorder
 
   public constructor(path: Path, id: string, parent: DirectoryBox|null) {
@@ -77,18 +77,18 @@ export abstract class Box {
   }
 
   protected renderStyle(): Promise<void> {
-    let basicStyle: string = this.getDisplayStyle() + 'position:absolute;overflow:' + this.getOverflow() + ';'
+    let basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
-    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getAdditionalStyle())
+    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getPointerEventsStyle() + this.getAdditionalStyle())
   }
 
-  private getDisplayStyle(): string {
-    if (this.hide) {
-      return 'display:none;'
+  private getPointerEventsStyle(): string {
+    if (this.draggingInProgress) {
+      return 'pointer-events: none;'
     } else {
-      return 'display:inline-block;'
+      return 'pointer-events: auto;'
     }
   }
 
@@ -111,21 +111,12 @@ export abstract class Box {
     let clientRect: Rect = await this.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
 
-    this.hide = true
+    this.draggingInProgress = true
     this.renderStyle()
   }
 
-  public async drag(clientX: number, clientY: number): Promise<void> {
-
-  }
-
-  public async dragCancel(): Promise<void> {
-    this.hide = false
-    this.renderStyle()
-  }
-
-  public async dragEnd(clientX: number, clientY: number, dropTarget: DirectoryBox): Promise<void> {
-    let parent: DirectoryBox = this.getParent()
+  public async drag(clientX: number, clientY: number, dropTarget: DirectoryBox): Promise<void> {
+    let parent: DirectoryBox = this.getParent() // TODO: cache
     let parentClientRect: Rect = await parent.getClientRect()
 
     if (parent != dropTarget) {
@@ -145,7 +136,15 @@ export abstract class Box {
     this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
 
-    this.hide = false
+    this.renderStyle()
+  }
+
+  public async dragCancel(): Promise<void> {
+    this.dragEnd() // TODO: reset position instead
+  }
+
+  public async dragEnd(): Promise<void> {
+    this.draggingInProgress = false
     this.renderStyle()
     this.saveMapData()
   }

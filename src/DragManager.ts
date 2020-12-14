@@ -6,7 +6,7 @@ import { DirectoryBox } from './box/DirectoryBox'
 // TODO: rename to BoxDragManager?
 export class DragManager {
 
-  private static draggingBox: Box|null = null
+  private static draggingBox: Box|null = null // TODO: refactor either both are null or none
   private static dragOverBox: DirectoryBox|null = null
 
   private static setDragOverBox(box: DirectoryBox|null): void {
@@ -30,9 +30,18 @@ export class DragManager {
     dom.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
       elementToDrag.dragStart(clientX, clientY)
       this.draggingBox = elementToDrag
+      this.setDragOverBox(elementToDrag.getParent())
     })
 
-    dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => elementToDrag.drag(clientX, clientY))
+    dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => {
+      if (this.dragOverBox == null) {
+        util.logWarning("DragManager: dragOverBox is null although dragging is in progress")
+        elementToDrag.dragCancel()
+        return
+      }
+
+      elementToDrag.drag(clientX, clientY, this.dragOverBox)
+    })
 
     dom.addDragListenerTo(draggableId, 'dragend', (clientX: number, clientY: number) => {
       if (this.dragOverBox == null) {
@@ -41,7 +50,7 @@ export class DragManager {
         return
       }
       // TODO: call elementToDrag.dragCancel() if esc is pressed
-      elementToDrag.dragEnd(clientX, clientY, this.dragOverBox)
+      elementToDrag.dragEnd()
       this.draggingBox = null
       this.setDragOverBox(null)
     })
