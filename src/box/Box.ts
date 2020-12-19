@@ -69,7 +69,7 @@ export abstract class Box {
     await this.renderStyle()
   }
 
-  private async saveMapData(): Promise<void> {
+  public async saveMapData(): Promise<void> {
     const mapDataFilePath: string = this.getMapDataFilePath()
     await util.writeFile(mapDataFilePath, this.mapData.toJson())
       .then(() => util.logInfo('saved ' + mapDataFilePath))

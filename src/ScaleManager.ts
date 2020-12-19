@@ -153,7 +153,11 @@ export class ScaleManager {
   }
 
   private static dragEnd(): void {
-    // TODO: notify scalable?
+    if (this.state == null) {
+      util.logWarning("ScaleManager: failed to save resize operation, state is null although resizing was in progress")
+      return
+    }
+    this.state.scaling.referenceBox.saveMapData()
     this.state = null
   }
 
