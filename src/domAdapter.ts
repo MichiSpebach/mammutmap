@@ -52,6 +52,10 @@ export function addClassTo(id: string, className: string): Promise<void> {
   return executeJsOnElement(id, "classList.add('" + className + "')")
 }
 
+export function removeClassFrom(id: string, className: string): Promise<void> {
+  return executeJsOnElement(id, "classList.remove('" + className + "')")
+}
+
 export function getClassesOf(id: string): Promise<string[]> {
   return executeJsOnElement(id, "classList")  // throws error: object could not be cloned
 }

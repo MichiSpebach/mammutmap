@@ -12,3 +12,7 @@ body {
 .ewResize {
   cursor:ew-resize;
 }
+
+.draggingInProgress {
+  pointer-events: none;
+}

@@ -3,8 +3,8 @@ import * as dom from '../domAdapter'
 import { Path } from '../Path'
 import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
-import { DragManager } from '../DragManager'
 import { DirectoryBox } from './DirectoryBox'
+import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
 
 export abstract class Box {
@@ -13,14 +13,14 @@ export abstract class Box {
   private parent: DirectoryBox|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
   private unsavedChanges: boolean = false
-  private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
-  private draggingInProgress: boolean = false
+  private readonly header: BoxHeader
   private readonly border: BoxBorder
 
   public constructor(path: Path, id: string, parent: DirectoryBox|null) {
     this.path = path
     this.id = id
     this.parent = parent
+    this.header = new BoxHeader(this)
     this.border = new BoxBorder(this)
   }
 
@@ -36,15 +36,27 @@ export abstract class Box {
     return this.id
   }
 
-  public getHeaderId(): string {
-    return this.getId() + 'header'
-  }
-
   public getParent(): DirectoryBox|never {
     if (this.parent == null) {
       util.logError('Box.getParent() cannot be called on root.')
     }
     return this.parent
+  }
+
+  public async setParentAndFlawlesslyResize(newParent: DirectoryBox): Promise<void> {
+    if (this.parent == null) {
+      util.logError('Box.setParent() cannot be called on root.')
+    }
+    const parentClientRect: Promise<Rect> = this.parent.getClientRect()
+    const newParentClientRect: Promise<Rect> = newParent.getClientRect()
+
+    this.parent.removeBox(this)
+    newParent.addBox(this)
+    this.parent = newParent
+
+    const newWidth: number = this.mapData.width * ((await parentClientRect).width / (await newParentClientRect).width)
+    const newHeight: number = this.mapData.height * ((await parentClientRect).height / (await newParentClientRect).height)
+    this.updateMeasures({width: newWidth, height: newHeight})
   }
 
   public async getClientRect(): Promise<Rect> {
@@ -55,7 +67,7 @@ export abstract class Box {
 
   public render(): void {
     this.loadAndProcessMapData()
-    this.renderHeader()
+    this.header.render()
     this.border.render()
     this.renderBody()
   }
@@ -81,73 +93,12 @@ export abstract class Box {
     let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
-    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getPointerEventsStyle() + this.getAdditionalStyle())
-  }
-
-  private getPointerEventsStyle(): string {
-    if (this.draggingInProgress) {
-      return 'pointer-events: none;'
-    } else {
-      return 'pointer-events: auto;'
-    }
+    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getAdditionalStyle())
   }
 
   protected abstract getOverflow(): 'hidden'|'visible'
 
   protected abstract getAdditionalStyle(): string|null
-
-  private async renderHeader(): Promise<void> {
-    let headerElement: string = '<div id="' + this.getHeaderId() + '" draggable="true" style="background-color:skyblue;">' + this.getPath().getSrcName() + '</div>'
-    await dom.setContentTo(this.getId(), headerElement)
-
-    DragManager.addDraggable(this) // TODO: move to other method
-  }
-
-  public getDraggableId(): string {
-    return this.getHeaderId()
-  }
-
-  public async dragStart(clientX: number, clientY: number): Promise<void> {
-    let clientRect: Rect = await this.getClientRect()
-    this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
-
-    this.draggingInProgress = true
-    this.renderStyle()
-  }
-
-  public async drag(clientX: number, clientY: number, dropTarget: DirectoryBox): Promise<void> {
-    let parent: DirectoryBox = this.getParent() // TODO: cache
-    let parentClientRect: Rect = await parent.getClientRect()
-
-    if (parent != dropTarget) {
-      const oldParent: DirectoryBox = parent
-      const oldParentClientRect: Rect = parentClientRect
-      parent = dropTarget
-      this.parent = dropTarget
-      parentClientRect = await parent.getClientRect()
-
-      oldParent.removeBox(this)
-      parent.addBox(this)
-
-      this.mapData.width *= oldParentClientRect.width / parentClientRect.width
-      this.mapData.height *= oldParentClientRect.height / parentClientRect.height
-    }
-
-    this.mapData.x = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
-    this.mapData.y = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
-
-    this.renderStyle()
-  }
-
-  public async dragCancel(): Promise<void> {
-    this.dragEnd() // TODO: reset position instead
-  }
-
-  public async dragEnd(): Promise<void> {
-    this.draggingInProgress = false
-    this.renderStyle()
-    this.saveMapData()
-  }
 
   public async updateMeasures(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
     if (measuresInPercentIfChanged.x != null) {
