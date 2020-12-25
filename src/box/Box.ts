@@ -6,6 +6,7 @@ import { Rect } from '../Rect'
 import { DirectoryBox } from './DirectoryBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
+import { FolderBoxHeader } from './FolderBoxHeader'
 
 export abstract class Box {
   private readonly path: Path
@@ -20,9 +21,11 @@ export abstract class Box {
     this.path = path
     this.id = id
     this.parent = parent
-    this.header = new BoxHeader(this)
+    this.header = this.createHeader()
     this.border = new BoxBorder(this)
   }
+
+  protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
 
   public getPath(): Path {
     return this.path

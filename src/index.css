@@ -16,3 +16,11 @@ body {
 .draggingInProgress {
   pointer-events: none;
 }
+
+.fileBoxHeader {
+  background-color: skyblue;
+}
+
+.folderBoxHeader {
+  background-color: gold;
+}

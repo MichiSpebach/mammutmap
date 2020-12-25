@@ -23,7 +23,7 @@ export class DragManager {
   }
 
   public static addDraggable(elementToDrag: BoxHeader): void {
-    const draggableId: string = elementToDrag.getDraggableId()
+    const draggableId: string = elementToDrag.getId()
 
     dom.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
       elementToDrag.dragStart(clientX, clientY)

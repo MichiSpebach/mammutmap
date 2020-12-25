@@ -4,7 +4,7 @@ import { Rect } from '../Rect'
 import { Box } from './Box'
 import { DirectoryBox } from './DirectoryBox'
 
-export class BoxHeader {
+export abstract  class BoxHeader {
   private static readonly draggingInProgressClass: string = 'draggingInProgress'
 
   public readonly referenceBox: Box
@@ -15,16 +15,12 @@ export class BoxHeader {
     this.referenceBox = referenceBox
   }
 
-  private getHeaderId(): string {
+  public getId(): string {
     return this.referenceBox.getId() + 'header'
   }
 
-  public getDraggableId(): string {
-    return this.getHeaderId()
-  }
-
   public async render(): Promise<void> {
-    let html: string = '<div id="' + this.getHeaderId() + '" draggable="true" style="background-color:skyblue;">'
+    let html: string = '<div id="' + this.getId() + '" draggable="true">'
     html += this.referenceBox.getPath().getSrcName()
     html += '</div>'
     await dom.setContentTo(this.referenceBox.getId(), html)

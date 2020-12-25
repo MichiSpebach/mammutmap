@@ -2,6 +2,7 @@ import * as util from '../util'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
+import { FolderBoxHeader } from './FolderBoxHeader'
 import { Path } from '../Path'
 import { DragManager } from '../DragManager'
 
@@ -11,6 +12,10 @@ export class DirectoryBox extends Box {
 
   public constructor(path: Path, id: string, parent: DirectoryBox|null) {
     super(path, id, parent)
+  }
+
+  protected createHeader(): FolderBoxHeader {
+    return new FolderBoxHeader(this)
   }
 
   protected getOverflow(): 'visible' {
