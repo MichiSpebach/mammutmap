@@ -75,17 +75,20 @@ export abstract class Box {
   }
 
   public async render(): Promise<void> {
-    await this.loadMapData()
+    this.mapData = await this.loadMapData()
     this.renderStyle()
     this.header.render()
     this.border.render()
     this.renderBody()
   }
 
-  protected async loadMapData():Promise<void> {
-    await util.readFile(this.getMapDataFilePath())
-      .then(json => this.mapData = BoxMapData.buildFromJson(json))
-      .catch(error => util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error))
+  protected async loadMapData():Promise<BoxMapData> {
+    return util.readFile(this.getMapDataFilePath())
+      .then(json => BoxMapData.buildFromJson(json))
+      .catch(error => {
+        util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error)
+        return BoxMapData.buildDefault()
+      })
   }
 
   public async saveMapData(): Promise<void> {

@@ -1,4 +1,5 @@
 import { DirectoryBox } from './DirectoryBox'
+import { BoxMapData } from './BoxMapData'
 
 export class RootDirectoryBox extends DirectoryBox {
 
@@ -17,8 +18,8 @@ export class RootDirectoryBox extends DirectoryBox {
     return this.mapPath
   }
 
-  protected async loadMapData():Promise<void> {
-    // root folder has no mapData
+  protected async loadMapData():Promise<BoxMapData> {
+    return BoxMapData.buildDefault()
   }
 
 }
