@@ -1,25 +1,23 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
-import { Path } from '../Path'
 import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
 import { DirectoryBox } from './DirectoryBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
-import { FolderBoxHeader } from './FolderBoxHeader'
 
 export abstract class Box {
-  private readonly path: Path
   private readonly id: string
+  private name: string
   private parent: DirectoryBox|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
   private unsavedChanges: boolean = false
   private readonly header: BoxHeader
   private readonly border: BoxBorder
 
-  public constructor(path: Path, id: string, parent: DirectoryBox|null) {
-    this.path = path
+  public constructor(id: string, name: string, parent: DirectoryBox|null) {
     this.id = id
+    this.name = name
     this.parent = parent
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
@@ -27,16 +25,24 @@ export abstract class Box {
 
   protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
 
-  public getPath(): Path {
-    return this.path
+  public getId(): string {
+    return this.id
+  }
+
+  public getName(): string {
+    return this.name
+  }
+
+  public getSrcPath(): string {
+    return this.getParent().getSrcPath() + '/' + this.name
+  }
+
+  public getMapPath(): string {
+    return this.getParent().getMapPath() + '/' + this.name
   }
 
   public getMapDataFilePath(): string {
-    return this.getPath().getMapPath() + '.json'
-  }
-
-  public getId(): string {
-    return this.id
+    return this.getMapPath() + '.json'
   }
 
   public getParent(): DirectoryBox|never {
@@ -68,20 +74,18 @@ export abstract class Box {
     return await dom.getClientRectOf(this.getId())
   }
 
-  public render(): void {
-    this.loadAndProcessMapData()
+  public async render(): Promise<void> {
+    await this.loadMapData()
+    this.renderStyle()
     this.header.render()
     this.border.render()
     this.renderBody()
   }
 
-  private async loadAndProcessMapData():Promise<void> {
-    if (!this.getPath().isRoot()) {
-      await util.readFile(this.getMapDataFilePath())
-        .then(json => this.mapData = BoxMapData.buildFromJson(json))
-        .catch(error => util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error))
-    }
-    await this.renderStyle()
+  protected async loadMapData():Promise<void> {
+    await util.readFile(this.getMapDataFilePath())
+      .then(json => this.mapData = BoxMapData.buildFromJson(json))
+      .catch(error => util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error))
   }
 
   public async saveMapData(): Promise<void> {

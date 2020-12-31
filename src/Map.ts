@@ -1,5 +1,4 @@
 import * as dom from './domAdapter'
-import { Path } from './Path'
 import { RootDirectoryBox } from './box/RootDirectoryBox'
 
 export class Map {
@@ -17,8 +16,7 @@ export class Map {
     this.updateStyle()
 
     //this.addBoxes()
-    let rootPath: Path = Path.buildRoot('./src', './map')
-    this.rootDirectory = new RootDirectoryBox(rootPath, 'root')
+    this.rootDirectory = new RootDirectoryBox('root', './src', './map')
     this.rootDirectory.render()
 
     dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))

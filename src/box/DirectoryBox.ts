@@ -3,15 +3,14 @@ import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
 import { FolderBoxHeader } from './FolderBoxHeader'
-import { Path } from '../Path'
 import { DragManager } from '../DragManager'
 
 export class DirectoryBox extends Box {
   private boxes: Box[] = []
   private dragOver: boolean = false
 
-  public constructor(path: Path, id: string, parent: DirectoryBox|null) {
-    super(path, id, parent)
+  public constructor(id: string, name: string, parent: DirectoryBox|null) {
+    super(id, name, parent)
   }
 
   protected createHeader(): FolderBoxHeader {
@@ -32,13 +31,13 @@ export class DirectoryBox extends Box {
 
   public setDragOverStyle(value: boolean) {
     this.dragOver = value
-    super.renderStyle()
+    this.renderStyle()
   }
 
   protected renderBody(): void {
-    util.readdirSync(super.getPath().getSrcPath()).forEach(file => {
+    util.readdirSync(this.getSrcPath()).forEach(file => {
       let fileName: string = file.name
-      let filePath: string = super.getPath().getSrcPath() + '/' + fileName
+      let filePath: string = this.getSrcPath() + '/' + fileName
 
       if (file.isDirectory()) {
         util.logInfo('Box::render directory ' + filePath)
@@ -61,18 +60,18 @@ export class DirectoryBox extends Box {
   }
 
   private createDirectoryBox(name: string): DirectoryBox {
-    let elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new DirectoryBox(Path.buildDirEntry(super.getPath(), name), elementId, this)
+    const elementId: string = this.renderBoxPlaceholderAndReturnId(name)
+    return new DirectoryBox(elementId, name, this)
   }
 
   private createFileBox(name: string): FileBox {
-    let elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new FileBox(Path.buildDirEntry(super.getPath(), name), elementId, this)
+    const elementId: string = this.renderBoxPlaceholderAndReturnId(name)
+    return new FileBox(elementId, name, this)
   }
 
   private renderBoxPlaceholderAndReturnId(name: string): string {
-    let elementId: string = dom.generateElementId()
-    dom.addContentTo(super.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
+    const elementId: string = dom.generateElementId()
+    dom.addContentTo(this.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
     return elementId
   }
 
@@ -85,7 +84,7 @@ export class DirectoryBox extends Box {
       util.logWarning('DirectoryBox.addBox: trying to add box that is already contained')
     }
     this.boxes.push(box)
-    dom.appendChildTo(super.getId(), box.getId())
+    dom.appendChildTo(this.getId(), box.getId())
   }
 
   public removeBox(box: Box): void {

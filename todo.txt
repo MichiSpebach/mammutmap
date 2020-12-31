@@ -1,4 +1,6 @@
 
+return MapData in Box::loadMapData
+
 add padding to BoxBorder lines, to make them easier to grab
 
 delete mapDataFile when box is moved out of directory and update path and refactor path before

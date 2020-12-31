@@ -1,10 +1,24 @@
 import { DirectoryBox } from './DirectoryBox'
-import { Path } from '../Path'
 
 export class RootDirectoryBox extends DirectoryBox {
 
-  public constructor(path: Path, id: string) {
-    super(path, id, null)
+  private mapPath: string
+
+  public constructor(id: string, srcPath: string, mapPath: string) {
+    super(id, srcPath, null)
+    this.mapPath = mapPath
+  }
+
+  public getSrcPath(): string {
+    return this.getName()
+  }
+
+  public getMapPath(): string {
+    return this.mapPath
+  }
+
+  protected async loadMapData():Promise<void> {
+    // root folder has no mapData
   }
 
 }

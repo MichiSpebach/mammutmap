@@ -21,7 +21,7 @@ export abstract  class BoxHeader {
 
   public async render(): Promise<void> {
     let html: string = '<div id="' + this.getId() + '" draggable="true">'
-    html += this.referenceBox.getPath().getSrcName()
+    html += this.referenceBox.getName()
     html += '</div>'
     await dom.setContentTo(this.referenceBox.getId(), html)
 
