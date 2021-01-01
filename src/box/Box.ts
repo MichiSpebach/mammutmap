@@ -56,16 +56,23 @@ export abstract class Box {
     if (this.parent == null) {
       util.logError('Box.setParent() cannot be called on root.')
     }
-    const parentClientRect: Promise<Rect> = this.parent.getClientRect()
-    const newParentClientRect: Promise<Rect> = newParent.getClientRect()
+    const parentClientRect: Rect = await this.parent.getClientRect()
+    const newParentClientRect: Rect = await newParent.getClientRect()
 
     this.parent.removeBox(this)
     newParent.addBox(this)
     this.parent = newParent
 
-    const newWidth: number = this.mapData.width * ((await parentClientRect).width / (await newParentClientRect).width)
-    const newHeight: number = this.mapData.height * ((await parentClientRect).height / (await newParentClientRect).height)
-    this.updateMeasures({width: newWidth, height: newHeight})
+    const distanceBetweenParentsX: number = (parentClientRect.x - newParentClientRect.x) / newParentClientRect.width * 100
+    const distanceBetweenParentsY: number = (parentClientRect.y - newParentClientRect.y) / newParentClientRect.height * 100
+    const scaleX: number = parentClientRect.width / newParentClientRect.width
+    const scaleY: number = parentClientRect.height / newParentClientRect.height
+
+    const newX: number = distanceBetweenParentsX + this.mapData.x * scaleX
+    const newY: number = distanceBetweenParentsY + this.mapData.y * scaleY
+    const newWidth: number = this.mapData.width * scaleX
+    const newHeight: number = this.mapData.height * scaleY
+    this.updateMeasures({x: newX, y: newY, width: newWidth, height: newHeight})
   }
 
   public async getClientRect(): Promise<Rect> {
@@ -89,6 +96,11 @@ export abstract class Box {
         util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error)
         return BoxMapData.buildDefault()
       })
+  }
+
+  public async restoreMapData(): Promise<void> {
+    this.mapData = await this.loadMapData()
+    this.renderStyle()
   }
 
   public async saveMapData(): Promise<void> {

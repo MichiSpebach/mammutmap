@@ -35,12 +35,8 @@ export abstract  class BoxHeader {
     dom.addClassTo(this.referenceBox.getId(), BoxHeader.draggingInProgressClass)
   }
 
-  public async drag(clientX: number, clientY: number, dropTarget: DirectoryBox): Promise<void> {
-    if (this.referenceBox.getParent() != dropTarget) {
-      this.referenceBox.setParentAndFlawlesslyResize(dropTarget)
-    }
-
-    const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect() // TODO: cache?
+  public async drag(clientX: number, clientY: number): Promise<void> {
+    const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect() // TODO: cache, save in state object when dragStart is called
 
     const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
@@ -48,11 +44,15 @@ export abstract  class BoxHeader {
   }
 
   public async dragCancel(): Promise<void> {
-    this.dragEnd() // TODO: reset position instead
+    dom.removeClassFrom(this.referenceBox.getId(), BoxHeader.draggingInProgressClass)
+    this.referenceBox.restoreMapData()
   }
 
-  public async dragEnd(): Promise<void> {
+  public async dragEnd(dropTarget: DirectoryBox): Promise<void> {
     dom.removeClassFrom(this.referenceBox.getId(), BoxHeader.draggingInProgressClass)
+    if (this.referenceBox.getParent() != dropTarget) {
+      await this.referenceBox.setParentAndFlawlesslyResize(dropTarget)
+    }
     this.referenceBox.saveMapData()
   }
 

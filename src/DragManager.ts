@@ -36,7 +36,7 @@ export class DragManager {
         elementToDrag.dragCancel()
         return
       }
-      elementToDrag.drag(clientX, clientY, this.state.draggingOver)
+      elementToDrag.drag(clientX, clientY)
     })
 
     dom.addDragListenerTo(draggableId, 'dragend', (_) => {
@@ -45,7 +45,7 @@ export class DragManager {
         elementToDrag.dragCancel()
         return
       }
-      elementToDrag.dragEnd()
+      elementToDrag.dragEnd(this.state.draggingOver)
       this.setState(null)
     })
 
