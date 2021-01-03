@@ -1,4 +1,4 @@
-import * as util from '../util'
+import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { DirectoryBox } from './DirectoryBox'
@@ -23,7 +23,7 @@ export class FileBox extends Box {
   }
 
   protected renderBody(): void {
-    util.readFileAndConvertToHtml(super.getSrcPath(), (dataConvertedToHtml: string) => {
+    fileSystem.readFileAndConvertToHtml(super.getSrcPath(), (dataConvertedToHtml: string) => {
       let content: string = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>'
       dom.addContentTo(super.getId(), content)
     })

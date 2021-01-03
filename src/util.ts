@@ -1,6 +1,4 @@
 import * as dom from './domAdapter'
-import * as fs from 'fs'
-import { Dirent, promises as fsPromises } from 'fs'
 
 export function logInfo(message: string): void {
     log('Info: ' + message, 'grey')
@@ -32,24 +30,6 @@ export function stringify(object: any): string {
   return stringifiedObject
 }
 
-export function readdirSync(path: string): Dirent[] {
-  return fs.readdirSync(path, { withFileTypes: true })
-}
-
-export function readFile(path: string): Promise<string> {
-  return fsPromises.readFile(path, 'utf-8')
-}
-
-export function readFileAndConvertToHtml(path: string, callback: (dataConvertedToHtml: string) => void): void|never {
-  fs.readFile(path, 'utf-8', (err: NodeJS.ErrnoException | null, data: string) => {
-    if(err) {
-      logError('util::readFile, ' + path + ', ' + err.message)
-    } else {
-      callback(escapeForHtml(data))
-    }
-  })
-}
-
 export function escapeForHtml(text: string): string {
   var content: string = '';
   for (let i = 0; i < text.length; i++) {
@@ -78,15 +58,4 @@ function escapeCharForHtml(c: string): string {
     default:
       return c
   }
-}
-
-export async function writeFile(path: string, data: string): Promise<void> {
-  let directory = ''
-  const fileEntries: string[] = path.split('/')
-  for (let i = 0; i < fileEntries.length - 1; i++) {
-    directory += fileEntries[i] + '/'
-  }
-
-  await fsPromises.mkdir(directory, {recursive: true})
-  return fsPromises.writeFile(path, data)
 }

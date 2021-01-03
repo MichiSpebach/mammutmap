@@ -1,4 +1,5 @@
 import * as util from '../util'
+import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
@@ -35,7 +36,7 @@ export class DirectoryBox extends Box {
   }
 
   protected renderBody(): void {
-    util.readdirSync(this.getSrcPath()).forEach(file => {
+    fileSystem.readdirSync(this.getSrcPath()).forEach(file => { // TODO: use async
       let fileName: string = file.name
       let filePath: string = this.getSrcPath() + '/' + fileName
 

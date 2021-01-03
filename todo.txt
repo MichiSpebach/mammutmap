@@ -1,4 +1,6 @@
 
+cancel drag when escape is pressed
+
 add padding to BoxBorder lines, to make them easier to grab
 
 delete mapDataFile when box is moved out of directory and update path and refactor path before
@@ -12,6 +14,8 @@ load style from css file, use html/css classes
 settings to adapt zoom out
 
 improve box header, should not overlap content
+
+double click on FileBoxHeader should open file in editor/ide that is specified in settings
 
 check when directory is loaded that sourceFiles and mapFiles match
 

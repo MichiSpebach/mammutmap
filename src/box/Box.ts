@@ -1,4 +1,5 @@
 import * as util from '../util'
+import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
@@ -90,7 +91,7 @@ export abstract class Box {
   }
 
   protected async loadMapData():Promise<BoxMapData> {
-    return util.readFile(this.getMapDataFilePath())
+    return fileSystem.readFile(this.getMapDataFilePath())
       .then(json => BoxMapData.buildFromJson(json))
       .catch(error => {
         util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error)
@@ -105,7 +106,7 @@ export abstract class Box {
 
   public async saveMapData(): Promise<void> {
     const mapDataFilePath: string = this.getMapDataFilePath()
-    await util.writeFile(mapDataFilePath, this.mapData.toJson())
+    await fileSystem.writeFile(mapDataFilePath, this.mapData.toJson())
       .then(() => util.logInfo('saved ' + mapDataFilePath))
       .catch(error => util.logWarning('failed to save ' + mapDataFilePath + ': ' + error))
   }
