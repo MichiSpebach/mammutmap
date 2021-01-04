@@ -12,6 +12,7 @@ export abstract class Box {
   private name: string
   private parent: DirectoryBox|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
+  private mapDataFileExists: boolean = false
   private unsavedChanges: boolean = false
   private readonly header: BoxHeader
   private readonly border: BoxBorder
@@ -53,7 +54,7 @@ export abstract class Box {
     return this.parent
   }
 
-  public async setParentAndFlawlesslyResize(newParent: DirectoryBox): Promise<void> {
+  public async setParentAndFlawlesslyResizeAndSave(newParent: DirectoryBox): Promise<void> {
     if (this.parent == null) {
       util.logError('Box.setParent() cannot be called on root.')
     }
@@ -62,7 +63,12 @@ export abstract class Box {
 
     this.parent.removeBox(this)
     newParent.addBox(this)
+
+    const oldSrcPath: string = this.getSrcPath()
+    const oldMapDataFilePath: string = this.getMapDataFilePath()
     this.parent = newParent
+    const newSrcPath: string = this.getSrcPath()
+    const newMapDataFilePath: string = this.getMapDataFilePath()
 
     const distanceBetweenParentsX: number = (parentClientRect.x - newParentClientRect.x) / newParentClientRect.width * 100
     const distanceBetweenParentsY: number = (parentClientRect.y - newParentClientRect.y) / newParentClientRect.height * 100
@@ -73,7 +79,15 @@ export abstract class Box {
     const newY: number = distanceBetweenParentsY + this.mapData.y * scaleY
     const newWidth: number = this.mapData.width * scaleX
     const newHeight: number = this.mapData.height * scaleY
-    this.updateMeasures({x: newX, y: newY, width: newWidth, height: newHeight})
+    await this.updateMeasures({x: newX, y: newY, width: newWidth, height: newHeight})
+
+    await fileSystem.rename(oldSrcPath, newSrcPath)
+    util.logInfo('moved ' + oldSrcPath + ' to ' + newSrcPath)
+    if (this.mapDataFileExists) {
+      await fileSystem.rename(oldMapDataFilePath, newMapDataFilePath)
+      util.logInfo('moved ' + oldMapDataFilePath + ' to ' + newMapDataFilePath)
+    }
+    await this.saveMapData()
   }
 
   public async getClientRect(): Promise<Rect> {
@@ -92,9 +106,13 @@ export abstract class Box {
 
   protected async loadMapData():Promise<BoxMapData> {
     return fileSystem.readFile(this.getMapDataFilePath())
-      .then(json => BoxMapData.buildFromJson(json))
+      .then(json => {
+        this.mapDataFileExists = true
+        return BoxMapData.buildFromJson(json)
+      })
       .catch(error => {
         util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error)
+        this.mapDataFileExists = false
         return BoxMapData.buildDefault()
       })
   }
@@ -137,7 +155,7 @@ export abstract class Box {
       this.mapData.height = measuresInPercentIfChanged.height
     }
 
-    this.renderStyle()
+    await this.renderStyle()
   }
 
   protected abstract renderBody(): void

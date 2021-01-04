@@ -51,9 +51,10 @@ export abstract  class BoxHeader {
   public async dragEnd(dropTarget: DirectoryBox): Promise<void> {
     dom.removeClassFrom(this.referenceBox.getId(), BoxHeader.draggingInProgressClass)
     if (this.referenceBox.getParent() != dropTarget) {
-      await this.referenceBox.setParentAndFlawlesslyResize(dropTarget)
+      await this.referenceBox.setParentAndFlawlesslyResizeAndSave(dropTarget)
+    } else {
+      await this.referenceBox.saveMapData()
     }
-    this.referenceBox.saveMapData()
   }
 
 }

@@ -30,3 +30,7 @@ export async function writeFile(path: string, data: string): Promise<void> {
   await fsPromises.mkdir(directory, {recursive: true})
   return fsPromises.writeFile(path, data)
 }
+
+export async function rename(oldPath: string, newPath: string): Promise<void> {
+  return fsPromises.rename(oldPath, newPath)
+}
