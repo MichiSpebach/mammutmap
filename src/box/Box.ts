@@ -6,6 +6,7 @@ import { Rect } from '../Rect'
 import { DirectoryBox } from './DirectoryBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
+import { Link } from './Link'
 
 export abstract class Box {
   private readonly id: string
@@ -16,6 +17,7 @@ export abstract class Box {
   private unsavedChanges: boolean = false
   private readonly header: BoxHeader
   private readonly border: BoxBorder
+  private link: Link|null
 
   public constructor(id: string, name: string, parent: DirectoryBox|null) {
     this.id = id
@@ -23,6 +25,12 @@ export abstract class Box {
     this.parent = parent
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
+    if (name == 'Box.ts') {
+      this.link = new Link('testLink', this, {x: 0, y: 0}, this, {x: 0, y: 0})
+      util.logInfo("Box.ts has a link")
+    } else {
+      this.link = null
+    }
   }
 
   protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
@@ -102,6 +110,7 @@ export abstract class Box {
     this.header.render()
     this.border.render()
     this.renderBody()
+    this.renderLinks()
   }
 
   protected async loadMapData():Promise<BoxMapData> {
@@ -165,5 +174,11 @@ export abstract class Box {
   }
 
   protected abstract formBody(): string*/
+
+  private async renderLinks(): Promise<void> {
+    if (this.link != null) {
+      return this.link.render()
+    }
+  }
 
 }
