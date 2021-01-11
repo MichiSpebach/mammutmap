@@ -4,14 +4,28 @@ import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
 import { FolderBoxHeader } from './FolderBoxHeader'
+import { Link } from './Link'
+import { BoxMapLinkData } from './BoxMapLinkData'
+import { WayPoint } from './WayPoint'
 import { DragManager } from '../DragManager'
 
 export class DirectoryBox extends Box {
   private boxes: Box[] = []
+  private link: Link|null
   private dragOver: boolean = false
 
   public constructor(id: string, name: string, parent: DirectoryBox|null) {
     super(id, name, parent)
+
+    if (name == 'box') {
+      const fromWayPoint = new WayPoint('', 100, 50)
+      const toWayPoint = new WayPoint('...', 0, 50)
+      const linkData = new BoxMapLinkData('testLink', [fromWayPoint], [toWayPoint])
+      this.link = new Link(linkData, this)
+      util.logInfo("box has a link")
+    } else {
+      this.link = null
+    }
   }
 
   protected createHeader(): FolderBoxHeader {
@@ -58,6 +72,8 @@ export class DirectoryBox extends Box {
     });
 
     DragManager.addDropTarget(this) // TODO: move to other method
+
+    this.renderLinks() // TODO: call from superclass?
   }
 
   private createDirectoryBox(name: string): DirectoryBox {
@@ -80,7 +96,11 @@ export class DirectoryBox extends Box {
     return this.boxes.includes(box)
   }
 
-  public addBox(box: Box): void {
+  public getChild(id: string): Box {
+    return this.boxes[id.length] // TODO: real implementation
+  }
+
+  public addBox(box: Box): void { // TODO: rename to addChild?
     if (this.containsBox(box)) {
       util.logWarning('DirectoryBox.addBox: trying to add box that is already contained')
     }
@@ -88,7 +108,7 @@ export class DirectoryBox extends Box {
     dom.appendChildTo(this.getId(), box.getId())
   }
 
-  public removeBox(box: Box): void {
+  public removeBox(box: Box): void { // TODO: rename to removeChild?
     if (!this.containsBox(box)) {
       util.logWarning('DirectoryBox.removeBox: trying to remove box that is not contained')
     }
@@ -108,6 +128,12 @@ export class DirectoryBox extends Box {
     }
 
     return boxesAtPostion
+  }
+
+  private async renderLinks(): Promise<void> {
+    if (this.link != null) {
+      return this.link.render()
+    }
   }
 
 }
