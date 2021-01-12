@@ -9,12 +9,12 @@ import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPoint } from './WayPoint'
 import { DragManager } from '../DragManager'
 
-export class DirectoryBox extends Box {
+export class FolderBox extends Box {
   private boxes: Box[] = []
   private link: Link|null
   private dragOver: boolean = false
 
-  public constructor(id: string, name: string, parent: DirectoryBox|null) {
+  public constructor(id: string, name: string, parent: FolderBox|null) {
     super(id, name, parent)
 
     if (name == 'box') {
@@ -76,9 +76,9 @@ export class DirectoryBox extends Box {
     this.renderLinks() // TODO: call from superclass?
   }
 
-  private createDirectoryBox(name: string): DirectoryBox {
+  private createDirectoryBox(name: string): FolderBox {
     const elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new DirectoryBox(elementId, name, this)
+    return new FolderBox(elementId, name, this)
   }
 
   private createFileBox(name: string): FileBox {

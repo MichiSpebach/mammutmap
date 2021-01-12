@@ -3,21 +3,21 @@ import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
-import { DirectoryBox } from './DirectoryBox'
+import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
 
 export abstract class Box {
   private readonly id: string
   private name: string
-  private parent: DirectoryBox|null
+  private parent: FolderBox|null
   private mapData: BoxMapData = BoxMapData.buildDefault()
   private mapDataFileExists: boolean = false
   private unsavedChanges: boolean = false
   private readonly header: BoxHeader
   private readonly border: BoxBorder
 
-  public constructor(id: string, name: string, parent: DirectoryBox|null) {
+  public constructor(id: string, name: string, parent: FolderBox|null) {
     this.id = id
     this.name = name
     this.parent = parent
@@ -47,14 +47,14 @@ export abstract class Box {
     return this.getMapPath() + '.json'
   }
 
-  public getParent(): DirectoryBox|never {
+  public getParent(): FolderBox|never {
     if (this.parent == null) {
       util.logError('Box.getParent() cannot be called on root.')
     }
     return this.parent
   }
 
-  public async setParentAndFlawlesslyResizeAndSave(newParent: DirectoryBox): Promise<void> {
+  public async setParentAndFlawlesslyResizeAndSave(newParent: FolderBox): Promise<void> {
     if (this.parent == null) {
       util.logError('Box.setParent() cannot be called on root.')
     }

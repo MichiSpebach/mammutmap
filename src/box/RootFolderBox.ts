@@ -1,7 +1,7 @@
-import { DirectoryBox } from './DirectoryBox'
+import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
 
-export class RootDirectoryBox extends DirectoryBox {
+export class RootFolderBox extends FolderBox {
 
   private mapPath: string
 

@@ -1,16 +1,16 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
-import { DirectoryBox } from './DirectoryBox'
+import { FolderBox } from './FolderBox'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPoint } from './WayPoint'
 import { Rect } from '../Rect'
 
 export class Link {
   private data: BoxMapLinkData
-  private base: DirectoryBox
+  private base: FolderBox
 
-  public constructor(data: BoxMapLinkData, base: DirectoryBox) {
+  public constructor(data: BoxMapLinkData, base: FolderBox) {
     this.base = base
     this.data = data
   }
@@ -25,10 +25,15 @@ export class Link {
     const fromRect: Rect = await fromBox.getClientRect() // TODO: optimize
     const toRect: Rect = await toBox.getClientRect() // TODO: optimize
 
-    const fromBaseCoordX: number = (fromRect.x + (from.x * fromRect.width / 100) - baseRect.x) / baseRect.width * 100
-    const fromBaseCoordY: number = (fromRect.y + (from.y * fromRect.height / 100) - baseRect.y) / baseRect.height * 100
-    const toBaseCoordX: number = (toRect.x + (to.x * toRect.width / 100) - baseRect.x) / baseRect.width * 100
-    const toBaseCoordY: number = (toRect.y + (to.y * toRect.height / 100) - baseRect.y) / baseRect.height * 100
+    const fromXInPixel: number = from.x * fromRect.width / 100
+    const fromYInPixel: number = from.y * fromRect.height / 100
+    const toXInPixel: number = to.x * toRect.width / 100
+    const toYInPixel: number = to.y * toRect.height / 100
+
+    const fromBaseCoordX: number = (fromRect.x + fromXInPixel - baseRect.x) / baseRect.width * 100
+    const fromBaseCoordY: number = (fromRect.y + fromYInPixel - baseRect.y) / baseRect.height * 100
+    const toBaseCoordX: number = (toRect.x + toXInPixel - baseRect.x) / baseRect.width * 100
+    const toBaseCoordY: number = (toRect.y + toYInPixel - baseRect.y) / baseRect.height * 100
 
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed

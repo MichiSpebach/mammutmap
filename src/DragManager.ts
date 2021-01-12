@@ -1,17 +1,17 @@
 import * as util from './util'
 import * as dom from './domAdapter'
 import { BoxHeader } from './box/BoxHeader'
-import { DirectoryBox } from './box/DirectoryBox'
+import { FolderBox } from './box/FolderBox'
 
 // TODO: rename to BoxDragManager?
 export class DragManager {
 
   private static state: {
     dragging: BoxHeader
-    draggingOver: DirectoryBox
+    draggingOver: FolderBox
   } | null
 
-  private static setState(newState: {dragging: BoxHeader, draggingOver: DirectoryBox} | null): void {
+  private static setState(newState: {dragging: BoxHeader, draggingOver: FolderBox} | null): void {
     if (this.state != null) {
       this.state.draggingOver.setDragOverStyle(false)
     }
@@ -52,7 +52,7 @@ export class DragManager {
     // TODO: call elementToDrag.dragCancel() if esc is pressed
   }
 
-  public static addDropTarget(targetElement: DirectoryBox): void {
+  public static addDropTarget(targetElement: FolderBox): void {
     dom.addDragListenerTo(targetElement.getId(), 'dragenter', (_) => {
       if (this.state == null) {
         util.logWarning("DragManager: state is null although dragging is in progress")

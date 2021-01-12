@@ -2,7 +2,7 @@ import * as dom from '../domAdapter'
 import { DragManager } from '../DragManager'
 import { Rect } from '../Rect'
 import { Box } from './Box'
-import { DirectoryBox } from './DirectoryBox'
+import { FolderBox } from './FolderBox'
 
 export abstract  class BoxHeader {
   private static readonly draggingInProgressClass: string = 'draggingInProgress'
@@ -48,7 +48,7 @@ export abstract  class BoxHeader {
     this.referenceBox.restoreMapData()
   }
 
-  public async dragEnd(dropTarget: DirectoryBox): Promise<void> {
+  public async dragEnd(dropTarget: FolderBox): Promise<void> {
     dom.removeClassFrom(this.referenceBox.getId(), BoxHeader.draggingInProgressClass)
     if (this.referenceBox.getParent() != dropTarget) {
       await this.referenceBox.setParentAndFlawlesslyResizeAndSave(dropTarget)

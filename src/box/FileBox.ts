@@ -1,12 +1,12 @@
 import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
-import { DirectoryBox } from './DirectoryBox'
+import { FolderBox } from './FolderBox'
 import { FileBoxHeader } from './FileBoxHeader'
 
 export class FileBox extends Box {
 
-  public constructor(id: string, name: string, parent: DirectoryBox) {
+  public constructor(id: string, name: string, parent: FolderBox) {
     super(id, name, parent)
   }
 
