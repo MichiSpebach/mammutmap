@@ -158,7 +158,7 @@ export abstract class Box {
     await this.renderStyle()
   }
 
-  protected abstract renderBody(): void
+  protected async abstract renderBody(): Promise<void>
 
   /*private renderBody(): void {
     util.addContentTo(this.getId(), this.formBody())

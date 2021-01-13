@@ -22,7 +22,7 @@ export class FileBox extends Box {
     return null
   }
 
-  protected renderBody(): void {
+  protected async renderBody(): Promise<void> {
     fileSystem.readFileAndConvertToHtml(super.getSrcPath(), (dataConvertedToHtml: string) => {
       let content: string = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>'
       dom.addContentTo(super.getId(), content)
