@@ -62,7 +62,7 @@ export class DragManager {
       //  return // TODO: make this somehow work, sourceId is not contained in dragenter event
       //}
       if (this.state == null) {
-        util.logWarning("DragManager: state is null although dragging is in progress")
+        //util.logWarning("DragManager: state is null although dragging is in progress") // TODO: reactivate when condition above works
         return
       }
       this.setState({dragging: this.state.dragging, draggingOver: dropTarget})

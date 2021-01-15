@@ -18,33 +18,25 @@ export async function getClientRectOf(id: string): Promise<Rect> {
   // implemented workaround because following line doesn't work, because 'Error: An object could not be cloned.'
   //return await executeJsOnElement(id, "getBoundingClientRect()").catch(reason => util.logError(reason))
 
-  var rendererCode = '(() => {'
-  rendererCode += 'let rect = document.getElementById("' + id + '").getBoundingClientRect();'
-  rendererCode += 'return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};' // manual copy because DOMRect could not be cloned
-  rendererCode += '}).call()'
+  let js = 'let rect = document.getElementById("' + id + '").getBoundingClientRect();'
+  js += 'return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};' // manual copy because DOMRect could not be cloned
 
-  let rect = await webContents.executeJavaScript(rendererCode)
+  const rect = await executeJavaScript(js)
+
   return new Rect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
 }
 
 export function appendChildTo(parentId: string, childId: string): Promise<void> {
-  // () => {..} because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
-  var rendererCode = '(() => {'
-  rendererCode += 'document.getElementById("' + parentId + '").appendChild(document.getElementById("' + childId + '"))'
-  rendererCode += '}).call()'
-
-  return webContents.executeJavaScript(rendererCode)
+  // not executeJsOnElement because of "UnhandledPromiseRejectionWarning: Unhandled promise rejection."
+  return executeJavaScript('document.getElementById("' + parentId + '").appendChild(document.getElementById("' + childId + '"))')
 }
 
 export function addContentTo(id: string, content: string): Promise<void> {
-  // () => {..} because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
-  var rendererCode = '(() => {'
-  rendererCode += 'const temp = document.createElement("template");'
-  rendererCode += 'temp.innerHTML = \'<div>' + content + '</div>\';'
-  rendererCode += 'document.getElementById("' + id + '").appendChild(temp.content.firstChild);'
-  rendererCode += '}).call()'
+  let js = 'const temp = document.createElement("template");'
+  js += 'temp.innerHTML = \'<div>' + content + '</div>\';'
+  js += 'document.getElementById("' + id + '").appendChild(temp.content.firstChild);'
 
-  return webContents.executeJavaScript(rendererCode)
+  return executeJavaScript(js)
 }
 
 export function setContentTo(id: string, content: string): Promise<void> {
@@ -110,6 +102,15 @@ export function addDragListenerTo(
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
 }
 
-function executeJsOnElement(elementId: string, jsToExectue: string): Promise<any> {
-  return webContents.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExectue)
+function executeJsOnElement(elementId: string, jsToExecute: string): Promise<any> {
+  return webContents.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExecute)
+}
+
+function executeJavaScript(jsToExecute: string): Promise<any> {
+  // () => {..} because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
+  let rendererCode = '(() => {'
+  rendererCode += jsToExecute
+  rendererCode += '}).call()'
+
+  return webContents.executeJavaScript(rendererCode)
 }
