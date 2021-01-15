@@ -13,6 +13,10 @@ body {
   cursor:ew-resize;
 }
 
+.draggable {
+  cursor: grab;
+}
+
 .draggingInProgress {
   pointer-events: none;
 }

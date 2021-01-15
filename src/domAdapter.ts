@@ -56,6 +56,10 @@ export function removeClassFrom(id: string, className: string): Promise<void> {
   return executeJsOnElement(id, "classList.remove('" + className + "')")
 }
 
+export function containsClass(id: string, className: string): Promise<boolean> {
+  return executeJsOnElement(id, "classList.contains('" + className + "')")
+}
+
 export function getClassesOf(id: string): Promise<string[]> {
   return executeJsOnElement(id, "classList")  // throws error: object could not be cloned
 }
@@ -81,7 +85,7 @@ export function addWheelListenerTo(id: string, callback: (delta: number, clientX
 export function addDragListenerTo(
     id: string,
     eventType: 'dragstart'|'drag'|'dragend'|'dragenter',
-    callback: (clientX: number, clientY: number, targetId: string) => void
+    callback: (clientX: number, clientY: number) => void
   ): void {
   let ipcChannelName = eventType + '_' + id
 
@@ -90,13 +94,13 @@ export function addDragListenerTo(
 //  rendererFunction += 'console.log(event);'
   rendererFunction += 'event.stopPropagation();'
   rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {'
-  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY, event.target.id);'
+  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);'
   rendererFunction += '}'
   rendererFunction += '}'
 
   executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
 
-  ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number, targetId: string) => callback(clientX, clientY, targetId))
+  ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
 }
 
 function executeJsOnElement(elementId: string, jsToExectue: string): Promise<any> {

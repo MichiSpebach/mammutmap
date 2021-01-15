@@ -6,6 +6,8 @@ import { FolderBox } from './box/FolderBox'
 // TODO: rename to BoxDragManager?
 export class DragManager {
 
+  private static readonly draggableStyleClass: string = 'draggable'
+
   private static state: {
     dragging: BoxHeader
     draggingOver: FolderBox
@@ -24,6 +26,8 @@ export class DragManager {
 
   public static addDraggable(elementToDrag: BoxHeader): void {
     const draggableId: string = elementToDrag.getId()
+
+    dom.addClassTo(draggableId, this.draggableStyleClass)
 
     dom.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
       elementToDrag.dragStart(clientX, clientY)
@@ -52,13 +56,16 @@ export class DragManager {
     // TODO: call elementToDrag.dragCancel() if esc is pressed
   }
 
-  public static addDropTarget(targetElement: FolderBox): void {
-    dom.addDragListenerTo(targetElement.getId(), 'dragenter', (_) => {
+  public static addDropTarget(dropTarget: FolderBox): void {
+    dom.addDragListenerTo(dropTarget.getId(), 'dragenter', async (_) => {
+      //if (!await dom.containsClass(sourceId, this.draggableStyleClass)) {
+      //  return // TODO: make this somehow work, sourceId is not contained in dragenter event
+      //}
       if (this.state == null) {
         util.logWarning("DragManager: state is null although dragging is in progress")
         return
       }
-      this.setState({dragging: this.state.dragging, draggingOver: targetElement})
+      this.setState({dragging: this.state.dragging, draggingOver: dropTarget})
     })
   }
 
