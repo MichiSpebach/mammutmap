@@ -59,3 +59,7 @@ function escapeCharForHtml(c: string): string {
       return c
   }
 }
+
+export function wait(milliSeconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliSeconds))
+}

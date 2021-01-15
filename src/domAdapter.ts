@@ -28,7 +28,7 @@ export async function getClientRectOf(id: string): Promise<Rect> {
 }
 
 export function appendChildTo(parentId: string, childId: string): Promise<void> {
-  // otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
+  // () => {..} because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
   var rendererCode = '(() => {'
   rendererCode += 'document.getElementById("' + parentId + '").appendChild(document.getElementById("' + childId + '"))'
   rendererCode += '}).call()'
@@ -37,7 +37,14 @@ export function appendChildTo(parentId: string, childId: string): Promise<void> 
 }
 
 export function addContentTo(id: string, content: string): Promise<void> {
-  return executeJsOnElement(id, "innerHTML += '" + content + "'")
+  // () => {..} because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
+  var rendererCode = '(() => {'
+  rendererCode += 'const temp = document.createElement("template");'
+  rendererCode += 'temp.innerHTML = \'<div>' + content + '</div>\';'
+  rendererCode += 'document.getElementById("' + id + '").appendChild(temp.content.firstChild);'
+  rendererCode += '}).call()'
+
+  return webContents.executeJavaScript(rendererCode)
 }
 
 export function setContentTo(id: string, content: string): Promise<void> {
