@@ -33,8 +33,8 @@ export function appendChildTo(parentId: string, childId: string): Promise<void> 
 
 export function addContentTo(id: string, content: string): Promise<void> {
   let js = 'const temp = document.createElement("template");'
-  js += 'temp.innerHTML = \'<div>' + content + '</div>\';'
-  js += 'document.getElementById("' + id + '").appendChild(temp.content.firstChild);'
+  js += 'temp.innerHTML = \'' + content + '\';'
+  js += 'document.getElementById("' + id + '").append(temp.content);'
 
   return executeJavaScript(js)
 }
