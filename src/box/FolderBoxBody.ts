@@ -58,7 +58,7 @@ export class FolderBoxBody {
   }
 
   private renderBoxPlaceholderAndReturnId(name: string): string {
-    const elementId: string = dom.generateElementId()
+    const elementId: string = util.generateId()
     dom.addContentTo(this.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
     return elementId
   }

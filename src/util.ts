@@ -63,3 +63,7 @@ function escapeCharForHtml(c: string): string {
 export function wait(milliSeconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliSeconds))
 }
+
+export function generateId(): string {
+  return Math.random().toString(32)
+}

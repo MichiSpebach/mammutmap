@@ -2,16 +2,9 @@ import { WebContents, ipcMain, IpcMainEvent } from 'electron'
 import { Rect } from './Rect'
 
 var webContents: WebContents
-var elementIdCounter: number
 
 export function init(webContentsToRender: WebContents) {
   webContents = webContentsToRender
-  elementIdCounter = 0
-}
-
-export function generateElementId(): string {
-  elementIdCounter += 1
-  return 'element' + elementIdCounter
 }
 
 export async function getClientRectOf(id: string): Promise<Rect> {
