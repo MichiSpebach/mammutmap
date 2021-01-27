@@ -1,6 +1,7 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
+import { BoxMapData } from './BoxMapData'
 import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
 import { Link } from './Link'
@@ -13,8 +14,8 @@ export class FolderBox extends Box {
   private dragOver: boolean = false
   private readonly body: FolderBoxBody
 
-  public constructor(id: string, name: string, parent: FolderBox|null) {
-    super(id, name, parent)
+  public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
+    super(name, parent, mapData, mapDataFileExists)
     this.body = new FolderBoxBody(this)
 
     if (name == 'box') {
@@ -61,7 +62,7 @@ export class FolderBox extends Box {
     return this.body.getBox(id)
   }
 
-  public addBox(box: Box): void { // TODO: rename to addChild?
+  public async addBox(box: Box): Promise<void> { // TODO: rename to addChild?
     return this.body.addBox(box)
   }
 

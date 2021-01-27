@@ -1,21 +1,29 @@
 import * as util from '../util'
 
 export class BoxMapData {
+  public readonly id: string
   public x: number
   public y: number
   public width: number
   public height: number
 
   public static buildDefault(): BoxMapData {
-    return new BoxMapData(10, 10, 80, 80)
+    return new BoxMapData(util.generateId(), 10, 10, 80, 80)
   }
 
   public static buildFromJson(json: string ): BoxMapData /*| SyntaxError*/ {
-    let parsedData: BoxMapData = JSON.parse(json) // parsed object has no functions
-    return new BoxMapData(parsedData.x, parsedData.y, parsedData.width, parsedData.height)
+    const parsedData: BoxMapData = JSON.parse(json) // parsed object has no functions
+
+    let id: string = parsedData.id // TODO: delete this later
+    if (id == null) {
+      id = util.generateId()
+    }
+
+    return new BoxMapData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height)
   }
 
-  private constructor(x: number, y: number, width: number, height: number) {
+  public constructor(id: string, x: number, y: number, width: number, height: number) {
+    this.id = id
     this.x = x
     this.y = y
     this.width = width
@@ -25,6 +33,10 @@ export class BoxMapData {
   }
 
   public validate(): void {
+    this.warnIf(this.id == null, 'id is null')
+    this.warnIf(this.id == undefined, 'id is undefined')
+    this.warnIf(this.id == '', 'id is empty')
+
     this.warnIf(this.x == null, 'x is null')
     this.warnIf(this.y == null, 'y is null')
     this.warnIf(this.width == null, 'width is null')

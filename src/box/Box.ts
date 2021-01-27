@@ -8,19 +8,23 @@ import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
 
 export abstract class Box {
-  private readonly id: string
   private name: string
   private parent: FolderBox|null
-  private mapData: BoxMapData = BoxMapData.buildDefault()
-  private mapDataFileExists: boolean = false
-  private unsavedChanges: boolean = false
+  private mapData: BoxMapData
+  private mapDataFileExists: boolean
   private readonly header: BoxHeader
   private readonly border: BoxBorder
+  private unsavedChanges: boolean = false
 
-  public constructor(id: string, name: string, parent: FolderBox|null) {
-    this.id = id
+  public static prepareConstructor(name: string, parent: FolderBox): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}>  {
+    return Box.loadMapData(parent, name)
+  }
+
+  public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
     this.name = name
     this.parent = parent
+    this.mapData = mapData
+    this.mapDataFileExists = mapDataFileExists
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
   }
@@ -28,7 +32,7 @@ export abstract class Box {
   protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
 
   public getId(): string {
-    return this.id
+    return this.mapData.id
   }
 
   public getName(): string {
@@ -40,11 +44,19 @@ export abstract class Box {
   }
 
   public getMapPath(): string {
-    return this.getParent().getMapPath() + '/' + this.name
+    return Box.getMapPath(this.getParent(), this.name)
+  }
+
+  private static getMapPath(parent: Box, name: string): string {
+    return parent.getMapPath() + '/' + name
   }
 
   public getMapDataFilePath(): string {
-    return this.getMapPath() + '.json'
+    return Box.getMapDataFilePath(this.getParent(), this.getName())
+  }
+
+  private static getMapDataFilePath(parent: Box, name: string): string {
+    return Box.getMapPath(parent, name) + '.json'
   }
 
   public getParent(): FolderBox|never {
@@ -97,29 +109,35 @@ export abstract class Box {
   }
 
   public async render(): Promise<void> {
-    this.mapData = await this.loadMapData()
     this.renderStyle()
     this.header.render()
     this.border.render()
     this.renderBody()
   }
 
-  protected async loadMapData():Promise<BoxMapData> {
-    return fileSystem.readFile(this.getMapDataFilePath())
+  private async loadMapData(): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}> {
+    return Box.loadMapData(this.getParent(), this.getName())
+  }
+
+  private static async loadMapData(parent: Box, name:string): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}> {
+    const mapDataPath: string = Box.getMapDataFilePath(parent, name)
+
+    return fileSystem.readFile(mapDataPath)
       .then(json => {
-        this.mapDataFileExists = true
-        return BoxMapData.buildFromJson(json)
+        return {mapData: BoxMapData.buildFromJson(json), mapDataFileExists: true}
       })
       .catch(error => {
-        util.logWarning('failed to load ' + this.getMapDataFilePath() + ': ' + error)
-        this.mapDataFileExists = false
-        return BoxMapData.buildDefault()
+        util.logWarning('failed to load ' + mapDataPath + ': ' + error)
+        return {mapData: BoxMapData.buildDefault(), mapDataFileExists: false}
       })
   }
 
   public async restoreMapData(): Promise<void> {
-    this.mapData = await this.loadMapData()
-    this.renderStyle()
+    const data: {mapData: BoxMapData, mapDataFileExists: boolean} = await this.loadMapData()
+    this.mapData = data.mapData
+    this.mapDataFileExists = data.mapDataFileExists
+
+    return await this.renderStyle()
   }
 
   public async saveMapData(): Promise<void> {
@@ -129,10 +147,10 @@ export abstract class Box {
       .catch(error => util.logWarning('failed to save ' + mapDataFilePath + ': ' + error))
   }
 
-  protected renderStyle(): Promise<void> {
-    let basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
-    let scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
-    let positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
+  protected async renderStyle(): Promise<void> {
+    const basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
+    const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
+    const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
     return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getAdditionalStyle())
   }

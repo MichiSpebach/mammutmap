@@ -65,5 +65,5 @@ export function wait(milliSeconds: number): Promise<void> {
 }
 
 export function generateId(): string {
-  return Math.random().toString(32)
+  return Math.random().toString(32).substring(2)
 }

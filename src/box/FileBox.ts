@@ -1,13 +1,14 @@
 import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
+import { BoxMapData } from './BoxMapData'
 import { FolderBox } from './FolderBox'
 import { FileBoxHeader } from './FileBoxHeader'
 
 export class FileBox extends Box {
 
-  public constructor(id: string, name: string, parent: FolderBox) {
-    super(id, name, parent)
+  public constructor(name: string, parent: FolderBox, mapData: BoxMapData, mapDataFileExists: boolean) {
+    super(name, parent, mapData, mapDataFileExists)
   }
 
   protected createHeader(): FileBoxHeader {
@@ -23,9 +24,9 @@ export class FileBox extends Box {
   }
 
   protected async renderBody(): Promise<void> {
-    fileSystem.readFileAndConvertToHtml(super.getSrcPath(), (dataConvertedToHtml: string) => {
+    fileSystem.readFileAndConvertToHtml(super.getSrcPath(), async (dataConvertedToHtml: string) => {
       let content: string = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>'
-      dom.addContentTo(super.getId(), content)
+      return dom.addContentTo(super.getId(), content)
     })
   }
 

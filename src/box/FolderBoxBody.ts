@@ -21,46 +21,48 @@ export class FolderBoxBody {
     let html: string = '<div id="' + this.getId() + '"></div>'
     await dom.addContentTo(this.referenceBox.getId(), html)
 
-    this.renderBoxes()
+    await this.renderBoxes()
   }
 
   private async renderBoxes(): Promise<void> {
-    fileSystem.readdirSync(this.referenceBox.getSrcPath()).forEach(file => { // TODO: use async
-      let fileName: string = file.name
-      let filePath: string = this.referenceBox.getSrcPath() + '/' + fileName
+    await Promise.all(fileSystem.readdirSync(this.referenceBox.getSrcPath()).map(async (dirEntry) => { // TODO: use read async
+      const name: string = dirEntry.name
+      const path: string = this.referenceBox.getSrcPath() + '/' + name
 
-      if (file.isDirectory()) {
-        util.logInfo('Box::render directory ' + filePath)
-        this.boxes.push(this.createFolderBox(fileName))
+      if (dirEntry.isDirectory()) {
+        util.logInfo('Box::render folder ' + path)
+        this.boxes.push(await this.createFolderBox(name))
 
-      } else if (file.isFile()) {
-        util.logInfo('Box::render file ' + filePath)
-        this.boxes.push(this.createFileBox(fileName))
+      } else if (dirEntry.isFile()) {
+        util.logInfo('Box::render file ' + path)
+        this.boxes.push(await this.createFileBox(name))
 
       } else {
-        util.logError('Box::render ' + filePath + ' is neither file nor directory.')
+        util.logError('Box::render ' + path + ' is neither file nor directory.')
       }
-    });
+    }))
 
-    this.boxes.forEach(box => {
-      box.render()
-    });
+    await Promise.all(this.boxes.map(async (box) => {
+      await box.render()
+    }))
   }
 
-  private createFolderBox(name: string): FolderBox {
-    const elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new FolderBox(elementId, name, this.referenceBox)
+  private async createFolderBox(name: string): Promise<FolderBox> {
+    const boxData = await Box.prepareConstructor(name, this.referenceBox)
+    const box = new FolderBox(name, this.referenceBox, boxData.mapData, boxData.mapDataFileExists)
+    await this.renderBoxPlaceholderFor(box)
+    return box
   }
 
-  private createFileBox(name: string): FileBox {
-    const elementId: string = this.renderBoxPlaceholderAndReturnId(name)
-    return new FileBox(elementId, name, this.referenceBox)
+  private async createFileBox(name: string): Promise<FileBox> {
+    const boxData = await Box.prepareConstructor(name, this.referenceBox)
+    const box = new FileBox(name, this.referenceBox, boxData.mapData, boxData.mapDataFileExists)
+    await this.renderBoxPlaceholderFor(box)
+    return box
   }
 
-  private renderBoxPlaceholderAndReturnId(name: string): string {
-    const elementId: string = util.generateId()
-    dom.addContentTo(this.getId(), '<div id="' + elementId + '" style="display:inline-block;">loading... ' + name + '</div>')
-    return elementId
+  private async renderBoxPlaceholderFor(box: Box): Promise<void> {
+    return dom.addContentTo(this.getId(), '<div id="' + box.getId() + '" style="display:inline-block;">loading... ' + box.getName() + '</div>')
   }
 
   public containsBox(box: Box): boolean {
@@ -71,12 +73,12 @@ export class FolderBoxBody {
     return this.boxes[id.length] // TODO: real implementation
   }
 
-  public addBox(box: Box): void {
+  public async addBox(box: Box): Promise<void> {
     if (this.containsBox(box)) {
       util.logWarning('DirectoryBox.addBox: trying to add box that is already contained')
     }
     this.boxes.push(box)
-    dom.appendChildTo(this.getId(), box.getId())
+    return dom.appendChildTo(this.getId(), box.getId())
   }
 
   public removeBox(box: Box): void {

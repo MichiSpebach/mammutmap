@@ -6,7 +6,7 @@ export class RootFolderBox extends FolderBox {
   private mapPath: string
 
   public constructor(id: string, srcPath: string, mapPath: string) {
-    super(id, srcPath, null)
+    super(srcPath, null, new BoxMapData(id, 0, 0, 100, 100), false)
     this.mapPath = mapPath
   }
 
@@ -16,10 +16,6 @@ export class RootFolderBox extends FolderBox {
 
   public getMapPath(): string {
     return this.mapPath
-  }
-
-  protected async loadMapData():Promise<BoxMapData> {
-    return BoxMapData.buildDefault()
   }
 
 }
