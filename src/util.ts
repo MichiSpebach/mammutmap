@@ -1,21 +1,26 @@
 import * as dom from './domAdapter'
 
 export function logInfo(message: string): void {
-    log('Info: ' + message, 'grey')
+    log('Info: ' + message, 'grey', 'log')
 }
 
 export function logWarning(message: string): void {
-    log('WARNING: ' + message, 'orange')
+    log('WARNING: ' + message, 'orange', 'trace')
 }
 
 export function logError(message: string): never {
-    log('ERROR: ' + message, 'red')
+    log('ERROR: ' + message, 'red', 'trace')
     throw new Error(message)
 }
 
-async function log(message: string, color: string): Promise<void> {
-  console.log(message)
-  let division: string = '<div style="color:' + color + '">' + escapeForHtml(message) + '</div>'
+async function log(message: string, color: string, mode: 'log'|'trace'): Promise<void> {
+  if (mode === 'log') {
+    console.log(message)
+  } else {
+    console.trace(message)
+  }
+
+  const division: string = '<div style="color:' + color + '">' + escapeForHtml(message) + '</div>'
   await dom.addContentTo('log', division)
   dom.scrollToBottom('log')
 }
