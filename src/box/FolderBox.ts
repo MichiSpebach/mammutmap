@@ -19,8 +19,8 @@ export class FolderBox extends Box {
     this.body = new FolderBoxBody(this)
 
     if (name == 'box') {
-      const fromWayPoint = new WayPoint('', 100, 50)
-      const toWayPoint = new WayPoint('...', 0, 50)
+      const fromWayPoint = new WayPoint('iu4msv07ut8', 100, 50)
+      const toWayPoint = new WayPoint('93kjm246u28', 0, 50)
       const linkData = new BoxMapLinkData('testLink', [fromWayPoint], [toWayPoint])
       this.link = new Link(linkData, this)
       util.logInfo("box has a link")

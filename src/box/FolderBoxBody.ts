@@ -69,13 +69,17 @@ export class FolderBoxBody {
     return this.boxes.includes(box)
   }
 
-  public getBox(id: string): Box {
-    return this.boxes[id.length] // TODO: real implementation
+  public getBox(id: string): Box|never {
+    const box: Box|undefined = this.boxes.find((candidate: Box) => candidate.getId() === id)
+    if (!box) {
+      util.logError(this.referenceBox.getSrcPath() + ' does not contain a box with id ' + id)
+    }
+    return box
   }
 
   public async addBox(box: Box): Promise<void> {
     if (this.containsBox(box)) {
-      util.logWarning('DirectoryBox.addBox: trying to add box that is already contained')
+      util.logWarning('trying to add box that is already contained')
     }
     this.boxes.push(box)
     return dom.appendChildTo(this.getId(), box.getId())
@@ -83,7 +87,7 @@ export class FolderBoxBody {
 
   public removeBox(box: Box): void {
     if (!this.containsBox(box)) {
-      util.logWarning('DirectoryBox.removeBox: trying to remove box that is not contained')
+      util.logWarning('trying to remove box that is not contained')
     }
     this.boxes.splice(this.boxes.indexOf(box), 1)
     // TODO: try to remove from dom?
