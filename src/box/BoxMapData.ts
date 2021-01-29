@@ -1,4 +1,5 @@
 import * as util from '../util'
+import { BoxMapLinkData } from './BoxMapLinkData'
 
 export class BoxMapData {
   public readonly id: string
@@ -6,9 +7,10 @@ export class BoxMapData {
   public y: number
   public width: number
   public height: number
+  public links: BoxMapLinkData[]
 
   public static buildDefault(): BoxMapData {
-    return new BoxMapData(util.generateId(), 10, 10, 80, 80)
+    return new BoxMapData(util.generateId(), 10, 10, 80, 80, [])
   }
 
   public static buildFromJson(json: string ): BoxMapData /*| SyntaxError*/ {
@@ -19,15 +21,21 @@ export class BoxMapData {
       id = util.generateId()
     }
 
-    return new BoxMapData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height)
+    let links: BoxMapLinkData[] = parsedData.links
+    if (links == null) {
+      links = []
+    }
+
+    return new BoxMapData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height, links)
   }
 
-  public constructor(id: string, x: number, y: number, width: number, height: number) {
+  public constructor(id: string, x: number, y: number, width: number, height: number, links: BoxMapLinkData[]) {
     this.id = id
     this.x = x
     this.y = y
     this.width = width
     this.height = height
+    this.links = links
 
     this.validate()
   }
