@@ -21,6 +21,74 @@
 					"y": 50
 				}
 			]
+		},
+		{
+			"id": "65jivuv451o",
+			"fromWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"x": 50,
+					"y": 100
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3n81ck4i5sg",
+					"x": 50,
+					"y": 0
+				}
+			]
+		},
+		{
+			"id": "opjcldb1v4o",
+			"fromWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"x": 100,
+					"y": 50
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "ujltrbp3r9",
+					"x": 0,
+					"y": 50
+				}
+			]
+		},
+		{
+			"id": "h9lp1umk3g",
+			"fromWayPoints": [
+				{
+					"boxId": "93kjm246u28",
+					"x": 100,
+					"y": 25
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "flo206thmv",
+					"x": 0,
+					"y": 50
+				}
+			]
+		},
+		{
+			"id": "9fgac3urmj",
+			"fromWayPoints": [
+				{
+					"boxId": "flo206thmv",
+					"x": 50,
+					"y": 100
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "qm6p7cuvvl",
+					"x": 50,
+					"y": 0
+				}
+			]
 		}
 	]
 }

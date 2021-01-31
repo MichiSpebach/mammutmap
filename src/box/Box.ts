@@ -6,6 +6,7 @@ import { Rect } from '../Rect'
 import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
+import { BoxMapLinkData } from './BoxMapLinkData'
 
 export abstract class Box {
   private name: string
@@ -113,6 +114,10 @@ export abstract class Box {
     this.header.render()
     this.border.render()
     this.renderBody()
+  }
+
+  protected getMapLinkData(): BoxMapLinkData[] {
+    return this.mapData.links
   }
 
   private async loadMapData(): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}> {
