@@ -30,19 +30,20 @@ export class Link {
     const toXInPixel: number = to.x * toRect.width / 100
     const toYInPixel: number = to.y * toRect.height / 100
 
-    const fromBaseCoordX: number = (fromRect.x + fromXInPixel - baseRect.x) / baseRect.width * 100
-    const fromBaseCoordY: number = (fromRect.y + fromYInPixel - baseRect.y) / baseRect.height * 100
-    const toBaseCoordX: number = (toRect.x + toXInPixel - baseRect.x) / baseRect.width * 100
-    const toBaseCoordY: number = (toRect.y + toYInPixel - baseRect.y) / baseRect.height * 100
+    const fromBaseCoordInPixel: number[] = [fromRect.x+fromXInPixel-baseRect.x, fromRect.y+fromYInPixel-baseRect.y]
+    const toBaseCoordInPixel: number[] = [toRect.x+toXInPixel-baseRect.x, toRect.y+toYInPixel-baseRect.y]
 
-    const distanceInBaseCoord: number[] = [toBaseCoordX-fromBaseCoordX, toBaseCoordY-fromBaseCoordY]
-    const angleInRadians: number = Math.atan2(distanceInBaseCoord[1], distanceInBaseCoord[0])
+    const fromBaseCoord: number[] = [fromBaseCoordInPixel[0]/baseRect.width*100, fromBaseCoordInPixel[1]/baseRect.height*100]
+    const toBaseCoord: number[] = [toBaseCoordInPixel[0]/baseRect.width*100, toBaseCoordInPixel[1]/baseRect.height*100]
+
+    const distanceInPixel: number[] = [toBaseCoordInPixel[0]-fromBaseCoordInPixel[0], toBaseCoordInPixel[1]-fromBaseCoordInPixel[1]]
+    const angleInRadians: number = Math.atan2(distanceInPixel[1], distanceInPixel[0])
 
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed
-    const line: string = '<line x1="' + fromBaseCoordX +'%" y1="' + fromBaseCoordY + '%" x2="' + toBaseCoordX + '%" y2="' + toBaseCoordY + '%" style="stroke:blue;stroke-width:2px;"/>'
+    const line: string = '<line x1="' + fromBaseCoord[0] +'%" y1="' + fromBaseCoord[1] + '%" x2="' + toBaseCoord[0] + '%" y2="' + toBaseCoord[1] + '%" style="stroke:blue;stroke-width:2px;"/>'
 
-    const head: string = '<div style="position:absolute;left:'+toBaseCoordX+'%;top:'+toBaseCoordY+'%;width:14px;height:10px;background:blue;clip-path:polygon(0% 0%, 100% 50%, 0% 100%);transform:translate(-7px, -5px)rotate('+angleInRadians+'rad)"/>'
+    const head: string = '<div style="position:absolute;left:'+toBaseCoord[0]+'%;top:'+toBaseCoord[1]+'%;width:14px;height:10px;background:blue;clip-path:polygon(0% 0%, 100% 50%, 0% 100%);transform:translate(-7px, -5px)rotate('+angleInRadians+'rad)"/>'
 
     await dom.addContentTo(this.base.getId(), '<svg id="' + this.data.id + '">' + line + '</svg>' + head)
 
