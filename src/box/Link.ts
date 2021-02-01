@@ -35,10 +35,16 @@ export class Link {
     const toBaseCoordX: number = (toRect.x + toXInPixel - baseRect.x) / baseRect.width * 100
     const toBaseCoordY: number = (toRect.y + toYInPixel - baseRect.y) / baseRect.height * 100
 
+    const distanceInBaseCoord: number[] = [toBaseCoordX-fromBaseCoordX, toBaseCoordY-fromBaseCoordY]
+    const angleInRadians: number = Math.atan2(distanceInBaseCoord[1], distanceInBaseCoord[0])
+
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed
-    let line: string = '<line x1="' + fromBaseCoordX +'%" y1="' + fromBaseCoordY + '%" x2="' + toBaseCoordX + '%" y2="' + toBaseCoordY + '%" style="stroke:blue;stroke-width:2px;"/>'
-    await dom.addContentTo(this.base.getId(), '<svg id="' + this.data.id + '">' + line + '</svg>')
+    const line: string = '<line x1="' + fromBaseCoordX +'%" y1="' + fromBaseCoordY + '%" x2="' + toBaseCoordX + '%" y2="' + toBaseCoordY + '%" style="stroke:blue;stroke-width:2px;"/>'
+
+    const head: string = '<div style="position:absolute;left:'+toBaseCoordX+'%;top:'+toBaseCoordY+'%;width:14px;height:10px;background:blue;clip-path:polygon(0% 0%, 100% 50%, 0% 100%);transform:translate(-7px, -5px)rotate('+angleInRadians+'rad)"/>'
+
+    await dom.addContentTo(this.base.getId(), '<svg id="' + this.data.id + '">' + line + '</svg>' + head)
 
     await this.renderStyle()
   }
