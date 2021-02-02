@@ -1,10 +1,11 @@
 import * as dom from '../domAdapter'
+import { Draggable } from '../Draggable'
 import { DragManager } from '../DragManager'
 import { Rect } from '../Rect'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 
-export abstract  class BoxHeader {
+export abstract  class BoxHeader implements Draggable {
   private static readonly draggingInProgressClass: string = 'draggingInProgress'
 
   public readonly referenceBox: Box
@@ -17,6 +18,10 @@ export abstract  class BoxHeader {
 
   public getId(): string {
     return this.referenceBox.getId() + 'header'
+  }
+
+  public getDropTargetAtDragStart(): FolderBox {
+    return this.referenceBox.getParent()
   }
 
   public async render(): Promise<void> {

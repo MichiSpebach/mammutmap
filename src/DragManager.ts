@@ -1,6 +1,6 @@
 import * as util from './util'
 import * as dom from './domAdapter'
-import { BoxHeader } from './box/BoxHeader'
+import { Draggable } from './Draggable'
 import { FolderBox } from './box/FolderBox'
 
 // TODO: rename to BoxDragManager?
@@ -9,11 +9,11 @@ export class DragManager {
   private static readonly draggableStyleClass: string = 'draggable'
 
   private static state: {
-    dragging: BoxHeader
+    dragging: Draggable
     draggingOver: FolderBox
   } | null
 
-  private static setState(newState: {dragging: BoxHeader, draggingOver: FolderBox} | null): void {
+  private static setState(newState: {dragging: Draggable, draggingOver: FolderBox} | null): void {
     if (this.state != null) {
       this.state.draggingOver.setDragOverStyle(false)
     }
@@ -24,14 +24,14 @@ export class DragManager {
     this.state = newState
   }
 
-  public static addDraggable(elementToDrag: BoxHeader): void {
+  public static addDraggable(elementToDrag: Draggable): void {
     const draggableId: string = elementToDrag.getId()
 
     dom.addClassTo(draggableId, this.draggableStyleClass)
 
     dom.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
       elementToDrag.dragStart(clientX, clientY)
-      this.setState({dragging: elementToDrag, draggingOver: elementToDrag.referenceBox.getParent()})
+      this.setState({dragging: elementToDrag, draggingOver: elementToDrag.getDropTargetAtDragStart()})
     })
 
     dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => {
