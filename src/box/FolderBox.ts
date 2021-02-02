@@ -6,9 +6,10 @@ import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
+import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 
-export class FolderBox extends Box {
+export class FolderBox extends Box implements DropTarget {
   private dragOver: boolean = false
   private readonly body: FolderBoxBody
   private links: Link[] = []
@@ -34,9 +35,9 @@ export class FolderBox extends Box {
     }
   }
 
-  public setDragOverStyle(value: boolean) {
+  public async setDragOverStyle(value: boolean): Promise<void> {
     this.dragOver = value
-    this.renderStyle()
+    await this.renderStyle()
   }
 
   protected async renderBody(): Promise<void> {

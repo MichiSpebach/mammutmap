@@ -1,11 +1,11 @@
-import { FolderBox } from './box/FolderBox'
+import { DropTarget } from './DropTarget'
 
-export interface Draggable {
+export interface Draggable<DropTargetType extends DropTarget> {
   getId(): string
-  getDropTargetAtDragStart(): FolderBox
+  getDropTargetAtDragStart(): DropTargetType
 
   dragStart(clientX: number, clientY: number): Promise<void>
   drag(clientX: number, clientY: number): Promise<void>
   dragCancel(): Promise<void>
-  dragEnd(dropTarget: FolderBox): Promise<void>
+  dragEnd(dropTarget: DropTargetType): Promise<void>
 }

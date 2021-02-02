@@ -1,19 +1,18 @@
 import * as util from './util'
 import * as dom from './domAdapter'
 import { Draggable } from './Draggable'
-import { FolderBox } from './box/FolderBox'
+import { DropTarget } from './DropTarget'
 
-// TODO: rename to BoxDragManager?
 export class DragManager {
 
   private static readonly draggableStyleClass: string = 'draggable'
 
   private static state: {
-    dragging: Draggable
-    draggingOver: FolderBox
+    dragging: Draggable<DropTarget>
+    draggingOver: DropTarget
   } | null
 
-  private static setState(newState: {dragging: Draggable, draggingOver: FolderBox} | null): void {
+  private static setState(newState: {dragging: Draggable<DropTarget>, draggingOver: DropTarget} | null): void {
     if (this.state != null) {
       this.state.draggingOver.setDragOverStyle(false)
     }
@@ -24,7 +23,7 @@ export class DragManager {
     this.state = newState
   }
 
-  public static addDraggable(elementToDrag: Draggable): void {
+  public static addDraggable(elementToDrag: Draggable<DropTarget>): void {
     const draggableId: string = elementToDrag.getId()
 
     dom.addClassTo(draggableId, this.draggableStyleClass)
@@ -56,13 +55,16 @@ export class DragManager {
     // TODO: call elementToDrag.dragCancel() if esc is pressed
   }
 
-  public static addDropTarget(dropTarget: FolderBox): void {
+  public static addDropTarget(dropTarget: DropTarget): void {
     dom.addDragListenerTo(dropTarget.getId(), 'dragenter', async (_) => {
       //if (!await dom.containsClass(sourceId, this.draggableStyleClass)) {
       //  return // TODO: make this somehow work, sourceId is not contained in dragenter event
       //}
       if (this.state == null) {
         //util.logWarning("DragManager: state is null although dragging is in progress") // TODO: reactivate when condition above works
+        return
+      }
+      if (typeof dropTarget !== typeof this.state.dragging.getDropTargetAtDragStart()) {
         return
       }
       this.setState({dragging: this.state.dragging, draggingOver: dropTarget})

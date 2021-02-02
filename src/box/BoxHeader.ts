@@ -5,7 +5,7 @@ import { Rect } from '../Rect'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 
-export abstract  class BoxHeader implements Draggable {
+export abstract  class BoxHeader implements Draggable<FolderBox> {
   private static readonly draggingInProgressClass: string = 'draggingInProgress'
 
   public readonly referenceBox: Box
