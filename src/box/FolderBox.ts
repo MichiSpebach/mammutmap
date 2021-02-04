@@ -6,11 +6,9 @@ import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
-import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 
-export class FolderBox extends Box implements DropTarget {
-  private dragOver: boolean = false
+export class FolderBox extends Box {
   private readonly body: FolderBoxBody
   private links: Link[] = []
 
@@ -25,19 +23,6 @@ export class FolderBox extends Box implements DropTarget {
 
   protected getOverflow(): 'visible' {
     return 'visible'
-  }
-
-  protected getAdditionalStyle(): string {
-    if (this.dragOver) {
-      return 'background-color:#33F6'
-    } else {
-      return 'background-color:#0000'
-    }
-  }
-
-  public async setDragOverStyle(value: boolean): Promise<void> {
-    this.dragOver = value
-    await this.renderStyle()
   }
 
   protected async renderBody(): Promise<void> {

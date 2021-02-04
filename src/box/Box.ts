@@ -7,14 +7,17 @@ import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
 import { BoxMapLinkData } from './BoxMapLinkData'
+import { DropTarget } from '../DropTarget'
 
-export abstract class Box {
+export abstract class Box implements DropTarget {
   private name: string
   private parent: FolderBox|null
   private mapData: BoxMapData
   private mapDataFileExists: boolean
   private readonly header: BoxHeader
   private readonly border: BoxBorder
+//  private readonly connector: BoxConnector // TODO: wip
+  private dragOver: boolean = false
   private unsavedChanges: boolean = false
 
   public static prepareConstructor(name: string, parent: FolderBox): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}>  {
@@ -152,17 +155,28 @@ export abstract class Box {
       .catch(error => util.logWarning('failed to save ' + mapDataFilePath + ': ' + error))
   }
 
+  public async setDragOverStyle(value: boolean): Promise<void> {
+    this.dragOver = value
+    await this.renderStyle()
+  }
+
   protected async renderStyle(): Promise<void> {
     const basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
     const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
-    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getAdditionalStyle())
+    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getBackgroundStyle())
+  }
+
+  private getBackgroundStyle(): string {
+    if (this.dragOver) {
+      return 'background-color:#33F6'
+    } else {
+      return 'background-color:#0000'
+    }
   }
 
   protected abstract getOverflow(): 'hidden'|'visible'
-
-  protected abstract getAdditionalStyle(): string|null
 
   public async updateMeasures(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
     if (measuresInPercentIfChanged.x != null) {
