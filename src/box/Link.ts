@@ -9,17 +9,22 @@ import { Rect } from '../Rect'
 export class Link {
   private data: BoxMapLinkData
   private base: FolderBox
+  private rendered: boolean = false
 
   public constructor(data: BoxMapLinkData, base: FolderBox) {
     this.base = base
     this.data = data
   }
 
+  private getHeadId(): string {
+    return this.data.id+'head'
+  }
+
   public async render(): Promise<void> {
     const from: WayPoint = this.data.fromWayPoints[0]
     const to: WayPoint = this.data.toWayPoints[0]
-    const fromBox: Box = this.base.getChild(from.boxId)
-    const toBox: Box = this.base.getChild(to.boxId)
+    const fromBox: Box = this.getBox(from.boxId)
+    const toBox: Box = this.getBox(to.boxId)
 
     const baseRect: Rect = await this.base.getClientRect() // TODO: optimize
     const fromRect: Rect = await fromBox.getClientRect() // TODO: optimize
@@ -46,15 +51,25 @@ export class Link {
     const headPositionStyle = 'position:absolute;left:'+toBaseCoord[0]+'%;top:'+toBaseCoord[1]+'%;'
     const headTriangleStyle = 'width:28px;height:10px;background:blue;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
     const headTransformStyle = 'transform:translate(-14px, -5px)rotate('+angleInRadians+'rad);'
-    const headHtml: string = '<div style="' + headPositionStyle + headTriangleStyle + headTransformStyle + '"/>'
+    const headStyle = headPositionStyle + headTriangleStyle + headTransformStyle
 
-    await dom.addContentTo(this.base.getId(), '<svg id="' + this.data.id + '">' + lineHtml + '</svg>' + headHtml)
+    if (this.rendered === false) {
+      const headHtml: string = '<div id="'+this.getHeadId()+'"/>'
+      await dom.addContentTo(this.base.getId(), '<svg id="'+this.data.id+'">'+lineHtml+'</svg>' + headHtml)
+      this.rendered = true
+    } else {
+      await dom.setContentTo(this.data.id, lineHtml)
+    }
 
-    await this.renderStyle()
+    await dom.setStyleTo(this.data.id, 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
+    return dom.setStyleTo(this.getHeadId(), headStyle) // TODO: gather awaits for more performance
   }
 
-  public async renderStyle(): Promise<void> {
-    return dom.setStyleTo(this.data.id, 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
+  private getBox(boxIdFromWayPoint: string) {
+    if (boxIdFromWayPoint === WayPoint.THIS_BOX_ID) {
+      return this.base
+    }
+    return this.base.getChild(boxIdFromWayPoint)
   }
 
 }

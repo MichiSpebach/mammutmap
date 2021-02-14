@@ -6,6 +6,7 @@ import { Rect } from '../Rect'
 import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
+import { BoxConnector } from './BoxConnector'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { DropTarget } from '../DropTarget'
 
@@ -16,7 +17,7 @@ export abstract class Box implements DropTarget {
   private mapDataFileExists: boolean
   private readonly header: BoxHeader
   private readonly border: BoxBorder
-//  private readonly connector: BoxConnector // TODO: wip
+  private readonly connector: BoxConnector
   private dragOver: boolean = false
   private unsavedChanges: boolean = false
 
@@ -31,6 +32,7 @@ export abstract class Box implements DropTarget {
     this.mapDataFileExists = mapDataFileExists
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
+    this.connector = new BoxConnector(this)
   }
 
   protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
@@ -112,11 +114,23 @@ export abstract class Box implements DropTarget {
     return await dom.getClientRectOf(this.getId())
   }
 
+  public transformLocalToParent(x: number, y: number): {x: number, y: number} {
+    const xTransformed: number = this.mapData.x + x * (this.mapData.width/100)
+    const yTransformed: number = this.mapData.y + y * (this.mapData.height/100)
+    return {x: xTransformed, y: yTransformed}
+  }
+
   public async render(): Promise<void> {
     this.renderStyle()
+
     this.header.render()
     this.border.render()
     this.renderBody()
+
+    const connectorPlaceholder: string = '<div id="'+this.connector.getId()+'" class="boxConnectorPlacement"></div>' // TODO: remove style class from here?
+    await dom.addContentTo(this.getId(), connectorPlaceholder) // TODO: add placeholders for other parts too
+
+    this.connector.render()
   }
 
   protected getMapLinkData(): BoxMapLinkData[] {

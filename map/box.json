@@ -89,6 +89,40 @@
 					"y": 0
 				}
 			]
+		},
+		{
+			"id": "8k1ggo7bqkg",
+			"fromWayPoints": [
+				{
+					"boxId": "3n81ck4i5sg",
+					"x": 100,
+					"y": 50
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "this",
+					"x": 49.53888075361181,
+					"y": 41.63231213782449
+				}
+			]
+		},
+		{
+			"id": "giag3kom29g",
+			"fromWayPoints": [
+				{
+					"boxId": "8hst7ghum5o",
+					"x": 100,
+					"y": 50
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "this",
+					"x": 49.48641910014733,
+					"y": 69.84207001575663
+				}
+			]
 		}
 	]
 }
