@@ -1,5 +1,5 @@
 
-export class WayPoint {
+export class WayPointData {
   public static readonly THIS_BOX_ID: string = 'this'
 
   public readonly boxId: string

@@ -6,7 +6,7 @@ import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
-import { WayPoint } from './WayPoint'
+import { WayPointData } from './WayPointData'
 import { DragManager } from '../DragManager'
 
 export class FolderBox extends Box {
@@ -46,7 +46,7 @@ export class FolderBox extends Box {
     return this.body.removeBox(box)
   }
 
-  public async addLink(from: WayPoint, to: WayPoint): Promise<void> {
+  public async addLink(from: WayPointData, to: WayPointData): Promise<void> {
     const linkData = new BoxMapLinkData(util.generateId(), [from], [to])
     this.getMapLinkData().push(linkData)
 

@@ -2,7 +2,7 @@ import * as dom from '../domAdapter'
 import { Draggable } from "../Draggable";
 import { DragManager } from '../DragManager'
 import { Box } from "./Box";
-import { WayPoint } from './WayPoint'
+import { WayPointData } from './WayPointData'
 
 export class BoxConnector {
   private readonly referenceBox: Box
@@ -19,10 +19,10 @@ export class BoxConnector {
     await dom.addClassTo(this.getId(), 'boxConnector')
 
     dom.addClickListenerTo(this.getId(), () => {
-      const from = new WayPoint(this.referenceBox.getId(), 100, 50)
+      const from = new WayPointData(this.referenceBox.getId(), 100, 50)
 
       const rightMiddle: {x: number, y: number} = this.referenceBox.transformLocalToParent(100, 50)
-      const to = new WayPoint(WayPoint.THIS_BOX_ID, rightMiddle.x + 5, rightMiddle.y)
+      const to = new WayPointData(WayPointData.THIS_BOX_ID, rightMiddle.x + 5, rightMiddle.y)
 
       this.referenceBox.getParent().addLink(from, to)
     })

@@ -3,7 +3,7 @@ import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { BoxMapLinkData } from './BoxMapLinkData'
-import { WayPoint } from './WayPoint'
+import { WayPointData } from './WayPointData'
 import { Rect } from '../Rect'
 
 export class Link {
@@ -21,8 +21,8 @@ export class Link {
   }
 
   public async render(): Promise<void> {
-    const from: WayPoint = this.data.fromWayPoints[0]
-    const to: WayPoint = this.data.toWayPoints[0]
+    const from: WayPointData = this.data.fromWayPoints[0]
+    const to: WayPointData = this.data.toWayPoints[0]
     const fromBox: Box = this.getBox(from.boxId)
     const toBox: Box = this.getBox(to.boxId)
 
@@ -66,7 +66,7 @@ export class Link {
   }
 
   private getBox(boxIdFromWayPoint: string) {
-    if (boxIdFromWayPoint === WayPoint.THIS_BOX_ID) {
+    if (boxIdFromWayPoint === WayPointData.THIS_BOX_ID) {
       return this.base
     }
     return this.base.getChild(boxIdFromWayPoint)
