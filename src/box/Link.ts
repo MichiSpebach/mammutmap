@@ -4,16 +4,19 @@ import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
+import { WayPoint } from './WayPoint'
 import { Rect } from '../Rect'
 
 export class Link {
   private data: BoxMapLinkData
   private base: FolderBox
+  private head: WayPoint
   private rendered: boolean = false
 
   public constructor(data: BoxMapLinkData, base: FolderBox) {
-    this.base = base
     this.data = data
+    this.base = base
+    this.head = new WayPoint(this.getHeadId(), data.toWayPoints[0], this)
   }
 
   private getHeadId(): string {
@@ -48,11 +51,6 @@ export class Link {
     // TODO: move coordinates to svg element, svg element only as big as needed
     const lineHtml: string = '<line x1="'+fromBaseCoord[0]+'%" y1="'+fromBaseCoord[1]+'%" x2="'+toBaseCoord[0]+'%" y2="'+toBaseCoord[1]+'%" style="stroke:blue;stroke-width:2px;"/>'
 
-    const headPositionStyle = 'position:absolute;left:'+toBaseCoord[0]+'%;top:'+toBaseCoord[1]+'%;'
-    const headTriangleStyle = 'width:28px;height:10px;background:blue;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
-    const headTransformStyle = 'transform:translate(-14px, -5px)rotate('+angleInRadians+'rad);'
-    const headStyle = headPositionStyle + headTriangleStyle + headTransformStyle
-
     if (this.rendered === false) {
       const headHtml: string = '<div id="'+this.getHeadId()+'"/>'
       await dom.addContentTo(this.base.getId(), '<svg id="'+this.data.id+'">'+lineHtml+'</svg>' + headHtml)
@@ -62,7 +60,7 @@ export class Link {
     }
 
     await dom.setStyleTo(this.data.id, 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
-    return dom.setStyleTo(this.getHeadId(), headStyle) // TODO: gather awaits for more performance
+    return this.head.render(toBox, toBaseCoord[0], toBaseCoord[1], angleInRadians) // TODO: gather awaits for more performance
   }
 
   private getBox(boxIdFromWayPoint: string) {
