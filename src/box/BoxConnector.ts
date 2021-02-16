@@ -18,14 +18,16 @@ export class BoxConnector {
   public async render(): Promise<void> {
     await dom.addClassTo(this.getId(), 'boxConnector')
 
-    dom.addClickListenerTo(this.getId(), () => {
-      const from = new WayPointData(this.referenceBox.getId(), 100, 50)
+    dom.addClickListenerTo(this.getId(), () => this.addLinkToReferenceBox())
+  }
 
-      const rightMiddle: {x: number, y: number} = this.referenceBox.transformLocalToParent(100, 50)
-      const to = new WayPointData(WayPointData.THIS_BOX_ID, rightMiddle.x + 5, rightMiddle.y)
+  private addLinkToReferenceBox(): void {
+    const from = new WayPointData(this.referenceBox.getId(), 100, 50)
 
-      this.referenceBox.getParent().addLink(from, to)
-    })
+    const rightMiddle: {x: number, y: number} = this.referenceBox.transformLocalToParent(100, 50)
+    const to = new WayPointData(WayPointData.THIS_BOX_ID, rightMiddle.x + 5, rightMiddle.y)
+
+    this.referenceBox.getParent().addLink(from, to)
   }
 
 }
