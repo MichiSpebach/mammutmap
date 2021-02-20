@@ -26,30 +26,19 @@ export class Link {
   public async render(): Promise<void> {
     const from: WayPointData = this.data.fromWayPoints[0]
     const to: WayPointData = this.data.toWayPoints[0]
-    const fromBox: Box = this.getBox(from.boxId)
     const toBox: Box = this.getBox(to.boxId)
 
-    const baseRect: Rect = await this.base.getClientRect() // TODO: optimize
-    const fromRect: Rect = await fromBox.getClientRect() // TODO: optimize
-    const toRect: Rect = await toBox.getClientRect() // TODO: optimize
+    const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, gather awaits for more performance
+    const fromInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(from, baseRect) // TODO: optimize, gather awaits for more performance
+    const toInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(to, baseRect) // TODO: optimize, gather awaits for more performance
 
-    const fromXInPixel: number = from.x * fromRect.width / 100
-    const fromYInPixel: number = from.y * fromRect.height / 100
-    const toXInPixel: number = to.x * toRect.width / 100
-    const toYInPixel: number = to.y * toRect.height / 100
-
-    const fromBaseCoordInPixel: number[] = [fromRect.x+fromXInPixel-baseRect.x, fromRect.y+fromYInPixel-baseRect.y]
-    const toBaseCoordInPixel: number[] = [toRect.x+toXInPixel-baseRect.x, toRect.y+toYInPixel-baseRect.y]
-
-    const fromBaseCoord: number[] = [fromBaseCoordInPixel[0]/baseRect.width*100, fromBaseCoordInPixel[1]/baseRect.height*100]
-    const toBaseCoord: number[] = [toBaseCoordInPixel[0]/baseRect.width*100, toBaseCoordInPixel[1]/baseRect.height*100]
-
-    const distanceInPixel: number[] = [toBaseCoordInPixel[0]-fromBaseCoordInPixel[0], toBaseCoordInPixel[1]-fromBaseCoordInPixel[1]]
+    const distanceInPixel: number[] = [toInBaseCoords.x-fromInBaseCoords.x, toInBaseCoords.y-fromInBaseCoords.y]
     const angleInRadians: number = Math.atan2(distanceInPixel[1], distanceInPixel[0])
 
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
-    // TODO: move coordinates to svg element, svg element only as big as needed
-    const lineHtml: string = '<line x1="'+fromBaseCoord[0]+'%" y1="'+fromBaseCoord[1]+'%" x2="'+toBaseCoord[0]+'%" y2="'+toBaseCoord[1]+'%" style="stroke:blue;stroke-width:2px;"/>'
+    // TODO: move coordinates to svg element, svg element only as big as needed?
+    const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
+    const lineHtml: string = '<line '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
 
     if (this.rendered === false) {
       const headHtml: string = '<div id="'+this.getHeadId()+'"/>'
@@ -60,7 +49,7 @@ export class Link {
     }
 
     await dom.setStyleTo(this.data.id, 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
-    return this.head.render(toBox, toBaseCoord[0], toBaseCoord[1], angleInRadians) // TODO: gather awaits for more performance
+    return this.head.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
   }
 
   private getBox(boxIdFromWayPoint: string) {
@@ -68,6 +57,27 @@ export class Link {
       return this.base
     }
     return this.base.getChild(boxIdFromWayPoint)
+  }
+
+  private async getWayPointPositionInBaseCoords(wayPoint: WayPointData, baseRect: Rect): Promise<{x: number; y: number} > {
+    const box: Box = this.getBox(wayPoint.boxId)
+    const rect: Rect = await box.getClientRect()
+
+    const xInPixel: number = wayPoint.x * rect.width / 100
+    const yInPixel: number = wayPoint.y * rect.height / 100
+
+    const xInBaseCoordsInPixel: number = rect.x + xInPixel - baseRect.x
+    const yInBaseCoordsInPixel: number = rect.y + yInPixel - baseRect.y
+
+    return {x: xInBaseCoordsInPixel / baseRect.width * 100, y: yInBaseCoordsInPixel / baseRect.height * 100}
+  }
+
+  public async moveWayPointTo(wayPoint: WayPoint, clientX: number, clientY: number): Promise<void> {
+    if (wayPoint !== this.head) {
+      util.logError('Given WayPoint is not contained by Link.')
+    }
+    const newTo: {x: number, y: number} = await this.base.transformClientPositionToLocal(clientX, clientY)
+    // TODO: wip
   }
 
 }

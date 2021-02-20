@@ -114,6 +114,14 @@ export abstract class Box implements DropTarget {
     return await dom.getClientRectOf(this.getId())
   }
 
+  // TODO: introduce PercentPosition/PercentPoint and ClientPosition/ClientPoint/ClientPixelPosition/ClientPixelPoint?
+  public async transformClientPositionToLocal(clientX: number, clientY: number): Promise<{x: number, y: number}> {
+    const clientRect: Rect = await this.getClientRect()
+    const x: number = (clientX - clientRect.x) / clientRect.width * 100
+    const y: number = (clientY - clientRect.y) / clientRect.height * 100
+    return {x: x, y: y}
+  }
+
   public transformLocalToParent(x: number, y: number): {x: number, y: number} {
     const xTransformed: number = this.mapData.x + x * (this.mapData.width/100)
     const yTransformed: number = this.mapData.y + y * (this.mapData.height/100)
