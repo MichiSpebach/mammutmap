@@ -35,11 +35,11 @@ export class WayPoint implements Draggable<Box> {
   }
 
   public drag(clientX: number, clientY: number): Promise<void> {
-    throw new Error('Method not implemented.');
+    return this.referenceLink.moveWayPointTo(this, clientX, clientY)
   }
 
   public dragCancel(): Promise<void> {
-    throw new Error('Method not implemented.');
+    return this.referenceLink.render()
   }
 
   public dragEnd(dropTarget: Box): Promise<void> {

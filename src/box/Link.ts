@@ -26,11 +26,30 @@ export class Link {
   public async render(): Promise<void> {
     const from: WayPointData = this.data.fromWayPoints[0]
     const to: WayPointData = this.data.toWayPoints[0]
-    const toBox: Box = this.getBox(to.boxId)
 
     const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, gather awaits for more performance
     const fromInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(from, baseRect) // TODO: optimize, gather awaits for more performance
     const toInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(to, baseRect) // TODO: optimize, gather awaits for more performance
+
+    return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
+  }
+
+  public async moveWayPointTo(wayPoint: WayPoint, clientX: number, clientY: number): Promise<void> {
+    if (wayPoint !== this.head) {
+      util.logError('Given WayPoint is not contained by Link.')
+    }
+
+    const from: WayPointData = this.data.fromWayPoints[0]
+    const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, use cached?
+    const fromInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(from, baseRect)
+    const newToInBaseCoords: {x: number, y: number} = await this.base.transformClientPositionToLocal(clientX, clientY)
+
+    this.renderAtPosition(fromInBaseCoords, newToInBaseCoords)
+  }
+
+  private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}): Promise<void> {
+    const to: WayPointData = this.data.toWayPoints[0]
+    const toBox: Box = this.getBox(to.boxId)
 
     const distanceInPixel: number[] = [toInBaseCoords.x-fromInBaseCoords.x, toInBaseCoords.y-fromInBaseCoords.y]
     const angleInRadians: number = Math.atan2(distanceInPixel[1], distanceInPixel[0])
@@ -41,7 +60,7 @@ export class Link {
     const lineHtml: string = '<line '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
 
     if (this.rendered === false) {
-      const headHtml: string = '<div id="'+this.getHeadId()+'"/>'
+      const headHtml: string = '<div id="'+this.getHeadId()+'" draggable="true"/>'
       await dom.addContentTo(this.base.getId(), '<svg id="'+this.data.id+'">'+lineHtml+'</svg>' + headHtml)
       this.rendered = true
     } else {
@@ -52,14 +71,7 @@ export class Link {
     return this.head.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
   }
 
-  private getBox(boxIdFromWayPoint: string) {
-    if (boxIdFromWayPoint === WayPointData.THIS_BOX_ID) {
-      return this.base
-    }
-    return this.base.getChild(boxIdFromWayPoint)
-  }
-
-  private async getWayPointPositionInBaseCoords(wayPoint: WayPointData, baseRect: Rect): Promise<{x: number; y: number} > {
+  private async getWayPointPositionInBaseCoords(wayPoint: WayPointData, baseRect: Rect): Promise<{x: number; y: number}> {
     const box: Box = this.getBox(wayPoint.boxId)
     const rect: Rect = await box.getClientRect()
 
@@ -72,12 +84,11 @@ export class Link {
     return {x: xInBaseCoordsInPixel / baseRect.width * 100, y: yInBaseCoordsInPixel / baseRect.height * 100}
   }
 
-  public async moveWayPointTo(wayPoint: WayPoint, clientX: number, clientY: number): Promise<void> {
-    if (wayPoint !== this.head) {
-      util.logError('Given WayPoint is not contained by Link.')
+  private getBox(boxIdFromWayPoint: string) {
+    if (boxIdFromWayPoint === WayPointData.THIS_BOX_ID) {
+      return this.base
     }
-    const newTo: {x: number, y: number} = await this.base.transformClientPositionToLocal(clientX, clientY)
-    // TODO: wip
+    return this.base.getChild(boxIdFromWayPoint)
   }
 
 }
