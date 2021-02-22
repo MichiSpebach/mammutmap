@@ -1,6 +1,7 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
 import { Draggable } from '../Draggable';
+import { DropTarget } from '../DropTarget';
 import { DragManager } from '../DragManager'
 import { Box } from './Box';
 import { WayPointData } from './WayPointData'
@@ -10,8 +11,9 @@ export class WayPoint implements Draggable<Box> {
   private readonly id: string
   private readonly data: WayPointData
   private readonly referenceLink: Link
-  private dropTarget: Box|null = null
   private rendered: boolean = false
+  private dropTarget: Box|null = null
+  private recentDragPosition: {x: number, y: number}|null = null
 
   public constructor(id: string, data: WayPointData, referenceLink: Link) {
     this.id = id
@@ -30,20 +32,33 @@ export class WayPoint implements Draggable<Box> {
     return this.dropTarget
   }
 
+  canBeDroppedInto(dropTarget: DropTarget): boolean {
+    return dropTarget instanceof Box
+  }
+
   public dragStart(clientX: number, clientY: number): Promise<void> {
-    return this.referenceLink.moveWayPointTo(this, clientX, clientY)
+    this.recentDragPosition = {x: clientX, y: clientY}
+    return this.referenceLink.moveWayPointTo(this, clientX, clientY, false)
   }
 
   public drag(clientX: number, clientY: number): Promise<void> {
-    return this.referenceLink.moveWayPointTo(this, clientX, clientY)
+    this.recentDragPosition = {x: clientX, y: clientY}
+    return this.referenceLink.moveWayPointTo(this, clientX, clientY, false)
   }
 
   public dragCancel(): Promise<void> {
+    this.recentDragPosition = null
     return this.referenceLink.render()
   }
 
-  public dragEnd(dropTarget: Box): Promise<void> {
-    throw new Error('Method not implemented.');
+  public async dragEnd(dropTarget: Box): Promise<void> {
+    if (this.recentDragPosition === null) {
+      util.logError('recentDragPosition is null')
+    }
+
+    await this.referenceLink.moveWayPointTo(this, this.recentDragPosition.x, this.recentDragPosition.y, true)
+
+    this.recentDragPosition = null
   }
 
   public async render(toBox: Box, x: number, y: number, angleInRadians: number): Promise<void> {

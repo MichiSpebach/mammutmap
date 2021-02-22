@@ -34,7 +34,7 @@ export class Link {
     return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
 
-  public async moveWayPointTo(wayPoint: WayPoint, clientX: number, clientY: number): Promise<void> {
+  public async moveWayPointTo(wayPoint: WayPoint, clientX: number, clientY: number, save: boolean): Promise<void> {
     if (wayPoint !== this.head) {
       util.logError('Given WayPoint is not contained by Link.')
     }
@@ -44,7 +44,15 @@ export class Link {
     const fromInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(from, baseRect)
     const newToInBaseCoords: {x: number, y: number} = await this.base.transformClientPositionToLocal(clientX, clientY)
 
-    this.renderAtPosition(fromInBaseCoords, newToInBaseCoords)
+    await this.renderAtPosition(fromInBaseCoords, newToInBaseCoords)
+
+    if (save) {
+      const to: WayPointData = this.data.toWayPoints[0]
+      // TODO: wip set to.boxId according to dropTarget
+      to.x = newToInBaseCoords.x
+      to.y = newToInBaseCoords.y
+      await this.base.saveMapData()
+    }
   }
 
   private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}): Promise<void> {

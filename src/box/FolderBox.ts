@@ -1,5 +1,4 @@
 import * as util from '../util'
-import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBoxHeader } from './FolderBoxHeader'
@@ -7,7 +6,6 @@ import { FolderBoxBody } from './FolderBoxBody'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
-import { DragManager } from '../DragManager'
 
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
@@ -28,9 +26,6 @@ export class FolderBox extends Box {
 
   protected async renderBody(): Promise<void> {
     await this.body.render()
-
-    DragManager.addDropTarget(this) // TODO: move to other method?
-
     this.renderLinks()
   }
 

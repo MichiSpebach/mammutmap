@@ -9,6 +9,7 @@ import { BoxBorder } from './BoxBorder'
 import { BoxConnector } from './BoxConnector'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { DropTarget } from '../DropTarget'
+import { DragManager } from '../DragManager'
 
 export abstract class Box implements DropTarget {
   private name: string
@@ -139,6 +140,8 @@ export abstract class Box implements DropTarget {
     await dom.addContentTo(this.getId(), connectorPlaceholder) // TODO: add placeholders for other parts too
 
     this.connector.render()
+
+    DragManager.addDropTarget(this)
   }
 
   protected getMapLinkData(): BoxMapLinkData[] {

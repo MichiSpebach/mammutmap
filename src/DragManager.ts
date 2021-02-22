@@ -64,7 +64,7 @@ export class DragManager {
         //util.logWarning("DragManager: state is null although dragging is in progress") // TODO: reactivate when condition above works
         return
       }
-      if (typeof dropTarget !== typeof this.state.dragging.getDropTargetAtDragStart()) {
+      if (!this.state.dragging.canBeDroppedInto(dropTarget)) {
         return
       }
       this.setState({dragging: this.state.dragging, draggingOver: dropTarget})

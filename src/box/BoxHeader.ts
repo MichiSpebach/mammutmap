@@ -1,5 +1,6 @@
 import * as dom from '../domAdapter'
 import { Draggable } from '../Draggable'
+import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 import { Rect } from '../Rect'
 import { Box } from './Box'
@@ -22,6 +23,10 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
 
   public getDropTargetAtDragStart(): FolderBox {
     return this.referenceBox.getParent()
+  }
+
+  public canBeDroppedInto(dropTarget: DropTarget): boolean {
+    return dropTarget instanceof FolderBox
   }
 
   public async render(): Promise<void> {
