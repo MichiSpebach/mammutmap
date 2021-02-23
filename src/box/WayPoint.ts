@@ -38,12 +38,12 @@ export class WayPoint implements Draggable<Box> {
 
   public dragStart(clientX: number, clientY: number): Promise<void> {
     this.recentDragPosition = {x: clientX, y: clientY}
-    return this.referenceLink.moveWayPointTo(this, clientX, clientY, false)
+    return this.referenceLink.moveWayPointTo(this, clientX, clientY)
   }
 
   public drag(clientX: number, clientY: number): Promise<void> {
     this.recentDragPosition = {x: clientX, y: clientY}
-    return this.referenceLink.moveWayPointTo(this, clientX, clientY, false)
+    return this.referenceLink.moveWayPointTo(this, clientX, clientY)
   }
 
   public dragCancel(): Promise<void> {
@@ -56,7 +56,7 @@ export class WayPoint implements Draggable<Box> {
       util.logError('recentDragPosition is null')
     }
 
-    await this.referenceLink.moveWayPointTo(this, this.recentDragPosition.x, this.recentDragPosition.y, true)
+    await this.referenceLink.moveWayPointToAndSave(this, this.recentDragPosition.x, this.recentDragPosition.y, dropTarget)
 
     this.recentDragPosition = null
   }
