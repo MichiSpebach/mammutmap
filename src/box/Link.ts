@@ -34,21 +34,7 @@ export class Link {
     return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
 
-  public async moveWayPointTo(wayPoint: WayPoint, clientX: number, clientY: number): Promise<void> {
-    await this.moveWayPointToAndReturnTransformedPosition(wayPoint, clientX, clientY)
-  }
-
-  public async moveWayPointToAndSave(wayPoint: WayPoint, clientX: number, clientY: number, dropTarget: Box): Promise<void> {
-    const newToInBaseCoords: {x: number, y: number} = await this.moveWayPointToAndReturnTransformedPosition(wayPoint, clientX, clientY)
-
-    const to: WayPointData = this.data.toWayPoints[0]
-    to.boxId = dropTarget.getId()
-    to.x = newToInBaseCoords.x
-    to.y = newToInBaseCoords.y
-    await this.base.saveMapData()
-  }
-
-  private async moveWayPointToAndReturnTransformedPosition(wayPoint: WayPoint, clientX: number, clientY: number): Promise<{x: number, y: number}> {
+  public async renderWayPointAtPosition(wayPoint: WayPoint, clientX: number, clientY: number): Promise<void> {
     if (wayPoint !== this.head) {
       util.logError('Given WayPoint is not contained by Link.')
     }
@@ -59,7 +45,22 @@ export class Link {
     const newToInBaseCoords: {x: number, y: number} = await this.base.transformClientPositionToLocal(clientX, clientY)
 
     await this.renderAtPosition(fromInBaseCoords, newToInBaseCoords)
-    return newToInBaseCoords
+  }
+
+  public async renderWayPointAtPositionAndSave(wayPoint: WayPoint, clientX: number, clientY: number, dropTarget: Box): Promise<void> {
+    if (wayPoint !== this.head) {
+      util.logError('Given WayPoint is not contained by Link.')
+    }
+
+    const newPositionInDropTargetCoords: {x: number, y: number} = await dropTarget.transformClientPositionToLocal(clientX, clientY)
+
+    const to: WayPointData = this.data.toWayPoints[0]
+    to.boxId = dropTarget.getId()
+    to.x = newPositionInDropTargetCoords.x
+    to.y = newPositionInDropTargetCoords.y
+
+    await this.render()
+    await this.base.saveMapData()
   }
 
   private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}): Promise<void> {

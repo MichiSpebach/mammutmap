@@ -1,4 +1,6 @@
 
+when a linkHead is dragged over another linkHead and a box the dropTarget is the linkHeads baseBox but it should be the box (somehow set pointer-events: none; for all linkHeads while dragging)
+
 cancel drag when escape is pressed
 
 add padding to BoxBorder lines, to make them easier to grab
