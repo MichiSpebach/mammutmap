@@ -231,16 +231,16 @@ export abstract class Box implements DropTarget {
 
   protected abstract formBody(): string*/
 
-  public addBorderingLink(link: Link) {
+  public registerBorderingLink(link: Link) {
     if (this.borderingLinks.includes(link)) {
-      util.logWarning('trying to add borderingLink that is already contained')
+      util.logWarning('trying to register borderingLink that is already registered')
     }
     this.borderingLinks.push(link)
   }
 
-  public removeBorderingLink(link: Link) {
+  public deregisterBorderingLink(link: Link) {
     if (!this.borderingLinks.includes(link)) {
-      util.logWarning('trying to remove borderingLink that is not contained')
+      util.logWarning('trying to deregister borderingLink that is not registered')
     }
     this.borderingLinks.splice(this.borderingLinks.indexOf(link), 1)
   }

@@ -12,7 +12,7 @@ export class WayPoint implements Draggable<Box> {
   private readonly data: WayPointData
   private readonly referenceLink: Link
   private rendered: boolean = false
-  private dropTarget: Box|null = null
+  private borderingBox: Box|null = null
   private recentDragPosition: {x: number, y: number}|null = null
 
   public constructor(id: string, data: WayPointData, referenceLink: Link) {
@@ -26,10 +26,10 @@ export class WayPoint implements Draggable<Box> {
   }
 
   public getDropTargetAtDragStart(): Box|never {
-    if (!this.dropTarget) {
+    if (!this.borderingBox) {
       util.logError('WayPoint must be rendered before calling getDropTargetAtDragStart(), but was not.')
     }
-    return this.dropTarget
+    return this.borderingBox
   }
 
   public canBeDroppedInto(dropTarget: DropTarget): boolean {
@@ -61,8 +61,12 @@ export class WayPoint implements Draggable<Box> {
     this.recentDragPosition = null
   }
 
-  public async render(toBox: Box, x: number, y: number, angleInRadians: number): Promise<void> {
-    this.dropTarget = toBox
+  public async render(borderingBox: Box, x: number, y: number, angleInRadians: number): Promise<void> {
+    if (this.borderingBox !== borderingBox) {
+      this.borderingBox?.deregisterBorderingLink(this.referenceLink)
+      this.borderingBox = borderingBox
+      this.borderingBox.registerBorderingLink(this.referenceLink)
+    }
 
     const positionStyle = 'position:absolute;left:'+x+'%;top:'+y+'%;'
     const triangleStyle = 'width:28px;height:10px;background:blue;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'

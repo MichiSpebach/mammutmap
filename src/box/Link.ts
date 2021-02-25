@@ -81,10 +81,7 @@ export class Link {
       const from: WayPointData = this.data.fromWayPoints[0]
       if (from.boxId !== WayPointData.THIS_BOX_ID) {
         const fromBox: Box = this.getBox(from.boxId)
-        fromBox.addBorderingLink(this)
-      }
-      if (to.boxId !== WayPointData.THIS_BOX_ID) {
-        toBox.addBorderingLink(this)
+        fromBox.registerBorderingLink(this) // TODO: move this logic into a WayPoint
       }
       this.rendered = true
     } else {
