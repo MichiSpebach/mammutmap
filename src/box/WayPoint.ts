@@ -8,8 +8,6 @@ import { WayPointData } from './WayPointData'
 import { Link } from './Link';
 
 export class WayPoint implements Draggable<Box> {
-  private static readonly draggingInProgressClass: string = 'draggingInProgress' // TODO: move to general style class?
-
   private readonly id: string
   private readonly data: WayPointData
   private readonly referenceLink: Link
@@ -40,7 +38,6 @@ export class WayPoint implements Draggable<Box> {
 
   public dragStart(clientX: number, clientY: number): Promise<void> {
     this.recentDragPosition = {x: clientX, y: clientY}
-    dom.addClassTo(this.getId(), WayPoint.draggingInProgressClass) // TODO: extract this logic to DragManager?
     return this.referenceLink.renderWayPointAtPosition(this, clientX, clientY)
   }
 
@@ -51,12 +48,10 @@ export class WayPoint implements Draggable<Box> {
 
   public dragCancel(): Promise<void> {
     this.recentDragPosition = null
-    dom.removeClassFrom(this.getId(), WayPoint.draggingInProgressClass) // TODO: extract this logic to DragManager?
     return this.referenceLink.render()
   }
 
   public async dragEnd(dropTarget: Box): Promise<void> {
-    dom.removeClassFrom(this.getId(), WayPoint.draggingInProgressClass) // TODO: extract this logic to DragManager?
     if (this.recentDragPosition === null) {
       util.logError('recentDragPosition is null')
     }

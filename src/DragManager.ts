@@ -4,8 +4,8 @@ import { Draggable } from './Draggable'
 import { DropTarget } from './DropTarget'
 
 export class DragManager {
-
   private static readonly draggableStyleClass: string = 'draggable'
+  public static readonly draggingInProgressStyleClass: string = 'draggingInProgress'
 
   private static state: {
     dragging: Draggable<DropTarget>
@@ -29,6 +29,7 @@ export class DragManager {
     dom.addClassTo(draggableId, this.draggableStyleClass)
 
     dom.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
+      dom.addClassTo(elementToDrag.getId(), DragManager.draggingInProgressStyleClass)
       elementToDrag.dragStart(clientX, clientY)
       this.setState({dragging: elementToDrag, draggingOver: elementToDrag.getDropTargetAtDragStart()})
     })
@@ -43,6 +44,7 @@ export class DragManager {
     })
 
     dom.addDragListenerTo(draggableId, 'dragend', (_) => {
+      dom.removeClassFrom(elementToDrag.getId(), DragManager.draggingInProgressStyleClass)
       if (this.state == null) {
         util.logWarning("DragManager: state is null although dragging was in progress")
         elementToDrag.dragCancel()
@@ -52,7 +54,7 @@ export class DragManager {
       this.setState(null)
     })
 
-    // TODO: call elementToDrag.dragCancel() if esc is pressed
+    // TODO: call elementToDrag.dragCancel() if esc is pressed (and remove draggingInProgressStyleClass)
   }
 
   public static addDropTarget(dropTarget: DropTarget): void {
