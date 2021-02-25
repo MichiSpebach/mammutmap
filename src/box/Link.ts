@@ -78,6 +78,14 @@ export class Link {
     if (this.rendered === false) {
       const headHtml: string = '<div id="'+this.getHeadId()+'" draggable="true"/>'
       await dom.addContentTo(this.base.getId(), '<svg id="'+this.data.id+'">'+lineHtml+'</svg>' + headHtml)
+      const from: WayPointData = this.data.fromWayPoints[0]
+      if (from.boxId !== WayPointData.THIS_BOX_ID) {
+        const fromBox: Box = this.getBox(from.boxId)
+        fromBox.addBorderingLink(this)
+      }
+      if (to.boxId !== WayPointData.THIS_BOX_ID) {
+        toBox.addBorderingLink(this)
+      }
       this.rendered = true
     } else {
       await dom.setContentTo(this.data.id, lineHtml)

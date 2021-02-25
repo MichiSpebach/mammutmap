@@ -32,7 +32,7 @@ export class WayPoint implements Draggable<Box> {
     return this.dropTarget
   }
 
-  canBeDroppedInto(dropTarget: DropTarget): boolean {
+  public canBeDroppedInto(dropTarget: DropTarget): boolean {
     return dropTarget instanceof Box
   }
 

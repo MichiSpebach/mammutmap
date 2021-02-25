@@ -7,6 +7,7 @@ import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
 import { BoxConnector } from './BoxConnector'
+import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
@@ -19,6 +20,7 @@ export abstract class Box implements DropTarget {
   private readonly header: BoxHeader
   private readonly border: BoxBorder
   private readonly connector: BoxConnector
+  private readonly borderingLinks: Link[] = []
   private dragOver: boolean = false
   private unsavedChanges: boolean = false
 
@@ -218,6 +220,7 @@ export abstract class Box implements DropTarget {
     }
 
     await this.renderStyle()
+    await Promise.all(this.borderingLinks.map(link => link.render()))
   }
 
   protected async abstract renderBody(): Promise<void>
@@ -227,5 +230,19 @@ export abstract class Box implements DropTarget {
   }
 
   protected abstract formBody(): string*/
+
+  public addBorderingLink(link: Link) {
+    if (this.borderingLinks.includes(link)) {
+      util.logWarning('trying to add borderingLink that is already contained')
+    }
+    this.borderingLinks.push(link)
+  }
+
+  public removeBorderingLink(link: Link) {
+    if (!this.borderingLinks.includes(link)) {
+      util.logWarning('trying to remove borderingLink that is not contained')
+    }
+    this.borderingLinks.splice(this.borderingLinks.indexOf(link), 1)
+  }
 
 }
