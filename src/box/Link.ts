@@ -10,17 +10,15 @@ import { Rect } from '../Rect'
 export class Link {
   private data: BoxMapLinkData
   private base: FolderBox
-  private head: WayPoint
+  private fromWayPoint: WayPoint
+  private toWayPoint: WayPoint
   private rendered: boolean = false
 
   public constructor(data: BoxMapLinkData, base: FolderBox) {
     this.data = data
     this.base = base
-    this.head = new WayPoint(this.getHeadId(), data.toWayPoints[0], this)
-  }
-
-  private getHeadId(): string {
-    return this.data.id+'head'
+    this.fromWayPoint = new WayPoint(this.data.id+'from', data.fromWayPoints[0], this, 'none')
+    this.toWayPoint = new WayPoint(this.data.id+'to', data.toWayPoints[0], this, 'arrow')
   }
 
   public async render(): Promise<void> {
@@ -35,7 +33,7 @@ export class Link {
   }
 
   public async renderWayPointAtPosition(wayPoint: WayPoint, clientX: number, clientY: number): Promise<void> {
-    if (wayPoint !== this.head) {
+    if (wayPoint !== this.toWayPoint) {
       util.logError('Given WayPoint is not contained by Link.')
     }
 
@@ -48,14 +46,19 @@ export class Link {
   }
 
   public async renderWayPointAtPositionAndSave(wayPoint: WayPoint, clientX: number, clientY: number, dropTarget: Box): Promise<void> {
-    if (wayPoint !== this.head) {
+    if (wayPoint !== this.toWayPoint) {
       util.logError('Given WayPoint is not contained by Link.')
     }
 
-    const newPositionInDropTargetCoords: {x: number, y: number} = await dropTarget.transformClientPositionToLocal(clientX, clientY)
-
     const to: WayPointData = this.data.toWayPoints[0]
     to.boxId = dropTarget.getId()
+
+    //if (!this.base.containsBox(dropTarget)) {
+    //  this.reorder() // TODO: wip
+    //}
+
+    const newPositionInDropTargetCoords: {x: number, y: number} = await dropTarget.transformClientPositionToLocal(clientX, clientY)
+
     to.x = newPositionInDropTargetCoords.x
     to.y = newPositionInDropTargetCoords.y
 
@@ -64,9 +67,6 @@ export class Link {
   }
 
   private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}): Promise<void> {
-    const to: WayPointData = this.data.toWayPoints[0]
-    const toBox: Box = this.getBox(to.boxId)
-
     const distanceInPixel: number[] = [toInBaseCoords.x-fromInBaseCoords.x, toInBaseCoords.y-fromInBaseCoords.y]
     const angleInRadians: number = Math.atan2(distanceInPixel[1], distanceInPixel[0])
 
@@ -76,20 +76,19 @@ export class Link {
     const lineHtml: string = '<line '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
 
     if (this.rendered === false) {
-      const headHtml: string = '<div id="'+this.getHeadId()+'" draggable="true"/>'
-      await dom.addContentTo(this.base.getId(), '<svg id="'+this.data.id+'">'+lineHtml+'</svg>' + headHtml)
-      const from: WayPointData = this.data.fromWayPoints[0]
-      if (from.boxId !== WayPointData.THIS_BOX_ID) {
-        const fromBox: Box = this.getBox(from.boxId)
-        fromBox.registerBorderingLink(this) // TODO: move this logic into a WayPoint
-      }
+      const fromWayPointHtml: string = '<div id="'+this.fromWayPoint.getId()+'" draggable="true"/>'
+      const toWayPointHtml: string = '<div id="'+this.toWayPoint.getId()+'" draggable="true"/>'
+      await dom.addContentTo(this.base.getId(), '<svg id="'+this.data.id+'">'+lineHtml+'</svg>'+fromWayPointHtml+toWayPointHtml)
       this.rendered = true
     } else {
       await dom.setContentTo(this.data.id, lineHtml)
     }
 
     await dom.setStyleTo(this.data.id, 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
-    return this.head.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
+    const fromBox: Box = this.getBox(this.fromWayPoint.getData().boxId)
+    await this.fromWayPoint.render(fromBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians)
+    const toBox: Box = this.getBox(this.toWayPoint.getData().boxId)
+    await this.toWayPoint.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
   }
 
   private async getWayPointPositionInBaseCoords(wayPoint: WayPointData, baseRect: Rect): Promise<{x: number; y: number}> {
@@ -110,6 +109,10 @@ export class Link {
       return this.base
     }
     return this.base.getChild(boxIdFromWayPoint)
+  }
+
+  private reorder_restructure_rebalance(): void {
+
   }
 
 }

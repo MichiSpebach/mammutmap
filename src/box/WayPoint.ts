@@ -11,18 +11,24 @@ export class WayPoint implements Draggable<Box> {
   private readonly id: string
   private readonly data: WayPointData
   private readonly referenceLink: Link
+  private shape: 'none'|'arrow'
   private rendered: boolean = false
   private borderingBox: Box|null = null
   private recentDragPosition: {x: number, y: number}|null = null
 
-  public constructor(id: string, data: WayPointData, referenceLink: Link) {
+  public constructor(id: string, data: WayPointData, referenceLink: Link, shape: 'none'|'arrow') {
     this.id = id
     this.data = data
     this.referenceLink = referenceLink
+    this.shape = shape
   }
 
   public getId(): string {
     return this.id
+  }
+
+  public getData(): WayPointData {
+    return this.data
   }
 
   public getDropTargetAtDragStart(): Box|never {
@@ -68,16 +74,24 @@ export class WayPoint implements Draggable<Box> {
       this.borderingBox.registerBorderingLink(this.referenceLink)
     }
 
-    const positionStyle = 'position:absolute;left:'+x+'%;top:'+y+'%;'
-    const triangleStyle = 'width:28px;height:10px;background:blue;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
-    const transformStyle = 'transform:translate(-14px, -5px)rotate('+angleInRadians+'rad);'
-
-    await dom.setStyleTo(this.getId(), positionStyle + triangleStyle + transformStyle)
+    await this.renderShape(x, y, angleInRadians)
 
     if (!this.rendered) {
       DragManager.addDraggable(this)
       this.rendered = true
     }
+  }
+
+  private async renderShape(x: number, y: number, angleInRadians: number): Promise<void> {
+    if (this.shape === 'none') {
+      return
+    }
+
+    const positionStyle = 'position:absolute;left:'+x+'%;top:'+y+'%;'
+    const triangleStyle = 'width:28px;height:10px;background:blue;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
+    const transformStyle = 'transform:translate(-14px, -5px)rotate('+angleInRadians+'rad);'
+
+    await dom.setStyleTo(this.getId(), positionStyle + triangleStyle + transformStyle)
   }
 
 }
