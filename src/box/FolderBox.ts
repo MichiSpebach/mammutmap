@@ -29,8 +29,12 @@ export class FolderBox extends Box {
     this.renderLinks()
   }
 
-  public getChild(id: string): Box {
+  public getChild(id: string): Box { // TODO: rename to getBox?
     return this.body.getBox(id)
+  }
+
+  public containsBox(box: Box): boolean { // TODO: rename to containsChild?
+    return this.body.containsBox(box)
   }
 
   public async addBox(box: Box): Promise<void> { // TODO: rename to addChild?

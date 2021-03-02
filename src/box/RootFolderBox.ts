@@ -18,4 +18,8 @@ export class RootFolderBox extends FolderBox {
     return this.mapPath
   }
 
+  public isRoot(): boolean {
+    return true
+  }
+
 }

@@ -1,22 +1,23 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
-import { Draggable } from '../Draggable';
-import { DropTarget } from '../DropTarget';
+import { Rect } from '../Rect'
+import { Draggable } from '../Draggable'
+import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
-import { Box } from './Box';
+import { Box } from './Box'
 import { WayPointData } from './WayPointData'
-import { Link } from './Link';
+import { Link } from './Link'
 
 export class WayPoint implements Draggable<Box> {
   private readonly id: string
   private readonly data: WayPointData
   private readonly referenceLink: Link
-  private shape: 'none'|'arrow'
+  private shape: 'square'|'arrow'
   private rendered: boolean = false
   private borderingBox: Box|null = null
   private recentDragPosition: {x: number, y: number}|null = null
 
-  public constructor(id: string, data: WayPointData, referenceLink: Link, shape: 'none'|'arrow') {
+  public constructor(id: string, data: WayPointData, referenceLink: Link, shape: 'square'|'arrow') {
     this.id = id
     this.data = data
     this.referenceLink = referenceLink
@@ -83,15 +84,31 @@ export class WayPoint implements Draggable<Box> {
   }
 
   private async renderShape(x: number, y: number, angleInRadians: number): Promise<void> {
-    if (this.shape === 'none') {
-      return
+    const positionStyle = 'position:absolute;left:'+x+'%;top:'+y+'%;'
+    let shapeStyle: string
+    let transformStyle: string
+
+    switch (this.shape) {
+      case 'square':
+        shapeStyle = 'width:10px;height:10px;background:blue;'
+        transformStyle = 'transform:translate(-5px,-5px);'
+        break
+      case 'arrow':
+        shapeStyle = 'width:28px;height:10px;background:blue;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
+        transformStyle = 'transform:translate(-14px,-5px)rotate('+angleInRadians+'rad);'
+        break
+      default:
+        shapeStyle = ''
+        transformStyle = ''
+        util.logWarning('Shape '+this.shape+' is not implemented.')
     }
 
-    const positionStyle = 'position:absolute;left:'+x+'%;top:'+y+'%;'
-    const triangleStyle = 'width:28px;height:10px;background:blue;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
-    const transformStyle = 'transform:translate(-14px, -5px)rotate('+angleInRadians+'rad);'
+    await dom.setStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle)
+  }
 
-    await dom.setStyleTo(this.getId(), positionStyle + triangleStyle + transformStyle)
+  public async getClientPosition(): Promise<{x: number, y: number}> {
+    const clientRect: Rect = await dom.getClientRectOf(this.getId())
+    return {x: clientRect.x, y: clientRect.y}
   }
 
 }

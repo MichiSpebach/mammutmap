@@ -75,6 +75,10 @@ export abstract class Box implements DropTarget {
     return this.parent
   }
 
+  public isRoot(): boolean {
+    return false
+  }
+
   public async setParentAndFlawlesslyResizeAndSave(newParent: FolderBox): Promise<void> {
     if (this.parent == null) {
       util.logError('Box.setParent() cannot be called on root.')
