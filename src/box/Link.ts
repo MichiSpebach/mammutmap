@@ -22,12 +22,9 @@ export class Link {
   }
 
   public async render(): Promise<void> {
-    const from: WayPointData = this.data.fromWayPoints[0]
-    const to: WayPointData = this.data.toWayPoints[0]
-
     const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, gather awaits for more performance
-    const fromInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(from, baseRect) // TODO: optimize, gather awaits for more performance
-    const toInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(to, baseRect) // TODO: optimize, gather awaits for more performance
+    const fromInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(this.fromWayPoint.getData(), baseRect) // TODO: optimize, gather awaits for more performance
+    const toInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(this.toWayPoint.getData(), baseRect) // TODO: optimize, gather awaits for more performance
 
     return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
@@ -79,8 +76,8 @@ export class Link {
     const lineHtml: string = '<line '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
 
     if (this.rendered === false) {
-      const fromWayPointHtml: string = '<div id="'+this.fromWayPoint.getId()+'" draggable="true"/>'
-      const toWayPointHtml: string = '<div id="'+this.toWayPoint.getId()+'" draggable="true"/>'
+      const fromWayPointHtml: string = '<div id="'+this.fromWayPoint.getId()+'" draggable="true"></div>'
+      const toWayPointHtml: string = '<div id="'+this.toWayPoint.getId()+'" draggable="true"></div>'
       await dom.addContentTo(this.base.getId(), '<svg id="'+this.data.id+'">'+lineHtml+'</svg>'+fromWayPointHtml+toWayPointHtml)
       this.rendered = true
     } else {
@@ -89,7 +86,7 @@ export class Link {
 
     await dom.setStyleTo(this.data.id, 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
     const fromBox: Box = this.getBox(this.fromWayPoint.getData().boxId)
-    await this.fromWayPoint.render(fromBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians)
+    await this.fromWayPoint.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians)
     const toBox: Box = this.getBox(this.toWayPoint.getData().boxId)
     await this.toWayPoint.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
   }
@@ -123,10 +120,16 @@ export class Link {
       const positionInBoxCoords: {x: number, y: number} = await box.transformClientPositionToLocal(fromClientPosition.x, fromClientPosition.y)
       return new WayPointData(box.getId(), positionInBoxCoords.x, positionInBoxCoords.y)
     })
-
-    // TODO: WIP toWayPoints
+    const toWayPoints: Promise<WayPointData>[] = relation.toBoxes.map(async box => {
+      const positionInBoxCoords: {x: number, y: number} = await box.transformClientPositionToLocal(toClientPosition.x, toClientPosition.y)
+      return new WayPointData(box.getId(), positionInBoxCoords.x, positionInBoxCoords.y)
+    })
 
     // TODO: WIP unshift into existing WayPointData[] till inner boxId matches
+    this.data.fromWayPoints = await Promise.all(fromWayPoints)
+    this.data.toWayPoints = await Promise.all(toWayPoints)
+
+    // TODO: WIP move link elements to new baseBox if base changes
 
     this.base = relation.commonAncestor
   }
