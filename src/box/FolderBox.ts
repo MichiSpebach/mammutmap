@@ -1,4 +1,5 @@
 import * as util from '../util'
+import * as dom from '../domAdapter'
 import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBoxHeader } from './FolderBoxHeader'
@@ -43,6 +44,25 @@ export class FolderBox extends Box {
 
   public removeBox(box: Box): void { // TODO: rename to removeChild?
     return this.body.removeBox(box)
+  }
+
+  public static changeManagingBoxOfLink(oldManagingBox: FolderBox, newManagingBox: FolderBox, link: Link): void {
+    if (link.getBase() !== newManagingBox) {
+      util.logWarning('baseBox/managingBox '+newManagingBox.getSrcPath()+' of given link '+link.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
+    }
+    if (newManagingBox.links.includes(link)) {
+      util.logWarning('box '+newManagingBox.getSrcPath()+' already manages link '+link.getId())
+    }
+    if (!oldManagingBox.links.includes(link)) {
+      util.logWarning('box '+oldManagingBox.getSrcPath()+' does not manage link '+link.getId())
+    }
+
+    newManagingBox.links.push(link)
+    dom.appendChildTo(newManagingBox.getId(), link.getId())
+    oldManagingBox.links.splice(oldManagingBox.links.indexOf(link), 1)
+
+    newManagingBox.saveMapData()
+    oldManagingBox.saveMapData()
   }
 
   public async addLink(from: WayPointData, to: WayPointData): Promise<void> {

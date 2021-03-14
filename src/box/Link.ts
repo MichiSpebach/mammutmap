@@ -4,66 +4,57 @@ import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
-import { WayPoint } from './WayPoint'
+import { LinkEnd } from './LinkEnd'
 import { Rect } from '../Rect'
 
 export class Link {
   private data: BoxMapLinkData
-  private base: FolderBox
-  private fromWayPoint: WayPoint
-  private toWayPoint: WayPoint
+  private base: FolderBox // TODO: rename to managingBox?
+  private from: LinkEnd
+  private to: LinkEnd
   private rendered: boolean = false
 
   public constructor(data: BoxMapLinkData, base: FolderBox) {
     this.data = data
     this.base = base
-    this.fromWayPoint = new WayPoint(this.data.id+'from', data.fromWayPoints[0], this, 'square')
-    this.toWayPoint = new WayPoint(this.data.id+'to', data.toWayPoints[0], this, 'arrow')
+    this.from = new LinkEnd(this.data.id+'from', this, 'square')
+    this.to = new LinkEnd(this.data.id+'to', this, 'arrow')
+  }
+
+  public getId(): string {
+    return this.data.id
+  }
+
+  public getBase(): FolderBox {
+    return this.base
   }
 
   public async render(): Promise<void> {
     const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, gather awaits for more performance
-    const fromInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(this.fromWayPoint.getData(), baseRect) // TODO: optimize, gather awaits for more performance
-    const toInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(this.toWayPoint.getData(), baseRect) // TODO: optimize, gather awaits for more performance
+    const fromInBaseCoords: {x: number, y: number} = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.fromWayPoints, baseRect) // TODO: optimize, gather awaits for more performance
+    const toInBaseCoords: {x: number, y: number} = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.toWayPoints, baseRect) // TODO: optimize, gather awaits for more performance
 
     return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
 
-  public async renderWayPointAtPosition(wayPoint: WayPoint, clientX: number, clientY: number): Promise<void> {
-    if (wayPoint !== this.toWayPoint) {
-      util.logError('Given WayPoint is not contained by Link.')
+  public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number): Promise<void> {
+    if (linkEnd !== this.to) {
+      util.logError('Given LinkEnd is not contained by Link.')
     }
 
-    const from: WayPointData = this.data.fromWayPoints[0]
     const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, use cached?
-    const fromInBaseCoords: {x: number, y: number} = await this.getWayPointPositionInBaseCoords(from, baseRect)
+    const fromInBaseCoords: {x: number, y: number} = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.fromWayPoints, baseRect)
     const newToInBaseCoords: {x: number, y: number} = await this.base.transformClientPositionToLocal(clientX, clientY)
 
     await this.renderAtPosition(fromInBaseCoords, newToInBaseCoords)
   }
 
-  // TODO: refactor, simplify, only needs wayPoint and dropTarget as argument
-  public async renderWayPointAtPositionAndSave(wayPoint: WayPoint, clientX: number, clientY: number, dropTarget: Box): Promise<void> {
-    if (wayPoint !== this.toWayPoint) {
-      util.logError('Given WayPoint is not contained by Link.')
+  public async renderLinkEndAtPositionAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
+    if (linkEnd !== this.to) {
+      util.logError('Given LinkEnd is not contained by Link.')
     }
 
-    const to: WayPointData = this.data.toWayPoints[0]
-    to.boxId = dropTarget.getId()
-
-    if (!this.base.containsBox(dropTarget)) { // TODO: condition not needed
-      await this.reorder(this.fromWayPoint.getDropTargetAtDragStart(), dropTarget)
-    }
-
-    // TODO: not needed from here
-    const newPositionInDropTargetCoords: {x: number, y: number} = await dropTarget.transformClientPositionToLocal(clientX, clientY)
-
-    to.x = newPositionInDropTargetCoords.x
-    to.y = newPositionInDropTargetCoords.y
-
-    await this.render()
-    // TODO: not needed till here
-    await this.base.saveMapData()
+    await this.reorderAndSave(this.from.getDropTargetAtDragStart(), dropTarget)
   }
 
   private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}): Promise<void> {
@@ -76,27 +67,28 @@ export class Link {
     const lineHtml: string = '<line '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
 
     if (this.rendered === false) {
-      const fromWayPointHtml: string = '<div id="'+this.fromWayPoint.getId()+'" draggable="true"></div>'
-      const toWayPointHtml: string = '<div id="'+this.toWayPoint.getId()+'" draggable="true"></div>'
-      await dom.addContentTo(this.base.getId(), '<svg id="'+this.data.id+'">'+lineHtml+'</svg>'+fromWayPointHtml+toWayPointHtml)
+      const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
+      const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
+      const svgHtml: string = '<svg id="'+this.data.id+'line">'+lineHtml+'</svg>'
+      await dom.addContentTo(this.base.getId(), '<div id="'+this.data.id+'">'+svgHtml+fromHtml+toHtml+'</div>')
+      await dom.setStyleTo(this.data.id+'line', 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
       this.rendered = true
     } else {
-      await dom.setContentTo(this.data.id, lineHtml)
+      await dom.setContentTo(this.data.id+'line', lineHtml)
     }
 
-    await dom.setStyleTo(this.data.id, 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
-    const fromBox: Box = this.getBox(this.fromWayPoint.getData().boxId)
-    await this.fromWayPoint.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians)
-    const toBox: Box = this.getBox(this.toWayPoint.getData().boxId)
-    await this.toWayPoint.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
+    const fromBox: Box = this.getDeepestRenderedBox(this.data.fromWayPoints).box
+    await this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians)
+    const toBox: Box = this.getDeepestRenderedBox(this.data.toWayPoints).box
+    await this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
   }
 
-  private async getWayPointPositionInBaseCoords(wayPoint: WayPointData, baseRect: Rect): Promise<{x: number; y: number}> {
-    const box: Box = this.getBox(wayPoint.boxId)
-    const rect: Rect = await box.getClientRect()
+  private async getDeepestRenderedWayPointPositionInBaseCoords(path: WayPointData[], baseRect: Rect): Promise<{x: number; y: number}> {
+    const deepestRendered: {box: Box, wayPoint: WayPointData} = this.getDeepestRenderedBox(path)
+    const rect: Rect = await deepestRendered.box.getClientRect()
 
-    const xInPixel: number = wayPoint.x * rect.width / 100
-    const yInPixel: number = wayPoint.y * rect.height / 100
+    const xInPixel: number = deepestRendered.wayPoint.x * rect.width / 100
+    const yInPixel: number = deepestRendered.wayPoint.y * rect.height / 100
 
     const xInBaseCoordsInPixel: number = rect.x + xInPixel - baseRect.x
     const yInBaseCoordsInPixel: number = rect.y + yInPixel - baseRect.y
@@ -104,16 +96,40 @@ export class Link {
     return {x: xInBaseCoordsInPixel / baseRect.width * 100, y: yInBaseCoordsInPixel / baseRect.height * 100}
   }
 
-  private getBox(boxIdFromWayPoint: string) {
-    if (boxIdFromWayPoint === WayPointData.THIS_BOX_ID) {
-      return this.base
+  private getDeepestRenderedBox(path: WayPointData[]): {box: Box, wayPoint: WayPointData}|never {
+    if (path.length === 0) {
+      util.logError(this.base.getSrcPath+' has empty link path.')
     }
-    return this.base.getChild(boxIdFromWayPoint)
+
+    let pivotBox: FolderBox = this.base
+    let pivotWayPoint: WayPointData = path[0]
+
+    for (let i = 0; i < path.length; i++) {
+      // TODO: handle if deepest box is not rendered but also log warning if path is corrupted
+      pivotWayPoint = path[i]
+      let box: Box
+      if (pivotWayPoint.boxId === WayPointData.THIS_BOX_ID) {
+        box = this.base
+      } else {
+        box = pivotBox.getChild(pivotWayPoint.boxId)
+      }
+
+      if (box instanceof FolderBox) {
+        pivotBox = box
+      } else {
+        if (i != path.length-1) {
+          util.logWarning(this.base.getSrcPath+' seems to have a corrupted link, '+box.getSrcPath+' is not the deepest WayPoint in path.')
+        }
+        return {box: box, wayPoint: pivotWayPoint}
+      }
+    }
+
+    return {box: pivotBox, wayPoint: pivotWayPoint}
   }
 
-  private async reorder(fromBox: Box, toBox: Box): Promise<void | never> {
-    const fromClientPosition: {x: number, y: number} = await this.fromWayPoint.getClientPosition()
-    const toClientPosition: {x: number, y: number} = await this.toWayPoint.getClientPosition()
+  private async reorderAndSave(fromBox: Box, toBox: Box): Promise<void | never> {
+    const fromClientPosition: {x: number, y: number} = await this.from.getClientPosition()
+    const toClientPosition: {x: number, y: number} = await this.to.getClientPosition()
     const relation: {commonAncestor: FolderBox, fromBoxes: Box[], toBoxes: Box[]} = this.findCommonAncestor(fromBox, toBox)
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
@@ -129,9 +145,13 @@ export class Link {
     this.data.fromWayPoints = await Promise.all(fromWayPoints)
     this.data.toWayPoints = await Promise.all(toWayPoints)
 
-    // TODO: WIP move link elements to new baseBox if base changes
+    if(this.base !== relation.commonAncestor) {
+      const oldBase: FolderBox = this.base
+      this.base = relation.commonAncestor
+      FolderBox.changeManagingBoxOfLink(oldBase, relation.commonAncestor, this)
+    }
 
-    this.base = relation.commonAncestor
+    await this.render()
   }
 
   private findCommonAncestor(fromBox: Box, toBox: Box): {commonAncestor: FolderBox, fromBoxes: Box[], toBoxes: Box[]} | never {

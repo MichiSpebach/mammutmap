@@ -5,31 +5,24 @@ import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 import { Box } from './Box'
-import { WayPointData } from './WayPointData'
 import { Link } from './Link'
 
-export class WayPoint implements Draggable<Box> {
+export class LinkEnd implements Draggable<Box> {
   private readonly id: string
-  private readonly data: WayPointData
   private readonly referenceLink: Link
   private shape: 'square'|'arrow'
   private rendered: boolean = false
   private borderingBox: Box|null = null
   private recentDragPosition: {x: number, y: number}|null = null
 
-  public constructor(id: string, data: WayPointData, referenceLink: Link, shape: 'square'|'arrow') {
+  public constructor(id: string, referenceLink: Link, shape: 'square'|'arrow') {
     this.id = id
-    this.data = data
     this.referenceLink = referenceLink
     this.shape = shape
   }
 
   public getId(): string {
     return this.id
-  }
-
-  public getData(): WayPointData {
-    return this.data
   }
 
   public getDropTargetAtDragStart(): Box|never {
@@ -45,12 +38,12 @@ export class WayPoint implements Draggable<Box> {
 
   public dragStart(clientX: number, clientY: number): Promise<void> {
     this.recentDragPosition = {x: clientX, y: clientY}
-    return this.referenceLink.renderWayPointAtPosition(this, clientX, clientY)
+    return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY)
   }
 
   public drag(clientX: number, clientY: number): Promise<void> {
     this.recentDragPosition = {x: clientX, y: clientY}
-    return this.referenceLink.renderWayPointAtPosition(this, clientX, clientY)
+    return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY)
   }
 
   public dragCancel(): Promise<void> {
@@ -63,13 +56,13 @@ export class WayPoint implements Draggable<Box> {
       util.logError('recentDragPosition is null')
     }
 
-    await this.referenceLink.renderWayPointAtPositionAndSave(this, this.recentDragPosition.x, this.recentDragPosition.y, dropTarget)
+    await this.referenceLink.renderLinkEndAtPositionAndSave(this, dropTarget)
 
     this.recentDragPosition = null
   }
 
   public async render(borderingBox: Box, x: number, y: number, angleInRadians: number): Promise<void> {
-    if (this.borderingBox !== borderingBox) {
+    if (this.borderingBox !== borderingBox) { // TODO: does not work for all wayPoints, move up to Link class
       this.borderingBox?.deregisterBorderingLink(this.referenceLink)
       this.borderingBox = borderingBox
       this.borderingBox.registerBorderingLink(this.referenceLink)

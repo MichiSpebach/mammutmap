@@ -1,6 +1,6 @@
 
 export class WayPointData {
-  public static readonly THIS_BOX_ID: string = 'this'
+  public static readonly THIS_BOX_ID: string = 'this' // TODO: remove and use id of baseBox?
 
   public boxId: string
   public x: number
