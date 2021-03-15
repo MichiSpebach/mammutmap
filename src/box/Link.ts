@@ -148,7 +148,7 @@ export class Link {
     if(this.base !== relation.commonAncestor) {
       const oldBase: FolderBox = this.base
       this.base = relation.commonAncestor
-      FolderBox.changeManagingBoxOfLink(oldBase, relation.commonAncestor, this)
+      FolderBox.changeManagingBoxOfLinkAndSave(oldBase, relation.commonAncestor, this)
     }
 
     await this.render()

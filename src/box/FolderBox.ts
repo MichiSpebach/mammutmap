@@ -46,7 +46,7 @@ export class FolderBox extends Box {
     return this.body.removeBox(box)
   }
 
-  public static changeManagingBoxOfLink(oldManagingBox: FolderBox, newManagingBox: FolderBox, link: Link): void {
+  public static changeManagingBoxOfLinkAndSave(oldManagingBox: FolderBox, newManagingBox: FolderBox, link: Link): void {
     if (link.getBase() !== newManagingBox) {
       util.logWarning('baseBox/managingBox '+newManagingBox.getSrcPath()+' of given link '+link.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
     }
