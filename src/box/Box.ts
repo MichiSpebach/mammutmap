@@ -159,16 +159,8 @@ export abstract class Box implements DropTarget {
   }
 
   private static async loadMapData(parent: Box, name:string): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}> {
-    const mapDataPath: string = Box.getMapDataFilePath(parent, name)
-
-    return fileSystem.readFile(mapDataPath)
-      .then(json => {
-        return {mapData: BoxMapData.buildFromJson(json), mapDataFileExists: true}
-      })
-      .catch(error => {
-        util.logWarning('failed to load ' + mapDataPath + ': ' + error)
-        return {mapData: BoxMapData.buildDefault(), mapDataFileExists: false}
-      })
+    const filePath: string = Box.getMapDataFilePath(parent, name)
+    return fileSystem.loadMapData(filePath)
   }
 
   public async restoreMapData(): Promise<void> {

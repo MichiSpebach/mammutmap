@@ -26,7 +26,7 @@ export class FolderBox extends Box {
   }
 
   protected async renderBody(): Promise<void> {
-    await this.body.render()
+    await this.body.render() // TODO: fix body.render(), seems to resolve before it has finished
     this.renderLinks()
   }
 
@@ -61,6 +61,8 @@ export class FolderBox extends Box {
     dom.appendChildTo(newManagingBox.getId(), link.getId())
     oldManagingBox.links.splice(oldManagingBox.links.indexOf(link), 1)
 
+    newManagingBox.getMapLinkData().push(link.getData())
+    oldManagingBox.getMapLinkData().splice(oldManagingBox.getMapLinkData().indexOf(link.getData()), 1)
     newManagingBox.saveMapData()
     oldManagingBox.saveMapData()
   }

@@ -25,6 +25,10 @@ export class Link {
     return this.data.id
   }
 
+  public getData(): BoxMapLinkData {
+    return this.data
+  }
+
   public getBase(): FolderBox {
     return this.base
   }

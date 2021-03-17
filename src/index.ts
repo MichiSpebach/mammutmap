@@ -28,7 +28,7 @@ const createWindow = () => {
 
   dom.init(mainWindow.webContents)
 
-  new Map()
+  Map.new()
 };
 
 // This method will be called when Electron has finished

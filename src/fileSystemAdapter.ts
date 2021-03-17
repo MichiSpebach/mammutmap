@@ -1,6 +1,18 @@
 import * as fs from 'fs'
 import { Dirent, promises as fsPromises } from 'fs'
 import * as util from './util'
+import { BoxMapData } from './box/BoxMapData'
+
+export async function loadMapData(filePath: string): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}> {
+  return readFile(filePath)
+    .then(json => {
+      return {mapData: BoxMapData.buildFromJson(json), mapDataFileExists: true}
+    })
+    .catch(error => {
+      util.logWarning('failed to load ' + filePath + ': ' + error)
+      return {mapData: BoxMapData.buildDefault(), mapDataFileExists: false}
+    })
+}
 
 export function readdirSync(path: string): Dirent[] {
   return fs.readdirSync(path, { withFileTypes: true })

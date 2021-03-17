@@ -8,7 +8,11 @@ export class Map {
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
 
-  public constructor() {
+  public static async new(): Promise<Map> {
+     return new Map(await RootFolderBox.new('./src', './map'))
+  }
+
+  private constructor(root: RootFolderBox) {
     dom.setContentTo('content', '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
     dom.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>')
     dom.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
@@ -16,7 +20,7 @@ export class Map {
     this.updateStyle()
 
     //this.addBoxes()
-    this.rootDirectory = new RootFolderBox('root', './src', './map')
+    this.rootDirectory = root
     this.rootDirectory.render()
 
     dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
