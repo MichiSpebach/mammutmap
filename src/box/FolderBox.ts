@@ -26,7 +26,7 @@ export class FolderBox extends Box {
   }
 
   protected async renderBody(): Promise<void> {
-    await this.body.render() // TODO: fix body.render(), seems to resolve before it has finished
+    await this.body.render()
     this.renderLinks()
   }
 

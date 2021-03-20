@@ -14,9 +14,9 @@ export class Map {
 
   private constructor(root: RootFolderBox) {
     dom.setContentTo('content', '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
-    dom.setContentTo('map', '<div id="mapRatioAdjuster" style="width:' + this.mapRatioAdjusterSizePx + 'px; height:' + this.mapRatioAdjusterSizePx + 'px;"></div>')
+    dom.setContentTo('map', '<div id="mapRatioAdjuster" style="width:'+this.mapRatioAdjusterSizePx+'px; height:'+this.mapRatioAdjusterSizePx+'px;"></div>')
     dom.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
-    dom.setContentTo('mapMover', '<div id="root" style="width:100%; height:100%;"></div>')
+    dom.setContentTo('mapMover', '<div id="'+root.getId()+'" style="width:100%; height:100%;"></div>')
     this.updateStyle()
 
     //this.addBoxes()
@@ -34,7 +34,7 @@ export class Map {
   }
 
   private addBox(color: string) {
-    dom.addContentTo('root', '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>')
+    dom.addContentTo(this.rootDirectory.getId(), '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>')
   }
 
   private zoom(delta: number, clientX: number, clientY: number): void {

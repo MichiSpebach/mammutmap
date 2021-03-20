@@ -42,7 +42,7 @@ export class FolderBoxBody {
       }
     }))
 
-    await Promise.all(this.boxes.map(async (box) => {
+    await Promise.all(this.boxes.map(async (box: Box): Promise<void> => {
       await box.render()
     }))
   }

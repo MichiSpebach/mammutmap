@@ -138,9 +138,9 @@ export abstract class Box implements DropTarget {
   public async render(): Promise<void> {
     this.renderStyle()
 
-    this.header.render()
-    this.border.render()
-    this.renderBody()
+    await this.header.render()
+    await this.border.render()
+    await this.renderBody()
 
     const connectorPlaceholder: string = '<div id="'+this.connector.getId()+'" class="boxConnectorPlacement"></div>' // TODO: remove style class from here?
     await dom.addContentTo(this.getId(), connectorPlaceholder) // TODO: add placeholders for other parts too
