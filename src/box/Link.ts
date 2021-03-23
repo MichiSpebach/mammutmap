@@ -132,8 +132,8 @@ export class Link {
   }
 
   private async reorderAndSave(fromBox: Box, toBox: Box): Promise<void | never> {
-    const fromClientPosition: {x: number, y: number} = await this.from.getClientPosition()
-    const toClientPosition: {x: number, y: number} = await this.to.getClientPosition()
+    const fromClientPosition: {x: number, y: number} = await this.from.getClientMidPosition()
+    const toClientPosition: {x: number, y: number} = await this.to.getClientMidPosition()
     const relation: {commonAncestor: FolderBox, fromBoxes: Box[], toBoxes: Box[]} = this.findCommonAncestor(fromBox, toBox)
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
@@ -153,6 +153,8 @@ export class Link {
       const oldBase: FolderBox = this.base
       this.base = relation.commonAncestor
       FolderBox.changeManagingBoxOfLinkAndSave(oldBase, relation.commonAncestor, this)
+    } else {
+      this.base.saveMapData()
     }
 
     await this.render()

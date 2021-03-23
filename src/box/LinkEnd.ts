@@ -99,9 +99,9 @@ export class LinkEnd implements Draggable<Box> {
     await dom.setStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle)
   }
 
-  public async getClientPosition(): Promise<{x: number, y: number}> {
+  public async getClientMidPosition(): Promise<{x: number, y: number}> {
     const clientRect: Rect = await dom.getClientRectOf(this.getId())
-    return {x: clientRect.x, y: clientRect.y}
+    return {x: clientRect.x + clientRect.width/2, y: clientRect.y + clientRect.height/2}
   }
 
 }
