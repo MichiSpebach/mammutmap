@@ -42,23 +42,31 @@ export class Link {
   }
 
   public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number): Promise<void> {
-    if (linkEnd !== this.to) {
+    const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, use cached?
+
+    let fromInBaseCoords: {x: number, y: number}
+    let toInBaseCoords: {x: number, y: number}
+    if (linkEnd === this.to) {
+      fromInBaseCoords = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.fromWayPoints, baseRect)
+      toInBaseCoords = await this.base.transformClientPositionToLocal(clientX, clientY)
+    } else if (linkEnd === this.from) {
+      fromInBaseCoords = await this.base.transformClientPositionToLocal(clientX, clientY)
+      toInBaseCoords = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.toWayPoints, baseRect)
+    } else {
       util.logError('Given LinkEnd is not contained by Link.')
     }
 
-    const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, use cached?
-    const fromInBaseCoords: {x: number, y: number} = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.fromWayPoints, baseRect)
-    const newToInBaseCoords: {x: number, y: number} = await this.base.transformClientPositionToLocal(clientX, clientY)
-
-    await this.renderAtPosition(fromInBaseCoords, newToInBaseCoords)
+    await this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
 
-  public async renderLinkEndAtPositionAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
-    if (linkEnd !== this.to) {
+  public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
+    if (linkEnd === this.to) {
+      await this.reorderAndSave(this.from.getBorderingBox(), dropTarget)
+    } else if (linkEnd === this.from) {
+      await this.reorderAndSave(dropTarget, this.to.getBorderingBox())
+    } else {
       util.logError('Given LinkEnd is not contained by Link.')
     }
-
-    await this.reorderAndSave(this.from.getDropTargetAtDragStart(), dropTarget)
   }
 
   private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}): Promise<void> {

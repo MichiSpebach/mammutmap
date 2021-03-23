@@ -25,11 +25,15 @@ export class LinkEnd implements Draggable<Box> {
     return this.id
   }
 
-  public getDropTargetAtDragStart(): Box|never {
+  public getBorderingBox(): Box|never {
     if (!this.borderingBox) {
-      util.logError('WayPoint must be rendered before calling getDropTargetAtDragStart(), but was not.')
+      util.logError('WayPoint must be rendered before calling getBorderingBox(), but was not.')
     }
     return this.borderingBox
+  }
+
+  public getDropTargetAtDragStart(): Box|never {
+    return this.getBorderingBox()
   }
 
   public canBeDroppedInto(dropTarget: DropTarget): boolean {
@@ -56,7 +60,7 @@ export class LinkEnd implements Draggable<Box> {
       util.logError('recentDragPosition is null')
     }
 
-    await this.referenceLink.renderLinkEndAtPositionAndSave(this, dropTarget)
+    await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
 
     this.recentDragPosition = null
   }
