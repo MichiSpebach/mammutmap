@@ -120,7 +120,7 @@ export class Link {
       // TODO: handle if deepest box is not rendered but also log warning if path is corrupted
       pivotWayPoint = path[i]
       let box: Box
-      if (pivotWayPoint.boxId === WayPointData.THIS_BOX_ID) {
+      if (pivotWayPoint.boxId === this.base.getId()) {
         box = this.base
       } else {
         box = pivotBox.getChild(pivotWayPoint.boxId)

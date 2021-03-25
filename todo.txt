@@ -1,4 +1,6 @@
 
+add name of box to WayPointData to be better readable
+
 optimize domAdapter, add prioritize flag to methods, queue requests and replace outdated ones with new ones with same id and resolve all of them when newest finishes (return same result)
 
 when a linkHead is dragged over another linkHead and a box the dropTarget is the linkHeads baseBox but it should be the box (somehow set pointer-events: none; for all linkHeads while dragging)
