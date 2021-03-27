@@ -180,21 +180,21 @@ export class Link {
 
       if (!fromBoxes[0].isRoot()) {
         commonAncestorCandidate = fromBoxes[0].getParent()
-        fromBoxes.unshift(commonAncestorCandidate)
         if (toBoxes.includes(commonAncestorCandidate)) {
-          fromBoxes.shift()
-          toBoxes.shift()
+          toBoxes.splice(0, Math.min(toBoxes.indexOf(commonAncestorCandidate)+1, toBoxes.length-1))
           break
+        } else {
+          fromBoxes.unshift(commonAncestorCandidate)
         }
       }
 
       if (!toBoxes[0].isRoot()) {
         commonAncestorCandidate = toBoxes[0].getParent()
-        toBoxes.unshift(commonAncestorCandidate)
         if (fromBoxes.includes(commonAncestorCandidate)) {
-          fromBoxes.shift()
-          toBoxes.shift()
+          fromBoxes.splice(0, Math.min(fromBoxes.indexOf(commonAncestorCandidate)+1, fromBoxes.length-1))
           break
+        } else {
+          toBoxes.unshift(commonAncestorCandidate)
         }
       }
     }
