@@ -146,11 +146,11 @@ export class Link {
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
       const positionInBoxCoords: {x: number, y: number} = await box.transformClientPositionToLocal(fromClientPosition.x, fromClientPosition.y)
-      return new WayPointData(box.getId(), positionInBoxCoords.x, positionInBoxCoords.y)
+      return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.x, positionInBoxCoords.y)
     })
     const toWayPoints: Promise<WayPointData>[] = relation.toBoxes.map(async box => {
       const positionInBoxCoords: {x: number, y: number} = await box.transformClientPositionToLocal(toClientPosition.x, toClientPosition.y)
-      return new WayPointData(box.getId(), positionInBoxCoords.x, positionInBoxCoords.y)
+      return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.x, positionInBoxCoords.y)
     })
 
     // TODO: WIP unshift into existing WayPointData[] till inner boxId matches

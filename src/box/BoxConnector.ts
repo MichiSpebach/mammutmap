@@ -22,10 +22,10 @@ export class BoxConnector {
   }
 
   private addLinkToReferenceBox(): void {
-    const from = new WayPointData(this.referenceBox.getId(), 100, 50)
+    const from = new WayPointData(this.referenceBox.getId(), this.referenceBox.getName(), 100, 50)
 
     const rightMiddle: {x: number, y: number} = this.referenceBox.transformLocalToParent(100, 50)
-    const to = new WayPointData(this.referenceBox.getParent().getId(), rightMiddle.x + 5, rightMiddle.y)
+    const to = new WayPointData(this.referenceBox.getParent().getId(), this.referenceBox.getParent().getName(), rightMiddle.x + 5, rightMiddle.y)
 
     this.referenceBox.getParent().addLink(from, to)
   }
