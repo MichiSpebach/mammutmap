@@ -113,6 +113,7 @@ export abstract class Box implements DropTarget {
       util.logInfo('moved ' + oldMapDataFilePath + ' to ' + newMapDataFilePath)
     }
     await this.saveMapData()
+    await Promise.all(this.borderingLinks.map(link => link.reorderAndSave()))
   }
 
   public async getClientRect(): Promise<Rect> {
@@ -201,7 +202,12 @@ export abstract class Box implements DropTarget {
 
   protected abstract getOverflow(): 'hidden'|'visible'
 
-  public async updateMeasures(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
+  public async updateMeasuresAndBorderingLinks(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
+    await this.updateMeasures(measuresInPercentIfChanged)
+    await Promise.all(this.borderingLinks.map(link => link.render()))
+  }
+
+  private async updateMeasures(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
     if (measuresInPercentIfChanged.x != null) {
       this.mapData.x = measuresInPercentIfChanged.x
     }
@@ -216,7 +222,6 @@ export abstract class Box implements DropTarget {
     }
 
     await this.renderStyle()
-    await Promise.all(this.borderingLinks.map(link => link.render()))
   }
 
   protected async abstract renderBody(): Promise<void>

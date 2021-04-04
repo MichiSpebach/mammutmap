@@ -105,7 +105,7 @@ export class ScaleManager {
     const newWidthInPixel: number = this.state.startClientRect.width + clientX - this.state.startClientX
     const newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
 
-    this.state.scaling.referenceBox.updateMeasures({width: newWidthInPercent})
+    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({width: newWidthInPercent})
   }
 
   private static dragSouthBorder(clientX: number, clientY: number): void {
@@ -117,7 +117,7 @@ export class ScaleManager {
     const newHeightInPixel: number = this.state.startClientRect.height + clientY - this.state.startClientY
     const newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
 
-    this.state.scaling.referenceBox.updateMeasures({height: newHeightInPercent})
+    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({height: newHeightInPercent})
   }
 
   private static dragNorthBorder(clientX: number, clientY: number): void {
@@ -133,7 +133,7 @@ export class ScaleManager {
     const newYInPercent: number = newYInPixel / this.state.startParentClientRect.height * 100
     const newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
 
-    this.state.scaling.referenceBox.updateMeasures({y: newYInPercent, height: newHeightInPercent})
+    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({y: newYInPercent, height: newHeightInPercent})
   }
 
   private static dragWestBorder(clientX: number, clientY: number): void {
@@ -149,7 +149,7 @@ export class ScaleManager {
     const newXInPercent: number = newXInPixel / this.state.startParentClientRect.width * 100
     const newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
 
-    this.state.scaling.referenceBox.updateMeasures({x: newXInPercent, width: newWidthInPercent})
+    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({x: newXInPercent, width: newWidthInPercent})
   }
 
   private static dragEnd(): void {

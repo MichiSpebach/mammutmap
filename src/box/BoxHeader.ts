@@ -47,7 +47,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
 
     const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
-    this.referenceBox.updateMeasures({x: newX, y: newY})
+    this.referenceBox.updateMeasuresAndBorderingLinks({x: newX, y: newY})
   }
 
   public async dragCancel(): Promise<void> {

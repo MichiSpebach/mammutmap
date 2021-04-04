@@ -61,9 +61,9 @@ export class Link {
 
   public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
     if (linkEnd === this.to) {
-      await this.reorderAndSave(this.from.getBorderingBox(), dropTarget)
+      await this.reorderAndSaveWithEndBoxes(this.from.getBorderingBox(), dropTarget)
     } else if (linkEnd === this.from) {
-      await this.reorderAndSave(dropTarget, this.to.getBorderingBox())
+      await this.reorderAndSaveWithEndBoxes(dropTarget, this.to.getBorderingBox())
     } else {
       util.logError('Given LinkEnd is not contained by Link.')
     }
@@ -139,7 +139,11 @@ export class Link {
     return {box: pivotBox, wayPoint: pivotWayPoint}
   }
 
-  private async reorderAndSave(fromBox: Box, toBox: Box): Promise<void | never> {
+  public async reorderAndSave(): Promise<void|never> {
+    await this.reorderAndSaveWithEndBoxes(this.from.getBorderingBox(), this.to.getBorderingBox())
+  }
+
+  private async reorderAndSaveWithEndBoxes(fromBox: Box, toBox: Box): Promise<void|never> {
     const fromClientPosition: {x: number, y: number} = await this.from.getClientMidPosition()
     const toClientPosition: {x: number, y: number} = await this.to.getClientMidPosition()
     const relation: {commonAncestor: FolderBox, fromBoxes: Box[], toBoxes: Box[]} = this.findCommonAncestor(fromBox, toBox)
