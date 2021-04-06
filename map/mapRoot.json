@@ -125,22 +125,22 @@
 				{
 					"boxId": "3ht1ieidr2o",
 					"boxName": "fileSystemAdapter.ts",
-					"x": 0.17156954828367835,
-					"y": 48.43756886597029
+					"x": 0.16948696564526108,
+					"y": 48.42195540308748
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 81.43547791263566,
-					"y": 7.7103831586175815
+					"x": 87.88802373859937,
+					"y": 22.691414511026466
 				},
 				{
 					"boxId": "93kjm246u28",
 					"boxName": "BoxMapData.ts",
-					"x": 99.96966127708177,
-					"y": 0.14796373714124667
+					"x": 63.92675483214649,
+					"y": 1.4546159813809154
 				}
 			]
 		},
@@ -150,22 +150,22 @@
 				{
 					"boxId": "6o0ikrr8ru",
 					"boxName": "Map.ts",
-					"x": 99.57505491214057,
-					"y": 98.23770395309963
+					"x": 98.34782124150229,
+					"y": 33.93943135862686
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 1.640136119548473,
-					"y": 88.92727648098685
+					"x": 6.412399331408601,
+					"y": 11.707482130017342
 				},
 				{
 					"boxId": "8i2aqhl305",
 					"boxName": "RootFolderBox.ts",
-					"x": 0.21997759861151753,
-					"y": 1.4436296975252063
+					"x": 1.293379061791548,
+					"y": 50.62237101897159
 				}
 			]
 		},
@@ -213,22 +213,22 @@
 				{
 					"boxId": "82efivc7np8",
 					"boxName": "ScaleManager.ts",
-					"x": 0.006746970610196021,
-					"y": 13.473291143362678
+					"x": 0.37303400994757363,
+					"y": 76.49051490514906
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 93.1395164732974,
-					"y": 45.1568979886933
+					"x": 90.15902488694559,
+					"y": 61.114167675332865
 				},
 				{
 					"boxId": "ujltrbp3r9",
 					"boxName": "BoxBorder.ts",
-					"x": 99.94373606111755,
-					"y": 74.0458755637457
+					"x": 98.69725113756779,
+					"y": 35.8347876672484
 				}
 			]
 		},
@@ -333,16 +333,16 @@
 				{
 					"boxId": "dub9um70n18",
 					"boxName": "DragManager.ts",
-					"x": 79.80662912391678,
-					"y": 99.93156437614708
+					"x": 66.5473075333976,
+					"y": 95.22710411342841
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "ve86au87rlg",
 					"boxName": "DropTarget.ts",
-					"x": 47.02688581196969,
-					"y": 0.6000734132367258
+					"x": 94.94728193892921,
+					"y": 30.47564796354315
 				}
 			]
 		},
@@ -362,6 +362,438 @@
 					"boxName": "domAdapter.ts",
 					"x": 97.92470971564948,
 					"y": 99.97256084489732
+				}
+			]
+		},
+		{
+			"id": "m2fuje9q438",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 70.13383853816538,
+					"y": 0.30619431090970334
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "5da77t8c1t8",
+					"boxName": "domAdapter.ts",
+					"x": 1.363355558869267,
+					"y": 97.88138389943119
+				}
+			]
+		},
+		{
+			"id": "dp372otc5fo",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 44.18660610484765,
+					"y": 6.155329968491863
+				},
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 99.79633271596687,
+					"y": 3.483018616133983
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3ht1ieidr2o",
+					"boxName": "fileSystemAdapter.ts",
+					"x": 2.7029419948900864,
+					"y": 29.179686712497226
+				}
+			]
+		},
+		{
+			"id": "d7r5eriv86",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 99.98014468481846,
+					"y": 18.97015570934256
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "l84ccd69v6g",
+					"boxName": "util.ts",
+					"x": 0.07399673603438314,
+					"y": 51.49877542327761
+				}
+			]
+		},
+		{
+			"id": "2r6p40gleqo",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 43.93030066268233,
+					"y": 25.745566713335137
+				},
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 99.19229498065513,
+					"y": 99.97913339172548
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "dub9um70n18",
+					"boxName": "DragManager.ts",
+					"x": 1.7786919650679935,
+					"y": 51.05791392787893
+				}
+			]
+		},
+		{
+			"id": "oni0c7slmdo",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 39.8216697310402,
+					"y": 58.66173185723835
+				},
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 41.59165035877365,
+					"y": 96.36550074057195
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "ve86au87rlg",
+					"boxName": "DropTarget.ts",
+					"x": 1.537606520933679,
+					"y": 30.27715749376067
+				}
+			]
+		},
+		{
+			"id": "8k1ggo7bqkg",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 67.97558191473523,
+					"y": 24.134158228729437
+				},
+				{
+					"boxId": "3n81ck4i5sg",
+					"boxName": "FileBox.ts",
+					"x": 98.14359478731251,
+					"y": 12.514390973981119
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3ht1ieidr2o",
+					"boxName": "fileSystemAdapter.ts",
+					"x": 1.179475272811702,
+					"y": 27.7720207253886
+				}
+			]
+		},
+		{
+			"id": "pqgjpkifd1o",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 34.89053599615675,
+					"y": 7.157004332576852
+				},
+				{
+					"boxId": "8i2aqhl305",
+					"boxName": "RootFolderBox.ts",
+					"x": 99.34076839468834,
+					"y": 4.44553004396678
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3ht1ieidr2o",
+					"boxName": "fileSystemAdapter.ts",
+					"x": 0.9567688183262967,
+					"y": 24.49721099227266
+				}
+			]
+		},
+		{
+			"id": "jhjrrdtds4o",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 98.75431289779725,
+					"y": 38.0116628512751
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "p1f768sjqmg",
+					"boxName": "Rect.ts",
+					"x": 0.07370912053380921,
+					"y": 55.14055053010407
+				}
+			]
+		},
+		{
+			"id": "44u7ufsllu",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 90.12807842432592,
+					"y": 60.60199865955765
+				},
+				{
+					"boxId": "ujltrbp3r9",
+					"boxName": "BoxBorder.ts",
+					"x": 98.50402044505392,
+					"y": 29.21595242712171
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "82efivc7np8",
+					"boxName": "ScaleManager.ts",
+					"x": 0.6598109064838464,
+					"y": 73.23848238482384
+				}
+			]
+		},
+		{
+			"id": "8b4vvvp4oug",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 88.29999301734178,
+					"y": 52.16400139940638
+				},
+				{
+					"boxId": "710vhdi6un8",
+					"boxName": "BoxHeader.ts",
+					"x": 99.62129676455714,
+					"y": 84.8592397852996
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "p0kd6a1t4vo",
+					"boxName": "Draggable.ts",
+					"x": 1.6177023838024556,
+					"y": 13.21575259724571
+				}
+			]
+		},
+		{
+			"id": "b3p70tgfgao",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 88.31440882788199,
+					"y": 52.61181144127571
+				},
+				{
+					"boxId": "710vhdi6un8",
+					"boxName": "BoxHeader.ts",
+					"x": 99.69656697284393,
+					"y": 89.20582758242962
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "ve86au87rlg",
+					"boxName": "DropTarget.ts",
+					"x": 3.1483745223583317,
+					"y": 21.753282176237406
+				}
+			]
+		},
+		{
+			"id": "873stdvoj1g",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 88.3432404489624,
+					"y": 51.75952781320182
+				},
+				{
+					"boxId": "710vhdi6un8",
+					"boxName": "BoxHeader.ts",
+					"x": 99.84710738941747,
+					"y": 80.93328951692409
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "dub9um70n18",
+					"boxName": "DragManager.ts",
+					"x": 1.54283804817137,
+					"y": 13.582871939538116
+				}
+			]
+		},
+		{
+			"id": "o4hev9jgan",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 87.4270036895926,
+					"y": 79.81970801661582
+				},
+				{
+					"boxId": "jclbfe4iai",
+					"boxName": "BoxConnector.ts",
+					"x": 98.76969945515262,
+					"y": 66.90437926878265
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "dub9um70n18",
+					"boxName": "DragManager.ts",
+					"x": 1.6485914783601383,
+					"y": 59.86495719625417
+				}
+			]
+		},
+		{
+			"id": "505rtddidto",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 87.4270036895926,
+					"y": 80.26181981143458
+				},
+				{
+					"boxId": "jclbfe4iai",
+					"boxName": "BoxConnector.ts",
+					"x": 98.76969945515262,
+					"y": 72.05705102450783
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "p0kd6a1t4vo",
+					"boxName": "Draggable.ts",
+					"x": 1.367895269498221,
+					"y": 20.210048254328697
+				}
+			]
+		},
+		{
+			"id": "pkceusc47ao",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 58.633307721859396,
+					"y": 12.178315015494775
+				},
+				{
+					"boxId": "rjo0gg3uqi",
+					"boxName": "FolderBoxBody.ts",
+					"x": 99.3688781177421,
+					"y": 1.666863695472278
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3ht1ieidr2o",
+					"boxName": "fileSystemAdapter.ts",
+					"x": 1.5389108554996405,
+					"y": 25.882689966339612
+				}
+			]
+		},
+		{
+			"id": "d7thbobrnio",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 42.71095840151258,
+					"y": 92.60513582923863
+				},
+				{
+					"boxId": "153ri2jccq8",
+					"boxName": "LinkEnd.ts",
+					"x": 99.55254532348661,
+					"y": 54.29990585332597
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "p0kd6a1t4vo",
+					"boxName": "Draggable.ts",
+					"x": 1.1222933821286978,
+					"y": 31.522891992222025
+				}
+			]
+		},
+		{
+			"id": "u0devabee28",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 42.67667908399236,
+					"y": 91.90096528256721
+				},
+				{
+					"boxId": "153ri2jccq8",
+					"boxName": "LinkEnd.ts",
+					"x": 99.37845961347533,
+					"y": 45.78125507255787
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "dub9um70n18",
+					"boxName": "DragManager.ts",
+					"x": 0.6069191924472278,
+					"y": 97.07398878654385
+				}
+			]
+		},
+		{
+			"id": "m5buokbcmmg",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 42.625260107712045,
+					"y": 93.15473235347001
+				},
+				{
+					"boxId": "153ri2jccq8",
+					"boxName": "LinkEnd.ts",
+					"x": 99.1173310484584,
+					"y": 60.94860890173035
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "ve86au87rlg",
+					"boxName": "DropTarget.ts",
+					"x": 2.9007012907815835,
+					"y": 37.03463484239201
 				}
 			]
 		}

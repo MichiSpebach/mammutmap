@@ -6,36 +6,21 @@
 	"height": 48.699515488621856,
 	"links": [
 		{
-			"id": "1ombf65moho",
-			"fromWayPoints": [
-				{
-					"boxId": "iu4msv07ut8",
-					"x": 100,
-					"y": 50
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "93kjm246u28",
-					"x": 0,
-					"y": 50
-				}
-			]
-		},
-		{
 			"id": "65jivuv451o",
 			"fromWayPoints": [
 				{
 					"boxId": "iu4msv07ut8",
-					"x": 50,
-					"y": 100
+					"boxName": "Box.ts",
+					"x": 4.896972139654391,
+					"y": 3.4755829300483945
 				}
 			],
 			"toWayPoints": [
 				{
-					"boxId": "3n81ck4i5sg",
-					"x": 50,
-					"y": 0
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 99.32338055762149,
+					"y": 91.23221924668731
 				}
 			]
 		},
@@ -44,32 +29,17 @@
 			"fromWayPoints": [
 				{
 					"boxId": "iu4msv07ut8",
-					"x": 100,
-					"y": 50
+					"boxName": "Box.ts",
+					"x": 99.15772196185992,
+					"y": 75.32249547374774
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "ujltrbp3r9",
-					"x": 0,
-					"y": 50
-				}
-			]
-		},
-		{
-			"id": "h9lp1umk3g",
-			"fromWayPoints": [
-				{
-					"boxId": "93kjm246u28",
-					"x": 100,
-					"y": 25
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "flo206thmv",
-					"x": 0,
-					"y": 50
+					"boxName": "BoxBorder.ts",
+					"x": 1.0074168754940378,
+					"y": 28.877882032857787
 				}
 			]
 		},
@@ -78,32 +48,17 @@
 			"fromWayPoints": [
 				{
 					"boxId": "flo206thmv",
-					"x": 50,
-					"y": 100
+					"boxName": "BoxMapLinkData.ts",
+					"x": 50.16116035455278,
+					"y": 85.844093735055
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "qm6p7cuvvl",
-					"x": 50,
-					"y": 0
-				}
-			]
-		},
-		{
-			"id": "8k1ggo7bqkg",
-			"fromWayPoints": [
-				{
-					"boxId": "3n81ck4i5sg",
-					"x": 100,
-					"y": 50
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"x": 49.53888075361181,
-					"y": 41.63231213782449
+					"boxName": "WayPointData.ts",
+					"x": 51.8534912028328,
+					"y": 9.30473884469042
 				}
 			]
 		},
@@ -112,15 +67,473 @@
 			"fromWayPoints": [
 				{
 					"boxId": "8hst7ghum5o",
-					"x": 100,
-					"y": 50
+					"boxName": "FolderBox.ts",
+					"x": 95.72441816169935,
+					"y": 96.57427051090322
 				}
 			],
 			"toWayPoints": [
 				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 0.9202814583438292,
+					"y": 7.792931514884881
+				}
+			]
+		},
+		{
+			"id": "j1bsg578ft8",
+			"fromWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 98.34111114895936,
+					"y": 42.637872568267
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "710vhdi6un8",
+					"boxName": "BoxHeader.ts",
+					"x": 2.8216503992901507,
+					"y": 79.76859504132231
+				}
+			]
+		},
+		{
+			"id": "9m1lgn02i2g",
+			"fromWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 80.65636618594898,
+					"y": 98.71705574404027
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "jclbfe4iai",
+					"boxName": "BoxConnector.ts",
+					"x": 19.490228653871377,
+					"y": 1.6938959607096322
+				}
+			]
+		},
+		{
+			"id": "pci0kff1s48",
+			"fromWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 2.362595398569509,
+					"y": 96.59228102971531
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "93jcctiarsg",
+					"boxName": "Link.ts",
+					"x": 65.79089723056036,
+					"y": 3.32920874857869
+				}
+			]
+		},
+		{
+			"id": "rjhihd48edg",
+			"fromWayPoints": [
+				{
+					"boxId": "93kjm246u28",
+					"boxName": "BoxMapData.ts",
+					"x": 96.47338080705325,
+					"y": 42.4166020170675
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "flo206thmv",
+					"boxName": "BoxMapLinkData.ts",
+					"x": 2.7775895942009345,
+					"y": 45.31422271223815
+				}
+			]
+		},
+		{
+			"id": "1hj9nar106",
+			"fromWayPoints": [
+				{
+					"boxId": "3n81ck4i5sg",
+					"boxName": "FileBox.ts",
+					"x": 16.944370977695495,
+					"y": 89.99504705299654
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 80.86405661454172,
+					"y": 9.340111642743222
+				}
+			]
+		},
+		{
+			"id": "ad9fl1gc64o",
+			"fromWayPoints": [
+				{
 					"boxId": "3lnmuaqr88",
-					"x": 49.48641910014733,
-					"y": 69.84207001575663
+					"boxName": "box",
+					"x": 77.76691547724475,
+					"y": 28.887211372790816
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "93kjm246u28",
+					"boxName": "BoxMapData.ts",
+					"x": 4.177687351644625,
+					"y": 69.38518231186967
+				}
+			]
+		},
+		{
+			"id": "vcs22i0orv8",
+			"fromWayPoints": [
+				{
+					"boxId": "3n81ck4i5sg",
+					"boxName": "FileBox.ts",
+					"x": 1.1460812836110377,
+					"y": 39.27686973749381
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 98.64989828000739,
+					"y": 9.502422881456091
+				}
+			]
+		},
+		{
+			"id": "alfkrujbgho",
+			"fromWayPoints": [
+				{
+					"boxId": "3n81ck4i5sg",
+					"boxName": "FileBox.ts",
+					"x": 95.56625769216069,
+					"y": 77.35146743020759
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "n2rcvc1did8",
+					"boxName": "FileBoxHeader.ts",
+					"x": 22.42438156459852,
+					"y": 6.218762014609766
+				}
+			]
+		},
+		{
+			"id": "oq6hlkek8a",
+			"fromWayPoints": [
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 97.7043496532885,
+					"y": 22.37889011985094
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "lsppgrrk3so",
+					"boxName": "FolderBoxHeader.ts",
+					"x": 4.294594085515163,
+					"y": 48.71379380190399
+				}
+			]
+		},
+		{
+			"id": "j1q645qcv7",
+			"fromWayPoints": [
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 69.96044139079743,
+					"y": 97.2055888223553
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "93jcctiarsg",
+					"boxName": "Link.ts",
+					"x": 50.31723328565666,
+					"y": 6.556429232192415
+				}
+			]
+		},
+		{
+			"id": "btvk87v9t38",
+			"fromWayPoints": [
+				{
+					"boxId": "8i2aqhl305",
+					"boxName": "RootFolderBox.ts",
+					"x": 41.0545705733364,
+					"y": 81.3647698934482
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 35.09991311902693,
+					"y": 16.379789006107718
+				}
+			]
+		},
+		{
+			"id": "ckg29q74ffg",
+			"fromWayPoints": [
+				{
+					"boxId": "ujltrbp3r9",
+					"boxName": "BoxBorder.ts",
+					"x": 1.1402815385391614,
+					"y": 17.48229795249224
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 98.96982916873637,
+					"y": 70.52278213639107
+				}
+			]
+		},
+		{
+			"id": "g6lnv48rgcg",
+			"fromWayPoints": [
+				{
+					"boxId": "710vhdi6un8",
+					"boxName": "BoxHeader.ts",
+					"x": 4.445430346051464,
+					"y": 91.099173553719
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 98.34111114895936,
+					"y": 47.9683502885359
+				}
+			]
+		},
+		{
+			"id": "t0gelgml1fg",
+			"fromWayPoints": [
+				{
+					"boxId": "710vhdi6un8",
+					"boxName": "BoxHeader.ts",
+					"x": 1.5959821428571428,
+					"y": 14.525294525294525
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 98.79975316260413,
+					"y": 41.094350783791775
+				}
+			]
+		},
+		{
+			"id": "k7l97462cho",
+			"fromWayPoints": [
+				{
+					"boxId": "n2rcvc1did8",
+					"boxName": "FileBoxHeader.ts",
+					"x": 41.163310961968676,
+					"y": 93.64017482829364
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "710vhdi6un8",
+					"boxName": "BoxHeader.ts",
+					"x": 71.97332216772341,
+					"y": 2.646386985347373
+				}
+			]
+		},
+		{
+			"id": "mfo5vt3k0j8",
+			"fromWayPoints": [
+				{
+					"boxId": "lsppgrrk3so",
+					"boxName": "FolderBoxHeader.ts",
+					"x": 61.86643463128127,
+					"y": 92.77617477328937
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "710vhdi6un8",
+					"boxName": "BoxHeader.ts",
+					"x": 19.162718746978634,
+					"y": 3.1698385063336736
+				}
+			]
+		},
+		{
+			"id": "o1k2okk22eo",
+			"fromWayPoints": [
+				{
+					"boxId": "jclbfe4iai",
+					"boxName": "BoxConnector.ts",
+					"x": 26.84596949062274,
+					"y": 0.2965288679574394
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 86.81771369721936,
+					"y": 98.71749755620723
+				}
+			]
+		},
+		{
+			"id": "ag89smblafg",
+			"fromWayPoints": [
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 81.68656716417911,
+					"y": 7.115604731018695
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "rjo0gg3uqi",
+					"boxName": "FolderBoxBody.ts",
+					"x": 3.164633409832105,
+					"y": 78.88857466063348
+				}
+			]
+		},
+		{
+			"id": "pf3n99cui8o",
+			"fromWayPoints": [
+				{
+					"boxId": "rjo0gg3uqi",
+					"boxName": "FolderBoxBody.ts",
+					"x": 53.0196883681604,
+					"y": 91.55825791855203
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 47.372299755884114,
+					"y": 4.649666157187676
+				}
+			]
+		},
+		{
+			"id": "hb324ah31o8",
+			"fromWayPoints": [
+				{
+					"boxId": "93jcctiarsg",
+					"boxName": "Link.ts",
+					"x": 72.85363259617853,
+					"y": 4.336262719703978
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 7.825751734772552,
+					"y": 97.42122273094532
+				}
+			]
+		},
+		{
+			"id": "p9bve5ld09o",
+			"fromWayPoints": [
+				{
+					"boxId": "93jcctiarsg",
+					"boxName": "Link.ts",
+					"x": 46.09601349616753,
+					"y": 5.0763182238667905
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 64.88861128461379,
+					"y": 95.16167664670658
+				}
+			]
+		},
+		{
+			"id": "ngukshmtaao",
+			"fromWayPoints": [
+				{
+					"boxId": "93jcctiarsg",
+					"boxName": "Link.ts",
+					"x": 80.62079159139431,
+					"y": 91.42931123770067
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "153ri2jccq8",
+					"boxName": "LinkEnd.ts",
+					"x": 12.71594139514542,
+					"y": 19.237796919864262
+				}
+			]
+		},
+		{
+			"id": "500q1kkp0t",
+			"fromWayPoints": [
+				{
+					"boxId": "153ri2jccq8",
+					"boxName": "LinkEnd.ts",
+					"x": 24.611852175814562,
+					"y": 14.199947794309582
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "93jcctiarsg",
+					"boxName": "Link.ts",
+					"x": 89.55493512892102,
+					"y": 81.51216986017607
+				}
+			]
+		},
+		{
+			"id": "c50qbs1f9eg",
+			"fromWayPoints": [
+				{
+					"boxId": "153ri2jccq8",
+					"boxName": "LinkEnd.ts",
+					"x": 60.999343975508424,
+					"y": 12.555468546071522
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 18.203003625064735,
+					"y": 93.064978139605
 				}
 			]
 		}
