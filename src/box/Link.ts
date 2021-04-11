@@ -108,35 +108,42 @@ export class Link {
     return {x: xInBaseCoordsInPixel / baseRect.width * 100, y: yInBaseCoordsInPixel / baseRect.height * 100}
   }
 
-  private getDeepestRenderedBox(path: WayPointData[]): {box: Box, wayPoint: WayPointData}|never {
+  private getDeepestRenderedBox(path: WayPointData[]): {box: Box, wayPoint: WayPointData} | never {
+    const renderedBoxes: {box: Box, wayPoint: WayPointData}[] = this.getRenderedBoxes(path)
+    return renderedBoxes[renderedBoxes.length-1]
+  }
+
+  private getRenderedBoxes(path: WayPointData[]): {box: Box, wayPoint: WayPointData}[] | never {
     if (path.length === 0) {
       util.logError(this.base.getSrcPath+' has empty link path.')
     }
 
+    const result: {box: Box, wayPoint: WayPointData}[] = []
     let pivotBox: FolderBox = this.base
-    let pivotWayPoint: WayPointData = path[0]
 
-    for (let i = 0; i < path.length; i++) {
-      // TODO: handle if deepest box is not rendered but also log warning if path is corrupted
-      pivotWayPoint = path[i]
-      let box: Box
-      if (pivotWayPoint.boxId === this.base.getId()) {
-        box = this.base
-      } else {
-        box = pivotBox.getChild(pivotWayPoint.boxId)
+    for(let i = 0; i < path.length; i++) {
+      if (!pivotBox.isBodyRendered()) {
+        break
       }
+
+      let box: Box
+      if (path[i].boxId === pivotBox.getId()) {
+        box = pivotBox
+      } else {
+        box = pivotBox.getChild(path[i].boxId)
+      }
+
+      result.push({box: box, wayPoint: path[i]})
 
       if (box instanceof FolderBox) {
         pivotBox = box
-      } else {
-        if (i != path.length-1) {
-          util.logWarning(this.base.getSrcPath+' seems to have a corrupted link, '+box.getSrcPath+' is not the deepest WayPoint in path.')
-        }
-        return {box: box, wayPoint: pivotWayPoint}
+      } else if (i != path.length-1) {
+        util.logWarning(this.base.getSrcPath+' seems to have a corrupted link, '+box.getSrcPath+' is not the deepest WayPoint in path.')
+        break
       }
     }
 
-    return {box: pivotBox, wayPoint: pivotWayPoint}
+    return result
   }
 
   public async reorderAndSave(): Promise<void|never> {

@@ -30,6 +30,10 @@ export class FolderBox extends Box {
     this.renderLinks()
   }
 
+  public isBodyRendered(): boolean {
+    return this.body.isRendered()
+  }
+
   public getChild(id: string): Box { // TODO: rename to getBox?
     return this.body.getBox(id)
   }

@@ -8,6 +8,7 @@ import { FolderBox } from './FolderBox'
 export class FolderBoxBody {
   private readonly referenceBox: FolderBox
   private boxes: Box[] = []
+  private rendered: boolean = false
 
   public constructor(referenceBox: FolderBox) {
     this.referenceBox = referenceBox
@@ -17,11 +18,16 @@ export class FolderBoxBody {
     return this.referenceBox.getId() + 'body'
   }
 
+  public isRendered(): boolean {
+    return this.rendered
+  }
+
   public async render(): Promise<void> {
     let html: string = '<div id="' + this.getId() + '"></div>'
     await dom.addContentTo(this.referenceBox.getId(), html)
 
     await this.renderBoxes()
+    this.rendered = true
   }
 
   private async renderBoxes(): Promise<void> {
