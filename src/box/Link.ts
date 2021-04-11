@@ -78,12 +78,13 @@ export class Link {
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
     const lineHtml: string = '<line '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
 
-    if (this.rendered === false) {
+    if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
       const svgHtml: string = '<svg id="'+this.data.id+'line">'+lineHtml+'</svg>'
       await dom.addContentTo(this.base.getId(), '<div id="'+this.data.id+'">'+svgHtml+fromHtml+toHtml+'</div>')
       await dom.setStyleTo(this.data.id+'line', 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
+      this.registerAtBorderingBoxes()
       this.rendered = true
     } else {
       await dom.setContentTo(this.data.id+'line', lineHtml)
@@ -164,19 +165,34 @@ export class Link {
       return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.x, positionInBoxCoords.y)
     })
 
-    // TODO: WIP unshift into existing WayPointData[] till inner boxId matches
+    if(this.base !== relation.commonAncestor) {
+      this.deregisterAtBorderingBoxes()
+    }
+
+    // TODO: WIP unshift into existing WayPointData[] till inner boxId matches (matters when shallow render gets implemented)
     this.data.fromWayPoints = await Promise.all(fromWayPoints)
     this.data.toWayPoints = await Promise.all(toWayPoints)
 
     if(this.base !== relation.commonAncestor) {
       const oldBase: FolderBox = this.base
       this.base = relation.commonAncestor
+      this.registerAtBorderingBoxes()
       FolderBox.changeManagingBoxOfLinkAndSave(oldBase, relation.commonAncestor, this)
     } else {
       this.base.saveMapData()
     }
 
     await this.render()
+  }
+
+  private registerAtBorderingBoxes(): void {
+    this.getRenderedBoxes(this.data.fromWayPoints).map(tuple => tuple.box).forEach((box: Box) => box.registerBorderingLink(this))
+    this.getRenderedBoxes(this.data.toWayPoints).map(tuple => tuple.box).forEach((box: Box) => box.registerBorderingLink(this))
+  }
+
+  private deregisterAtBorderingBoxes(): void {
+    this.getRenderedBoxes(this.data.fromWayPoints).map(tuple => tuple.box).forEach((box: Box) => box.deregisterBorderingLink(this))
+    this.getRenderedBoxes(this.data.toWayPoints).map(tuple => tuple.box).forEach((box: Box) => box.deregisterBorderingLink(this))
   }
 
   private findCommonAncestor(fromBox: Box, toBox: Box): {commonAncestor: FolderBox, fromBoxes: Box[], toBoxes: Box[]} | never {

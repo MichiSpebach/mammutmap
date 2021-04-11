@@ -1,4 +1,6 @@
 
+highlight borderingBoxes of a Box on hover
+
 introduce interface Linkable, Box and LinkEnd implement it and have a list of borderingLinks
 
 optimize domAdapter, add prioritize flag to methods, queue requests and replace outdated ones with new ones with same id and resolve all of them when newest finishes (return same result)

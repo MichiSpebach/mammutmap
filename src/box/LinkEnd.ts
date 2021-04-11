@@ -66,11 +66,7 @@ export class LinkEnd implements Draggable<Box> {
   }
 
   public async render(borderingBox: Box, x: number, y: number, angleInRadians: number): Promise<void> {
-    if (this.borderingBox !== borderingBox) { // TODO: does not work for all wayPoints, move up to Link class
-      this.borderingBox?.deregisterBorderingLink(this.referenceLink)
-      this.borderingBox = borderingBox
-      this.borderingBox.registerBorderingLink(this.referenceLink)
-    }
+    this.borderingBox = borderingBox
 
     await this.renderShape(x, y, angleInRadians)
 
