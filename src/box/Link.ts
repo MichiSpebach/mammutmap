@@ -186,13 +186,17 @@ export class Link {
   }
 
   private registerAtBorderingBoxes(): void {
-    this.getRenderedBoxes(this.data.fromWayPoints).map(tuple => tuple.box).forEach((box: Box) => box.registerBorderingLink(this))
-    this.getRenderedBoxes(this.data.toWayPoints).map(tuple => tuple.box).forEach((box: Box) => box.registerBorderingLink(this))
+    this.getRenderedBoxesWithoutBase(this.data.fromWayPoints).forEach((box: Box) => box.registerBorderingLink(this))
+    this.getRenderedBoxesWithoutBase(this.data.toWayPoints).forEach((box: Box) => box.registerBorderingLink(this))
   }
 
   private deregisterAtBorderingBoxes(): void {
-    this.getRenderedBoxes(this.data.fromWayPoints).map(tuple => tuple.box).forEach((box: Box) => box.deregisterBorderingLink(this))
-    this.getRenderedBoxes(this.data.toWayPoints).map(tuple => tuple.box).forEach((box: Box) => box.deregisterBorderingLink(this))
+    this.getRenderedBoxesWithoutBase(this.data.fromWayPoints).forEach((box: Box) => box.deregisterBorderingLink(this))
+    this.getRenderedBoxesWithoutBase(this.data.toWayPoints).forEach((box: Box) => box.deregisterBorderingLink(this))
+  }
+
+  private getRenderedBoxesWithoutBase(path: WayPointData[]): Box[] {
+    return this.getRenderedBoxes(path).map((tuple: {box: Box, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.base)
   }
 
   private findCommonAncestor(fromBox: Box, toBox: Box): {commonAncestor: FolderBox, fromBoxes: Box[], toBoxes: Box[]} | never {
