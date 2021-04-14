@@ -29,6 +29,13 @@ body {
   background-color: gold;
 }
 
+.boxBorder {
+  background-color: lightskyblue;
+}
+.boxBorderNoMapData {
+  background-color: red;
+}
+
 .boxConnectorPlacement {
   position: absolute;
   left: 100%;

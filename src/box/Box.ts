@@ -108,7 +108,7 @@ export abstract class Box implements DropTarget {
 
     await fileSystem.rename(oldSrcPath, newSrcPath)
     util.logInfo('moved ' + oldSrcPath + ' to ' + newSrcPath)
-    if (this.mapDataFileExists) {
+    if (this.isMapDataFileExisting()) {
       await fileSystem.rename(oldMapDataFilePath, newMapDataFilePath)
       util.logInfo('moved ' + oldMapDataFilePath + ' to ' + newMapDataFilePath)
     }
@@ -151,6 +151,17 @@ export abstract class Box implements DropTarget {
     DragManager.addDropTarget(this)
   }
 
+  public isMapDataFileExisting(): boolean {
+    return this.mapDataFileExists
+  }
+
+  private setMapDataFileExistingAndRenderBorder(exists: boolean): void {
+    if (this.mapDataFileExists != exists) {
+      this.mapDataFileExists = exists
+      this.border.render()
+    }
+  }
+
   protected getMapLinkData(): BoxMapLinkData[] {
     return this.mapData.links
   }
@@ -167,7 +178,7 @@ export abstract class Box implements DropTarget {
   public async restoreMapData(): Promise<void> {
     const data: {mapData: BoxMapData, mapDataFileExists: boolean} = await this.loadMapData()
     this.mapData = data.mapData
-    this.mapDataFileExists = data.mapDataFileExists
+    this.setMapDataFileExistingAndRenderBorder(data.mapDataFileExists)
 
     return await this.renderStyle()
   }
@@ -175,7 +186,10 @@ export abstract class Box implements DropTarget {
   public async saveMapData(): Promise<void> {
     const mapDataFilePath: string = this.getMapDataFilePath()
     await fileSystem.writeFile(mapDataFilePath, this.mapData.toJson())
-      .then(() => util.logInfo('saved ' + mapDataFilePath))
+      .then(() => {
+        util.logInfo('saved ' + mapDataFilePath)
+        this.setMapDataFileExistingAndRenderBorder(true)
+      })
       .catch(error => util.logWarning('failed to save ' + mapDataFilePath + ': ' + error))
   }
 
