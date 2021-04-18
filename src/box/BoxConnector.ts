@@ -18,7 +18,7 @@ export class BoxConnector {
   public async render(): Promise<void> {
     await dom.addClassTo(this.getId(), 'boxConnector')
 
-    dom.addClickListenerTo(this.getId(), () => this.addLinkToReferenceBox())
+    dom.addEventListenerTo('click', this.getId(), () => this.addLinkToReferenceBox())
   }
 
   private addLinkToReferenceBox(): void {

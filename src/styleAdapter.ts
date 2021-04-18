@@ -6,3 +6,7 @@ export function getBoxBorderClass(mapDataFileExisting: boolean): string {
     return "boxBorderNoMapData"
   }
 }
+
+export function getHighlightClass(): string {
+  return 'highlight'
+}

@@ -21,6 +21,11 @@ body {
   pointer-events: none;
 }
 
+.highlight {
+  background-color: lightblue !important;
+  stroke: lightblue !important;
+}
+
 .fileBoxHeader {
   background-color: skyblue;
 }

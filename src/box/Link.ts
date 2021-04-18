@@ -1,5 +1,6 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
+import * as style from '../styleAdapter'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { BoxMapLinkData } from './BoxMapLinkData'
@@ -76,24 +77,38 @@ export class Link {
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
-    const lineHtml: string = '<line '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
+    const lineHtml: string = '<line id="'+this.getId()+'line" '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
 
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
-      const svgHtml: string = '<svg id="'+this.data.id+'line">'+lineHtml+'</svg>'
-      await dom.addContentTo(this.base.getId(), '<div id="'+this.data.id+'">'+svgHtml+fromHtml+toHtml+'</div>')
-      await dom.setStyleTo(this.data.id+'line', 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
+      const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
+      await dom.addContentTo(this.base.getId(), '<div id="'+this.getId()+'">'+svgHtml+fromHtml+toHtml+'</div>')
+      await dom.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
       this.registerAtBorderingBoxes()
       this.rendered = true
     } else {
-      await dom.setContentTo(this.data.id+'line', lineHtml)
+      await dom.setContentTo(this.getId()+'svg', lineHtml)
     }
 
     const fromBox: Box = this.getDeepestRenderedBox(this.data.fromWayPoints).box
     await this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians)
     const toBox: Box = this.getDeepestRenderedBox(this.data.toWayPoints).box
     await this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
+  }
+
+  public async setHighlight(highlight: boolean): Promise<void> {
+    if (!this.rendered) {
+      util.logWarning('setHighlight(..) called although Link is not rendered yet.')
+    }
+
+    if (highlight) {
+      dom.addClassTo(this.getId()+'line', style.getHighlightClass())
+    } else {
+      dom.removeClassFrom(this.getId()+'line', style.getHighlightClass())
+    }
+    this.to.setHighlight(highlight)
+    this.from.setHighlight(highlight)
   }
 
   private async getDeepestRenderedWayPointPositionInBaseCoords(path: WayPointData[], baseRect: Rect): Promise<{x: number; y: number}> {

@@ -11,6 +11,7 @@ import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
+import { HoverManager } from '../HoverManager'
 
 export abstract class Box implements DropTarget {
   private name: string
@@ -149,6 +150,11 @@ export abstract class Box implements DropTarget {
     this.connector.render()
 
     DragManager.addDropTarget(this)
+    HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false))
+  }
+
+  private setHighlight(highlight: boolean): void {
+    this.borderingLinks.forEach(link => link.setHighlight(highlight))
   }
 
   public isMapDataFileExisting(): boolean {
