@@ -10,6 +10,10 @@ export class HoverManager {
 
   public static addHoverable(hoverable: Box, onHoverOver: () => void, onHoverOut: () => void) {
     dom.addEventListenerTo('mouseover', hoverable.getId(), () => {
+      if (this.state !== null && this.state.hovering === hoverable) {
+        return
+      }
+
       if (this.state !== null) {
         this.state.onHoverOut()
       }
