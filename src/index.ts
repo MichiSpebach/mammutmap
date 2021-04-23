@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
 import * as dom from './domAdapter'
+import * as menu from './menu'
 import { Map } from './Map'
 
 var mainWindow: BrowserWindow
@@ -11,6 +12,8 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 const createWindow = () => {
+  menu.setApplicationMenu()
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     height: 800,
