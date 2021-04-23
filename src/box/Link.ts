@@ -146,7 +146,7 @@ export class Link {
       if (path[i].boxId === pivotBox.getId()) {
         box = pivotBox
       } else {
-        box = pivotBox.getChild(path[i].boxId)
+        box = pivotBox.getBox(path[i].boxId)
       }
 
       result.push({box: box, wayPoint: path[i]})

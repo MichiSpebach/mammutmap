@@ -34,19 +34,19 @@ export class FolderBox extends Box {
     return this.body.isRendered()
   }
 
-  public getChild(id: string): Box { // TODO: rename to getBox?
+  public getBox(id: string): Box {
     return this.body.getBox(id)
   }
 
-  public containsBox(box: Box): boolean { // TODO: rename to containsChild?
+  public containsBox(box: Box): boolean {
     return this.body.containsBox(box)
   }
 
-  public async addBox(box: Box): Promise<void> { // TODO: rename to addChild?
+  public async addBox(box: Box): Promise<void> {
     return this.body.addBox(box)
   }
 
-  public removeBox(box: Box): void { // TODO: rename to removeChild?
+  public removeBox(box: Box): void {
     return this.body.removeBox(box)
   }
 
