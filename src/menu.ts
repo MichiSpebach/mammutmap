@@ -31,16 +31,20 @@ export function setApplicationMenu(): void {
 
 async function openFolder(): Promise<void> {
   const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
-    title:"Select a folder",
-    properties: ["openDirectory"]
+    title:'Select a folder',
+    properties: ['openDirectory']
   })
 
   const folderPaths: string[] = dialogReturnValue.filePaths
 
   if (folderPaths === undefined) {
-    util.logInfo("No destination folder selected")
+    util.logInfo('no folder selected')
   } else {
-    util.logInfo("selected "+folderPaths)
-    Map.new()
+    if (folderPaths.length !== 1) {
+      util.logWarning('expected exactly one selected folder but is '+folderPaths.length)
+    }
+    const folderPath: string = folderPaths[0]
+    util.logInfo('opening '+folderPath)
+    Map.new(folderPath+'/src', folderPath+'/map')
   }
 }

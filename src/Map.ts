@@ -8,8 +8,8 @@ export class Map {
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
 
-  public static async new(): Promise<Map> {
-     return new Map(await RootFolderBox.new('./src', './map'))
+  public static async new(sourceRootPath: string, mapRootPath: string): Promise<Map> {
+     return new Map(await RootFolderBox.new(sourceRootPath, mapRootPath))
   }
 
   private constructor(root: RootFolderBox) {

@@ -31,7 +31,7 @@ const createWindow = () => {
 
   dom.init(mainWindow.webContents)
 
-  Map.new()
+  //Map.new('./src', './map')
 };
 
 // This method will be called when Electron has finished
