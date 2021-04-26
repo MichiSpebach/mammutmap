@@ -1,9 +1,11 @@
 import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
+import { Dirent } from 'original-fs'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
 import { FolderBox } from './FolderBox'
+import { BoxMapData } from './BoxMapData'
 
 export class FolderBoxBody {
   private readonly referenceBox: FolderBox
@@ -26,49 +28,63 @@ export class FolderBoxBody {
     let html: string = '<div id="' + this.getId() + '"></div>'
     await dom.addContentTo(this.referenceBox.getId(), html)
 
+    if (!this.rendered) {
+      await this.loadMapDatasAndCreateBoxes()
+    }
     await this.renderBoxes()
     this.rendered = true
   }
 
-  private async renderBoxes(): Promise<void> {
-    await Promise.all(fileSystem.readdirSync(this.referenceBox.getSrcPath()).map(async (dirEntry) => { // TODO: use read async
+  private async loadMapDatasAndCreateBoxes(): Promise<void> {
+    const boxesWithMapData: {dirEntry: Dirent, mapData: BoxMapData}[] = []
+    const boxesWithoutMapData: {dirEntry: Dirent}[] = []
+
+    const sourcePaths: Dirent[] = await fileSystem.readdir(this.referenceBox.getSrcPath())
+    await Promise.all(sourcePaths.map(async (dirEntry: Dirent) => {
       const name: string = dirEntry.name
-      const path: string = this.referenceBox.getSrcPath() + '/' + name
+      const mapPath: string = this.referenceBox.getMapPath()+'/'+name+'.json'
 
-      if (dirEntry.isDirectory()) {
-        util.logInfo('Box::render folder ' + path)
-        this.boxes.push(await this.createFolderBox(name))
+      const mapData: BoxMapData|null = await fileSystem.loadMapData(mapPath)
 
-      } else if (dirEntry.isFile()) {
-        util.logInfo('Box::render file ' + path)
-        this.boxes.push(await this.createFileBox(name))
-
+      if (mapData !== null) {
+        boxesWithMapData.push({dirEntry, mapData}) // TODO: can this lead to race conditions because of async?
       } else {
-        util.logError('Box::render ' + path + ' is neither file nor directory.')
+        boxesWithoutMapData.push({dirEntry})
       }
     }))
 
-    await Promise.all(this.boxes.map(async (box: Box): Promise<void> => {
-      await box.render()
+    await Promise.all(boxesWithMapData.map((data: {dirEntry: Dirent, mapData: BoxMapData}) => {
+      this.boxes.push(this.createBox(data.dirEntry, data.mapData, true))
+    }))
+
+    await Promise.all(boxesWithoutMapData.map((data: {dirEntry: Dirent}) => {
+      this.boxes.push(this.createBox(data.dirEntry, BoxMapData.buildNew(10, 10, 80, 80), false))
+      // TODO: wip
+    }))
+
+    await Promise.all(this.boxes.map(async box => {
+      await this.renderBoxPlaceholderFor(box)
     }))
   }
 
-  private async createFolderBox(name: string): Promise<FolderBox> {
-    const boxData = await Box.prepareConstructor(name, this.referenceBox)
-    const box = new FolderBox(name, this.referenceBox, boxData.mapData, boxData.mapDataFileExists)
-    await this.renderBoxPlaceholderFor(box)
-    return box
-  }
-
-  private async createFileBox(name: string): Promise<FileBox> {
-    const boxData = await Box.prepareConstructor(name, this.referenceBox)
-    const box = new FileBox(name, this.referenceBox, boxData.mapData, boxData.mapDataFileExists)
-    await this.renderBoxPlaceholderFor(box)
-    return box
+  private createBox(dirEntry: Dirent, mapData: BoxMapData, mapDataFileExists: boolean): Box {
+    if (dirEntry.isDirectory()) {
+      return new FolderBox(dirEntry.name, this.referenceBox, mapData, mapDataFileExists)
+    } else if (dirEntry.isFile()) {
+      return new FileBox(dirEntry.name, this.referenceBox, mapData, mapDataFileExists)
+    } else {
+      util.logError(this.referenceBox.getMapPath()+'/'+dirEntry+' is neither file nor directory.')
+    }
   }
 
   private async renderBoxPlaceholderFor(box: Box): Promise<void> {
     return dom.addContentTo(this.getId(), '<div id="' + box.getId() + '" style="display:inline-block;">loading... ' + box.getName() + '</div>')
+  }
+
+  private async renderBoxes(): Promise<void> {
+    await Promise.all(this.boxes.map(async (box: Box): Promise<void> => {
+      await box.render()
+    }))
   }
 
   public containsBox(box: Box): boolean {

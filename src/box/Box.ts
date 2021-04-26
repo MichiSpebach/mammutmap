@@ -25,10 +25,6 @@ export abstract class Box implements DropTarget {
   private dragOver: boolean = false
   private unsavedChanges: boolean = false
 
-  public static prepareConstructor(name: string, parent: FolderBox): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}>  {
-    return Box.loadMapData(parent, name)
-  }
-
   public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
     this.name = name
     this.parent = parent
@@ -50,23 +46,15 @@ export abstract class Box implements DropTarget {
   }
 
   public getSrcPath(): string {
-    return this.getParent().getSrcPath() + '/' + this.name
+    return this.getParent().getSrcPath()+'/'+this.getName()
   }
 
   public getMapPath(): string {
-    return Box.getMapPath(this.getParent(), this.name)
-  }
-
-  private static getMapPath(parent: Box, name: string): string {
-    return parent.getMapPath() + '/' + name
+    return this.getParent().getMapPath()+'/'+this.getName()
   }
 
   public getMapDataFilePath(): string {
-    return Box.getMapDataFilePath(this.getParent(), this.getName())
-  }
-
-  private static getMapDataFilePath(parent: Box, name: string): string {
-    return Box.getMapPath(parent, name) + '.json'
+    return this.getMapPath()+'.json'
   }
 
   public getParent(): FolderBox|never {
@@ -161,10 +149,10 @@ export abstract class Box implements DropTarget {
     return this.mapDataFileExists
   }
 
-  private setMapDataFileExistingAndRenderBorder(exists: boolean): void {
+  private async setMapDataFileExistingAndRenderBorder(exists: boolean): Promise<void> {
     if (this.mapDataFileExists != exists) {
       this.mapDataFileExists = exists
-      this.border.render()
+      await this.border.render()
     }
   }
 
@@ -172,20 +160,16 @@ export abstract class Box implements DropTarget {
     return this.mapData.links
   }
 
-  private async loadMapData(): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}> {
-    return Box.loadMapData(this.getParent(), this.getName())
-  }
-
-  private static async loadMapData(parent: Box, name:string): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}> {
-    const filePath: string = Box.getMapDataFilePath(parent, name)
-    return fileSystem.loadMapData(filePath)
-  }
-
   public async restoreMapData(): Promise<void> {
-    const data: {mapData: BoxMapData, mapDataFileExists: boolean} = await this.loadMapData()
-    this.mapData = data.mapData
-    this.setMapDataFileExistingAndRenderBorder(data.mapDataFileExists)
+    const restoredMapData: BoxMapData|null = await fileSystem.loadMapData(this.getMapDataFilePath())
+    if (restoredMapData === null) {
+      util.logWarning('failed to restoreMapData of '+this.getSrcPath()+' because mapDataFile does not exist')
+      return
+    }
 
+    this.mapData = restoredMapData
+
+    await this.render()
     return await this.renderStyle()
   }
 

@@ -9,8 +9,8 @@ export class BoxMapData {
   public height: number
   public links: BoxMapLinkData[]
 
-  public static buildDefault(): BoxMapData {
-    return new BoxMapData(util.generateId(), 10, 10, 80, 80, [])
+  public static buildNew(x: number, y: number, width: number, height: number): BoxMapData {
+    return new BoxMapData(util.generateId(), x, y, width, height, [])
   }
 
   public static buildFromJson(json: string ): BoxMapData /*| SyntaxError*/ {

@@ -3,19 +3,18 @@ import { Dirent, promises as fsPromises } from 'fs'
 import * as util from './util'
 import { BoxMapData } from './box/BoxMapData'
 
-export async function loadMapData(filePath: string): Promise<{mapData: BoxMapData, mapDataFileExists: boolean}> {
-  return readFile(filePath)
+export async function loadMapData(mapDataFilePath: string): Promise<BoxMapData|null> {
+  return readFile(mapDataFilePath)
     .then(json => {
-      return {mapData: BoxMapData.buildFromJson(json), mapDataFileExists: true}
+      return BoxMapData.buildFromJson(json)
     })
-    .catch(error => {
-      util.logWarning('failed to load ' + filePath + ': ' + error)
-      return {mapData: BoxMapData.buildDefault(), mapDataFileExists: false}
+    .catch(_ => {
+      return null
     })
 }
 
-export function readdirSync(path: string): Dirent[] {
-  return fs.readdirSync(path, { withFileTypes: true })
+export function readdir(path: string): Promise<Dirent[]> {
+  return fsPromises.readdir(path, {withFileTypes: true})
 }
 
 export function readFile(path: string): Promise<string> {

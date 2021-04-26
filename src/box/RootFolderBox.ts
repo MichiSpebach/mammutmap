@@ -9,8 +9,13 @@ export class RootFolderBox extends FolderBox {
   private mapPath: string
 
   public static async new(srcPath: string, mapPath: string): Promise<RootFolderBox> {
-    const data: {mapData: BoxMapData, mapDataFileExists: boolean} = await fileSystem.loadMapData(mapPath+'/'+RootFolderBox.mapFileName)
-    return new RootFolderBox(srcPath, mapPath, data.mapData, data.mapDataFileExists)
+    let mapData: BoxMapData|null = await fileSystem.loadMapData(mapPath+'/'+RootFolderBox.mapFileName)
+    const mapDataFileExists: boolean = (mapData !== null)
+    if (mapData === null) {
+      mapData = BoxMapData.buildNew(5, 5, 90, 90)
+    }
+
+    return new RootFolderBox(srcPath, mapPath, mapData, mapDataFileExists)
   }
 
   private constructor(srcPath: string, mapPath: string, mapData: BoxMapData, mapDataFileExists: boolean) {
