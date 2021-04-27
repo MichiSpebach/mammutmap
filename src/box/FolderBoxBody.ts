@@ -53,28 +53,44 @@ export class FolderBoxBody {
       }
     }))
 
-    await Promise.all(boxesWithMapData.map((data: {dirEntry: Dirent, mapData: BoxMapData}) => {
-      this.boxes.push(this.createBox(data.dirEntry, data.mapData, true))
-    }))
+    await this.addBoxesWithMapData(boxesWithMapData);
+    await this.addBoxesWithoutMapData(boxesWithoutMapData);
+  }
 
-    await Promise.all(boxesWithoutMapData.map((data: {dirEntry: Dirent}) => {
-      this.boxes.push(this.createBox(data.dirEntry, BoxMapData.buildNew(10, 10, 80, 80), false))
-      // TODO: wip
-    }))
-
-    await Promise.all(this.boxes.map(async box => {
-      await this.renderBoxPlaceholderFor(box)
+  private async addBoxesWithMapData(boxes: {dirEntry: Dirent, mapData: BoxMapData}[]): Promise<void> {
+    await Promise.all(boxes.map(async (data: {dirEntry: Dirent, mapData: BoxMapData}) => {
+      this.boxes.push(await this.createBoxAndRenderPlaceholder(data.dirEntry, data.mapData, true))
     }))
   }
 
-  private createBox(dirEntry: Dirent, mapData: BoxMapData, mapDataFileExists: boolean): Box {
+  private async addBoxesWithoutMapData(boxes: {dirEntry: Dirent}[] = []): Promise<void> {
+    const gridSize: number = Math.ceil(Math.sqrt(boxes.length))
+    const cellSize = 100/gridSize
+    const boxSize: number = 100/(gridSize+1)
+    const spaceBetweenBoxes: number = cellSize-boxSize
+
+    let arrayIndex: number = boxes.length-1
+    for (let rowIndex: number = gridSize-1; rowIndex>=0; rowIndex--) {
+      for (let columnIndex: number = gridSize-1; columnIndex>=0 && arrayIndex>=0; columnIndex--, arrayIndex--) {
+        const mapData: BoxMapData = BoxMapData.buildNew(spaceBetweenBoxes/2 + columnIndex*cellSize, spaceBetweenBoxes/2 + rowIndex*cellSize, boxSize, boxSize)
+        this.boxes.push(await this.createBoxAndRenderPlaceholder(boxes[arrayIndex].dirEntry, mapData, false))
+      }
+    }
+  }
+
+  private async createBoxAndRenderPlaceholder(dirEntry: Dirent, mapData: BoxMapData, mapDataFileExists: boolean): Promise<Box> {
+    let box: Box
+
     if (dirEntry.isDirectory()) {
-      return new FolderBox(dirEntry.name, this.referenceBox, mapData, mapDataFileExists)
+      box = new FolderBox(dirEntry.name, this.referenceBox, mapData, mapDataFileExists)
     } else if (dirEntry.isFile()) {
-      return new FileBox(dirEntry.name, this.referenceBox, mapData, mapDataFileExists)
+      box = new FileBox(dirEntry.name, this.referenceBox, mapData, mapDataFileExists)
     } else {
       util.logError(this.referenceBox.getMapPath()+'/'+dirEntry+' is neither file nor directory.')
     }
+    await this.renderBoxPlaceholderFor(box)
+
+    return box
   }
 
   private async renderBoxPlaceholderFor(box: Box): Promise<void> {
