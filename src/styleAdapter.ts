@@ -2,6 +2,7 @@
 interface Style {
   getBoxBorderClass(mapDataFileExisting: boolean): string
   getHighlightClass(): string
+  getLinkColor(): string
 }
 
 class DarkTheme implements Style {
@@ -16,6 +17,10 @@ class DarkTheme implements Style {
 
   public getHighlightClass(): string {
     return 'highlight'
+  }
+
+  public getLinkColor(): string {
+    return '#2060c0'
   }
 
 }

@@ -1,8 +1,12 @@
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: auto;
-  max-width: 38rem;
-  padding: 2rem;
+  color: #ccc;
+  background-color: #242832;
+}
+
+.logPanel {
+  background-color: #202428;
 }
 
 .nsResize {
@@ -22,20 +26,24 @@ body {
 }
 
 .highlight {
-  background-color: lightblue !important;
-  stroke: lightblue !important;
+  background-color: white !important;
+  stroke: white !important;
 }
 
 .fileBoxHeader {
-  background-color: skyblue;
+  padding: 2px;
+  color: #ddd;
+  background-color: steelblue;
 }
 
 .folderBoxHeader {
-  background-color: gold;
+  padding: 2px;
+  color: #ddd;
+  background-color: slategrey;
 }
 
 .boxBorder {
-  background-color: lightskyblue;
+  background-color: slategrey;
 }
 .boxBorderNoMapData {
   background-color: red;
@@ -52,5 +60,5 @@ body {
   margin-top: -5px;
   width: 10px;
   height: 10px;
-  background-color: lightskyblue;
+  background-color: #2060c0;
 }

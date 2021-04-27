@@ -84,11 +84,11 @@ export class LinkEnd implements Draggable<Box> {
 
     switch (this.shape) {
       case 'square':
-        shapeStyle = 'width:10px;height:10px;background:blue;'
+        shapeStyle = 'width:10px;height:10px;background-color:'+style.getLinkColor()+';'
         transformStyle = 'transform:translate(-5px,-5px);'
         break
       case 'arrow':
-        shapeStyle = 'width:28px;height:10px;background:blue;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
+        shapeStyle = 'width:28px;height:10px;background-color:'+style.getLinkColor()+';clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
         transformStyle = 'transform:translate(-14px,-5px)rotate('+angleInRadians+'rad);'
         break
       default:

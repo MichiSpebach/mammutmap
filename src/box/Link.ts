@@ -77,7 +77,7 @@ export class Link {
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
-    const lineHtml: string = '<line id="'+this.getId()+'line" '+linePositionHtml+' style="stroke:blue;stroke-width:2px;"/>'
+    const lineHtml: string = '<line id="'+this.getId()+'line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;"/>'
 
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
