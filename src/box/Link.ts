@@ -1,6 +1,6 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
-import * as style from '../styleAdapter'
+import { style } from '../styleAdapter'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { BoxMapLinkData } from './BoxMapLinkData'

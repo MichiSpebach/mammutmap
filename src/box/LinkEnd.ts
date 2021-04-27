@@ -1,6 +1,6 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
-import * as style from '../styleAdapter'
+import { style } from '../styleAdapter'
 import { Rect } from '../Rect'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
@@ -104,7 +104,7 @@ export class LinkEnd implements Draggable<Box> {
     if (!this.rendered) {
       util.logWarning('setHighlight(..) called although LinkEnd '+this.getId()+' is not rendered yet.')
     }
-    
+
     if (highlight) {
       await dom.addClassTo(this.getId(), style.getHighlightClass())
     } else {
