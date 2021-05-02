@@ -180,19 +180,18 @@ export class Link {
       return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.x, positionInBoxCoords.y)
     })
 
-    if(this.base !== relation.commonAncestor) {
-      this.deregisterAtBorderingBoxes()
-    }
+    this.deregisterAtBorderingBoxes()
 
     // TODO: WIP unshift into existing WayPointData[] till inner boxId matches (matters when shallow render gets implemented)
     this.data.fromWayPoints = await Promise.all(fromWayPoints)
     this.data.toWayPoints = await Promise.all(toWayPoints)
 
-    if(this.base !== relation.commonAncestor) {
-      const oldBase: FolderBox = this.base
-      this.base = relation.commonAncestor
-      this.registerAtBorderingBoxes()
-      FolderBox.changeManagingBoxOfLinkAndSave(oldBase, relation.commonAncestor, this)
+    const oldBase: FolderBox = this.base
+    this.base = relation.commonAncestor
+    this.registerAtBorderingBoxes()
+
+    if(oldBase !== this.base) {
+      FolderBox.changeManagingBoxOfLinkAndSave(oldBase, this.base, this)
     } else {
       this.base.saveMapData()
     }
