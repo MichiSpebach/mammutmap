@@ -1,5 +1,6 @@
 import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
+import { style } from '../styleAdapter'
 import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBox } from './FolderBox'
@@ -21,6 +22,11 @@ export class FileBox extends Box {
 
   protected getAdditionalStyle(): null {
     return null
+  }
+
+  public async render(): Promise<void> {
+    await super.render()
+    dom.addClassTo(super.getId(), style.getFolderBoxClass())
   }
 
   protected async renderBody(): Promise<void> {

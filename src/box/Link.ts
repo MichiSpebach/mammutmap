@@ -166,6 +166,7 @@ export class Link {
     await this.reorderAndSaveWithEndBoxes(this.from.getBorderingBox(), this.to.getBorderingBox())
   }
 
+  // TODO: fix bug that occurs when a Box with Links is dragged
   private async reorderAndSaveWithEndBoxes(fromBox: Box, toBox: Box): Promise<void|never> {
     const fromClientPosition: {x: number, y: number} = await this.from.getClientMidPosition()
     const toClientPosition: {x: number, y: number} = await this.to.getClientMidPosition()

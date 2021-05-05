@@ -30,6 +30,18 @@ body {
   stroke: white !important;
 }
 
+.highlightBox {
+  background-color: #2060ff80 !important;
+}
+
+.fileBox {
+  background-color: #2060ff20;
+}
+
+.folderBox {
+  background-color: #4080ee10;
+}
+
 .fileBoxHeader {
   padding: 2px;
   color: #ddd;

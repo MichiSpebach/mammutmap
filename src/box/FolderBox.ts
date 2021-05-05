@@ -1,5 +1,6 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
+import { style } from '../styleAdapter'
 import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBoxHeader } from './FolderBoxHeader'
@@ -23,6 +24,11 @@ export class FolderBox extends Box {
 
   protected getOverflow(): 'visible' {
     return 'visible'
+  }
+
+  public async render(): Promise<void> {
+    await super.render()
+    dom.addClassTo(super.getId(), style.getFolderBoxClass())
   }
 
   protected async renderBody(): Promise<void> {

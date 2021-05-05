@@ -1,6 +1,7 @@
 import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
+import { style } from '../styleAdapter'
 import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
 import { FolderBox } from './FolderBox'
@@ -185,7 +186,12 @@ export abstract class Box implements DropTarget {
 
   public async setDragOverStyle(value: boolean): Promise<void> {
     this.dragOver = value
-    await this.renderStyle()
+    
+    if (this.dragOver) {
+      dom.addClassTo(this.getId(), style.getHighlightBoxClass())
+    } else {
+      dom.removeClassFrom(this.getId(), style.getHighlightBoxClass())
+    }
   }
 
   protected async renderStyle(): Promise<void> {
@@ -193,15 +199,7 @@ export abstract class Box implements DropTarget {
     const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
-    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + this.getBackgroundStyle())
-  }
-
-  private getBackgroundStyle(): string {
-    if (this.dragOver) {
-      return 'background-color:#33F6'
-    } else {
-      return 'background-color:#0000'
-    }
+    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle)
   }
 
   protected abstract getOverflow(): 'hidden'|'visible'
