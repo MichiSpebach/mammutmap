@@ -1,4 +1,5 @@
 import * as dom from './domAdapter'
+import { settings } from './Settings'
 import { RootFolderBox } from './box/RootFolderBox'
 
 export class Map {
@@ -40,7 +41,7 @@ export class Map {
   private zoom(delta: number, clientX: number, clientY: number): void {
     let clientYPercent: number = 100 * clientY / this.mapRatioAdjusterSizePx
     let clientXPercent: number = 100 * clientX / this.mapRatioAdjusterSizePx
-    let scaleChange: number = this.scalePercent * (delta/500)
+    let scaleChange: number = this.scalePercent * (delta/2500) * settings.getZoomSpeed()
 
     this.marginTopPercent -= scaleChange * (clientYPercent - this.marginTopPercent) / this.scalePercent
     this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent

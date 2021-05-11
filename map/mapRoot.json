@@ -897,6 +897,25 @@
 					"y": -0.0038328861632809506
 				}
 			]
+		},
+		{
+			"id": "26rd2folvfo",
+			"fromWayPoints": [
+				{
+					"boxId": "6o0ikrr8ru",
+					"boxName": "Map.ts",
+					"x": 47.92986129285527,
+					"y": 99.77425354592307
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "7b4gp3csto8",
+					"boxName": "Settings.ts",
+					"x": 48.587761905381996,
+					"y": 0.4949886784504397
+				}
+			]
 		}
 	]
 }
