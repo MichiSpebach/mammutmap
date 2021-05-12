@@ -1,5 +1,6 @@
-import { Menu, dialog } from 'electron'
+import { Menu, MenuItem, dialog } from 'electron'
 import * as util from './util'
+import { settings } from './Settings'
 import { Map } from './Map'
 
 export function setApplicationMenu(): void {
@@ -21,6 +22,21 @@ export function setApplicationMenu(): void {
         },
         {
           label: 'Open root.json...'
+        }
+      ]
+    },
+    {
+      label: 'Settings',
+      submenu: [
+        {
+          label: 'Zoom speed',
+          submenu: [
+            buildZoomSpeedMenuItem(1),
+            buildZoomSpeedMenuItem(2),
+            buildZoomSpeedMenuItem(3),
+            buildZoomSpeedMenuItem(4),
+            buildZoomSpeedMenuItem(5)
+          ]
         }
       ]
     }
@@ -47,4 +63,13 @@ async function openFolder(): Promise<void> {
     util.logInfo('opening '+folderPath)
     Map.new(folderPath+'/src', folderPath+'/map')
   }
+}
+
+function buildZoomSpeedMenuItem(zoomSpeed: number): MenuItem {
+  return new MenuItem({
+    label: zoomSpeed.toString(),
+    type: 'radio',
+    checked: settings.getZoomSpeed() === zoomSpeed,
+    click: () => settings.setZoomSpeed(zoomSpeed)
+  })
 }

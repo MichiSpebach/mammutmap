@@ -1,10 +1,16 @@
 
 class Settings {
 
+  private zoomSpeed: number = 3
+
   public getZoomSpeed(): number {
-    return 5
+    return this.zoomSpeed
   }
-  
+
+  public setZoomSpeed(zoomSpeed: number) {
+    this.zoomSpeed = zoomSpeed
+  }
+
 }
 
 export const settings = new Settings()
