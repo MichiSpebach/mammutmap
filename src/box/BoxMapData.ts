@@ -74,6 +74,7 @@ export class BoxMapData {
   }
 
   public toJson(): string {
-    return JSON.stringify(this, null, '\t')
+    return util.toFormattedJson(this)
   }
+  
 }

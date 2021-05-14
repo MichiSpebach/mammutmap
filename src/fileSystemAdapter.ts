@@ -21,6 +21,10 @@ export function readFile(path: string): Promise<string> {
   return fsPromises.readFile(path, 'utf-8')
 }
 
+export function readFileSync(path: string): string {
+  return fs.readFileSync(path, 'utf-8')
+}
+
 export function readFileAndConvertToHtml(path: string, callback: (dataConvertedToHtml: string) => void): void|never {
   fs.readFile(path, 'utf-8', (err: NodeJS.ErrnoException | null, data: string) => {
     if(err) {

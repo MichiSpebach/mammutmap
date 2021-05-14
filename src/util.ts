@@ -65,6 +65,10 @@ function escapeCharForHtml(c: string): string {
   }
 }
 
+export function toFormattedJson(object: any) {
+  return JSON.stringify(object, null, '\t')
+}
+
 export function wait(milliSeconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliSeconds))
 }
