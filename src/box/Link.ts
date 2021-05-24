@@ -1,6 +1,7 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
 import { style } from '../styleAdapter'
+import { boxManager } from './BoxManager'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { BoxMapLinkData } from './BoxMapLinkData'
@@ -134,39 +135,22 @@ export class Link {
       util.logError(this.base.getSrcPath+' has empty link path.')
     }
 
-    const result: {box: Box, wayPoint: WayPointData}[] = []
-    let pivotBox: FolderBox = this.base
+    const renderedBoxesInPath: {box: Box, wayPoint: WayPointData}[] = []
 
     for(let i = 0; i < path.length; i++) {
-      if (!pivotBox.isBodyRendered()) {
-        break
-      }
-
-      let box: Box
-      if (path[i].boxId === pivotBox.getId()) {
-        box = pivotBox
-      } else {
-        box = pivotBox.getBox(path[i].boxId)
-      }
-
-      result.push({box: box, wayPoint: path[i]})
-
-      if (box instanceof FolderBox) {
-        pivotBox = box
-      } else if (i != path.length-1) {
-        util.logWarning(this.base.getSrcPath+' seems to have a corrupted link, '+box.getSrcPath+' is not the deepest WayPoint in path.')
-        break
+      const box: Box|undefined = boxManager.getBoxIfExists(path[i].boxId)
+      if (box instanceof Box) { // TODO: also check if box is rendered
+        renderedBoxesInPath.push({box: box, wayPoint: path[i]})
       }
     }
 
-    return result
+    return renderedBoxesInPath
   }
 
   public async reorderAndSave(): Promise<void|never> {
     await this.reorderAndSaveWithEndBoxes(this.from.getBorderingBox(), this.to.getBorderingBox())
   }
 
-  // TODO: fix bug that occurs when a Box with Links is dragged
   private async reorderAndSaveWithEndBoxes(fromBox: Box, toBox: Box): Promise<void|never> {
     const fromClientPosition: {x: number, y: number} = await this.from.getClientMidPosition()
     const toClientPosition: {x: number, y: number} = await this.to.getClientMidPosition()

@@ -2,6 +2,7 @@ import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { style } from '../styleAdapter'
+import { boxManager } from './BoxManager'
 import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
 import { FolderBox } from './FolderBox'
@@ -34,6 +35,8 @@ export abstract class Box implements DropTarget {
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
     this.connector = new BoxConnector(this)
+
+    boxManager.addBox(this)
   }
 
   protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
@@ -186,7 +189,7 @@ export abstract class Box implements DropTarget {
 
   public async setDragOverStyle(value: boolean): Promise<void> {
     this.dragOver = value
-    
+
     if (this.dragOver) {
       dom.addClassTo(this.getId(), style.getHighlightBoxClass())
     } else {
