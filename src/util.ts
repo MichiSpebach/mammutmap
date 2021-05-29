@@ -1,4 +1,9 @@
+import { exec } from 'child_process'
 import * as dom from './domAdapter'
+
+export function runShellCommand(command: string) {
+  exec(command)
+}
 
 export function logInfo(message: string): void {
     log('Info: ' + message, 'grey', 'log')

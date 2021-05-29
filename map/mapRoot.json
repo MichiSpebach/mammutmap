@@ -935,6 +935,56 @@
 					"y": 21.541472782332523
 				}
 			]
+		},
+		{
+			"id": "66fugjsccb",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 64.556687621938,
+					"y": 22.90305357580548
+				},
+				{
+					"boxId": "3n81ck4i5sg",
+					"boxName": "FileBox.ts",
+					"x": 78.1023465607045,
+					"y": 0.3716491104611528
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "lr0pi422h1o",
+					"boxName": "contextMenu.ts",
+					"x": 95.52575438697303,
+					"y": 99.78603384555534
+				}
+			]
+		},
+		{
+			"id": "8pktsjd7amo",
+			"fromWayPoints": [
+				{
+					"boxId": "lr0pi422h1o",
+					"boxName": "contextMenu.ts",
+					"x": 97.52117167915299,
+					"y": 98.76375110765308
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 65.17823542163451,
+					"y": 22.927374259216684
+				},
+				{
+					"boxId": "3n81ck4i5sg",
+					"boxName": "FileBox.ts",
+					"x": 81.95135048058853,
+					"y": 0.6531348272601324
+				}
+			]
 		}
 	]
 }
