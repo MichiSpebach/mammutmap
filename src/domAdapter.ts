@@ -74,19 +74,19 @@ export function addWheelListenerTo(id: string, callback: (delta: number, clientX
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
 }
 
-export function addEventListenerTo(eventType: 'click'|'mouseover'|'mouseout', id: string, callback: () => void): void {
+export function addEventListenerTo(id: string, eventType: 'click'|'mouseover'|'mouseout', callback: (clientX:number, clientY: number) => void): void {
   let ipcChannelName = eventType+'_'+id
 
   var rendererFunction: string = '(event) => {'
   rendererFunction += 'let ipc = require("electron").ipcRenderer;'
   //rendererFunction += 'console.log(event);'
   rendererFunction += 'event.stopPropagation();'
-  rendererFunction += 'ipc.send("' + ipcChannelName + '");'
+  rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);'
   rendererFunction += '}'
 
   executeJsOnElement(id, "addEventListener('"+eventType+"', "+rendererFunction+")")
 
-  ipcMain.on(ipcChannelName, (_: IpcMainEvent) => callback())
+  ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number) => callback(clientX, clientY))
 }
 
 export function addDragListenerTo(

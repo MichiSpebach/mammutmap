@@ -1,8 +1,10 @@
-import { Menu } from 'electron'
+import { Menu, MenuItem } from 'electron'
 import * as util from './util'
-import { FileBox } from './box/FileBox';
+import { Box } from './box/Box'
+import { FileBox } from './box/FileBox'
+import { BoxConnector } from './box/BoxConnector'
 
-export function openForFileBox(box: FileBox): void {
+export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const atomCommand: string = 'atom '+box.getSrcPath()
   const template: any = [
     {
@@ -13,5 +15,10 @@ export function openForFileBox(box: FileBox): void {
     }
   ]
   const menu = Menu.buildFromTemplate(template)
+  menu.insert(0, buildLinkItem(box, clientX, clientY))
   menu.popup()
+}
+
+function buildLinkItem(box: Box, clientX: number, clientY: number): MenuItem {
+  return new MenuItem({label: 'link from here', click: () => BoxConnector.addLinkToBox(box, clientX, clientY)})
 }
