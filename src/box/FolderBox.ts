@@ -1,6 +1,7 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
 import { style } from '../styleAdapter'
+import * as contextMenu from '../contextMenu'
 import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBoxHeader } from './FolderBoxHeader'
@@ -29,6 +30,7 @@ export class FolderBox extends Box {
   public async render(): Promise<void> {
     await super.render()
     dom.addClassTo(super.getId(), style.getFolderBoxClass())
+    dom.addEventListenerTo(this.getId(), 'click', (clientX: number, clientY: number) => contextMenu.openForFolderBox(this, clientX, clientY))
   }
 
   protected async renderBody(): Promise<void> {
