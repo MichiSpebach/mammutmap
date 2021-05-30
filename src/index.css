@@ -60,17 +60,3 @@ body {
 .boxBorderNoMapData {
   background-color: red;
 }
-
-.boxConnectorPlacement {
-  position: absolute;
-  left: 100%;
-  top: 50%;
-}
-
-.boxConnector {
-  margin-left: -10px;
-  margin-top: -5px;
-  width: 10px;
-  height: 10px;
-  background-color: #2060c0;
-}

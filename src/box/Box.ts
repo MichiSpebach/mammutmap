@@ -8,7 +8,6 @@ import { Rect } from '../Rect'
 import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
-import { BoxConnector } from './BoxConnector'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { DropTarget } from '../DropTarget'
@@ -22,7 +21,6 @@ export abstract class Box implements DropTarget {
   private mapDataFileExists: boolean
   private readonly header: BoxHeader
   private readonly border: BoxBorder
-  private readonly connector: BoxConnector
   private readonly borderingLinks: Link[] = []
   private dragOver: boolean = false
   private unsavedChanges: boolean = false
@@ -34,7 +32,6 @@ export abstract class Box implements DropTarget {
     this.mapDataFileExists = mapDataFileExists
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
-    this.connector = new BoxConnector(this)
 
     boxManager.addBox(this)
   }
@@ -132,14 +129,10 @@ export abstract class Box implements DropTarget {
   public async render(): Promise<void> {
     this.renderStyle()
 
+    // TODO: add placeholders before so that render order does no longer matter?
     await this.header.render()
     await this.border.render()
     await this.renderBody()
-
-    const connectorPlaceholder: string = '<div id="'+this.connector.getId()+'" class="boxConnectorPlacement"></div>' // TODO: remove style class from here?
-    await dom.addContentTo(this.getId(), connectorPlaceholder) // TODO: add placeholders for other parts too
-
-    this.connector.render()
 
     DragManager.addDropTarget(this)
     HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false))

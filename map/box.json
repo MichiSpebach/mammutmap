@@ -101,25 +101,6 @@
 			]
 		},
 		{
-			"id": "9m1lgn02i2g",
-			"fromWayPoints": [
-				{
-					"boxId": "iu4msv07ut8",
-					"boxName": "Box.ts",
-					"x": 80.65636618594898,
-					"y": 98.71705574404027
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "jclbfe4iai",
-					"boxName": "BoxConnector.ts",
-					"x": 19.490228653871377,
-					"y": 1.6938959607096322
-				}
-			]
-		},
-		{
 			"id": "pci0kff1s48",
 			"fromWayPoints": [
 				{
@@ -386,40 +367,21 @@
 			]
 		},
 		{
-			"id": "o1k2okk22eo",
-			"fromWayPoints": [
-				{
-					"boxId": "jclbfe4iai",
-					"boxName": "BoxConnector.ts",
-					"x": 26.84596949062274,
-					"y": 0.2965288679574394
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "iu4msv07ut8",
-					"boxName": "Box.ts",
-					"x": 86.81771369721936,
-					"y": 98.71749755620723
-				}
-			]
-		},
-		{
 			"id": "ag89smblafg",
 			"fromWayPoints": [
 				{
 					"boxId": "8hst7ghum5o",
 					"boxName": "FolderBox.ts",
-					"x": 81.68656716417911,
-					"y": 7.115604731018695
+					"x": 98.65359191898449,
+					"y": 2.9380902413431267
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "rjo0gg3uqi",
 					"boxName": "FolderBoxBody.ts",
-					"x": 3.164633409832105,
-					"y": 78.88857466063348
+					"x": 3.164537239015269,
+					"y": 78.88795819871565
 				}
 			]
 		},

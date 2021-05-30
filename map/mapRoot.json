@@ -648,56 +648,6 @@
 			]
 		},
 		{
-			"id": "o4hev9jgan",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 87.4270036895926,
-					"y": 79.81970801661582
-				},
-				{
-					"boxId": "jclbfe4iai",
-					"boxName": "BoxConnector.ts",
-					"x": 98.76969945515262,
-					"y": 66.90437926878265
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "dub9um70n18",
-					"boxName": "DragManager.ts",
-					"x": 1.6485914783601383,
-					"y": 59.86495719625417
-				}
-			]
-		},
-		{
-			"id": "505rtddidto",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 87.4270036895926,
-					"y": 80.26181981143458
-				},
-				{
-					"boxId": "jclbfe4iai",
-					"boxName": "BoxConnector.ts",
-					"x": 98.76969945515262,
-					"y": 72.05705102450783
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p0kd6a1t4vo",
-					"boxName": "Draggable.ts",
-					"x": 1.367895269498221,
-					"y": 20.210048254328697
-				}
-			]
-		},
-		{
 			"id": "pkceusc47ao",
 			"fromWayPoints": [
 				{
@@ -983,6 +933,56 @@
 					"boxName": "FileBox.ts",
 					"x": 81.95135048058853,
 					"y": 0.6531348272601324
+				}
+			]
+		},
+		{
+			"id": "ahf98ke2718",
+			"fromWayPoints": [
+				{
+					"boxId": "lr0pi422h1o",
+					"boxName": "contextMenu.ts",
+					"x": 81.95419792973931,
+					"y": 97.83877878950187
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 25.068496388762938,
+					"y": 29.346659132645854
+				},
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 93.06359457296533,
+					"y": 1.215277777777778
+				}
+			]
+		},
+		{
+			"id": "sp07k6mp3rg",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 25.678141110082027,
+					"y": 29.531948957008993
+				},
+				{
+					"boxId": "8hst7ghum5o",
+					"boxName": "FolderBox.ts",
+					"x": 95.70359755076213,
+					"y": 2.7504681647940075
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "lr0pi422h1o",
+					"boxName": "contextMenu.ts",
+					"x": 84.68843733589668,
+					"y": 98.52437064809855
 				}
 			]
 		}
