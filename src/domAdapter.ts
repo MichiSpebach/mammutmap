@@ -74,7 +74,7 @@ export function addWheelListenerTo(id: string, callback: (delta: number, clientX
   ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
 }
 
-export function addEventListenerTo(id: string, eventType: 'click'|'mouseover'|'mouseout', callback: (clientX:number, clientY: number) => void): void {
+export function addEventListenerTo(id: string, eventType: 'click'|'contextmenu'|'mouseover'|'mouseout', callback: (clientX:number, clientY: number) => void): void {
   let ipcChannelName = eventType+'_'+id
 
   var rendererFunction: string = '(event) => {'

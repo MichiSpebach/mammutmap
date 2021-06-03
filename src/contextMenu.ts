@@ -30,6 +30,7 @@ function buildLinkItem(box: Box, clientX: number, clientY: number): MenuItem {
   return new MenuItem({label: 'link from here', click: () => addLinkToBox(box, clientX, clientY)})
 }
 
+// TODO: move into Box?
 async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise<void> {
   const localPosition: {x: number, y: number} = await box.transformClientPositionToLocal(clientX, clientY)
   const from = new WayPointData(box.getId(), box.getName(), localPosition.x, localPosition.y)

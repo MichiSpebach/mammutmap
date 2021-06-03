@@ -28,7 +28,7 @@ export class FileBox extends Box {
   public async render(): Promise<void> {
     await super.render()
     dom.addClassTo(super.getId(), style.getFolderBoxClass())
-    dom.addEventListenerTo(this.getId(), 'click', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, clientX, clientY))
+    dom.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, clientX, clientY))
   }
 
   protected async renderBody(): Promise<void> {
