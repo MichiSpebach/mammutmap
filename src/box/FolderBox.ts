@@ -79,7 +79,7 @@ export class FolderBox extends Box {
     oldManagingBox.saveMapData()
   }
 
-  public async addLink(from: WayPointData, to: WayPointData): Promise<void> {
+  public async addLink(from: WayPointData, to: WayPointData): Promise<Link> {
     const linkData = new BoxMapLinkData(util.generateId(), [from], [to])
     this.getMapLinkData().push(linkData)
 
@@ -88,6 +88,8 @@ export class FolderBox extends Box {
 
     await link.render()
     await this.saveMapData()
+    
+    return link
   }
 
   private async renderLinks(): Promise<void> {

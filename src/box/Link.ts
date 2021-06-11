@@ -10,10 +10,10 @@ import { LinkEnd } from './LinkEnd'
 import { Rect } from '../Rect'
 
 export class Link {
-  private data: BoxMapLinkData
+  private readonly data: BoxMapLinkData
   private base: FolderBox // TODO: rename to managingBox?
-  private from: LinkEnd
-  private to: LinkEnd
+  private readonly from: LinkEnd
+  private readonly to: LinkEnd
   private rendered: boolean = false
 
   public constructor(data: BoxMapLinkData, base: FolderBox) {
@@ -33,6 +33,14 @@ export class Link {
 
   public getBase(): FolderBox {
     return this.base
+  }
+
+  public getFrom(): LinkEnd {
+    return this.from
+  }
+
+  public getTo(): LinkEnd {
+    return this.to
   }
 
   public async render(): Promise<void> {
