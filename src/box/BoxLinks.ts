@@ -1,21 +1,20 @@
 import * as util from '../util'
 import * as dom from '../domAdapter'
 import { Box } from './Box'
-import { FolderBox } from './FolderBox'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
 
 export class BoxLinks {
-    private readonly referenceBox: FolderBox
+    private readonly referenceBox: Box
     private links: Link[] = []
 
-    public constructor(referenceBox: FolderBox) {
+    public constructor(referenceBox: Box) {
       this.referenceBox = referenceBox
     }
 
-    public static changeManagingBoxOfLinkAndSave(oldManagingBox: FolderBox, newManagingBox: FolderBox, link: Link): void {
-      if (link.getBase() !== newManagingBox) {
+    public static changeManagingBoxOfLinkAndSave(oldManagingBox: Box, newManagingBox: Box, link: Link): void {
+      if (link.getManagingBox() !== newManagingBox) {
         util.logWarning('baseBox/managingBox '+newManagingBox.getSrcPath()+' of given link '+link.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
       }
       if (newManagingBox.links.links.includes(link)) {

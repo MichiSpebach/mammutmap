@@ -5,16 +5,13 @@ import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
-import { BoxLinks } from './BoxLinks'
 
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
-  public readonly links: BoxLinks
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
     super(name, parent, mapData, mapDataFileExists)
     this.body = new FolderBoxBody(this)
-    this.links = new BoxLinks(this)
   }
 
   protected createHeader(): FolderBoxHeader {
@@ -33,7 +30,6 @@ export class FolderBox extends Box {
 
   protected async renderBody(): Promise<void> {
     await this.body.render()
-    await this.links.render()
   }
 
   public isBodyRendered(): boolean {

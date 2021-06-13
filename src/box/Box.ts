@@ -8,6 +8,7 @@ import { Rect } from '../Rect'
 import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { BoxBorder } from './BoxBorder'
+import { BoxLinks } from './BoxLinks'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { DropTarget } from '../DropTarget'
@@ -21,6 +22,7 @@ export abstract class Box implements DropTarget {
   private mapDataFileExists: boolean
   private readonly header: BoxHeader
   private readonly border: BoxBorder
+  public readonly links: BoxLinks
   private readonly borderingLinks: Link[] = []
   private dragOver: boolean = false
   private unsavedChanges: boolean = false
@@ -32,6 +34,7 @@ export abstract class Box implements DropTarget {
     this.mapDataFileExists = mapDataFileExists
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
+    this.links = new BoxLinks(this)
 
     boxManager.addBox(this)
   }
@@ -133,6 +136,7 @@ export abstract class Box implements DropTarget {
     await this.header.render()
     await this.border.render()
     await this.renderBody()
+    await this.links.render()
 
     DragManager.addDropTarget(this)
     HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false))

@@ -3,7 +3,6 @@ import * as dom from '../domAdapter'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { Box } from './Box'
-import { FolderBox } from './FolderBox'
 import { BoxLinks } from './BoxLinks'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
@@ -12,14 +11,14 @@ import { Rect } from '../Rect'
 
 export class Link {
   private readonly data: BoxMapLinkData
-  private base: FolderBox // TODO: rename to managingBox?
+  private managingBox: Box
   private readonly from: LinkEnd
   private readonly to: LinkEnd
   private rendered: boolean = false
 
-  public constructor(data: BoxMapLinkData, base: FolderBox) {
+  public constructor(data: BoxMapLinkData, managingBox: Box) {
     this.data = data
-    this.base = base
+    this.managingBox = managingBox
     this.from = new LinkEnd(this.data.id+'from', this, 'square')
     this.to = new LinkEnd(this.data.id+'to', this, 'arrow')
   }
@@ -32,8 +31,8 @@ export class Link {
     return this.data
   }
 
-  public getBase(): FolderBox {
-    return this.base
+  public getManagingBox(): Box {
+    return this.managingBox
   }
 
   public getFrom(): LinkEnd {
@@ -45,7 +44,7 @@ export class Link {
   }
 
   public async render(): Promise<void> {
-    const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, gather awaits for more performance
+    const baseRect: Rect = await this.managingBox.getClientRect() // TODO: optimize, gather awaits for more performance
     const fromInBaseCoords: {x: number, y: number} = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.fromWayPoints, baseRect) // TODO: optimize, gather awaits for more performance
     const toInBaseCoords: {x: number, y: number} = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.toWayPoints, baseRect) // TODO: optimize, gather awaits for more performance
 
@@ -53,15 +52,15 @@ export class Link {
   }
 
   public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number): Promise<void> {
-    const baseRect: Rect = await this.base.getClientRect() // TODO: optimize, use cached?
+    const baseRect: Rect = await this.managingBox.getClientRect() // TODO: optimize, use cached?
 
     let fromInBaseCoords: {x: number, y: number}
     let toInBaseCoords: {x: number, y: number}
     if (linkEnd === this.to) {
       fromInBaseCoords = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.fromWayPoints, baseRect)
-      toInBaseCoords = await this.base.transformClientPositionToLocal(clientX, clientY)
+      toInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
     } else if (linkEnd === this.from) {
-      fromInBaseCoords = await this.base.transformClientPositionToLocal(clientX, clientY)
+      fromInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
       toInBaseCoords = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.toWayPoints, baseRect)
     } else {
       util.logError('Given LinkEnd is not contained by Link.')
@@ -93,7 +92,7 @@ export class Link {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
       const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
-      await dom.addContentTo(this.base.getId(), '<div id="'+this.getId()+'">'+svgHtml+fromHtml+toHtml+'</div>')
+      await dom.addContentTo(this.managingBox.getId(), '<div id="'+this.getId()+'">'+svgHtml+fromHtml+toHtml+'</div>')
       await dom.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
       this.registerAtBorderingBoxes()
       this.rendered = true
@@ -141,7 +140,7 @@ export class Link {
 
   private getRenderedBoxes(path: WayPointData[]): {box: Box, wayPoint: WayPointData}[] | never {
     if (path.length === 0) {
-      util.logError(this.base.getSrcPath()+' has empty link path.')
+      util.logError(this.managingBox.getSrcPath()+' has empty link path.')
     }
 
     const renderedBoxesInPath: {box: Box, wayPoint: WayPointData}[] = []
@@ -163,7 +162,7 @@ export class Link {
   private async reorderAndSaveWithEndBoxes(fromBox: Box, toBox: Box): Promise<void|never> {
     const fromClientPosition: {x: number, y: number} = await this.from.getClientMidPosition()
     const toClientPosition: {x: number, y: number} = await this.to.getClientMidPosition()
-    const relation: {commonAncestor: FolderBox, fromBoxes: Box[], toBoxes: Box[]} = this.findCommonAncestor(fromBox, toBox)
+    const relation: {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} = this.findCommonAncestor(fromBox, toBox)
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
       const positionInBoxCoords: {x: number, y: number} = await box.transformClientPositionToLocal(fromClientPosition.x, fromClientPosition.y)
@@ -180,14 +179,14 @@ export class Link {
     this.data.fromWayPoints = await Promise.all(fromWayPoints)
     this.data.toWayPoints = await Promise.all(toWayPoints)
 
-    const oldBase: FolderBox = this.base
-    this.base = relation.commonAncestor
+    const oldManagingBox: Box = this.managingBox
+    this.managingBox = relation.commonAncestor
     this.registerAtBorderingBoxes()
 
-    if(oldBase !== this.base) {
-      BoxLinks.changeManagingBoxOfLinkAndSave(oldBase, this.base, this)
+    if(oldManagingBox !== this.managingBox) {
+      BoxLinks.changeManagingBoxOfLinkAndSave(oldManagingBox, this.managingBox, this)
     } else {
-      this.base.saveMapData()
+      this.managingBox.saveMapData()
     }
 
     await this.render()
@@ -204,10 +203,10 @@ export class Link {
   }
 
   private getRenderedBoxesWithoutBase(path: WayPointData[]): Box[] {
-    return this.getRenderedBoxes(path).map((tuple: {box: Box, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.base)
+    return this.getRenderedBoxes(path).map((tuple: {box: Box, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.managingBox)
   }
 
-  private findCommonAncestor(fromBox: Box, toBox: Box): {commonAncestor: FolderBox, fromBoxes: Box[], toBoxes: Box[]} | never {
+  private findCommonAncestor(fromBox: Box, toBox: Box): {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} | never {
     const fromBoxes: Box[] = [fromBox]
     const toBoxes: Box[] = [toBox]
 
@@ -238,12 +237,7 @@ export class Link {
       }
     }
 
-    if (commonAncestorCandidate instanceof FolderBox) {
-      return {commonAncestor: commonAncestorCandidate, fromBoxes: fromBoxes, toBoxes: toBoxes}
-    } else {
-      const errorExplanation: string = 'This can only occur if fromBox === toBox and fromBox is not a FolderBox. This is impossible if method is called correctly.'
-      util.logError('expected '+commonAncestorCandidate.getSrcPath()+' to be a FolderBox, but was not. '+errorExplanation)
-    }
+    return {commonAncestor: commonAncestorCandidate, fromBoxes: fromBoxes, toBoxes: toBoxes}
   }
 
 }
