@@ -4,6 +4,7 @@ import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
+import { BoxLinks } from './BoxLinks'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
 import { LinkEnd } from './LinkEnd'
@@ -140,7 +141,7 @@ export class Link {
 
   private getRenderedBoxes(path: WayPointData[]): {box: Box, wayPoint: WayPointData}[] | never {
     if (path.length === 0) {
-      util.logError(this.base.getSrcPath+' has empty link path.')
+      util.logError(this.base.getSrcPath()+' has empty link path.')
     }
 
     const renderedBoxesInPath: {box: Box, wayPoint: WayPointData}[] = []
@@ -184,7 +185,7 @@ export class Link {
     this.registerAtBorderingBoxes()
 
     if(oldBase !== this.base) {
-      FolderBox.changeManagingBoxOfLinkAndSave(oldBase, this.base, this)
+      BoxLinks.changeManagingBoxOfLinkAndSave(oldBase, this.base, this)
     } else {
       this.base.saveMapData()
     }

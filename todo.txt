@@ -1,5 +1,7 @@
 
-fix borderingLinks, links are not always updated correctly when dragged
+when link is created over contextMenu and click in contextMenu is outside of link.from's box, then dropTarget is wrong as long as link is dragged over a boxBorder
+
+done, but check if working correctly: fix borderingLinks, links are not always updated correctly when dragged
 
 introduce interface Linkable, Box and LinkEnd implement it and have a list of borderingLinks
 

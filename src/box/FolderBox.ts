@@ -1,4 +1,3 @@
-import * as util from '../util'
 import * as dom from '../domAdapter'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu'
@@ -6,17 +5,16 @@ import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
-import { Link } from './Link'
-import { BoxMapLinkData } from './BoxMapLinkData'
-import { WayPointData } from './WayPointData'
+import { BoxLinks } from './BoxLinks'
 
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
-  private links: Link[] = []
+  public readonly links: BoxLinks
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
     super(name, parent, mapData, mapDataFileExists)
     this.body = new FolderBoxBody(this)
+    this.links = new BoxLinks(this)
   }
 
   protected createHeader(): FolderBoxHeader {
@@ -35,7 +33,7 @@ export class FolderBox extends Box {
 
   protected async renderBody(): Promise<void> {
     await this.body.render()
-    this.renderLinks()
+    await this.links.render()
   }
 
   public isBodyRendered(): boolean {
@@ -56,50 +54,6 @@ export class FolderBox extends Box {
 
   public removeBox(box: Box): void {
     return this.body.removeBox(box)
-  }
-
-  public static changeManagingBoxOfLinkAndSave(oldManagingBox: FolderBox, newManagingBox: FolderBox, link: Link): void {
-    if (link.getBase() !== newManagingBox) {
-      util.logWarning('baseBox/managingBox '+newManagingBox.getSrcPath()+' of given link '+link.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
-    }
-    if (newManagingBox.links.includes(link)) {
-      util.logWarning('box '+newManagingBox.getSrcPath()+' already manages link '+link.getId())
-    }
-    if (!oldManagingBox.links.includes(link)) {
-      util.logWarning('box '+oldManagingBox.getSrcPath()+' does not manage link '+link.getId())
-    }
-
-    newManagingBox.links.push(link)
-    dom.appendChildTo(newManagingBox.getId(), link.getId())
-    oldManagingBox.links.splice(oldManagingBox.links.indexOf(link), 1)
-
-    newManagingBox.getMapLinkData().push(link.getData())
-    oldManagingBox.getMapLinkData().splice(oldManagingBox.getMapLinkData().indexOf(link.getData()), 1)
-    newManagingBox.saveMapData()
-    oldManagingBox.saveMapData()
-  }
-
-  public async addLink(from: WayPointData, to: WayPointData): Promise<Link> {
-    const linkData = new BoxMapLinkData(util.generateId(), [from], [to])
-    this.getMapLinkData().push(linkData)
-
-    const link: Link = new Link(linkData, this)
-    this.links.push(link)
-
-    await link.render()
-    await this.saveMapData()
-    
-    return link
-  }
-
-  private async renderLinks(): Promise<void> {
-    this.getMapLinkData().forEach((linkData: BoxMapLinkData) => {
-      this.links.push(new Link(linkData, this))
-    })
-
-    await Promise.all(this.links.map(async (link: Link) => {
-      await link.render()
-    }))
   }
 
 }

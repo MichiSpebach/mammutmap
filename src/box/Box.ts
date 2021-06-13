@@ -153,7 +153,7 @@ export abstract class Box implements DropTarget {
     }
   }
 
-  protected getMapLinkData(): BoxMapLinkData[] {
+  public getMapLinkData(): BoxMapLinkData[] {
     return this.mapData.links
   }
 
