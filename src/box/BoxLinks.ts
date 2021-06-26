@@ -8,6 +8,7 @@ import { WayPointData } from './WayPointData'
 export class BoxLinks {
     private readonly referenceBox: Box
     private links: Link[] = []
+    private rendered: boolean = false
 
     public constructor(referenceBox: Box) {
       this.referenceBox = referenceBox
@@ -48,6 +49,10 @@ export class BoxLinks {
     }
 
     public async render(): Promise<void> { // TODO: render all links in one html-element like header is rendered in <boxId>header
+      if (this.rendered) {
+        return
+      }
+
       this.referenceBox.getMapLinkData().forEach((linkData: BoxMapLinkData) => {
         this.links.push(new Link(linkData, this.referenceBox))
       })
@@ -55,6 +60,8 @@ export class BoxLinks {
       await Promise.all(this.links.map(async (link: Link) => {
         await link.render()
       }))
+
+      this.rendered = true
     }
 
 }

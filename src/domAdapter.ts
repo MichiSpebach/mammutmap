@@ -11,6 +11,11 @@ export function init(windowToRenderIn: BrowserWindow) {
   // TODO: define 'let ipc = require("electron").ipcRenderer;' in renderer only once
 }
 
+export function getClientSize(): {width: number, height: number} {
+  const size: number[] = renderWindow.getContentSize()
+  return {width: size[0], height: size[1]}
+}
+
 export function getCursorClientPosition(): {x: number, y: number} {
   const cursorScreenPosition: Point = screen.getCursorScreenPoint()
   const contentBounds: Rectangle = renderWindow.getContentBounds()

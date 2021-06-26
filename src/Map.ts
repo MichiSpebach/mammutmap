@@ -38,7 +38,7 @@ export class Map {
     dom.addContentTo(this.rootDirectory.getId(), '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>')
   }
 
-  private zoom(delta: number, clientX: number, clientY: number): void {
+  private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {
     let clientYPercent: number = 100 * clientY / this.mapRatioAdjusterSizePx
     let clientXPercent: number = 100 * clientX / this.mapRatioAdjusterSizePx
     let scaleChange: number = this.scalePercent * (delta/1500) * settings.getZoomSpeed()
@@ -47,15 +47,16 @@ export class Map {
     this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent
     this.scalePercent += scaleChange
 
-    this.updateStyle()
+    await this.updateStyle()
+    await this.rootDirectory.render()
   }
 
-  private async updateStyle() {
+  private async updateStyle(): Promise<void> {
     let basicStyle: string = 'position:relative;'
     let offsetStyle: string = 'top:' + this.marginTopPercent + '%;left:' + this.marginLeftPercent + '%;'
     let scaleStyle: string = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;'
 
-    dom.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle)
+    await dom.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle)
   }
 
 }

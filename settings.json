@@ -1,3 +1,4 @@
 {
-	"zoomSpeed": 3
+	"zoomSpeed": 3,
+	"boxMinSizeToRender": 200
 }

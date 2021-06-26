@@ -8,6 +8,7 @@ import { FolderBox } from './FolderBox'
 import { FileBoxHeader } from './FileBoxHeader'
 
 export class FileBox extends Box {
+  private bodyRendered: boolean = false
 
   public constructor(name: string, parent: FolderBox, mapData: BoxMapData, mapDataFileExists: boolean) {
     super(name, parent, mapData, mapDataFileExists)
@@ -25,17 +26,30 @@ export class FileBox extends Box {
     return null
   }
 
-  public async render(): Promise<void> {
-    await super.render()
+  protected async renderAdditional(): Promise<void> {
+    if (this.isRendered()) {
+      return
+    }
+
     dom.addClassTo(super.getId(), style.getFolderBoxClass())
     dom.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, clientX, clientY))
   }
 
   protected async renderBody(): Promise<void> {
+    if (this.isBodyRendered()) {
+      return
+    }
+
     fileSystem.readFileAndConvertToHtml(super.getSrcPath(), async (dataConvertedToHtml: string) => {
       let content: string = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>'
       return dom.addContentTo(super.getId(), content)
     })
+
+    this.bodyRendered = true
+  }
+
+  public isBodyRendered(): boolean {
+    return this.bodyRendered
   }
 
 }

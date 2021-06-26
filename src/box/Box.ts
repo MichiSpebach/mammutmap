@@ -23,7 +23,8 @@ export abstract class Box implements DropTarget {
   private readonly header: BoxHeader
   private readonly border: BoxBorder
   public readonly links: BoxLinks
-  private readonly borderingLinks: Link[] = []
+  private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
+  private rendered: boolean = false
   private dragOver: boolean = false
   private unsavedChanges: boolean = false
 
@@ -70,6 +71,10 @@ export abstract class Box implements DropTarget {
 
   public isRoot(): boolean {
     return false
+  }
+
+  protected isRendered(): boolean {
+    return this.rendered
   }
 
   public async setParentAndFlawlesslyResizeAndSave(newParent: FolderBox): Promise<void> {
@@ -130,16 +135,26 @@ export abstract class Box implements DropTarget {
   }
 
   public async render(): Promise<void> {
-    this.renderStyle()
+    if (!this.isRendered()) {
+      this.renderStyle()
 
-    // TODO: add placeholders before so that render order does no longer matter?
-    await this.header.render()
-    await this.border.render()
+      // TODO: add placeholders before so that render order does no longer matter?
+      await this.header.render()
+      await this.border.render()
+    }
+
     await this.renderBody()
-    await this.links.render()
+    if (this.isBodyRendered()) {
+      await this.links.render()
+    }
 
-    DragManager.addDropTarget(this)
-    HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false))
+    if (!this.isRendered()) {
+      DragManager.addDropTarget(this)
+      HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false))
+    }
+
+    this.renderAdditional()
+    this.rendered = true
   }
 
   private setHighlight(highlight: boolean): void {
@@ -226,7 +241,11 @@ export abstract class Box implements DropTarget {
     await this.renderStyle()
   }
 
+  protected async abstract renderAdditional(): Promise<void>
+
   protected async abstract renderBody(): Promise<void>
+
+  protected abstract isBodyRendered(): boolean
 
   /*private renderBody(): void {
     util.addContentTo(this.getId(), this.formBody())

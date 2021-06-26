@@ -22,8 +22,11 @@ export class FolderBox extends Box {
     return 'visible'
   }
 
-  public async render(): Promise<void> {
-    await super.render()
+  protected async renderAdditional(): Promise<void> {
+    if (this.isRendered()) {
+      return
+    }
+
     dom.addClassTo(super.getId(), style.getFolderBoxClass())
     dom.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFolderBox(this, clientX, clientY))
   }

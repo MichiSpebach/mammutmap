@@ -1,4 +1,6 @@
 
+filter to only show some parts, for example only links of one class with variable follow depth
+
 when link is created over contextMenu and click in contextMenu is outside of link.from's box, then dropTarget is wrong as long as link is dragged over a boxBorder
 
 done, but check if working correctly: fix borderingLinks, links are not always updated correctly when dragged

@@ -6,12 +6,14 @@ class Settings {
   private static readonly settingsFilePath: string = './settings.json'
 
   private zoomSpeed: number
+  private boxMinSizeToRender: number
 
   public constructor() {
     const settingsJson: string = fileSystem.readFileSync(Settings.settingsFilePath)
     const settingsParsed: any = JSON.parse(settingsJson)
 
     this.zoomSpeed = settingsParsed['zoomSpeed']
+    this.boxMinSizeToRender = settingsParsed['boxMinSizeToRender']
   }
 
   private async save(): Promise<void> {
@@ -26,8 +28,17 @@ class Settings {
     return this.zoomSpeed
   }
 
-  public async setZoomSpeed(zoomSpeed: number): Promise<void> {
-    this.zoomSpeed = zoomSpeed
+  public async setZoomSpeed(value: number): Promise<void> {
+    this.zoomSpeed = value
+    await this.save()
+  }
+
+  public getBoxMinSizeToRender(): number {
+    return this.boxMinSizeToRender
+  }
+
+  public async setBoxMinSizeToRender(value: number) {
+    this.boxMinSizeToRender = value
     await this.save()
   }
 

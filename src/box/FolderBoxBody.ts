@@ -2,6 +2,8 @@ import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { Dirent } from 'original-fs'
+import { settings } from '../Settings'
+import { Rect } from '../Rect'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
 import { FolderBox } from './FolderBox'
@@ -11,6 +13,8 @@ export class FolderBoxBody {
   private readonly referenceBox: FolderBox
   private boxes: Box[] = []
   private rendered: boolean = false
+  private renderInProgress = false
+  private rerenderAfterRenderFinished = false
 
   public constructor(referenceBox: FolderBox) {
     this.referenceBox = referenceBox
@@ -25,14 +29,59 @@ export class FolderBoxBody {
   }
 
   public async render(): Promise<void> {
-    let html: string = '<div id="' + this.getId() + '"></div>'
-    await dom.addContentTo(this.referenceBox.getId(), html)
+    if (this.renderInProgress) {
+      this.rerenderAfterRenderFinished = true
+      return
+    }
+    this.renderInProgress = true // TODO: make atomic with if statement
+
+    if (! await this.shouldBeRendered()) {
+      this.renderInProgress = false
+      return
+    }
 
     if (!this.rendered) {
+      let html: string = '<div id="' + this.getId() + '"></div>'
+      await dom.addContentTo(this.referenceBox.getId(), html)
       await this.loadMapDatasAndCreateBoxes()
     }
     await this.renderBoxes()
+
     this.rendered = true
+    this.renderInProgress = false
+
+    if (this.rerenderAfterRenderFinished) {
+      this.rerenderAfterRenderFinished = false
+      this.render()
+    }
+  }
+
+  private async shouldBeRendered(): Promise<boolean> {
+    const boxRect: Rect = await dom.getClientRectOf(this.referenceBox.getId())
+    return this.isRectLargeEnoughToRender(boxRect) && this.isRectInsideScreen(boxRect)
+  }
+
+  private isRectLargeEnoughToRender(rect: Rect): boolean {
+    return (rect.width+rect.height)/2 >= settings.getBoxMinSizeToRender()
+  }
+
+  private isRectInsideScreen(rect: Rect): boolean {
+    if (rect.x+rect.width < 0) {
+      return false
+    }
+    if (rect.y+rect.height < 0) {
+      return false
+    }
+
+    const clientSize = dom.getClientSize()
+    if (rect.x > clientSize.width) {
+      return false
+    }
+    if (rect.y > clientSize.height) {
+      return false
+    }
+
+    return true
   }
 
   private async loadMapDatasAndCreateBoxes(): Promise<void> {
