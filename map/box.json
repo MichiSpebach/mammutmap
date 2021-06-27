@@ -593,6 +593,63 @@
 					"y": 92.76395074665969
 				}
 			]
+		},
+		{
+			"id": "2q68jvfpi",
+			"fromWayPoints": [
+				{
+					"boxId": "rjo0gg3uqi",
+					"boxName": "FolderBoxBody.ts",
+					"x": 59.91061512317183,
+					"y": 0.6028842530743672
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "abdt6a40aoo",
+					"boxName": "BoxBody.ts",
+					"x": 36.02570727296215,
+					"y": 98.82642438008708
+				}
+			]
+		},
+		{
+			"id": "5bebn6jt888",
+			"fromWayPoints": [
+				{
+					"boxId": "96nihtd8s1",
+					"boxName": "FileBoxBody.ts",
+					"x": 2.1929428751917697,
+					"y": 0.7242990654205608
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "abdt6a40aoo",
+					"boxName": "BoxBody.ts",
+					"x": 99.54295452784879,
+					"y": 61.28641695043511
+				}
+			]
+		},
+		{
+			"id": "gt4k6thirpg",
+			"fromWayPoints": [
+				{
+					"boxId": "3n81ck4i5sg",
+					"boxName": "FileBox.ts",
+					"x": 91.28326753628845,
+					"y": 0.3504026556832852
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "96nihtd8s1",
+					"boxName": "FileBoxBody.ts",
+					"x": 32.75927960636316,
+					"y": 99.67533973377857
+				}
+			]
 		}
 	]
 }

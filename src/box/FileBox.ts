@@ -1,4 +1,3 @@
-import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu'
@@ -6,12 +5,14 @@ import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBox } from './FolderBox'
 import { FileBoxHeader } from './FileBoxHeader'
+import { FileBoxBody } from './FileBoxBody'
 
 export class FileBox extends Box {
-  private bodyRendered: boolean = false
+  private readonly body: FileBoxBody
 
   public constructor(name: string, parent: FolderBox, mapData: BoxMapData, mapDataFileExists: boolean) {
     super(name, parent, mapData, mapDataFileExists)
+    this.body = new FileBoxBody(this)
   }
 
   protected createHeader(): FileBoxHeader {
@@ -36,20 +37,11 @@ export class FileBox extends Box {
   }
 
   protected async renderBody(): Promise<void> {
-    if (this.isBodyRendered()) {
-      return
-    }
-
-    fileSystem.readFileAndConvertToHtml(super.getSrcPath(), async (dataConvertedToHtml: string) => {
-      let content: string = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>'
-      return dom.addContentTo(super.getId(), content)
-    })
-
-    this.bodyRendered = true
+    this.body.render()
   }
 
   public isBodyRendered(): boolean {
-    return this.bodyRendered
+    return this.body.isRendered()
   }
 
 }

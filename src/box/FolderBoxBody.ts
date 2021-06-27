@@ -2,26 +2,26 @@ import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
 import * as dom from '../domAdapter'
 import { Dirent } from 'original-fs'
-import { settings } from '../Settings'
-import { Rect } from '../Rect'
+import { BoxBody } from './BoxBody'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
 import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
 
-export class FolderBoxBody {
-  private readonly referenceBox: FolderBox
+export class FolderBoxBody extends BoxBody {
+  private readonly referenceFolderBox: FolderBox
   private boxes: Box[] = []
   private rendered: boolean = false
   private renderInProgress = false
   private rerenderAfterRenderFinished = false
 
   public constructor(referenceBox: FolderBox) {
-    this.referenceBox = referenceBox
+    super(referenceBox)
+    this.referenceFolderBox = referenceBox
   }
 
   public getId(): string {
-    return this.referenceBox.getId() + 'body'
+    return this.referenceFolderBox.getId() + 'body'
   }
 
   public isRendered(): boolean {
@@ -42,7 +42,7 @@ export class FolderBoxBody {
 
     if (!this.rendered) {
       let html: string = '<div id="' + this.getId() + '"></div>'
-      await dom.addContentTo(this.referenceBox.getId(), html)
+      await dom.addContentTo(this.referenceFolderBox.getId(), html)
       await this.loadMapDatasAndCreateBoxes()
     }
     await this.renderBoxes()
@@ -56,42 +56,14 @@ export class FolderBoxBody {
     }
   }
 
-  private async shouldBeRendered(): Promise<boolean> {
-    const boxRect: Rect = await dom.getClientRectOf(this.referenceBox.getId())
-    return this.isRectLargeEnoughToRender(boxRect) && this.isRectInsideScreen(boxRect)
-  }
-
-  private isRectLargeEnoughToRender(rect: Rect): boolean {
-    return (rect.width+rect.height)/2 >= settings.getBoxMinSizeToRender()
-  }
-
-  private isRectInsideScreen(rect: Rect): boolean {
-    if (rect.x+rect.width < 0) {
-      return false
-    }
-    if (rect.y+rect.height < 0) {
-      return false
-    }
-
-    const clientSize = dom.getClientSize()
-    if (rect.x > clientSize.width) {
-      return false
-    }
-    if (rect.y > clientSize.height) {
-      return false
-    }
-
-    return true
-  }
-
   private async loadMapDatasAndCreateBoxes(): Promise<void> {
     const boxesWithMapData: {dirEntry: Dirent, mapData: BoxMapData}[] = []
     const boxesWithoutMapData: {dirEntry: Dirent}[] = []
 
-    const sourcePaths: Dirent[] = await fileSystem.readdir(this.referenceBox.getSrcPath())
+    const sourcePaths: Dirent[] = await fileSystem.readdir(this.referenceFolderBox.getSrcPath())
     await Promise.all(sourcePaths.map(async (dirEntry: Dirent) => {
       const name: string = dirEntry.name
-      const mapPath: string = this.referenceBox.getMapPath()+'/'+name+'.json'
+      const mapPath: string = this.referenceFolderBox.getMapPath()+'/'+name+'.json'
 
       const mapData: BoxMapData|null = await fileSystem.loadMapData(mapPath)
 
@@ -131,11 +103,11 @@ export class FolderBoxBody {
     let box: Box
 
     if (dirEntry.isDirectory()) {
-      box = new FolderBox(dirEntry.name, this.referenceBox, mapData, mapDataFileExists)
+      box = new FolderBox(dirEntry.name, this.referenceFolderBox, mapData, mapDataFileExists)
     } else if (dirEntry.isFile()) {
-      box = new FileBox(dirEntry.name, this.referenceBox, mapData, mapDataFileExists)
+      box = new FileBox(dirEntry.name, this.referenceFolderBox, mapData, mapDataFileExists)
     } else {
-      util.logError(this.referenceBox.getMapPath()+'/'+dirEntry+' is neither file nor directory.')
+      util.logError(this.referenceFolderBox.getMapPath()+'/'+dirEntry+' is neither file nor directory.')
     }
     await this.renderBoxPlaceholderFor(box)
 
@@ -159,7 +131,7 @@ export class FolderBoxBody {
   public getBox(id: string): Box|never {
     const box: Box|undefined = this.boxes.find((candidate: Box) => candidate.getId() === id)
     if (!box) {
-      util.logError(this.referenceBox.getSrcPath() + ' does not contain a box with id ' + id)
+      util.logError(this.referenceFolderBox.getSrcPath() + ' does not contain a box with id ' + id)
     }
     return box
   }

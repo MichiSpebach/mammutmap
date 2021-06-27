@@ -985,6 +985,31 @@
 					"y": 98.52437064809855
 				}
 			]
+		},
+		{
+			"id": "u5ne16v474o",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 46.12294416701423,
+					"y": 5.747578930792851
+				},
+				{
+					"boxId": "abdt6a40aoo",
+					"boxName": "BoxBody.ts",
+					"x": 0.5291762013729977,
+					"y": 0.35974992141385215
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "7b4gp3csto8",
+					"boxName": "Settings.ts",
+					"x": 98.58418189426699,
+					"y": 97.31944873270272
+				}
+			]
 		}
 	]
 }
