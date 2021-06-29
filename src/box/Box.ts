@@ -11,6 +11,7 @@ import { BoxBorder } from './BoxBorder'
 import { BoxLinks } from './BoxLinks'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
+import { WayPointData } from './WayPointData'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 import { HoverManager } from '../HoverManager'
@@ -141,6 +142,7 @@ export abstract class Box implements DropTarget {
       // TODO: add placeholders before so that render order does no longer matter?
       await this.header.render()
       await this.border.render()
+      this.renderAndRegisterBorderingLinks()
     }
 
     await this.renderBody()
@@ -155,6 +157,17 @@ export abstract class Box implements DropTarget {
 
     this.renderAdditional()
     this.rendered = true
+  }
+
+  private renderAndRegisterBorderingLinks(): void {
+    if (this.isRoot()) {
+      return
+    }
+    const linksToUpdate: Link[] = this.getParent().filterBorderingLinksFor(this.getId())
+    linksToUpdate.forEach((link: Link) => {
+      link.render()
+      this.registerBorderingLink(link)
+    })
   }
 
   private setHighlight(highlight: boolean): void {
@@ -265,6 +278,14 @@ export abstract class Box implements DropTarget {
       util.logWarning('trying to deregister borderingLink that is not registered')
     }
     this.borderingLinks.splice(this.borderingLinks.indexOf(link), 1)
+  }
+
+  public filterBorderingLinksFor(boxId: string): Link[] {
+    return this.borderingLinks.filter((link: Link) => {
+        return link.getData().fromWayPoints.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
+            || link.getData().toWayPoints.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
+      }
+    )
   }
 
 }
