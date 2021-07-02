@@ -254,9 +254,9 @@ export abstract class Box implements DropTarget {
     await this.renderStyle()
   }
 
-  protected async abstract renderAdditional(): Promise<void>
+  protected abstract renderAdditional(): Promise<void>
 
-  protected async abstract renderBody(): Promise<void>
+  protected abstract renderBody(): Promise<void>
 
   protected abstract isBodyRendered(): boolean
 
