@@ -1,4 +1,4 @@
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { style } from '../styleAdapter'
 import { Box } from './Box'
 import { ScaleManager } from '../ScaleManager'

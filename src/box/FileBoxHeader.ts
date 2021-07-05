@@ -1,4 +1,4 @@
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { BoxHeader } from './BoxHeader'
 import { Box } from './Box'
 

@@ -1,6 +1,6 @@
 import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { Dirent } from 'original-fs'
 import { BoxBody } from './BoxBody'
 import { Box } from './Box'

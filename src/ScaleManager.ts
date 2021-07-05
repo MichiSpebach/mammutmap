@@ -1,5 +1,5 @@
 import * as util from './util'
-import * as dom from './domAdapter'
+import { dom } from './domAdapter'
 import { BoxBorder } from './box/BoxBorder'
 import { Rect } from './Rect'
 

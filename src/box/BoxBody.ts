@@ -1,4 +1,4 @@
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { settings } from '../Settings'
 import { Rect } from '../Rect'
 import { Box } from './Box'
@@ -10,7 +10,7 @@ export abstract class BoxBody {
     this.referenceBox = referenceBox
   }
 
-  public async abstract render(): Promise<void>
+  public abstract render(): Promise<void>
 
   protected async shouldBeRendered(): Promise<boolean> {
     const boxRect: Rect = await dom.getClientRectOf(this.referenceBox.getId())

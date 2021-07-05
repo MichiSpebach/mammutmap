@@ -1,5 +1,5 @@
 import * as fileSystem from '../fileSystemAdapter'
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { BoxBody } from './BoxBody'
 import { FileBox } from './FileBox'
 

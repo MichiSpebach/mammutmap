@@ -1,5 +1,5 @@
 import * as util from '../util'
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { Box } from './Box'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'

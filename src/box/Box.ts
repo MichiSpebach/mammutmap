@@ -1,6 +1,6 @@
 import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { BoxMapData } from './BoxMapData'
@@ -254,9 +254,9 @@ export abstract class Box implements DropTarget {
     await this.renderStyle()
   }
 
-  protected async abstract renderAdditional(): Promise<void>
+  protected abstract renderAdditional(): Promise<void>
 
-  protected async abstract renderBody(): Promise<void>
+  protected abstract renderBody(): Promise<void>
 
   protected abstract isBodyRendered(): boolean
 

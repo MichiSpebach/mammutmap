@@ -1,5 +1,5 @@
 import { exec } from 'child_process'
-import * as dom from './domAdapter'
+import { dom } from './domAdapter'
 
 export function runShellCommand(command: string) {
   exec(command)

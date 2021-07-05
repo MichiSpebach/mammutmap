@@ -1,4 +1,4 @@
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'

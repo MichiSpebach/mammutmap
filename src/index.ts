@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
-import * as dom from './domAdapter'
+import * as domAdapter from './domAdapter'
 import * as applicationMenu from './applicationMenu'
 import { Map } from './Map'
 
@@ -29,7 +29,7 @@ const createWindow = () => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  dom.init(mainWindow)
+  domAdapter.init(mainWindow)
 
   //Map.new('./src', './map')
 };

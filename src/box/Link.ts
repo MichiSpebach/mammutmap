@@ -1,5 +1,5 @@
 import * as util from '../util'
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { Box } from './Box'

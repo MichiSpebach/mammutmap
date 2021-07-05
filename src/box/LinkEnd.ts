@@ -1,5 +1,5 @@
 import * as util from '../util'
-import * as dom from '../domAdapter'
+import { dom } from '../domAdapter'
 import { style } from '../styleAdapter'
 import { Rect } from '../Rect'
 import { Draggable } from '../Draggable'

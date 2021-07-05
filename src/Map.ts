@@ -1,4 +1,4 @@
-import * as dom from './domAdapter'
+import { dom } from './domAdapter'
 import { settings } from './Settings'
 import { RootFolderBox } from './box/RootFolderBox'
 
