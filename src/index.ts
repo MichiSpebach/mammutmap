@@ -29,7 +29,7 @@ const createWindow = () => {
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 
-  domAdapter.init(mainWindow)
+  domAdapter.initFromBrowserWindow(mainWindow)
 
   //Map.new('./src', './map')
 };

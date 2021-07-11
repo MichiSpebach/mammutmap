@@ -3,11 +3,15 @@ import { Rect } from './Rect'
 
 export let dom: DocumentObjectModelAdapter
 
-export function init(windowToRenderIn: BrowserWindow) {
+export function initFromBrowserWindow(windowToRenderIn: BrowserWindow): void {
   dom = new DocumentObjectModelAdapter(windowToRenderIn)
 }
 
-class DocumentObjectModelAdapter {
+export function init(object: DocumentObjectModelAdapter): void {
+  dom = object
+}
+
+export class DocumentObjectModelAdapter {
   private renderWindow: BrowserWindow
   private webContents: WebContents
   private definedRendererFunctions: Set<string> = new Set<string>()

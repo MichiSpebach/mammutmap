@@ -147,7 +147,7 @@ export class Link {
 
     for(let i = 0; i < path.length; i++) {
       const box: Box|undefined = boxManager.getBoxIfExists(path[i].boxId)
-      if (box instanceof Box) { // TODO: also check if box is rendered
+      if (box) { // TODO: also check if box is rendered
         renderedBoxesInPath.push({box: box, wayPoint: path[i]})
       }
     }

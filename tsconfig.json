@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "strict": true,
-    "allowJs": true,
+    "allowJs": false,
+    "skipLibCheck": true,
     "module": "commonjs",
     "noImplicitAny": true,
     "sourceMap": true,

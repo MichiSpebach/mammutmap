@@ -1,7 +1,7 @@
 import * as util from '../util'
 import { Box } from './Box'
 
-class BoxManager {
+export class BoxManager {
   private boxes: Map<string, Box> = new Map()
 
   public addBox(box: Box): void {
@@ -22,7 +22,11 @@ class BoxManager {
   public getBoxIfExists(id: string): Box|undefined {
     return this.boxes.get(id);
   }
-  
+
 }
 
-export const boxManager: BoxManager = new BoxManager()
+export let boxManager: BoxManager = new BoxManager()
+
+export function init(object: BoxManager): void {
+  boxManager = object
+}
