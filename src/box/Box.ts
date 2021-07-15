@@ -135,6 +135,16 @@ export abstract class Box implements DropTarget {
     return {x: xTransformed, y: yTransformed}
   }
 
+  public transformInnerCoordsRecursiveToLocal(inner: Box, innerX: number, innerY: number): {x: number, y: number} {
+    let tempCoords: {x: number, y: number} = {x: innerX, y: innerY}
+    let tempBox: Box = inner
+    while (tempBox !== this) {
+      tempCoords = tempBox.transformLocalToParent(tempCoords.x, tempCoords.y)
+      tempBox = tempBox.getParent()
+    }
+    return tempCoords
+  }
+
   public async render(): Promise<void> {
     if (!this.isRendered()) {
       this.renderStyle()

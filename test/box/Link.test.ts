@@ -61,6 +61,8 @@ test('reorderAndSave linkEnds moved (to edges)', async () => {
   scenario.domAdapter.getClientRectOf.calledWith('linkto').mockReturnValue(Promise.resolve(new Rect(75, 5, 10, 10)))
   scenario.fromBox.transformClientPositionToLocal.calledWith(20, 10).mockReturnValue(Promise.resolve({x: 100, y: 50}))
   scenario.toBox.transformClientPositionToLocal.calledWith(80, 10).mockReturnValue(Promise.resolve({x: 0, y: 50}))
+  scenario.managingBox.transformInnerCoordsRecursiveToLocal.calledWith(scenario.fromBox, 100, 50).mockReturnValue({x: 20, y: 10})
+  scenario.managingBox.transformInnerCoordsRecursiveToLocal.calledWith(scenario.toBox, 0, 50).mockReturnValue({x: 80, y: 10})
 
   await scenario.link.reorderAndSave()
 
@@ -88,20 +90,20 @@ function setupSimpleScenario(): {
   const linkData: BoxMapLinkData = new BoxMapLinkData('link', fromWayPoints, toWayPoints)
 
   const managingBox: MockProxy<FolderBox> = mock<FolderBox>();
-  managingBox.getId.mockReturnValue('managingBox')
-  managingBox.getClientRect.mockReturnValue(Promise.resolve(new Rect(0, 0, 100, 100)))
-
   const fromBox: MockProxy<Box> = mock<Box>();
+  const toBox: MockProxy<Box> = mock<Box>();
+
+  managingBox.getId.mockReturnValue('managingBox')
+  managingBox.transformInnerCoordsRecursiveToLocal.calledWith(fromBox, 50, 50).mockReturnValue({x: 10, y: 10})
+  managingBox.transformInnerCoordsRecursiveToLocal.calledWith(toBox, 50, 50).mockReturnValue({x: 90, y: 10})
+
   fromBox.getId.mockReturnValue('fromBox')
   fromBox.getName.mockReturnValue('FromBox')
   fromBox.getParent.mockReturnValue(managingBox)
-  fromBox.getClientRect.mockReturnValue(Promise.resolve(new Rect(0, 0, 20, 20)))
 
-  const toBox: MockProxy<Box> = mock<Box>();
   toBox.getId.mockReturnValue('toBox')
   toBox.getName.mockReturnValue('ToBox')
   toBox.getParent.mockReturnValue(managingBox)
-  toBox.getClientRect.mockReturnValue(Promise.resolve(new Rect(80, 0, 20, 20)))
 
   const boxManager: MockProxy<BoxManager> = mock<BoxManager>()
   boxManager.getBoxIfExists.calledWith('fromBox').mockReturnValue(fromBox)

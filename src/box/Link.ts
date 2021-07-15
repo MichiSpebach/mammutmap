@@ -7,7 +7,6 @@ import { BoxLinks } from './BoxLinks'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
 import { LinkEnd } from './LinkEnd'
-import { Rect } from '../Rect'
 
 export class Link {
   private readonly data: BoxMapLinkData
@@ -44,24 +43,21 @@ export class Link {
   }
 
   public async render(): Promise<void> {
-    const baseRect: Rect = await this.managingBox.getClientRect() // TODO: optimize, gather awaits for more performance
-    const fromInBaseCoords: {x: number, y: number} = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.fromWayPoints, baseRect) // TODO: optimize, gather awaits for more performance
-    const toInBaseCoords: {x: number, y: number} = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.toWayPoints, baseRect) // TODO: optimize, gather awaits for more performance
+    const fromInBaseCoords: {x: number, y: number} = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.fromWayPoints)
+    const toInBaseCoords: {x: number, y: number} = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.toWayPoints)
 
     return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
 
   public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number): Promise<void> {
-    const baseRect: Rect = await this.managingBox.getClientRect() // TODO: optimize, use cached?
-
     let fromInBaseCoords: {x: number, y: number}
     let toInBaseCoords: {x: number, y: number}
     if (linkEnd === this.to) {
-      fromInBaseCoords = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.fromWayPoints, baseRect)
+      fromInBaseCoords = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.fromWayPoints)
       toInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
     } else if (linkEnd === this.from) {
       fromInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
-      toInBaseCoords = await this.getDeepestRenderedWayPointPositionInBaseCoords(this.data.toWayPoints, baseRect)
+      toInBaseCoords = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.toWayPoints)
     } else {
       util.logError('Given LinkEnd is not contained by Link.')
     }
@@ -120,17 +116,9 @@ export class Link {
     this.from.setHighlight(highlight)
   }
 
-  private async getDeepestRenderedWayPointPositionInBaseCoords(path: WayPointData[], baseRect: Rect): Promise<{x: number; y: number}> {
+  private getDeepestRenderedWayPointPositionInManagingBoxCoords(path: WayPointData[]): {x: number; y: number} {
     const deepestRendered: {box: Box, wayPoint: WayPointData} = this.getDeepestRenderedBox(path)
-    const rect: Rect = await deepestRendered.box.getClientRect()
-
-    const xInPixel: number = deepestRendered.wayPoint.x * rect.width / 100
-    const yInPixel: number = deepestRendered.wayPoint.y * rect.height / 100
-
-    const xInBaseCoordsInPixel: number = rect.x + xInPixel - baseRect.x
-    const yInBaseCoordsInPixel: number = rect.y + yInPixel - baseRect.y
-
-    return {x: xInBaseCoordsInPixel / baseRect.width * 100, y: yInBaseCoordsInPixel / baseRect.height * 100}
+    return this.managingBox.transformInnerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.x, deepestRendered.wayPoint.y)
   }
 
   private getDeepestRenderedBox(path: WayPointData[]): {box: Box, wayPoint: WayPointData} | never {
