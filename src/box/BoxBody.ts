@@ -1,4 +1,4 @@
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { settings } from '../Settings'
 import { Rect } from '../Rect'
 import { Box } from './Box'
@@ -13,7 +13,7 @@ export abstract class BoxBody {
   public abstract render(): Promise<void>
 
   protected async shouldBeRendered(): Promise<boolean> {
-    const boxRect: Rect = await dom.getClientRectOf(this.referenceBox.getId())
+    const boxRect: Rect = await renderManager.getClientRectOf(this.referenceBox.getId())
     return this.isRectLargeEnoughToRender(boxRect) && this.isRectInsideScreen(boxRect)
   }
 
@@ -29,7 +29,7 @@ export abstract class BoxBody {
       return false
     }
 
-    const clientSize = dom.getClientSize()
+    const clientSize = renderManager.getClientSize()
     if (rect.x > clientSize.width) {
       return false
     }

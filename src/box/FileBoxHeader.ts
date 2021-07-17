@@ -1,4 +1,4 @@
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { BoxHeader } from './BoxHeader'
 import { Box } from './Box'
 
@@ -10,7 +10,7 @@ export class FileBoxHeader extends BoxHeader {
 
   public async render(): Promise<void> {
     await super.render()
-    dom.addClassTo(super.getId(), 'fileBoxHeader')
+    renderManager.addClassTo(super.getId(), 'fileBoxHeader')
   }
 
 }

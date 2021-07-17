@@ -1,5 +1,5 @@
 import * as util from '../util'
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { Box } from './Box'
@@ -88,12 +88,12 @@ export class Link {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
       const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
-      await dom.addContentTo(this.managingBox.getId(), '<div id="'+this.getId()+'">'+svgHtml+fromHtml+toHtml+'</div>')
-      await dom.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
+      await renderManager.addContentTo(this.managingBox.getId(), '<div id="'+this.getId()+'">'+svgHtml+fromHtml+toHtml+'</div>')
+      await renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
       this.registerAtBorderingBoxes()
       this.rendered = true
     } else {
-      await dom.setContentTo(this.getId()+'svg', lineHtml)
+      await renderManager.setContentTo(this.getId()+'svg', lineHtml)
     }
 
     const fromBox: Box = this.getDeepestRenderedBox(this.data.fromWayPoints).box
@@ -108,9 +108,9 @@ export class Link {
     }
 
     if (highlight) {
-      dom.addClassTo(this.getId()+'line', style.getHighlightClass())
+      renderManager.addClassTo(this.getId()+'line', style.getHighlightClass())
     } else {
-      dom.removeClassFrom(this.getId()+'line', style.getHighlightClass())
+      renderManager.removeClassFrom(this.getId()+'line', style.getHighlightClass())
     }
     this.to.setHighlight(highlight)
     this.from.setHighlight(highlight)

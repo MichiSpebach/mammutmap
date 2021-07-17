@@ -1,4 +1,5 @@
 import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu'
 import { Box } from './Box'
@@ -32,7 +33,7 @@ export class FileBox extends Box {
       return
     }
 
-    dom.addClassTo(super.getId(), style.getFolderBoxClass())
+    renderManager.addClassTo(super.getId(), style.getFolderBoxClass())
     dom.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, clientX, clientY))
   }
 

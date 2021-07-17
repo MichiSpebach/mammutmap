@@ -1,9 +1,10 @@
 import { dom } from './domAdapter'
+import { renderManager } from './RenderManager'
 import { settings } from './Settings'
 import { RootFolderBox } from './box/RootFolderBox'
 
 export class Map {
-  private rootDirectory: RootFolderBox
+  private rootFolder: RootFolderBox
   private scalePercent: number = 100
   private marginTopPercent: number = 0
   private marginLeftPercent: number = 0
@@ -14,15 +15,15 @@ export class Map {
   }
 
   private constructor(root: RootFolderBox) {
-    dom.setContentTo('content', '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
-    dom.setContentTo('map', '<div id="mapRatioAdjuster" style="width:'+this.mapRatioAdjusterSizePx+'px; height:'+this.mapRatioAdjusterSizePx+'px;"></div>')
-    dom.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
-    dom.setContentTo('mapMover', '<div id="'+root.getId()+'" style="width:100%; height:100%;"></div>')
+    renderManager.setContentTo('content', '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
+    renderManager.setContentTo('map', '<div id="mapRatioAdjuster" style="width:'+this.mapRatioAdjusterSizePx+'px; height:'+this.mapRatioAdjusterSizePx+'px;"></div>')
+    renderManager.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
+    renderManager.setContentTo('mapMover', '<div id="'+root.getId()+'" style="width:100%; height:100%;"></div>')
     this.updateStyle()
 
     //this.addBoxes()
-    this.rootDirectory = root
-    this.rootDirectory.render()
+    this.rootFolder = root
+    this.rootFolder.render()
 
     dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
   }
@@ -35,7 +36,7 @@ export class Map {
   }
 
   private addBox(color: string) {
-    dom.addContentTo(this.rootDirectory.getId(), '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>')
+    renderManager.addContentTo(this.rootFolder.getId(), '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>')
   }
 
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {
@@ -47,16 +48,16 @@ export class Map {
     this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent
     this.scalePercent += scaleChange
 
-    await this.updateStyle()
-    await this.rootDirectory.render()
+    await this.updateStyle(2)
+    await this.rootFolder.render()
   }
 
-  private async updateStyle(): Promise<void> {
+  private async updateStyle(priority: number = 1): Promise<void> {
     let basicStyle: string = 'position:relative;'
     let offsetStyle: string = 'top:' + this.marginTopPercent + '%;left:' + this.marginLeftPercent + '%;'
     let scaleStyle: string = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;'
 
-    await dom.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle)
+    await renderManager.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle, priority)
   }
 
 }

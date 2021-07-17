@@ -1,6 +1,6 @@
 import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { BoxMapData } from './BoxMapData'
@@ -118,7 +118,7 @@ export abstract class Box implements DropTarget {
   public async getClientRect(): Promise<Rect> {
     // TODO: cache rect for better responsivity?
     // TODO: but then more complex, needs to be updated on many changes, also when parent boxes change
-    return await dom.getClientRectOf(this.getId())
+    return await renderManager.getClientRectOf(this.getId())
   }
 
   // TODO: introduce PercentPosition/PercentPoint and ClientPosition/ClientPoint/ClientPixelPosition/ClientPixelPoint?
@@ -226,9 +226,9 @@ export abstract class Box implements DropTarget {
     this.dragOver = value
 
     if (this.dragOver) {
-      dom.addClassTo(this.getId(), style.getHighlightBoxClass())
+      renderManager.addClassTo(this.getId(), style.getHighlightBoxClass())
     } else {
-      dom.removeClassFrom(this.getId(), style.getHighlightBoxClass())
+      renderManager.removeClassFrom(this.getId(), style.getHighlightBoxClass())
     }
   }
 
@@ -237,7 +237,7 @@ export abstract class Box implements DropTarget {
     const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
-    return dom.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle)
+    return renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle)
   }
 
   protected abstract getOverflow(): 'hidden'|'visible'

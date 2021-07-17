@@ -1,4 +1,4 @@
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { Box } from './Box'
 import { ScaleManager } from '../ScaleManager'
@@ -47,15 +47,15 @@ export class BoxBorder {
       const bottom: string = this.formLine(this.getBottomId(), 'width:100%;height:2px;bottom:0px;')
       const right: string = this.formLine(this.getRightId(), 'width:2px;height:100%;top:0px;right:0px;')
       const left: string = this.formLine(this.getLeftId(), 'width:2px;height:100%;top:0px;')
-      await dom.addContentTo(this.referenceBox.getId(), top + bottom + right + left)
+      await renderManager.addContentTo(this.referenceBox.getId(), top + bottom + right + left)
 
       ScaleManager.addScalable(this)
 
       this.rendered = true
     }
 
-    this.sideIds.forEach((sideId: string) => dom.removeClassFrom(sideId, style.getBoxBorderClass(!this.referenceBox.isMapDataFileExisting())))
-    this.sideIds.forEach((sideId: string) => dom.addClassTo(sideId, style.getBoxBorderClass(this.referenceBox.isMapDataFileExisting())))
+    this.sideIds.forEach((sideId: string) => renderManager.removeClassFrom(sideId, style.getBoxBorderClass(!this.referenceBox.isMapDataFileExisting())))
+    this.sideIds.forEach((sideId: string) => renderManager.addClassTo(sideId, style.getBoxBorderClass(this.referenceBox.isMapDataFileExisting())))
   }
 
   private formLine(id: string, sizeAndPositionStyle: string): string {

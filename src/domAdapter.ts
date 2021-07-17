@@ -83,8 +83,8 @@ export class DocumentObjectModelAdapter {
     return this.executeJsOnElement(id, "classList")  // throws error: object could not be cloned
   }
 
-  public scrollToBottom(id: string): void {
-    this.executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER")
+  public scrollToBottom(id: string): Promise<void> {
+    return this.executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER")
   }
 
   public addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): void {

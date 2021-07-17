@@ -1,4 +1,4 @@
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
@@ -30,7 +30,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     let html: string = '<div id="' + this.getId() + '" draggable="true">'
     html += this.referenceBox.getName()
     html += '</div>'
-    await dom.setContentTo(this.referenceBox.getId(), html)
+    await renderManager.setContentTo(this.referenceBox.getId(), html)
 
     DragManager.addDraggable(this)
   }
@@ -39,7 +39,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     let clientRect: Rect = await this.referenceBox.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
 
-    dom.addClassTo(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
+    renderManager.addClassTo(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
   }
 
   public async drag(clientX: number, clientY: number): Promise<void> {
@@ -51,12 +51,12 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async dragCancel(): Promise<void> {
-    dom.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
+    renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
     this.referenceBox.restoreMapData()
   }
 
   public async dragEnd(dropTarget: FolderBox): Promise<void> {
-    dom.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
+    renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
     if (this.referenceBox.getParent() != dropTarget) {
       await this.referenceBox.setParentAndFlawlesslyResizeAndSave(dropTarget)
     } else {

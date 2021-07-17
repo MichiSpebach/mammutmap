@@ -1,6 +1,6 @@
 import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { Dirent } from 'original-fs'
 import { BoxBody } from './BoxBody'
 import { Box } from './Box'
@@ -42,7 +42,7 @@ export class FolderBoxBody extends BoxBody {
 
     if (!this.rendered) {
       let html: string = '<div id="' + this.getId() + '"></div>'
-      await dom.addContentTo(this.referenceFolderBox.getId(), html)
+      await renderManager.addContentTo(this.referenceFolderBox.getId(), html)
       await this.loadMapDatasAndCreateBoxes()
     }
     await this.renderBoxes()
@@ -115,7 +115,7 @@ export class FolderBoxBody extends BoxBody {
   }
 
   private async renderBoxPlaceholderFor(box: Box): Promise<void> {
-    return dom.addContentTo(this.getId(), '<div id="' + box.getId() + '" style="display:inline-block;">loading... ' + box.getName() + '</div>')
+    return renderManager.addContentTo(this.getId(), '<div id="' + box.getId() + '" style="display:inline-block;">loading... ' + box.getName() + '</div>')
   }
 
   private async renderBoxes(): Promise<void> {
@@ -141,7 +141,7 @@ export class FolderBoxBody extends BoxBody {
       util.logWarning('trying to add box that is already contained')
     }
     this.boxes.push(box)
-    return dom.appendChildTo(this.getId(), box.getId())
+    return renderManager.appendChildTo(this.getId(), box.getId())
   }
 
   public removeBox(box: Box): void {

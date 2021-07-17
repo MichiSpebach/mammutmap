@@ -1,5 +1,5 @@
 import * as util from '../util'
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { Box } from './Box'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
@@ -26,7 +26,7 @@ export class BoxLinks {
       }
 
       newManagingBox.links.links.push(link)
-      dom.appendChildTo(newManagingBox.getId(), link.getId())
+      renderManager.appendChildTo(newManagingBox.getId(), link.getId())
       oldManagingBox.links.links.splice(oldManagingBox.links.links.indexOf(link), 1)
 
       newManagingBox.getMapLinkData().push(link.getData())

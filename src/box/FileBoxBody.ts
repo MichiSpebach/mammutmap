@@ -1,5 +1,5 @@
 import * as fileSystem from '../fileSystemAdapter'
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { BoxBody } from './BoxBody'
 import { FileBox } from './FileBox'
 
@@ -26,7 +26,7 @@ export class FileBoxBody extends BoxBody {
 
     fileSystem.readFileAndConvertToHtml(this.referenceFileBox.getSrcPath(), async (dataConvertedToHtml: string) => {
       let content: string = '<pre style="margin:0px;">' + dataConvertedToHtml + '</pre>'
-      return dom.addContentTo(this.referenceFileBox.getId(), content)
+      return renderManager.addContentTo(this.referenceFileBox.getId(), content)
     })
 
     this.rendered = true

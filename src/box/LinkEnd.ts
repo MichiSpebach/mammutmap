@@ -1,5 +1,5 @@
 import * as util from '../util'
-import { dom } from '../domAdapter'
+import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { Rect } from '../Rect'
 import { Draggable } from '../Draggable'
@@ -97,7 +97,7 @@ export class LinkEnd implements Draggable<Box> {
         util.logWarning('Shape '+this.shape+' is not implemented.')
     }
 
-    await dom.setStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle)
+    await renderManager.setStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle)
   }
 
   public async setHighlight(highlight: boolean): Promise<void> {
@@ -106,14 +106,14 @@ export class LinkEnd implements Draggable<Box> {
     }
 
     if (highlight) {
-      await dom.addClassTo(this.getId(), style.getHighlightClass())
+      await renderManager.addClassTo(this.getId(), style.getHighlightClass())
     } else {
-      await dom.removeClassFrom(this.getId(), style.getHighlightClass())
+      await renderManager.removeClassFrom(this.getId(), style.getHighlightClass())
     }
   }
 
   public async getClientMidPosition(): Promise<{x: number, y: number}> {
-    const clientRect: Rect = await dom.getClientRectOf(this.getId())
+    const clientRect: Rect = await renderManager.getClientRectOf(this.getId())
     return {x: clientRect.x + clientRect.width/2, y: clientRect.y + clientRect.height/2}
   }
 
