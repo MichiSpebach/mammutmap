@@ -43,26 +43,16 @@ export class RenderManager {
   }
 
   public async runOrSchedule<T>(command: Command): Promise<T> { // only public for unit tests
-    return command.command() // TODO: wip, remove this line and make below work
-
-    // TODO: wip, this is very inefficient, improve
+    // TODO: improve implementation, squishy behavior when higher prioritized command is added, commands is never shifted/emptied
     this.addCommand(command)
 
-    for(let waits: number = 1; this.commands[0] !== command; waits++) {
-      await this.latestPromise
-      await util.wait(0)
-      if (waits%1000 == 0) {
-        util.logWarning('waiting '+waits+' times to run command')
-      }
+    const indexToWaitFor: number = this.commands.indexOf(command)-1
+    if (indexToWaitFor >= 0) {
+      await this.commands[indexToWaitFor].promise.get()
     }
 
-    const promise: Promise<any> = command.command()
-    await promise
-    if (this.commands.shift() === undefined) {
-      util.logError('lost command, this should never happen')
-    }
-    this.latestPromise = promise // TODO: check that race conditions are impossible or improve
-    return promise
+    command.promise.run()
+    return command.promise.get()
   }
 
   public addCommand(command: Command): void { // only public for unit tests
@@ -81,17 +71,43 @@ export class RenderManager {
 
 }
 
+export class SchedulablePromise<T> { // only export for unit tests
+  private promise: Promise<T>
+  private resolve: ((value: T) => void) | undefined
+  private command: () => T
+
+  public constructor(command: () => T) {
+    this.promise = new Promise((resolve: (value: T) => void) => {
+      this.resolve = resolve
+    })
+    this.command = command
+  }
+
+  public get(): Promise<T> {
+    return this.promise
+  }
+
+  public run(): void {
+    const result: T = this.command()
+    if (!this.resolve) {
+      throw Error('resolve function is still undefined, this should be impossible at this state')
+    }
+    this.resolve(result)
+  }
+
+}
+
 export class Command { // only export for unit tests
   public readonly affectedElementId: string
   public priority: number
   public readonly type: string
-  public command: () => Promise<any>
+  public readonly promise: SchedulablePromise<Promise<any>>
 
   public constructor(affectedElementId: string, priority: number, type: string, command: () => Promise<any>) {
     this.affectedElementId = affectedElementId
     this.priority = priority
     this.type = type
-    this.command = command
+    this.promise = new SchedulablePromise(command)
   }
 }
 

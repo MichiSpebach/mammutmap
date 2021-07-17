@@ -1,4 +1,34 @@
-import { RenderManager, Command } from '../src/RenderManager'
+import { RenderManager, SchedulablePromise, Command } from '../src/RenderManager'
+
+test('SchedulablePromise simple call', async () => {
+  const schedulablePromise = new SchedulablePromise(() => 'test is working')
+
+  schedulablePromise.run()
+  const result = await schedulablePromise.get()
+
+  expect(result).toEqual('test is working')
+})
+
+test('SchedulablePromise wrap resolved Promise', async () => {
+  const schedulablePromise = new SchedulablePromise(() => Promise.resolve('test is working'))
+
+  schedulablePromise.run()
+  const result = await schedulablePromise.get()
+
+  expect(result).toEqual('test is working')
+})
+
+test('SchedulablePromise wrap Promise with timeout', async () => {
+  const schedulablePromise = new SchedulablePromise(() => new Promise((resolve) => {
+    setTimeout(resolve, 1)
+    resolve('test is working')
+  }))
+
+  schedulablePromise.run()
+  const result = await schedulablePromise.get()
+
+  expect(result).toEqual('test is working')
+})
 
 test('runOrSchedule one command', async () => {
   const renderManager = new RenderManager()
