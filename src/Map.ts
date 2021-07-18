@@ -23,9 +23,11 @@ export class Map {
 
     //this.addBoxes()
     this.rootFolder = root
-    this.rootFolder.render()
+    const renderFinished: Promise<void> = this.rootFolder.render()
 
-    dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
+    renderFinished.then(() => {
+      dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
+    })
   }
 
   private addBoxes(): void {

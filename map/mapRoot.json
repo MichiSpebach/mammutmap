@@ -371,16 +371,16 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 70.13383853816538,
-					"y": 0.30619431090970334
+					"x": 70.13584062751616,
+					"y": 0.3059104749437978
 				}
 			],
 			"toWayPoints": [
 				{
-					"boxId": "5da77t8c1t8",
-					"boxName": "domAdapter.ts",
-					"x": 1.363355558869267,
-					"y": 97.88138389943119
+					"boxId": "p0d1i1vr268",
+					"boxName": "RenderManager.ts",
+					"x": 0.9622097435119138,
+					"y": 83.8202699979851
 				}
 			]
 		},
@@ -1008,6 +1008,25 @@
 					"boxName": "Settings.ts",
 					"x": 98.58418189426699,
 					"y": 97.31944873270272
+				}
+			]
+		},
+		{
+			"id": "6ooau7blmfg",
+			"fromWayPoints": [
+				{
+					"boxId": "p0d1i1vr268",
+					"boxName": "RenderManager.ts",
+					"x": 46.821335646140504,
+					"y": -0.10075204202799468
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "5da77t8c1t8",
+					"boxName": "domAdapter.ts",
+					"x": 57.39046079223928,
+					"y": 99.84486851204606
 				}
 			]
 		}
