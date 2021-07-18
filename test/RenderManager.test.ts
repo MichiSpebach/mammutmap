@@ -41,6 +41,7 @@ test('runOrSchedule one command', async () => {
   await renderManager.runOrSchedule(command)
 
   expect(commandExecutionProof).toBe(true)
+  expect(renderManager.getCommands().length).toBe(0)
 })
 
 test('runOrSchedule two commands', async () => {
@@ -60,6 +61,7 @@ test('runOrSchedule two commands', async () => {
 
   expect(await command1Result).toBe(1)
   expect(await command2Result).toBe(2)
+  expect(renderManager.getCommands().length).toBe(0)
 })
 
 test('runOrSchedule three commands, third overtakes second', async () => {
@@ -85,6 +87,7 @@ test('runOrSchedule three commands, third overtakes second', async () => {
   expect(await command1Result).toBe(1)
   expect(await command2Result).toBe(3)
   expect(await command3Result).toBe(2)
+  expect(renderManager.getCommands().length).toBe(0)
 })
 
 test('addCommand empty before', () => {

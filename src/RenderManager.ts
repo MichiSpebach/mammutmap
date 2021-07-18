@@ -43,7 +43,7 @@ export class RenderManager {
   }
 
   public async runOrSchedule<T>(command: Command): Promise<T> { // only public for unit tests
-    // TODO: improve implementation, squishy behavior when higher prioritized command is added, commands is never shifted/emptied
+    // TODO: improve implementation, squishy behavior when higher prioritized command is added
     this.addCommand(command)
 
     const indexToWaitFor: number = this.commands.indexOf(command)-1
@@ -52,6 +52,7 @@ export class RenderManager {
     }
 
     command.promise.run()
+    command.promise.get().then(() => this.commands.splice(this.commands.indexOf(command), 1)) // TODO: check that no race conditions occur, improve
     return command.promise.get()
   }
 
