@@ -1,4 +1,6 @@
 
+add overflow:visible to link-svgs
+
 filter to only show some parts, for example only links of one class with variable follow depth
 
 when link is created over contextMenu and click in contextMenu is outside of link.from's box, then dropTarget is wrong as long as link is dragged over a boxBorder
@@ -6,8 +8,6 @@ when link is created over contextMenu and click in contextMenu is outside of lin
 done, but check if working correctly: fix borderingLinks, links are not always updated correctly when dragged
 
 introduce interface Linkable, Box and LinkEnd implement it and have a list of borderingLinks
-
-optimize domAdapter, add prioritize flag to methods, queue requests and replace outdated ones with new ones with same id and resolve all of them when newest finishes (return same result)
 
 when a linkHead is dragged over another linkHead and a box the dropTarget is the linkHeads baseBox but it should be the box (somehow set pointer-events: none; for all linkHeads while dragging)
 

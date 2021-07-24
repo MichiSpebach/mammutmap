@@ -10,42 +10,47 @@ export class RenderManager {
     return dom.getClientSize()
   }
 
-  public getClientRectOf(id: string): Promise<Rect> {
-    return this.runOrSchedule(new Command(id, 1, 'getClientRect', () => dom.getClientRectOf(id)))
+  public getClientRectOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<Rect> {
+    return this.runOrSchedule(new Command(priority, 'getClientRectOf'+id, () => dom.getClientRectOf(id)))
   }
 
-  public appendChildTo(parentId: string, childId: string): Promise<void> {
-    return this.runOrSchedule(new Command(childId, 1, 'appendChild', () => dom.appendChildTo(parentId, childId)))
+  public appendChildTo(parentId: string, childId: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command(priority, 'appendChildTo'+childId, () => dom.appendChildTo(parentId, childId)))
   }
 
-  public addContentTo(id: string, content: string): Promise<void> {
-    return this.runOrSchedule(new Command(id, 1, 'addContent', () => dom.addContentTo(id, content)))
+  public addContentTo(id: string, content: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command(priority, undefined, () => dom.addContentTo(id, content)))
   }
 
-  public setContentTo(id: string, content: string): Promise<void> {
-    return this.runOrSchedule(new Command(id, 1, 'setContent', () => dom.setContentTo(id, content)))
+  public setContentTo(id: string, content: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command(priority, 'setContentTo'+id, () => dom.setContentTo(id, content)))
   }
 
-  public setStyleTo(id: string, style: string, priority: number = 1): Promise<void> {
-    return this.runOrSchedule(new Command(id, priority, 'setStyle', () => dom.setStyleTo(id, style)))
+  public setStyleTo(id: string, style: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command(priority, 'setStyleTo'+id, () => dom.setStyleTo(id, style)))
   }
 
-  public addClassTo(id: string, className: string): Promise<void> {
-    return this.runOrSchedule(new Command(id, 1, 'addClass', () => dom.addClassTo(id, className)))
+  public addClassTo(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command(priority, undefined, () => dom.addClassTo(id, className)))
   }
 
-  public removeClassFrom(id: string, className: string): Promise<void> {
-    return this.runOrSchedule(new Command(id, 1, 'removeClass', () => dom.removeClassFrom(id, className)))
+  public removeClassFrom(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command(priority, undefined, () => dom.removeClassFrom(id, className)))
   }
 
-  public scrollToBottom(id: string): Promise<void> {
-    return this.runOrSchedule(new Command(id, 1, 'scrollToBottom', () => dom.scrollToBottom(id)))
+  public scrollToBottom(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command(priority, undefined, () => dom.scrollToBottom(id)))
   }
 
   public async runOrSchedule<T>(command: Command): Promise<T> { // only public for unit tests
-    // TODO: improve implementation, squishy behavior when higher prioritized command is added
+    const squashedCommand: Command|undefined = this.tryToSquashIntoQueuedCommands(command)
+    if (squashedCommand) {
+      return squashedCommand.promise.get()
+    }
+
     this.addCommand(command)
 
+    // TODO: improve implementation, squishy behavior when higher prioritized command is added
     const indexToWaitFor: number = this.commands.indexOf(command)-1
     if (indexToWaitFor >= 0) {
       await this.commands[indexToWaitFor].promise.get()
@@ -66,16 +71,54 @@ export class RenderManager {
     this.commands.splice(i, 0, command)
   }
 
+  private tryToSquashIntoQueuedCommands(command: Command): Command|undefined {
+    if (!command.squashableWith) {
+      return undefined
+    }
+
+    for (let i = 0; i < this.commands.length; i++) {
+      const compareCommand: Command = this.commands[i]
+      if (compareCommand.promise.isStarted()) {
+        continue
+      }
+      if (compareCommand.squashableWith == command.squashableWith) {
+        compareCommand.priority = Math.max(compareCommand.priority.valueOf(), command.priority.valueOf())
+        compareCommand.promise.setCommand(command.promise.getCommand())
+        return compareCommand
+      }
+    }
+
+    return undefined
+  }
+
   public getCommands(): Command[] { // only public for unit tests
     return this.commands
   }
 
 }
 
+export enum RenderPriority {
+  NORMAL = 1,
+  RESPONSIVE = 2
+}
+
+export class Command { // only export for unit tests
+  public priority: RenderPriority
+  public readonly squashableWith: string|undefined
+  public readonly promise: SchedulablePromise<Promise<any>>
+
+  public constructor(priority: RenderPriority, squashableWith: string|undefined, command: () => Promise<any>) {
+    this.priority = priority
+    this.squashableWith = squashableWith
+    this.promise = new SchedulablePromise(command)
+  }
+}
+
 export class SchedulablePromise<T> { // only export for unit tests
   private promise: Promise<T>
   private resolve: ((value: T) => void) | undefined
   private command: () => T
+  private started: boolean = false
 
   public constructor(command: () => T) {
     this.promise = new Promise((resolve: (value: T) => void) => {
@@ -89,6 +132,7 @@ export class SchedulablePromise<T> { // only export for unit tests
   }
 
   public run(): void {
+    this.started = true
     const result: T = this.command()
     if (!this.resolve) {
       throw Error('resolve function is still undefined, this should be impossible at this state')
@@ -96,20 +140,18 @@ export class SchedulablePromise<T> { // only export for unit tests
     this.resolve(result)
   }
 
-}
-
-export class Command { // only export for unit tests
-  public readonly affectedElementId: string
-  public priority: number
-  public readonly type: string
-  public readonly promise: SchedulablePromise<Promise<any>>
-
-  public constructor(affectedElementId: string, priority: number, type: string, command: () => Promise<any>) {
-    this.affectedElementId = affectedElementId
-    this.priority = priority
-    this.type = type
-    this.promise = new SchedulablePromise(command)
+  public getCommand(): () => T {
+    return this.command
   }
+
+  public setCommand(command: () => T): void {
+    this.command = command
+  }
+
+  public isStarted(): boolean {
+    return this.started
+  }
+
 }
 
 export let renderManager: RenderManager = new RenderManager()

@@ -1,6 +1,6 @@
 import * as util from '../util'
 import * as fileSystem from '../fileSystemAdapter'
-import { renderManager } from '../RenderManager'
+import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { BoxMapData } from './BoxMapData'
@@ -115,10 +115,10 @@ export abstract class Box implements DropTarget {
     await Promise.all(this.borderingLinks.map(link => link.reorderAndSave()))
   }
 
-  public async getClientRect(): Promise<Rect> {
+  public async getClientRect(priority: RenderPriority = RenderPriority.NORMAL): Promise<Rect> {
     // TODO: cache rect for better responsivity?
     // TODO: but then more complex, needs to be updated on many changes, also when parent boxes change
-    return await renderManager.getClientRectOf(this.getId())
+    return await renderManager.getClientRectOf(this.getId(), priority)
   }
 
   // TODO: introduce PercentPosition/PercentPoint and ClientPosition/ClientPoint/ClientPixelPosition/ClientPixelPoint?
@@ -232,22 +232,28 @@ export abstract class Box implements DropTarget {
     }
   }
 
-  protected async renderStyle(): Promise<void> {
+  protected async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
     const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
-    return renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle)
+    return renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle, priority)
   }
 
   protected abstract getOverflow(): 'hidden'|'visible'
 
-  public async updateMeasuresAndBorderingLinks(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
-    await this.updateMeasures(measuresInPercentIfChanged)
+  public async updateMeasuresAndBorderingLinks(
+    measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
+    await this.updateMeasures(measuresInPercentIfChanged, priority)
     await Promise.all(this.borderingLinks.map(link => link.render()))
   }
 
-  private async updateMeasures(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
+  private async updateMeasures(
+    measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
     if (measuresInPercentIfChanged.x != null) {
       this.mapData.x = measuresInPercentIfChanged.x
     }
@@ -261,7 +267,7 @@ export abstract class Box implements DropTarget {
       this.mapData.height = measuresInPercentIfChanged.height
     }
 
-    await this.renderStyle()
+    await this.renderStyle(priority)
   }
 
   protected abstract renderAdditional(): Promise<void>

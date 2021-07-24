@@ -1,4 +1,4 @@
-import { RenderManager, SchedulablePromise, Command } from '../src/RenderManager'
+import { RenderManager, RenderPriority, SchedulablePromise, Command } from '../src/RenderManager'
 
 test('SchedulablePromise simple call', async () => {
   const schedulablePromise = new SchedulablePromise(() => 'test is working')
@@ -67,15 +67,15 @@ test('runOrSchedule two commands', async () => {
 test('runOrSchedule three commands, third overtakes second', async () => {
   const renderManager = new RenderManager()
   let counter: number = 0
-  const command1 = buildCommand({affectedElementId: '1', priority: 1, command: () => {
+  const command1 = buildCommand({priority: RenderPriority.NORMAL, command: () => {
     counter++
     return Promise.resolve(counter)
   }})
-  const command2 = buildCommand({affectedElementId: '2', priority: 1, command: () => {
+  const command2 = buildCommand({priority: RenderPriority.NORMAL, command: () => {
     counter++
     return Promise.resolve(counter)
   }})
-  const command3 = buildCommand({affectedElementId: '3', priority: 2, command: () => {
+  const command3 = buildCommand({priority: RenderPriority.RESPONSIVE, command: () => {
     counter++
     return Promise.resolve(counter)
   }})
@@ -88,6 +88,76 @@ test('runOrSchedule three commands, third overtakes second', async () => {
   expect(await command2Result).toBe(3)
   expect(await command3Result).toBe(2)
   expect(renderManager.getCommands().length).toBe(0)
+})
+
+test('runOrSchedule squashable, does not squash into already started command', () => {
+  const renderManager = new RenderManager()
+  const commandDirectlyStarted = buildCommand({squashableWith: 'command'})
+  const command2 = buildCommand({squashableWith: 'command'})
+
+  renderManager.runOrSchedule(commandDirectlyStarted)
+  renderManager.runOrSchedule(command2)
+
+  expect(renderManager.getCommands()).toHaveLength(2)
+  expect(renderManager.getCommands()[0]).toBe(commandDirectlyStarted)
+  expect(renderManager.getCommands()[1]).toBe(command2)
+})
+
+test('runOrSchedule squashable, priority is max of squashed commands', () => {
+  const renderManager = new RenderManager()
+  const command1 = buildCommand({})
+  const command2 = buildCommand({priority: RenderPriority.NORMAL, squashableWith: 'command'})
+  const command3 = buildCommand({priority: RenderPriority.RESPONSIVE, squashableWith: 'command'})
+
+  renderManager.runOrSchedule(command1)
+  renderManager.runOrSchedule(command2)
+  renderManager.runOrSchedule(command3)
+
+  expect(renderManager.getCommands()).toHaveLength(2)
+  expect(renderManager.getCommands()[0]).toBe(command1)
+  expect(renderManager.getCommands()[1]).toBe(command2)
+  expect(renderManager.getCommands()[1].priority).toBe(RenderPriority.RESPONSIVE)
+})
+
+test('runOrSchedule squashable, redundant commands are skipped', async () => {
+  const renderManager = new RenderManager()
+  const command1 = buildCommand({command: () => Promise.resolve('command1Result')})
+  const squashable: string = 'command'
+  let squashableEqualButDynamicGenerated: string = ''
+  for (let i: number = 0; i < squashable.length; i++) {
+    squashableEqualButDynamicGenerated += squashable[i]
+  }
+  const command2 = buildCommand({command: () => Promise.resolve('command2Result(skipped)'), squashableWith: squashable})
+  const command3 = buildCommand({command: () => Promise.resolve('command3Result'), squashableWith: squashableEqualButDynamicGenerated})
+
+  const command1Result: Promise<number> = renderManager.runOrSchedule(command1)
+  const command2Result: Promise<number> = renderManager.runOrSchedule(command2)
+  const command3Result: Promise<number> = renderManager.runOrSchedule(command3)
+
+  expect(renderManager.getCommands()).toHaveLength(2)
+  expect(renderManager.getCommands()[0]).toBe(command1)
+  expect(renderManager.getCommands()[1]).toBe(command2)
+  expect(command2.promise.getCommand()).toBe(command3.promise.getCommand())
+
+  expect(await command1Result).toBe('command1Result')
+  expect(await command2Result).toBe('command3Result')
+  expect(await command3Result).toBe('command3Result')
+})
+
+test('runOrSchedule squashable, commands not squashable', () => {
+  const renderManager = new RenderManager()
+  const command1 = buildCommand({})
+  const command2 = buildCommand({squashableWith: 'command2'})
+  const command3 = buildCommand({squashableWith: 'command3'})
+
+  renderManager.runOrSchedule(command1)
+  renderManager.runOrSchedule(command2)
+  renderManager.runOrSchedule(command3)
+
+  expect(renderManager.getCommands()).toHaveLength(3)
+  expect(renderManager.getCommands()[0]).toBe(command1)
+  expect(renderManager.getCommands()[1]).toBe(command2)
+  expect(renderManager.getCommands()[2]).toBe(command3)
 })
 
 test('addCommand empty before', () => {
@@ -115,8 +185,8 @@ test('addCommand same priority', () => {
 
 test('addCommand increasing priority', () => {
   const renderManager = new RenderManager()
-  const command1 = buildCommand({priority: 1})
-  const command2 = buildCommand({priority: 2})
+  const command1 = buildCommand({priority: RenderPriority.NORMAL})
+  const command2 = buildCommand({priority: RenderPriority.RESPONSIVE})
 
   renderManager.addCommand(command1)
   renderManager.addCommand(command2)
@@ -128,9 +198,9 @@ test('addCommand increasing priority', () => {
 
 test('addCommand increasing and same priority', () => {
   const renderManager = new RenderManager()
-  const command1 = buildCommand({priority: 1})
-  const command2 = buildCommand({priority: 2})
-  const command3 = buildCommand({priority: 2})
+  const command1 = buildCommand({priority: RenderPriority.NORMAL})
+  const command2 = buildCommand({priority: RenderPriority.RESPONSIVE})
+  const command3 = buildCommand({priority: RenderPriority.RESPONSIVE})
 
   renderManager.addCommand(command1)
   renderManager.addCommand(command2)
@@ -143,13 +213,17 @@ test('addCommand increasing and same priority', () => {
 })
 
 function buildCommand(options: {
-  affectedElementId?: string,
-  priority?: number,
+  priority?: RenderPriority,
+  squashableWith?: string,
   command?: () => Promise<any>
-}) {
-  return buildCommandFull(options.affectedElementId, options.priority, options.command)
+}): Command {
+  return buildCommandFull(options.priority, options.squashableWith, options.command)
 }
 
-function buildCommandFull(affectedElementId: string = 'elementId', priority: number = 1, command: () => Promise<any> = () => Promise.resolve()): Command {
-  return new Command(affectedElementId, priority, 'genericType', command);
+function buildCommandFull(
+  priority: RenderPriority = RenderPriority.NORMAL,
+  squashableWith: string|undefined,
+  command: () => Promise<any> = () => Promise.resolve()
+): Command {
+  return new Command(priority, squashableWith, command);
 }

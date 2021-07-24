@@ -1,4 +1,4 @@
-import { renderManager } from '../RenderManager'
+import { renderManager, RenderPriority } from '../RenderManager'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
@@ -43,11 +43,11 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async drag(clientX: number, clientY: number): Promise<void> {
-    const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect() // TODO: cache, save in state object when dragStart is called
+    const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect(RenderPriority.RESPONSIVE) // TODO: cache, save in state object when dragStart is called
 
     const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
     const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
-    this.referenceBox.updateMeasuresAndBorderingLinks({x: newX, y: newY})
+    this.referenceBox.updateMeasuresAndBorderingLinks({x: newX, y: newY}, RenderPriority.RESPONSIVE)
   }
 
   public async dragCancel(): Promise<void> {

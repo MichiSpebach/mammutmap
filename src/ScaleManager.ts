@@ -1,5 +1,6 @@
 import * as util from './util'
 import { dom } from './domAdapter'
+import { RenderPriority } from './RenderManager'
 import { BoxBorder } from './box/BoxBorder'
 import { Rect } from './Rect'
 
@@ -105,7 +106,7 @@ export class ScaleManager {
     const newWidthInPixel: number = this.state.startClientRect.width + clientX - this.state.startClientX
     const newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
 
-    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({width: newWidthInPercent})
+    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({width: newWidthInPercent}, RenderPriority.RESPONSIVE)
   }
 
   private static dragSouthBorder(clientX: number, clientY: number): void {
@@ -117,7 +118,7 @@ export class ScaleManager {
     const newHeightInPixel: number = this.state.startClientRect.height + clientY - this.state.startClientY
     const newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
 
-    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({height: newHeightInPercent})
+    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({height: newHeightInPercent}, RenderPriority.RESPONSIVE)
   }
 
   private static dragNorthBorder(clientX: number, clientY: number): void {
@@ -133,7 +134,7 @@ export class ScaleManager {
     const newYInPercent: number = newYInPixel / this.state.startParentClientRect.height * 100
     const newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
 
-    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({y: newYInPercent, height: newHeightInPercent})
+    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({y: newYInPercent, height: newHeightInPercent}, RenderPriority.RESPONSIVE)
   }
 
   private static dragWestBorder(clientX: number, clientY: number): void {
@@ -149,7 +150,7 @@ export class ScaleManager {
     const newXInPercent: number = newXInPixel / this.state.startParentClientRect.width * 100
     const newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
 
-    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({x: newXInPercent, width: newWidthInPercent})
+    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({x: newXInPercent, width: newWidthInPercent}, RenderPriority.RESPONSIVE)
   }
 
   private static dragEnd(): void {
