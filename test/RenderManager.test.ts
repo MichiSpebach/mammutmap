@@ -160,6 +160,50 @@ test('runOrSchedule squashable, commands not squashable', () => {
   expect(renderManager.getCommands()[2]).toBe(command3)
 })
 
+test('runOrSchedule neutralizable, does not neutralize with already started command', () => {
+  const renderManager = new RenderManager()
+  const commandDirectlyStarted = buildCommand({squashableWith: 'commandPositive', neutralizableWith: 'commandNegative'})
+  const command2 = buildCommand({squashableWith: 'commandNegative', neutralizableWith: 'commandPositive'})
+
+  renderManager.runOrSchedule(commandDirectlyStarted)
+  renderManager.runOrSchedule(command2)
+
+  expect(renderManager.getCommands()).toHaveLength(2)
+  expect(renderManager.getCommands()[0]).toBe(commandDirectlyStarted)
+  expect(renderManager.getCommands()[1]).toBe(command2)
+})
+
+test('runOrSchedule neutralizable, neutralized commands simply resolve and are not executed', async () => {
+  const renderManager = new RenderManager()
+  let counter: number = 0
+  const command1 = buildCommand({command: () => {
+    counter++
+    return Promise.resolve(counter)
+  }})
+  const command2 = buildCommand({squashableWith: 'commandPositive', neutralizableWith: 'commandNegative', command: () => {
+    counter++
+    return Promise.resolve(counter)
+  }})
+  const command3 = buildCommand({squashableWith: 'commandNegative', neutralizableWith: 'commandPositive', command: () => {
+    counter++
+    return Promise.resolve(counter)
+  }})
+
+  const command1Result: Promise<number> = renderManager.runOrSchedule(command1)
+  const command2Result: Promise<number> = renderManager.runOrSchedule(command2)
+  const command3Result: Promise<number> = renderManager.runOrSchedule(command3)
+
+  expect(renderManager.getCommands()).toHaveLength(2)
+  expect(renderManager.getCommands()[0]).toBe(command1)
+  expect(renderManager.getCommands()[1]).toBe(command2)
+
+  expect(await command1Result).toEqual(1)
+  expect(await command2Result).toBe(undefined) // promise should resolve to void result
+  expect(await command3Result).toBe(undefined) // promise should resolve to void result
+
+  expect(counter).toEqual(1)
+})
+
 test('addCommand empty before', () => {
   const renderManager = new RenderManager()
   const command = buildCommand({})
@@ -215,15 +259,20 @@ test('addCommand increasing and same priority', () => {
 function buildCommand(options: {
   priority?: RenderPriority,
   squashableWith?: string,
+  neutralizableWith?: string,
   command?: () => Promise<any>
 }): Command {
-  return buildCommandFull(options.priority, options.squashableWith, options.command)
-}
+  if (!options.priority) {
+    options.priority = RenderPriority.NORMAL
+  }
+  if (!options.command) {
+    options.command = () => Promise.resolve()
+  }
 
-function buildCommandFull(
-  priority: RenderPriority = RenderPriority.NORMAL,
-  squashableWith: string|undefined,
-  command: () => Promise<any> = () => Promise.resolve()
-): Command {
-  return new Command(priority, squashableWith, command);
+  return new Command({
+    priority: options.priority,
+    squashableWith: options.squashableWith,
+    neutralizableWith: options.neutralizableWith,
+    command: options.command
+  });
 }

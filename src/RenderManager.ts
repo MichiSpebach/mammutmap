@@ -1,51 +1,88 @@
-import * as util from './util'
 import { dom } from './domAdapter'
 import { Rect } from './Rect'
 
 export class RenderManager {
   private commands: Command[] = []
-  private latestPromise: Promise<any> = Promise.resolve()
 
   public getClientSize(): {width: number, height: number} {
     return dom.getClientSize()
   }
 
   public getClientRectOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<Rect> {
-    return this.runOrSchedule(new Command(priority, 'getClientRectOf'+id, () => dom.getClientRectOf(id)))
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'getClientRectOf'+id,
+      command: () => dom.getClientRectOf(id)
+    }))
   }
 
   public appendChildTo(parentId: string, childId: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    return this.runOrSchedule(new Command(priority, 'appendChildTo'+childId, () => dom.appendChildTo(parentId, childId)))
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'appendChildTo'+childId,
+      command: () => dom.appendChildTo(parentId, childId)
+    }))
   }
 
   public addContentTo(id: string, content: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    return this.runOrSchedule(new Command(priority, undefined, () => dom.addContentTo(id, content)))
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addContentTo(id, content)
+    }))
   }
 
   public setContentTo(id: string, content: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    return this.runOrSchedule(new Command(priority, 'setContentTo'+id, () => dom.setContentTo(id, content)))
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'setContentTo'+id,
+      command: () => dom.setContentTo(id, content)
+    }))
   }
 
   public setStyleTo(id: string, style: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    return this.runOrSchedule(new Command(priority, 'setStyleTo'+id, () => dom.setStyleTo(id, style)))
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'setStyleTo'+id,
+      command: () => dom.setStyleTo(id, style)
+    }))
   }
 
+  /** notice: a sequel like addClass, removeClass, removeClass, addClass could be completely neutralized, the last addClass is NOT save to be executed */
   public addClassTo(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    return this.runOrSchedule(new Command(priority, undefined, () => dom.addClassTo(id, className)))
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'addClass'+className+'to'+id,
+      neutralizableWith: 'removeClass'+className+'from'+id,
+      command: () => dom.addClassTo(id, className)
+    }))
   }
 
+  /** notice: a sequel like addClass, removeClass, removeClass, addClass could be completely neutralized, the last addClass is NOT save to be executed */
   public removeClassFrom(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    return this.runOrSchedule(new Command(priority, undefined, () => dom.removeClassFrom(id, className)))
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'removeClass'+className+'from'+id,
+      neutralizableWith: 'addClass'+className+'to'+id,
+      command: () => dom.removeClassFrom(id, className)
+    }))
   }
 
   public scrollToBottom(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    return this.runOrSchedule(new Command(priority, undefined, () => dom.scrollToBottom(id)))
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.scrollToBottom(id)
+    }))
   }
 
   public async runOrSchedule<T>(command: Command): Promise<T> { // only public for unit tests
     const squashedCommand: Command|undefined = this.tryToSquashIntoQueuedCommands(command)
     if (squashedCommand) {
       return squashedCommand.promise.get()
+    }
+
+    const neutralizedCommand: Command|undefined = this.tryToNeutralizeWithQueuedCommands(command)
+    if (neutralizedCommand) {
+      return neutralizedCommand.promise.get()
     }
 
     this.addCommand(command)
@@ -82,8 +119,29 @@ export class RenderManager {
         continue
       }
       if (compareCommand.squashableWith == command.squashableWith) {
-        compareCommand.priority = Math.max(compareCommand.priority.valueOf(), command.priority.valueOf())
+        compareCommand.priority = Math.max(compareCommand.priority.valueOf(), command.priority.valueOf()) // TODO: command should also be resorted in queue
         compareCommand.promise.setCommand(command.promise.getCommand())
+        return compareCommand
+      }
+    }
+
+    return undefined
+  }
+
+  // TODO: a sequel like addClass, removeClass, removeclass, addClass could be completely neutralized, but last addClass should be executed
+  private tryToNeutralizeWithQueuedCommands(command: Command): Command|undefined {
+    if (!command.neutralizableWith) {
+      return undefined
+    }
+
+    for (let i = 0; i < this.commands.length; i++) {
+      const compareCommand: Command = this.commands[i]
+      if (compareCommand.promise.isStarted()) {
+        continue
+      }
+      if (compareCommand.neutralizableWith == command.squashableWith) {
+        compareCommand.priority = Math.max(compareCommand.priority.valueOf(), command.priority.valueOf()) // TODO: command should also be resorted in queue
+        compareCommand.promise.setCommand(() => Promise.resolve())
         return compareCommand
       }
     }
@@ -105,12 +163,19 @@ export enum RenderPriority {
 export class Command { // only export for unit tests
   public priority: RenderPriority
   public readonly squashableWith: string|undefined
+  public readonly neutralizableWith: string|undefined
   public readonly promise: SchedulablePromise<Promise<any>>
 
-  public constructor(priority: RenderPriority, squashableWith: string|undefined, command: () => Promise<any>) {
-    this.priority = priority
-    this.squashableWith = squashableWith
-    this.promise = new SchedulablePromise(command)
+  public constructor(options: {
+    priority: RenderPriority,
+    squashableWith?: string,
+    neutralizableWith?: string,
+    command: () => Promise<any>
+  }) {
+    this.priority = options.priority
+    this.squashableWith = options.squashableWith
+    this.neutralizableWith = options.neutralizableWith
+    this.promise = new SchedulablePromise(options.command)
   }
 }
 
