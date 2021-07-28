@@ -204,6 +204,47 @@ test('runOrSchedule neutralizable, neutralized commands simply resolve and are n
   expect(counter).toEqual(1)
 })
 
+test('runOrSchedule neutralizable, does not neutralize too much', async () => {
+  const renderManager = new RenderManager()
+  let command1Executed: boolean = false
+  let command2Executed: boolean = false
+  let command3Executed: boolean = false
+  let command4Executed: boolean = false
+  const command1 = buildCommand({command: () => {
+    command1Executed = true
+    return Promise.resolve()
+  }})
+  const command2 = buildCommand({squashableWith: 'commandPositive', neutralizableWith: 'commandNegative', command: () => {
+    command2Executed = true
+    return Promise.resolve()
+  }})
+  const command3 = buildCommand({squashableWith: 'commandNegative', neutralizableWith: 'commandPositive', command: () => {
+    command3Executed = true
+    return Promise.resolve()
+  }})
+  const command4 = buildCommand({squashableWith: 'commandNegative', neutralizableWith: 'commandPositive', command: () => {
+    command4Executed = true
+    return Promise.resolve()
+  }})
+
+  const command1Result: Promise<number> = renderManager.runOrSchedule(command1)
+  const command2Result: Promise<number> = renderManager.runOrSchedule(command2)
+  const command3Result: Promise<number> = renderManager.runOrSchedule(command3)
+  const command4Result: Promise<number> = renderManager.runOrSchedule(command4)
+
+  expect(renderManager.getCommands()).toHaveLength(3)
+  expect(renderManager.getCommands()[0]).toBe(command1)
+  expect(renderManager.getCommands()[1]).toBe(command2)
+  expect(renderManager.getCommands()[2]).toBe(command4)
+
+  await Promise.all([command1Result, command2Result, command3Result, command4Result])
+
+  expect(command1Executed).toEqual(true)
+  expect(command2Executed).toEqual(false)
+  expect(command3Executed).toEqual(false)
+  expect(command4Executed).toEqual(true)
+})
+
 test('addCommand empty before', () => {
   const renderManager = new RenderManager()
   const command = buildCommand({})

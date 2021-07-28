@@ -140,6 +140,8 @@ export class RenderManager {
         continue
       }
       if (compareCommand.neutralizableWith == command.squashableWith) {
+        compareCommand.neutralizableWith = undefined
+        compareCommand.squashableWith = undefined
         compareCommand.priority = Math.max(compareCommand.priority.valueOf(), command.priority.valueOf()) // TODO: command should also be resorted in queue
         compareCommand.promise.setCommand(() => Promise.resolve())
         return compareCommand
@@ -162,8 +164,8 @@ export enum RenderPriority {
 
 export class Command { // only export for unit tests
   public priority: RenderPriority
-  public readonly squashableWith: string|undefined
-  public readonly neutralizableWith: string|undefined
+  public squashableWith: string|undefined
+  public neutralizableWith: string|undefined
   public readonly promise: SchedulablePromise<Promise<any>>
 
   public constructor(options: {
