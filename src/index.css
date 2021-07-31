@@ -31,15 +31,15 @@ body {
 }
 
 .highlightBox {
-  background-color: #2060ff80 !important;
+  background-color: #2060a080 !important;
 }
 
 .fileBox {
-  background-color: #2060ff20;
+  background-color: #00206080;
 }
 
 .folderBox {
-  background-color: #4080ee10;
+  background-color: #10204040;
 }
 
 .fileBoxHeader {
