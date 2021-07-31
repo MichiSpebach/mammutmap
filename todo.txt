@@ -1,6 +1,4 @@
 
-add overflow:visible to link-svgs
-
 filter to only show some parts, for example only links of one class with variable follow depth
 
 when link is created over contextMenu and click in contextMenu is outside of link.from's box, then dropTarget is wrong as long as link is dragged over a boxBorder

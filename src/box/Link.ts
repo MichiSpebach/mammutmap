@@ -89,7 +89,7 @@ export class Link {
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
       const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
       await renderManager.addContentTo(this.managingBox.getId(), '<div id="'+this.getId()+'">'+svgHtml+fromHtml+toHtml+'</div>')
-      await renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;pointer-events:none;')
+      await renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;')
       this.registerAtBorderingBoxes()
       this.rendered = true
     } else {
