@@ -84,22 +84,25 @@ export class Link {
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
     const lineHtml: string = '<line id="'+this.getId()+'line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;"/>'
 
+    let linePromise: Promise<void>
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
       const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
       await renderManager.addContentTo(this.managingBox.getId(), '<div id="'+this.getId()+'">'+svgHtml+fromHtml+toHtml+'</div>')
-      await renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;')
+      linePromise = renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;')
       this.registerAtBorderingBoxes()
       this.rendered = true
     } else {
-      await renderManager.setContentTo(this.getId()+'svg', lineHtml)
+      linePromise = renderManager.setContentTo(this.getId()+'svg', lineHtml)
     }
 
     const fromBox: Box = this.getDeepestRenderedBox(this.data.fromWayPoints).box
-    await this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians)
+    const fromPromise: Promise<void> = this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians)
     const toBox: Box = this.getDeepestRenderedBox(this.data.toWayPoints).box
-    await this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians) // TODO: gather awaits for more performance
+    const toPromise: Promise<void> = this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians)
+
+    await Promise.all([linePromise, fromPromise, toPromise])
   }
 
   public async setHighlight(highlight: boolean): Promise<void> {
