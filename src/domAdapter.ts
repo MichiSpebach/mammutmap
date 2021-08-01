@@ -1,6 +1,8 @@
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { Rect } from './Rect'
 
+export type BatchMethod = 'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
+
 export let dom: DocumentObjectModelAdapter
 
 export function initFromBrowserWindow(windowToRenderIn: BrowserWindow): void {
@@ -57,6 +59,23 @@ export class DocumentObjectModelAdapter {
     js += 'document.getElementById("' + id + '").append(temp.content);'
 
     return this.executeJavaScript(js)
+  }
+
+  public batch(batch: {elementId: string, method: BatchMethod, value: string}[]): Promise<void> {
+    const commands: {elementId: string, jsToExecute: string}[] = batch.map(command => {
+      switch (command.method) {
+        case 'innerHTML':
+        case 'style':
+          return {elementId: command.elementId, jsToExecute: command.method+"='"+command.value+"'"}
+
+        case 'addClassTo':
+          return {elementId: command.elementId, jsToExecute: "classList.add('"+command.value+"')"}
+
+        case 'removeClassFrom':
+          return {elementId: command.elementId, jsToExecute: "classList.remove('"+command.value+"')"}
+      }
+    })
+    return this.executeJsOnElements(commands)
   }
 
   public setContentTo(id: string, content: string): Promise<void> {
@@ -173,6 +192,14 @@ export class DocumentObjectModelAdapter {
     this.executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
 
     ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
+  }
+
+  private executeJsOnElements(commands: {elementId: string, jsToExecute: string}[]): Promise<void> {
+    let jsBatch: string = ''
+    commands.forEach(command => {
+      jsBatch += "document.getElementById('"+command.elementId+"')."+command.jsToExecute+";"
+    })
+    return this.webContents.executeJavaScript(jsBatch)
   }
 
   private executeJsOnElement(elementId: string, jsToExecute: string): Promise<any> {

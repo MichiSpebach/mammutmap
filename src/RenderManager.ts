@@ -1,4 +1,4 @@
-import { dom } from './domAdapter'
+import { dom, BatchMethod } from './domAdapter'
 import { Rect } from './Rect'
 
 export class RenderManager {
@@ -35,6 +35,7 @@ export class RenderManager {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'setContentTo'+id,
+      batchParameters: {elementId: id, method: 'innerHTML', value: content},
       command: () => dom.setContentTo(id, content)
     }))
   }
@@ -43,6 +44,7 @@ export class RenderManager {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'setStyleTo'+id,
+      batchParameters: {elementId: id, method: 'style', value: style},
       command: () => dom.setStyleTo(id, style)
     }))
   }
@@ -53,6 +55,7 @@ export class RenderManager {
       priority: priority,
       squashableWith: 'addClass'+className+'to'+id,
       neutralizableWith: 'removeClass'+className+'from'+id,
+      batchParameters: {elementId: id, method: 'addClassTo', value: className},
       command: () => dom.addClassTo(id, className)
     }))
   }
@@ -63,6 +66,7 @@ export class RenderManager {
       priority: priority,
       squashableWith: 'removeClass'+className+'from'+id,
       neutralizableWith: 'addClass'+className+'to'+id,
+      batchParameters: {elementId: id, method: 'removeClassFrom', value: className},
       command: () => dom.removeClassFrom(id, className)
     }))
   }
@@ -93,7 +97,10 @@ export class RenderManager {
       await this.commands[indexToWaitFor].promise.get()
     }
 
-    command.promise.run()
+    this.batchUpcommingCommandsInto(command)
+    if (!command.promise.isStarted()) { // if command was batched into another command, promise is already started
+      command.promise.run()
+    }
     command.promise.get().then(() => this.commands.splice(this.commands.indexOf(command), 1)) // TODO: check that no race conditions occur, improve
     return command.promise.get()
   }
@@ -151,6 +158,31 @@ export class RenderManager {
     return undefined
   }
 
+  private batchUpcommingCommandsInto(command: Command): void {
+    if (!command.batchParameters) {
+      return
+    }
+
+    const maxBatchSize: number = 100
+    const batch: {elementId: string, method: BatchMethod, value: string}[] = [command.batchParameters]
+
+    for (let i: number = this.commands.indexOf(command)+1; i < this.commands.length && batch.length < maxBatchSize; i++) {
+      const upcommingCommand: Command = this.commands[i]
+
+      if (upcommingCommand.batchParameters) {
+        batch.push(upcommingCommand.batchParameters)
+        upcommingCommand.squashableWith = undefined
+        upcommingCommand.neutralizableWith = undefined
+        upcommingCommand.batchParameters = undefined
+        upcommingCommand.promise.setCommand(() => Promise.resolve())
+      }
+    }
+
+    if (batch.length > 1) {
+      command.promise.setCommand(() => dom.batch(batch))
+    }
+  }
+
   public getCommands(): Command[] { // only public for unit tests
     return this.commands
   }
@@ -166,17 +198,20 @@ export class Command { // only export for unit tests
   public priority: RenderPriority
   public squashableWith: string|undefined
   public neutralizableWith: string|undefined
+  public batchParameters: {elementId: string, method: BatchMethod, value: string}|undefined
   public readonly promise: SchedulablePromise<Promise<any>>
 
   public constructor(options: {
     priority: RenderPriority,
     squashableWith?: string,
     neutralizableWith?: string,
+    batchParameters?: {elementId: string, method: BatchMethod, value: string},
     command: () => Promise<any>
   }) {
     this.priority = options.priority
     this.squashableWith = options.squashableWith
     this.neutralizableWith = options.neutralizableWith
+    this.batchParameters = options.batchParameters
     this.promise = new SchedulablePromise(options.command)
   }
 }
