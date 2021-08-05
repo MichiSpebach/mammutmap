@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
 import * as domAdapter from './domAdapter'
 import * as applicationMenu from './applicationMenu'
+import * as pluginLoader from './pluginLoader'
 import { Map } from './Map'
 
 var mainWindow: BrowserWindow
@@ -32,6 +33,8 @@ const createWindow = () => {
   domAdapter.initFromBrowserWindow(mainWindow)
 
   //Map.new('./src', './map')
+
+  pluginLoader.loadPlugins()
 };
 
 // This method will be called when Electron has finished

@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "allowJs": false,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "outDir": "../plugin"
+  }
+}
