@@ -39,10 +39,46 @@ export function setApplicationMenu(): void {
           ]
         }
       ]
+    },
+    {
+      id: 'Plugins',
+      label: 'Plugins',
+      submenu: [
+        {
+          label: 'MarketPlace (coming soon)'
+        },
+        {
+          label: 'Tutorial to create plugins (coming soon)'
+        }
+      ]
     }
   ]
   const menu = Menu.buildFromTemplate(template)
   Menu.setApplicationMenu(menu)
+}
+
+export function addMenuItemToPlugins(menuItem: MenuItem): void {
+  addMenuItemTo('Plugins', menuItem)
+}
+
+export function addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void|never {
+  const menu: Menu|undefined = getMenuItemById(parentMenuItemId).submenu
+  if (!menu) {
+    util.logError('cannot add MenuItem "'+menuItem.label+'" because parentMenuItem with id "'+parentMenuItemId+'" has to be initialized with submenu field')
+  }
+  menu.append(menuItem)
+}
+
+function getMenuItemById(id: string): MenuItem|never {
+  return getApplicationMenu().getMenuItemById(id)
+}
+
+function getApplicationMenu(): Menu|never {
+  const applicationMenu: Menu|null = Menu.getApplicationMenu()
+  if (!applicationMenu) {
+    util.logError('setApplicationMenu has to be called before')
+  }
+  return applicationMenu
 }
 
 async function openFolder(): Promise<void> {
