@@ -1,4 +1,6 @@
 
+when link starts in FileBox: overflow is not visible but should (only hide overflow of inner body)
+
 filter to only show some parts, for example only links of one class with variable follow depth
 
 when link is created over contextMenu and click in contextMenu is outside of link.from's box, then dropTarget is wrong as long as link is dragged over a boxBorder
