@@ -1,7 +1,7 @@
 import { Menu, MenuItem, dialog } from 'electron'
 import * as util from './util'
 import { settings } from './Settings'
-import { Map } from './Map'
+import * as map from './Map'
 
 export function setApplicationMenu(): void {
   const template: any = [
@@ -97,7 +97,8 @@ async function openFolder(): Promise<void> {
     }
     const folderPath: string = folderPaths[0]
     util.logInfo('opening '+folderPath)
-    Map.new(folderPath+'/src', folderPath+'/map')
+
+    map.loadAndSetMap(folderPath+'/src', folderPath+'/map')
   }
 }
 

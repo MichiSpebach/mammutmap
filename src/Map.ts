@@ -3,6 +3,12 @@ import { renderManager } from './RenderManager'
 import { settings } from './Settings'
 import { RootFolderBox } from './box/RootFolderBox'
 
+export let map: Map
+
+export async function loadAndSetMap(sourceRootPath: string, mapRootPath: string): Promise<void> {
+  map = await Map.new('content', sourceRootPath, mapRootPath)
+}
+
 export class Map {
   private rootFolder: RootFolderBox
   private scalePercent: number = 100
@@ -10,12 +16,12 @@ export class Map {
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
 
-  public static async new(sourceRootPath: string, mapRootPath: string): Promise<Map> {
-     return new Map(await RootFolderBox.new(sourceRootPath, mapRootPath))
+  public static async new(idToRenderIn: string, sourceRootPath: string, mapRootPath: string): Promise<Map> {
+     return new Map(idToRenderIn, await RootFolderBox.new(sourceRootPath, mapRootPath))
   }
 
-  private constructor(root: RootFolderBox) {
-    renderManager.setContentTo('content', '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
+  private constructor(idToRenderIn: string, root: RootFolderBox) {
+    renderManager.setContentTo(idToRenderIn, '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
     renderManager.setContentTo('map', '<div id="mapRatioAdjuster" style="width:'+this.mapRatioAdjusterSizePx+'px; height:'+this.mapRatioAdjusterSizePx+'px;"></div>')
     renderManager.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
     renderManager.setContentTo('mapMover', '<div id="'+root.getId()+'" style="width:100%; height:100%;"></div>')
@@ -28,6 +34,10 @@ export class Map {
     renderFinished.then(() => {
       dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
     })
+  }
+
+  public getRootFolder(): RootFolderBox {
+    return this.rootFolder
   }
 
   private addBoxes(): void {
