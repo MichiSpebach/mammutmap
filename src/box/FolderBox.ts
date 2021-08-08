@@ -44,6 +44,10 @@ export class FolderBox extends Box {
     return this.body.getBox(id)
   }
 
+  public getBoxes(): Box[] {
+    return this.body.getBoxes()
+  }
+
   public containsBox(box: Box): boolean {
     return this.body.containsBox(box)
   }

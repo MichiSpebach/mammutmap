@@ -136,6 +136,10 @@ export class FolderBoxBody extends BoxBody {
     return box
   }
 
+  public getBoxes(): Box[] {
+    return this.boxes
+  }
+
   public async addBox(box: Box): Promise<void> {
     if (this.containsBox(box)) {
       util.logWarning('trying to add box that is already contained')

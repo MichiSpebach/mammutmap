@@ -256,17 +256,17 @@
 			"fromWayPoints": [
 				{
 					"boxId": "2cnbfh46bf8",
-					"boxName": "./src",
-					"x": 13.605955232129698,
-					"y": 2.07085943257185
+					"boxName": "/home/michael/programming/ts-visualize-files/src",
+					"x": 9.20006490345611,
+					"y": -3.1393801719941585
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "ffddla14d38",
 					"boxName": "index.ts",
-					"x": 44.98135457545052,
-					"y": -0.05660251714723314
+					"x": 44.982721810138,
+					"y": -0.056304192785556095
 				}
 			]
 		},
@@ -1084,6 +1084,82 @@
 					"boxName": "fileSystemAdapter.ts",
 					"x": 0.2261743208818418,
 					"y": 18.761384335154826
+				}
+			]
+		},
+		{
+			"id": "t8vnvq4liso",
+			"fromWayPoints": [
+				{
+					"boxId": "18tbjkfri3o",
+					"boxName": "pluginFacade.ts",
+					"x": 48.822065752554394,
+					"y": -0.24405125076266015
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "6o0ikrr8ru",
+					"boxName": "Map.ts",
+					"x": 49.569489197612384,
+					"y": 99.98853736817973
+				}
+			]
+		},
+		{
+			"id": "vmipsrqebkg",
+			"fromWayPoints": [
+				{
+					"boxId": "18tbjkfri3o",
+					"boxName": "pluginFacade.ts",
+					"x": 99.79602510460252,
+					"y": 50.61281896724935
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": -0.08361074552914764,
+					"y": 52.07301350342674
+				}
+			]
+		},
+		{
+			"id": "uuvi3g2bitg",
+			"fromWayPoints": [
+				{
+					"boxId": "2cnbfh46bf8",
+					"boxName": "/home/michael/programming/ts-visualize-files/src",
+					"x": -14.958079268292682,
+					"y": 23.29268292682927
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "18tbjkfri3o",
+					"boxName": "pluginFacade.ts",
+					"x": -0.04220744961485702,
+					"y": 2.4118362383461696
+				}
+			]
+		},
+		{
+			"id": "7natorsupng",
+			"fromWayPoints": [
+				{
+					"boxId": "ua13104dlao",
+					"boxName": "pluginLoader.ts",
+					"x": 0.26359600443951164,
+					"y": 4.436396559529198
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "2cnbfh46bf8",
+					"boxName": "/home/michael/programming/ts-visualize-files/src",
+					"x": -15.28036052336198,
+					"y": 22.435543046690455
 				}
 			]
 		}
