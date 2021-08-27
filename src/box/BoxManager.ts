@@ -23,6 +23,15 @@ export class BoxManager {
     return this.boxes.get(id);
   }
 
+  public getBoxBySourcePathIfExists(path: string): Box|undefined {
+    for (let box of this.boxes.values()) {
+      if (box.getSrcPath() == path) {
+        return box
+      }
+    }
+    return undefined
+  }
+
 }
 
 export let boxManager: BoxManager = new BoxManager()

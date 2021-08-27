@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
+    "target": "es2021",
     "strict": true,
     "allowJs": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
-    "outDir": "../plugin"
+    "outDir": "../plugin",
+    "moduleResolution": "node"
   }
 }
