@@ -181,6 +181,11 @@ export abstract class Box implements DropTarget {
   }
 
   private setHighlight(highlight: boolean): void {
+    if (highlight) {
+      renderManager.addClassTo(this.getId(), style.getHighlightBoxClass())
+    } else {
+      renderManager.removeClassFrom(this.getId(), style.getHighlightBoxClass())
+    }
     this.borderingLinks.forEach(link => link.setHighlight(highlight))
   }
 
