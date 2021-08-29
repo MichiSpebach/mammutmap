@@ -4,6 +4,7 @@ import { RootFolderBox } from './box/RootFolderBox'
 import { boxManager } from './box/BoxManager'
 import { map } from './Map'
 import * as util from './util'
+import { WayPointData } from './box/WayPointData'
 
 export { Box, FileBox, RootFolderBox }
 
@@ -53,7 +54,6 @@ export class FileBoxIterator { // TODO: real implementation that only takes root
 }
 
 export function addLink(fromFilePath: string, toFilePath: string): void {
-  util.logInfo('add link from "'+fromFilePath+'" to "'+toFilePath+'"')
   const from: Box|undefined = boxManager.getBoxBySourcePathIfExists(fromFilePath)
   if (!from) {
     util.logWarning('failed to add link because file for fromFilePath "'+fromFilePath+'" was not found')
@@ -65,7 +65,13 @@ export function addLink(fromFilePath: string, toFilePath: string): void {
     return
   }
 
-  // TODO: 
+  const managingBox: Box = Box.findCommonAncestor(from, to).commonAncestor;
+  if (managingBox.links.hasLinkWithEndBoxes(from, to)) {
+    return
+  }
 
-  util.logInfo('added link from "'+fromFilePath+'" to "'+toFilePath+'"')
+  const fromWayPoint = new WayPointData(from.getId(), from.getName(), 50, 50)
+  const toWayPoint = new WayPointData(to.getId(), to.getName(), 50, 50)
+
+  managingBox.links.addLink(fromWayPoint, toWayPoint)
 }

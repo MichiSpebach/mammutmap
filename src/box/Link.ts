@@ -153,7 +153,7 @@ export class Link {
   private async reorderAndSaveWithEndBoxes(fromBox: Box, toBox: Box): Promise<void|never> {
     const fromClientPosition: {x: number, y: number} = await this.from.getClientMidPosition()
     const toClientPosition: {x: number, y: number} = await this.to.getClientMidPosition()
-    const relation: {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} = this.findCommonAncestor(fromBox, toBox)
+    const relation: {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} = Box.findCommonAncestor(fromBox, toBox)
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
       const positionInBoxCoords: {x: number, y: number} = await box.transformClientPositionToLocal(fromClientPosition.x, fromClientPosition.y)
@@ -195,40 +195,6 @@ export class Link {
 
   private getRenderedBoxesWithoutBase(path: WayPointData[]): Box[] {
     return this.getRenderedBoxes(path).map((tuple: {box: Box, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.managingBox)
-  }
-
-  private findCommonAncestor(fromBox: Box, toBox: Box): {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} | never {
-    const fromBoxes: Box[] = [fromBox]
-    const toBoxes: Box[] = [toBox]
-
-    let commonAncestorCandidate: Box = fromBox
-    while (fromBoxes[0] !== toBoxes[0]) {
-      if (fromBoxes[0].isRoot() && toBoxes[0].isRoot()) {
-        util.logError(fromBox.getSrcPath()+' and '+toBox.getSrcPath()+' do not have a common ancestor, file structure seems to be corrupted.')
-      }
-
-      if (!fromBoxes[0].isRoot()) {
-        commonAncestorCandidate = fromBoxes[0].getParent()
-        if (toBoxes.includes(commonAncestorCandidate)) {
-          toBoxes.splice(0, Math.min(toBoxes.indexOf(commonAncestorCandidate)+1, toBoxes.length-1))
-          break
-        } else {
-          fromBoxes.unshift(commonAncestorCandidate)
-        }
-      }
-
-      if (!toBoxes[0].isRoot()) {
-        commonAncestorCandidate = toBoxes[0].getParent()
-        if (fromBoxes.includes(commonAncestorCandidate)) {
-          fromBoxes.splice(0, Math.min(fromBoxes.indexOf(commonAncestorCandidate)+1, fromBoxes.length-1))
-          break
-        } else {
-          toBoxes.unshift(commonAncestorCandidate)
-        }
-      }
-    }
-
-    return {commonAncestor: commonAncestorCandidate, fromBoxes: fromBoxes, toBoxes: toBoxes}
   }
 
 }
