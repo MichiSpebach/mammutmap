@@ -9,7 +9,7 @@ import { Box, FileBoxIterator } from '../dist/pluginFacade'
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Generate links', click: generateLinks}))
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Join on GitHub (coming soon)'}))
 
-function generateLinks(): void {
+async function generateLinks(): Promise<void> {
   util.logInfo('generateLinks')
 
   const boxes: FileBoxIterator = pluginFacade.getFileBoxIterator()
@@ -17,17 +17,18 @@ function generateLinks(): void {
     const box = boxes.next()
     const sourcePath: string = box.getSrcPath()
     if (sourcePath.endsWith('.ts')) {
-      generateOutgoingLinksForBox(box)
+      await generateOutgoingLinksForBox(box)
     }
   }
 
   util.logInfo('generateLinks finished')
 }
 
-function generateOutgoingLinksForBox(box: Box) {
+async function generateOutgoingLinksForBox(box: Box): Promise<void> {
   const filePath: string = box.getSrcPath()
   util.logInfo('generate outgoing links for file '+filePath)
 
+  await util.wait(0) // unblocks main-thread // TODO: still blocks too much, use workers and run in other thread
   const program: Program = ts.createProgram([filePath], {})
   const sourceFile: SourceFile|undefined = program.getSourceFile(filePath)
   if (!sourceFile) {
@@ -36,13 +37,28 @@ function generateOutgoingLinksForBox(box: Box) {
   }
 
   const parentFilePath: string = box.getParent().getSrcPath()
+  const importPaths: string[] = extractImportPaths(sourceFile)
+  await addLinks(filePath, parentFilePath, importPaths)
+}
+
+function extractImportPaths(sourceFile: SourceFile): string[] {
+  const importPaths: string[] = []
+
   ts.forEachChild(sourceFile, node => {
     if (ts.isImportDeclaration(node)) {
-      let relativeToPath: string = node.moduleSpecifier.getText(sourceFile)
-      relativeToPath = normalizeRelativeImportPath(relativeToPath)
-      pluginFacade.addLink(filePath, parentFilePath+'/'+relativeToPath)
+      let importPath: string = node.moduleSpecifier.getText(sourceFile)
+      importPaths.push(importPath)
     }
   })
+
+  return importPaths
+}
+
+async function addLinks(fromFilePath: string, parentFilePath: string, relativeToFilePaths: string[]): Promise<void> {
+  for (let importPath of relativeToFilePaths) {
+    let normalizedImportPath = normalizeRelativeImportPath(importPath)
+    await pluginFacade.addLink(fromFilePath, parentFilePath+'/'+normalizedImportPath)
+  }
 }
 
 function normalizeRelativeImportPath(path: string): string {

@@ -53,7 +53,7 @@ export class FileBoxIterator { // TODO: real implementation that only takes root
 
 }
 
-export function addLink(fromFilePath: string, toFilePath: string): void {
+export async function addLink(fromFilePath: string, toFilePath: string): Promise<void> {
   const from: Box|undefined = boxManager.getBoxBySourcePathIfExists(fromFilePath)
   if (!from) {
     util.logWarning('failed to add link because file for fromFilePath "'+fromFilePath+'" was not found')
@@ -73,5 +73,5 @@ export function addLink(fromFilePath: string, toFilePath: string): void {
   const fromWayPoint = new WayPointData(from.getId(), from.getName(), 50, 50)
   const toWayPoint = new WayPointData(to.getId(), to.getName(), 50, 50)
 
-  managingBox.links.addLink(fromWayPoint, toWayPoint)
+  await managingBox.links.addLink(fromWayPoint, toWayPoint)
 }
