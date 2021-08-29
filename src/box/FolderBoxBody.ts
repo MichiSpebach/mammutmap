@@ -87,7 +87,7 @@ export class FolderBoxBody extends BoxBody {
   private async addBoxesWithoutMapData(boxes: {dirEntry: Dirent}[] = []): Promise<void> {
     const gridSize: number = Math.ceil(Math.sqrt(boxes.length))
     const cellSize = 100/gridSize
-    const boxSize: number = 100/(gridSize+1)
+    const boxSize: number = 100/(gridSize*1.75)
     const spaceBetweenBoxes: number = cellSize-boxSize
 
     let arrayIndex: number = boxes.length-1
