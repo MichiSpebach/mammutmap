@@ -9,9 +9,9 @@ export function setApplicationMenu(): void {
       label: 'File',
       submenu: [
         {
-          label: 'Open...',
+          label: 'Open /src...',
           click: () => {
-            openFolder()
+            openFolder('/src')
           }
         },
         {
@@ -81,7 +81,7 @@ function getApplicationMenu(): Menu|never {
   return applicationMenu
 }
 
-async function openFolder(): Promise<void> {
+async function openFolder(subFolder: string = ''): Promise<void> { // TODO: remove subFolder argument, is just workaround, later covered by project settings
   const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
     title:'Select a folder',
     properties: ['openDirectory']
@@ -98,7 +98,7 @@ async function openFolder(): Promise<void> {
     const folderPath: string = folderPaths[0]
     util.logInfo('opening '+folderPath)
 
-    map.loadAndSetMap(folderPath+'/src', folderPath+'/map')
+    map.loadAndSetMap(folderPath+subFolder, folderPath+'/map')
   }
 }
 
