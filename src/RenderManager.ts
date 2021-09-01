@@ -40,6 +40,13 @@ export class RenderManager {
     }))
   }
 
+  public remove(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.remove(id)
+    }))
+  }
+
   public setStyleTo(id: string, style: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,

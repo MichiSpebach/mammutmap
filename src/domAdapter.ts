@@ -82,6 +82,10 @@ export class DocumentObjectModelAdapter {
     return this.executeJsOnElement(id, "innerHTML = '" + content + "'")
   }
 
+  public remove(id: string): Promise<void> {
+    return this.executeJsOnElement(id, "remove()")
+  }
+
   public setStyleTo(id: string, style: string): Promise<void> {
     return this.executeJsOnElement(id, "style = '" + style + "'")
   }
@@ -106,16 +110,20 @@ export class DocumentObjectModelAdapter {
     return this.executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER")
   }
 
-  public addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): void {
-    let ipcChannelName = 'wheel_' + id
+  public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
+    const listenerFunctionName = 'wheel_'+id
+    let ipcChannelName = 'wheel_'+id
 
-    var rendererFunction: string = '(event) => {'
-    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-    //rendererFunction += 'console.log(event);'
-    rendererFunction += 'ipc.send("' + ipcChannelName + '", event.deltaY, event.clientX, event.clientY);'
-    rendererFunction += '}'
+    if (!this.definedRendererFunctions.has(listenerFunctionName)) {
+      let rendererFunction: string = 'function '+listenerFunctionName+'(event) {'
+      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+      //rendererFunction += 'console.log(event);'
+      rendererFunction += 'ipc.send("'+ipcChannelName+'", event.deltaY, event.clientX, event.clientY);'
+      rendererFunction += '}'
+      await this.defineRendererFunction(listenerFunctionName, rendererFunction)
+    }
 
-    this.executeJsOnElement(id, "addEventListener('wheel', " + rendererFunction + ")")
+    this.executeJsOnElement(id, "addEventListener('wheel', "+listenerFunctionName+")")
 
     ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
   }
@@ -153,7 +161,7 @@ export class DocumentObjectModelAdapter {
       rendererFunction += 'let ipc = require("electron").ipcRenderer;'
       //rendererFunction += 'console.log(event);'
       rendererFunction += 'event.stopPropagation();'
-      rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);'
+      rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY);'
       rendererFunction += '}'
       await this.defineRendererFunction(listenerFunctionName, rendererFunction)
     }
@@ -165,7 +173,7 @@ export class DocumentObjectModelAdapter {
 
   public removeEventListenerFrom(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'
   ): void {
     const listenerFunctionName = eventType+'_'+id
     const ipcChannelName = eventType+'_'+id

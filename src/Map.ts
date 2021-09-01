@@ -6,6 +6,9 @@ import { RootFolderBox } from './box/RootFolderBox'
 export let map: Map
 
 export async function loadAndSetMap(sourceRootPath: string, mapRootPath: string): Promise<void> {
+  if (map) {
+    map.destruct() // otherwise wheelListener still exists somehow and creates old phantom map while zooming
+  }
   map = await Map.new('content', sourceRootPath, mapRootPath)
 }
 
@@ -34,6 +37,10 @@ export class Map {
     renderFinished.then(() => {
       dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
     })
+  }
+
+  public destruct(): void {
+    dom.removeEventListenerFrom('map', 'wheel')
   }
 
   public getRootFolder(): RootFolderBox {
