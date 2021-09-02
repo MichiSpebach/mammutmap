@@ -31,6 +31,10 @@ export class DragManager {
     this.state = newState
   }
 
+  public static clear(): void {
+    this.state = null
+  }
+
   public static addDraggable(elementToDrag: Draggable<DropTarget>): void {
     const draggableId: string = elementToDrag.getId()
 

@@ -4,6 +4,10 @@ import { Rect } from './Rect'
 export class RenderManager {
   private commands: Command[] = []
 
+  public clear(): void {
+    this.commands = []
+  }
+
   public getClientSize(): {width: number, height: number} {
     return dom.getClientSize()
   }

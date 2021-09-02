@@ -4,6 +4,10 @@ import { Box } from './Box'
 export class BoxManager {
   private boxes: Map<string, Box> = new Map()
 
+  public clear(): void {
+    this.boxes = new Map()
+  }
+
   public addBox(box: Box): void {
     if (this.boxes.has(box.getId())) {
       util.logWarning('box with id '+box.getId()+' already contained by BoxManager.');

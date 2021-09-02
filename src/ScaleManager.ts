@@ -50,6 +50,10 @@ export class ScaleManager {
     })
   }*/
 
+  public static clear(): void {
+    this.state = null
+  }
+
   public static addScalable(scalable: BoxBorder) {
 
     // TODO: set element draggable="true" or use mousedown instead of drag events

@@ -1,6 +1,10 @@
 import { dom } from './domAdapter'
 import { renderManager } from './RenderManager'
 import { settings } from './Settings'
+import { DragManager } from './DragManager'
+import { ScaleManager } from './ScaleManager'
+import { HoverManager } from './HoverManager'
+import { boxManager } from './box/BoxManager'
 import { RootFolderBox } from './box/RootFolderBox'
 
 export let map: Map
@@ -8,8 +12,17 @@ export let map: Map
 export async function loadAndSetMap(sourceRootPath: string, mapRootPath: string): Promise<void> {
   if (map) {
     map.destruct() // otherwise wheelListener still exists somehow and creates old phantom map while zooming
+    clearManagers()
   }
   map = await Map.new('content', sourceRootPath, mapRootPath)
+}
+
+function clearManagers(): void {
+  DragManager.clear()
+  ScaleManager.clear()
+  HoverManager.clear()
+  boxManager.clear()
+  renderManager.clear()
 }
 
 export class Map {
