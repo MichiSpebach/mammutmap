@@ -16,7 +16,6 @@ export function init(object: DocumentObjectModelAdapter): void {
 export class DocumentObjectModelAdapter {
   private renderWindow: BrowserWindow
   private webContents: WebContents
-  private definedRendererFunctions: Set<string> = new Set<string>()
 
   public constructor(windowToRenderIn: BrowserWindow) {
     this.renderWindow = windowToRenderIn
@@ -111,95 +110,73 @@ export class DocumentObjectModelAdapter {
   }
 
   public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
-    const listenerFunctionName = 'wheel_'+id
     let ipcChannelName = 'wheel_'+id
 
-    if (!this.definedRendererFunctions.has(listenerFunctionName)) {
-      let rendererFunction: string = 'function '+listenerFunctionName+'(event) {'
-      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-      //rendererFunction += 'console.log(event);'
-      rendererFunction += 'ipc.send("'+ipcChannelName+'", event.deltaY, event.clientX, event.clientY);'
-      rendererFunction += '}'
-      await this.defineRendererFunction(listenerFunctionName, rendererFunction)
-    }
+    let rendererFunction: string = '(event) => {'
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+    //rendererFunction += 'console.log(event);'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.deltaY, event.clientX, event.clientY);'
+    rendererFunction += '}'
 
-    this.executeJsOnElement(id, "addEventListener('wheel', "+listenerFunctionName+")")
+    await this.executeJavaScript("document.getElementById('"+id+"').onwheel = "+rendererFunction)
 
     ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
   }
 
-  public addEventListenerTo(
-    id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove',
-    callback: (clientX:number, clientY: number) => void
-  ): void {
-    let ipcChannelName = eventType+'_'+id
-
-    var rendererFunction: string = '(event) => {'
-    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-    //rendererFunction += 'console.log(event);'
-    rendererFunction += 'event.stopPropagation();'
-    rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);'
-    rendererFunction += '}'
-
-    this.executeJsOnElement(id, "addEventListener('"+eventType+"', "+rendererFunction+")")
-
-    ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number) => callback(clientX, clientY))
-  }
-
-  // TODO: fuse with addEventListenerTo?
-  public async addRemovableEventListenerTo(
+  public async addEventListenerTo(
     id: string,
     eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove',
     callback: (clientX:number, clientY: number) => void
   ): Promise<void> {
-    const listenerFunctionName = eventType+'_'+id
-    const ipcChannelName = eventType+'_'+id
+    let ipcChannelName = eventType+'_'+id
 
-    if (!this.definedRendererFunctions.has(listenerFunctionName)) {
-      let rendererFunction: string = 'function '+listenerFunctionName+'(event) {'
-      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-      //rendererFunction += 'console.log(event);'
-      rendererFunction += 'event.stopPropagation();'
-      rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY);'
-      rendererFunction += '}'
-      await this.defineRendererFunction(listenerFunctionName, rendererFunction)
-    }
+    let rendererFunction: string = '(event) => {'
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+    //rendererFunction += 'console.log(event);'
+    rendererFunction += 'event.stopPropagation();'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY);'
+    rendererFunction += '}'
 
-    await this.executeJsOnElement(id, "addEventListener('"+eventType+"', "+listenerFunctionName+")")
+    await this.executeJavaScript("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
     ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number) => callback(clientX, clientY))
   }
 
-  public removeEventListenerFrom(
-    id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'
-  ): void {
-    const listenerFunctionName = eventType+'_'+id
-    const ipcChannelName = eventType+'_'+id
-    this.executeJsOnElement(id, "removeEventListener('"+eventType+"', "+listenerFunctionName+")")
-    ipcMain.removeAllListeners(ipcChannelName)
-  }
-
-  public addDragListenerTo(
+  public async addDragListenerTo(
     id: string,
     eventType: 'dragstart'|'drag'|'dragend'|'dragenter',
     callback: (clientX: number, clientY: number) => void
-  ): void {
-    let ipcChannelName = eventType + '_' + id
+  ): Promise<void> {
+    let ipcChannelName = eventType+'_'+id
 
-    var rendererFunction: string = '(event) => {'
+    let rendererFunction: string = '(event) => {'
     rendererFunction += 'let ipc = require("electron").ipcRenderer;'
     //rendererFunction += 'console.log(event);'
     rendererFunction += 'event.stopPropagation();'
     rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {'
-    rendererFunction += 'ipc.send("' + ipcChannelName + '", event.clientX, event.clientY);'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY);'
     rendererFunction += '}'
     rendererFunction += '}'
 
-    this.executeJsOnElement(id, "addEventListener('" + eventType + "', " + rendererFunction + ")")
+    await this.executeJavaScript("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
     ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
+  }
+
+  public removeEventListenerFrom(
+    id: string,
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
+  ): void {
+    this.executeJsOnElement(id, "on"+eventType+" = null")
+    this.removeChannelForEventListenerFrom(id, eventType)
+  }
+
+  public removeChannelForEventListenerFrom(
+    id: string,
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
+  ): void {
+    const ipcChannelName = eventType+'_'+id
+    ipcMain.removeAllListeners(ipcChannelName)
   }
 
   private executeJsOnElements(commands: {elementId: string, jsToExecute: string}[]): Promise<void> {
@@ -220,11 +197,6 @@ export class DocumentObjectModelAdapter {
     rendererCode += jsToExecute
     rendererCode += '}).call()'
 
-    return this.webContents.executeJavaScript(rendererCode)
-  }
-
-  private defineRendererFunction(name: string, rendererCode: string): Promise<void> {
-    this.definedRendererFunctions.add(name)
     return this.webContents.executeJavaScript(rendererCode)
   }
 

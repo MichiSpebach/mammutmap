@@ -82,6 +82,11 @@ export class DragManager {
     })
   }
 
+  public static removeDropTarget(dropTarget: DropTarget): void {
+    dom.removeEventListenerFrom(dropTarget.getId(), 'dragenter')
+    dom.removeEventListenerFrom(dropTarget.getId(), 'mouseover')
+  }
+
   private static onDragEnter(dropTarget: DropTarget): void {
     //if (!await dom.containsClass(sourceId, this.draggableStyleClass)) {
     //  return // TODO: make this somehow work, sourceId is not contained in dragenter event
@@ -100,10 +105,10 @@ export class DragManager {
     const cursorClientPosition: {x: number, y: number} = dom.getCursorClientPosition();
     this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, true)
 
-    dom.addRemovableEventListenerTo('content', 'mousemove', (clientX: number, clientY: number) => {
+    dom.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number) => {
       this.onDrag(clientX, clientY)
     })
-    dom.addRemovableEventListenerTo('content', 'click', (_) => {
+    dom.addEventListenerTo('content', 'click', (_) => {
       dom.removeEventListenerFrom('content', 'mousemove')
       dom.removeEventListenerFrom('content', 'click')
       this.onDragEnd()
