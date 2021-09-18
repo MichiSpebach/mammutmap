@@ -58,6 +58,22 @@ export class BoxBorder {
     this.sideIds.forEach((sideId: string) => renderManager.addClassTo(sideId, style.getBoxBorderClass(this.referenceBox.isMapDataFileExisting())))
   }
 
+  public async unrender(): Promise<void> {
+    if (!this.rendered) {
+      return
+    }
+
+    ScaleManager.removeScalable(this)
+
+    const removeTop: Promise<void> = renderManager.remove(this.getTopId())
+    const removeBottom: Promise<void> = renderManager.remove(this.getBottomId())
+    const removeRight: Promise<void> = renderManager.remove(this.getRightId())
+    const removeLeft: Promise<void> = renderManager.remove(this.getLeftId())
+    await Promise.all([removeTop, removeBottom, removeRight, removeLeft])
+
+    this.rendered = false
+  }
+
   private formLine(id: string, sizeAndPositionStyle: string): string {
     return '<div id="' + id + '" draggable="true" style="position:absolute;' + sizeAndPositionStyle + '"></div>'
   }

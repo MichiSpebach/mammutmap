@@ -64,6 +64,19 @@ export class BoxLinks {
       this.rendered = true
     }
 
+    public async unrender(): Promise<void> {
+      if (!this.rendered) {
+        return
+      }
+
+      await Promise.all(this.links.map(async (link: Link) => {
+        await link.unrender()
+      }))
+      this.links = []
+
+      this.rendered = false
+    }
+
     public hasLinkWithEndBoxes(from: Box, to: Box): boolean {
       const link: Link|undefined = this.links.find((link: Link) => {
         const linkFromWayPoints: WayPointData[] = link.getData().fromWayPoints

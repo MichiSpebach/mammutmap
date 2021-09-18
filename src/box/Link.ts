@@ -49,6 +49,19 @@ export class Link {
     return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
 
+  public async unrender(): Promise<void> {
+    if(!this.rendered) {
+      return
+    }
+
+    this.deregisterAtBorderingBoxes()
+    this.from.unrender()
+    this.to.unrender()
+    renderManager.remove(this.getId())
+
+    this.rendered = false
+  }
+
   public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number): Promise<void> {
     let fromInBaseCoords: {x: number, y: number}
     let toInBaseCoords: {x: number, y: number}

@@ -74,6 +74,18 @@ export class ScaleManager {
     //this.scalables.set(scalable.getLeftId(), scalable)
   }
 
+  public static removeScalable(scalable: BoxBorder) {
+    dom.removeClassFrom(scalable.getTopId(), this.verticalStyleClass)
+    dom.removeClassFrom(scalable.getBottomId(), this.verticalStyleClass)
+    dom.removeClassFrom(scalable.getRightId(), this.horizontalStyleClass)
+    dom.removeClassFrom(scalable.getLeftId(), this.horizontalStyleClass)
+
+    this.removeListenersForSide(scalable.getRightId())
+    this.removeListenersForSide(scalable.getBottomId())
+    this.removeListenersForSide(scalable.getTopId())
+    this.removeListenersForSide(scalable.getLeftId())
+  }
+
   private static addListenersForSide(scalable: BoxBorder, id: string, drag: (clientX: number, clientY:number) => void): void {
     dom.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
       this.dragstart(scalable, clientX, clientY)
@@ -86,6 +98,12 @@ export class ScaleManager {
     dom.addDragListenerTo(id, 'dragend', (clientX: number, clientY:number): void => {
       this.dragEnd()
     })
+  }
+
+  private static removeListenersForSide(id: string): void {
+    dom.removeEventListenerFrom(id, 'dragstart')
+    dom.removeEventListenerFrom(id, 'drag')
+    dom.removeEventListenerFrom(id, 'dragend')
   }
 
   private static async dragstart(scalable: BoxBorder, clientX: number, clientY: number): Promise<void> {

@@ -26,4 +26,8 @@ export class HoverManager {
     })
   }
 
+  public static removeHoverable(hoverable: Box) {
+    dom.removeEventListenerFrom(hoverable.getId(), 'mouseover')
+  }
+
 }

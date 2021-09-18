@@ -20,10 +20,6 @@ export class FolderBoxBody extends BoxBody {
     this.referenceFolderBox = referenceBox
   }
 
-  public getId(): string {
-    return this.referenceFolderBox.getId() + 'body'
-  }
-
   public isRendered(): boolean {
     return this.rendered
   }
@@ -41,7 +37,7 @@ export class FolderBoxBody extends BoxBody {
     }
 
     if (!this.rendered) {
-      let html: string = '<div id="' + this.getId() + '"></div>'
+      let html: string = '<div id="'+this.getId()+'"></div>'
       await renderManager.addContentTo(this.referenceFolderBox.getId(), html)
       await this.loadMapDatasAndCreateBoxes()
     }
@@ -54,6 +50,21 @@ export class FolderBoxBody extends BoxBody {
       this.rerenderAfterRenderFinished = false
       this.render()
     }
+  }
+
+  public async unrender(): Promise<void> {
+    // TODO: handle this.renderInProgress?
+    if (this.rerenderAfterRenderFinished) {
+      this.rerenderAfterRenderFinished = false
+    }
+    if (!this.rendered) {
+      return
+    }
+
+    await this.destructBoxes()
+    await renderManager.remove(this.getId())
+
+    this.rendered = false
   }
 
   private async loadMapDatasAndCreateBoxes(): Promise<void> {
@@ -122,6 +133,13 @@ export class FolderBoxBody extends BoxBody {
     await Promise.all(this.boxes.map(async (box: Box): Promise<void> => {
       await box.render()
     }))
+  }
+
+  private async destructBoxes(): Promise<void> {
+    await Promise.all(this.boxes.map(async (box: Box): Promise<void> => {
+      await box.destruct()
+    }))
+    this.boxes = []
   }
 
   public containsBox(box: Box): boolean {

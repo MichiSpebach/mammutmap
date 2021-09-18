@@ -55,6 +55,14 @@ export class DragManager {
     // TODO: call elementToDrag.dragCancel() if esc is pressed (and remove draggingInProgressStyleClass)
   }
 
+  public static removeDraggable(elementToDrag: Draggable<DropTarget>): void {
+    const draggableId: string = elementToDrag.getId()
+    dom.removeClassFrom(draggableId, this.draggableStyleClass)
+    dom.removeEventListenerFrom(draggableId, 'dragstart')
+    dom.removeEventListenerFrom(draggableId, 'drag')
+    dom.removeEventListenerFrom(draggableId, 'dragend')
+  }
+
   private static onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean) {
     dom.addClassTo(elementToDrag.getId(), DragManager.draggingInProgressStyleClass)
     elementToDrag.dragStart(clientX, clientY)

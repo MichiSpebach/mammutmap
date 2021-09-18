@@ -1,3 +1,4 @@
+import * as util from './util'
 import { dom } from './domAdapter'
 import { renderManager } from './RenderManager'
 import { settings } from './Settings'
@@ -11,17 +12,26 @@ export let map: Map
 
 export async function loadAndSetMap(sourceRootPath: string, mapRootPath: string): Promise<void> {
   if (map) {
-    map.destruct() // otherwise wheelListener still exists somehow and creates old phantom map while zooming
+    await map.destruct()
+    checkMapUnloaded()
     clearManagers()
   }
   map = await Map.new('content', sourceRootPath, mapRootPath)
+}
+
+function checkMapUnloaded(): void {
+  if (boxManager.getNumberOfBoxes() != 0) {
+    util.logWarning('expected all boxes to be unloaded at this state, but there are '+boxManager.getNumberOfBoxes()+' boxes.')
+  }
+  if (dom.getIpcChannelsCount() != 0) {
+    util.logWarning('expected that no ipcChannels exist at this state, but there are '+dom.getIpcChannelsCount()+' ipcChannels')
+  }
 }
 
 function clearManagers(): void {
   DragManager.clear()
   ScaleManager.clear()
   HoverManager.clear()
-  boxManager.clear()
   renderManager.clear()
 }
 
@@ -52,8 +62,10 @@ export class Map {
     })
   }
 
-  public destruct(): void {
+  public async destruct(): Promise<void> {
+    await this.rootFolder.destruct()
     dom.removeEventListenerFrom('map', 'wheel')
+    await renderManager.remove('map')
   }
 
   public getRootFolder(): RootFolderBox {

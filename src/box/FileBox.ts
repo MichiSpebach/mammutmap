@@ -37,8 +37,20 @@ export class FileBox extends Box {
     dom.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, clientX, clientY))
   }
 
+  protected async unrenderAdditional(): Promise<void> {
+    if (!this.isRendered()) {
+      return
+    }
+
+    dom.removeEventListenerFrom(this.getId(), 'contextmenu')
+  }
+
   protected async renderBody(): Promise<void> {
     this.body.render()
+  }
+
+  protected async unrenderBody(): Promise<void> {
+    this.body.unrender()
   }
 
   public isBodyRendered(): boolean {

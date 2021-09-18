@@ -4,15 +4,22 @@ import { Box } from './Box'
 export class BoxManager {
   private boxes: Map<string, Box> = new Map()
 
-  public clear(): void {
-    this.boxes = new Map()
+  public getNumberOfBoxes(): number {
+    return this.boxes.size
   }
 
   public addBox(box: Box): void {
     if (this.boxes.has(box.getId())) {
-      util.logWarning('box with id '+box.getId()+' already contained by BoxManager.');
+      util.logWarning('trying to add box with id '+box.getId()+' that is already contained by BoxManager.');
     }
     this.boxes.set(box.getId(), box)
+  }
+
+  public removeBox(box: Box): void {
+    if (!this.boxes.has(box.getId())) {
+      util.logWarning('trying to remove box with id '+box.getId()+' that is not contained by BoxManager.');
+    }
+    this.boxes.delete(box.getId())
   }
 
   public getBox(id: string): Box|never {

@@ -1,3 +1,4 @@
+import * as util from './util'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { Rect } from './Rect'
 
@@ -16,6 +17,7 @@ export function init(object: DocumentObjectModelAdapter): void {
 export class DocumentObjectModelAdapter {
   private renderWindow: BrowserWindow
   private webContents: WebContents
+  private ipcChannels: string[] = []
 
   public constructor(windowToRenderIn: BrowserWindow) {
     this.renderWindow = windowToRenderIn
@@ -120,7 +122,7 @@ export class DocumentObjectModelAdapter {
 
     await this.executeJavaScript("document.getElementById('"+id+"').onwheel = "+rendererFunction)
 
-    ipcMain.on(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
+    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
   }
 
   public async addEventListenerTo(
@@ -139,7 +141,7 @@ export class DocumentObjectModelAdapter {
 
     await this.executeJavaScript("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
-    ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number) => callback(clientX, clientY))
+    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number) => callback(clientX, clientY))
   }
 
   public async addDragListenerTo(
@@ -160,23 +162,36 @@ export class DocumentObjectModelAdapter {
 
     await this.executeJavaScript("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
-    ipcMain.on(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
+    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
   }
 
   public removeEventListenerFrom(
     id: string,
     eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
   ): void {
+    const ipcChannelName = eventType+'_'+id
     this.executeJsOnElement(id, "on"+eventType+" = null")
-    this.removeChannelForEventListenerFrom(id, eventType)
+    this.removeIpcChannelListener(ipcChannelName)
   }
 
-  public removeChannelForEventListenerFrom(
-    id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
-  ): void {
-    const ipcChannelName = eventType+'_'+id
-    ipcMain.removeAllListeners(ipcChannelName)
+  private addIpcChannelListener(channelName: string, listener: (event: IpcMainEvent, ...args: any[]) => void) {
+    if (this.ipcChannels.includes(channelName) && !channelName.startsWith('mouseover')) { // TODO: also warn for mouseover asap
+      util.logWarning('trying to add already included ipcChannel "'+channelName+'"')
+    }
+    ipcMain.on(channelName, listener)
+    this.ipcChannels.push(channelName)
+  }
+
+  private removeIpcChannelListener(channelName: string) {
+    if (!this.ipcChannels.includes(channelName)) {
+      util.logWarning('trying to remove not included ipcChannel "'+channelName+'"')
+    }
+    ipcMain.removeAllListeners(channelName)
+    this.ipcChannels.splice(this.ipcChannels.indexOf(channelName), 1)
+  }
+
+  public getIpcChannelsCount(): number {
+    return this.ipcChannels.length
   }
 
   private executeJsOnElements(commands: {elementId: string, jsToExecute: string}[]): Promise<void> {

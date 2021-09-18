@@ -10,7 +10,13 @@ export abstract class BoxBody {
     this.referenceBox = referenceBox
   }
 
+  public getId(): string {
+    return this.referenceBox.getId()+'body'
+  }
+
   public abstract render(): Promise<void>
+
+  public abstract unrender(): Promise<void>
 
   protected async shouldBeRendered(): Promise<boolean> {
     const boxRect: Rect = await renderManager.getClientRectOf(this.referenceBox.getId())

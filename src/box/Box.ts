@@ -41,6 +41,11 @@ export abstract class Box implements DropTarget {
     boxManager.addBox(this)
   }
 
+  public async destruct(): Promise<void> {
+    await this.unrender()
+    boxManager.removeBox(this)
+  }
+
   protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
 
   public getId(): string {
@@ -169,6 +174,24 @@ export abstract class Box implements DropTarget {
     this.rendered = true
   }
 
+  public async unrender(): Promise<void> {
+    if (!this.isRendered()) {
+      return
+    }
+
+    DragManager.removeDropTarget(this)
+    HoverManager.removeHoverable(this)
+
+    await this.header.unrender()
+    await this.border.unrender()
+    await this.unrenderBody()
+    await this.links.unrender()
+    //await this.borderingLinks.updateLinkEnds() // TODO: otherwise links reference to not existing borderingBoxes
+    await this.unrenderAdditional()
+
+    this.rendered = false
+  }
+
   private renderAndRegisterBorderingLinks(): void {
     if (this.isRoot()) {
       return
@@ -277,7 +300,11 @@ export abstract class Box implements DropTarget {
 
   protected abstract renderAdditional(): Promise<void>
 
+  protected abstract unrenderAdditional(): Promise<void>
+
   protected abstract renderBody(): Promise<void>
+
+  protected abstract unrenderBody(): Promise<void>
 
   protected abstract isBodyRendered(): boolean
 

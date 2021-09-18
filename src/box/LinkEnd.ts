@@ -77,6 +77,17 @@ export class LinkEnd implements Draggable<Box> {
     }
   }
 
+  public async unrender(): Promise<void> {
+    if (!this.rendered) {
+      return
+    }
+
+    DragManager.removeDraggable(this)
+    await renderManager.setStyleTo(this.getId(), '')
+
+    this.rendered = false
+  }
+
   private async renderShape(x: number, y: number, angleInRadians: number): Promise<void> {
     const positionStyle = 'position:absolute;left:'+x+'%;top:'+y+'%;'
     let shapeStyle: string
