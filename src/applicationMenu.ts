@@ -89,17 +89,18 @@ async function openFolder(subFolder: string = ''): Promise<void> { // TODO: remo
 
   const folderPaths: string[] = dialogReturnValue.filePaths
 
-  if (folderPaths === undefined) {
+  if (folderPaths.length === 0) {
     util.logInfo('no folder selected')
-  } else {
-    if (folderPaths.length !== 1) {
-      util.logWarning('expected exactly one selected folder but is '+folderPaths.length)
-    }
-    const folderPath: string = folderPaths[0]
-    util.logInfo('opening '+folderPath)
-
-    map.loadAndSetMap(folderPath+subFolder, folderPath+'/map')
+    return
   }
+
+  if (folderPaths.length !== 1) {
+    util.logWarning('expected exactly one selected folder but is '+folderPaths.length)
+  }
+
+  const folderPath: string = folderPaths[0]
+  util.logInfo('opening '+folderPath)
+  map.loadAndSetMap(folderPath+subFolder, folderPath+'/map')
 }
 
 function buildZoomSpeedMenuItem(zoomSpeed: number): MenuItem {
