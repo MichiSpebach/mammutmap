@@ -3,7 +3,7 @@ interface Style {
   getHighlightBoxClass(): string
   getFileBoxClass(): string
   getFolderBoxClass(): string
-  getBoxBorderClass(mapDataFileExisting: boolean): string
+  getBoxBorderLineClass(mapDataFileExisting: boolean): string
   getHighlightClass(): string
   getLinkColor(): string
 }
@@ -22,11 +22,11 @@ class DarkTheme implements Style {
     return 'folderBox'
   }
 
-  public getBoxBorderClass(mapDataFileExisting: boolean): string {
+  public getBoxBorderLineClass(mapDataFileExisting: boolean): string {
     if (mapDataFileExisting) {
-      return 'boxBorder'
+      return 'boxBorderLine'
     } else {
-      return 'boxBorderNoMapData'
+      return 'boxBorderLineNoMapData'
     }
   }
 

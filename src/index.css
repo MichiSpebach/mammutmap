@@ -54,9 +54,9 @@ body {
   background-color: slategrey;
 }
 
-.boxBorder {
+.boxBorderLine {
   background-color: slategrey;
 }
-.boxBorderNoMapData {
+.boxBorderLineNoMapData {
   background-color: red;
 }
