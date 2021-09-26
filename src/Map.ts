@@ -10,6 +10,10 @@ import { RootFolderBox } from './box/RootFolderBox'
 
 export let map: Map
 
+export function setMap(object: Map): void {
+  map = object
+}
+
 export async function loadAndSetMap(sourceRootPath: string, mapRootPath: string): Promise<void> {
   if (map) {
     await map.destruct()

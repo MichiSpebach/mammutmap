@@ -20,6 +20,14 @@ export class FileBox extends Box {
     return new FileBoxHeader(this)
   }
 
+  public isFolder(): boolean {
+    return false
+  }
+
+  public isFile(): boolean {
+    return true
+  }
+
   protected getOverflow(): 'hidden' {
     return 'hidden'
   }

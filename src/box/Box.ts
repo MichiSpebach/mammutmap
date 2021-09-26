@@ -79,6 +79,10 @@ export abstract class Box implements DropTarget {
     return false
   }
 
+  public abstract isFolder(): boolean
+
+  public abstract isFile(): boolean
+
   protected isRendered(): boolean {
     return this.rendered
   }

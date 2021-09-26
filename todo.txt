@@ -1,4 +1,6 @@
 
+save mapData of box as soon as its id is needed anywhere
+
 when link starts in FileBox: overflow is not visible but should (only hide overflow of inner body)
 
 filter to only show some parts, for example only links of one class with variable follow depth

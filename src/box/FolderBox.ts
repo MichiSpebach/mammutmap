@@ -19,6 +19,14 @@ export class FolderBox extends Box {
     return new FolderBoxHeader(this)
   }
 
+  public isFolder(): boolean {
+    return true
+  }
+
+  public isFile(): boolean {
+    return false
+  }
+
   protected getOverflow(): 'visible' {
     return 'visible'
   }

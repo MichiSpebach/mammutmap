@@ -1,5 +1,6 @@
 import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
+import { FolderBox } from './box/FolderBox'
 import { RootFolderBox } from './box/RootFolderBox'
 import { boxManager } from './box/BoxManager'
 import { map } from './Map'
@@ -8,22 +9,8 @@ import { WayPointData } from './box/WayPointData'
 
 export { Box, FileBox, RootFolderBox }
 
-export function getFileBoxIterator(): FileBoxIterator {
-  return new FileBoxIterator(getFileBoxes())
-}
-
-function getFileBoxes(): FileBox[] {
-  const fileBoxes: FileBox[] = []
-  getBoxes().forEach((box: Box) => {
-    if (box instanceof FileBox) {
-      fileBoxes.push(box)
-    }
-  })
-  return fileBoxes
-}
-
-function getBoxes(): Box[] {
-  return getRootFolder().getBoxes()
+export function getFileBoxIterator(): FileBoxDepthTreeIterator {
+  return new FileBoxDepthTreeIterator(getRootFolder())
 }
 
 export function getRootFolder(): RootFolderBox|never {
@@ -33,12 +20,64 @@ export function getRootFolder(): RootFolderBox|never {
   return map.getRootFolder()
 }
 
-export class FileBoxIterator { // TODO: real implementation that only takes rootBox and traverses tree
+export class FileBoxDepthTreeIterator {
+  private readonly boxIterators: BoxIterator[]
+  private nextBox: FileBox|null
 
-  private readonly boxes: FileBox[]
+  public constructor(rootBox: FolderBox) {
+    this.boxIterators = []
+    this.boxIterators.push(new BoxIterator(rootBox.getBoxes()))
+    this.nextBox = null
+  }
+
+  public hasNext(): boolean {
+    this.prepareNext()
+    return this.nextBox != null
+  }
+
+  public next(): FileBox|never {
+    this.prepareNext()
+    if (!this.nextBox) {
+      util.logError('next() was called, but there are no FileBoxes left, call hasNext() to check if next exists')
+    }
+
+    const nextBox = this.nextBox
+    this.nextBox = null
+    return nextBox;
+  }
+
+  private prepareNext(): void {
+    if (this.nextBox || this.boxIterators.length === 0) {
+      return
+    }
+
+    const currentBoxIterator = this.getCurrentBoxIterator()
+    if (currentBoxIterator.hasNext()) {
+      const nextBox: Box = currentBoxIterator.next()
+      if (nextBox.isFile()) {
+        this.nextBox = nextBox as FileBox
+      } else if (nextBox.isFolder()) {
+        this.boxIterators.push(new BoxIterator((nextBox as FolderBox).getBoxes()))
+        this.prepareNext()
+      } else {
+        util.logError('nextBox (id '+nextBox.getId()+') is neither FileBox nor FolderBox')
+      }
+    } else {
+      this.boxIterators.pop()
+      this.prepareNext()
+    }
+  }
+
+  private getCurrentBoxIterator(): BoxIterator {
+    return this.boxIterators[this.boxIterators.length - 1]
+  }
+}
+
+class BoxIterator {
+  private readonly boxes: Box[]
   private nextIndex: number
 
-  public constructor(boxes: FileBox[]) {
+  public constructor(boxes: Box[]) {
     this.boxes = boxes
     this.nextIndex = 0
   }
@@ -47,10 +86,9 @@ export class FileBoxIterator { // TODO: real implementation that only takes root
     return this.nextIndex < this.boxes.length
   }
 
-  public next(): FileBox {
+  public next(): Box {
     return this.boxes[this.nextIndex++]
   }
-
 }
 
 export async function addLink(fromFilePath: string, toFilePath: string): Promise<void> {
