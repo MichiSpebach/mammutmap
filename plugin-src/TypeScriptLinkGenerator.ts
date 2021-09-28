@@ -13,23 +13,34 @@ async function generateLinks(): Promise<void> {
   util.logInfo('generateLinks')
 
   const boxes: FileBoxDepthTreeIterator = pluginFacade.getFileBoxIterator()
+  let boxChunk: Box[] = [] // calling ts.createProgram(..) with many files is magnitude faster than calling many times with one file
   while (boxes.hasNext()) {
     const box = boxes.next()
-    const sourcePath: string = box.getSrcPath()
-    if (sourcePath.endsWith('.ts')) {
-      await generateOutgoingLinksForBox(box)
+    if (box.getSrcPath().endsWith('.ts')) {
+      boxChunk.push(box)
+    }
+    if (boxChunk.length > 31) {
+      await generateOutgoingLinksForBoxes(boxChunk)
+      boxChunk = []
     }
   }
 
   util.logInfo('generateLinks finished')
 }
 
-async function generateOutgoingLinksForBox(box: Box): Promise<void> {
+async function generateOutgoingLinksForBoxes(boxes: Box[]) {
+  const filePaths: Box[] = boxes.map(box => box.getSrcPath())
+  const program: Program = ts.createProgram(filePaths, {}) // TODO: blocks for about a second, use workers and run in other thread
+
+  for (const box of boxes) {
+    await generateOutgoingLinksForBox(box, program)
+  }
+}
+
+async function generateOutgoingLinksForBox(box: Box, program: Program): Promise<void> {
   const filePath: string = box.getSrcPath()
   util.logInfo('generate outgoing links for file '+filePath)
 
-  await util.wait(0) // unblocks main-thread // TODO: still blocks too much, use workers and run in other thread
-  const program: Program = ts.createProgram([filePath], {}) // TODO: try createProgram with multiple files, could save magnitude of time
   const sourceFile: SourceFile|undefined = program.getSourceFile(filePath)
   if (!sourceFile) {
     util.logError('failed to get '+ filePath +' as SourceFile')

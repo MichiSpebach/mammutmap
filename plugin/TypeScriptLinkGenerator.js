@@ -45,21 +45,26 @@ applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new electron_1.MenuI
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new electron_1.MenuItem({ label: 'Join on GitHub (coming soon)' }));
 function generateLinks() {
     return __awaiter(this, void 0, void 0, function () {
-        var boxes, box, sourcePath;
+        var boxes, boxChunk, box;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     util.logInfo('generateLinks');
                     boxes = pluginFacade.getFileBoxIterator();
+                    boxChunk = [] // calling ts.createProgram(..) with many files is magnitude faster than calling many times with one file
+                    ;
                     _a.label = 1;
                 case 1:
                     if (!boxes.hasNext()) return [3 /*break*/, 4];
                     box = boxes.next();
-                    sourcePath = box.getSrcPath();
-                    if (!sourcePath.endsWith('.ts')) return [3 /*break*/, 3];
-                    return [4 /*yield*/, generateOutgoingLinksForBox(box)];
+                    if (box.getSrcPath().endsWith('.ts')) {
+                        boxChunk.push(box);
+                    }
+                    if (!(boxChunk.length > 31)) return [3 /*break*/, 3];
+                    return [4 /*yield*/, generateOutgoingLinksForBoxes(boxChunk)];
                 case 2:
                     _a.sent();
+                    boxChunk = [];
                     _a.label = 3;
                 case 3: return [3 /*break*/, 1];
                 case 4:
@@ -69,19 +74,40 @@ function generateLinks() {
         });
     });
 }
-function generateOutgoingLinksForBox(box) {
+function generateOutgoingLinksForBoxes(boxes) {
     return __awaiter(this, void 0, void 0, function () {
-        var filePath, program, sourceFile, parentFilePath, importPaths;
+        var filePaths, program, _i, boxes_1, box;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    filePaths = boxes.map(function (box) { return box.getSrcPath(); });
+                    program = ts.createProgram(filePaths, {}) // TODO: blocks for about a second, use workers and run in other thread
+                    ;
+                    _i = 0, boxes_1 = boxes;
+                    _a.label = 1;
+                case 1:
+                    if (!(_i < boxes_1.length)) return [3 /*break*/, 4];
+                    box = boxes_1[_i];
+                    return [4 /*yield*/, generateOutgoingLinksForBox(box, program)];
+                case 2:
+                    _a.sent();
+                    _a.label = 3;
+                case 3:
+                    _i++;
+                    return [3 /*break*/, 1];
+                case 4: return [2 /*return*/];
+            }
+        });
+    });
+}
+function generateOutgoingLinksForBox(box, program) {
+    return __awaiter(this, void 0, void 0, function () {
+        var filePath, sourceFile, parentFilePath, importPaths;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     filePath = box.getSrcPath();
                     util.logInfo('generate outgoing links for file ' + filePath);
-                    return [4 /*yield*/, util.wait(0)]; // unblocks main-thread // TODO: still blocks too much, use workers and run in other thread
-                case 1:
-                    _a.sent(); // unblocks main-thread // TODO: still blocks too much, use workers and run in other thread
-                    program = ts.createProgram([filePath], {}) // TODO: try createProgram with multiple files, could save magnitude of time
-                    ;
                     sourceFile = program.getSourceFile(filePath);
                     if (!sourceFile) {
                         util.logError('failed to get ' + filePath + ' as SourceFile');
@@ -90,7 +116,7 @@ function generateOutgoingLinksForBox(box) {
                     parentFilePath = box.getParent().getSrcPath();
                     importPaths = extractImportPaths(sourceFile);
                     return [4 /*yield*/, addLinks(filePath, parentFilePath, importPaths)];
-                case 2:
+                case 1:
                     _a.sent();
                     return [2 /*return*/];
             }
