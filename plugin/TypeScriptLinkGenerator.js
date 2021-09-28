@@ -80,7 +80,8 @@ function generateOutgoingLinksForBox(box) {
                     return [4 /*yield*/, util.wait(0)]; // unblocks main-thread // TODO: still blocks too much, use workers and run in other thread
                 case 1:
                     _a.sent(); // unblocks main-thread // TODO: still blocks too much, use workers and run in other thread
-                    program = ts.createProgram([filePath], {});
+                    program = ts.createProgram([filePath], {}) // TODO: try createProgram with multiple files, could save magnitude of time
+                    ;
                     sourceFile = program.getSourceFile(filePath);
                     if (!sourceFile) {
                         util.logError('failed to get ' + filePath + ' as SourceFile');
@@ -108,7 +109,7 @@ function extractImportPaths(sourceFile) {
 }
 function addLinks(fromFilePath, parentFilePath, relativeToFilePaths) {
     return __awaiter(this, void 0, void 0, function () {
-        var _i, relativeToFilePaths_1, importPath, normalizedImportPath;
+        var _i, relativeToFilePaths_1, importPath, normalizedImportPath, normalizedToFilePath;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -117,8 +118,12 @@ function addLinks(fromFilePath, parentFilePath, relativeToFilePaths) {
                 case 1:
                     if (!(_i < relativeToFilePaths_1.length)) return [3 /*break*/, 4];
                     importPath = relativeToFilePaths_1[_i];
+                    if (isImportFromLibrary(importPath)) {
+                        return [3 /*break*/, 3];
+                    }
                     normalizedImportPath = normalizeRelativeImportPath(importPath);
-                    return [4 /*yield*/, pluginFacade.addLink(fromFilePath, parentFilePath + '/' + normalizedImportPath)];
+                    normalizedToFilePath = normalizePath(parentFilePath + '/' + normalizedImportPath);
+                    return [4 /*yield*/, pluginFacade.addLink(fromFilePath, normalizedToFilePath)];
                 case 2:
                     _a.sent();
                     _a.label = 3;
@@ -129,6 +134,12 @@ function addLinks(fromFilePath, parentFilePath, relativeToFilePaths) {
             }
         });
     });
+}
+function isImportFromLibrary(importPath) {
+    return !importPath.includes('/');
+}
+function normalizePath(path) {
+    return path.replaceAll(new RegExp('/[^/]+/(..)/', 'g'), '/');
 }
 function normalizeRelativeImportPath(path) {
     path = path.replaceAll('\'', '');

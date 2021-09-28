@@ -4,7 +4,7 @@ import { MenuItem } from 'electron'
 import * as util from '../dist/util'
 import * as applicationMenu from '../dist/applicationMenu'
 import * as pluginFacade from '../dist/pluginFacade'
-import { Box, FileBoxIterator } from '../dist/pluginFacade'
+import { Box, FileBoxDepthTreeIterator } from '../dist/pluginFacade'
 
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Generate links', click: generateLinks}))
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Join on GitHub (coming soon)'}))
@@ -12,7 +12,7 @@ applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label:
 async function generateLinks(): Promise<void> {
   util.logInfo('generateLinks')
 
-  const boxes: FileBoxIterator = pluginFacade.getFileBoxIterator()
+  const boxes: FileBoxDepthTreeIterator = pluginFacade.getFileBoxIterator()
   while (boxes.hasNext()) {
     const box = boxes.next()
     const sourcePath: string = box.getSrcPath()
@@ -29,7 +29,7 @@ async function generateOutgoingLinksForBox(box: Box): Promise<void> {
   util.logInfo('generate outgoing links for file '+filePath)
 
   await util.wait(0) // unblocks main-thread // TODO: still blocks too much, use workers and run in other thread
-  const program: Program = ts.createProgram([filePath], {})
+  const program: Program = ts.createProgram([filePath], {}) // TODO: try createProgram with multiple files, could save magnitude of time
   const sourceFile: SourceFile|undefined = program.getSourceFile(filePath)
   if (!sourceFile) {
     util.logError('failed to get '+ filePath +' as SourceFile')
@@ -56,9 +56,21 @@ function extractImportPaths(sourceFile: SourceFile): string[] {
 
 async function addLinks(fromFilePath: string, parentFilePath: string, relativeToFilePaths: string[]): Promise<void> {
   for (let importPath of relativeToFilePaths) {
-    let normalizedImportPath = normalizeRelativeImportPath(importPath)
-    await pluginFacade.addLink(fromFilePath, parentFilePath+'/'+normalizedImportPath)
+    if (isImportFromLibrary(importPath)) {
+      continue
+    }
+    const normalizedImportPath = normalizeRelativeImportPath(importPath)
+    const normalizedToFilePath = normalizePath(parentFilePath+'/'+normalizedImportPath)
+    await pluginFacade.addLink(fromFilePath, normalizedToFilePath)
   }
+}
+
+function isImportFromLibrary(importPath: string): boolean {
+  return !importPath.includes('/')
+}
+
+function normalizePath(path: string): string {
+  return path.replaceAll(new RegExp('/[^/]+/(..)/', 'g'), '/')
 }
 
 function normalizeRelativeImportPath(path: string): string {
