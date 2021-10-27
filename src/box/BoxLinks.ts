@@ -35,7 +35,7 @@ export class BoxLinks {
       oldManagingBox.saveMapData()
     }
 
-    public async addLink(from: WayPointData, to: WayPointData): Promise<Link> {
+    public async addLink(from: WayPointData, to: WayPointData, reorderAndSave: boolean): Promise<Link> {
       const linkData = new BoxMapLinkData(util.generateId(), [from], [to])
       this.referenceBox.getMapLinkData().push(linkData)
 
@@ -43,7 +43,9 @@ export class BoxLinks {
       this.links.push(link)
 
       await link.render()
-      await this.referenceBox.saveMapData()
+      if (reorderAndSave) {
+        await link.reorderAndSave()
+      }
 
       return link
     }
