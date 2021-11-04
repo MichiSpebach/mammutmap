@@ -220,7 +220,7 @@ export abstract class Box implements DropTarget {
     return this.mapDataFileExists
   }
 
-  private async setMapDataFileExistingAndRenderBorder(exists: boolean): Promise<void> {
+  private async setMapDataFileExistsAndRenderBorder(exists: boolean): Promise<void> {
     if (this.mapDataFileExists != exists) {
       this.mapDataFileExists = exists
       await this.border.render()
@@ -249,7 +249,7 @@ export abstract class Box implements DropTarget {
     await fileSystem.writeFile(mapDataFilePath, this.mapData.toJson())
       .then(() => {
         util.logInfo('saved ' + mapDataFilePath)
-        this.setMapDataFileExistingAndRenderBorder(true)
+        this.setMapDataFileExistsAndRenderBorder(true)
       })
       .catch(error => util.logWarning('failed to save ' + mapDataFilePath + ': ' + error))
   }
@@ -323,6 +323,10 @@ export abstract class Box implements DropTarget {
       util.logWarning('trying to register borderingLink that is already registered')
     }
     this.borderingLinks.push(link)
+    if (!this.mapDataFileExists) {
+      // otherwise managingBox of link would save linkPath with not persisted boxId
+      this.saveMapData()
+    }
   }
 
   public deregisterBorderingLink(link: Link) {
