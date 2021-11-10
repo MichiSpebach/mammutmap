@@ -2,7 +2,6 @@ import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
 import { RootFolderBox } from './box/RootFolderBox'
-import { boxManager } from './box/BoxManager'
 import { map } from './Map'
 import * as util from './util'
 import { WayPointData } from './box/WayPointData'
@@ -92,12 +91,12 @@ class BoxIterator {
 }
 
 export async function addLink(fromFilePath: string, toFilePath: string): Promise<void> {
-  const from: Box|undefined = boxManager.getBoxBySourcePathIfExists(fromFilePath)
+  const from: Box|undefined = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(fromFilePath, 'plugin')
   if (!from) {
     util.logWarning('failed to add link because file for fromFilePath "'+fromFilePath+'" was not found')
     return
   }
-  const to: Box|undefined = boxManager.getBoxBySourcePathIfExists(toFilePath)
+  const to: Box|undefined = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(toFilePath, 'plugin')
   if (!to) {
     util.logWarning('failed to add link because file for toFilePath "'+toFilePath+'" was not found')
     return

@@ -1,3 +1,4 @@
+import * as util from '../util'
 import { dom } from '../domAdapter'
 import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
@@ -58,6 +59,32 @@ export class FolderBox extends Box {
 
   public isBodyRendered(): boolean {
     return this.body.isRendered()
+  }
+
+  public async getBoxBySourcePathAndRenderIfNecessary(path: string, watcher: string): Promise<Box|undefined> {
+    //await this.renderForWatcher(watcher) // TODO: implement Box::renderForWatcher
+
+    if (!path.startsWith(this.getName())) {
+      util.logError('path '+path+' must start with name of box '+this.getName())
+    }
+
+    const remainingPath: string = path.substr(this.getName().length+1)
+    for (const box of this.getBoxes()) {
+      if (remainingPath.startsWith(box.getName())) {
+        if (remainingPath === box.getName()) {
+          return box
+        } else {
+          if (!box.isFolder()) {
+            util.logWarning(box.getSrcPath()+' is not last element in path '+path+' but is not a folder')
+            return undefined
+          }
+          return (box as FolderBox).getBoxBySourcePathAndRenderIfNecessary(remainingPath, watcher)
+        }
+      }
+    }
+
+    util.logWarning(path+' not found')
+    return undefined
   }
 
   public getBox(id: string): Box {
