@@ -7,9 +7,9 @@ import * as util from '../util'
 export abstract class BoxBody {
   private readonly referenceBox: Box
   private rendered: boolean = false
-  private renderInProgress = false
-  private rerenderAfterRenderFinished = false
-  private unrenderAfterRenderFinished = false
+  private renderInProgress: boolean = false
+  private rerenderAfterRenderFinished: boolean = false
+  private unrenderAfterRenderFinished: boolean = false
 
   public constructor(referenceBox: Box) {
     this.referenceBox = referenceBox
