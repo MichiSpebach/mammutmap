@@ -11,60 +11,28 @@ import { BoxMapData } from './BoxMapData'
 export class FolderBoxBody extends BoxBody {
   private readonly referenceFolderBox: FolderBox
   private boxes: Box[] = []
-  private rendered: boolean = false
-  private renderInProgress = false
-  private rerenderAfterRenderFinished = false
 
   public constructor(referenceBox: FolderBox) {
     super(referenceBox)
     this.referenceFolderBox = referenceBox
   }
 
-  public isRendered(): boolean {
-    return this.rendered
-  }
-
-  public async render(): Promise<void> {
-    if (this.renderInProgress) {
-      this.rerenderAfterRenderFinished = true
-      return
-    }
-    this.renderInProgress = true // TODO: make atomic with if statement
-
-    if (! await this.shouldBeRendered()) {
-      this.renderInProgress = false
-      return
-    }
-
-    if (!this.rendered) {
+  public async executeRender(): Promise<void> {
+    if (!this.isRendered()) {
       let html: string = '<div id="'+this.getId()+'"></div>'
       await renderManager.addContentTo(this.referenceFolderBox.getId(), html)
       await this.loadMapDatasAndCreateBoxes()
     }
     await this.renderBoxes()
-
-    this.rendered = true
-    this.renderInProgress = false
-
-    if (this.rerenderAfterRenderFinished) {
-      this.rerenderAfterRenderFinished = false
-      this.render()
-    }
   }
 
-  public async unrender(): Promise<void> {
-    // TODO: handle this.renderInProgress?
-    if (this.rerenderAfterRenderFinished) {
-      this.rerenderAfterRenderFinished = false
-    }
-    if (!this.rendered) {
+  public async executeUnrender(): Promise<void> {
+    if (!this.isRendered()) {
       return
     }
 
     await this.destructBoxes()
     await renderManager.remove(this.getId())
-
-    this.rendered = false
   }
 
   private async loadMapDatasAndCreateBoxes(): Promise<void> {

@@ -167,6 +167,8 @@ export abstract class Box implements DropTarget {
     await this.renderBody()
     if (this.isBodyRendered()) {
       await this.links.render()
+    } else {
+      await this.links.unrender()
     }
 
     if (!this.isRendered()) {
