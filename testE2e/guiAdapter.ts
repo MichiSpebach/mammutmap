@@ -27,6 +27,10 @@ export async function getTitle(): Promise<string> {
   return (await getPage()).title()
 }
 
+export async function takeScreenshot(): Promise<Buffer|string> {
+  return await (await getPage()).screenshot({type: 'png'})
+}
+
 async function getPage(): Promise<Page> {
   if (!page) {
     page = await init()

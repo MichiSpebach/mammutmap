@@ -49,18 +49,20 @@
     "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
     "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@types/jest": "^26.0.23",
+    "@types/jest-image-snapshot": "^4.3.1",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
     "electron": "10.1.5",
     "eslint": "^7.6.0",
     "eslint-plugin-import": "^2.20.0",
     "jest": "^27.0.6",
+    "jest-image-snapshot": "^4.5.1",
     "jest-mock-extended": "^1.0.16",
+    "puppeteer-core": "^11.0.0",
     "ts-jest": "^27.0.3",
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
-    "puppeteer-core": "^11.0.0"
+    "electron-squirrel-startup": "^1.0.0"
   }
 }
