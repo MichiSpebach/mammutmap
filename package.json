@@ -5,7 +5,8 @@
   "description": "My Electron application description",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --config ./test/jest.config.js",
+    "testE2e": "jest --config ./testE2e/jest.config.js",
     "start": "tsc && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
