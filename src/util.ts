@@ -27,7 +27,7 @@ async function log(message: string, color: string, mode: 'log'|'trace'): Promise
 
   const division: string = '<div style="color:' + color + '">' + escapeForHtml(message) + '</div>'
   await renderManager.addContentTo('log', division)
-  await renderManager.scrollToBottom('log')
+  await renderManager.scrollToBottom('terminal')
 }
 
 export function stringify(object: any): string {

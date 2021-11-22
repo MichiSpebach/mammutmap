@@ -5,7 +5,18 @@ body {
   background-color: #242832;
 }
 
-.logPanel {
+.terminal {
+  background-color: #202428;
+}
+
+.commandLine {
+  padding:0px;
+  border-style:none;
+  outline:none;
+  color:white;
+  background:none;
+}
+.commandLine:focus {
   background-color: #202428;
 }
 

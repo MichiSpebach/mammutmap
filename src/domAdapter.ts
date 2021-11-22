@@ -107,8 +107,32 @@ export class DocumentObjectModelAdapter {
     return this.executeJsOnElement(id, "classList")  // throws error: object could not be cloned
   }
 
+  public getValueOf(id: string): Promise<string> {
+    return this.executeJsOnElement(id, "value")
+  }
+
+  public setValueTo(id: string, value: string): Promise<void> {
+    return this.executeJsOnElement(id, "value='"+value+"'")
+  }
+
   public scrollToBottom(id: string): Promise<void> {
     return this.executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER")
+  }
+
+  public async addKeypressListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
+    let ipcChannelName = 'keypress_'+id
+
+    let rendererFunction: string = '(event) => {'
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+    //rendererFunction += 'console.log(event);'
+    rendererFunction += 'if (event.key === "'+key+'") {'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.target.value);'
+    rendererFunction += '}'
+    rendererFunction += '}'
+
+    await this.executeJavaScript("document.getElementById('"+id+"').onkeypress = "+rendererFunction)
+
+    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, value: string) => callback(value))
   }
 
   public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
