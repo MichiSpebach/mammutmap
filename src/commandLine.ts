@@ -22,6 +22,9 @@ async function processCommand(command: string): Promise<void> {
       await map.unloadAndUnsetMap()
       util.logInfo('closing finished')
       return
+    case 'clear':
+      await dom.setContentTo('log', '')
+      return
     default:
       util.logWarning(`unknown command ${command}`)
   }
