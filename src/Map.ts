@@ -8,7 +8,7 @@ import { HoverManager } from './HoverManager'
 import { boxManager } from './box/BoxManager'
 import { RootFolderBox } from './box/RootFolderBox'
 
-export let map: Map
+export let map: Map|undefined
 
 export function setMap(object: Map): void {
   map = object
@@ -16,11 +16,20 @@ export function setMap(object: Map): void {
 
 export async function loadAndSetMap(sourceRootPath: string, mapRootPath: string): Promise<void> {
   if (map) {
-    await map.destruct()
-    checkMapUnloaded()
-    clearManagers()
+    await unloadAndUnsetMap()
   }
   map = await Map.new('content', sourceRootPath, mapRootPath)
+}
+
+export async function unloadAndUnsetMap(): Promise<void> {
+  if (!map) {
+    util.logWarning('cannot unload map because no map is loaded')
+    return
+  }
+  await map.destruct()
+  checkMapUnloaded()
+  clearManagers()
+  map = undefined
 }
 
 function checkMapUnloaded(): void {

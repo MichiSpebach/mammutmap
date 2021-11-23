@@ -8,12 +8,21 @@ export function init(): void {
 
 async function processCommand(command: string): Promise<void> {
   const [commandName, parameter]: string[] = command.split(' ', 2)
-  if (commandName === 'open') {
-    const folderPath: string = parameter
-    util.logInfo('opening '+folderPath)
-    await dom.setValueTo('commandLine', '')
-    await map.loadAndSetMap(folderPath, folderPath+'/map')
-    return
+  dom.setValueTo('commandLine', '')
+
+  switch (commandName) {
+    case 'open':
+      const folderPath: string = parameter
+      util.logInfo('opening '+folderPath)
+      await map.loadAndSetMap(folderPath, folderPath+'/map')
+      util.logInfo('opening finished')
+      return
+    case 'close':
+      util.logInfo('closing current opened folder')
+      await map.unloadAndUnsetMap()
+      util.logInfo('closing finished')
+      return
+    default:
+      util.logWarning(`unknown command ${command}`)
   }
-  util.logWarning(`unknown command ${command}`)
 }
