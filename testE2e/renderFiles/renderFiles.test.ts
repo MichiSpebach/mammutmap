@@ -8,13 +8,8 @@ afterAll(async () => {
   await gui.resetWindow()
 })
 
-test('title of app', async () => {
-  const title: string = await gui.getTitle()
-  expect(title).toBe('FileVis')
-})
-
-test('snapshot empty window', async () => {
-  await gui.resetWindow()
+test('file with special characters', async () => {
+  await gui.openFolder('testE2e/renderFiles/scenario')
   const image = await gui.takeScreenshot()
   expect(image).toMatchImageSnapshot(snapshotOptions)
 })

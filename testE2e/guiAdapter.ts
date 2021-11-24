@@ -3,23 +3,21 @@ import { spawn } from 'child_process'
 import { Browser, Page } from 'puppeteer-core'
 import * as util from '../src/util'
 
-const electronDebugPort: number = 9200
+const electronDebugPort: number = 9291
 const timeoutForPuppeteerToConnectToElectronInMs: number = 15000
-const timeoutForPageToFullyLoadInMs: number = 10000
+const timeoutForPageToFullyLoadInMs: number = 5000
 
 let page: Page|undefined
 
-export async function ensureInit(): Promise<void> {
-  if (!page) {
-    page = await init()
-  }
+export async function startApp(): Promise<void> {
+  spawn('electron', ['.', `--remote-debugging-port=${electronDebugPort}`], {
+    shell: true
+  })
+  await connectToAppAndWaitUntilFullyLoaded()
 }
 
-export async function shutdown(): Promise<void> {
-  if (!page) {
-    throw new Error('shutdown called although not initialized')
-  }
-  await page.close()
+export async function shutdownApp(): Promise<void> {
+  await (await getPage()).close()
   page = undefined
 }
 
@@ -31,24 +29,55 @@ export async function takeScreenshot(): Promise<Buffer|string> {
   return await (await getPage()).screenshot({type: 'png'})
 }
 
+export async function openFolder(path: string): Promise<void> {
+  await command('open '+path)
+  await waitUntilLogMatches((log: string) => log.endsWith('opening finished'), 2000)
+}
+
+export async function resetWindow(): Promise<void> {
+  await command('close')
+  await waitUntilLogMatches((log: string) => log.endsWith('closing finished'), 2000)
+  await command('clear')
+  await waitUntilLogMatches((log: string) => log === '', 500)
+}
+
+async function command(command: string): Promise<void> {
+  await type('commandLine', command+'\n')
+}
+
+async function type(id: string, text: string): Promise<void> {
+  await (await getPage()).type('#'+id, text)
+}
+
+async function waitUntilLogMatches(condition:(log: string) => boolean, timelimitInMs: number): Promise<void> {
+  const timecap: number = Date.now() + timelimitInMs
+  while(!condition(await getLog())) {
+    if (Date.now() > timecap) {
+      throw new Error(`log does not match condition after timelimit of ${timelimitInMs}ms`)
+    }
+    await util.wait(50)
+  }
+}
+
+async function getLog(): Promise<string> {
+  const logElement: puppeteer.ElementHandle<Element>|null = await (await getPage()).$('#log')
+  if (!logElement) {
+    throw new Error('failed to get log')
+  }
+  return (await logElement.getProperty('innerText'))._remoteObject.value
+}
+
 async function getPage(): Promise<Page> {
   if (!page) {
-    page = await init()
+    page = await connectToAppAndWaitUntilFullyLoaded()
   }
   return page
 }
 
-async function init(): Promise<Page> {
-  startApp()
+async function connectToAppAndWaitUntilFullyLoaded(): Promise<Page> {
   let page: Page = await connectToApp()
   await waitUntilFullyLoaded(page)
   return page
-}
-
-function startApp(): void {
-  spawn('electron', ['.', `--remote-debugging-port=${electronDebugPort}`], {
-    shell: true
-  })
 }
 
 async function connectToApp(): Promise<Page> {
@@ -56,7 +85,9 @@ async function connectToApp(): Promise<Page> {
   let browser: Browser|undefined
   while (!browser) {
     try {
-      browser = await puppeteer.connect({browserURL: `http://localhost:${electronDebugPort}`})
+      browser = await puppeteer.connect({
+        browserURL: `http://localhost:${electronDebugPort}`
+      })
     } catch (error) {
       if (Date.now() > timecap) {
         throw error
@@ -70,9 +101,9 @@ async function connectToApp(): Promise<Page> {
 
 async function waitUntilFullyLoaded(page: Page): Promise<void> {
   const timecap: number = Date.now() + timeoutForPageToFullyLoadInMs
-  while(await page.title() === '') {
+  while(await page.title() === '') { // TODO: instead log.endsWith('plugins loaded')
     if (Date.now() > timecap) {
-      throw new Error(`not fully loaded until timeout of ${timeoutForPageToFullyLoadInMs}ms`)
+      throw new Error(`not fully loaded until timeout of ${timeoutForPageToFullyLoadInMs}ms, might happen when electronDebugPort is not free`)
     }
     console.log(`wait ${timecap-Date.now()}ms until fully loaded`)
     await util.wait(100)
