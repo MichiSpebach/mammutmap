@@ -17,22 +17,16 @@ export function readdir(path: string): Promise<Dirent[]> {
   return fsPromises.readdir(path, {withFileTypes: true})
 }
 
+export async function readFileAndConvertToHtml(path: string): Promise<string> {
+  return util.escapeForHtml(await readFile(path))
+}
+
 export function readFile(path: string): Promise<string> {
   return fsPromises.readFile(path, 'utf-8')
 }
 
 export function readFileSync(path: string): string {
   return fs.readFileSync(path, 'utf-8')
-}
-
-export function readFileAndConvertToHtml(path: string, callback: (dataConvertedToHtml: string) => void): void|never {
-  fs.readFile(path, 'utf-8', (err: NodeJS.ErrnoException | null, data: string) => {
-    if(err) {
-      util.logError('fileSystemAdapter::readFile, ' + path + ', ' + err.message)
-    } else {
-      callback(util.escapeForHtml(data))
-    }
-  })
 }
 
 export async function writeFile(path: string, data: string): Promise<void> {

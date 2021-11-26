@@ -16,10 +16,9 @@ export class FileBoxBody extends BoxBody {
       return
     }
 
-    fileSystem.readFileAndConvertToHtml(this.referenceFileBox.getSrcPath(), async (dataConvertedToHtml: string) => {
-      let content: string = '<pre id="'+this.getId()+'" style="margin:0px;">'+dataConvertedToHtml+'</pre>'
-      return renderManager.addContentTo(this.referenceFileBox.getId(), content)
-    })
+    const dataConvertedToHtml: string = await fileSystem.readFileAndConvertToHtml(this.referenceFileBox.getSrcPath())
+    const content: string = `<pre id="${this.getId()}" style="margin:0px;">${dataConvertedToHtml}</pre>`
+    return renderManager.addContentTo(this.referenceFileBox.getId(), content)
   }
 
   public async executeUnrender(): Promise<void> {
