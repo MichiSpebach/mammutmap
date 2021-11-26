@@ -9,6 +9,7 @@ afterAll(async () => {
 })
 
 test('file with special characters', async () => {
+  await gui.resetWindow()
   await gui.openFolder('testE2e/renderFiles/scenario')
   const image = await gui.takeScreenshot()
   expect(image).toMatchImageSnapshot(snapshotOptions)

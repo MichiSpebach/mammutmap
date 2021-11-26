@@ -5,7 +5,6 @@ import * as util from '../src/util'
 
 const electronDebugPort: number = 9291
 const timeoutForPuppeteerToConnectToElectronInMs: number = 15000
-const timeoutForPageToFullyLoadInMs: number = 5000
 
 let page: Page|undefined
 
@@ -13,7 +12,7 @@ export async function startApp(): Promise<void> {
   spawn('electron', ['.', `--remote-debugging-port=${electronDebugPort}`], {
     shell: true
   })
-  await connectToAppAndWaitUntilFullyLoaded()
+  await connectToAppAndFindCorrectPage()
 }
 
 export async function shutdownApp(): Promise<void> {
@@ -53,34 +52,41 @@ async function waitUntilLogMatches(condition:(log: string) => boolean, timelimit
   const timecap: number = Date.now() + timelimitInMs
   while(!condition(await getLog())) {
     if (Date.now() > timecap) {
-      throw new Error(`log does not match condition after timelimit of ${timelimitInMs}ms`)
+      throw new Error(`log does not match condition in time of ${timelimitInMs}ms`)
     }
     await util.wait(50)
   }
 }
 
 async function getLog(): Promise<string> {
-  const logElement: puppeteer.ElementHandle<Element>|null = await (await getPage()).$('#log')
+  const logElement: puppeteer.ElementHandle<Element>|null = await findElementInPage(await getPage(), 'log')
   if (!logElement) {
     throw new Error('failed to get log')
   }
-  return (await logElement.getProperty('innerText'))._remoteObject.value
+  return getContentOf(logElement)
+}
+
+async function findElementInPage(page: Page, elementId: string): Promise<puppeteer.ElementHandle<Element>|null> {
+  return await page.$('#'+elementId)
+}
+
+async function getContentOf(element: puppeteer.ElementHandle<Element>): Promise<string> {
+  return (await element.getProperty('innerText'))._remoteObject.value
 }
 
 async function getPage(): Promise<Page> {
   if (!page) {
-    page = await connectToAppAndWaitUntilFullyLoaded()
+    page = await connectToAppAndFindCorrectPage()
   }
   return page
 }
 
-async function connectToAppAndWaitUntilFullyLoaded(): Promise<Page> {
-  let page: Page = await connectToApp()
-  await waitUntilFullyLoaded(page)
-  return page
+async function connectToAppAndFindCorrectPage(): Promise<Page> {
+  let browser: Browser = await connectToApp()
+  return findCorrectPage(browser)
 }
 
-async function connectToApp(): Promise<Page> {
+async function connectToApp(): Promise<Browser> {
   const timecap = Date.now() + timeoutForPuppeteerToConnectToElectronInMs
   let browser: Browser|undefined
   while (!browser) {
@@ -96,16 +102,19 @@ async function connectToApp(): Promise<Page> {
       await util.wait(100)
     }
   }
-  return (await browser.pages())[0]
+  return browser
 }
 
-async function waitUntilFullyLoaded(page: Page): Promise<void> {
-  const timecap: number = Date.now() + timeoutForPageToFullyLoadInMs
-  while(await page.title() === '') { // TODO: instead log.endsWith('plugins loaded')
-    if (Date.now() > timecap) {
-      throw new Error(`not fully loaded until timeout of ${timeoutForPageToFullyLoadInMs}ms, might happen when electronDebugPort is not free`)
+async function findCorrectPage(browser: Browser): Promise<Page> {
+  const pages: Page[] = await browser.pages()
+  for (page of pages) {
+    if (await isCorrectPage(page)) {
+      return page
     }
-    console.log(`wait ${timecap-Date.now()}ms until fully loaded`)
-    await util.wait(100)
   }
+  throw new Error('browser does not contain correct page, might happen when electronDebugPort is not free')
+}
+
+async function isCorrectPage(page: Page): Promise<boolean> {
+  return await page.title() !== ''
 }
