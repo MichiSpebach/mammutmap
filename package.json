@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jest --config ./test/jest.config.js",
-    "testE2e": "jest --config ./testE2e/jest.config.js --runInBand",
+    "testE2e": "tsc && jest --config ./testE2e/jest.config.js --runInBand",
     "start": "tsc && electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",

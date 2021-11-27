@@ -54,11 +54,11 @@ export class FileBox extends Box {
   }
 
   protected async renderBody(): Promise<void> {
-    this.body.render()
+    await this.body.render()
   }
 
   protected async unrenderBody(): Promise<void> {
-    this.body.unrender()
+    await this.body.unrender()
   }
 
   public isBodyRendered(): boolean {

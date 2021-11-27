@@ -56,7 +56,10 @@ export class Map {
   private readonly mapRatioAdjusterSizePx: number = 600
 
   public static async new(idToRenderIn: string, sourceRootPath: string, mapRootPath: string): Promise<Map> {
-     return new Map(idToRenderIn, await RootFolderBox.new(sourceRootPath, mapRootPath))
+     const map = new Map(idToRenderIn, await RootFolderBox.new(sourceRootPath, mapRootPath))
+     await map.rootFolder.render()
+     dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY))
+     return map
   }
 
   private constructor(idToRenderIn: string, root: RootFolderBox) {
@@ -68,11 +71,6 @@ export class Map {
 
     //this.addBoxes()
     this.rootFolder = root
-    const renderFinished: Promise<void> = this.rootFolder.render()
-
-    renderFinished.then(() => {
-      dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY))
-    })
   }
 
   public async destruct(): Promise<void> {
