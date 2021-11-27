@@ -28,12 +28,18 @@ export async function takeScreenshot(): Promise<Buffer|string> {
   return await (await getPage()).screenshot({type: 'png'})
 }
 
+export async function zoom(delta: number): Promise<void> {
+  await (await getPage()).mouse.move(300, 300)
+  await (await getPage()).mouse.wheel({deltaY: -delta})
+}
+
 export async function openFolder(path: string): Promise<void> {
   await command('open '+path)
   await waitUntilLogMatches((log: string) => log.endsWith('opening finished'), 2000)
 }
 
 export async function resetWindow(): Promise<void> {
+  await (await getPage()).mouse.move(0, 0)
   await command('close')
   await waitUntilLogMatches((log: string) => log.endsWith('closing finished'), 2000)
   await command('clear')
