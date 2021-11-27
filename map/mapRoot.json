@@ -816,16 +816,16 @@
 				{
 					"boxId": "ffddla14d38",
 					"boxName": "index.ts",
-					"x": 20.23892221871382,
-					"y": 99.74332741011972
+					"x": 36.75524319913958,
+					"y": 99.18418896777717
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "ita04k5ms68",
-					"boxName": "menu.ts",
-					"x": 53.35193282721249,
-					"y": -0.05462909718228868
+					"boxName": "applicationMenu.ts",
+					"x": 87.10174717368962,
+					"y": 1.1246200607902737
 				}
 			]
 		},
@@ -834,17 +834,17 @@
 			"fromWayPoints": [
 				{
 					"boxId": "ita04k5ms68",
-					"boxName": "menu.ts",
-					"x": 49.69114310743728,
-					"y": 99.80335481425323
+					"boxName": "applicationMenu.ts",
+					"x": 49.50782383622887,
+					"y": 99.77963349570865
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "6o0ikrr8ru",
 					"boxName": "Map.ts",
-					"x": 38.85827327963827,
-					"y": -0.0038328861632809506
+					"x": 46.170917999711776,
+					"y": -0.16887137630171686
 				}
 			]
 		},
@@ -1131,16 +1131,16 @@
 				{
 					"boxId": "2cnbfh46bf8",
 					"boxName": "/home/michael/programming/ts-visualize-files/src",
-					"x": -14.958079268292682,
-					"y": 23.29268292682927
+					"x": -14.934559665672895,
+					"y": 20.369123702777607
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "18tbjkfri3o",
 					"boxName": "pluginFacade.ts",
-					"x": -0.04220744961485702,
-					"y": 2.4118362383461696
+					"x": -0.04236262406197047,
+					"y": 2.41776124607695
 				}
 			]
 		},
@@ -1150,16 +1150,73 @@
 				{
 					"boxId": "ua13104dlao",
 					"boxName": "pluginLoader.ts",
-					"x": 0.26359600443951164,
-					"y": 4.436396559529198
+					"x": 0.26788300028960327,
+					"y": 4.440245630609352
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "2cnbfh46bf8",
 					"boxName": "/home/michael/programming/ts-visualize-files/src",
-					"x": -15.28036052336198,
-					"y": 22.435543046690455
+					"x": -14.710742356551465,
+					"y": 19.86553475725439
+				}
+			]
+		},
+		{
+			"id": "56kjgge036g",
+			"fromWayPoints": [
+				{
+					"boxId": "5194u9gf71g",
+					"boxName": "commandLine.ts",
+					"x": 7.314820922102763,
+					"y": 97.05449189985272
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "6o0ikrr8ru",
+					"boxName": "Map.ts",
+					"x": 3.235912444865823,
+					"y": 0.1475981751498345
+				}
+			]
+		},
+		{
+			"id": "cmc9pp4r27g",
+			"fromWayPoints": [
+				{
+					"boxId": "5194u9gf71g",
+					"boxName": "commandLine.ts",
+					"x": 99.3067282908186,
+					"y": 13.792552341377656
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "5da77t8c1t8",
+					"boxName": "domAdapter.ts",
+					"x": 0.9673762438594281,
+					"y": 98.87149617764834
+				}
+			]
+		},
+		{
+			"id": "08h4ldsnhbg",
+			"fromWayPoints": [
+				{
+					"boxId": "ffddla14d38",
+					"boxName": "index.ts",
+					"x": 15.057037307676694,
+					"y": 99.49559109251233
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "5194u9gf71g",
+					"boxName": "commandLine.ts",
+					"x": 47.40044979494642,
+					"y": 0.49676454669038667
 				}
 			]
 		}
