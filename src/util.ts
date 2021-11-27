@@ -1,21 +1,33 @@
 import { exec } from 'child_process'
 import { renderManager } from './RenderManager'
 
+let logDebugActivated: boolean = false
+
 export function runShellCommand(command: string) {
   exec(command)
 }
 
+export function setLogDebugActivated(activated: boolean): void {
+  logDebugActivated = activated
+}
+
+export function logDebug(message: string): void {
+  if (logDebugActivated) {
+    log('debug: ' + message, 'grey', 'log')
+  }
+}
+
 export function logInfo(message: string): void {
-    log('Info: ' + message, 'grey', 'log')
+  log('Info: ' + message, 'grey', 'log')
 }
 
 export function logWarning(message: string): void {
-    log('WARNING: ' + message, 'orange', 'trace')
+  log('WARNING: ' + message, 'orange', 'trace')
 }
 
 export function logError(message: string): never {
-    log('ERROR: ' + message, 'red', 'trace')
-    throw new Error(message)
+  log('ERROR: ' + message, 'red', 'trace')
+  throw new Error(message)
 }
 
 async function log(message: string, color: string, mode: 'log'|'trace'): Promise<void> {

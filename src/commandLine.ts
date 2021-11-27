@@ -22,6 +22,17 @@ async function processCommand(command: string): Promise<void> {
       await map.unloadAndUnsetMap()
       util.logInfo('closing finished')
       return
+    case 'setLogDebugActivated':
+      if (parameter === 'true') {
+        util.setLogDebugActivated(true)
+        util.logInfo('activated debug logging')
+      } else if (parameter === 'false') {
+        util.setLogDebugActivated(false)
+        util.logInfo('deactivated debug logging')
+      } else {
+        util.logWarning('setLogDebugActivated expects true or false as parameter')
+      }
+      return
     case 'clear':
       await dom.setContentTo('log', '')
       return

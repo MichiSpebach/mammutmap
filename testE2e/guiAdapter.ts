@@ -13,6 +13,7 @@ export async function startApp(): Promise<void> {
     shell: true
   })
   await connectToAppAndFindCorrectPage()
+  await command('setLogDebugActivated true')
 }
 
 export async function shutdownApp(): Promise<void> {
@@ -31,6 +32,7 @@ export async function takeScreenshot(): Promise<Buffer|string> {
 export async function zoom(delta: number): Promise<void> {
   await (await getPage()).mouse.move(300, 300)
   await (await getPage()).mouse.wheel({deltaY: -delta})
+  await waitUntilLogMatches((log: string) => log.endsWith(`zooming ${delta} at x=300 and y=300 finished`), 2000)
 }
 
 export async function openFolder(path: string): Promise<void> {

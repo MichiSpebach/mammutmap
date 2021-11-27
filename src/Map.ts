@@ -105,6 +105,7 @@ export class Map {
 
     await this.updateStyle(2)
     await this.rootFolder.render()
+    util.logDebug(`zooming ${delta} at x=${clientX} and y=${clientY} finished`)
   }
 
   private async updateStyle(priority: number = 1): Promise<void> {
