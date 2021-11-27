@@ -67,15 +67,15 @@ async function waitUntilLogMatches(condition:(log: string) => boolean, timelimit
 }
 
 async function getLog(): Promise<string> {
-  const logElement: puppeteer.ElementHandle<Element>|null = await findElementInPage(await getPage(), 'log')
+  const logElement: puppeteer.ElementHandle<Element>|null = await findElement('log')
   if (!logElement) {
     throw new Error('failed to get log')
   }
   return getContentOf(logElement)
 }
 
-async function findElementInPage(page: Page, elementId: string): Promise<puppeteer.ElementHandle<Element>|null> {
-  return await page.$('#'+elementId)
+async function findElement(id: string): Promise<puppeteer.ElementHandle<Element>|null> {
+  return await (await getPage()).$('#'+id)
 }
 
 async function getContentOf(element: puppeteer.ElementHandle<Element>): Promise<string> {
