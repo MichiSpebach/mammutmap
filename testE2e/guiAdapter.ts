@@ -50,10 +50,15 @@ export async function resetWindow(): Promise<void> {
 
 async function command(command: string): Promise<void> {
   await type('commandLine', command+'\n')
+  await removeFocus()
 }
 
 async function type(id: string, text: string): Promise<void> {
   await (await getPage()).type('#'+id, text)
+}
+
+async function removeFocus(): Promise<void> {
+  await (await getPage()).mouse.click(0, 0)
 }
 
 async function waitUntilLogMatches(condition:(log: string) => boolean, timelimitInMs: number): Promise<void> {
