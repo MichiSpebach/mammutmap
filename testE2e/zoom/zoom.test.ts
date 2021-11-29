@@ -15,3 +15,24 @@ test('zoom into deep folder', async () => {
   const image = await gui.takeScreenshot()
   expect(image).toMatchImageSnapshot(snapshotOptions)
 })
+
+test('zoom in and out', async () => {
+  await gui.resetWindow()
+  await gui.openFolder('testE2e/zoom/scenario')
+  await gui.zoom(1500)
+  await gui.zoom(2500)
+  const image1 = await gui.takeScreenshot()
+  expect(image1).toMatchImageSnapshot(snapshotOptions)
+
+  await gui.zoom(-250)
+  const image2 = await gui.takeScreenshot()
+  expect(image2).toMatchImageSnapshot(snapshotOptions)
+
+  await gui.zoom(500)
+  const image3 = await gui.takeScreenshot()
+  expect(image3).toMatchImageSnapshot(snapshotOptions)
+
+  await gui.zoom(-485)
+  const image4 = await gui.takeScreenshot()
+  expect(image4).toMatchImageSnapshot(snapshotOptions)
+})

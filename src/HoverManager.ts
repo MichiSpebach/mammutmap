@@ -28,6 +28,11 @@ export class HoverManager {
 
   public static removeHoverable(hoverable: Box) {
     dom.removeEventListenerFrom(hoverable.getId(), 'mouseover')
+
+    if (this.state !== null && this.state.hovering === hoverable) {
+      this.state.onHoverOut()
+      this.state = null
+    }
   }
 
 }
