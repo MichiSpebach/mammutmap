@@ -30,9 +30,28 @@ export async function takeScreenshot(): Promise<Buffer|string> {
 }
 
 export async function zoom(delta: number): Promise<void> {
+  await zoomWithoutWaitingUntilFinished(delta)
+  await waitUntilLogMatches((log: string): boolean => log.endsWith(`zooming ${delta} at x=300 and y=300 finished`), 2000)
+}
+
+export async function zoomWithoutWaitingInBetween(deltas: number[]): Promise<void> {
+  for (const delta of deltas) {
+    await zoomWithoutWaitingUntilFinished(delta)
+  }
+  await waitUntilLogMatches((log: string): boolean => {
+    for (const delta of deltas) {
+      if (!log.includes(`zooming ${delta} at x=300 and y=300 finished`)) {
+        return false
+      }
+    }
+    return true
+  }, 2000)
+}
+
+export async function zoomWithoutWaitingUntilFinished(delta: number): Promise<void> {
   await (await getPage()).mouse.move(300, 300)
+  await (await getPage()).focus('#map') // otherwise sometimes wheel does not work immediately
   await (await getPage()).mouse.wheel({deltaY: -delta})
-  await waitUntilLogMatches((log: string) => log.endsWith(`zooming ${delta} at x=300 and y=300 finished`), 2000)
 }
 
 export async function openFolder(path: string): Promise<void> {
@@ -42,8 +61,16 @@ export async function openFolder(path: string): Promise<void> {
 
 export async function resetWindow(): Promise<void> {
   await (await getPage()).mouse.move(0, 0)
+  await closeFolder()
+  await clearTerminal()
+}
+
+export async function closeFolder(): Promise<void> {
   await command('close')
   await waitUntilLogMatches((log: string) => log.endsWith('closing finished'), 2000)
+}
+
+export async function clearTerminal(): Promise<void> {
   await command('clear')
   await waitUntilLogMatches((log: string) => log === '', 500)
 }

@@ -36,3 +36,12 @@ test('zoom in and out', async () => {
   const image4 = await gui.takeScreenshot()
   expect(image4).toMatchImageSnapshot(snapshotOptions)
 })
+
+test('zoom in and out without waiting', async () => {
+  await gui.resetWindow()
+  await gui.openFolder('testE2e/zoom/scenario')
+  await gui.zoomWithoutWaitingInBetween([1500, 2500, -250, 500, -485])
+  await gui.clearTerminal()
+  const image = await gui.takeScreenshot()
+  expect(image).toMatchImageSnapshot(snapshotOptions)
+})

@@ -58,7 +58,7 @@ export class Map {
   public static async new(idToRenderIn: string, sourceRootPath: string, mapRootPath: string): Promise<Map> {
      const map = new Map(idToRenderIn, await RootFolderBox.new(sourceRootPath, mapRootPath))
      await map.rootFolder.render()
-     dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY))
+     await dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY))
      return map
   }
 
