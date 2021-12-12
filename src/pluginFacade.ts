@@ -8,6 +8,8 @@ import { WayPointData } from './box/WayPointData'
 
 export { Box, FileBox, RootFolderBox }
 
+let watchedBoxes: Box[] = []
+
 export function getFileBoxIterator(): FileBoxDepthTreeIterator {
   return new FileBoxDepthTreeIterator(getRootFolder())
 }
@@ -29,13 +31,16 @@ export class FileBoxDepthTreeIterator {
     this.nextBox = null
   }
 
-  public hasNext(): boolean {
-    this.prepareNext()
-    return this.nextBox != null
+  public async hasNext(): Promise<boolean> {
+    await this.prepareNext()
+    if (!this.nextBox) {
+      clearWatchedBoxes() // TODO: implement better solution
+    }
+    return this.nextBox !== null
   }
 
-  public next(): FileBox|never {
-    this.prepareNext()
+  public async next(): Promise<FileBox | never> {
+    await this.prepareNext()
     if (!this.nextBox) {
       util.logError('next() was called, but there are no FileBoxes left, call hasNext() to check if next exists')
     }
@@ -45,7 +50,7 @@ export class FileBoxDepthTreeIterator {
     return nextBox;
   }
 
-  private prepareNext(): void {
+  private async prepareNext(): Promise<void> {
     if (this.nextBox || this.boxIterators.length === 0) {
       return
     }
@@ -53,17 +58,19 @@ export class FileBoxDepthTreeIterator {
     const currentBoxIterator = this.getCurrentBoxIterator()
     if (currentBoxIterator.hasNext()) {
       const nextBox: Box = currentBoxIterator.next()
+      await nextBox.addWatcherAndUpdateRender('plugin')
+      await addToWatchedBoxes([nextBox])
       if (nextBox.isFile()) {
         this.nextBox = nextBox as FileBox
       } else if (nextBox.isFolder()) {
         this.boxIterators.push(new BoxIterator((nextBox as FolderBox).getBoxes()))
-        this.prepareNext()
+        await this.prepareNext()
       } else {
         util.logError('nextBox (id '+nextBox.getId()+') is neither FileBox nor FolderBox')
       }
     } else {
       this.boxIterators.pop()
-      this.prepareNext()
+      await this.prepareNext()
     }
   }
 
@@ -77,8 +84,23 @@ class BoxIterator {
   private nextIndex: number
 
   public constructor(boxes: Box[]) {
-    this.boxes = boxes
+    this.boxes = this.sortBoxesByFilesFirst(boxes)
     this.nextIndex = 0
+  }
+
+  private sortBoxesByFilesFirst(boxes: Box[]): Box[] {
+    const fileBoxes: Box[] = []
+    const folderBoxes: Box[] = []
+
+    for (const box of boxes) {
+      if (box.isFile()) {
+        fileBoxes.push(box)
+      } else {
+        folderBoxes.push(box)
+      }
+    }
+
+    return fileBoxes.concat(folderBoxes)
   }
 
   public hasNext(): boolean {
@@ -91,12 +113,12 @@ class BoxIterator {
 }
 
 export async function addLink(fromFilePath: string, toFilePath: string): Promise<void> {
-  const from: Box|undefined = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(fromFilePath, 'plugin')
+  const from: Box|undefined = await getBoxBySourcePathAndHandleWatchedBoxes(fromFilePath)
   if (!from) {
     util.logWarning('failed to add link because file for fromFilePath "'+fromFilePath+'" was not found')
     return
   }
-  const to: Box|undefined = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(toFilePath, 'plugin')
+  const to: Box|undefined = await getBoxBySourcePathAndHandleWatchedBoxes(toFilePath)
   if (!to) {
     util.logWarning('failed to add link because file for toFilePath "'+toFilePath+'" was not found')
     return
@@ -111,4 +133,21 @@ export async function addLink(fromFilePath: string, toFilePath: string): Promise
   const toWayPoint = new WayPointData(to.getId(), to.getName(), 50, 50)
 
   await managingBox.links.addLink(fromWayPoint, toWayPoint, true)
+}
+
+async function getBoxBySourcePathAndHandleWatchedBoxes(path: string): Promise<Box | undefined> {
+  const result: {watchedBoxes: Box[], box: Box|undefined} = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(path, 'plugin')
+  await addToWatchedBoxes(result.watchedBoxes)
+  return result.box
+}
+
+async function addToWatchedBoxes(boxes: Box[]): Promise<void> {
+  watchedBoxes = watchedBoxes.concat(boxes)
+}
+
+export async function clearWatchedBoxes(): Promise<void> {
+  while (watchedBoxes.length > 0) {
+    const box: Box = watchedBoxes.pop() as Box
+    await box.removeWatcherAndUpdateRender('plugin')
+  }
 }

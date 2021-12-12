@@ -7,6 +7,7 @@ const electronDebugPort: number = 9291
 const timeoutForPuppeteerToConnectToElectronInMs: number = 15000
 
 let page: Page|undefined
+let boxIteratorLastFilePath: string|null = null
 
 export async function startApp(): Promise<void> {
   spawn('electron', ['.', `--remote-debugging-port=${electronDebugPort}`], {
@@ -31,7 +32,7 @@ export async function takeScreenshot(): Promise<Buffer|string> {
 
 export async function zoom(delta: number): Promise<void> {
   await zoomWithoutWaitingUntilFinished(delta)
-  await waitUntilLogMatches((log: string): boolean => log.endsWith(`zooming ${delta} at x=300 and y=300 finished`), 2000)
+  await waitUntilLastLogEndsWith(`zooming ${delta} at x=300 and y=300 finished`, 2000)
 }
 
 export async function zoomWithoutWaitingInBetween(deltas: number[]): Promise<void> {
@@ -56,7 +57,7 @@ export async function zoomWithoutWaitingUntilFinished(delta: number): Promise<vo
 
 export async function openFolder(path: string): Promise<void> {
   await command('open '+path)
-  await waitUntilLogMatches((log: string) => log.endsWith('opening finished'), 2000)
+  await waitUntilLastLogEndsWith('opening finished', 2000)
 }
 
 export async function resetWindow(): Promise<void> {
@@ -67,12 +68,42 @@ export async function resetWindow(): Promise<void> {
 
 export async function closeFolder(): Promise<void> {
   await command('close')
-  await waitUntilLogMatches((log: string) => log.endsWith('closing finished'), 2000)
+  await waitUntilLastLogEndsWith('closing finished', 2000)
 }
 
 export async function clearTerminal(): Promise<void> {
   await command('clear')
   await waitUntilLogMatches((log: string) => log === '', 500)
+}
+
+export async function startBoxIterator(): Promise<void> {
+  boxIteratorLastFilePath = null
+  await command('boxIterator start')
+  await waitUntilLastLogEndsWith('boxIterator ready', 500)
+}
+
+export async function getNextSourcePathOfBoxIterator(): Promise<string|undefined> {
+  await command('boxIterator printNextBox')
+  const nextBoxMarker: string = 'Info: next box is '
+  const noFurtherBoxesMarker: string = 'Info: no further boxes to iterate'
+  const getFilePathIn = (log: string) => log.substring(nextBoxMarker.length)
+
+  const lastLog: string = await waitUntilLastLogMatches((log: string) => {
+    return (log.startsWith(nextBoxMarker) && getFilePathIn(log) !== boxIteratorLastFilePath) || log === noFurtherBoxesMarker
+  }, 500)
+
+  if (lastLog.startsWith(nextBoxMarker)) {
+    boxIteratorLastFilePath = getFilePathIn(lastLog)
+    return boxIteratorLastFilePath
+  } else {
+    boxIteratorLastFilePath = null
+    return undefined
+  }
+}
+
+export async function clearWatchedBoxes(): Promise<void> {
+  await command('boxIterator clearWatchedBoxes')
+  await waitUntilLastLogEndsWith('watchedBoxes cleared', 500)
 }
 
 async function command(command: string): Promise<void> {
@@ -88,9 +119,35 @@ async function removeFocus(): Promise<void> {
   await (await getPage()).mouse.click(0, 0)
 }
 
+async function waitUntilLastLogEndsWith(ending: string, timelimitInMs: number): Promise<string> {
+  try {
+    return waitUntilLastLogMatches((log: string) => log.endsWith(ending), timelimitInMs)
+  } catch (_) {
+    throw new Error(`last log does not end with "${ending}" in time of ${timelimitInMs}ms`)
+  }
+}
+
+async function waitUntilLastLogMatches(condition:(log: string) => boolean, timelimitInMs: number): Promise<string> {
+  const timecap: number = Date.now() + timelimitInMs
+  while(true) {
+    const lastLog: string = await getLastLog()
+    if (condition(lastLog)) {
+      return lastLog
+    }
+    if (Date.now() > timecap) {
+      throw new Error(`last log does not match condition in time of ${timelimitInMs}ms`)
+    }
+    await util.wait(50)
+  }
+}
+
 async function waitUntilLogMatches(condition:(log: string) => boolean, timelimitInMs: number): Promise<void> {
   const timecap: number = Date.now() + timelimitInMs
-  while(!condition(await getLog())) {
+  while(true) {
+    const log: string = await getContentOf(await getLog())
+    if (condition(log)) {
+      return
+    }
     if (Date.now() > timecap) {
       throw new Error(`log does not match condition in time of ${timelimitInMs}ms`)
     }
@@ -98,12 +155,20 @@ async function waitUntilLogMatches(condition:(log: string) => boolean, timelimit
   }
 }
 
-async function getLog(): Promise<string> {
+async function getLastLog(): Promise<string> {
+  const logs: puppeteer.ElementHandle<Element>[] = await (await getLog()).$x('div')
+  if (logs.length === 0) {
+    return ''
+  }
+  return getContentOf(logs[logs.length-1])
+}
+
+async function getLog(): Promise<puppeteer.ElementHandle<Element>> {
   const logElement: puppeteer.ElementHandle<Element>|null = await findElement('log')
   if (!logElement) {
     throw new Error('failed to get log')
   }
-  return getContentOf(logElement)
+  return logElement
 }
 
 async function findElement(id: string): Promise<puppeteer.ElementHandle<Element>|null> {

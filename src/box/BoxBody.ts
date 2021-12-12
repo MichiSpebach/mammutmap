@@ -84,12 +84,16 @@ export abstract class BoxBody {
   public abstract executeUnrender(): Promise<void>
 
   private async shouldBeRendered(): Promise<boolean> {
+    if (this.referenceBox.hasWatchers()) {
+      return true
+    }
+
     const boxRect: Rect = await renderManager.getClientRectOf(this.referenceBox.getId())
     return this.isRectLargeEnoughToRender(boxRect) && this.isRectInsideScreen(boxRect)
   }
 
   private async shouldBeUnrendered(): Promise<boolean> {
-    if (this.referenceBox.isRoot()) {
+    if (this.referenceBox.isRoot() || this.referenceBox.hasWatchers()) {
       return false
     }
     const boxRect: Rect = await renderManager.getClientRectOf(this.referenceBox.getId())

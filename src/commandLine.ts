@@ -1,6 +1,7 @@
 import { dom } from './domAdapter'
 import * as map from './Map'
 import * as util from './util'
+import * as commandLineBoxIterator from './commandLineBoxIterator'
 
 export function init(): void {
   dom.addKeypressListenerTo('commandLine', 'Enter', processCommand)
@@ -35,6 +36,9 @@ async function processCommand(command: string): Promise<void> {
       return
     case 'clear':
       await dom.setContentTo('log', '')
+      return
+    case 'boxIterator':
+      await commandLineBoxIterator.processCommand(parameter)
       return
     default:
       util.logWarning(`unknown command ${command}`)

@@ -26,6 +26,7 @@ export abstract class Box implements DropTarget {
   public readonly links: BoxLinks
   private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
   private rendered: boolean = false
+  private watchers: string[] = []
   private dragOver: boolean = false
   private unsavedChanges: boolean = false
 
@@ -154,6 +155,20 @@ export abstract class Box implements DropTarget {
     return tempCoords
   }
 
+  public async addWatcherAndUpdateRender(watcher: string): Promise<void> {
+    this.watchers.push(watcher)
+    await this.render()
+  }
+
+  public async removeWatcherAndUpdateRender(watcher: string): Promise<void> {
+    this.watchers.splice(this.watchers.indexOf(watcher), 1)
+    await this.render()
+  }
+
+  public hasWatchers(): boolean {
+    return this.watchers.length !== 0
+  }
+
   public async render(): Promise<void> {
     if (!this.isRendered()) {
       this.renderStyle()
@@ -181,6 +196,9 @@ export abstract class Box implements DropTarget {
   }
 
   public async unrender(): Promise<void> {
+    if (this.hasWatchers()) {
+      util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
+    }
     if (!this.isRendered()) {
       return
     }

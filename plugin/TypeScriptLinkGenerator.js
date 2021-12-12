@@ -54,20 +54,23 @@ function generateLinks() {
                     boxChunk = [] // calling ts.createProgram(..) with many files is magnitude faster than calling many times with one file
                     ;
                     _a.label = 1;
-                case 1:
-                    if (!boxes.hasNext()) return [3 /*break*/, 4];
-                    box = boxes.next();
+                case 1: return [4 /*yield*/, boxes.hasNext()];
+                case 2:
+                    if (!_a.sent()) return [3 /*break*/, 6];
+                    return [4 /*yield*/, boxes.next()];
+                case 3:
+                    box = _a.sent();
                     if (box.getSrcPath().endsWith('.ts')) {
                         boxChunk.push(box);
                     }
-                    if (!(boxChunk.length > 31)) return [3 /*break*/, 3];
+                    if (!(boxChunk.length > 31)) return [3 /*break*/, 5];
                     return [4 /*yield*/, generateOutgoingLinksForBoxes(boxChunk)];
-                case 2:
+                case 4:
                     _a.sent();
                     boxChunk = [];
-                    _a.label = 3;
-                case 3: return [3 /*break*/, 1];
-                case 4:
+                    _a.label = 5;
+                case 5: return [3 /*break*/, 1];
+                case 6:
                     util.logInfo('generateLinks finished');
                     return [2 /*return*/];
             }

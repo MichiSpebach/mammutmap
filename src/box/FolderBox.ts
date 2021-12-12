@@ -61,8 +61,8 @@ export class FolderBox extends Box {
     return this.body.isRendered()
   }
 
-  public async getBoxBySourcePathAndRenderIfNecessary(path: string, watcher: string): Promise<Box|undefined> {
-    //await this.renderForWatcher(watcher) // TODO: implement Box::renderForWatcher
+  public async getBoxBySourcePathAndRenderIfNecessary(path: string, watcher: string): Promise<{watchedBoxes: Box[], box: Box|undefined}> {
+    await this.addWatcherAndUpdateRender(watcher)
 
     if (!path.startsWith(this.getName())) {
       util.logError('path '+path+' must start with name of box '+this.getName())
@@ -72,19 +72,22 @@ export class FolderBox extends Box {
     for (const box of this.getBoxes()) {
       if (remainingPath.startsWith(box.getName())) {
         if (remainingPath === box.getName()) {
-          return box
+          await box.addWatcherAndUpdateRender(watcher)
+          return {watchedBoxes: [this, box], box}
         } else {
           if (!box.isFolder()) {
             util.logWarning(box.getSrcPath()+' is not last element in path '+path+' but is not a folder')
-            return undefined
+            return {watchedBoxes: [this], box: undefined}
           }
-          return (box as FolderBox).getBoxBySourcePathAndRenderIfNecessary(remainingPath, watcher)
+          const result: {watchedBoxes: Box[], box: Box|undefined} = await (box as FolderBox).getBoxBySourcePathAndRenderIfNecessary(remainingPath, watcher)
+          result.watchedBoxes.unshift(this)
+          return {watchedBoxes: result.watchedBoxes, box: result.box}
         }
       }
     }
 
     util.logWarning(path+' not found')
-    return undefined
+    return {watchedBoxes: [this], box: undefined}
   }
 
   public getBox(id: string): Box {
