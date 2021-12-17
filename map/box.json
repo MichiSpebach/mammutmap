@@ -650,6 +650,44 @@
 					"y": 99.67533973377857
 				}
 			]
+		},
+		{
+			"id": "eljcn0173co",
+			"fromWayPoints": [
+				{
+					"boxId": "vn8ji2a9l2g",
+					"boxName": "BoxWatcher.ts",
+					"x": 46.88156972669937,
+					"y": 98.72899308007344
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "asn5cru6lo8",
+					"boxName": "BoxManager.ts",
+					"x": 34.8199879590608,
+					"y": -0.031666613888976854
+				}
+			]
+		},
+		{
+			"id": "b9qqgs7kn3o",
+			"fromWayPoints": [
+				{
+					"boxId": "vn8ji2a9l2g",
+					"boxName": "BoxWatcher.ts",
+					"x": 99.64675658317277,
+					"y": 51.40845070422535
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": -0.017543859649122806,
+					"y": 15.094520220148361
+				}
+			]
 		}
 	]
 }

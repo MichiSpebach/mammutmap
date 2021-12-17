@@ -26,13 +26,22 @@ export class FolderBoxBody extends BoxBody {
     await this.renderBoxes()
   }
 
-  public async executeUnrender(): Promise<void> {
+  public async executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
     if (!this.isRendered()) {
-      return
+      return {rendered: false}
     }
 
-    await this.destructBoxes()
-    await renderManager.remove(this.getId())
+    let rendered: boolean = false
+    await Promise.all(this.boxes.map(async (box: Box): Promise<void> => {
+      if ((await box.unrenderIfPossible(force)).rendered) {
+        rendered = true
+      }
+    }))
+    if (!rendered) {
+      await this.destructBoxes()
+      await renderManager.remove(this.getId())
+    }
+    return {rendered: rendered}
   }
 
   private async loadMapDatasAndCreateBoxes(): Promise<void> {

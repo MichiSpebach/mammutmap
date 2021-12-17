@@ -5,10 +5,11 @@ import { RootFolderBox } from './box/RootFolderBox'
 import { map } from './Map'
 import * as util from './util'
 import { WayPointData } from './box/WayPointData'
+import { BoxWatcher } from './box/BoxWatcher'
 
 export { Box, FileBox, RootFolderBox }
 
-let watchedBoxes: Box[] = []
+let boxWatchers: BoxWatcher[] = []
 
 export function getFileBoxIterator(): FileBoxDepthTreeIterator {
   return new FileBoxDepthTreeIterator(getRootFolder())
@@ -58,8 +59,7 @@ export class FileBoxDepthTreeIterator {
     const currentBoxIterator = this.getCurrentBoxIterator()
     if (currentBoxIterator.hasNext()) {
       const nextBox: Box = currentBoxIterator.next()
-      await nextBox.addWatcherAndUpdateRender('plugin')
-      await addToWatchedBoxes([nextBox])
+      await addWatcherAndUpdateRenderFor(nextBox)
       if (nextBox.isFile()) {
         this.nextBox = nextBox as FileBox
       } else if (nextBox.isFolder()) {
@@ -113,12 +113,12 @@ class BoxIterator {
 }
 
 export async function addLink(fromFilePath: string, toFilePath: string): Promise<void> {
-  const from: Box|undefined = await getBoxBySourcePathAndHandleWatchedBoxes(fromFilePath)
+  const from: Box|undefined = await getBoxBySourcePathAndAddBoxWatcher(fromFilePath)
   if (!from) {
     util.logWarning('failed to add link because file for fromFilePath "'+fromFilePath+'" was not found')
     return
   }
-  const to: Box|undefined = await getBoxBySourcePathAndHandleWatchedBoxes(toFilePath)
+  const to: Box|undefined = await getBoxBySourcePathAndAddBoxWatcher(toFilePath)
   if (!to) {
     util.logWarning('failed to add link because file for toFilePath "'+toFilePath+'" was not found')
     return
@@ -135,19 +135,22 @@ export async function addLink(fromFilePath: string, toFilePath: string): Promise
   await managingBox.links.addLink(fromWayPoint, toWayPoint, true)
 }
 
-async function getBoxBySourcePathAndHandleWatchedBoxes(path: string): Promise<Box | undefined> {
-  const result: {watchedBoxes: Box[], box: Box|undefined} = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(path, 'plugin')
-  await addToWatchedBoxes(result.watchedBoxes)
-  return result.box
+async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
+  const boxWatcher = new BoxWatcher(box)
+  await box.addWatcherAndUpdateRender(boxWatcher)
+  boxWatchers.push(boxWatcher)
 }
 
-async function addToWatchedBoxes(boxes: Box[]): Promise<void> {
-  watchedBoxes = watchedBoxes.concat(boxes)
+async function getBoxBySourcePathAndAddBoxWatcher(path: string): Promise<Box|undefined> {
+  const boxWatcher: BoxWatcher|undefined = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(path)
+  if (boxWatcher) {
+    boxWatchers.push(boxWatcher)
+  }
+  return boxWatcher?.get()
 }
 
 export async function clearWatchedBoxes(): Promise<void> {
-  while (watchedBoxes.length > 0) {
-    const box: Box = watchedBoxes.pop() as Box
-    await box.removeWatcherAndUpdateRender('plugin')
+  while (boxWatchers.length > 0) {
+    boxWatchers.shift()?.unwatch()
   }
 }

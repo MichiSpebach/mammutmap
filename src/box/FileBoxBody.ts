@@ -21,11 +21,12 @@ export class FileBoxBody extends BoxBody {
     return renderManager.addContentTo(this.referenceFileBox.getId(), content)
   }
 
-  public async executeUnrender(): Promise<void> {
+  public async executeUnrenderIfPossible(): Promise<{rendered: boolean}> {
     if (!this.isRendered()) {
-      return
+      return {rendered: false}
     }
     await renderManager.remove(this.getId())
+    return {rendered: false}
   }
 
 }

@@ -10,6 +10,7 @@ export abstract class BoxBody {
   private renderInProgress: boolean = false
   private rerenderAfterRenderFinished: boolean = false
   private unrenderAfterRenderFinished: boolean = false
+  private unrenderAfterRenderFinishedForce?: boolean
 
   public constructor(referenceBox: Box) {
     this.referenceBox = referenceBox
@@ -33,7 +34,8 @@ export abstract class BoxBody {
     if (! await this.shouldBeRendered()) {
       this.renderInProgress = false
       if (await this.shouldBeUnrendered()) {
-        await this.unrender()
+        await this.unrenderIfPossible()
+        // TODO: if unrendered, then it could be possible, that parent should be unrendered too
       }
       return
     }
@@ -46,24 +48,25 @@ export abstract class BoxBody {
     await this.rerenderIfNecessary()
   }
 
-  public async unrender(): Promise<void> {
+  public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
     if (this.renderInProgress) {
-      this.scheduleRerender(false)
-      return // TODO: should return promise that resolves when current render operation and scheduled rerender operation are finished
+      this.scheduleRerender(false, force)
+      return {rendered: this.rendered} // TODO: should return promise that resolves when current render operation and scheduled rerender operation are finished
     }
     this.renderInProgress = true // TODO: make atomic with if statement
 
-    await this.executeUnrender()
+    this.rendered = (await this.executeUnrenderIfPossible(force)).rendered
 
-    this.rendered = false
     this.renderInProgress = false
 
     await this.rerenderIfNecessary()
+    return {rendered: this.rendered}
   }
 
-  private scheduleRerender(render: boolean): void {
+  private scheduleRerender(render: boolean, forceIfUnrender?: boolean): void {
     this.rerenderAfterRenderFinished = render
     this.unrenderAfterRenderFinished = !render
+    this.unrenderAfterRenderFinishedForce = forceIfUnrender
   }
 
   private async rerenderIfNecessary(): Promise<void> {
@@ -75,13 +78,13 @@ export abstract class BoxBody {
       await this.render()
     } else if (this.unrenderAfterRenderFinished) {
       this.unrenderAfterRenderFinished = false
-      await this.unrender()
+      await this.unrenderIfPossible(this.unrenderAfterRenderFinishedForce)
     }
   }
 
   public abstract executeRender(): Promise<void>
 
-  public abstract executeUnrender(): Promise<void>
+  public abstract executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}>
 
   private async shouldBeRendered(): Promise<boolean> {
     if (this.referenceBox.hasWatchers()) {

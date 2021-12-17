@@ -57,8 +57,8 @@ export class FileBox extends Box {
     await this.body.render()
   }
 
-  protected async unrenderBody(): Promise<void> {
-    await this.body.unrender()
+  protected async unrenderBodyIfPossible(): Promise<{rendered: boolean}> {
+    return this.body.unrenderIfPossible()
   }
 
   public isBodyRendered(): boolean {

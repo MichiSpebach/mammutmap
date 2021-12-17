@@ -15,6 +15,7 @@ import { WayPointData } from './WayPointData'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 import { HoverManager } from '../HoverManager'
+import { BoxWatcher } from './BoxWatcher'
 
 export abstract class Box implements DropTarget {
   private name: string
@@ -26,7 +27,7 @@ export abstract class Box implements DropTarget {
   public readonly links: BoxLinks
   private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
   private rendered: boolean = false
-  private watchers: string[] = []
+  private watchers: BoxWatcher[] = []
   private dragOver: boolean = false
   private unsavedChanges: boolean = false
 
@@ -43,7 +44,10 @@ export abstract class Box implements DropTarget {
   }
 
   public async destruct(): Promise<void> {
-    await this.unrender()
+    if (this.isRendered()) {
+      util.logWarning('destruct called on rendered box '+this.getSrcPath()+', box should be unrendered before')
+      await this.unrenderIfPossible(true)
+    }
     boxManager.removeBox(this)
   }
 
@@ -155,14 +159,18 @@ export abstract class Box implements DropTarget {
     return tempCoords
   }
 
-  public async addWatcherAndUpdateRender(watcher: string): Promise<void> {
+  public async addWatcherAndUpdateRender(watcher: BoxWatcher): Promise<void> {
     this.watchers.push(watcher)
     await this.render()
   }
 
-  public async removeWatcherAndUpdateRender(watcher: string): Promise<void> {
-    this.watchers.splice(this.watchers.indexOf(watcher), 1)
+  public async removeWatcherAndUpdateRender(watcher: BoxWatcher): Promise<void> {
+    this.removeWatcher(watcher)
     await this.render()
+  }
+
+  protected removeWatcher(watcher: BoxWatcher): void {
+    this.watchers.splice(this.watchers.indexOf(watcher), 1)
   }
 
   public hasWatchers(): boolean {
@@ -195,12 +203,18 @@ export abstract class Box implements DropTarget {
     this.rendered = true
   }
 
-  public async unrender(): Promise<void> {
-    if (this.hasWatchers()) {
-      util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
-    }
+  public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
     if (!this.isRendered()) {
-      return
+      return {rendered: false}
+    }
+    if ((await this.unrenderBodyIfPossible(force)).rendered) {
+      return {rendered: true}
+    }
+    if (this.hasWatchers()) {
+      if (!force) {
+        return {rendered: true}
+      }
+      util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
     }
 
     DragManager.removeDropTarget(this)
@@ -208,12 +222,12 @@ export abstract class Box implements DropTarget {
 
     await this.header.unrender()
     await this.border.unrender()
-    await this.unrenderBody()
     await this.links.unrender()
     //await this.borderingLinks.updateLinkEnds() // TODO: otherwise links reference to not existing borderingBoxes
     await this.unrenderAdditional()
 
     this.rendered = false
+    return {rendered: false}
   }
 
   private renderAndRegisterBorderingLinks(): void {
@@ -328,7 +342,7 @@ export abstract class Box implements DropTarget {
 
   protected abstract renderBody(): Promise<void>
 
-  protected abstract unrenderBody(): Promise<void>
+  protected abstract unrenderBodyIfPossible(force?: boolean): Promise<{rendered: boolean}>
 
   protected abstract isBodyRendered(): boolean
 
