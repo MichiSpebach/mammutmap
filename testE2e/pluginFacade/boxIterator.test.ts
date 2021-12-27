@@ -10,16 +10,16 @@ afterAll(async () => {
 
 test('iterate over boxes', async () => {
   await gui.resetWindow()
-  await gui.openFolder('testE2e/boxIterator/scenario')
+  await gui.openFolder('testE2e/pluginFacade/scenario')
   await gui.startBoxIterator()
 
   await gui.getNextSourcePathOfBoxIterator()
   expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
 
-  await iterateOverBoxesUntilFile('testE2e/boxIterator/scenario/c/a/a')
+  await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/c/a/a')
   expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
 
-  await iterateOverBoxesUntilFile('testE2e/boxIterator/scenario/b/a/a')
+  await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/b/a/a')
   expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
 
   expect(await gui.getNextSourcePathOfBoxIterator()).toBeUndefined()

@@ -33,9 +33,8 @@ export abstract class BoxBody {
 
     if (! await this.shouldBeRendered()) {
       this.renderInProgress = false
-      if (await this.shouldBeUnrendered()) {
+      if (this.isRendered() && await this.shouldBeUnrendered()) {
         await this.unrenderIfPossible()
-        // TODO: if unrendered, then it could be possible, that parent should be unrendered too
       }
       return
     }

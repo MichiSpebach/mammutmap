@@ -166,7 +166,13 @@ export abstract class Box implements DropTarget {
 
   public async removeWatcherAndUpdateRender(watcher: BoxWatcher): Promise<void> {
     this.removeWatcher(watcher)
-    await this.render()
+
+    for (let box: Box = this; !box.isRoot(); box = box.getParent()) {
+      await box.render()
+      if (box.isBodyRendered()) {
+        break
+      }
+    }
   }
 
   protected removeWatcher(watcher: BoxWatcher): void {

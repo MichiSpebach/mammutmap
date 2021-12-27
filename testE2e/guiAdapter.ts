@@ -78,12 +78,12 @@ export async function clearTerminal(): Promise<void> {
 
 export async function startBoxIterator(): Promise<void> {
   boxIteratorLastFilePath = null
-  await command('boxIterator start')
+  await command('pluginFacade start')
   await waitUntilLastLogEndsWith('boxIterator ready', 500)
 }
 
 export async function getNextSourcePathOfBoxIterator(): Promise<string|undefined> {
-  await command('boxIterator printNextBox')
+  await command('pluginFacade printNextBox')
   const nextBoxMarker: string = 'Info: next box is '
   const noFurtherBoxesMarker: string = 'Info: no further boxes to iterate'
   const getFilePathIn = (log: string) => log.substring(nextBoxMarker.length)
@@ -102,8 +102,18 @@ export async function getNextSourcePathOfBoxIterator(): Promise<string|undefined
 }
 
 export async function clearWatchedBoxes(): Promise<void> {
-  await command('boxIterator clearWatchedBoxes')
+  await command('pluginFacade clearWatchedBoxes')
   await waitUntilLastLogEndsWith('watchedBoxes cleared', 500)
+}
+
+export async function watchBox(sourcePath: string): Promise<void> {
+  await command('pluginFacade watchBox '+sourcePath)
+  await waitUntilLastLogEndsWith('watching '+sourcePath, 500)
+}
+
+export async function unwatchBox(sourcePath: string): Promise<void> {
+  await command('pluginFacade unwatchBox '+sourcePath)
+  await waitUntilLastLogEndsWith('unwatched '+sourcePath, 500)
 }
 
 async function command(command: string): Promise<void> {

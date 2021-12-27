@@ -1,14 +1,14 @@
 import { dom } from './domAdapter'
 import * as map from './Map'
 import * as util from './util'
-import * as commandLineBoxIterator from './commandLineBoxIterator'
+import * as commandLinePluginFacade from './commandLinePluginFacade'
 
 export function init(): void {
   dom.addKeypressListenerTo('commandLine', 'Enter', processCommand)
 }
 
 async function processCommand(command: string): Promise<void> {
-  const [commandName, parameter]: string[] = command.split(' ', 2)
+  const [commandName, parameter]: string[] = command.split(/ (.+)/, 2)
   dom.setValueTo('commandLine', '')
 
   switch (commandName) {
@@ -37,8 +37,8 @@ async function processCommand(command: string): Promise<void> {
     case 'clear':
       await dom.setContentTo('log', '')
       return
-    case 'boxIterator':
-      await commandLineBoxIterator.processCommand(parameter)
+    case 'pluginFacade':
+      await commandLinePluginFacade.processCommand(parameter)
       return
     default:
       util.logWarning(`unknown command ${command}`)

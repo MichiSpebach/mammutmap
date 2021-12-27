@@ -1233,7 +1233,7 @@
 			"toWayPoints": [
 				{
 					"boxId": "8k5lfaulrs8",
-					"boxName": "commandLineBoxIterator.ts",
+					"boxName": "commandLinePluginFacade.ts",
 					"x": 48.267732983199544,
 					"y": 0.022318107424490405
 				}
@@ -1244,7 +1244,7 @@
 			"fromWayPoints": [
 				{
 					"boxId": "8k5lfaulrs8",
-					"boxName": "commandLineBoxIterator.ts",
+					"boxName": "commandLinePluginFacade.ts",
 					"x": 19.77792920992504,
 					"y": 98.97571699810132
 				}
