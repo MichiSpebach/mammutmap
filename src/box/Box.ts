@@ -188,10 +188,11 @@ export abstract class Box implements DropTarget {
       this.renderStyle()
 
       const headerHtml = `<div id="${this.header.getId()}"></div>`
-      const borderHtml = `<div id="${this.border.getId()}"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}"></div>`
+      const headerAndBodyHtml = `<div style="width:100%;height:100%;overflow:hidden;">${headerHtml+bodyHtml}</div>`
+      const borderHtml = `<div id="${this.border.getId()}"></div>`
       const linksHtml = `<div id="${this.links.getId()}"></div>`
-      await renderManager.setContentTo(this.getId(), headerHtml+borderHtml+bodyHtml+linksHtml)
+      await renderManager.setContentTo(this.getId(), headerAndBodyHtml+borderHtml+linksHtml)
 
       await this.header.render()
       await this.border.render()
@@ -310,14 +311,12 @@ export abstract class Box implements DropTarget {
   }
 
   protected async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    const basicStyle: string = 'display:inline-block;position:absolute;overflow:' + this.getOverflow() + ';'
+    const basicStyle: string = 'display:inline-block;position:absolute;overflow:visible;'
     const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
     return renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle, priority)
   }
-
-  protected abstract getOverflow(): 'hidden'|'visible'
 
   public async updateMeasuresAndBorderingLinks(
     measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},

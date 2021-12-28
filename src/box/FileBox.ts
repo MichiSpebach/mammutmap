@@ -28,10 +28,6 @@ export class FileBox extends Box {
     return true
   }
 
-  protected getOverflow(): 'hidden' {
-    return 'hidden'
-  }
-
   protected getAdditionalStyle(): null {
     return null
   }

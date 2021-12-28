@@ -3,6 +3,8 @@ interface Style {
   getHighlightBoxClass(): string
   getFileBoxClass(): string
   getFolderBoxClass(): string
+  getFileBoxHeaderClass(): string
+  getFolderBoxHeaderClass(): string
   getBoxBorderLineClass(mapDataFileExisting: boolean): string
   getHighlightClass(): string
   getLinkColor(): string
@@ -20,6 +22,14 @@ class DarkTheme implements Style {
 
   public getFolderBoxClass(): string {
     return 'folderBox'
+  }
+
+  public getFileBoxHeaderClass(): string {
+    return 'fileBoxHeader'
+  }
+
+  public getFolderBoxHeaderClass(): string {
+    return 'folderBoxHeader'
   }
 
   public getBoxBorderLineClass(mapDataFileExisting: boolean): string {
