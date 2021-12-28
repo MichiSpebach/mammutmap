@@ -14,6 +14,10 @@ export class BoxLinks {
       this.referenceBox = referenceBox
     }
 
+    public getId(): string {
+      return this.referenceBox.getId()+'Links'
+    }
+
     public static changeManagingBoxOfLinkAndSave(oldManagingBox: Box, newManagingBox: Box, link: Link): void {
       if (link.getManagingBox() !== newManagingBox) {
         util.logWarning('baseBox/managingBox '+newManagingBox.getSrcPath()+' of given link '+link.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
@@ -42,6 +46,7 @@ export class BoxLinks {
       const link: Link = new Link(linkData, this.referenceBox)
       this.links.push(link)
 
+      await this.addPlaceholderFor(link)
       await link.render()
       if (reorderAndSave) {
         await link.reorderAndSave()
@@ -50,7 +55,7 @@ export class BoxLinks {
       return link
     }
 
-    public async render(): Promise<void> { // TODO: render all links in one html-element like header is rendered in <boxId>header
+    public async render(): Promise<void> {
       if (this.rendered) {
         return
       }
@@ -60,10 +65,19 @@ export class BoxLinks {
       })
 
       await Promise.all(this.links.map(async (link: Link) => {
+        await this.addPlaceholderFor(link)
         await link.render()
       }))
 
       this.rendered = true
+    }
+
+    private async addPlaceholderFor(link: Link): Promise<void> {
+      await renderManager.addContentTo(this.getId(), '<div id="'+link.getId()+'"></div>')
+    }
+
+    private async removePlaceholderFor(link: Link): Promise<void> {
+      await renderManager.remove(link.getId())
     }
 
     public async unrender(): Promise<void> {
@@ -73,6 +87,7 @@ export class BoxLinks {
 
       await Promise.all(this.links.map(async (link: Link) => {
         await link.unrender()
+        await this.removePlaceholderFor(link)
       }))
       this.links = []
 

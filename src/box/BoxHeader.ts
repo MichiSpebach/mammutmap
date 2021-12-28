@@ -15,7 +15,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public getId(): string {
-    return this.referenceBox.getId() + 'header'
+    return this.referenceBox.getId()+'Header'
   }
 
   public getDropTargetAtDragStart(): FolderBox {
@@ -27,10 +27,10 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async render(): Promise<void> {
-    let html: string = '<div id="' + this.getId() + '" draggable="true">'
+    let html: string = '<div draggable="true">'
     html += this.referenceBox.getName()
     html += '</div>'
-    await renderManager.setContentTo(this.referenceBox.getId(), html)
+    await renderManager.setContentTo(this.getId(), html)
 
     DragManager.addDraggable(this)
   }

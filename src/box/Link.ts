@@ -57,7 +57,6 @@ export class Link {
     this.deregisterAtBorderingBoxes()
     this.from.unrender()
     this.to.unrender()
-    renderManager.remove(this.getId())
 
     this.rendered = false
   }
@@ -95,14 +94,14 @@ export class Link {
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
-    const lineHtml: string = '<line id="'+this.getId()+'line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;"/>'
+    const lineHtml: string = '<line id="'+this.getId()+'Line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;"/>'
 
     let linePromise: Promise<void>
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
       const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
-      await renderManager.addContentTo(this.managingBox.getId(), '<div id="'+this.getId()+'">'+svgHtml+fromHtml+toHtml+'</div>')
+      await renderManager.setContentTo(this.getId(), svgHtml+fromHtml+toHtml)
       linePromise = renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;')
       this.registerAtBorderingBoxes()
       this.rendered = true
@@ -124,9 +123,9 @@ export class Link {
     }
 
     if (highlight) {
-      renderManager.addClassTo(this.getId()+'line', style.getHighlightClass())
+      renderManager.addClassTo(this.getId()+'Line', style.getHighlightClass())
     } else {
-      renderManager.removeClassFrom(this.getId()+'line', style.getHighlightClass())
+      renderManager.removeClassFrom(this.getId()+'Line', style.getHighlightClass())
     }
     this.to.setHighlight(highlight)
     this.from.setHighlight(highlight)

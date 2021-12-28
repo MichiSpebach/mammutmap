@@ -187,7 +187,12 @@ export abstract class Box implements DropTarget {
     if (!this.isRendered()) {
       this.renderStyle()
 
-      // TODO: add placeholders before so that render order does no longer matter?
+      const headerHtml = `<div id="${this.header.getId()}"></div>`
+      const borderHtml = `<div id="${this.border.getId()}"></div>`
+      const bodyHtml = `<div id="${this.getBodyId()}"></div>`
+      const linksHtml = `<div id="${this.links.getId()}"></div>`
+      await renderManager.setContentTo(this.getId(), headerHtml+borderHtml+bodyHtml+linksHtml)
+
       await this.header.render()
       await this.border.render()
       this.renderAndRegisterBorderingLinks()
@@ -345,6 +350,8 @@ export abstract class Box implements DropTarget {
   protected abstract renderAdditional(): Promise<void>
 
   protected abstract unrenderAdditional(): Promise<void>
+
+  protected abstract getBodyId(): string
 
   protected abstract renderBody(): Promise<void>
 

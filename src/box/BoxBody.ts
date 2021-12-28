@@ -21,7 +21,7 @@ export abstract class BoxBody {
   }
 
   public getId(): string {
-    return this.referenceBox.getId()+'body'
+    return this.referenceBox.getId()+'Body'
   }
 
   public async render(): Promise<void> { // TODO: make sure only one thread is in this method (semaphore)

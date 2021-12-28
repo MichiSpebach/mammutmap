@@ -53,6 +53,10 @@ export class FileBox extends Box {
     dom.removeEventListenerFrom(this.getId(), 'contextmenu')
   }
 
+  protected getBodyId(): string {
+    return this.body.getId()
+  }
+
   protected async renderBody(): Promise<void> {
     await this.body.render()
   }

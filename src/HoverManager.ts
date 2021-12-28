@@ -12,7 +12,7 @@ export class HoverManager {
     this.state = null
   }
 
-  public static addHoverable(hoverable: Box, onHoverOver: () => void, onHoverOut: () => void) {
+  public static addHoverable(hoverable: Box, onHoverOver: () => void, onHoverOut: () => void): void {
     dom.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
       if (this.state !== null && this.state.hovering === hoverable) {
         return
@@ -26,7 +26,7 @@ export class HoverManager {
     })
   }
 
-  public static removeHoverable(hoverable: Box) {
+  public static removeHoverable(hoverable: Box): void {
     dom.removeEventListenerFrom(hoverable.getId(), 'mouseover')
 
     if (this.state !== null && this.state.hovering === hoverable) {

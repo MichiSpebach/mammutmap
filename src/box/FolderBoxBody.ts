@@ -19,8 +19,6 @@ export class FolderBoxBody extends BoxBody {
 
   public async executeRender(): Promise<void> {
     if (!this.isRendered()) {
-      let html: string = '<div id="'+this.getId()+'"></div>'
-      await renderManager.addContentTo(this.referenceFolderBox.getId(), html)
       await this.loadMapDatasAndCreateBoxes()
     }
     await this.renderBoxes()
@@ -38,8 +36,8 @@ export class FolderBoxBody extends BoxBody {
       }
     }))
     if (!rendered) {
+      await this.unrenderBoxPlaceholders()
       await this.destructBoxes()
-      await renderManager.remove(this.getId())
     }
     return {rendered: rendered}
   }
@@ -104,6 +102,10 @@ export class FolderBoxBody extends BoxBody {
 
   private async renderBoxPlaceholderFor(box: Box): Promise<void> {
     return renderManager.addContentTo(this.getId(), '<div id="' + box.getId() + '" style="display:inline-block;">loading... ' + box.getName() + '</div>')
+  }
+
+  private async unrenderBoxPlaceholders(): Promise<void> {
+    await renderManager.setContentTo(this.getId(), '')
   }
 
   private async renderBoxes(): Promise<void> {

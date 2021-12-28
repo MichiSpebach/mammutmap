@@ -5,40 +5,32 @@ import { ScaleManager } from '../ScaleManager'
 
 export class BoxBorder {
   public readonly referenceBox: Box // TODO: use interface instead?
-
-  private readonly topId: string
-  private readonly bottomId: string
-  private readonly rightId: string
-  private readonly leftId: string
   private readonly sideIds: string[]
-
   private rendered: boolean = false
 
   public constructor(referenceBox: Box) {
     this.referenceBox = referenceBox
+    this.sideIds = [this.getTopId(), this.getBottomId(), this.getRightId(), this.getLeftId()]
+  }
 
-    this.topId = referenceBox.getId() + 'BorderTop'
-    this.bottomId = referenceBox.getId() + 'BorderBottom'
-    this.rightId = referenceBox.getId() + 'BorderRight'
-    this.leftId = referenceBox.getId() + 'BorderLeft'
-
-    this.sideIds = [this.topId, this.bottomId, this.rightId, this.leftId]
+  public getId(): string {
+    return this.referenceBox.getId()+'Border'
   }
 
   public getTopId() {
-    return this.topId
+    return this.getId()+'Top'
   }
 
   public getBottomId() {
-    return this.bottomId
+    return this.getId()+'Bottom'
   }
 
   public getRightId() {
-    return this.rightId
+    return this.getId()+'Right'
   }
 
   public getLeftId() {
-    return this.leftId
+    return this.getId()+'Left'
   }
 
   public async render(): Promise<void> {
@@ -47,7 +39,7 @@ export class BoxBorder {
       const bottom: string = this.formLine(this.getBottomId(), 'width:100%;height:8px;bottom:0px;', 'width:100%;height:2px;bottom:0px;')
       const right: string = this.formLine(this.getRightId(), 'width:8px;height:100%;top:0px;right:0px;', 'width:2px;height:100%;top:0px;right:0px;')
       const left: string = this.formLine(this.getLeftId(), 'width:8px;height:100%;top:0px;', 'width:2px;height:100%;top:0px;')
-      await renderManager.addContentTo(this.referenceBox.getId(), top + bottom + right + left)
+      await renderManager.setContentTo(this.getId(), top+bottom+right+left)
 
       ScaleManager.addScalable(this)
 
