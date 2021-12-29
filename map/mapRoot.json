@@ -194,16 +194,16 @@
 				{
 					"boxId": "82efivc7np8",
 					"boxName": "ScaleManager.ts",
-					"x": 99.97084657073444,
-					"y": 0.14251695771395584
+					"x": 99.97838383110566,
+					"y": 0.1452630623269327
 				}
 			],
 			"toWayPoints": [
 				{
-					"boxId": "5da77t8c1t8",
-					"boxName": "domAdapter.ts",
-					"x": 98.91748555718611,
-					"y": 99.93332303363934
+					"boxId": "p0d1i1vr268",
+					"boxName": "RenderManager.ts",
+					"x": 94.47795014816106,
+					"y": 99.25907477741112
 				}
 			]
 		},
@@ -295,16 +295,16 @@
 				{
 					"boxId": "dub9um70n18",
 					"boxName": "DragManager.ts",
-					"x": 99.96586500373192,
-					"y": 0.06606474344857961
+					"x": 99.96595439681046,
+					"y": 0.07273608922293612
 				}
 			],
 			"toWayPoints": [
 				{
-					"boxId": "5da77t8c1t8",
-					"boxName": "domAdapter.ts",
-					"x": 99.96324479331564,
-					"y": 99.95858289792278
+					"boxId": "p0d1i1vr268",
+					"boxName": "RenderManager.ts",
+					"x": 96.50056805911571,
+					"y": 99.34596679523729
 				}
 			]
 		},
@@ -314,16 +314,16 @@
 				{
 					"boxId": "dub9um70n18",
 					"boxName": "DragManager.ts",
-					"x": 21.11782715876093,
-					"y": 99.84399375975039
+					"x": 25.44595871002564,
+					"y": 99.36708860759494
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "p0kd6a1t4vo",
 					"boxName": "Draggable.ts",
-					"x": 41.33883413025841,
-					"y": 1.430479976538825
+					"x": 47.090810222947255,
+					"y": 0.6125080593165699
 				}
 			]
 		},
@@ -1349,6 +1349,25 @@
 					"boxName": "HoverManager.ts",
 					"x": 0.11188147344510178,
 					"y": 1.7311608961303464
+				}
+			]
+		},
+		{
+			"id": "3lvil3pvqog",
+			"fromWayPoints": [
+				{
+					"boxId": "sde0jdvhn4o",
+					"boxName": "HoverManager.ts",
+					"x": 99.54710524770827,
+					"y": -0.24473147518694768
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "p0d1i1vr268",
+					"boxName": "RenderManager.ts",
+					"x": 98.78407181018375,
+					"y": 99.56062384705685
 				}
 			]
 		}

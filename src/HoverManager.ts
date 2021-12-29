@@ -1,4 +1,4 @@
-import { dom } from './domAdapter'
+import { renderManager } from './RenderManager'
 import { Hoverable } from './Hoverable'
 
 export class HoverManager {
@@ -13,7 +13,7 @@ export class HoverManager {
   }
 
   public static async addHoverable(hoverable: Hoverable, onHoverOver: () => void, onHoverOut: () => void): Promise<void> {
-    await dom.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
+    await renderManager.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
       if (this.state !== null && this.state.hovering === hoverable) {
         return
       }
@@ -27,7 +27,7 @@ export class HoverManager {
   }
 
   public static async removeHoverable(hoverable: Hoverable): Promise<void> {
-    await dom.removeEventListenerFrom(hoverable.getId(), 'mouseover')
+    await renderManager.removeEventListenerFrom(hoverable.getId(), 'mouseover')
 
     if (this.state !== null && this.state.hovering === hoverable) {
       this.state.onHoverOut()

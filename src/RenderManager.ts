@@ -99,6 +99,18 @@ export class RenderManager {
     }))
   }
 
+  public async addDragListenerTo(
+    id: string,
+    eventType: 'dragstart'|'drag'|'dragend'|'dragenter',
+    callback: (clientX: number, clientY: number) => void,
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addDragListenerTo(id, eventType, callback)
+    }))
+  }
+
   public removeEventListenerFrom(
     id: string,
     eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter',

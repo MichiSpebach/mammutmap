@@ -1,6 +1,5 @@
 import * as util from './util'
-import { dom } from './domAdapter'
-import { RenderPriority } from './RenderManager'
+import { renderManager, RenderPriority } from './RenderManager'
 import { BoxBorder } from './box/BoxBorder'
 import { Rect } from './Rect'
 
@@ -58,10 +57,10 @@ export class ScaleManager {
 
     // TODO: set element draggable="true" or use mousedown instead of drag events
 
-    dom.addClassTo(scalable.getTopId(), this.verticalStyleClass)
-    dom.addClassTo(scalable.getBottomId(), this.verticalStyleClass)
-    dom.addClassTo(scalable.getRightId(), this.horizontalStyleClass)
-    dom.addClassTo(scalable.getLeftId(), this.horizontalStyleClass)
+    renderManager.addClassTo(scalable.getTopId(), this.verticalStyleClass)
+    renderManager.addClassTo(scalable.getBottomId(), this.verticalStyleClass)
+    renderManager.addClassTo(scalable.getRightId(), this.horizontalStyleClass)
+    renderManager.addClassTo(scalable.getLeftId(), this.horizontalStyleClass)
 
     this.addListenersForSide(scalable, scalable.getRightId(), (x: number, y:number) => this.dragEastBorder(x, y))
     this.addListenersForSide(scalable, scalable.getBottomId(), (x: number, y:number) => this.dragSouthBorder(x, y))
@@ -75,10 +74,10 @@ export class ScaleManager {
   }
 
   public static removeScalable(scalable: BoxBorder) {
-    dom.removeClassFrom(scalable.getTopId(), this.verticalStyleClass)
-    dom.removeClassFrom(scalable.getBottomId(), this.verticalStyleClass)
-    dom.removeClassFrom(scalable.getRightId(), this.horizontalStyleClass)
-    dom.removeClassFrom(scalable.getLeftId(), this.horizontalStyleClass)
+    renderManager.removeClassFrom(scalable.getTopId(), this.verticalStyleClass)
+    renderManager.removeClassFrom(scalable.getBottomId(), this.verticalStyleClass)
+    renderManager.removeClassFrom(scalable.getRightId(), this.horizontalStyleClass)
+    renderManager.removeClassFrom(scalable.getLeftId(), this.horizontalStyleClass)
 
     this.removeListenersForSide(scalable.getRightId())
     this.removeListenersForSide(scalable.getBottomId())
@@ -87,23 +86,23 @@ export class ScaleManager {
   }
 
   private static addListenersForSide(scalable: BoxBorder, id: string, drag: (clientX: number, clientY:number) => void): void {
-    dom.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
+    renderManager.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
       this.dragstart(scalable, clientX, clientY)
     })
 
-    dom.addDragListenerTo(id, 'drag', (clientX: number, clientY:number): void => {
+    renderManager.addDragListenerTo(id, 'drag', (clientX: number, clientY:number): void => {
       drag(clientX, clientY)
     })
 
-    dom.addDragListenerTo(id, 'dragend', (clientX: number, clientY:number): void => {
+    renderManager.addDragListenerTo(id, 'dragend', (clientX: number, clientY:number): void => {
       this.dragEnd()
     })
   }
 
   private static removeListenersForSide(id: string): void {
-    dom.removeEventListenerFrom(id, 'dragstart')
-    dom.removeEventListenerFrom(id, 'drag')
-    dom.removeEventListenerFrom(id, 'dragend')
+    renderManager.removeEventListenerFrom(id, 'dragstart')
+    renderManager.removeEventListenerFrom(id, 'drag')
+    renderManager.removeEventListenerFrom(id, 'dragend')
   }
 
   private static async dragstart(scalable: BoxBorder, clientX: number, clientY: number): Promise<void> {

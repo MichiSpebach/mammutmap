@@ -1,5 +1,6 @@
 import * as util from './util'
 import { dom } from './domAdapter'
+import { renderManager, RenderPriority } from './RenderManager'
 import { Draggable } from './Draggable'
 import { DropTarget } from './DropTarget'
 
@@ -38,17 +39,17 @@ export class DragManager {
   public static addDraggable(elementToDrag: Draggable<DropTarget>): void {
     const draggableId: string = elementToDrag.getId()
 
-    dom.addClassTo(draggableId, this.draggableStyleClass)
+    renderManager.addClassTo(draggableId, this.draggableStyleClass)
 
-    dom.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
+    renderManager.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
       this.onDragStart(elementToDrag, clientX, clientY, false)
     })
 
-    dom.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => {
+    renderManager.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => {
       this.onDrag(clientX, clientY)
     })
 
-    dom.addDragListenerTo(draggableId, 'dragend', (_) => {
+    renderManager.addDragListenerTo(draggableId, 'dragend', (_) => {
       this.onDragEnd()
     })
 
@@ -57,14 +58,14 @@ export class DragManager {
 
   public static removeDraggable(elementToDrag: Draggable<DropTarget>): void {
     const draggableId: string = elementToDrag.getId()
-    dom.removeClassFrom(draggableId, this.draggableStyleClass)
-    dom.removeEventListenerFrom(draggableId, 'dragstart')
-    dom.removeEventListenerFrom(draggableId, 'drag')
-    dom.removeEventListenerFrom(draggableId, 'dragend')
+    renderManager.removeClassFrom(draggableId, this.draggableStyleClass)
+    renderManager.removeEventListenerFrom(draggableId, 'dragstart')
+    renderManager.removeEventListenerFrom(draggableId, 'drag')
+    renderManager.removeEventListenerFrom(draggableId, 'dragend')
   }
 
-  private static onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean) {
-    dom.addClassTo(elementToDrag.getId(), DragManager.draggingInProgressStyleClass)
+  private static async onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean) {
+    await renderManager.addClassTo(elementToDrag.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
     elementToDrag.dragStart(clientX, clientY)
     this.setState({dragging: elementToDrag, draggingOver: elementToDrag.getDropTargetAtDragStart(), clickToDropMode: clickToDropMode})
   }
@@ -76,23 +77,23 @@ export class DragManager {
   private static onDragEnd() {
     const state: {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} = this.getState()
 
-    dom.removeClassFrom(state.dragging.getId(), DragManager.draggingInProgressStyleClass)
+    renderManager.removeClassFrom(state.dragging.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
     state.dragging.dragEnd(state.draggingOver)
     this.setState(null)
   }
 
   public static addDropTarget(dropTarget: DropTarget): void {
-    dom.addDragListenerTo(dropTarget.getId(), 'dragenter', async (_) => {
+    renderManager.addDragListenerTo(dropTarget.getId(), 'dragenter', async (_) => {
       this.onDragEnter(dropTarget)
     })
-    dom.addEventListenerTo(dropTarget.getId(), 'mouseover', async (_) => {
+    renderManager.addEventListenerTo(dropTarget.getId(), 'mouseover', async (_) => {
       this.onDragEnter(dropTarget)
     })
   }
 
   public static removeDropTarget(dropTarget: DropTarget): void {
-    dom.removeEventListenerFrom(dropTarget.getId(), 'dragenter')
-    dom.removeEventListenerFrom(dropTarget.getId(), 'mouseover')
+    renderManager.removeEventListenerFrom(dropTarget.getId(), 'dragenter')
+    renderManager.removeEventListenerFrom(dropTarget.getId(), 'mouseover')
   }
 
   private static onDragEnter(dropTarget: DropTarget): void {
@@ -113,14 +114,14 @@ export class DragManager {
     const cursorClientPosition: {x: number, y: number} = dom.getCursorClientPosition();
     this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, true)
 
-    dom.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number) => {
+    renderManager.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number) => {
       this.onDrag(clientX, clientY)
-    })
-    dom.addEventListenerTo('content', 'click', (_) => {
-      dom.removeEventListenerFrom('content', 'mousemove')
-      dom.removeEventListenerFrom('content', 'click')
+    }, RenderPriority.RESPONSIVE)
+    renderManager.addEventListenerTo('content', 'click', (_) => {
+      renderManager.removeEventListenerFrom('content', 'mousemove', RenderPriority.RESPONSIVE)
+      renderManager.removeEventListenerFrom('content', 'click', RenderPriority.RESPONSIVE)
       this.onDragEnd()
-    })
+    }, RenderPriority.RESPONSIVE)
   }
 
 }
