@@ -14,10 +14,11 @@ import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
+import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
 
-export abstract class Box implements DropTarget {
+export abstract class Box implements DropTarget, Hoverable {
   private name: string
   private parent: FolderBox|null
   private mapData: BoxMapData
