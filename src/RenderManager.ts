@@ -60,23 +60,21 @@ export class RenderManager {
     }))
   }
 
-  /** notice: a sequel like addClass, removeClass, removeClass, addClass could be completely neutralized, the last addClass is NOT save to be executed */
   public addClassTo(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'addClass'+className+'to'+id,
-      neutralizableWith: 'removeClass'+className+'from'+id,
+      //neutralizableWith: 'removeClass'+className+'from'+id, // deactivated because implementation does not work reliable and performance boost is only small
       batchParameters: {elementId: id, method: 'addClassTo', value: className},
       command: () => dom.addClassTo(id, className)
     }))
   }
 
-  /** notice: a sequel like addClass, removeClass, removeClass, addClass could be completely neutralized, the last addClass is NOT save to be executed */
   public removeClassFrom(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'removeClass'+className+'from'+id,
-      neutralizableWith: 'addClass'+className+'to'+id,
+      //neutralizableWith: 'addClass'+className+'to'+id, // deactivated because implementation does not work reliable and performance boost is only small
       batchParameters: {elementId: id, method: 'removeClassFrom', value: className},
       command: () => dom.removeClassFrom(id, className)
     }))
