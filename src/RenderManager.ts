@@ -87,6 +87,29 @@ export class RenderManager {
     }))
   }
 
+  public addEventListenerTo(
+    id: string,
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove',
+    callback: (clientX:number, clientY: number) => void,
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addEventListenerTo(id, eventType, callback)
+    }))
+  }
+
+  public removeEventListenerFrom(
+    id: string,
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter',
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.removeEventListenerFrom(id, eventType)
+    }))
+  }
+
   public async runOrSchedule<T>(command: Command): Promise<T> { // only public for unit tests
     const squashedCommand: Command|undefined = this.tryToSquashIntoQueuedCommands(command)
     if (squashedCommand) {

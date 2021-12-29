@@ -18,18 +18,28 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
     }
   ]
   const menu = Menu.buildFromTemplate(template)
-  menu.insert(0, buildLinkItem(box, clientX, clientY))
+  menu.insert(0, buildAddLinkItem(box, clientX, clientY))
   menu.popup()
 }
 
 export function openForFolderBox(box: FolderBox, clientX: number, clientY: number): void {
   const menu = new Menu()
-  menu.append(buildLinkItem(box, clientX, clientY))
+  menu.append(buildAddLinkItem(box, clientX, clientY))
   menu.popup()
 }
 
-function buildLinkItem(box: Box, clientX: number, clientY: number): MenuItem {
+export function openForLink(link: Link, clientX: number, clientY: number): void {
+  const menu = new Menu()
+  menu.append(buildRemoveLinkItem(link))
+  menu.popup()
+}
+
+function buildAddLinkItem(box: Box, clientX: number, clientY: number): MenuItem {
   return new MenuItem({label: 'link from here', click: () => addLinkToBox(box, clientX, clientY)})
+}
+
+function buildRemoveLinkItem(link: Link): MenuItem {
+  return new MenuItem({label: 'remove link', click: () => link.getManagingBoxLinks().removeLink(link)})
 }
 
 // TODO: move into Box?

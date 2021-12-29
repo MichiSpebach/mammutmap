@@ -55,6 +55,20 @@ export class BoxLinks {
       return link
     }
 
+    public async removeLink(link: Link): Promise<void> {
+      if (!this.links.includes(link)) {
+        util.logWarning('trying to remove link from box "'+this.referenceBox.getName()+'" that is not managed by that box')
+        return
+      }
+
+      await link.unrender()
+      await this.removePlaceholderFor(link)
+
+      this.links.splice(this.links.indexOf(link), 1)
+      this.referenceBox.getMapLinkData().splice(this.referenceBox.getMapLinkData().indexOf(link.getData()), 1)
+      await this.referenceBox.saveMapData()
+    }
+
     public async render(): Promise<void> {
       if (this.rendered) {
         return

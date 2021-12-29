@@ -12,8 +12,8 @@ export class HoverManager {
     this.state = null
   }
 
-  public static addHoverable(hoverable: Hoverable, onHoverOver: () => void, onHoverOut: () => void): void {
-    dom.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
+  public static async addHoverable(hoverable: Hoverable, onHoverOver: () => void, onHoverOut: () => void): Promise<void> {
+    await dom.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
       if (this.state !== null && this.state.hovering === hoverable) {
         return
       }
@@ -26,8 +26,8 @@ export class HoverManager {
     })
   }
 
-  public static removeHoverable(hoverable: Hoverable): void {
-    dom.removeEventListenerFrom(hoverable.getId(), 'mouseover')
+  public static async removeHoverable(hoverable: Hoverable): Promise<void> {
+    await dom.removeEventListenerFrom(hoverable.getId(), 'mouseover')
 
     if (this.state !== null && this.state.hovering === hoverable) {
       this.state.onHoverOut()

@@ -1,6 +1,7 @@
 import * as util from '../util'
 import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
+import * as contextMenu from '../contextMenu'
 import { boxManager } from './BoxManager'
 import { Box } from './Box'
 import { BoxLinks } from './BoxLinks'
@@ -36,6 +37,10 @@ export class Link implements Hoverable {
     return this.managingBox
   }
 
+  public getManagingBoxLinks(): BoxLinks {
+    return this.managingBox.links
+  }
+
   public getFrom(): LinkEnd {
     return this.from
   }
@@ -56,12 +61,14 @@ export class Link implements Hoverable {
       return
     }
 
-    HoverManager.removeHoverable(this)
+    const proms: Promise<any>[] = []
+    proms.push(this.removeContextMenu())
     this.deregisterAtBorderingBoxes()
-    this.from.unrender()
-    this.to.unrender()
+    proms.push(this.from.unrender())
+    proms.push(this.to.unrender())
 
     this.rendered = false
+    await Promise.all(proms)
   }
 
   public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number): Promise<void> {
@@ -99,26 +106,44 @@ export class Link implements Hoverable {
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
     const lineHtml: string = '<line id="'+this.getId()+'Line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;pointer-events:auto;"/>'
 
-    let linePromise: Promise<void>
+    const proms: Promise<any>[] = []
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
       const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
       await renderManager.setContentTo(this.getId(), svgHtml+fromHtml+toHtml)
-      linePromise = renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;')
+      proms.push(renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'))
       this.registerAtBorderingBoxes()
-      HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false))
+      proms.push(this.addContextMenu())
       this.rendered = true
     } else {
-      linePromise = renderManager.setContentTo(this.getId()+'svg', lineHtml)
+      proms.push(renderManager.setContentTo(this.getId()+'svg', lineHtml))
     }
 
     const fromBox: Box = this.getDeepestRenderedBox(this.data.fromWayPoints).box
-    const fromPromise: Promise<void> = this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians)
+    proms.push(this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians))
     const toBox: Box = this.getDeepestRenderedBox(this.data.toWayPoints).box
-    const toPromise: Promise<void> = this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians)
+    proms.push(this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians))
 
-    await Promise.all([linePromise, fromPromise, toPromise])
+    await Promise.all(proms)
+  }
+
+  private async addContextMenu(): Promise<void> {
+    const proms: Promise<any>[] = []
+
+    proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, clientX, clientY)))
+    proms.push(HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false)))
+
+    await Promise.all(proms)
+  }
+
+  private async removeContextMenu(): Promise<void> {
+    const proms: Promise<any>[] = []
+
+    proms.push(HoverManager.removeHoverable(this))
+    proms.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))
+
+    await Promise.all(proms)
   }
 
   public async setHighlight(highlight: boolean): Promise<void> {

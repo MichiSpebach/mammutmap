@@ -189,12 +189,12 @@ export class DocumentObjectModelAdapter {
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
   }
 
-  public removeEventListenerFrom(
+  public async removeEventListenerFrom(
     id: string,
     eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
-  ): void {
+  ): Promise<void> {
     const ipcChannelName = eventType+'_'+id
-    this.executeJsOnElement(id, "on"+eventType+" = null")
+    await this.executeJsOnElement(id, "on"+eventType+" = null")
     this.removeIpcChannelListener(ipcChannelName)
   }
 
