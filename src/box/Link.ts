@@ -7,8 +7,10 @@ import { BoxLinks } from './BoxLinks'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
 import { LinkEnd } from './LinkEnd'
+import { Hoverable } from '../Hoverable'
+import { HoverManager } from '../HoverManager'
 
-export class Link {
+export class Link implements Hoverable {
   private readonly data: BoxMapLinkData
   private managingBox: Box
   private readonly from: LinkEnd
@@ -54,6 +56,7 @@ export class Link {
       return
     }
 
+    HoverManager.removeHoverable(this)
     this.deregisterAtBorderingBoxes()
     this.from.unrender()
     this.to.unrender()
@@ -94,7 +97,7 @@ export class Link {
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
-    const lineHtml: string = '<line id="'+this.getId()+'Line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;"/>'
+    const lineHtml: string = '<line id="'+this.getId()+'Line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;pointer-events:auto;"/>'
 
     let linePromise: Promise<void>
     if (!this.rendered) {
@@ -104,6 +107,7 @@ export class Link {
       await renderManager.setContentTo(this.getId(), svgHtml+fromHtml+toHtml)
       linePromise = renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;')
       this.registerAtBorderingBoxes()
+      HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false))
       this.rendered = true
     } else {
       linePromise = renderManager.setContentTo(this.getId()+'svg', lineHtml)
