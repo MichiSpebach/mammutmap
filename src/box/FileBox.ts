@@ -36,8 +36,10 @@ export class FileBox extends Box {
       return
     }
 
-    renderManager.addClassTo(super.getId(), style.getFolderBoxClass())
-    renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, clientX, clientY))
+    const proms: Promise<any>[] = []
+    proms.push(renderManager.addClassTo(super.getId(), style.getFolderBoxClass()))
+    proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, clientX, clientY)))
+    await Promise.all(proms)
   }
 
   protected async unrenderAdditional(): Promise<void> {
@@ -45,7 +47,7 @@ export class FileBox extends Box {
       return
     }
 
-    renderManager.removeEventListenerFrom(this.getId(), 'contextmenu')
+    await renderManager.removeEventListenerFrom(this.getId(), 'contextmenu')
   }
 
   protected getBodyId(): string {

@@ -151,6 +151,6 @@ async function getBoxBySourcePathAndAddBoxWatcher(path: string): Promise<Box|und
 
 export async function clearWatchedBoxes(): Promise<void> {
   while (boxWatchers.length > 0) {
-    boxWatchers.shift()?.unwatch()
+    await boxWatchers.shift()?.unwatch()
   }
 }

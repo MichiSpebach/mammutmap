@@ -212,7 +212,7 @@ export abstract class Box implements DropTarget, Hoverable {
       HoverManager.addHoverable(this, () => this.setHighlight(true), () => this.setHighlight(false))
     }
 
-    this.renderAdditional()
+    await this.renderAdditional()
     this.rendered = true
   }
 
