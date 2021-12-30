@@ -71,7 +71,7 @@ export class Link implements Hoverable {
     await Promise.all(proms)
   }
 
-  public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number): Promise<void> {
+  public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number, draggingInProgress: boolean = false): Promise<void> {
     let fromInBaseCoords: {x: number, y: number}
     let toInBaseCoords: {x: number, y: number}
     if (linkEnd === this.to) {
@@ -84,7 +84,7 @@ export class Link implements Hoverable {
       util.logError('Given LinkEnd is not contained by Link.')
     }
 
-    await this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
+    await this.renderAtPosition(fromInBaseCoords, toInBaseCoords, draggingInProgress)
   }
 
   public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
@@ -97,14 +97,15 @@ export class Link implements Hoverable {
     }
   }
 
-  private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}): Promise<void> {
+  private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}, draggingInProgress: boolean = false): Promise<void> {
     const distanceInPixel: number[] = [toInBaseCoords.x-fromInBaseCoords.x, toInBaseCoords.y-fromInBaseCoords.y]
     const angleInRadians: number = Math.atan2(distanceInPixel[1], distanceInPixel[0])
 
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
-    const lineHtml: string = '<line id="'+this.getId()+'Line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;pointer-events:auto;"/>'
+    const pointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
+    const lineHtml: string = '<line id="'+this.getId()+'Line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;'+pointerEventsStyle+'"/>'
 
     const proms: Promise<any>[] = []
     if (!this.rendered) {

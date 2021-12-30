@@ -43,12 +43,12 @@ export class LinkEnd implements Draggable<Box> {
 
   public dragStart(clientX: number, clientY: number): Promise<void> {
     this.recentDragPosition = {x: clientX, y: clientY}
-    return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY)
+    return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY, true)
   }
 
   public drag(clientX: number, clientY: number): Promise<void> {
     this.recentDragPosition = {x: clientX, y: clientY}
-    return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY)
+    return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY, true)
   }
 
   public dragCancel(): Promise<void> {
