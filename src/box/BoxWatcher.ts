@@ -12,6 +12,7 @@ export class BoxWatcher {
     this.box = box
     this.boxId = box.getId()
     this.boxSrcPath = box.getSrcPath()
+    // TODO: call box.addWatcherAndUpdateRender
   }
 
   public async get(): Promise<Box> {
@@ -21,6 +22,7 @@ export class BoxWatcher {
     let box: Box|undefined = boxManager.getBoxIfExists(this.boxId)
     if (box) {
       this.box = box
+      // TODO: call box.addWatcherAndUpdateRender
       return this.box
     }
     // TODO:

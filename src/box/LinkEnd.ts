@@ -7,6 +7,7 @@ import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 import { Box } from './Box'
 import { Link } from './Link'
+import { BoxWatcher } from './BoxWatcher'
 
 export class LinkEnd implements Draggable<Box> {
   private readonly id: string
@@ -15,6 +16,7 @@ export class LinkEnd implements Draggable<Box> {
   private rendered: boolean = false
   private borderingBox: Box|null = null
   private recentDragPosition: {x: number, y: number}|null = null
+  private static watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher|null = null
 
   public constructor(id: string, referenceLink: Link, shape: 'square'|'arrow') {
     this.id = id
@@ -42,6 +44,7 @@ export class LinkEnd implements Draggable<Box> {
   }
 
   public dragStart(clientX: number, clientY: number): Promise<void> {
+    this.watchManagingBox()
     this.recentDragPosition = {x: clientX, y: clientY}
     return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY, true)
   }
@@ -51,9 +54,10 @@ export class LinkEnd implements Draggable<Box> {
     return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY, true)
   }
 
-  public dragCancel(): Promise<void> {
+  public async dragCancel(): Promise<void> {
     this.recentDragPosition = null
-    return this.referenceLink.render()
+    await this.referenceLink.render()
+    this.unwatchManagingBox()
   }
 
   public async dragEnd(dropTarget: Box): Promise<void> {
@@ -62,8 +66,29 @@ export class LinkEnd implements Draggable<Box> {
     }
 
     await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
-
     this.recentDragPosition = null
+    this.unwatchManagingBox()
+  }
+
+  private watchManagingBox(): void {
+    if (LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging) {
+      util.logWarning('watcherOfManagingBoxToPreventUnrenderWhileDragging is set at drag start')
+      this.unwatchManagingBox()
+    }
+
+    const managingBox: Box = this.referenceLink.getManagingBox()
+    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = new BoxWatcher(managingBox)
+    managingBox.addWatcherAndUpdateRender(LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging)
+  }
+
+  private unwatchManagingBox(): void {
+    if (!LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging) {
+      util.logWarning('managing box of link is not watched')
+      return
+    }
+
+    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging.unwatch()
+    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = null
   }
 
   public async render(borderingBox: Box, x: number, y: number, angleInRadians: number): Promise<void> {
