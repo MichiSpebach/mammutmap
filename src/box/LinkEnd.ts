@@ -70,15 +70,13 @@ export class LinkEnd implements Draggable<Box> {
     this.unwatchManagingBox()
   }
 
-  private watchManagingBox(): void {
+  private async watchManagingBox(): Promise<void> {
     if (LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging) {
       util.logWarning('watcherOfManagingBoxToPreventUnrenderWhileDragging is set at drag start')
       this.unwatchManagingBox()
     }
 
-    const managingBox: Box = this.referenceLink.getManagingBox()
-    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = new BoxWatcher(managingBox)
-    managingBox.addWatcherAndUpdateRender(LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging)
+    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = await BoxWatcher.newAndWatch(this.referenceLink.getManagingBox())
   }
 
   private unwatchManagingBox(): void {
