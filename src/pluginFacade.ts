@@ -143,14 +143,18 @@ async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
 
 async function getBoxBySourcePathAndAddBoxWatcher(path: string): Promise<Box|undefined> {
   const boxWatcher: BoxWatcher|undefined = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(path)
-  if (boxWatcher) {
-    boxWatchers.push(boxWatcher)
+  if (!boxWatcher) {
+    return undefined
   }
-  return boxWatcher?.get()
+  boxWatchers.push(boxWatcher)
+  return boxWatcher.get()
 }
 
 export async function clearWatchedBoxes(): Promise<void> {
   while (boxWatchers.length > 0) {
-    await boxWatchers.shift()?.unwatch()
+    const boxWatcher: BoxWatcher|undefined = boxWatchers.shift()
+    if (boxWatcher) {
+      await boxWatcher.unwatch()
+    }
   }
 }

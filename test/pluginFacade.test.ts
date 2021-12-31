@@ -7,15 +7,15 @@ import * as map from '../src/Map'
 import { FileBoxDepthTreeIterator } from '../src/pluginFacade'
 import * as pluginFacade from '../src/pluginFacade'
 
-test('getFileBoxIterator', () => {
+test('getFileBoxIterator', async () => {
   setupScenario()
 
   const fileBoxes: FileBoxDepthTreeIterator = pluginFacade.getFileBoxIterator()
-  expect(fileBoxes.hasNext()).toEqual(true)
-  expect(fileBoxes.next().getId()).toEqual('file1')
-  expect(fileBoxes.hasNext()).toEqual(true)
-  expect(fileBoxes.next().getId()).toEqual('file2')
-  expect(fileBoxes.hasNext()).toEqual(false)
+  expect(await fileBoxes.hasNext()).toEqual(true)
+  expect((await fileBoxes.next()).getId()).toEqual('flatFile')
+  expect(await fileBoxes.hasNext()).toEqual(true)
+  expect((await fileBoxes.next()).getId()).toEqual('deepFile')
+  expect(await fileBoxes.hasNext()).toEqual(false)
 })
 
 function setupScenario(): void {
@@ -27,12 +27,12 @@ function setupScenario(): void {
 
 function buildFolderTree(): RootFolderBox {
   const file1 = mockFileBox()
-  file1.getId.mockReturnValue('file1')
+  file1.getId.mockReturnValue('deepFile')
   const folder1 = mockFolderBox()
   folder1.getBoxes.mockReturnValue([file1])
 
   const file2 = mockFileBox()
-  file2.getId.mockReturnValue('file2')
+  file2.getId.mockReturnValue('flatFile')
 
   const folder2 = mockFolderBox()
   folder2.getBoxes.mockReturnValue([])
