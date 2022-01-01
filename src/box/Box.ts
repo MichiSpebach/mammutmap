@@ -17,12 +17,14 @@ import { DragManager } from '../DragManager'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
+import { Transform } from './Transform'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
   private parent: FolderBox|null
   private mapData: BoxMapData
   private mapDataFileExists: boolean
+  public readonly transform: Transform
   private readonly header: BoxHeader
   private readonly border: BoxBorder
   public readonly links: BoxLinks
@@ -37,6 +39,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.parent = parent
     this.mapData = mapData
     this.mapDataFileExists = mapDataFileExists
+    this.transform = new Transform(this)
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
     this.links = new BoxLinks(this)
@@ -136,9 +139,9 @@ export abstract class Box implements DropTarget, Hoverable {
     return await renderManager.getClientRectOf(this.getId(), priority)
   }
 
-  // TODO: introduce PercentPosition/PercentPoint and ClientPosition/ClientPoint/ClientPixelPosition/ClientPixelPoint?
+  // TODO: use LocalPosition and ClientPosition and move into Transform
   public async transformClientPositionToLocal(clientX: number, clientY: number): Promise<{x: number, y: number}> {
-    const clientRect: Rect = await this.getClientRect()
+    const clientRect: Rect = await this.getClientRect(RenderPriority.RESPONSIVE)
     const x: number = (clientX - clientRect.x) / clientRect.width * 100
     const y: number = (clientY - clientRect.y) / clientRect.height * 100
     return {x: x, y: y}

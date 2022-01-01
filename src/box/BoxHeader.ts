@@ -5,6 +5,7 @@ import { DragManager } from '../DragManager'
 import { Rect } from '../Rect'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
+import { ClientPosition, LocalPosition } from './Transform'
 
 export abstract  class BoxHeader implements Draggable<FolderBox> {
   public readonly referenceBox: Box
@@ -47,12 +48,18 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     renderManager.addClassTo(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
   }
 
-  public async drag(clientX: number, clientY: number): Promise<void> {
-    const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect(RenderPriority.RESPONSIVE) // TODO: cache, save in state object when dragStart is called
-
-    const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
-    const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
-    this.referenceBox.updateMeasuresAndBorderingLinks({x: newX, y: newY}, RenderPriority.RESPONSIVE)
+  public async drag(clientX: number, clientY: number, dropTarget: FolderBox): Promise<void> {
+    const ctrlPressed = false // TODO:
+    if (ctrlPressed) {
+      const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect(RenderPriority.RESPONSIVE) // TODO: cache, save in state object when dragStart is called
+      const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
+      const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
+      this.referenceBox.updateMeasuresAndBorderingLinks({x: newX, y: newY}, RenderPriority.RESPONSIVE)
+    } else {
+      const clientPosition = new ClientPosition(clientX-this.dragOffset.x, clientY-this.dragOffset.y)
+      const positionInParentBoxCoords: LocalPosition = await this.referenceBox.getParent().transform.getNearestGridPositionOfOtherTransform(clientPosition, dropTarget.transform)
+      this.referenceBox.updateMeasuresAndBorderingLinks({x: positionInParentBoxCoords.percentX, y: positionInParentBoxCoords.percentY})
+    }
   }
 
   public async dragCancel(): Promise<void> {

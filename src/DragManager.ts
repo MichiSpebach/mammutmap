@@ -71,7 +71,8 @@ export class DragManager {
   }
 
   private static onDrag(clientX: number, clientY: number) {
-    this.getState().dragging.drag(clientX, clientY)
+    const state: {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} = this.getState()
+    state.dragging.drag(clientX, clientY, state.draggingOver)
   }
 
   private static onDragEnd() {
