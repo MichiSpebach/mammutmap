@@ -45,8 +45,8 @@ export class DragManager {
       this.onDragStart(elementToDrag, clientX, clientY, false)
     })
 
-    renderManager.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number) => {
-      this.onDrag(clientX, clientY)
+    renderManager.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number, ctrlPressed: boolean) => {
+      this.onDrag(clientX, clientY, !ctrlPressed)
     })
 
     renderManager.addDragListenerTo(draggableId, 'dragend', (_) => {
@@ -70,9 +70,9 @@ export class DragManager {
     this.setState({dragging: elementToDrag, draggingOver: elementToDrag.getDropTargetAtDragStart(), clickToDropMode: clickToDropMode})
   }
 
-  private static onDrag(clientX: number, clientY: number) {
+  private static onDrag(clientX: number, clientY: number, snapToGrid: boolean) {
     const state: {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} = this.getState()
-    state.dragging.drag(clientX, clientY, state.draggingOver)
+    state.dragging.drag(clientX, clientY, state.draggingOver, snapToGrid)
   }
 
   private static onDragEnd() {
@@ -115,8 +115,8 @@ export class DragManager {
     const cursorClientPosition: {x: number, y: number} = dom.getCursorClientPosition();
     this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, true)
 
-    renderManager.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number) => {
-      this.onDrag(clientX, clientY)
+    renderManager.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
+      this.onDrag(clientX, clientY, ctrlPressed)
     }, RenderPriority.RESPONSIVE)
     renderManager.addEventListenerTo('content', 'click', (_) => {
       renderManager.removeEventListenerFrom('content', 'mousemove', RenderPriority.RESPONSIVE)

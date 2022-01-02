@@ -152,7 +152,7 @@ export class DocumentObjectModelAdapter {
   public async addEventListenerTo(
     id: string,
     eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove',
-    callback: (clientX:number, clientY: number) => void
+    callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void> {
     let ipcChannelName = eventType+'_'+id
 
@@ -160,18 +160,18 @@ export class DocumentObjectModelAdapter {
     rendererFunction += 'let ipc = require("electron").ipcRenderer;'
     //rendererFunction += 'console.log(event);'
     rendererFunction += 'event.stopPropagation();'
-    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY);'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey);'
     rendererFunction += '}'
 
     await this.executeJavaScript("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
-    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number) => callback(clientX, clientY))
+    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed))
   }
 
   public async addDragListenerTo(
     id: string,
     eventType: 'dragstart'|'drag'|'dragend'|'dragenter',
-    callback: (clientX: number, clientY: number) => void
+    callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void> {
     let ipcChannelName = eventType+'_'+id
 
@@ -180,13 +180,13 @@ export class DocumentObjectModelAdapter {
     //rendererFunction += 'console.log(event);'
     rendererFunction += 'event.stopPropagation();'
     rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {'
-    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY);'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey);'
     rendererFunction += '}'
     rendererFunction += '}'
 
     await this.executeJavaScript("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
-    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number) => callback(clientX, clientY))
+    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed))
   }
 
   public async removeEventListenerFrom(

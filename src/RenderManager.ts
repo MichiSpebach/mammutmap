@@ -90,7 +90,7 @@ export class RenderManager {
   public addEventListenerTo(
     id: string,
     eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove',
-    callback: (clientX:number, clientY: number) => void,
+    callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void,
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
     return this.runOrSchedule(new Command({
@@ -102,7 +102,7 @@ export class RenderManager {
   public async addDragListenerTo(
     id: string,
     eventType: 'dragstart'|'drag'|'dragend'|'dragenter',
-    callback: (clientX: number, clientY: number) => void,
+    callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
     return this.runOrSchedule(new Command({

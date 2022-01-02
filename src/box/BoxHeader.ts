@@ -48,9 +48,8 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     renderManager.addClassTo(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
   }
 
-  public async drag(clientX: number, clientY: number, dropTarget: FolderBox): Promise<void> {
-    const ctrlPressed = false // TODO:
-    if (ctrlPressed) {
+  public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
+    if (!snapToGrid) {
       const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect(RenderPriority.RESPONSIVE) // TODO: cache, save in state object when dragStart is called
       const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
       const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
