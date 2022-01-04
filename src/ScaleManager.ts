@@ -2,6 +2,7 @@ import * as util from './util'
 import { renderManager, RenderPriority } from './RenderManager'
 import { BoxBorder } from './box/BoxBorder'
 import { Rect } from './Rect'
+import { Box } from './box/Box'
 
 export class ScaleManager {
 
@@ -62,10 +63,10 @@ export class ScaleManager {
     renderManager.addClassTo(scalable.getRightId(), this.horizontalStyleClass)
     renderManager.addClassTo(scalable.getLeftId(), this.horizontalStyleClass)
 
-    this.addListenersForSide(scalable, scalable.getRightId(), (x: number, y:number) => this.dragEastBorder(x, y))
-    this.addListenersForSide(scalable, scalable.getBottomId(), (x: number, y:number) => this.dragSouthBorder(x, y))
-    this.addListenersForSide(scalable, scalable.getTopId(), (x: number, y:number) => this.dragNorthBorder(x, y))
-    this.addListenersForSide(scalable, scalable.getLeftId(), (x: number, y:number) => this.dragWestBorder(x, y))
+    this.addListenersForSide(scalable, scalable.getRightId(), (x: number, y:number, snapToGrid: boolean) => this.dragEastBorder(x, y, snapToGrid))
+    this.addListenersForSide(scalable, scalable.getBottomId(), (x: number, y:number, snapToGrid: boolean) => this.dragSouthBorder(x, y, snapToGrid))
+    this.addListenersForSide(scalable, scalable.getTopId(), (x: number, y:number, snapToGrid: boolean) => this.dragNorthBorder(x, y, snapToGrid))
+    this.addListenersForSide(scalable, scalable.getLeftId(), (x: number, y:number, snapToGrid: boolean) => this.dragWestBorder(x, y, snapToGrid))
 
     //this.scalables.set(scalable.getTopId(), scalable)
     //this.scalables.set(scalable.getBottomId(), scalable)
@@ -85,13 +86,13 @@ export class ScaleManager {
     this.removeListenersForSide(scalable.getLeftId())
   }
 
-  private static addListenersForSide(scalable: BoxBorder, id: string, drag: (clientX: number, clientY:number) => void): void {
+  private static addListenersForSide(scalable: BoxBorder, id: string, drag: (clientX: number, clientY:number, snapToGrid: boolean) => void): void {
     renderManager.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
       this.dragstart(scalable, clientX, clientY)
     })
 
-    renderManager.addDragListenerTo(id, 'drag', (clientX: number, clientY:number): void => {
-      drag(clientX, clientY)
+    renderManager.addDragListenerTo(id, 'drag', (clientX: number, clientY:number, ctrlPressed: boolean): void => {
+      drag(clientX, clientY, !ctrlPressed)
     })
 
     renderManager.addDragListenerTo(id, 'dragend', (clientX: number, clientY:number): void => {
@@ -118,60 +119,88 @@ export class ScaleManager {
     }
   }
 
-  private static dragEastBorder(clientX: number, clientY: number): void {
+  private static async dragEastBorder(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {
     if (this.state == null) {
       util.logWarning("ScaleManager: state is null while resizing")
       return
     }
+
+    const referenceBox: Box = this.state.scaling.referenceBox
 
     const newWidthInPixel: number = this.state.startClientRect.width + clientX - this.state.startClientX
-    const newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
+    let newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
+    if (snapToGrid) {
+      const leftBorderPositionInPercent: number = (this.state.startClientRect.x-this.state.startParentClientRect.x) / this.state.startParentClientRect.width * 100
+      const newRightBorderPositionInPercent: number = referenceBox.getParent().transform.roundToGridPosition(leftBorderPositionInPercent+newWidthInPercent)
+      newWidthInPercent = newRightBorderPositionInPercent-leftBorderPositionInPercent
+    }
 
-    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({width: newWidthInPercent}, RenderPriority.RESPONSIVE)
+    referenceBox.updateMeasuresAndBorderingLinks({width: newWidthInPercent}, RenderPriority.RESPONSIVE)
   }
 
-  private static dragSouthBorder(clientX: number, clientY: number): void {
+  private static dragSouthBorder(clientX: number, clientY: number, snapToGrid: boolean): void {
     if (this.state == null) {
       util.logWarning("ScaleManager: state is null while resizing")
       return
     }
+
+    const referenceBox: Box = this.state.scaling.referenceBox
 
     const newHeightInPixel: number = this.state.startClientRect.height + clientY - this.state.startClientY
-    const newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
+    let newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
+    if (snapToGrid) {
+      const topBorderPositionInPercent: number = (this.state.startClientRect.x-this.state.startParentClientRect.x) / this.state.startParentClientRect.width * 100
+      const newBottomBorderPositionInPercent: number = referenceBox.getParent().transform.roundToGridPosition(topBorderPositionInPercent+newHeightInPercent)
+      newHeightInPercent = newBottomBorderPositionInPercent-topBorderPositionInPercent
+    }
 
-    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({height: newHeightInPercent}, RenderPriority.RESPONSIVE)
+    referenceBox.updateMeasuresAndBorderingLinks({height: newHeightInPercent}, RenderPriority.RESPONSIVE)
   }
 
-  private static dragNorthBorder(clientX: number, clientY: number): void {
+  private static dragNorthBorder(clientX: number, clientY: number, snapToGrid: boolean): void {
     if (this.state == null) {
       util.logWarning("ScaleManager: state is null while resizing")
       return
     }
+
+    const referenceBox: Box = this.state.scaling.referenceBox
 
     const dragDistanceInPixel: number = clientY - this.state.startClientY
     const newYInPixel: number = this.state.startClientRect.y - this.state.startParentClientRect.y + dragDistanceInPixel
     const newHeightInPixel: number = this.state.startClientRect.height - dragDistanceInPixel
 
-    const newYInPercent: number = newYInPixel / this.state.startParentClientRect.height * 100
-    const newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
+    let newYInPercent: number = newYInPixel / this.state.startParentClientRect.height * 100
+    let newHeightInPercent: number = newHeightInPixel / this.state.startParentClientRect.height * 100
+    if (snapToGrid) {
+      const snapToGridDelta: number = referenceBox.getParent().transform.roundToGridPosition(newYInPercent)-newYInPercent
+      newYInPercent += snapToGridDelta
+      newHeightInPercent -= snapToGridDelta
+    }
 
-    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({y: newYInPercent, height: newHeightInPercent}, RenderPriority.RESPONSIVE)
+    referenceBox.updateMeasuresAndBorderingLinks({y: newYInPercent, height: newHeightInPercent}, RenderPriority.RESPONSIVE)
   }
 
-  private static dragWestBorder(clientX: number, clientY: number): void {
+  private static dragWestBorder(clientX: number, clientY: number, snapToGrid: boolean): void {
     if (this.state == null) {
       util.logWarning("ScaleManager: state is null while resizing")
       return
     }
 
+    const referenceBox: Box = this.state.scaling.referenceBox
+
     const dragDistanceInPixel: number = clientX - this.state.startClientX
     const newXInPixel: number = this.state.startClientRect.x - this.state.startParentClientRect.x + dragDistanceInPixel
     const newWidthInPixel: number = this.state.startClientRect.width - dragDistanceInPixel
 
-    const newXInPercent: number = newXInPixel / this.state.startParentClientRect.width * 100
-    const newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
+    let newXInPercent: number = newXInPixel / this.state.startParentClientRect.width * 100
+    let newWidthInPercent: number = newWidthInPixel / this.state.startParentClientRect.width * 100
+    if (snapToGrid) {
+      const snapToGridDelta: number = referenceBox.getParent().transform.roundToGridPosition(newXInPercent)-newXInPercent
+      newXInPercent += snapToGridDelta
+      newWidthInPercent -= snapToGridDelta
+    }
 
-    this.state.scaling.referenceBox.updateMeasuresAndBorderingLinks({x: newXInPercent, width: newWidthInPercent}, RenderPriority.RESPONSIVE)
+    referenceBox.updateMeasuresAndBorderingLinks({x: newXInPercent, width: newWidthInPercent}, RenderPriority.RESPONSIVE)
   }
 
   private static dragEnd(): void {

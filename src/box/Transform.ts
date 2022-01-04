@@ -28,7 +28,7 @@ export class Transform {
     return new LocalPosition(this.roundToGridPosition(position.percentX), this.roundToGridPosition(position.percentY))
   }
 
-  private roundToGridPosition(position: number): number {
+  public roundToGridPosition(position: number): number {
     return Math.round(position/4) * 4
   }
 
