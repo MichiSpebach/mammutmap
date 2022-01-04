@@ -191,12 +191,12 @@ export abstract class Box implements DropTarget, Hoverable {
     if (!this.isRendered()) {
       this.renderStyle()
 
+      const borderHtml = `<div id="${this.border.getId()}"></div>`
       const headerHtml = `<div id="${this.header.getId()}"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}"></div>`
       const headerAndBodyHtml = `<div style="width:100%;height:100%;overflow:hidden;">${headerHtml+bodyHtml}</div>`
-      const borderHtml = `<div id="${this.border.getId()}"></div>`
       const linksHtml = `<div id="${this.links.getId()}"></div>`
-      await renderManager.setContentTo(this.getId(), headerAndBodyHtml+borderHtml+linksHtml)
+      await renderManager.setContentTo(this.getId(), borderHtml+headerAndBodyHtml+linksHtml)
 
       await this.header.render()
       await this.border.render()
