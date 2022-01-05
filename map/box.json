@@ -688,6 +688,44 @@
 					"y": 15.094520220148361
 				}
 			]
+		},
+		{
+			"id": "jf876fccnjg",
+			"fromWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 96.46397396064506,
+					"y": 99.92654537235846
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "v8ooobkjdto",
+					"boxName": "Transform.ts",
+					"x": 0,
+					"y": 17.406246841200847
+				}
+			]
+		},
+		{
+			"id": "un3lia2d5n8",
+			"fromWayPoints": [
+				{
+					"boxId": "v8ooobkjdto",
+					"boxName": "Transform.ts",
+					"x": 0.7873531401857661,
+					"y": 25.169311634489034
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "iu4msv07ut8",
+					"boxName": "Box.ts",
+					"x": 92.30063618878532,
+					"y": 99.20895016386032
+				}
+			]
 		}
 	]
 }
