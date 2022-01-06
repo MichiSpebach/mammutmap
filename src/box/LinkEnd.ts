@@ -8,6 +8,7 @@ import { DragManager } from '../DragManager'
 import { Box } from './Box'
 import { Link } from './Link'
 import { BoxWatcher } from './BoxWatcher'
+import { ClientPosition, LocalPosition } from './Transform'
 
 export class LinkEnd implements Draggable<Box> {
   private readonly id: string
@@ -15,7 +16,6 @@ export class LinkEnd implements Draggable<Box> {
   private shape: 'square'|'arrow'
   private rendered: boolean = false
   private borderingBox: Box|null = null
-  private recentDragPosition: {x: number, y: number}|null = null
   private static watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher|null = null
 
   public constructor(id: string, referenceLink: Link, shape: 'square'|'arrow') {
@@ -45,28 +45,27 @@ export class LinkEnd implements Draggable<Box> {
 
   public dragStart(clientX: number, clientY: number): Promise<void> {
     this.watchManagingBox()
-    this.recentDragPosition = {x: clientX, y: clientY}
     return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY, true)
   }
 
-  public drag(clientX: number, clientY: number): Promise<void> {
-    this.recentDragPosition = {x: clientX, y: clientY}
+  public async drag(clientX: number, clientY: number, dropTarget: Box, snapToGrid: boolean): Promise<void> {
+    if (snapToGrid) {
+      const localDropTargetPosition: {x: number, y: number} = await dropTarget.transformClientPositionToLocal(clientX, clientY)
+      const localDropTargetPositionSnappedToGrid: LocalPosition = dropTarget.transform.getNearestGridPositionOf(new LocalPosition(localDropTargetPosition.x, localDropTargetPosition.y))
+      const clientPositionSnappedToDropTargetsGrid: ClientPosition = await dropTarget.transform.localToClientPosition(localDropTargetPositionSnappedToGrid)
+      clientX = clientPositionSnappedToDropTargetsGrid.x
+      clientY = clientPositionSnappedToDropTargetsGrid.y
+    }
     return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY, true)
   }
 
   public async dragCancel(): Promise<void> {
-    this.recentDragPosition = null
     await this.referenceLink.render()
     this.unwatchManagingBox()
   }
 
   public async dragEnd(dropTarget: Box): Promise<void> {
-    if (this.recentDragPosition === null) {
-      util.logError('recentDragPosition is null')
-    }
-
     await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
-    this.recentDragPosition = null
     this.unwatchManagingBox()
   }
 

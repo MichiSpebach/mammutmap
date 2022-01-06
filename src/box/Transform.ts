@@ -29,7 +29,7 @@ export class Transform {
   }
 
   public roundToGridPosition(position: number): number {
-    return Math.round(position/4) * 4
+    return Math.round(position/5) * 5
   }
 
 }
