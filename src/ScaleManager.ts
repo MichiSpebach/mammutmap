@@ -1,13 +1,11 @@
 import * as util from './util'
+import { style } from './styleAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { BoxBorder } from './box/BoxBorder'
 import { Rect } from './Rect'
 import { Box } from './box/Box'
 
 export class ScaleManager {
-
-  private static readonly verticalStyleClass: string = 'nsResize'
-  private static readonly horizontalStyleClass: string = 'ewResize'
 
   //private static scalables: Map<string, BoxBorder> = new Map() // TODO: introduce interface Scalable
   private static state: {
@@ -58,16 +56,19 @@ export class ScaleManager {
 
     // TODO: set element draggable="true" or use mousedown instead of drag events
 
-    renderManager.addClassTo(scalable.getTopId(), this.verticalStyleClass)
-    renderManager.addClassTo(scalable.getBottomId(), this.verticalStyleClass)
-    renderManager.addClassTo(scalable.getRightId(), this.horizontalStyleClass)
-    renderManager.addClassTo(scalable.getLeftId(), this.horizontalStyleClass)
+    renderManager.addClassTo(scalable.getRightBottomId(), style.getDiagonalResizeClass())
+    renderManager.addClassTo(scalable.getTopId(), style.getVerticalResizeClass())
+    renderManager.addClassTo(scalable.getBottomId(), style.getVerticalResizeClass())
+    renderManager.addClassTo(scalable.getRightId(), style.getHorizontalResizeClass())
+    renderManager.addClassTo(scalable.getLeftId(), style.getHorizontalResizeClass())
 
+    this.addListenersForSide(scalable, scalable.getRightBottomId(), (x: number, y:number, snapToGrid: boolean) => this.dragRightBottom(x, y, snapToGrid))
     this.addListenersForSide(scalable, scalable.getRightId(), (x: number, y:number, snapToGrid: boolean) => this.dragEastBorder(x, y, snapToGrid))
     this.addListenersForSide(scalable, scalable.getBottomId(), (x: number, y:number, snapToGrid: boolean) => this.dragSouthBorder(x, y, snapToGrid))
     this.addListenersForSide(scalable, scalable.getTopId(), (x: number, y:number, snapToGrid: boolean) => this.dragNorthBorder(x, y, snapToGrid))
     this.addListenersForSide(scalable, scalable.getLeftId(), (x: number, y:number, snapToGrid: boolean) => this.dragWestBorder(x, y, snapToGrid))
 
+    //this.scalables.set(scalable.getRightBottomId(), scalable)
     //this.scalables.set(scalable.getTopId(), scalable)
     //this.scalables.set(scalable.getBottomId(), scalable)
     //this.scalables.set(scalable.getRightId(), scalable)
@@ -75,11 +76,13 @@ export class ScaleManager {
   }
 
   public static removeScalable(scalable: BoxBorder) {
-    renderManager.removeClassFrom(scalable.getTopId(), this.verticalStyleClass)
-    renderManager.removeClassFrom(scalable.getBottomId(), this.verticalStyleClass)
-    renderManager.removeClassFrom(scalable.getRightId(), this.horizontalStyleClass)
-    renderManager.removeClassFrom(scalable.getLeftId(), this.horizontalStyleClass)
+    renderManager.removeClassFrom(scalable.getRightBottomId(), style.getDiagonalResizeClass())
+    renderManager.removeClassFrom(scalable.getTopId(), style.getVerticalResizeClass())
+    renderManager.removeClassFrom(scalable.getBottomId(), style.getVerticalResizeClass())
+    renderManager.removeClassFrom(scalable.getRightId(), style.getHorizontalResizeClass())
+    renderManager.removeClassFrom(scalable.getLeftId(), style.getHorizontalResizeClass())
 
+    this.removeListenersForSide(scalable.getRightBottomId())
     this.removeListenersForSide(scalable.getRightId())
     this.removeListenersForSide(scalable.getBottomId())
     this.removeListenersForSide(scalable.getTopId())
@@ -117,6 +120,12 @@ export class ScaleManager {
       startClientX: clientX,
       startClientY: clientY
     }
+  }
+
+  private static dragRightBottom(clientX: number, clientY: number, snapToGrid: boolean): void {
+    // TODO: triggers render two times, implement with one render
+    this.dragEastBorder(clientX, clientY, snapToGrid)
+    this.dragSouthBorder(clientX, clientY, snapToGrid)
   }
 
   private static async dragEastBorder(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {

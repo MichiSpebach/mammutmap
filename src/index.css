@@ -23,9 +23,11 @@ body {
 .nsResize {
   cursor:ns-resize;
 }
-
 .ewResize {
   cursor:ew-resize;
+}
+.nwseResize {
+  cursor:nwse-resize;
 }
 
 .draggable {

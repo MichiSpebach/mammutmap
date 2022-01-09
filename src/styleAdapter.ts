@@ -6,6 +6,9 @@ interface Style {
   getFileBoxHeaderClass(): string
   getFolderBoxHeaderClass(): string
   getBoxBorderLineClass(mapDataFileExisting: boolean): string
+  getHorizontalResizeClass(): string
+  getVerticalResizeClass(): string
+  getDiagonalResizeClass(): string
   getHighlightClass(): string
   getLinkColor(): string
 }
@@ -38,6 +41,16 @@ class DarkTheme implements Style {
     } else {
       return 'boxBorderLineNoMapData'
     }
+  }
+
+  public getHorizontalResizeClass(): string {
+    return 'ewResize'
+  }
+  public getVerticalResizeClass(): string {
+    return 'nsResize'
+  }
+  public getDiagonalResizeClass(): string {
+    return 'nwseResize'
   }
 
   public getHighlightClass(): string {
