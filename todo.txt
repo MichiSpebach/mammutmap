@@ -1,4 +1,7 @@
 
+improve snapToGrid: when draggable snaps below/behind a box, the box should be marked as dropTarget
+improve snapToGrid: when zooming in make snapToGrid finer?
+
 introduce FileManager|MapDataFileManager|FileSystemAdapter|FileSystemManager that queues file operations like RenderManager?
 
 filter to only show some parts, for example only links of one class with variable follow depth

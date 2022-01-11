@@ -20,9 +20,21 @@ export class FileBoxBody extends BoxBody {
       return
     }
 
-    const dataConvertedToHtml: string = await fileSystem.readFileAndConvertToHtml(this.referenceFileBox.getSrcPath())
-    const content: string = `<pre id="${this.getContentId()}" style="margin:0px;">${dataConvertedToHtml}</pre>`
-    return renderManager.setContentTo(this.getId(), content)
+    const normalizedFileName: string = this.referenceFileBox.getName().toLowerCase()
+    try {
+      // TODO: make something like this work: getImageType().startsWith('image/')
+      if (normalizedFileName.endsWith('.png') || normalizedFileName.endsWith('.jpg') || normalizedFileName.endsWith('.svg')) {
+        this.setContent(await this.formHtmlContentForImage())
+      } else {
+        this.setContent(await this.formHtmlContentForTextFile())
+      }
+    } catch(e) {
+      this.setContent(this.formHtmlContentForError(e))
+    }
+  }
+
+  private async setContent(content: string): Promise<void> {
+    await renderManager.setContentTo(this.getId(), content)
   }
 
   public async executeUnrenderIfPossible(): Promise<{rendered: boolean}> {
@@ -31,6 +43,19 @@ export class FileBoxBody extends BoxBody {
     }
     await renderManager.remove(this.getContentId())
     return {rendered: false}
+  }
+
+  private async formHtmlContentForImage(): Promise<string|never> {
+    return `<img id="${this.getContentId()}" style="width:100%;" src="${this.referenceFileBox.getSrcPath()}">`
+  }
+
+  private async formHtmlContentForTextFile(): Promise<string|never> {
+    const dataConvertedToHtml: string = await fileSystem.readFileAndConvertToHtml(this.referenceFileBox.getSrcPath())
+    return `<pre id="${this.getContentId()}" style="margin:0px;">${dataConvertedToHtml}</pre>`
+  }
+
+  private formHtmlContentForError(errorMessage: string): string {
+    return `<div id="${this.getContentId()}" style="color:red;">${errorMessage}</div>`
   }
 
 }
