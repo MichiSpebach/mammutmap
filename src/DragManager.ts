@@ -64,18 +64,18 @@ export class DragManager {
     renderManager.removeEventListenerFrom(draggableId, 'dragend')
   }
 
-  private static async onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean) {
-    await renderManager.addClassTo(elementToDrag.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
-    elementToDrag.dragStart(clientX, clientY)
+  private static onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean): void {
     this.setState({dragging: elementToDrag, draggingOver: elementToDrag.getDropTargetAtDragStart(), clickToDropMode: clickToDropMode})
+    renderManager.addClassTo(elementToDrag.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
+    elementToDrag.dragStart(clientX, clientY)
   }
 
-  private static onDrag(clientX: number, clientY: number, snapToGrid: boolean) {
+  private static onDrag(clientX: number, clientY: number, snapToGrid: boolean): void {
     const state: {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} = this.getState()
     state.dragging.drag(clientX, clientY, state.draggingOver, snapToGrid)
   }
 
-  private static onDragEnd() {
+  private static onDragEnd(): void {
     const state: {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} = this.getState()
 
     renderManager.removeClassFrom(state.dragging.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
