@@ -67,10 +67,14 @@ function escapeCharForHtml(c: string): string {
       return '&#92;'
     case '\n':
       return '<br/>'
+    case '\r':
+      return ''
     case '\'':
       return '&#39;'
     case '"':
       return '&quot;'
+    case '`':
+      return '&#96;'
     case '<':
       return '&lt;'
     case '>':
