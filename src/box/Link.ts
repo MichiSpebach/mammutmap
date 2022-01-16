@@ -1,4 +1,4 @@
-import * as util from '../util'
+import { util } from '../util'
 import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu'

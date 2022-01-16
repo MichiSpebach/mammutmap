@@ -1,5 +1,5 @@
 import { Menu, MenuItem } from 'electron'
-import * as util from './util'
+import { util } from './util'
 import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'

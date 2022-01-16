@@ -1,4 +1,4 @@
-import * as util from '../util'
+import { util } from '../util'
 import { BoxMapLinkData } from './BoxMapLinkData'
 
 export class BoxMapData {
@@ -76,5 +76,5 @@ export class BoxMapData {
   public toJson(): string {
     return util.toFormattedJson(this)
   }
-  
+
 }

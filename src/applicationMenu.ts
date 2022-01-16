@@ -1,5 +1,5 @@
 import { Menu, MenuItem, dialog } from 'electron'
-import * as util from './util'
+import { util } from './util'
 import { settings } from './Settings'
 import * as map from './Map'
 
@@ -11,13 +11,13 @@ export function setApplicationMenu(): void {
         {
           label: 'Open /src...',
           click: () => {
-            openFolder('/src')
+            openFolder('/src') // TODO: confusing, remove this option
           }
         },
         {
           label: 'Open Folder...',
           click: () => {
-            openFolder()
+            openFolder() // TODO: make this option smart look in ./ and ./map
           }
         },
         {

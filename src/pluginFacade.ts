@@ -3,7 +3,7 @@ import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
 import { RootFolderBox } from './box/RootFolderBox'
 import { map } from './Map'
-import * as util from './util'
+import { util } from './util'
 import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
 

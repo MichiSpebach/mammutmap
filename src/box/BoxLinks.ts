@@ -1,4 +1,4 @@
-import * as util from '../util'
+import { util } from '../util'
 import { renderManager } from '../RenderManager'
 import { Box } from './Box'
 import { Link } from './Link'

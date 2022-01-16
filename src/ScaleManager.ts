@@ -1,4 +1,4 @@
-import * as util from './util'
+import { util } from './util'
 import { style } from './styleAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { BoxBorder } from './box/BoxBorder'

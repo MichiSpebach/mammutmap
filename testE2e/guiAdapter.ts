@@ -1,7 +1,7 @@
 import puppeteer = require('puppeteer-core')
 import { spawn } from 'child_process'
 import { Browser, Page } from 'puppeteer-core'
-import * as util from '../src/util'
+import { util } from '../src/util'
 
 const electronDebugPort: number = 9291
 const timeoutForPuppeteerToConnectToElectronInMs: number = 15000

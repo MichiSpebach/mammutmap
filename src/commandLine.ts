@@ -1,6 +1,6 @@
 import { dom } from './domAdapter'
 import * as map from './Map'
-import * as util from './util'
+import { util } from './util'
 import * as commandLinePluginFacade from './commandLinePluginFacade'
 
 export function init(): void {

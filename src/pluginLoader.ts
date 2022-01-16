@@ -1,6 +1,6 @@
 import { Dirent } from 'fs'
 import { MenuItem } from 'electron'
-import * as util from './util'
+import { util } from './util'
 import * as fileSystem from './fileSystemAdapter'
 import * as applicationMenu from './applicationMenu'
 

@@ -1,4 +1,4 @@
-import * as util from './util'
+import { util } from './util'
 import { dom } from './domAdapter'
 import { renderManager } from './RenderManager'
 import { settings } from './Settings'

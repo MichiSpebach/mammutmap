@@ -63,4 +63,4 @@ class DarkTheme implements Style {
 
 }
 
-export const style: Style = new DarkTheme()
+export let style: Style = new DarkTheme()

@@ -1,6 +1,6 @@
 import { Box } from './Box';
 import { boxManager } from './BoxManager'
-import * as util from '../util'
+import { util } from '../util'
 import { map } from '../Map'
 
 export class BoxWatcher {

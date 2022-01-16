@@ -1,4 +1,4 @@
-import * as util from './util'
+import { util } from './util'
 import { dom } from './domAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { Draggable } from './Draggable'
@@ -98,11 +98,8 @@ export class DragManager {
   }
 
   private static onDragEnter(dropTarget: DropTarget): void {
-    //if (!await dom.containsClass(sourceId, this.draggableStyleClass)) {
-    //  return // TODO: make this somehow work, sourceId is not contained in dragenter event
-    //}
     if (this.state == null) {
-      //util.logWarning("DragManager: state is null although dragging is in progress") // TODO: reactivate when condition above works
+      //util.logWarning("DragManager: state is null although dragging is in progress") // TODO: reactivate when ensured that eventType is from dragenter not mouseover
       return
     }
     if (!this.state.dragging.canBeDroppedInto(dropTarget)) {

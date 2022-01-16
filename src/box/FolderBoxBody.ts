@@ -1,4 +1,4 @@
-import * as util from '../util'
+import { util } from '../util'
 import * as fileSystem from '../fileSystemAdapter'
 import { renderManager } from '../RenderManager'
 import { Dirent } from 'original-fs'

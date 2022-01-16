@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import { Dirent, promises as fsPromises } from 'fs'
-import * as util from './util'
+import { util } from './util'
 import { BoxMapData } from './box/BoxMapData'
 
 export async function loadMapData(mapDataFilePath: string): Promise<BoxMapData|null> {

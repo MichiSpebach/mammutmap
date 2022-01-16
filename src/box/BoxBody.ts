@@ -2,7 +2,7 @@ import { renderManager } from '../RenderManager'
 import { settings } from '../Settings'
 import { Rect } from '../Rect'
 import { Box } from './Box'
-import * as util from '../util'
+import { util } from '../util'
 
 export abstract class BoxBody {
   private readonly referenceBox: Box
