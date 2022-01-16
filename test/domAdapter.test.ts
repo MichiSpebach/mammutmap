@@ -1,54 +1,44 @@
 import { util } from '../src/util'
 import { DocumentObjectModelAdapter } from '../src/domAdapter'
 
-test('executeJavaScriptCrashSafe', async () => {
-  const utilMock = mockUtil()
+test('executeJavaScript', async () => {
   const scenario = setupScenario()
 
-  // TODO: 
-  //await scenario.dom.executeJavaScriptCrashSafe('util.logInfo("successfully executed")')
-
-  //expect(utilMock.infoCalls).toHaveLength(1)
-  //expect(utilMock.infoCalls).toContain('successfully executed')
-  expect(utilMock.warningCalls).toHaveLength(0)
+  expect(await scenario.dom.executeJavaScript('"successfully "+"executed"')).toBe('successfully executed')
 })
 
-test('executeJavaScriptCrashSafe with error', async () => {
-  const utilMock = mockUtil()
+test('executeJavaScript with error', async () => {
   const scenario = setupScenario()
 
-  await scenario.dom.executeJavaScriptCrashSafe('throw new Error("test error")')
-
-  expect(utilMock.infoCalls).toHaveLength(0)
-  expect(utilMock.warningCalls).toHaveLength(1)
-  expect(utilMock.warningCalls).toContain('error in render thread occured: test error. the javascript that was tried to execute was: throw new Error("test error")')
+  expect(async () => await scenario.dom.executeJavaScript('throw new Error("test error")')).rejects
+    .toThrow(Error('error in render thread occured: test error. the javascript that was tried to execute was: throw new Error("test error")'))
 })
 
-test('executeJavaScriptCrashSafe long javascript with error', async () => {
-  const utilMock = mockUtil()
+test('executeJavaScript long javascript with error', async () => {
   const scenario = setupScenario()
 
   let rendererCode = 'const text = "rendererCode throws Error but is too long to be fully displayed"\n'
   rendererCode += 'throw new Error("error of long rendererCode")'
-  await scenario.dom.executeJavaScriptCrashSafe(rendererCode)
-
-  expect(utilMock.infoCalls).toHaveLength(0)
-  expect(utilMock.warningCalls).toHaveLength(1)
-  expect(utilMock.warningCalls).toContain('error in render thread occured: error of long rendererCode. the javascript that was tried to execute was: const text = "rendererCode throws Error but is too[...]yed"\nthrow new Error("error of long rendererCode")')
+  expect(async () => await scenario.dom.executeJavaScript(rendererCode)).rejects
+    .toThrow(Error('error in render thread occured: error of long rendererCode. the javascript that was tried to execute was: const text = "rendererCode throws Error but is too[...]yed"\nthrow new Error("error of long rendererCode")'))
 })
 
-function mockUtil(): {infoCalls: string[], warningCalls: string[]} {
-  const infoCalls: string[] = []
-  util.logInfo = (message: string): void => {
-    infoCalls.push(message)
-  }
+test('executeJavaScriptSuppressingErrors with error', async () => {
+  const utilMock = mockUtil()
+  const scenario = setupScenario()
 
+  await scenario.dom.executeJavaScriptSuppressingErrors('throw new Error("test error")')
+
+  expect(utilMock.warningCalls).toHaveLength(1)
+  expect(utilMock.warningCalls).toContain('error in render thread occured: test error. the javascript that was tried to execute was: throw new Error("test error")')
+})
+
+function mockUtil(): {warningCalls: string[]} {
   const warningCalls: string[] = []
   util.logWarning = (message: string): void => {
     warningCalls.push(message)
   }
-
-  return {infoCalls: infoCalls, warningCalls: warningCalls}
+  return {warningCalls: warningCalls}
 }
 
 function setupScenario(): {dom: DocumentObjectModelAdapter} {

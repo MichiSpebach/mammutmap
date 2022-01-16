@@ -44,21 +44,22 @@ export class DocumentObjectModelAdapter {
     let js = 'let rect = document.getElementById("' + id + '").getBoundingClientRect();'
     js += 'return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};' // manual copy because DOMRect could not be cloned
 
-    const rect = await this.executeJavaScript(js)
+    // not executeJavaScript because of "UnhandledPromiseRejectionWarning: Unhandled promise rejection."
+    const rect = await this.executeJavaScriptInFunction(js)
 
     return new Rect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
   }
 
   public appendChildTo(parentId: string, childId: string): Promise<void> {
     // not executeJsOnElement because of "UnhandledPromiseRejectionWarning: Unhandled promise rejection."
-    return this.executeJavaScript('document.getElementById("' + parentId + '").appendChild(document.getElementById("' + childId + '"))')
+    return this.executeJavaScriptInFunction('document.getElementById("' + parentId + '").appendChild(document.getElementById("' + childId + '"))')
   }
 
   public addContentTo(id: string, content: string): Promise<void> {
     let js = 'const temp = document.createElement("template");'
     js += 'temp.innerHTML = \''+content+'\';'
     js += 'document.getElementById("'+id+'").append(temp.content);'
-    return this.executeJavaScriptCrashSafe(js)
+    return this.executeJavaScriptSuppressingErrors(js)
   }
 
   public batch(batch: {elementId: string, method: BatchMethod, value: string}[]): Promise<void> {
@@ -75,27 +76,27 @@ export class DocumentObjectModelAdapter {
           return {elementId: command.elementId, jsToExecute: "classList.remove('"+command.value+"')"}
       }
     })
-    return this.executeJsOnElements(commands)
+    return this.executeJsOnElementsSuppressingErrors(commands)
   }
 
   public setContentTo(id: string, content: string): Promise<void> {
-    return this.executeJsOnElementCrashSafe(id, "innerHTML = '"+content+"'")
+    return this.executeJsOnElementSuppressingErrors(id, "innerHTML = '"+content+"'")
   }
 
   public remove(id: string): Promise<void> {
-    return this.executeJsOnElementCrashSafe(id, "remove()")
+    return this.executeJsOnElementSuppressingErrors(id, "remove()")
   }
 
   public setStyleTo(id: string, style: string): Promise<void> {
-    return this.executeJsOnElementCrashSafe(id, "style = '"+style+"'")
+    return this.executeJsOnElementSuppressingErrors(id, "style = '"+style+"'")
   }
 
   public addClassTo(id: string, className: string): Promise<void> {
-    return this.executeJsOnElementCrashSafe(id, "classList.add('"+className+"')")
+    return this.executeJsOnElementSuppressingErrors(id, "classList.add('"+className+"')")
   }
 
   public removeClassFrom(id: string, className: string): Promise<void> {
-    return this.executeJsOnElementCrashSafe(id, "classList.remove('"+className+"')")
+    return this.executeJsOnElementSuppressingErrors(id, "classList.remove('"+className+"')")
   }
 
   public containsClass(id: string, className: string): Promise<boolean> {
@@ -111,11 +112,11 @@ export class DocumentObjectModelAdapter {
   }
 
   public setValueTo(id: string, value: string): Promise<void> {
-    return this.executeJsOnElementCrashSafe(id, "value='"+value+"'")
+    return this.executeJsOnElementSuppressingErrors(id, "value='"+value+"'")
   }
 
   public scrollToBottom(id: string): Promise<void> {
-    return this.executeJsOnElementCrashSafe(id, "scrollTop = Number.MAX_SAFE_INTEGER")
+    return this.executeJsOnElementSuppressingErrors(id, "scrollTop = Number.MAX_SAFE_INTEGER")
   }
 
   public async addKeypressListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
@@ -129,7 +130,7 @@ export class DocumentObjectModelAdapter {
     rendererFunction += '}'
     rendererFunction += '}'
 
-    await this.executeJavaScript("document.getElementById('"+id+"').onkeypress = "+rendererFunction)
+    await this.executeJavaScriptInFunction("document.getElementById('"+id+"').onkeypress = "+rendererFunction)
 
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, value: string) => callback(value))
   }
@@ -143,7 +144,7 @@ export class DocumentObjectModelAdapter {
     rendererFunction += 'ipc.send("'+ipcChannelName+'", event.deltaY, event.clientX, event.clientY);'
     rendererFunction += '}'
 
-    await this.executeJavaScript("document.getElementById('"+id+"').onwheel = "+rendererFunction)
+    await this.executeJavaScriptInFunction("document.getElementById('"+id+"').onwheel = "+rendererFunction)
 
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
   }
@@ -162,7 +163,7 @@ export class DocumentObjectModelAdapter {
     rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey);'
     rendererFunction += '}'
 
-    await this.executeJavaScript("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
+    await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed))
   }
@@ -183,7 +184,7 @@ export class DocumentObjectModelAdapter {
     rendererFunction += '}'
     rendererFunction += '}'
 
-    await this.executeJavaScript("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
+    await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed))
   }
@@ -217,23 +218,41 @@ export class DocumentObjectModelAdapter {
     return this.ipcChannels.length
   }
 
-  private executeJsOnElements(commands: {elementId: string, jsToExecute: string}[]): Promise<void> {
+  private executeJsOnElementsSuppressingErrors(commands: {elementId: string, jsToExecute: string}[]): Promise<void> {
     let jsBatch: string = ''
     commands.forEach(command => {
       jsBatch += "document.getElementById('"+command.elementId+"')."+command.jsToExecute+";"
     })
-    return this.executeJavaScriptCrashSafe(jsBatch)
+    return this.executeJavaScriptSuppressingErrors(jsBatch)
+  }
+
+  private executeJsOnElementSuppressingErrors(elementId: string, jsToExecute: string): Promise<void> {
+    return this.executeJavaScriptSuppressingErrors("document.getElementById('"+elementId+"')."+jsToExecute)
   }
 
   private executeJsOnElement(elementId: string, jsToExecute: string): Promise<any> {
-    return this.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExecute)
+    return this.executeJavaScript("document.getElementById('"+elementId+"')."+jsToExecute)
   }
 
-  private executeJsOnElementCrashSafe(elementId: string, jsToExecute: string): Promise<void> {
-    return this.executeJavaScriptCrashSafe("document.getElementById('" + elementId + "')." + jsToExecute)
+  public async executeJavaScriptSuppressingErrors(jsToExecute: string): Promise<void> { // public only for unit tests
+    try {
+      await this.executeJavaScript(jsToExecute)
+    } catch(error) {
+      util.logWarning(error.message)
+    }
   }
 
-  public async executeJavaScriptCrashSafe(jsToExecute: string): Promise<void> { // public only for unit tests
+  private executeJavaScriptInFunction(jsToExecute: string): Promise<any> {
+    // () => {..} because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
+    let rendererCode = '(() => {'
+    rendererCode += jsToExecute
+    rendererCode += '}).call()'
+
+    return this.executeJavaScript(rendererCode)
+  }
+
+  public async executeJavaScript(jsToExecute: string): Promise<any> { // public only for unit tests
+    // otherwise render thread would crash when error occurs
     // TODO: does not work when jsToExecute destroys escaping and leads to invalid javascript
     const rendererCode = `try {
       ${jsToExecute}
@@ -248,17 +267,10 @@ export class DocumentObjectModelAdapter {
       if (jsToExecute.length > 110) {
         jsToExecuteEndings = jsToExecute.substring(0, 50)+'[...]'+jsToExecute.substring(jsToExecute.length-50)
       }
-      util.logWarning('error in render thread occured: '+result.message+'. the javascript that was tried to execute was: '+jsToExecuteEndings)
+      throw new Error('error in render thread occured: '+result.message+'. the javascript that was tried to execute was: '+jsToExecuteEndings)
     }
-  }
 
-  private executeJavaScript(jsToExecute: string): Promise<any> {
-    // () => {..} because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
-    let rendererCode = '(() => {'
-    rendererCode += jsToExecute
-    rendererCode += '}).call()'
-
-    return this.webContents.executeJavaScript(rendererCode)
+    return result
   }
 
 }
