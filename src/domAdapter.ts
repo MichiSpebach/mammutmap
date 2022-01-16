@@ -1,4 +1,4 @@
-import * as util from './util'
+import { util } from './util'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { Rect } from './Rect'
 
@@ -56,10 +56,9 @@ export class DocumentObjectModelAdapter {
 
   public addContentTo(id: string, content: string): Promise<void> {
     let js = 'const temp = document.createElement("template");'
-    js += 'temp.innerHTML = \'' + content + '\';'
-    js += 'document.getElementById("' + id + '").append(temp.content);'
-
-    return this.executeJavaScript(js)
+    js += 'temp.innerHTML = \''+content+'\';'
+    js += 'document.getElementById("'+id+'").append(temp.content);'
+    return this.executeJavaScriptCrashSafe(js)
   }
 
   public batch(batch: {elementId: string, method: BatchMethod, value: string}[]): Promise<void> {
@@ -80,27 +79,27 @@ export class DocumentObjectModelAdapter {
   }
 
   public setContentTo(id: string, content: string): Promise<void> {
-    return this.executeJsOnElement(id, "innerHTML = '" + content + "'")
+    return this.executeJsOnElementCrashSafe(id, "innerHTML = '"+content+"'")
   }
 
   public remove(id: string): Promise<void> {
-    return this.executeJsOnElement(id, "remove()")
+    return this.executeJsOnElementCrashSafe(id, "remove()")
   }
 
   public setStyleTo(id: string, style: string): Promise<void> {
-    return this.executeJsOnElement(id, "style = '" + style + "'")
+    return this.executeJsOnElementCrashSafe(id, "style = '"+style+"'")
   }
 
   public addClassTo(id: string, className: string): Promise<void> {
-    return this.executeJsOnElement(id, "classList.add('" + className + "')")
+    return this.executeJsOnElementCrashSafe(id, "classList.add('"+className+"')")
   }
 
   public removeClassFrom(id: string, className: string): Promise<void> {
-    return this.executeJsOnElement(id, "classList.remove('" + className + "')")
+    return this.executeJsOnElementCrashSafe(id, "classList.remove('"+className+"')")
   }
 
   public containsClass(id: string, className: string): Promise<boolean> {
-    return this.executeJsOnElement(id, "classList.contains('" + className + "')")
+    return this.executeJsOnElement(id, "classList.contains('"+className+"')")
   }
 
   public getClassesOf(id: string): Promise<string[]> {
@@ -112,11 +111,11 @@ export class DocumentObjectModelAdapter {
   }
 
   public setValueTo(id: string, value: string): Promise<void> {
-    return this.executeJsOnElement(id, "value='"+value+"'")
+    return this.executeJsOnElementCrashSafe(id, "value='"+value+"'")
   }
 
   public scrollToBottom(id: string): Promise<void> {
-    return this.executeJsOnElement(id, "scrollTop = Number.MAX_SAFE_INTEGER")
+    return this.executeJsOnElementCrashSafe(id, "scrollTop = Number.MAX_SAFE_INTEGER")
   }
 
   public async addKeypressListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
@@ -223,11 +222,34 @@ export class DocumentObjectModelAdapter {
     commands.forEach(command => {
       jsBatch += "document.getElementById('"+command.elementId+"')."+command.jsToExecute+";"
     })
-    return this.webContents.executeJavaScript(jsBatch)
+    return this.executeJavaScriptCrashSafe(jsBatch)
   }
 
   private executeJsOnElement(elementId: string, jsToExecute: string): Promise<any> {
-    return this.webContents.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExecute)
+    return this.executeJavaScript("document.getElementById('" + elementId + "')." + jsToExecute)
+  }
+
+  private executeJsOnElementCrashSafe(elementId: string, jsToExecute: string): Promise<void> {
+    return this.executeJavaScriptCrashSafe("document.getElementById('" + elementId + "')." + jsToExecute)
+  }
+
+  public async executeJavaScriptCrashSafe(jsToExecute: string): Promise<void> { // public only for unit tests
+    // TODO: does not work when jsToExecute destroys escaping and leads to invalid javascript
+    const rendererCode = `try {
+      ${jsToExecute}
+    } catch(error) {
+      error
+    }`
+
+    const result = await this.webContents.executeJavaScript(rendererCode)
+
+    if (result instanceof Error) {
+      let jsToExecuteEndings: string = jsToExecute
+      if (jsToExecute.length > 110) {
+        jsToExecuteEndings = jsToExecute.substring(0, 50)+'[...]'+jsToExecute.substring(jsToExecute.length-50)
+      }
+      util.logWarning('error in render thread occured: '+result.message+'. the javascript that was tried to execute was: '+jsToExecuteEndings)
+    }
   }
 
   private executeJavaScript(jsToExecute: string): Promise<any> {
