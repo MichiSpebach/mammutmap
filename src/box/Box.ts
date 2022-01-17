@@ -1,5 +1,5 @@
 import { util } from '../util'
-import * as fileSystem from '../fileSystemAdapter'
+import { fileSystem } from '../fileSystemAdapter'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'

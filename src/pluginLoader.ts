@@ -1,7 +1,7 @@
 import { Dirent } from 'fs'
 import { MenuItem } from 'electron'
 import { util } from './util'
-import * as fileSystem from './fileSystemAdapter'
+import { fileSystem } from './fileSystemAdapter'
 import * as applicationMenu from './applicationMenu'
 
 export async function loadPlugins(): Promise<void> {

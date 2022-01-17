@@ -1,4 +1,4 @@
-import * as fileSystem from '../fileSystemAdapter'
+import { fileSystem } from '../fileSystemAdapter'
 import { renderManager } from '../RenderManager'
 import { BoxBody } from './BoxBody'
 import { FileBox } from './FileBox'

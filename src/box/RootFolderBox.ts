@@ -1,4 +1,4 @@
-import * as fileSystem from '../fileSystemAdapter'
+import { fileSystem } from '../fileSystemAdapter'
 import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
 

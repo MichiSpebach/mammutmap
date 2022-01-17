@@ -1,5 +1,5 @@
 import { util } from './util'
-import * as fileSystem from './fileSystemAdapter'
+import { fileSystem } from './fileSystemAdapter'
 
 class Settings {
 
@@ -17,7 +17,7 @@ class Settings {
   }
 
   private async save(): Promise<void> {
-    await fileSystem.writeFile(Settings.settingsFilePath, util.toFormattedJson(this))
+    await fileSystem.writeFile(Settings.settingsFilePath, util.toFormattedJson(this)) // TODO: merge into existing settings file (not replacing whole file)
       .then(() => {
         util.logInfo('saved ' + Settings.settingsFilePath)
       })

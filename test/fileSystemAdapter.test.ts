@@ -1,4 +1,4 @@
-import * as fileSystem from '../src/fileSystemAdapter'
+import { fileSystem } from '../src/fileSystemAdapter'
 
 test('doesDirentExist', async () => {
   expect(await fileSystem.doesDirentExist('src')).toBe(true)
