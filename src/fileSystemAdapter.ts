@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import { Dirent, promises as fsPromises } from 'fs'
+import * as jsonMerger from 'json-merger'
 import { util } from './util'
 import { BoxMapData } from './box/BoxMapData'
 
@@ -11,6 +12,25 @@ export async function loadMapData(mapDataFilePath: string): Promise<BoxMapData|n
     .catch(_ => {
       return null
     })
+}
+
+export async function saveMapData(mapDataFilePath: string, data: BoxMapData): Promise<void> {
+  if (await doesDirentExist(mapDataFilePath)) {
+    await mergeJsonIntoFile(mapDataFilePath, data.toJson())
+      .catch(reason => util.logWarning('failed to merge mapData into '+mapDataFilePath+': '+reason))
+  } else {
+    await writeFile(mapDataFilePath, data.toJson())
+      .catch(reason => util.logWarning('failed to save '+mapDataFilePath+': '+reason))
+  }
+}
+
+export async function doesDirentExist(path: string): Promise<boolean> {
+  try {
+    await fsPromises.stat(path)
+    return true
+  } catch(_) {
+    return false
+  }
 }
 
 export function readdir(path: string): Promise<Dirent[]> {
@@ -27,6 +47,12 @@ export function readFile(path: string): Promise<string> {
 
 export function readFileSync(path: string): string {
   return fs.readFileSync(path, 'utf-8')
+}
+
+export async function mergeJsonIntoFile(path: string, json: string): Promise<void> {
+  const originalJson: string = await readFile(path)
+  const mergedJson: string = jsonMerger.mergeFiles([originalJson, json])
+  await writeFile(path, mergedJson)
 }
 
 export async function writeFile(path: string, data: string): Promise<void> {
