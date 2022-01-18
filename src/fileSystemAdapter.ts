@@ -1,6 +1,5 @@
 import * as fs from 'fs'
 import { Dirent, promises as fsPromises } from 'fs'
-import * as jsonMerger from 'json-merger'
 import { util } from './util'
 import { BoxMapData } from './box/BoxMapData'
 
@@ -18,7 +17,7 @@ class FileSystem {
 
   public async saveMapData(mapDataFilePath: string, data: BoxMapData): Promise<void> {
     if (await this.doesDirentExist(mapDataFilePath)) {
-      await this.mergeJsonIntoFile(mapDataFilePath, data.toJson())
+      await this.mergeObjectIntoJsonFile(mapDataFilePath, data)
         .catch(reason => util.logWarning('failed to merge mapData into '+mapDataFilePath+': '+reason))
     } else {
       await this.writeFile(mapDataFilePath, data.toJson())
@@ -51,9 +50,14 @@ class FileSystem {
     return fs.readFileSync(path, 'utf-8')
   }
 
-  public async mergeJsonIntoFile(path: string, json: string): Promise<void> {
+  public async mergeObjectIntoJsonFile(path: string, object: Object): Promise<void> {
+    // TODO: improve: originalJson should only changed where needed (not completely reformatted)
     const originalJson: string = await this.readFile(path)
-    const mergedJson: string = jsonMerger.mergeFiles([originalJson, json])
+    const originalObject: Object = JSON.parse(originalJson)
+
+    const mergedObject: Object = {...originalObject, ...object}
+    const mergedJson: string = util.toFormattedJson(mergedObject)
+
     await this.writeFile(path, mergedJson)
   }
 
