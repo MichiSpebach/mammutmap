@@ -69,6 +69,19 @@ test('mergeObjectIntoJsonFile deep', async () => {
     + '}')
 })
 
+test('mergeObjectIntoJsonFile undefined', async () => {
+  mockReadFile('{'
+    + '"id": "box1"'
+    + '}')
+  const getSavedData: () => string = mockWriteFile().getSavedData
+
+  await fileSystem.mergeObjectIntoJsonFile('path', {x: undefined})
+
+  expect(getSavedData()).toBe('{\n'
+    + '\t"id": "box1"\n'
+    + '}')
+})
+
 function mockReadFile(returnData: string): void {
   fileSystem.readFile = (_: string): Promise<string> => {
     return Promise.resolve(returnData)
