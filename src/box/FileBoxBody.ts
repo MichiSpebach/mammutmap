@@ -1,3 +1,4 @@
+import { util } from '../util'
 import { fileSystem } from '../fileSystemAdapter'
 import { renderManager } from '../RenderManager'
 import { BoxBody } from './BoxBody'
@@ -46,7 +47,7 @@ export class FileBoxBody extends BoxBody {
   }
 
   private async formHtmlContentForImage(): Promise<string|never> {
-    return `<img id="${this.getContentId()}" style="width:100%;" src="${this.referenceFileBox.getSrcPath()}">`
+    return `<img id="${this.getContentId()}" style="width:100%;" src="${util.escapeForHtml(this.referenceFileBox.getSrcPath())}">`
   }
 
   private async formHtmlContentForTextFile(): Promise<string|never> {
