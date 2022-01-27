@@ -15,22 +15,45 @@ class FileSystem {
       })
   }
 
+  public async loadFromJson<T extends BoxMapData>(filePath: string, buildFromJson: (json: string) => T): Promise<T|null> {
+    return this.readFile(filePath)
+      .then(json => {
+        return buildFromJson(json)
+      })
+      .catch(_ => {
+        return null
+      })
+  }
+
   public async saveMapData(mapDataFilePath: string, data: BoxMapData): Promise<void> {
-    if (await this.doesDirentExist(mapDataFilePath)) {
-      await this.mergeObjectIntoJsonFile(mapDataFilePath, data)
-        .catch(reason => util.logWarning('failed to merge mapData into '+mapDataFilePath+': '+reason))
+    await this.saveObject(mapDataFilePath, data)
+  }
+
+  public async saveObject(filePath: string, object: Object): Promise<void> {
+    if (await this.doesDirentExist(filePath)) {
+      await this.mergeObjectIntoJsonFile(filePath, object)
+        .catch(reason => util.logWarning('failed to merge object into '+filePath+': '+reason))
     } else {
-      await this.writeFile(mapDataFilePath, data.toJson())
-        .catch(reason => util.logWarning('failed to save '+mapDataFilePath+': '+reason))
+      await this.writeFile(filePath, util.toFormattedJson(object))
+        .catch(reason => util.logWarning('failed to write '+filePath+': '+reason))
     }
   }
 
+  public async doesDirentExistAndIsFile(path: string): Promise<boolean> {
+    const direntStats: fs.Stats|null = await this.getDirentStats(path)
+    return direntStats !== null && direntStats.isFile()
+  }
+
   public async doesDirentExist(path: string): Promise<boolean> {
+    const direntStats: fs.Stats|null = await this.getDirentStats(path)
+    return direntStats !== null
+  }
+
+  public async getDirentStats(path: string): Promise<fs.Stats|null> {
     try {
-      await fsPromises.stat(path)
-      return true
+      return await fsPromises.stat(path) // without await catch would not work
     } catch(_) {
-      return false
+      return null
     }
   }
 

@@ -2,6 +2,7 @@ import { dom } from './domAdapter'
 import * as map from './Map'
 import { util } from './util'
 import * as commandLinePluginFacade from './commandLinePluginFacade'
+import { ProjectSettings } from './ProjectSettings'
 
 export function init(): void {
   dom.addKeypressListenerTo('commandLine', 'Enter', processCommand)
@@ -15,7 +16,7 @@ async function processCommand(command: string): Promise<void> {
     case 'open':
       const folderPath: string = parameter
       util.logInfo('opening '+folderPath)
-      await map.loadAndSetMap(folderPath, folderPath+'/map')
+      await map.loadAndSetMap(new ProjectSettings(util.joinPaths([folderPath, '/map/', ProjectSettings.fileName]), '../', './'))
       util.logInfo('opening finished')
       return
     case 'close':

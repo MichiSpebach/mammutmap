@@ -1,42 +1,48 @@
 import { fileSystem } from '../fileSystemAdapter'
 import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
+import { ProjectSettings } from '../ProjectSettings'
 
 export class RootFolderBox extends FolderBox {
 
-  private static mapFileName = 'mapRoot.json' // TODO: find a more unique name
+  private projectSettings: ProjectSettings
 
-  private mapPath: string
-
-  public static async new(srcPath: string, mapPath: string): Promise<RootFolderBox> {
-    let mapData: BoxMapData|null = await fileSystem.loadMapData(mapPath+'/'+RootFolderBox.mapFileName)
+  public static async new(projectSettings: ProjectSettings): Promise<RootFolderBox> {
+    let mapData: BoxMapData|null = await fileSystem.loadMapData(projectSettings.getProjectSettingsFilePath())
     const mapDataFileExists: boolean = (mapData !== null)
     if (mapData === null) {
       mapData = BoxMapData.buildNew(5, 5, 90, 90)
     }
 
-    return new RootFolderBox(srcPath, mapPath, mapData, mapDataFileExists)
+    return new RootFolderBox(projectSettings, mapData, mapDataFileExists)
   }
 
-  private constructor(srcPath: string, mapPath: string, mapData: BoxMapData, mapDataFileExists: boolean) {
-    super(srcPath, null, mapData, mapDataFileExists)
-    this.mapPath = mapPath
+  private constructor(projectSettings: ProjectSettings, mapData: BoxMapData, mapDataFileExists: boolean) {
+    super(projectSettings.getAbsoluteSrcRootPath(), null, mapData, mapDataFileExists)
+    this.projectSettings = projectSettings
   }
 
   public getSrcPath(): string {
-    return this.getName()
+    return this.projectSettings.getAbsoluteSrcRootPath()
   }
 
   public getMapPath(): string {
-    return this.mapPath
+    return this.projectSettings.getAbsoluteMapRootPath()
   }
 
   public getMapDataFilePath(): string {
-    return this.getMapPath()+'/'+RootFolderBox.mapFileName
+    return this.projectSettings.getProjectSettingsFilePath()
   }
 
   public isRoot(): boolean {
     return true
+  }
+
+  public async saveMapData(): Promise<void> {
+    await super.saveMapData()
+    if (!this.isMapDataFileExisting()) {
+      await this.projectSettings.saveToFileSystem()
+    }
   }
 
 }

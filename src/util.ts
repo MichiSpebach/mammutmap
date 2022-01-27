@@ -87,6 +87,32 @@ class Util {
     }
   }
 
+  public joinPaths(paths: string[]): string {
+    let jointedPath: string = ''
+    for (let path of paths) {
+      if (jointedPath !== '') {
+        if (!jointedPath.endsWith('/') && !path.startsWith('/')) {
+          jointedPath += '/'
+        } else if (jointedPath.endsWith('/') && path.startsWith('/')) {
+          path = path.substring(1)
+        }
+        if (path.startsWith('../')) {
+          jointedPath = this.removeLastElementFromPath(jointedPath)
+          path = path.substring(3)
+        }
+        if (path.startsWith('./')) {
+          path = path.substring(2)
+        }
+      }
+      jointedPath += path
+    }
+    return jointedPath
+  }
+
+  public removeLastElementFromPath(path: string): string {
+    return path.replace(/[/][^/]*.$/, '/')
+  }
+
   public toFormattedJson(object: any) {
     return JSON.stringify(object, null, '\t')
   }

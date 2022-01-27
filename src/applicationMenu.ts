@@ -1,7 +1,9 @@
 import { Menu, MenuItem, dialog } from 'electron'
 import { util } from './util'
+import { fileSystem } from './fileSystemAdapter'
 import { settings } from './Settings'
 import * as map from './Map'
+import { ProjectSettings } from './ProjectSettings'
 
 export function setApplicationMenu(): void {
   const template: any = [
@@ -9,19 +11,13 @@ export function setApplicationMenu(): void {
       label: 'File',
       submenu: [
         {
-          label: 'Open /src...',
-          click: () => {
-            openFolder('/src') // TODO: confusing, remove this option
-          }
-        },
-        {
           label: 'Open Folder...',
           click: () => {
-            openFolder() // TODO: make this option smart look in ./ and ./map
+            openFolder()
           }
         },
         {
-          label: 'Open root.json...'
+          label: 'Open '+ProjectSettings.fileName+'...'
         }
       ]
     },
@@ -81,7 +77,7 @@ function getApplicationMenu(): Menu|never {
   return applicationMenu
 }
 
-async function openFolder(subFolder: string = ''): Promise<void> { // TODO: remove subFolder argument, is just workaround, later covered by project settings
+async function openFolder(): Promise<void> {
   const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
     title:'Select a folder',
     properties: ['openDirectory']
@@ -99,8 +95,23 @@ async function openFolder(subFolder: string = ''): Promise<void> { // TODO: remo
   }
 
   const folderPath: string = folderPaths[0]
-  util.logInfo('opening '+folderPath)
-  map.loadAndSetMap(folderPath+subFolder, folderPath+'/map')
+
+  const projectSettingsPaths: string [] = [
+    util.joinPaths([folderPath, '/', ProjectSettings.fileName]),
+    util.joinPaths([folderPath, '/map/', ProjectSettings.fileName]),
+    util.joinPaths([folderPath, '/../', ProjectSettings.fileName]),
+    util.joinPaths([folderPath, '/../map/', ProjectSettings.fileName])
+  ]
+  for (const projectSettingsPath of projectSettingsPaths) {
+    if (await fileSystem.doesDirentExistAndIsFile(projectSettingsPath)) {
+      util.logInfo('found existing ProjectSettings at '+projectSettingsPath)
+      map.loadAndSetMap(await ProjectSettings.loadFromFileSystem(projectSettingsPath))
+      return
+    }
+  }
+
+  util.logInfo('opening new project at '+folderPath)
+  map.loadAndSetMap(new ProjectSettings(util.joinPaths([folderPath, '/map/', ProjectSettings.fileName]), '../', './'))
 }
 
 function buildZoomSpeedMenuItem(zoomSpeed: number): MenuItem {

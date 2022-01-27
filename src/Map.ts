@@ -7,6 +7,7 @@ import { ScaleManager } from './ScaleManager'
 import { HoverManager } from './HoverManager'
 import { boxManager } from './box/BoxManager'
 import { RootFolderBox } from './box/RootFolderBox'
+import { ProjectSettings } from './ProjectSettings'
 
 export let map: Map|undefined
 
@@ -14,11 +15,11 @@ export function setMap(object: Map): void {
   map = object
 }
 
-export async function loadAndSetMap(sourceRootPath: string, mapRootPath: string): Promise<void> {
+export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<void> {
   if (map) {
     await unloadAndUnsetMap()
   }
-  map = await Map.new('content', sourceRootPath, mapRootPath)
+  map = await Map.new('content', projectSettings)
 }
 
 export async function unloadAndUnsetMap(): Promise<void> {
@@ -49,20 +50,24 @@ function clearManagers(): void {
 }
 
 export class Map {
+  private projectSettings: ProjectSettings
   private rootFolder: RootFolderBox
   private scalePercent: number = 100
   private marginTopPercent: number = 0
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
 
-  public static async new(idToRenderIn: string, sourceRootPath: string, mapRootPath: string): Promise<Map> {
-     const map = new Map(idToRenderIn, await RootFolderBox.new(sourceRootPath, mapRootPath))
-     await map.rootFolder.render()
-     await dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY))
-     return map
+  public static async new(idToRenderIn: string, projectSettings: ProjectSettings): Promise<Map> {
+    const map = new Map(idToRenderIn, projectSettings, await RootFolderBox.new(projectSettings))
+    await map.rootFolder.render()
+    await dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY))
+    return map
   }
 
-  private constructor(idToRenderIn: string, root: RootFolderBox) {
+  private constructor(idToRenderIn: string, projectSettings: ProjectSettings, root: RootFolderBox) {
+    this.projectSettings = projectSettings
+    this.rootFolder = root
+
     renderManager.setContentTo(idToRenderIn, '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
     renderManager.setContentTo('map', '<div id="mapRatioAdjuster" style="width:'+this.mapRatioAdjusterSizePx+'px; height:'+this.mapRatioAdjusterSizePx+'px;"></div>')
     renderManager.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
@@ -70,7 +75,6 @@ export class Map {
     this.updateStyle()
 
     //this.addBoxes()
-    this.rootFolder = root
   }
 
   public async destruct(): Promise<void> {
