@@ -1,21 +1,11 @@
 import * as fs from 'fs'
 import { Dirent, promises as fsPromises } from 'fs'
 import { util } from './util'
-import { BoxMapData } from './box/BoxMapData'
+import { JsonObject } from './JsonObject'
 
 class FileSystem {
 
-  public async loadMapData(mapDataFilePath: string): Promise<BoxMapData|null> {
-    return this.readFile(mapDataFilePath)
-      .then(json => {
-        return BoxMapData.buildFromJson(json)
-      })
-      .catch(_ => {
-        return null
-      })
-  }
-
-  public async loadFromJson<T extends BoxMapData>(filePath: string, buildFromJson: (json: string) => T): Promise<T|null> {
+  public async loadFromJsonFile<T>(filePath: string, buildFromJson: (json: string) => T): Promise<T|null> {
     return this.readFile(filePath)
       .then(json => {
         return buildFromJson(json)
@@ -25,16 +15,12 @@ class FileSystem {
       })
   }
 
-  public async saveMapData(mapDataFilePath: string, data: BoxMapData): Promise<void> {
-    await this.saveObject(mapDataFilePath, data)
-  }
-
-  public async saveObject(filePath: string, object: Object): Promise<void> {
+  public async saveToJsonFile(filePath: string, object: JsonObject): Promise<void> {
     if (await this.doesDirentExist(filePath)) {
       await this.mergeObjectIntoJsonFile(filePath, object)
         .catch(reason => util.logWarning('failed to merge object into '+filePath+': '+reason))
     } else {
-      await this.writeFile(filePath, util.toFormattedJson(object))
+      await this.writeFile(filePath, object.toJson())
         .catch(reason => util.logWarning('failed to write '+filePath+': '+reason))
     }
   }
@@ -73,14 +59,9 @@ class FileSystem {
     return fs.readFileSync(path, 'utf-8')
   }
 
-  public async mergeObjectIntoJsonFile(path: string, object: Object): Promise<void> {
-    // TODO: improve: originalJson should only changed where needed (not completely reformatted)
+  public async mergeObjectIntoJsonFile(path: string, object: JsonObject): Promise<void> {
     const originalJson: string = await this.readFile(path)
-    const originalObject: Object = JSON.parse(originalJson)
-
-    const mergedObject: Object = {...originalObject, ...object}
-    const mergedJson: string = util.toFormattedJson(mergedObject)
-
+    const mergedJson: string = object.mergeIntoJson(originalJson)
     await this.writeFile(path, mergedJson)
   }
 

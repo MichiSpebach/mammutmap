@@ -51,7 +51,7 @@ export class FolderBoxBody extends BoxBody {
       const name: string = dirEntry.name
       const mapPath: string = this.referenceFolderBox.getMapPath()+'/'+name+'.json'
 
-      const mapData: BoxMapData|null = await fileSystem.loadMapData(mapPath)
+      const mapData: BoxMapData|null = await fileSystem.loadFromJsonFile(mapPath, BoxMapData.buildFromJson)
 
       if (mapData !== null) {
         boxesWithMapData.push({dirEntry, mapData}) // TODO: can this lead to race conditions because of async?

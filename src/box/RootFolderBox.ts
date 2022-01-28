@@ -8,7 +8,7 @@ export class RootFolderBox extends FolderBox {
   private projectSettings: ProjectSettings
 
   public static async new(projectSettings: ProjectSettings): Promise<RootFolderBox> {
-    let mapData: BoxMapData|null = await fileSystem.loadMapData(projectSettings.getProjectSettingsFilePath())
+    let mapData: BoxMapData|null = await fileSystem.loadFromJsonFile(projectSettings.getProjectSettingsFilePath(), BoxMapData.buildFromJson)
     const mapDataFileExists: boolean = (mapData !== null)
     if (mapData === null) {
       mapData = BoxMapData.buildNew(5, 5, 90, 90)

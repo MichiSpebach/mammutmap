@@ -1,7 +1,8 @@
+import { JsonObject } from '../JsonObject'
 import { util } from '../util'
 import { BoxMapLinkData } from './BoxMapLinkData'
 
-export class BoxMapData {
+export class BoxMapData extends JsonObject {
   public readonly id: string
   public x: number
   public y: number
@@ -30,6 +31,7 @@ export class BoxMapData {
   }
 
   public constructor(id: string, x: number, y: number, width: number, height: number, links: BoxMapLinkData[]) {
+    super()
     this.id = id
     this.x = x
     this.y = y

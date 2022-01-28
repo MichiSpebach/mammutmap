@@ -1,7 +1,8 @@
 import { fileSystem } from './fileSystemAdapter'
+import { JsonObject } from './JsonObject'
 import { util } from './util'
 
-export class ProjectSettings { // TODO: rename to MapSettings?
+export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings?
 
   public static readonly fileName = 'mapRoot.json' // TODO: find a more unique name
 
@@ -19,6 +20,7 @@ export class ProjectSettings { // TODO: rename to MapSettings?
   }
 
   public constructor(projectSettingsFilePath: string, srcRootPath: string, mapRootPath: string) {
+    super()
     this.projectSettingsFilePath = projectSettingsFilePath
     const projectSettingsFolderPath: string = util.removeLastElementFromPath(projectSettingsFilePath)
     this.absoluteSrcRootPath = util.joinPaths([projectSettingsFolderPath, srcRootPath])
@@ -28,8 +30,20 @@ export class ProjectSettings { // TODO: rename to MapSettings?
   }
 
   public async saveToFileSystem(): Promise<void> {
-    await fileSystem.saveObject(this.projectSettingsFilePath, {srcRootPath: this.srcRootPath, mapRootPath: this.mapRootPath})
+    await fileSystem.saveToJsonFile(this.projectSettingsFilePath, this)
     util.logInfo('saved ProjectSettings into '+this.projectSettingsFilePath)
+  }
+
+  public toJson(): string {
+    return util.toFormattedJson({srcRootPath: this.srcRootPath, mapRootPath: this.mapRootPath})
+  }
+
+  public mergeIntoJson(jsonToMergeInto: string): string {
+    // TODO: improve, jsonToMergeInto should only be changed where needed (not completely reformatted)
+    const objectToMergeInto: Object = JSON.parse(jsonToMergeInto)
+    const mergedObject: Object = {...objectToMergeInto, ...{srcRootPath: this.srcRootPath, mapRootPath: this.mapRootPath}}
+    const mergedJson: string = util.toFormattedJson(mergedObject)
+    return mergedJson
   }
 
   public getProjectSettingsFilePath(): string {
