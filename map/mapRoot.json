@@ -122,52 +122,27 @@
 			]
 		},
 		{
-			"id": "oe60ed8ftu8",
-			"fromWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 0,
-					"y": 75
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 84.99979609314465,
-					"y": 24.99948429151969
-				},
-				{
-					"boxId": "93kjm246u28",
-					"boxName": "BoxMapData.ts",
-					"x": 50,
-					"y": 0
-				}
-			]
-		},
-		{
 			"id": "ipj5ro0m12",
 			"fromWayPoints": [
 				{
 					"boxId": "6o0ikrr8ru",
 					"boxName": "Map.ts",
 					"x": 100,
-					"y": 4.9979211798945276
+					"y": 39.99713453364535
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 5.322356874948028,
-					"y": 10.06226305448709
+					"x": 5.258281435066672,
+					"y": 10.06293106572129
 				},
 				{
 					"boxId": "8i2aqhl305",
 					"boxName": "RootFolderBox.ts",
-					"x": 1.2901983439245137,
-					"y": 50.62261331562345
+					"x": 1.2942356368498973,
+					"y": 50.63413455731368
 				}
 			]
 		},
@@ -373,16 +348,16 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 70.13584062751616,
-					"y": 0.3059104749437978
+					"x": 70.1363129681835,
+					"y": 0.305976647631327
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "p0d1i1vr268",
 					"boxName": "RenderManager.ts",
-					"x": 0.9622097435119138,
-					"y": 83.8202699979851
+					"x": 9.999429328700328,
+					"y": 100.00000743014475
 				}
 			]
 		},
@@ -417,16 +392,16 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 99.98014468481846,
-					"y": 18.97015570934256
+					"x": 100.00026243757267,
+					"y": 0
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "l84ccd69v6g",
 					"boxName": "util.ts",
-					"x": 0.07399673603438314,
-					"y": 51.49877542327761
+					"x": 0,
+					"y": 100
 				}
 			]
 		},
@@ -436,22 +411,22 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 57.411975054662165,
-					"y": 59.00380010623954
+					"x": 59.997234117635834,
+					"y": 64.00142317851241
 				},
 				{
 					"boxId": "iu4msv07ut8",
 					"boxName": "Box.ts",
-					"x": 99.20977631919855,
-					"y": 100.02855239364233
+					"x": 100.00238458603587,
+					"y": 95.00407031085115
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "dub9um70n18",
 					"boxName": "DragManager.ts",
-					"x": 0,
-					"y": 74.99191897424846
+					"x": -0.001192136666547453,
+					"y": 89.99713795077275
 				}
 			]
 		},
@@ -536,16 +511,16 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 99.92372447793126,
-					"y": 20.268438592378953
+					"x": 100,
+					"y": 4.999548835350684
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "p1f768sjqmg",
 					"boxName": "Rect.ts",
-					"x": 0.07676659117951867,
-					"y": 55.14387450678472
+					"x": 0.07645065110471191,
+					"y": 55.14780835881753
 				}
 			]
 		},
@@ -705,14 +680,8 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 54.606163092532555,
-					"y": 84.95348615481007
-				},
-				{
-					"boxId": "153ri2jccq8",
-					"boxName": "LinkEnd.ts",
-					"x": 99.38734204912204,
-					"y": 45.79762689518787
+					"x": 64.87717676410476,
+					"y": 89.57997356788897
 				}
 			],
 			"toWayPoints": [
@@ -720,7 +689,7 @@
 					"boxId": "dub9um70n18",
 					"boxName": "DragManager.ts",
 					"x": 0,
-					"y": 74.99191897424846
+					"y": 89.99907158109738
 				}
 			]
 		},
@@ -944,7 +913,7 @@
 				{
 					"boxId": "lr0pi422h1o",
 					"boxName": "contextMenu.ts",
-					"x": 4.999663548886347,
+					"x": 4.999738998799395,
 					"y": 100
 				}
 			],
@@ -952,14 +921,14 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 19.999551388452737,
-					"y": 24.999716350681325
+					"x": 23.7498251248139,
+					"y": 24.999669938238846
 				},
 				{
 					"boxId": "8hst7ghum5o",
 					"boxName": "FolderBox.ts",
-					"x": 59.999641107542125,
-					"y": 0
+					"x": 74.9993735853469,
+					"y": -0.0026404731727925645
 				}
 			]
 		},
@@ -969,13 +938,13 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 21.24983177066978,
-					"y": 24.999716350681325
+					"x": 24.999952491443707,
+					"y": 25
 				},
 				{
 					"boxId": "8hst7ghum5o",
 					"boxName": "FolderBox.ts",
-					"x": 65.00080750803022,
+					"x": 79.99939189394631,
 					"y": 0
 				}
 			],
@@ -983,7 +952,7 @@
 				{
 					"boxId": "lr0pi422h1o",
 					"boxName": "contextMenu.ts",
-					"x": 9.999327097772694,
+					"x": 9.999334897906827,
 					"y": 100
 				}
 			]
@@ -1095,16 +1064,16 @@
 				{
 					"boxId": "18tbjkfri3o",
 					"boxName": "pluginFacade.ts",
-					"x": 52.434612665807315,
-					"y": 1.5229747906452034
+					"x": 54.998298984762485,
+					"y": 0
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "6o0ikrr8ru",
 					"boxName": "Map.ts",
-					"x": 49.56949015011495,
-					"y": 99.99021765712888
+					"x": 49.57028522318311,
+					"y": 99.99194284793468
 				}
 			]
 		},
@@ -1133,16 +1102,16 @@
 				{
 					"boxId": "2cnbfh46bf8",
 					"boxName": "/home/michael/programming/ts-visualize-files/src",
-					"x": -9.999837105251727,
-					"y": 29.9997828070023
+					"x": -9.999798544145692,
+					"y": 29.999731392194256
 				}
 			],
 			"toWayPoints": [
 				{
 					"boxId": "18tbjkfri3o",
 					"boxName": "pluginFacade.ts",
-					"x": -0.03800904977375565,
-					"y": 2.418099547511312
+					"x": 0,
+					"y": 0
 				}
 			]
 		},
@@ -1335,14 +1304,14 @@
 				{
 					"boxId": "3lnmuaqr88",
 					"boxName": "box",
-					"x": 29.36425513474743,
-					"y": 88.94946192874217
+					"x": 40.00045892935312,
+					"y": 95.00032365421231
 				},
 				{
 					"boxId": "93jcctiarsg",
 					"boxName": "Link.ts",
-					"x": 99.96010714082179,
-					"y": 93.80952380952381
+					"x": 100,
+					"y": 100
 				}
 			],
 			"toWayPoints": [
@@ -1350,7 +1319,7 @@
 					"boxId": "sde0jdvhn4o",
 					"boxName": "HoverManager.ts",
 					"x": 0,
-					"y": 54.99850567842199
+					"y": 84.99867619804077
 				}
 			]
 		},
@@ -1370,6 +1339,145 @@
 					"boxName": "RenderManager.ts",
 					"x": 95.0006385786658,
 					"y": 100.00425694947002
+				}
+			]
+		},
+		{
+			"id": "eeu7otbh35g",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 90.00012035287462,
+					"y": 4.999878244776701
+				},
+				{
+					"boxId": "93kjm246u28",
+					"boxName": "BoxMapData.ts",
+					"x": 50,
+					"y": 0
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "81j924kmav",
+					"boxName": "JsonObject.ts",
+					"x": 50.00120345632657,
+					"y": 100.00240702852328
+				}
+			]
+		},
+		{
+			"id": "na8q4es2blg",
+			"fromWayPoints": [
+				{
+					"boxId": "3ht1ieidr2o",
+					"boxName": "fileSystemAdapter.ts",
+					"x": 4.999854796085303,
+					"y": 100
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "81j924kmav",
+					"boxName": "JsonObject.ts",
+					"x": 100,
+					"y": 0
+				}
+			]
+		},
+		{
+			"id": "6ma0j7m6huo",
+			"fromWayPoints": [
+				{
+					"boxId": "jnk7eechpkg",
+					"boxName": "ProjectSettings.ts",
+					"x": 100.00119667324836,
+					"y": 49.99880345562017
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "81j924kmav",
+					"boxName": "JsonObject.ts",
+					"x": 0,
+					"y": 49.99880334107173
+				}
+			]
+		},
+		{
+			"id": "o2452qnlsog",
+			"fromWayPoints": [
+				{
+					"boxId": "jnk7eechpkg",
+					"boxName": "ProjectSettings.ts",
+					"x": 100.00045863565066,
+					"y": 34.999541410620935
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "3ht1ieidr2o",
+					"boxName": "fileSystemAdapter.ts",
+					"x": 0,
+					"y": 49.99954138117645
+				}
+			]
+		},
+		{
+			"id": "kmkhvh5bin",
+			"fromWayPoints": [
+				{
+					"boxId": "6o0ikrr8ru",
+					"boxName": "Map.ts",
+					"x": 100,
+					"y": 0
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "jnk7eechpkg",
+					"boxName": "ProjectSettings.ts",
+					"x": 0,
+					"y": 100
+				}
+			]
+		},
+		{
+			"id": "pv4q8rug7o",
+			"fromWayPoints": [
+				{
+					"boxId": "ita04k5ms68",
+					"boxName": "applicationMenu.ts",
+					"x": 100,
+					"y": 84.99879605104744
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "jnk7eechpkg",
+					"boxName": "ProjectSettings.ts",
+					"x": 0,
+					"y": 9.997859703568944
+				}
+			]
+		},
+		{
+			"id": "i0lsbt4miqo",
+			"fromWayPoints": [
+				{
+					"boxId": "3lnmuaqr88",
+					"boxName": "box",
+					"x": 15.000125506876635,
+					"y": 5
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "jnk7eechpkg",
+					"boxName": "ProjectSettings.ts",
+					"x": 44.99960065264767,
+					"y": 100
 				}
 			]
 		}
