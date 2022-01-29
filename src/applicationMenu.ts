@@ -17,7 +17,10 @@ export function setApplicationMenu(): void {
           }
         },
         {
-          label: 'Open '+ProjectSettings.fileName+'...'
+          label: 'Open ProjectFile '+ProjectSettings.fileName+'...',
+          click: () => {
+            openProjectFile()
+          }
         }
       ]
     },
@@ -79,7 +82,7 @@ function getApplicationMenu(): Menu|never {
 
 async function openFolder(): Promise<void> {
   const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
-    title:'Select a folder',
+    title:'Open a folder',
     properties: ['openDirectory']
   })
 
@@ -91,7 +94,7 @@ async function openFolder(): Promise<void> {
   }
 
   if (folderPaths.length !== 1) {
-    util.logWarning('expected exactly one selected folder but is '+folderPaths.length)
+    util.logWarning('expected exactly one selected folder but are '+folderPaths.length)
   }
 
   const folderPath: string = folderPaths[0]
@@ -105,13 +108,44 @@ async function openFolder(): Promise<void> {
   for (const projectSettingsPath of projectSettingsPaths) {
     if (await fileSystem.doesDirentExistAndIsFile(projectSettingsPath)) {
       util.logInfo('found existing ProjectSettings at '+projectSettingsPath)
-      map.loadAndSetMap(await ProjectSettings.loadFromFileSystem(projectSettingsPath))
-      return
+      try {
+        await map.loadAndSetMap(await ProjectSettings.loadFromFileSystem(projectSettingsPath))
+        return
+      } catch (error) {
+        util.logWarning('Failed to open ProjectSettings at '+projectSettingsPath+'. '+error)
+      }
     }
   }
 
   util.logInfo('opening new project at '+folderPath)
   map.loadAndSetMap(new ProjectSettings(util.joinPaths([folderPath, '/map/', ProjectSettings.fileName]), '../', './'))
+}
+
+async function openProjectFile(): Promise<void> {
+  const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
+    title:'Open a projectFile '+ProjectSettings.fileName,
+    properties: ['openFile'],
+    filters: [{name: ProjectSettings.fileName, extensions: ['json']}]
+  })
+
+  const filePaths: string[] = dialogReturnValue.filePaths
+
+  if (filePaths.length === 0) {
+    util.logInfo('no file selected')
+    return
+  }
+
+  if (filePaths.length !== 1) {
+    util.logWarning('expected exactly one selected file but are '+filePaths.length)
+  }
+
+  const filePath: string = filePaths[0]
+  util.logInfo('opening existing ProjectSettings at '+filePath)
+  try {
+    await map.loadAndSetMap(await ProjectSettings.loadFromFileSystem(filePath))
+  } catch (error) {
+    util.logError('Failed to open ProjectSettings at '+filePath+'. '+error)
+  }
 }
 
 function buildZoomSpeedMenuItem(zoomSpeed: number): MenuItem {

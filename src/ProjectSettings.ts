@@ -20,6 +20,12 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
   }
 
   public constructor(projectSettingsFilePath: string, srcRootPath: string, mapRootPath: string) {
+    if (!srcRootPath || !mapRootPath) { // can happen when called with type any
+      let errorMessage = 'ProjectSettings need to have a srcRootPath and a mapRootPath'
+      errorMessage += ', but specified srcRootPath is '+srcRootPath+' and mapRootPath is '+mapRootPath+'.'
+      throw new Error(errorMessage)
+    }
+
     super()
     this.projectSettingsFilePath = projectSettingsFilePath
     const projectSettingsFolderPath: string = util.removeLastElementFromPath(projectSettingsFilePath)
