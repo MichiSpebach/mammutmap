@@ -4,7 +4,10 @@ import { util } from './util'
 
 export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings?
 
-  public static readonly fileName = 'mapRoot.json' // TODO: find a more unique name
+  public static readonly preferredFileNameExtension = 'mapsettings.json'
+  public static readonly preferredFileName = 'maproot.'+ProjectSettings.preferredFileNameExtension
+  public static readonly alternativeFileNameExtension = 'json'
+  public static readonly alternativeFileNames = ['mapRoot.'+ProjectSettings.alternativeFileNameExtension]
 
   private projectSettingsFilePath: string
   private absoluteSrcRootPath: string

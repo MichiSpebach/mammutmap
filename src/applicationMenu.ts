@@ -17,7 +17,7 @@ export function setApplicationMenu(): void {
           }
         },
         {
-          label: 'Open ProjectFile '+ProjectSettings.fileName+'...',
+          label: 'Open ProjectFile '+ProjectSettings.preferredFileNameExtension+'...',
           click: () => {
             openProjectFile()
           }
@@ -99,33 +99,60 @@ async function openFolder(): Promise<void> {
 
   const folderPath: string = folderPaths[0]
 
-  const projectSettingsPaths: string [] = [
-    util.joinPaths([folderPath, '/', ProjectSettings.fileName]),
-    util.joinPaths([folderPath, '/map/', ProjectSettings.fileName]),
-    util.joinPaths([folderPath, '/../', ProjectSettings.fileName]),
-    util.joinPaths([folderPath, '/../map/', ProjectSettings.fileName])
-  ]
-  for (const projectSettingsPath of projectSettingsPaths) {
-    if (await fileSystem.doesDirentExistAndIsFile(projectSettingsPath)) {
-      util.logInfo('found existing ProjectSettings at '+projectSettingsPath)
+  const filePathsToLookForProjectSettings: string[] = generatePreferredProjectSettingsFilePaths(folderPath)
+    .concat(generateAlternativeProjectSettingsFilePaths(folderPath))
+
+  for (const projectSettingsFilePath of filePathsToLookForProjectSettings) {
+    if (await fileSystem.doesDirentExistAndIsFile(projectSettingsFilePath)) {
+      util.logInfo('found existing ProjectSettings at '+projectSettingsFilePath)
       try {
-        await map.loadAndSetMap(await ProjectSettings.loadFromFileSystem(projectSettingsPath))
+        await map.loadAndSetMap(await ProjectSettings.loadFromFileSystem(projectSettingsFilePath))
         return
       } catch (error) {
-        util.logWarning('Failed to open ProjectSettings at '+projectSettingsPath+'. '+error)
+        util.logWarning('Failed to open ProjectSettings at '+projectSettingsFilePath+'. '+error)
       }
     }
   }
 
   util.logInfo('opening new project at '+folderPath)
-  map.loadAndSetMap(new ProjectSettings(util.joinPaths([folderPath, '/map/', ProjectSettings.fileName]), '../', './'))
+  map.loadAndSetMap(new ProjectSettings(util.joinPaths([folderPath, '/map/', ProjectSettings.preferredFileName]), '../', './'))
+}
+
+function generatePreferredProjectSettingsFilePaths(openedFolderPath: string): string[] {
+  return generateFolderPathsToLookForProjectSettings(openedFolderPath).map((folderPath: string) => {
+    return util.joinPaths([folderPath, ProjectSettings.preferredFileName])
+  })
+}
+
+function generateAlternativeProjectSettingsFilePaths(openedFolderPath: string): string[] {
+  let projectSettingsFilePaths: string[] = []
+  for (const folderPath of generateFolderPathsToLookForProjectSettings(openedFolderPath)) {
+    projectSettingsFilePaths = projectSettingsFilePaths.concat(
+      ProjectSettings.alternativeFileNames.map((fileName: string) => {
+        return util.joinPaths([folderPath, fileName])
+      })
+    )
+  }
+  return projectSettingsFilePaths
+}
+
+function generateFolderPathsToLookForProjectSettings(openedFolderPath: string): string[] {
+  return [
+    util.joinPaths([openedFolderPath, '/']),
+    util.joinPaths([openedFolderPath, '/map/']),
+    util.joinPaths([openedFolderPath, '/../']),
+    util.joinPaths([openedFolderPath, '/../map/'])
+  ]
 }
 
 async function openProjectFile(): Promise<void> {
   const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
-    title:'Open a projectFile '+ProjectSettings.fileName,
+    title:'Open a projectFile '+ProjectSettings.preferredFileNameExtension,
     properties: ['openFile'],
-    filters: [{name: ProjectSettings.fileName, extensions: ['json']}]
+    filters: [
+      {name: '.'+ProjectSettings.preferredFileNameExtension, extensions: [ProjectSettings.preferredFileNameExtension]},
+      {name: '.'+ProjectSettings.alternativeFileNameExtension, extensions: [ProjectSettings.alternativeFileNameExtension]}
+    ]
   })
 
   const filePaths: string[] = dialogReturnValue.filePaths
