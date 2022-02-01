@@ -20,6 +20,17 @@ body {
   background-color: #202428;
 }
 
+.hint {
+  position:fixed;
+  top:5%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  color:white;
+  background-color:#8888;
+  padding:10px;
+  border-radius:10px;
+}
+
 .nsResize {
   cursor:ns-resize;
 }

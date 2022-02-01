@@ -1,5 +1,6 @@
 import { exec } from 'child_process'
 import { renderManager } from './RenderManager'
+import { style } from './styleAdapter'
 
 class Util {
   private logDebugActivated: boolean = false
@@ -41,6 +42,27 @@ class Util {
     const division: string = '<div style="color:' + color + '">'+this.escapeForHtml(message)+'</div>'
     await renderManager.addContentTo('log', division)
     await renderManager.scrollToBottom('terminal')
+  }
+
+  // TODO: move to HintManager/HintComponent
+  public readonly hintToDeactivateSnapToGrid: string = 'Press CTRL to deactivate snapToGrid'
+  private readonly hintId: string = 'hint'
+  private hint: string|null = null
+  public async setHint(hint: string, active: boolean): Promise<void> {
+    if (active) {
+      if (!this.hint) {
+        this.hint = hint
+        await renderManager.addContentTo('body', `<div id="${this.hintId}" class="${style.getHintClass()}">${hint}</div>`)
+      } else if (this.hint !== hint) {
+        this.hint = hint
+        await renderManager.setContentTo(this.hintId, hint)
+      }
+    } else {
+      if (this.hint === hint) {
+        this.hint = null
+        await renderManager.remove(this.hintId)
+      }
+    }
   }
 
   public stringify(object: any): string {

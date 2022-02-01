@@ -1,5 +1,6 @@
 
 interface Style {
+  getHintClass(): string
   getHighlightBoxClass(): string
   getFileBoxClass(): string
   getFolderBoxClass(): string
@@ -14,6 +15,10 @@ interface Style {
 }
 
 class DarkTheme implements Style {
+
+  public getHintClass(): string {
+    return 'hint'
+  }
 
   public getHighlightBoxClass(): string {
     return 'highlightBox'

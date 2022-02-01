@@ -50,6 +50,7 @@ export class ScaleManager {
 
   public static clear(): void {
     this.state = null
+    util.setHint(util.hintToDeactivateSnapToGrid, false)
   }
 
   public static addScalable(scalable: BoxBorder) {
@@ -96,6 +97,7 @@ export class ScaleManager {
 
     renderManager.addDragListenerTo(id, 'drag', (clientX: number, clientY:number, ctrlPressed: boolean): void => {
       drag(clientX, clientY, !ctrlPressed)
+      util.setHint(util.hintToDeactivateSnapToGrid, !ctrlPressed)
     })
 
     renderManager.addDragListenerTo(id, 'dragend', (clientX: number, clientY:number): void => {
@@ -219,6 +221,7 @@ export class ScaleManager {
     }
     this.state.scaling.referenceBox.saveMapData()
     this.state = null
+    util.setHint(util.hintToDeactivateSnapToGrid, false)
   }
 
 }

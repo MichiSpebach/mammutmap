@@ -34,6 +34,7 @@ export class DragManager {
 
   public static clear(): void {
     this.state = null
+    util.setHint(util.hintToDeactivateSnapToGrid, false)
   }
 
   public static addDraggable(elementToDrag: Draggable<DropTarget>): void {
@@ -73,6 +74,7 @@ export class DragManager {
   private static onDrag(clientX: number, clientY: number, snapToGrid: boolean): void {
     const state: {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} = this.getState()
     state.dragging.drag(clientX, clientY, state.draggingOver, snapToGrid)
+    util.setHint(util.hintToDeactivateSnapToGrid, snapToGrid)
   }
 
   private static onDragEnd(): void {
@@ -81,6 +83,7 @@ export class DragManager {
     renderManager.removeClassFrom(state.dragging.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
     state.dragging.dragEnd(state.draggingOver)
     this.setState(null)
+    util.setHint(util.hintToDeactivateSnapToGrid, false)
   }
 
   public static addDropTarget(dropTarget: DropTarget): void {
