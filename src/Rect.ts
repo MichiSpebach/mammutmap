@@ -13,6 +13,15 @@ export class Rect {
   }
 
   public isPositionInside(x: number, y: number): boolean {
-    return x >= this.x && y >= this.y && x <= this.x + this.width && y <= this.y + this.height
+    return x >= this.x && y >= this.y && x <= this.getRightX() && y <= this.getBottomY()
   }
+
+  public getRightX() {
+    return this.x+this.width
+  }
+
+  public getBottomY() {
+    return this.y+this.height
+  }
+
 }

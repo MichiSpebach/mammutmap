@@ -1,4 +1,4 @@
-import { renderManager } from '../RenderManager'
+import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { Box } from './Box'
 import { ScaleManager } from '../ScaleManager'
@@ -81,6 +81,17 @@ export class BoxBorder {
 
   private formEdge(id: string, sizeAndPositionStyle: string): string {
     return '<div id="'+id+'" draggable="true" style="position:absolute;'+sizeAndPositionStyle+'"></div>'
+  }
+
+  public async scaleStart(): Promise<void> {
+    await this.referenceBox.getParent().attachGrid(RenderPriority.RESPONSIVE)
+  }
+
+  public async scaleEnd(): Promise<void> {
+    const proms: Promise<any>[] = []
+    proms.push(this.referenceBox.getParent().detachGrid(RenderPriority.RESPONSIVE))
+    proms.push(this.referenceBox.saveMapData())
+    await Promise.all(proms)
   }
 
 }

@@ -17,7 +17,8 @@ import { DragManager } from '../DragManager'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
-import { Transform } from './Transform'
+import { ClientPosition, LocalPosition, Transform } from './Transform'
+import { grid } from './Grid'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -25,6 +26,7 @@ export abstract class Box implements DropTarget, Hoverable {
   private mapData: BoxMapData
   private mapDataFileExists: boolean
   public readonly transform: Transform
+  private readonly gridPlaceHolderId: string
   private readonly header: BoxHeader
   private readonly border: BoxBorder
   public readonly links: BoxLinks
@@ -40,6 +42,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.mapData = mapData
     this.mapDataFileExists = mapDataFileExists
     this.transform = new Transform(this)
+    this.gridPlaceHolderId = this.getId()+'Grid'
     this.header = this.createHeader()
     this.border = new BoxBorder(this)
     this.links = new BoxLinks(this)
@@ -139,12 +142,10 @@ export abstract class Box implements DropTarget, Hoverable {
     return await renderManager.getClientRectOf(this.getId(), priority)
   }
 
-  // TODO: use LocalPosition and ClientPosition and move into Transform
+  // TODO: remove, deprecated, use delegated method from transform instead
   public async transformClientPositionToLocal(clientX: number, clientY: number): Promise<{x: number, y: number}> {
-    const clientRect: Rect = await this.getClientRect(RenderPriority.RESPONSIVE)
-    const x: number = (clientX - clientRect.x) / clientRect.width * 100
-    const y: number = (clientY - clientRect.y) / clientRect.height * 100
-    return {x: x, y: y}
+    const locPos: LocalPosition = await this.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
+    return {x: locPos.percentX, y: locPos.percentY}
   }
 
   public transformLocalToParent(x: number, y: number): {x: number, y: number} {
@@ -191,12 +192,14 @@ export abstract class Box implements DropTarget, Hoverable {
     if (!this.isRendered()) {
       this.renderStyle()
 
-      const borderHtml = `<div id="${this.border.getId()}"></div>`
+      const basicStyle: string = 'position:absolute;width:100%;height:100%;'
+      const gridPlaceHolderHtml = `<div id="${this.gridPlaceHolderId}" style="${basicStyle}"></div>`
       const headerHtml = `<div id="${this.header.getId()}"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}"></div>`
-      const headerAndBodyHtml = `<div style="width:100%;height:100%;overflow:hidden;">${headerHtml+bodyHtml}</div>`
+      const headerAndBodyHtml = `<div style="${basicStyle}overflow:hidden;">${headerHtml+bodyHtml}</div>`
+      const borderHtml = `<div id="${this.border.getId()}"></div>`
       const linksHtml = `<div id="${this.links.getId()}"></div>`
-      await renderManager.setContentTo(this.getId(), borderHtml+headerAndBodyHtml+linksHtml)
+      await renderManager.setContentTo(this.getId(), gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+linksHtml)
 
       await this.header.render()
       await this.border.render()
@@ -236,11 +239,14 @@ export abstract class Box implements DropTarget, Hoverable {
     DragManager.removeDropTarget(this)
     HoverManager.removeHoverable(this)
 
-    await this.header.unrender()
-    await this.border.unrender()
-    await this.links.unrender()
-    //await this.borderingLinks.updateLinkEnds() // TODO: otherwise links reference to not existing borderingBoxes
-    await this.unrenderAdditional()
+    const proms: Promise<any>[] = []
+    proms.push(this.detachGrid())
+    proms.push(this.header.unrender())
+    proms.push(this.border.unrender())
+    proms.push(this.links.unrender())
+    //proms.push(this.borderingLinks.updateLinkEnds()) // TODO: otherwise links reference to not existing borderingBoxes
+    proms.push(this.unrenderAdditional())
+    await Promise.all(proms)
 
     this.rendered = false
     return {rendered: false}
@@ -306,9 +312,19 @@ export abstract class Box implements DropTarget, Hoverable {
 
     if (this.dragOver) {
       renderManager.addClassTo(this.getId(), style.getHighlightBoxClass())
+      this.attachGrid(RenderPriority.RESPONSIVE)
     } else {
       renderManager.removeClassFrom(this.getId(), style.getHighlightBoxClass())
+      this.detachGrid(RenderPriority.RESPONSIVE)
     }
+  }
+
+  public async attachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    await grid.renderInto(this.gridPlaceHolderId, priority)
+  }
+
+  public async detachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    await grid.unrenderFrom(this.gridPlaceHolderId, priority)
   }
 
   protected async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {

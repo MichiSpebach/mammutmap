@@ -1,4 +1,8 @@
 
+improve Grid, implement layer2 and layer3 that is visible when clientRectSize is bigger
+
+snapToGrid also for startDragWithClickToDropMode
+
 improve snapToGrid: when draggable snaps below/behind a box, the box should be marked as dropTarget
 improve snapToGrid: when zooming in make snapToGrid finer?
 

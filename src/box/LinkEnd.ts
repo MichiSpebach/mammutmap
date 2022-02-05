@@ -50,8 +50,8 @@ export class LinkEnd implements Draggable<Box> {
 
   public async drag(clientX: number, clientY: number, dropTarget: Box, snapToGrid: boolean): Promise<void> {
     if (snapToGrid) {
-      const localDropTargetPosition: {x: number, y: number} = await dropTarget.transformClientPositionToLocal(clientX, clientY)
-      const localDropTargetPositionSnappedToGrid: LocalPosition = dropTarget.transform.getNearestGridPositionOf(new LocalPosition(localDropTargetPosition.x, localDropTargetPosition.y))
+      const localDropTargetPosition: LocalPosition = await dropTarget.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
+      const localDropTargetPositionSnappedToGrid: LocalPosition = dropTarget.transform.getNearestGridPositionOf(localDropTargetPosition)
       const clientPositionSnappedToDropTargetsGrid: ClientPosition = await dropTarget.transform.localToClientPosition(localDropTargetPositionSnappedToGrid)
       clientX = clientPositionSnappedToDropTargetsGrid.x
       clientY = clientPositionSnappedToDropTargetsGrid.y

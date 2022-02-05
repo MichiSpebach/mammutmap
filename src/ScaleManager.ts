@@ -114,6 +114,7 @@ export class ScaleManager {
   private static async dragstart(scalable: BoxBorder, clientX: number, clientY: number): Promise<void> {
     let parentClientRect: Promise<Rect> = scalable.referenceBox.getParent().getClientRect()
     let clientRect: Promise<Rect> = scalable.referenceBox.getClientRect()
+    scalable.scaleStart()
 
     this.state = {
       scaling: scalable,
@@ -219,7 +220,7 @@ export class ScaleManager {
       util.logWarning("ScaleManager: failed to save resize operation, state is null although resizing was in progress")
       return
     }
-    this.state.scaling.referenceBox.saveMapData()
+    this.state.scaling.scaleEnd()
     this.state = null
     util.setHint(util.hintToDeactivateSnapToGrid, false)
   }
