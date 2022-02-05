@@ -13,7 +13,7 @@
 				{
 					"boxId": "perbgpafqk8",
 					"boxName": "index.html",
-					"x": 25,
+					"x": 50,
 					"y": 100
 				}
 			],
@@ -21,7 +21,7 @@
 				{
 					"boxId": "3lsosl5fvo8",
 					"boxName": "index.css",
-					"x": 50,
+					"x": 50.001186943620176,
 					"y": 0
 				}
 			]
@@ -52,7 +52,7 @@
 					"boxId": "ffddla14d38",
 					"boxName": "index.ts",
 					"x": 100,
-					"y": 74.99860995273839
+					"y": 49.99725802029065
 				}
 			],
 			"toWayPoints": [
@@ -60,7 +60,7 @@
 					"boxId": "perbgpafqk8",
 					"boxName": "index.html",
 					"x": 0,
-					"y": 50.00278009452322
+					"y": 50.006854949273375
 				}
 			]
 		},
@@ -1478,6 +1478,25 @@
 					"boxName": "ProjectSettings.ts",
 					"x": 44.99960065264767,
 					"y": 100
+				}
+			]
+		},
+		{
+			"id": "tmgdcbj0s48",
+			"fromWayPoints": [
+				{
+					"boxId": "cr2q48p1plg",
+					"boxName": "indexHtmlIds.ts",
+					"x": 0,
+					"y": 50
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "perbgpafqk8",
+					"boxName": "index.html",
+					"x": 100,
+					"y": 50
 				}
 			]
 		}
