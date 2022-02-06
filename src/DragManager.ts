@@ -12,7 +12,11 @@ export class DragManager {
     dragging: Draggable<DropTarget>
     draggingOver: DropTarget
     clickToDropMode: boolean
-  } | null
+  } | null = null
+
+  public static isDraggingInProgress(): boolean {
+    return this.state !== null
+  }
 
   private static getState(): {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} | never {
     if (this.state === null) {

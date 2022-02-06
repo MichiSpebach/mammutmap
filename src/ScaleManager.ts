@@ -14,7 +14,7 @@ export class ScaleManager {
     startClientRect: Rect,
     startClientX: number,
     startClientY: number
-  } | null
+  } | null = null
   //private static onScaling: ((clientX: number, clientY: number) => void) | null
   //private static initialized: boolean = false
 
@@ -47,6 +47,10 @@ export class ScaleManager {
       util.logInfo('resize end, targetId: ' + targetId)
     })
   }*/
+
+  public static isScalingInProgress(): boolean {
+    return this.state !== null
+  }
 
   public static clear(): void {
     this.state = null
@@ -112,8 +116,8 @@ export class ScaleManager {
   }
 
   private static async dragstart(scalable: BoxBorder, clientX: number, clientY: number): Promise<void> {
-    let parentClientRect: Promise<Rect> = scalable.referenceBox.getParent().getClientRect()
-    let clientRect: Promise<Rect> = scalable.referenceBox.getClientRect()
+    let parentClientRect: Promise<Rect> = scalable.referenceBox.getParent().getClientRect(RenderPriority.RESPONSIVE)
+    let clientRect: Promise<Rect> = scalable.referenceBox.getClientRect(RenderPriority.RESPONSIVE)
     scalable.scaleStart()
 
     this.state = {

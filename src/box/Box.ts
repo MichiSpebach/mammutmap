@@ -263,12 +263,8 @@ export abstract class Box implements DropTarget, Hoverable {
     })
   }
 
-  private setHighlight(highlight: boolean): void {
-    if (highlight) {
-      renderManager.addClassTo(this.getId(), style.getHighlightBoxClass())
-    } else {
-      renderManager.removeClassFrom(this.getId(), style.getHighlightBoxClass())
-    }
+  public setHighlight(highlight: boolean): void {
+    this.border.setHighlight(highlight)
     this.borderingLinks.forEach(link => link.setHighlight(highlight))
   }
 
@@ -311,10 +307,8 @@ export abstract class Box implements DropTarget, Hoverable {
     this.dragOver = value
 
     if (this.dragOver) {
-      renderManager.addClassTo(this.getId(), style.getHighlightBoxClass())
       this.attachGrid(RenderPriority.RESPONSIVE)
     } else {
-      renderManager.removeClassFrom(this.getId(), style.getHighlightBoxClass())
       this.detachGrid(RenderPriority.RESPONSIVE)
     }
   }

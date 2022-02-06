@@ -1,5 +1,7 @@
 import { renderManager } from './RenderManager'
 import { Hoverable } from './Hoverable'
+import { DragManager } from './DragManager'
+import { ScaleManager } from './ScaleManager'
 
 export class HoverManager {
 
@@ -14,6 +16,9 @@ export class HoverManager {
 
   public static async addHoverable(hoverable: Hoverable, onHoverOver: () => void, onHoverOut: () => void): Promise<void> {
     await renderManager.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
+      if (DragManager.isDraggingInProgress() || ScaleManager.isScalingInProgress()) {
+        return
+      }
       if (this.state !== null && this.state.hovering === hoverable) {
         return
       }

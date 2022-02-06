@@ -94,4 +94,12 @@ export class BoxBorder {
     await Promise.all(proms)
   }
 
+  public async setHighlight(highlight: boolean): Promise<void> {
+    if (highlight) {
+      await Promise.all(this.sideLineIds.map(id => renderManager.addClassTo(id, style.getHighlightClass())))
+    } else {
+      await Promise.all(this.sideLineIds.map(id => renderManager.removeClassFrom(id, style.getHighlightClass())))
+    }
+  }
+
 }
