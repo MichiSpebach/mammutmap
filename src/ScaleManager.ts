@@ -169,7 +169,7 @@ export class ScaleManager {
     const newHeightInPixel: number = startClientRect.height + clientY - this.state.startClientY
     let newHeightInPercent: number = newHeightInPixel / startParentClientRect.height * 100
     if (snapToGrid) {
-      const topBorderPositionInPercent: number = (startClientRect.x-startParentClientRect.x) / startParentClientRect.width * 100
+      const topBorderPositionInPercent: number = (startClientRect.y-startParentClientRect.y) / startParentClientRect.width * 100
       const newBottomBorderPositionInPercent: number = referenceBox.getParent().transform.roundToGridPosition(topBorderPositionInPercent+newHeightInPercent)
       newHeightInPercent = newBottomBorderPositionInPercent-topBorderPositionInPercent
     }
