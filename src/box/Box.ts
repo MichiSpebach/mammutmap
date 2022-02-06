@@ -33,7 +33,6 @@ export abstract class Box implements DropTarget, Hoverable {
   private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
   private rendered: boolean = false
   private watchers: BoxWatcher[] = []
-  private dragOver: boolean = false
   private unsavedChanges: boolean = false
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
@@ -303,14 +302,12 @@ export abstract class Box implements DropTarget, Hoverable {
     this.setMapDataFileExistsAndRenderBorder(true)
   }
 
-  public async setDragOverStyle(value: boolean): Promise<void> {
-    this.dragOver = value
+  public async onDragEnter(): Promise<void> {
+    await this.attachGrid(RenderPriority.RESPONSIVE)
+  }
 
-    if (this.dragOver) {
-      this.attachGrid(RenderPriority.RESPONSIVE)
-    } else {
-      this.detachGrid(RenderPriority.RESPONSIVE)
-    }
+  public async onDragLeave(): Promise<void> {
+    await this.detachGrid(RenderPriority.RESPONSIVE)
   }
 
   public async attachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {

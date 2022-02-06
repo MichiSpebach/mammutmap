@@ -27,10 +27,10 @@ export class DragManager {
 
   private static setState(newState: {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} | null): void {
     if (this.state != null) {
-      this.state.draggingOver.setDragOverStyle(false)
+      this.state.draggingOver.onDragLeave()
     }
     if (newState != null) {
-      newState.draggingOver.setDragOverStyle(true)
+      newState.draggingOver.onDragEnter()
     }
 
     this.state = newState

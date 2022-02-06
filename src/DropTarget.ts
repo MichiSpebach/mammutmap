@@ -1,4 +1,5 @@
 export interface DropTarget {
   getId(): string
-  setDragOverStyle(value: boolean): Promise<void>
+  onDragEnter(): Promise<void>
+  onDragLeave(): Promise<void>
 }
