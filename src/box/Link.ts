@@ -17,6 +17,7 @@ export class Link implements Hoverable {
   private readonly from: LinkEnd
   private readonly to: LinkEnd
   private rendered: boolean = false
+  private highlight: boolean = false
 
   public constructor(data: BoxMapLinkData, managingBox: Box) {
     this.data = data
@@ -104,8 +105,10 @@ export class Link implements Hoverable {
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
-    const pointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
-    const lineHtml: string = '<line id="'+this.getId()+'Line" '+linePositionHtml+' style="stroke:'+style.getLinkColor()+';stroke-width:2px;'+pointerEventsStyle+'"/>'
+    const lineClassHtml: string = this.highlight ? 'class="'+style.getHighlightClass()+'" ' : ''
+    const linePointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
+    const lineStyleHtml: string = 'style="stroke:'+style.getLinkColor()+';stroke-width:2px;'+linePointerEventsStyle+'"'
+    const lineHtml: string = `<line id="${this.getId()}Line" ${linePositionHtml} ${lineClassHtml}${lineStyleHtml}/>`
 
     const proms: Promise<any>[] = []
     if (!this.rendered) {
@@ -152,6 +155,7 @@ export class Link implements Hoverable {
       util.logWarning('setHighlight(..) called although Link is not rendered yet.')
     }
 
+    this.highlight = highlight
     if (highlight) {
       renderManager.addClassTo(this.getId()+'Line', style.getHighlightClass())
     } else {
