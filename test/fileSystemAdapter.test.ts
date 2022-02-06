@@ -1,4 +1,5 @@
 import { fileSystem } from '../src/fileSystemAdapter'
+import { JsonObject } from '../src/JsonObject'
 
 test('doesDirentExist', async () => {
   expect(await fileSystem.doesDirentExist('src')).toBe(true)
@@ -12,7 +13,7 @@ test('mergeObjectIntoJsonFile', async () => {
     + '}')
   const getSavedData: () => string = mockWriteFile().getSavedData
 
-  await fileSystem.mergeObjectIntoJsonFile('path', {name: "box2", x: 3})
+  await fileSystem.mergeObjectIntoJsonFile('path', new TestJsonObject({name: "box2", x: 3}))
 
   expect(getSavedData()).toBe('{\n'
     + '\t"name": "box2",\n'
@@ -27,7 +28,7 @@ test('mergeObjectIntoJsonFile partial', async () => {
     + '}')
   const getSavedData: () => string = mockWriteFile().getSavedData
 
-  await fileSystem.mergeObjectIntoJsonFile('path', {x: 2})
+  await fileSystem.mergeObjectIntoJsonFile('path', new TestJsonObject({x: 2}))
 
   expect(getSavedData()).toBe('{\n'
     + '\t"id": "box1",\n'
@@ -41,7 +42,7 @@ test('mergeObjectIntoJsonFile additional', async () => {
     + '}')
   const getSavedData: () => string = mockWriteFile().getSavedData
 
-  await fileSystem.mergeObjectIntoJsonFile('path', {x: 2})
+  await fileSystem.mergeObjectIntoJsonFile('path', new TestJsonObject({x: 2}))
 
   expect(getSavedData()).toBe('{\n'
     + '\t"id": "box1",\n'
@@ -58,7 +59,7 @@ test('mergeObjectIntoJsonFile deep', async () => {
     + '}')
   const getSavedData: () => string = mockWriteFile().getSavedData
 
-  await fileSystem.mergeObjectIntoJsonFile('path', {profile: {loc: 123}})
+  await fileSystem.mergeObjectIntoJsonFile('path', new TestJsonObject({profile: {loc: 123}}))
 
   expect(getSavedData()).toBe('{\n'
     + '\t"id": "box1",\n'
@@ -75,7 +76,7 @@ test('mergeObjectIntoJsonFile undefined', async () => {
     + '}')
   const getSavedData: () => string = mockWriteFile().getSavedData
 
-  await fileSystem.mergeObjectIntoJsonFile('path', {x: undefined})
+  await fileSystem.mergeObjectIntoJsonFile('path', new TestJsonObject({x: undefined}))
 
   expect(getSavedData()).toBe('{\n'
     + '\t"id": "box1"\n'
@@ -95,4 +96,17 @@ function mockWriteFile(): {getSavedData: (() => string)} {
     return Promise.resolve()
   }
   return {getSavedData: () => savedData}
+}
+
+class TestJsonObject extends JsonObject {
+  public name: string|undefined
+  public x: number|undefined
+  public profile: {loc: number}|undefined
+
+  constructor(fields: {name?: string, x?: number, profile?: {loc: number}}) {
+    super()
+    this.name = fields.name
+    this.x = fields.x
+    this.profile = fields.profile
+  }
 }
