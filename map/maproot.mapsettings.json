@@ -1499,6 +1499,44 @@
 					"y": 50
 				}
 			]
+		},
+		{
+			"id": "gsmk66cm0bo",
+			"fromWayPoints": [
+				{
+					"boxId": "sde0jdvhn4o",
+					"boxName": "HoverManager.ts",
+					"x": 92.00008183760497,
+					"y": 0
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "dub9um70n18",
+					"boxName": "DragManager.ts",
+					"x": 100,
+					"y": 100
+				}
+			]
+		},
+		{
+			"id": "aonvncm0h78",
+			"fromWayPoints": [
+				{
+					"boxId": "sde0jdvhn4o",
+					"boxName": "HoverManager.ts",
+					"x": 92.0000256635635,
+					"y": 0
+				}
+			],
+			"toWayPoints": [
+				{
+					"boxId": "82efivc7np8",
+					"boxName": "ScaleManager.ts",
+					"x": 100,
+					"y": 100
+				}
+			]
 		}
 	]
 }
