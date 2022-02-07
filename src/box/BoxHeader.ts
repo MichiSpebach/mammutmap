@@ -6,6 +6,7 @@ import { Rect } from '../Rect'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { ClientPosition, LocalPosition } from './Transform'
+import { style } from '../styleAdapter'
 
 export abstract  class BoxHeader implements Draggable<FolderBox> {
   public readonly referenceBox: Box
@@ -28,7 +29,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async render(): Promise<void> {
-    let html: string = '<div draggable="true">'
+    let html: string = '<div draggable="true" class="'+style.getBoxHeaderInnerClass()+'">'
     html += this.referenceBox.getName()
     html += '</div>'
     await renderManager.setContentTo(this.getId(), html)

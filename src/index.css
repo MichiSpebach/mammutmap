@@ -67,15 +67,16 @@ body {
 }
 
 .fileBoxHeader {
-  padding: 2px;
-  color: #ddd;
   background-color: steelblue;
 }
 
 .folderBoxHeader {
-  padding: 2px;
-  color: #ddd;
   background-color: slategrey;
+}
+
+.boxHeaderInner {
+  padding: 2px;
+  color: #ddd;;
 }
 
 .boxBorderLine {
