@@ -31,6 +31,10 @@ export class FileBox extends Box {
     return null
   }
 
+  protected getBodyOverflowStyle(): 'hidden'|'visible' {
+    return 'hidden'
+  }
+
   protected async renderAdditional(): Promise<void> {
     if (this.isRendered()) {
       return

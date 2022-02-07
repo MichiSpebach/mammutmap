@@ -28,6 +28,10 @@ export class FolderBox extends Box {
     return false
   }
 
+  protected getBodyOverflowStyle(): 'hidden'|'visible' {
+    return 'visible'
+  }
+
   protected async renderAdditional(): Promise<void> {
     if (this.isRendered()) {
       return

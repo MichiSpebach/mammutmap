@@ -195,7 +195,7 @@ export abstract class Box implements DropTarget, Hoverable {
       const gridPlaceHolderHtml = `<div id="${this.gridPlaceHolderId}" style="${styleAbsoluteAndStretched}"></div>`
       const headerHtml = `<div id="${this.header.getId()}" style="overflow:hidden;max-height:100%"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}"></div>`
-      const headerAndBodyHtml = `<div style="${styleAbsoluteAndStretched}">${headerHtml+bodyHtml}</div>`
+      const headerAndBodyHtml = `<div style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};">${headerHtml+bodyHtml}</div>`
       const borderHtml = `<div id="${this.border.getId()}"></div>`
       const linksHtml = `<div id="${this.links.getId()}"></div>`
       await renderManager.setContentTo(this.getId(), gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+linksHtml)
@@ -353,6 +353,8 @@ export abstract class Box implements DropTarget, Hoverable {
 
     await this.renderStyle(priority)
   }
+
+  protected abstract getBodyOverflowStyle(): 'hidden'|'visible'
 
   protected abstract renderAdditional(): Promise<void>
 
