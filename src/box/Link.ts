@@ -105,15 +105,16 @@ export class Link implements Hoverable {
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
-    const lineClassHtml: string = this.highlight ? 'class="'+style.getHighlightClass()+'" ' : ''
+    const lineHighlightClass: string = this.highlight ? style.getHighlightClass() : ''
+    const lineClassHtml: string = `class="${style.getHighlightTransitionClass()} ${lineHighlightClass}"`
     const linePointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
     const lineStyleHtml: string = 'style="stroke:'+style.getLinkColor()+';stroke-width:2px;'+linePointerEventsStyle+'"'
     const lineHtml: string = `<line id="${this.getId()}Line" ${linePositionHtml} ${lineClassHtml}${lineStyleHtml}/>`
 
     const proms: Promise<any>[] = []
     if (!this.rendered) {
-      const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true"></div>'
-      const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true"></div>'
+      const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
+      const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
       const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
       await renderManager.setContentTo(this.getId(), svgHtml+fromHtml+toHtml)
       proms.push(renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'))

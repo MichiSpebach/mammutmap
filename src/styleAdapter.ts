@@ -1,7 +1,6 @@
 
 interface Style {
   getHintClass(): string
-  getHighlightBoxClass(): string
   getFileBoxClass(): string
   getFolderBoxClass(): string
   getFileBoxHeaderClass(): string
@@ -11,6 +10,7 @@ interface Style {
   getHorizontalResizeClass(): string
   getVerticalResizeClass(): string
   getDiagonalResizeClass(): string
+  getHighlightTransitionClass(): string
   getHighlightClass(): string
   getLinkColor(): string
 }
@@ -19,10 +19,6 @@ class DarkTheme implements Style {
 
   public getHintClass(): string {
     return 'hint'
-  }
-
-  public getHighlightBoxClass(): string {
-    return 'highlightBox'
   }
 
   public getFileBoxClass(): string {
@@ -61,6 +57,10 @@ class DarkTheme implements Style {
   }
   public getDiagonalResizeClass(): string {
     return 'nwseResize'
+  }
+
+  public getHighlightTransitionClass(): string {
+    return 'highlightTransition'
   }
 
   public getHighlightClass(): string {

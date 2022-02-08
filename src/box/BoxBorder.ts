@@ -75,12 +75,12 @@ export class BoxBorder {
 
   private formLine(id: string, sizeAndPositionStyle: string, sizeAndPositionStyleLine: string): string {
     return '<div id="'+id+'" draggable="true" style="position:absolute;'+sizeAndPositionStyle+'">'
-          +'<div id="'+id+'Line" style="position:absolute;'+sizeAndPositionStyleLine+'"></div>'
+          +'<div id="'+id+'Line" class="'+style.getHighlightTransitionClass()+'" style="position:absolute;'+sizeAndPositionStyleLine+'"></div>'
           +'</div>'
   }
 
   private formEdge(id: string, sizeAndPositionStyle: string): string {
-    return '<div id="'+id+'" draggable="true" style="position:absolute;'+sizeAndPositionStyle+'"></div>'
+    return '<div id="'+id+'" draggable="true" class="'+style.getHighlightTransitionClass()+'" style="position:absolute;'+sizeAndPositionStyle+'"></div>'
   }
 
   public async scaleStart(): Promise<void> {

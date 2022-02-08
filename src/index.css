@@ -49,13 +49,14 @@ body {
   pointer-events: none;
 }
 
+.highlightTransition {
+  transition-duration: 0.1s;
+  transition-property: background-color, stroke;
+}
+
 .highlight {
   background-color: white !important;
   stroke: white !important;
-}
-
-.highlightBox {
-  background-color: #2060a080 !important;
 }
 
 .fileBox {
