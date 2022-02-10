@@ -6,7 +6,6 @@ interface Style {
   getFileBoxHeaderClass(): string
   getFolderBoxHeaderClass(): string
   getBoxHeaderInnerClass(): string
-  getFileBoxBodyClass(): string
   getBoxBorderLineClass(mapDataFileExisting: boolean): string
   getHorizontalResizeClass(): string
   getVerticalResizeClass(): string
@@ -40,10 +39,6 @@ class DarkTheme implements Style {
 
   public getBoxHeaderInnerClass(): string {
     return 'boxHeaderInner'
-  }
-
-  public getFileBoxBodyClass(): string {
-    return 'fileBoxBody'
   }
 
   public getBoxBorderLineClass(mapDataFileExisting: boolean): string {
