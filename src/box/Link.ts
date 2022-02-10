@@ -105,11 +105,11 @@ export class Link implements Hoverable {
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
-    const lineHighlightClass: string = this.highlight ? style.getHighlightClass() : ''
-    const lineClassHtml: string = `class="${style.getHighlightTransitionClass()} ${lineHighlightClass}"`
+    const lineHighlightClass: string = this.highlight ? ' '+style.getHighlightClass() : ''
+    const lineClassHtml: string = `class="${style.getHighlightTransitionClass()}${lineHighlightClass}"`
     const linePointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
     const lineStyleHtml: string = 'style="stroke:'+style.getLinkColor()+';stroke-width:2px;'+linePointerEventsStyle+'"'
-    const lineHtml: string = `<line id="${this.getId()}Line" ${linePositionHtml} ${lineClassHtml}${lineStyleHtml}/>`
+    const lineHtml: string = `<line id="${this.getId()}Line" ${linePositionHtml} ${lineClassHtml} ${lineStyleHtml}/>`
 
     const proms: Promise<any>[] = []
     if (!this.rendered) {

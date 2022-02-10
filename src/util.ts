@@ -75,6 +75,39 @@ class Util {
     return stringifiedObject
   }
 
+  public getIndentationDepth(line: string, numberOfSpacesMatchingOneTab: number = 2): number {
+    const spacesForTab: string = ' '.repeat(numberOfSpacesMatchingOneTab)
+    let restLine: string = line
+    let indentation: number = 0
+    for (; restLine.length > 0; indentation++) {
+      if (restLine.startsWith('\t')) {
+        restLine = restLine.substring(1)
+        continue
+      } else if (restLine.startsWith(spacesForTab)) {
+        restLine = restLine.substring(numberOfSpacesMatchingOneTab)
+        continue
+      }
+      break
+    }
+    return indentation
+  }
+
+  public consistsOnlyOfEmptySpace(line: string): boolean {
+    return line.match(/^\s*$/) !== null
+  }
+
+  public consistsOnlyOfEmptySpaceExcept(line: string, exception: string): boolean {
+    let escapedException: string = ''
+    for (let char of exception) {
+      if (char === '[' || char === ']') {
+        escapedException += '\\'+char
+      } else {
+        escapedException += '['+char+']'
+      }
+    }
+    return line.match('^\\s*'+escapedException+'\\s*$') !== null
+  }
+
   public escapeForHtml(text: string): string {
     var content: string = '';
     for (let i = 0; i < text.length; i++) {

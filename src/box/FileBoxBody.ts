@@ -51,8 +51,73 @@ export class FileBoxBody extends BoxBody {
   }
 
   private async formHtmlContentForTextFile(): Promise<string|never> {
-    const dataConvertedToHtml: string = await fileSystem.readFileAndConvertToHtml(this.referenceFileBox.getSrcPath())
+    const data: string = await fileSystem.readFile(this.referenceFileBox.getSrcPath())
+    const mostImportantLines: string = this.extractMostImportantLines(data, 20, 10)
+    const dataConvertedToHtml: string = util.escapeForHtml(mostImportantLines)
     return `<pre id="${this.getContentId()}" style="margin:0px;">${dataConvertedToHtml}</pre>`
+  }
+
+  private extractMostImportantLines(code: string, roughNumberOfLines: number, minNumberOfLines: number): string {
+    let mostImportantLines: string[] = []
+
+    const lines = this.extractLines(code)
+    for (let indentation = 0; indentation < 3 && mostImportantLines.length < roughNumberOfLines; indentation++) {
+      const importantLines: string[] = this.extractLinesWithLowIndentation(lines, indentation)
+      if (importantLines.length > minNumberOfLines || Math.abs(importantLines.length-roughNumberOfLines) < Math.abs(mostImportantLines.length-roughNumberOfLines)) {
+        mostImportantLines = importantLines
+      }
+    }
+
+    return mostImportantLines.reduce((lines: string, line: string) => lines+line, '')
+  }
+
+  private extractLines(code: string): string[] {
+    const lines: string[] = []
+
+    let startLineIndex: number = 0
+    for (let index: number = 0; index < code.length; index++) {
+      const char: string = code[index]
+      if (char === '\n' || index === code.length-1) {
+        lines.push(code.substring(startLineIndex, index+1))
+        startLineIndex = index+1
+      }
+    }
+
+    return lines
+  }
+
+  private extractLinesWithLowIndentation(lines: string[], maxIndentationDepth: number): string[] {
+    let mostImportantLines: string[] = []
+
+    let latestImportantLine: string|undefined = undefined
+    for (const line of lines) {
+      if (util.consistsOnlyOfEmptySpace(line)) {
+        if (!latestImportantLine) {
+          continue
+        } else if (util.consistsOnlyOfEmptySpace(latestImportantLine)) {
+          continue
+        }
+      } else if (util.getIndentationDepth(line) > maxIndentationDepth) {
+        continue
+      }
+      if (line.startsWith('import')) {
+        continue
+      }
+      if (util.consistsOnlyOfEmptySpaceExcept(line, '}')) {
+        if (latestImportantLine && util.consistsOnlyOfEmptySpace(latestImportantLine)) {
+          mostImportantLines.pop()
+          latestImportantLine = mostImportantLines[mostImportantLines.length-1]
+        }
+        if (latestImportantLine && latestImportantLine.match(/{\s*$/)) {
+          mostImportantLines[mostImportantLines.length-1] = latestImportantLine.replace(/{\s*$/, '\n')
+          continue
+        }
+      }
+      latestImportantLine = line
+      mostImportantLines.push(line)
+    }
+
+    return mostImportantLines
   }
 
   private formHtmlContentForError(errorMessage: string): string {

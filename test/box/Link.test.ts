@@ -15,7 +15,7 @@ test('render', async () => {
   await scenario.link.render()
 
   //expect(scenario.renderMan.setContentTo).toHaveBeenCalledWith('link', any())) // TODO: make something like this work
-  expect(scenario.renderMan.setContentTo).toHaveBeenCalledWith('link', '<svg id="linksvg"><line id="linkLine" x1="10%" y1="10%" x2="90%" y2="10%" style="stroke:#2060c0;stroke-width:2px;pointer-events:auto;"/></svg><div id="linkfrom" draggable="true"></div><div id="linkto" draggable="true"></div>')
+  expect(scenario.renderMan.setContentTo).toHaveBeenCalledWith('link', '<svg id="linksvg"><line id="linkLine" x1="10%" y1="10%" x2="90%" y2="10%" class="highlightTransition" style="stroke:#2060c0;stroke-width:2px;pointer-events:auto;"/></svg><div id="linkfrom" draggable="true" class="highlightTransition"></div><div id="linkto" draggable="true" class="highlightTransition"></div>')
   expect(scenario.renderMan.setStyleTo).toHaveBeenCalledWith('linksvg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;')
   expect(scenario.fromBox.registerBorderingLink).toHaveBeenCalledWith(scenario.link)
   expect(scenario.toBox.registerBorderingLink).toHaveBeenCalledWith(scenario.link)
