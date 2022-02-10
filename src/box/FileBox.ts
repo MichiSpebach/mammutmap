@@ -31,6 +31,10 @@ export class FileBox extends Box {
     return null
   }
 
+  protected getBodyStyleClass(): string {
+    return style.getFileBoxBodyClass()
+  }
+
   protected getBodyOverflowStyle(): 'hidden'|'visible' {
     return 'hidden'
   }

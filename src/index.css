@@ -77,7 +77,11 @@ body {
 
 .boxHeaderInner {
   padding: 2px;
-  color: #ddd;;
+  color: #ddd;
+}
+
+.fileBoxBody {
+  padding-left: 5px;
 }
 
 .boxBorderLine {
