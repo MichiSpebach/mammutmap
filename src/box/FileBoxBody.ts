@@ -3,6 +3,7 @@ import { fileSystem } from '../fileSystemAdapter'
 import { renderManager } from '../RenderManager'
 import { BoxBody } from './BoxBody'
 import { FileBox } from './FileBox'
+import { style } from '../styleAdapter'
 
 export class FileBoxBody extends BoxBody {
   private readonly referenceFileBox: FileBox
@@ -54,7 +55,7 @@ export class FileBoxBody extends BoxBody {
     const data: string = await fileSystem.readFile(this.referenceFileBox.getSrcPath())
     const mostImportantLines: string = this.extractMostImportantLines(data, 20, 10)
     const dataConvertedToHtml: string = util.escapeForHtml(mostImportantLines)
-    return `<pre id="${this.getContentId()}" style="margin:0px;">${dataConvertedToHtml}</pre>`
+    return `<pre id="${this.getContentId()}" class="${style.getFileBoxBodyText()}">${dataConvertedToHtml}</pre>`
   }
 
   private extractMostImportantLines(code: string, roughNumberOfLines: number, minNumberOfLines: number): string {
