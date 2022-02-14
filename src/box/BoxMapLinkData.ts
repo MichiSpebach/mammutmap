@@ -1,29 +1,29 @@
-import { BoxMapLinkPathData } from './BoxMapLinkPathData'
+import { LinkEndData } from './LinkEndData'
 
 export class BoxMapLinkData {
   public readonly id: string
-  public fromPath: BoxMapLinkPathData
-  public toPath: BoxMapLinkPathData
+  public from: LinkEndData
+  public to: LinkEndData
 
   public static buildFromRawObject(object: any): BoxMapLinkData {
-    let fromPath: BoxMapLinkPathData = object.fromPath
-    let toPath: BoxMapLinkPathData = object.toPath
+    let from: LinkEndData = object.from
+    let to: LinkEndData = object.to
 
     // backwards compatibility, old files have wayPoints array field instead
-    if (!fromPath) {
-      fromPath = new BoxMapLinkPathData(object.fromWayPoints)
+    if (!from) {
+      from = new LinkEndData(object.fromWayPoints)
     }
-    if (!toPath) {
-      toPath = new BoxMapLinkPathData(object.toWayPoints)
+    if (!to) {
+      to = new LinkEndData(object.toWayPoints)
     }
 
-    return new BoxMapLinkData(object.id, fromPath, toPath)
+    return new BoxMapLinkData(object.id, from, to)
   }
 
-  public constructor(id: string, fromPath: BoxMapLinkPathData, toPath: BoxMapLinkPathData) {
+  public constructor(id: string, from: LinkEndData, to: LinkEndData) {
     this.id = id
-    this.fromPath = fromPath
-    this.toPath = toPath
+    this.from = from
+    this.to = to
   }
 
 }

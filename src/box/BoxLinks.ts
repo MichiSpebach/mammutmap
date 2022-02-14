@@ -4,7 +4,7 @@ import { Box } from './Box'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
-import { BoxMapLinkPathData } from './BoxMapLinkPathData'
+import { LinkEndData } from './LinkEndData'
 
 export class BoxLinks {
     private readonly referenceBox: Box
@@ -40,7 +40,7 @@ export class BoxLinks {
       oldManagingBox.saveMapData()
     }
 
-    public async addLink(from: BoxMapLinkPathData, to: BoxMapLinkPathData, reorderAndSave: boolean): Promise<Link> {
+    public async addLink(from: LinkEndData, to: LinkEndData, reorderAndSave: boolean): Promise<Link> {
       const linkData = new BoxMapLinkData(util.generateId(), from, to)
       this.referenceBox.getMapLinkData().push(linkData)
 
@@ -111,8 +111,8 @@ export class BoxLinks {
 
     public hasLinkWithEndBoxes(from: Box, to: Box): boolean {
       const link: Link|undefined = this.links.find((link: Link) => {
-        const linkFromWayPoints: WayPointData[] = link.getData().fromPath.wayPoints
-        const linkToWayPoints: WayPointData[] = link.getData().toPath.wayPoints
+        const linkFromWayPoints: WayPointData[] = link.getData().from.path
+        const linkToWayPoints: WayPointData[] = link.getData().to.path
         const linkFromBoxId: string = linkFromWayPoints[linkFromWayPoints.length-1].boxId
         const linkToBoxId: string = linkToWayPoints[linkToWayPoints.length-1].boxId
         return linkFromBoxId === from.getId() && linkToBoxId === to.getId()

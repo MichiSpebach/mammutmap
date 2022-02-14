@@ -6,7 +6,7 @@ import { map } from './Map'
 import { util } from './util'
 import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
-import { BoxMapLinkPathData } from './box/BoxMapLinkPathData'
+import { LinkEndData } from './box/LinkEndData'
 
 export { Box, FileBox, RootFolderBox }
 
@@ -133,7 +133,7 @@ export async function addLink(fromFilePath: string, toFilePath: string): Promise
   const fromWayPoint = new WayPointData(from.getId(), from.getName(), 50, 50)
   const toWayPoint = new WayPointData(to.getId(), to.getName(), 50, 50)
 
-  await managingBox.links.addLink(new BoxMapLinkPathData([fromWayPoint]), new BoxMapLinkPathData([toWayPoint]), true)
+  await managingBox.links.addLink(new LinkEndData([fromWayPoint]), new LinkEndData([toWayPoint]), true)
 }
 
 async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
