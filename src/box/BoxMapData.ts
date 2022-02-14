@@ -22,9 +22,12 @@ export class BoxMapData extends JsonObject {
       id = util.generateId()
     }
 
-    let links: BoxMapLinkData[] = parsedData.links
-    if (links == null) {
+    let links: BoxMapLinkData[]
+    let rawLinks: BoxMapLinkData[] = parsedData.links
+    if (!rawLinks) {
       links = []
+    } else {
+      links = rawLinks.map(BoxMapLinkData.buildFromRawObject)
     }
 
     return new BoxMapData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height, links)

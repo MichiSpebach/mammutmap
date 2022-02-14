@@ -51,8 +51,8 @@ export class Link implements Hoverable {
   }
 
   public async render(): Promise<void> {
-    const fromInBaseCoords: {x: number, y: number} = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.fromWayPoints)
-    const toInBaseCoords: {x: number, y: number} = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.toWayPoints)
+    const fromInBaseCoords: {x: number, y: number} = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.fromPath.wayPoints)
+    const toInBaseCoords: {x: number, y: number} = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.toPath.wayPoints)
 
     return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
@@ -76,11 +76,11 @@ export class Link implements Hoverable {
     let fromInBaseCoords: {x: number, y: number}
     let toInBaseCoords: {x: number, y: number}
     if (linkEnd === this.to) {
-      fromInBaseCoords = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.fromWayPoints)
+      fromInBaseCoords = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.fromPath.wayPoints)
       toInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
     } else if (linkEnd === this.from) {
       fromInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
-      toInBaseCoords = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.toWayPoints)
+      toInBaseCoords = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.toPath.wayPoints)
     } else {
       util.logError('Given LinkEnd is not contained by Link.')
     }
@@ -125,9 +125,9 @@ export class Link implements Hoverable {
       proms.push(renderManager.setContentTo(this.getId()+'svg', lineHtml))
     }
 
-    const fromBox: Box = this.getDeepestRenderedBox(this.data.fromWayPoints).box
+    const fromBox: Box = this.getDeepestRenderedBox(this.data.fromPath.wayPoints).box
     proms.push(this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians))
-    const toBox: Box = this.getDeepestRenderedBox(this.data.toWayPoints).box
+    const toBox: Box = this.getDeepestRenderedBox(this.data.toPath.wayPoints).box
     proms.push(this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians))
 
     await Promise.all(proms)
@@ -214,8 +214,8 @@ export class Link implements Hoverable {
     this.deregisterAtBorderingBoxes()
 
     // TODO: WIP unshift into existing WayPointData[] till inner boxId matches (matters when shallow render gets implemented)
-    this.data.fromWayPoints = await Promise.all(fromWayPoints)
-    this.data.toWayPoints = await Promise.all(toWayPoints)
+    this.data.fromPath.wayPoints = await Promise.all(fromWayPoints)
+    this.data.toPath.wayPoints = await Promise.all(toWayPoints)
 
     const oldManagingBox: Box = this.managingBox
     this.managingBox = relation.commonAncestor
@@ -231,13 +231,13 @@ export class Link implements Hoverable {
   }
 
   private registerAtBorderingBoxes(): void {
-    this.getRenderedBoxesWithoutBase(this.data.fromWayPoints).forEach((box: Box) => box.registerBorderingLink(this))
-    this.getRenderedBoxesWithoutBase(this.data.toWayPoints).forEach((box: Box) => box.registerBorderingLink(this))
+    this.getRenderedBoxesWithoutBase(this.data.fromPath.wayPoints).forEach((box: Box) => box.registerBorderingLink(this))
+    this.getRenderedBoxesWithoutBase(this.data.toPath.wayPoints).forEach((box: Box) => box.registerBorderingLink(this))
   }
 
   private deregisterAtBorderingBoxes(): void {
-    this.getRenderedBoxesWithoutBase(this.data.fromWayPoints).forEach((box: Box) => box.deregisterBorderingLink(this))
-    this.getRenderedBoxesWithoutBase(this.data.toWayPoints).forEach((box: Box) => box.deregisterBorderingLink(this))
+    this.getRenderedBoxesWithoutBase(this.data.fromPath.wayPoints).forEach((box: Box) => box.deregisterBorderingLink(this))
+    this.getRenderedBoxesWithoutBase(this.data.toPath.wayPoints).forEach((box: Box) => box.deregisterBorderingLink(this))
   }
 
   private getRenderedBoxesWithoutBase(path: WayPointData[]): Box[] {

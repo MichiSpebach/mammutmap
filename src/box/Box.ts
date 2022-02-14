@@ -394,8 +394,8 @@ export abstract class Box implements DropTarget, Hoverable {
 
   public filterBorderingLinksFor(boxId: string): Link[] {
     return this.borderingLinks.filter((link: Link) => {
-        return link.getData().fromWayPoints.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
-            || link.getData().toWayPoints.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
+        return link.getData().fromPath.wayPoints.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
+            || link.getData().toPath.wayPoints.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
       }
     )
   }

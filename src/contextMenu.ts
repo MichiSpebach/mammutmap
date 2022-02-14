@@ -6,6 +6,7 @@ import { FolderBox } from './box/FolderBox'
 import { WayPointData } from './box/WayPointData'
 import { Link } from './box/Link'
 import { DragManager } from './DragManager'
+import { BoxMapLinkPathData } from './box/BoxMapLinkPathData'
 
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const atomCommand: string = 'atom '+box.getSrcPath()
@@ -48,7 +49,7 @@ async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise
   const from = new WayPointData(box.getId(), box.getName(), localPosition.x, localPosition.y)
   const to = new WayPointData(box.getId(), box.getName(), localPosition.x, localPosition.y)
 
-  const link: Link = await box.links.addLink(from, to, false)
+  const link: Link = await box.links.addLink(new BoxMapLinkPathData([from]), new BoxMapLinkPathData([to]), false)
 
   DragManager.startDragWithClickToDropMode(link.getTo())
 }
