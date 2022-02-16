@@ -9,23 +9,32 @@ import { Box } from './Box'
 import { Link } from './Link'
 import { BoxWatcher } from './BoxWatcher'
 import { ClientPosition, LocalPosition } from './Transform'
+import { WayPointData } from './WayPointData'
+import { LinkEndData } from './LinkEndData'
+import { boxManager } from './BoxManager'
 
 export class LinkEnd implements Draggable<Box> {
   private readonly id: string
+  private readonly data: LinkEndData
   private readonly referenceLink: Link
   private shape: 'square'|'arrow'
   private rendered: boolean = false
   private borderingBox: Box|null = null
   private static watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher|null = null
 
-  public constructor(id: string, referenceLink: Link, shape: 'square'|'arrow') {
+  public constructor(id: string, data: LinkEndData, referenceLink: Link, shape: 'square'|'arrow') {
     this.id = id
+    this.data = data
     this.referenceLink = referenceLink
     this.shape = shape
   }
 
   public getId(): string {
     return this.id
+  }
+
+  private getManagingBox(): Box {
+    return this.referenceLink.getManagingBox()
   }
 
   public getBorderingBox(): Box|never {
@@ -148,6 +157,37 @@ export class LinkEnd implements Draggable<Box> {
   public async getClientMidPosition(): Promise<{x: number, y: number}> {
     const clientRect: Rect = await renderManager.getClientRectOf(this.getId())
     return {x: clientRect.x + clientRect.width/2, y: clientRect.y + clientRect.height/2}
+  }
+
+  public getDeepestRenderedWayPointPositionInManagingBoxCoords(): {x: number; y: number} {
+    const deepestRendered: {box: Box, wayPoint: WayPointData} = this.getDeepestRenderedBox()
+    return this.getManagingBox().transformInnerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.x, deepestRendered.wayPoint.y)
+  }
+
+  public getDeepestRenderedBox(): {box: Box, wayPoint: WayPointData} | never {
+    const renderedBoxes: {box: Box, wayPoint: WayPointData}[] = this.getRenderedBoxes()
+    return renderedBoxes[renderedBoxes.length-1]
+  }
+
+  public getRenderedBoxesWithoutManagingBox(): Box[] {
+    return this.getRenderedBoxes().map((tuple: {box: Box, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.getManagingBox())
+  }
+
+  private getRenderedBoxes(): {box: Box, wayPoint: WayPointData}[] | never {
+    if (this.data.path.length === 0) {
+      util.logError(this.getManagingBox().getSrcPath()+' has empty link path.')
+    }
+
+    const renderedBoxesInPath: {box: Box, wayPoint: WayPointData}[] = []
+
+    for(let i = 0; i < this.data.path.length; i++) {
+      const box: Box|undefined = boxManager.getBoxIfExists(this.data.path[i].boxId)
+      if (box) { // TODO: also check if box is rendered
+        renderedBoxesInPath.push({box: box, wayPoint: this.data.path[i]})
+      }
+    }
+
+    return renderedBoxesInPath
   }
 
 }

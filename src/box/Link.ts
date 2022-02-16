@@ -2,7 +2,6 @@ import { util } from '../util'
 import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu'
-import { boxManager } from './BoxManager'
 import { Box } from './Box'
 import { BoxLinks } from './BoxLinks'
 import { BoxMapLinkData } from './BoxMapLinkData'
@@ -22,8 +21,8 @@ export class Link implements Hoverable {
   public constructor(data: BoxMapLinkData, managingBox: Box) {
     this.data = data
     this.managingBox = managingBox
-    this.from = new LinkEnd(this.data.id+'from', this, 'square')
-    this.to = new LinkEnd(this.data.id+'to', this, 'arrow')
+    this.from = new LinkEnd(this.data.id+'from', this.data.from, this, 'square')
+    this.to = new LinkEnd(this.data.id+'to', this.data.to, this, 'arrow')
   }
 
   public getId(): string {
@@ -51,8 +50,8 @@ export class Link implements Hoverable {
   }
 
   public async render(): Promise<void> {
-    const fromInBaseCoords: {x: number, y: number} = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.from.path)
-    const toInBaseCoords: {x: number, y: number} = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.to.path)
+    const fromInBaseCoords: {x: number, y: number} = this.from.getDeepestRenderedWayPointPositionInManagingBoxCoords()
+    const toInBaseCoords: {x: number, y: number} = this.to.getDeepestRenderedWayPointPositionInManagingBoxCoords()
 
     return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
   }
@@ -76,11 +75,11 @@ export class Link implements Hoverable {
     let fromInBaseCoords: {x: number, y: number}
     let toInBaseCoords: {x: number, y: number}
     if (linkEnd === this.to) {
-      fromInBaseCoords = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.from.path)
+      fromInBaseCoords = this.from.getDeepestRenderedWayPointPositionInManagingBoxCoords()
       toInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
     } else if (linkEnd === this.from) {
       fromInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
-      toInBaseCoords = this.getDeepestRenderedWayPointPositionInManagingBoxCoords(this.data.to.path)
+      toInBaseCoords = this.to.getDeepestRenderedWayPointPositionInManagingBoxCoords()
     } else {
       util.logError('Given LinkEnd is not contained by Link.')
     }
@@ -125,9 +124,9 @@ export class Link implements Hoverable {
       proms.push(renderManager.setContentTo(this.getId()+'svg', lineHtml))
     }
 
-    const fromBox: Box = this.getDeepestRenderedBox(this.data.from.path).box
+    const fromBox: Box = this.from.getDeepestRenderedBox().box
     proms.push(this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians))
-    const toBox: Box = this.getDeepestRenderedBox(this.data.to.path).box
+    const toBox: Box = this.to.getDeepestRenderedBox().box
     proms.push(this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians))
 
     await Promise.all(proms)
@@ -164,33 +163,6 @@ export class Link implements Hoverable {
     }
     this.to.setHighlight(highlight)
     this.from.setHighlight(highlight)
-  }
-
-  private getDeepestRenderedWayPointPositionInManagingBoxCoords(path: WayPointData[]): {x: number; y: number} {
-    const deepestRendered: {box: Box, wayPoint: WayPointData} = this.getDeepestRenderedBox(path)
-    return this.managingBox.transformInnerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.x, deepestRendered.wayPoint.y)
-  }
-
-  private getDeepestRenderedBox(path: WayPointData[]): {box: Box, wayPoint: WayPointData} | never {
-    const renderedBoxes: {box: Box, wayPoint: WayPointData}[] = this.getRenderedBoxes(path)
-    return renderedBoxes[renderedBoxes.length-1]
-  }
-
-  private getRenderedBoxes(path: WayPointData[]): {box: Box, wayPoint: WayPointData}[] | never {
-    if (path.length === 0) {
-      util.logError(this.managingBox.getSrcPath()+' has empty link path.')
-    }
-
-    const renderedBoxesInPath: {box: Box, wayPoint: WayPointData}[] = []
-
-    for(let i = 0; i < path.length; i++) {
-      const box: Box|undefined = boxManager.getBoxIfExists(path[i].boxId)
-      if (box) { // TODO: also check if box is rendered
-        renderedBoxesInPath.push({box: box, wayPoint: path[i]})
-      }
-    }
-
-    return renderedBoxesInPath
   }
 
   public async reorderAndSave(): Promise<void|never> {
@@ -231,17 +203,13 @@ export class Link implements Hoverable {
   }
 
   private registerAtBorderingBoxes(): void {
-    this.getRenderedBoxesWithoutBase(this.data.from.path).forEach((box: Box) => box.registerBorderingLink(this))
-    this.getRenderedBoxesWithoutBase(this.data.to.path).forEach((box: Box) => box.registerBorderingLink(this))
+    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.registerBorderingLink(this))
+    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.registerBorderingLink(this))
   }
 
   private deregisterAtBorderingBoxes(): void {
-    this.getRenderedBoxesWithoutBase(this.data.from.path).forEach((box: Box) => box.deregisterBorderingLink(this))
-    this.getRenderedBoxesWithoutBase(this.data.to.path).forEach((box: Box) => box.deregisterBorderingLink(this))
-  }
-
-  private getRenderedBoxesWithoutBase(path: WayPointData[]): Box[] {
-    return this.getRenderedBoxes(path).map((tuple: {box: Box, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.managingBox)
+    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.deregisterBorderingLink(this))
+    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.deregisterBorderingLink(this))
   }
 
 }
