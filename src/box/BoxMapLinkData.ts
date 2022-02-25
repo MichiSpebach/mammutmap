@@ -6,15 +6,21 @@ export class BoxMapLinkData {
   public to: LinkEndData
 
   public static buildFromRawObject(object: any): BoxMapLinkData {
-    let from: LinkEndData = object.from
-    let to: LinkEndData = object.to
+    let from: LinkEndData
+    let to: LinkEndData
 
-    // backwards compatibility, old files have wayPoints array field instead
-    if (!from) {
-      from = new LinkEndData(object.fromWayPoints)
+    if (object.from) {
+      from = LinkEndData.buildFromRawObject(object.from) // raw object would have no methods
+    } else {
+      // backwards compatibility, old files have wayPoints array field instead
+      from = LinkEndData.buildFromRawObject(new LinkEndData(object.fromWayPoints)) // raw object would have no methods
     }
-    if (!to) {
-      to = new LinkEndData(object.toWayPoints)
+
+    if (object.to) {
+      to = LinkEndData.buildFromRawObject(object.to) // raw object would have no methods
+    } else {
+      // backwards compatibility, old files have wayPoints array field instead
+      to = LinkEndData.buildFromRawObject(new LinkEndData(object.toWayPoints)) // raw object would have no methods
     }
 
     return new BoxMapLinkData(object.id, from, to)

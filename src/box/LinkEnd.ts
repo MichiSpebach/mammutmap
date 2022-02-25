@@ -54,18 +54,19 @@ export class LinkEnd implements Draggable<Box> {
 
   public dragStart(clientX: number, clientY: number): Promise<void> {
     this.watchManagingBox()
-    return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY, true)
+    return this.referenceLink.renderLinkEndAtPosition(this, new ClientPosition(clientX, clientY), true)
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: Box, snapToGrid: boolean): Promise<void> {
+    let targetPosition: ClientPosition
     if (snapToGrid) {
       const localDropTargetPosition: LocalPosition = await dropTarget.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
       const localDropTargetPositionSnappedToGrid: LocalPosition = dropTarget.transform.getNearestGridPositionOf(localDropTargetPosition)
-      const clientPositionSnappedToDropTargetsGrid: ClientPosition = await dropTarget.transform.localToClientPosition(localDropTargetPositionSnappedToGrid)
-      clientX = clientPositionSnappedToDropTargetsGrid.x
-      clientY = clientPositionSnappedToDropTargetsGrid.y
+      targetPosition = await dropTarget.transform.localToClientPosition(localDropTargetPositionSnappedToGrid)
+    } else {
+      targetPosition = new ClientPosition(clientX, clientY)
     }
-    return this.referenceLink.renderLinkEndAtPosition(this, clientX, clientY, true)
+    return this.referenceLink.renderLinkEndAtPosition(this, targetPosition, true)
   }
 
   public async dragCancel(): Promise<void> {
@@ -97,10 +98,10 @@ export class LinkEnd implements Draggable<Box> {
     LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = null
   }
 
-  public async render(borderingBox: Box, x: number, y: number, angleInRadians: number): Promise<void> {
+  public async render(borderingBox: Box, positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
     this.borderingBox = borderingBox
 
-    await this.renderShape(x, y, angleInRadians)
+    await this.renderShape(positionInManagingBoxCoords, angleInRadians)
 
     if (!this.rendered) {
       DragManager.addDraggable(this)
@@ -119,8 +120,8 @@ export class LinkEnd implements Draggable<Box> {
     this.rendered = false
   }
 
-  private async renderShape(x: number, y: number, angleInRadians: number): Promise<void> {
-    const positionStyle = 'position:absolute;left:'+x+'%;top:'+y+'%;'
+  private async renderShape(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
+    const positionStyle = 'position:absolute;left:'+positionInManagingBoxCoords.percentX+'%;top:'+positionInManagingBoxCoords.percentY+'%;'
     let shapeStyle: string
     let transformStyle: string
 
@@ -159,9 +160,9 @@ export class LinkEnd implements Draggable<Box> {
     return {x: clientRect.x + clientRect.width/2, y: clientRect.y + clientRect.height/2}
   }
 
-  public getDeepestRenderedWayPointPositionInManagingBoxCoords(): {x: number; y: number} {
+  public getDeepestRenderedWayPointPositionInManagingBoxCoords(): LocalPosition {
     const deepestRendered: {box: Box, wayPoint: WayPointData} = this.getDeepestRenderedBox()
-    return this.getManagingBox().transformInnerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.x, deepestRendered.wayPoint.y)
+    return this.getManagingBox().transformInnerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.getPosition())
   }
 
   public getDeepestRenderedBox(): {box: Box, wayPoint: WayPointData} | never {

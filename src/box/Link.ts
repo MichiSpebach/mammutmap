@@ -9,6 +9,7 @@ import { WayPointData } from './WayPointData'
 import { LinkEnd } from './LinkEnd'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
+import { ClientPosition, LocalPosition } from './Transform'
 
 export class Link implements Hoverable {
   private readonly data: BoxMapLinkData
@@ -50,10 +51,10 @@ export class Link implements Hoverable {
   }
 
   public async render(): Promise<void> {
-    const fromInBaseCoords: {x: number, y: number} = this.from.getDeepestRenderedWayPointPositionInManagingBoxCoords()
-    const toInBaseCoords: {x: number, y: number} = this.to.getDeepestRenderedWayPointPositionInManagingBoxCoords()
+    const fromInManagingBoxCoords: LocalPosition = this.from.getDeepestRenderedWayPointPositionInManagingBoxCoords()
+    const toInManagingBoxCoords: LocalPosition = this.to.getDeepestRenderedWayPointPositionInManagingBoxCoords()
 
-    return this.renderAtPosition(fromInBaseCoords, toInBaseCoords)
+    return this.renderAtPosition(fromInManagingBoxCoords, toInManagingBoxCoords)
   }
 
   public async unrender(): Promise<void> {
@@ -71,20 +72,20 @@ export class Link implements Hoverable {
     await Promise.all(proms)
   }
 
-  public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientX: number, clientY: number, draggingInProgress: boolean = false): Promise<void> {
-    let fromInBaseCoords: {x: number, y: number}
-    let toInBaseCoords: {x: number, y: number}
+  public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientPosition: ClientPosition, draggingInProgress: boolean = false): Promise<void> {
+    let fromInManagingBoxCoords: LocalPosition
+    let toInManagingBoxCoords: LocalPosition
     if (linkEnd === this.to) {
-      fromInBaseCoords = this.from.getDeepestRenderedWayPointPositionInManagingBoxCoords()
-      toInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
+      fromInManagingBoxCoords = this.from.getDeepestRenderedWayPointPositionInManagingBoxCoords()
+      toInManagingBoxCoords = await this.managingBox.transform.clientToLocalPosition(clientPosition)
     } else if (linkEnd === this.from) {
-      fromInBaseCoords = await this.managingBox.transformClientPositionToLocal(clientX, clientY)
-      toInBaseCoords = this.to.getDeepestRenderedWayPointPositionInManagingBoxCoords()
+      fromInManagingBoxCoords = await this.managingBox.transform.clientToLocalPosition(clientPosition)
+      toInManagingBoxCoords = this.to.getDeepestRenderedWayPointPositionInManagingBoxCoords()
     } else {
       util.logError('Given LinkEnd is not contained by Link.')
     }
 
-    await this.renderAtPosition(fromInBaseCoords, toInBaseCoords, draggingInProgress)
+    await this.renderAtPosition(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
   }
 
   public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
@@ -97,13 +98,13 @@ export class Link implements Hoverable {
     }
   }
 
-  private async renderAtPosition(fromInBaseCoords: {x: number, y: number}, toInBaseCoords: {x: number, y: number}, draggingInProgress: boolean = false): Promise<void> {
-    const distanceInPixel: number[] = [toInBaseCoords.x-fromInBaseCoords.x, toInBaseCoords.y-fromInBaseCoords.y]
-    const angleInRadians: number = Math.atan2(distanceInPixel[1], distanceInPixel[0])
+  private async renderAtPosition(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean = false): Promise<void> {
+    const distance: number[] = [toInManagingBoxCoords.percentX-fromInManagingBoxCoords.percentX, toInManagingBoxCoords.percentY-fromInManagingBoxCoords.percentY]
+    const angleInRadians: number = Math.atan2(distance[1], distance[0]) // TODO: improve is only correct when managingBox is quadratic
 
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
-    const linePositionHtml: string = 'x1="'+fromInBaseCoords.x+'%" y1="'+fromInBaseCoords.y+'%" x2="'+toInBaseCoords.x+'%" y2="'+toInBaseCoords.y+'%"'
+    const linePositionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
     const lineHighlightClass: string = this.highlight ? ' '+style.getHighlightClass() : ''
     const lineClassHtml: string = `class="${style.getHighlightTransitionClass()}${lineHighlightClass}"`
     const linePointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
@@ -125,9 +126,9 @@ export class Link implements Hoverable {
     }
 
     const fromBox: Box = this.from.getDeepestRenderedBox().box
-    proms.push(this.from.render(fromBox, fromInBaseCoords.x, fromInBaseCoords.y, angleInRadians))
+    proms.push(this.from.render(fromBox, fromInManagingBoxCoords, angleInRadians))
     const toBox: Box = this.to.getDeepestRenderedBox().box
-    proms.push(this.to.render(toBox, toInBaseCoords.x, toInBaseCoords.y, angleInRadians))
+    proms.push(this.to.render(toBox, toInManagingBoxCoords, angleInRadians))
 
     await Promise.all(proms)
   }
