@@ -67,6 +67,15 @@ export class LocalPosition {
     this.percentX = percentX
     this.percentY = percentY
   }
+
+  public isBetweenCoordinateWise(line: {from: LocalPosition, to: LocalPosition}): boolean {
+    const leftLineEnd: number = Math.min(line.from.percentX, line.to.percentX)
+    const rightLineEnd: number = Math.max(line.from.percentX, line.to.percentX)
+    const topLineEnd: number = Math.min(line.from.percentY, line.to.percentY)
+    const bottomLineEnd: number = Math.max(line.from.percentY, line.to.percentY)
+    return this.percentX >= leftLineEnd && this.percentX <= rightLineEnd && this.percentY >= topLineEnd && this.percentY <= bottomLineEnd
+  }
+
 }
 
 export class ClientPosition {
