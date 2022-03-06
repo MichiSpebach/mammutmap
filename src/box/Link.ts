@@ -61,8 +61,10 @@ export class Link implements Hoverable {
   }
 
   public async render(draggingInProgress: boolean = false): Promise<void> {
-    const fromInManagingBoxCoords: LocalPosition = await this.from.getRenderPositionInManagingBoxCoords()
+    const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
+    const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
+
     const distance: number[] = [toInManagingBoxCoords.percentX-fromInManagingBoxCoords.percentX, toInManagingBoxCoords.percentY-fromInManagingBoxCoords.percentY]
     const angleInRadians: number = Math.atan2(distance[1], distance[0]) // TODO: improve is only correct when managingBox is quadratic
 
@@ -73,7 +75,15 @@ export class Link implements Hoverable {
     const lineClassHtml: string = `class="${style.getHighlightTransitionClass()}${lineHighlightClass}"`
     const linePointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
     const lineStyleHtml: string = 'style="stroke:'+style.getLinkColor()+';stroke-width:2px;'+linePointerEventsStyle+'"'
-    const lineHtml: string = `<line id="${this.getId()}Line" ${linePositionHtml} ${lineClassHtml} ${lineStyleHtml}/>`
+    let lineHtml: string = `<line id="${this.getId()}Line" ${linePositionHtml} ${lineClassHtml} ${lineStyleHtml}/>`
+    if (draggingInProgress /*&& (this.from.isFloatToBorder() || this.to.isFloatToBorder())*/) { // TODO: activate floatToBorder option
+      const fromTargetInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getTargetPositionInManagingBoxCoords()
+      const toTargetInManagingBoxCoords: LocalPosition = await this.to.getTargetPositionInManagingBoxCoords()
+      const fromTargetInManagingBoxCoords: LocalPosition = await fromTargetInManagingBoxCoordsPromise
+      const targetLinePositionHtml: string = 'x1="'+fromTargetInManagingBoxCoords.percentX+'%" y1="'+fromTargetInManagingBoxCoords.percentY+'%" x2="'+toTargetInManagingBoxCoords.percentX+'%" y2="'+toTargetInManagingBoxCoords.percentY+'%"'
+      const targetLineHtml: string = `<line ${targetLinePositionHtml} ${lineClassHtml} ${lineStyleHtml} stroke-dasharray="5"/>`
+      lineHtml = targetLineHtml+lineHtml
+    }
 
     const proms: Promise<any>[] = []
     if (!this.rendered) {
