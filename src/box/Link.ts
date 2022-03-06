@@ -50,44 +50,6 @@ export class Link implements Hoverable {
     return this.to
   }
 
-  public async render(): Promise<void> {
-    const fromInManagingBoxCoords: LocalPosition = this.from.getDeepestRenderedWayPointPositionInManagingBoxCoords()
-    const toInManagingBoxCoords: LocalPosition = this.to.getDeepestRenderedWayPointPositionInManagingBoxCoords()
-
-    return this.renderAtPosition(fromInManagingBoxCoords, toInManagingBoxCoords)
-  }
-
-  public async unrender(): Promise<void> {
-    if(!this.rendered) {
-      return
-    }
-
-    const proms: Promise<any>[] = []
-    proms.push(this.removeContextMenu())
-    this.deregisterAtBorderingBoxes()
-    proms.push(this.from.unrender())
-    proms.push(this.to.unrender())
-
-    this.rendered = false
-    await Promise.all(proms)
-  }
-
-  public async renderLinkEndAtPosition(linkEnd: LinkEnd, clientPosition: ClientPosition, draggingInProgress: boolean = false): Promise<void> {
-    let fromInManagingBoxCoords: LocalPosition
-    let toInManagingBoxCoords: LocalPosition
-    if (linkEnd === this.to) {
-      fromInManagingBoxCoords = this.from.getDeepestRenderedWayPointPositionInManagingBoxCoords()
-      toInManagingBoxCoords = await this.managingBox.transform.clientToLocalPosition(clientPosition)
-    } else if (linkEnd === this.from) {
-      fromInManagingBoxCoords = await this.managingBox.transform.clientToLocalPosition(clientPosition)
-      toInManagingBoxCoords = this.to.getDeepestRenderedWayPointPositionInManagingBoxCoords()
-    } else {
-      util.logError('Given LinkEnd is not contained by Link.')
-    }
-
-    await this.renderAtPosition(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
-  }
-
   public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
     if (linkEnd === this.to) {
       await this.reorderAndSaveWithEndBoxes(this.from.getBorderingBox(), dropTarget)
@@ -98,7 +60,9 @@ export class Link implements Hoverable {
     }
   }
 
-  private async renderAtPosition(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean = false): Promise<void> {
+  public async render(draggingInProgress: boolean = false): Promise<void> {
+    const fromInManagingBoxCoords: LocalPosition = await this.from.getRenderPositionInManagingBoxCoords()
+    const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const distance: number[] = [toInManagingBoxCoords.percentX-fromInManagingBoxCoords.percentX, toInManagingBoxCoords.percentY-fromInManagingBoxCoords.percentY]
     const angleInRadians: number = Math.atan2(distance[1], distance[0]) // TODO: improve is only correct when managingBox is quadratic
 
@@ -130,6 +94,21 @@ export class Link implements Hoverable {
     const toBox: Box = this.to.getDeepestRenderedBox().box
     proms.push(this.to.render(toBox, toInManagingBoxCoords, angleInRadians))
 
+    await Promise.all(proms)
+  }
+
+  public async unrender(): Promise<void> {
+    if(!this.rendered) {
+      return
+    }
+
+    const proms: Promise<any>[] = []
+    proms.push(this.removeContextMenu())
+    this.deregisterAtBorderingBoxes()
+    proms.push(this.from.unrender())
+    proms.push(this.to.unrender())
+
+    this.rendered = false
     await Promise.all(proms)
   }
 
@@ -171,17 +150,17 @@ export class Link implements Hoverable {
   }
 
   private async reorderAndSaveWithEndBoxes(fromBox: Box, toBox: Box): Promise<void|never> {
-    const fromClientPosition: {x: number, y: number} = await this.from.getClientMidPosition()
-    const toClientPosition: {x: number, y: number} = await this.to.getClientMidPosition()
+    const fromPosition: ClientPosition = await this.from.getPositionInClientCoords()
+    const toPosition: ClientPosition = await this.to.getPositionInClientCoords()
     const relation: {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} = Box.findCommonAncestor(fromBox, toBox)
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
-      const positionInBoxCoords: {x: number, y: number} = await box.transformClientPositionToLocal(fromClientPosition.x, fromClientPosition.y)
-      return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.x, positionInBoxCoords.y)
+      const positionInBoxCoords: LocalPosition = await box.transform.clientToLocalPosition(fromPosition)
+      return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.percentX, positionInBoxCoords.percentY)
     })
     const toWayPoints: Promise<WayPointData>[] = relation.toBoxes.map(async box => {
-      const positionInBoxCoords: {x: number, y: number} = await box.transformClientPositionToLocal(toClientPosition.x, toClientPosition.y)
-      return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.x, positionInBoxCoords.y)
+      const positionInBoxCoords: LocalPosition = await box.transform.clientToLocalPosition(toPosition)
+      return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.percentX, positionInBoxCoords.percentY)
     })
 
     this.deregisterAtBorderingBoxes()
@@ -211,6 +190,24 @@ export class Link implements Hoverable {
   private deregisterAtBorderingBoxes(): void {
     this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.deregisterBorderingLink(this))
     this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.deregisterBorderingLink(this))
+  }
+
+  public async getLineInClientCoords(): Promise<{from: ClientPosition, to: ClientPosition}> {
+    const fromPosition: Promise<ClientPosition> = this.from.getTargetPositionInClientCoords()
+    const toPosition: Promise<ClientPosition> = this.to.getTargetPositionInClientCoords()
+    return {
+      from: await fromPosition,
+      to: await toPosition
+    }
+  }
+
+  public async getLineInManagingBoxCoords(): Promise<{from: LocalPosition, to: LocalPosition}> {
+    const fromPosition: Promise<LocalPosition> = this.from.getTargetPositionInManagingBoxCoords()
+    const toPosition: Promise<LocalPosition> = this.to.getTargetPositionInManagingBoxCoords()
+    return {
+      from: await fromPosition,
+      to: await toPosition
+    }
   }
 
 }

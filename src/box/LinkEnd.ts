@@ -21,6 +21,11 @@ export class LinkEnd implements Draggable<Box> {
   private rendered: boolean = false
   private borderingBox: Box|null = null
   private static watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher|null = null
+  private dragState: {
+    clientPosition: ClientPosition
+    dropTarget: Box
+    snapToGrid: boolean
+  } | null = null
 
   public constructor(id: string, data: LinkEndData, referenceLink: Link, shape: 'square'|'arrow') {
     this.id = id
@@ -52,31 +57,27 @@ export class LinkEnd implements Draggable<Box> {
     return dropTarget instanceof Box
   }
 
-  public dragStart(clientX: number, clientY: number): Promise<void> {
+  public async dragStart(clientX: number, clientY: number): Promise<void> {
     this.watchManagingBox()
-    return this.referenceLink.renderLinkEndAtPosition(this, new ClientPosition(clientX, clientY), true)
+    this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: this.getDropTargetAtDragStart(), snapToGrid: false} // TODO add dropTarget and snapToGrid to dragstart(..)
+    return this.referenceLink.render(true)
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: Box, snapToGrid: boolean): Promise<void> {
-    let targetPosition: ClientPosition
-    if (snapToGrid) {
-      const localDropTargetPosition: LocalPosition = await dropTarget.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-      const localDropTargetPositionSnappedToGrid: LocalPosition = dropTarget.transform.getNearestGridPositionOf(localDropTargetPosition)
-      targetPosition = await dropTarget.transform.localToClientPosition(localDropTargetPositionSnappedToGrid)
-    } else {
-      targetPosition = new ClientPosition(clientX, clientY)
-    }
-    return this.referenceLink.renderLinkEndAtPosition(this, targetPosition, true)
+    this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: dropTarget, snapToGrid: snapToGrid}
+    return this.referenceLink.render(true)
   }
 
   public async dragCancel(): Promise<void> {
     await this.referenceLink.render()
     this.unwatchManagingBox()
+    this.dragState = null
   }
 
   public async dragEnd(dropTarget: Box): Promise<void> {
     await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
     this.unwatchManagingBox()
+    this.dragState = null
   }
 
   private async watchManagingBox(): Promise<void> {
@@ -155,12 +156,48 @@ export class LinkEnd implements Draggable<Box> {
     }
   }
 
-  public async getClientMidPosition(): Promise<{x: number, y: number}> {
-    const clientRect: Rect = await renderManager.getClientRectOf(this.getId())
-    return {x: clientRect.x + clientRect.width/2, y: clientRect.y + clientRect.height/2}
+  public async getRenderPositionInManagingBoxCoords(): Promise<LocalPosition> {
+    //if (this.data.floatToBorder) { // TODO: activate
+      let clientRect: Promise<Rect>
+      if (this.dragState) {
+        clientRect = this.dragState.dropTarget.getClientRect()
+      } else {
+        clientRect = this.getDeepestRenderedBox().box.getClientRect()
+      }
+      const line: {from: ClientPosition, to: ClientPosition} = await this.referenceLink.getLineInClientCoords()
+      const intersectionWithRect: ClientPosition|undefined = (await clientRect).calculateIntersectionWithLine(line)
+      if (intersectionWithRect) {
+        return this.getManagingBox().transform.clientToLocalPosition(intersectionWithRect)
+      }
+    //}
+    return this.getTargetPositionInManagingBoxCoords()
   }
 
-  public getDeepestRenderedWayPointPositionInManagingBoxCoords(): LocalPosition {
+  public async getTargetPositionInManagingBoxCoords(): Promise<LocalPosition> {
+    if (this.dragState) {
+      if (this.dragState.snapToGrid) {
+        return this.getManagingBox().transform.getNearestGridPositionOfOtherTransform(this.dragState.clientPosition, this.dragState.dropTarget.transform)
+      } else {
+        return this.getManagingBox().transform.clientToLocalPosition(this.dragState.clientPosition)
+      }
+    } else {
+      return this.getDeepestRenderedWayPointPositionInManagingBoxCoords()
+    }
+  }
+
+  public async getTargetPositionInClientCoords(): Promise<ClientPosition> {
+    if (this.dragState) {
+      if (this.dragState.snapToGrid) {
+        return this.dragState.dropTarget.transform.getNearestGridPositionInClientCoords(this.dragState.clientPosition)
+      } else {
+        return this.dragState.clientPosition
+      }
+    } else {
+      return this.getManagingBox().transform.localToClientPosition(this.getDeepestRenderedWayPointPositionInManagingBoxCoords())
+    }
+  }
+
+  private getDeepestRenderedWayPointPositionInManagingBoxCoords(): LocalPosition {
     const deepestRendered: {box: Box, wayPoint: WayPointData} = this.getDeepestRenderedBox()
     return this.getManagingBox().transformInnerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.getPosition())
   }

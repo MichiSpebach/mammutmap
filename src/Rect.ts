@@ -1,4 +1,4 @@
-import { LocalPosition } from './box/Transform'
+import { ClientPosition } from './box/Transform'
 
 export class Rect {
   public readonly x: number
@@ -17,9 +17,9 @@ export class Rect {
     return x >= this.x && y >= this.y && x <= this.getRightX() && y <= this.getBottomY()
   }
 
-  // TODO: should also be possible for type ClientPosition, or introduce interface for Position
-  public isLocalPositionInside(position: LocalPosition): boolean {
-    return this.isPositionInside(position.percentX, position.percentY)
+  // TODO: should also be possible for type LocalPosition, or introduce interface for Position
+  public isClientPositionInside(position: ClientPosition): boolean {
+    return this.isPositionInside(position.x, position.y)
   }
 
   public getRightX() {
@@ -30,32 +30,32 @@ export class Rect {
     return this.y+this.height
   }
 
-  // TODO: should also be possible for type ClientPosition, or introduce interface for Position
-  public calculateIntersectionWithLine(line: {from: LocalPosition, to: LocalPosition}): LocalPosition|undefined {
-    const deltaX: number = line.to.percentX - line.from.percentX
-    const deltaY: number = line.to.percentY - line.from.percentY
+  // TODO: should also be possible for type LocalPosition, or introduce interface for Position
+  public calculateIntersectionWithLine(line: {from: ClientPosition, to: ClientPosition}): ClientPosition|undefined {
+    const deltaX: number = line.to.x - line.from.x
+    const deltaY: number = line.to.y - line.from.y
 
-    const distanceToTop: number = this.y - line.from.percentY
-    const intersectionTop = new LocalPosition(line.from.percentX + distanceToTop * (deltaX/deltaY), this.y)
-    if (this.isLocalPositionInside(intersectionTop) && intersectionTop.isBetweenCoordinateWise(line)) {
+    const distanceToTop: number = this.y - line.from.y
+    const intersectionTop = new ClientPosition(line.from.x + distanceToTop * (deltaX/deltaY), this.y)
+    if (this.isClientPositionInside(intersectionTop) && intersectionTop.isBetweenCoordinateWise(line)) {
       return intersectionTop
     }
 
-    const distanceToBottom: number = this.getBottomY() - line.from.percentY
-    const intersectionBottom = new LocalPosition(line.from.percentX + distanceToBottom * (deltaX/deltaY), this.getBottomY())
-    if (this.isLocalPositionInside(intersectionBottom) && intersectionBottom.isBetweenCoordinateWise(line)) {
+    const distanceToBottom: number = this.getBottomY() - line.from.y
+    const intersectionBottom = new ClientPosition(line.from.x + distanceToBottom * (deltaX/deltaY), this.getBottomY())
+    if (this.isClientPositionInside(intersectionBottom) && intersectionBottom.isBetweenCoordinateWise(line)) {
       return intersectionBottom
     }
 
-    const distanceToLeft: number = this.x - line.from.percentX
-    const intersectionLeft = new LocalPosition(this.x, line.from.percentY + distanceToLeft * (deltaY/deltaX))
-    if (this.isLocalPositionInside(intersectionLeft) && intersectionLeft.isBetweenCoordinateWise(line)) {
+    const distanceToLeft: number = this.x - line.from.x
+    const intersectionLeft = new ClientPosition(this.x, line.from.y + distanceToLeft * (deltaY/deltaX))
+    if (this.isClientPositionInside(intersectionLeft) && intersectionLeft.isBetweenCoordinateWise(line)) {
       return intersectionLeft
     }
 
-    const distanceToRight: number = this.getRightX() - line.from.percentX
-    const intersectionRight = new LocalPosition(this.getRightX(), line.from.percentY + distanceToRight * (deltaY/deltaX))
-    if (this.isLocalPositionInside(intersectionRight) && intersectionRight.isBetweenCoordinateWise(line)) {
+    const distanceToRight: number = this.getRightX() - line.from.x
+    const intersectionRight = new ClientPosition(this.getRightX(), line.from.y + distanceToRight * (deltaY/deltaX))
+    if (this.isClientPositionInside(intersectionRight) && intersectionRight.isBetweenCoordinateWise(line)) {
       return intersectionRight
     }
 

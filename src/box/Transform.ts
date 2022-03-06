@@ -25,11 +25,14 @@ export class Transform {
   }
 
   public async getNearestGridPositionOfOtherTransform(position: ClientPosition, other: Transform): Promise<LocalPosition> {
-    const positionInDropTargetCoords: LocalPosition = await other.clientToLocalPosition(position)
-    const positionInDropTargetCoordsRounded: LocalPosition = other.getNearestGridPositionOf(positionInDropTargetCoords)
-    const positionInClientCoords: ClientPosition = await other.localToClientPosition(positionInDropTargetCoordsRounded)
-    const localPosition: {x: number, y: number} = await this.referenceBox.transformClientPositionToLocal(positionInClientCoords.x, positionInClientCoords.y)
-    return new LocalPosition(localPosition.x, localPosition.y)
+    const clientPositionSnappedToGrid: ClientPosition = await other.getNearestGridPositionInClientCoords(position)
+    return this.referenceBox.transform.clientToLocalPosition(clientPositionSnappedToGrid)
+  }
+
+  public async getNearestGridPositionInClientCoords(position: ClientPosition): Promise<ClientPosition> {
+    const localPosition: LocalPosition = await this.clientToLocalPosition(position)
+    const localPositionSnappedToGrid: LocalPosition = this.getNearestGridPositionOf(localPosition)
+    return await this.localToClientPosition(localPositionSnappedToGrid)
   }
 
   // remove? not really practical
@@ -67,15 +70,6 @@ export class LocalPosition {
     this.percentX = percentX
     this.percentY = percentY
   }
-
-  public isBetweenCoordinateWise(line: {from: LocalPosition, to: LocalPosition}): boolean {
-    const leftLineEnd: number = Math.min(line.from.percentX, line.to.percentX)
-    const rightLineEnd: number = Math.max(line.from.percentX, line.to.percentX)
-    const topLineEnd: number = Math.min(line.from.percentY, line.to.percentY)
-    const bottomLineEnd: number = Math.max(line.from.percentY, line.to.percentY)
-    return this.percentX >= leftLineEnd && this.percentX <= rightLineEnd && this.percentY >= topLineEnd && this.percentY <= bottomLineEnd
-  }
-
 }
 
 export class ClientPosition {
@@ -85,5 +79,13 @@ export class ClientPosition {
   public constructor(x: number, y: number) {
     this.x = x
     this.y = y
+  }
+
+  public isBetweenCoordinateWise(line: {from: ClientPosition, to: ClientPosition}): boolean {
+    const leftLineEnd: number = Math.min(line.from.x, line.to.x)
+    const rightLineEnd: number = Math.max(line.from.x, line.to.x)
+    const topLineEnd: number = Math.min(line.from.y, line.to.y)
+    const bottomLineEnd: number = Math.max(line.from.y, line.to.y)
+    return this.x >= leftLineEnd && this.x <= rightLineEnd && this.y >= topLineEnd && this.y <= bottomLineEnd
   }
 }
