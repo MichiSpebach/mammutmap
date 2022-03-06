@@ -9,1534 +9,1851 @@
 	"links": [
 		{
 			"id": "56uund4cto",
-			"fromWayPoints": [
-				{
-					"boxId": "perbgpafqk8",
-					"boxName": "index.html",
-					"x": 50,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lsosl5fvo8",
-					"boxName": "index.css",
-					"x": 50.001186943620176,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "perbgpafqk8",
+						"boxName": "index.html",
+						"x": 50,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lsosl5fvo8",
+						"boxName": "index.css",
+						"x": 50.001186943620176,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "hvdhhasu1t",
-			"fromWayPoints": [
-				{
-					"boxId": "ffddla14d38",
-					"boxName": "index.ts",
-					"x": 100,
-					"y": 9.99790741472715
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "5da77t8c1t8",
-					"boxName": "domAdapter.ts",
-					"x": 0,
-					"y": 19.996279761904763
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 100,
+						"y": 9.99790741472715
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5da77t8c1t8",
+						"boxName": "domAdapter.ts",
+						"x": 0,
+						"y": 19.996279761904763
+					}
+				]
+			}
 		},
 		{
 			"id": "hsmj0kkn42o",
-			"fromWayPoints": [
-				{
-					"boxId": "ffddla14d38",
-					"boxName": "index.ts",
-					"x": 100,
-					"y": 49.99725802029065
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "perbgpafqk8",
-					"boxName": "index.html",
-					"x": 0,
-					"y": 50.006854949273375
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 100,
+						"y": 49.99725802029065
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "perbgpafqk8",
+						"boxName": "index.html",
+						"x": 0,
+						"y": 50.006854949273375
+					}
+				]
+			}
 		},
 		{
 			"id": "i02328f46c",
-			"fromWayPoints": [
-				{
-					"boxId": "ita04k5ms68",
-					"boxName": "menu.ts",
-					"x": 99.74352076046992,
-					"y": 29.730803427857964
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "7b4gp3csto8",
-					"boxName": "Settings.ts",
-					"x": 0.6181887706328468,
-					"y": 57.17977215893304
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ita04k5ms68",
+						"boxName": "menu.ts",
+						"x": 99.74352076046992,
+						"y": 29.730803427857964
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "7b4gp3csto8",
+						"boxName": "Settings.ts",
+						"x": 0.6181887706328468,
+						"y": 57.17977215893304
+					}
+				]
+			}
 		},
 		{
 			"id": "vjlb3hs7fo",
-			"fromWayPoints": [
-				{
-					"boxId": "5da77t8c1t8",
-					"boxName": "domAdapter.ts",
-					"x": 25.000368345832534,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p1f768sjqmg",
-					"boxName": "Rect.ts",
-					"x": 25,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "5da77t8c1t8",
+						"boxName": "domAdapter.ts",
+						"x": 25.000368345832534,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p1f768sjqmg",
+						"boxName": "Rect.ts",
+						"x": 25,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "kngmr4gvmpo",
-			"fromWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 50.626739532332444,
-					"y": 99.8970413693498
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "l84ccd69v6g",
-					"boxName": "util.ts",
-					"x": 50.55437256773625,
-					"y": 0.15534271817616935
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 50.626739532332444,
+						"y": 99.8970413693498
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50.55437256773625,
+						"y": 0.15534271817616935
+					}
+				]
+			}
 		},
 		{
 			"id": "ipj5ro0m12",
-			"fromWayPoints": [
-				{
-					"boxId": "6o0ikrr8ru",
-					"boxName": "Map.ts",
-					"x": 100,
-					"y": 39.99713453364535
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 5.258281435066672,
-					"y": 10.06293106572129
-				},
-				{
-					"boxId": "8i2aqhl305",
-					"boxName": "RootFolderBox.ts",
-					"x": 1.2942356368498973,
-					"y": 50.63413455731368
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 100,
+						"y": 39.99713453364535
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 5.258281435066672,
+						"y": 10.06293106572129
+					},
+					{
+						"boxId": "8i2aqhl305",
+						"boxName": "RootFolderBox.ts",
+						"x": 1.2942356368498973,
+						"y": 50.63413455731368
+					}
+				]
+			}
 		},
 		{
 			"id": "v2b0imnouao",
-			"fromWayPoints": [
-				{
-					"boxId": "82efivc7np8",
-					"boxName": "ScaleManager.ts",
-					"x": 86.45421607378128,
-					"y": -0.1015721603956898
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "l84ccd69v6g",
-					"boxName": "util.ts",
-					"x": 84.9136445448627,
-					"y": 99.64799356331088
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 86.45421607378128,
+						"y": -0.1015721603956898
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 84.9136445448627,
+						"y": 99.64799356331088
+					}
+				]
+			}
 		},
 		{
 			"id": "2lre1tod0o8",
-			"fromWayPoints": [
-				{
-					"boxId": "82efivc7np8",
-					"boxName": "ScaleManager.ts",
-					"x": 99.97868632539712,
-					"y": 0.14542901559600824
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p0d1i1vr268",
-					"boxName": "RenderManager.ts",
-					"x": 94.99924775580482,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 99.97868632539712,
+						"y": 0.14542901559600824
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 94.99924775580482,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "f122uaq9c3g",
-			"fromWayPoints": [
-				{
-					"boxId": "82efivc7np8",
-					"boxName": "ScaleManager.ts",
-					"x": 0.37303400994757363,
-					"y": 76.49051490514906
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 90.15902488694559,
-					"y": 61.114167675332865
-				},
-				{
-					"boxId": "ujltrbp3r9",
-					"boxName": "BoxBorder.ts",
-					"x": 98.69725113756779,
-					"y": 35.8347876672484
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 0.37303400994757363,
+						"y": 76.49051490514906
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 90.15902488694559,
+						"y": 61.114167675332865
+					},
+					{
+						"boxId": "ujltrbp3r9",
+						"boxName": "BoxBorder.ts",
+						"x": 98.69725113756779,
+						"y": 35.8347876672484
+					}
+				]
+			}
 		},
 		{
 			"id": "tc31i339o2g",
-			"fromWayPoints": [
-				{
-					"boxId": "82efivc7np8",
-					"boxName": "ScaleManager.ts",
-					"x": 25,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p1f768sjqmg",
-					"boxName": "Rect.ts",
-					"x": 50,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 25,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p1f768sjqmg",
+						"boxName": "Rect.ts",
+						"x": 50,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "ah1s73g3f1g",
-			"fromWayPoints": [
-				{
-					"boxId": "2cnbfh46bf8",
-					"boxName": "/home/michael/programming/ts-visualize-files/src",
-					"x": 4.999449076284571,
-					"y": -4.999449076284571
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "ffddla14d38",
-					"boxName": "index.ts",
-					"x": 35.0013222460553,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "/home/michael/programming/ts-visualize-files/src",
+						"x": 4.999449076284571,
+						"y": -4.999449076284571
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 35.0013222460553,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "j2mmojuhqbo",
-			"fromWayPoints": [
-				{
-					"boxId": "dub9um70n18",
-					"boxName": "DragManager.ts",
-					"x": 98.52089032049152,
-					"y": 0.03533973430492715
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "l84ccd69v6g",
-					"boxName": "util.ts",
-					"x": 99.96272967835712,
-					"y": 99.93403516329663
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "DragManager.ts",
+						"x": 98.52089032049152,
+						"y": 0.03533973430492715
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 99.96272967835712,
+						"y": 99.93403516329663
+					}
+				]
+			}
 		},
 		{
 			"id": "eug1atktn7",
-			"fromWayPoints": [
-				{
-					"boxId": "dub9um70n18",
-					"boxName": "DragManager.ts",
-					"x": 99.96615056729142,
-					"y": 0.07271450779800412
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p0d1i1vr268",
-					"boxName": "RenderManager.ts",
-					"x": 94.99924775580482,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "DragManager.ts",
+						"x": 99.96615056729142,
+						"y": 0.07271450779800412
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 94.99924775580482,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "ccj5262mnto",
-			"fromWayPoints": [
-				{
-					"boxId": "dub9um70n18",
-					"boxName": "DragManager.ts",
-					"x": 59.99971030027377,
-					"y": 100.0027743868605
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p0kd6a1t4vo",
-					"boxName": "Draggable.ts",
-					"x": 100,
-					"y": 54.99681362609351
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "DragManager.ts",
+						"x": 59.99971030027377,
+						"y": 100.0027743868605
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0kd6a1t4vo",
+						"boxName": "Draggable.ts",
+						"x": 100,
+						"y": 54.99681362609351
+					}
+				]
+			}
 		},
 		{
 			"id": "2kd4k0po11g",
-			"fromWayPoints": [
-				{
-					"boxId": "2cnbfh46bf8",
-					"boxName": "/home/michael/programming/ts-visualize-files/src",
-					"x": 89.99987271793871,
-					"y": 74.99968179484678
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "ve86au87rlg",
-					"boxName": "DropTarget.ts",
-					"x": 100,
-					"y": 49.9978789292835
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "/home/michael/programming/ts-visualize-files/src",
+						"x": 89.99987271793871,
+						"y": 74.99968179484678
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ve86au87rlg",
+						"boxName": "DropTarget.ts",
+						"x": 100,
+						"y": 49.9978789292835
+					}
+				]
+			}
 		},
 		{
 			"id": "2shj5ghu4m",
-			"fromWayPoints": [
-				{
-					"boxId": "l84ccd69v6g",
-					"boxName": "util.ts",
-					"x": 99.91632253237147,
-					"y": 0.48885454952450413
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "5da77t8c1t8",
-					"boxName": "domAdapter.ts",
-					"x": 97.92470971564948,
-					"y": 99.97256084489732
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 99.91632253237147,
+						"y": 0.48885454952450413
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5da77t8c1t8",
+						"boxName": "domAdapter.ts",
+						"x": 97.92470971564948,
+						"y": 99.97256084489732
+					}
+				]
+			}
 		},
 		{
 			"id": "m2fuje9q438",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 70.1363129681835,
-					"y": 0.305976647631327
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p0d1i1vr268",
-					"boxName": "RenderManager.ts",
-					"x": 9.999429328700328,
-					"y": 100.00000743014475
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 70.1363129681835,
+						"y": 0.305976647631327
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 9.999429328700328,
+						"y": 100.00000743014475
+					}
+				]
+			}
 		},
 		{
 			"id": "dp372otc5fo",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 45.49955371189695,
-					"y": 4.999675187579173
-				},
-				{
-					"boxId": "abdt6a40aoo",
-					"boxName": "BoxBody.ts",
-					"x": 69.99871569844599,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 0,
-					"y": 50
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 45.49955371189695,
+						"y": 4.999675187579173
+					},
+					{
+						"boxId": "abdt6a40aoo",
+						"boxName": "BoxBody.ts",
+						"x": 69.99871569844599,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0,
+						"y": 50
+					}
+				]
+			}
 		},
 		{
 			"id": "d7r5eriv86",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 100.00026243757267,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "l84ccd69v6g",
-					"boxName": "util.ts",
-					"x": 0,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 100.00026243757267,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 0,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "2r6p40gleqo",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 59.997234117635834,
-					"y": 64.00142317851241
-				},
-				{
-					"boxId": "iu4msv07ut8",
-					"boxName": "Box.ts",
-					"x": 100.00238458603587,
-					"y": 95.00407031085115
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "dub9um70n18",
-					"boxName": "DragManager.ts",
-					"x": -0.001192136666547453,
-					"y": 89.99713795077275
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 59.997234117635834,
+						"y": 64.00142317851241
+					},
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 100.00238458603587,
+						"y": 95.00407031085115
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "DragManager.ts",
+						"x": -0.001192136666547453,
+						"y": 89.99713795077275
+					}
+				]
+			}
 		},
 		{
 			"id": "oni0c7slmdo",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 50.648424537284406,
-					"y": 58.83023852465262
-				},
-				{
-					"boxId": "iu4msv07ut8",
-					"boxName": "Box.ts",
-					"x": 72.08903420118057,
-					"y": 98.80548801050745
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "ve86au87rlg",
-					"boxName": "DropTarget.ts",
-					"x": 0,
-					"y": 49.9979915645712
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 50.648424537284406,
+						"y": 58.83023852465262
+					},
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 72.08903420118057,
+						"y": 98.80548801050745
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ve86au87rlg",
+						"boxName": "DropTarget.ts",
+						"x": 0,
+						"y": 49.9979915645712
+					}
+				]
+			}
 		},
 		{
 			"id": "8k1ggo7bqkg",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 59.99891244619471,
-					"y": 17.50009952697543
-				},
-				{
-					"boxId": "96nihtd8s1",
-					"boxName": "FileBoxBody.ts",
-					"x": 100,
-					"y": 50
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 0.000011179639818836173,
-					"y": 50.00143098365817
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 59.99891244619471,
+						"y": 17.50009952697543
+					},
+					{
+						"boxId": "96nihtd8s1",
+						"boxName": "FileBoxBody.ts",
+						"x": 100,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0.000011179639818836173,
+						"y": 50.00143098365817
+					}
+				]
+			}
 		},
 		{
 			"id": "pqgjpkifd1o",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 30.000438423429348,
-					"y": 6.498863447358208
-				},
-				{
-					"boxId": "8i2aqhl305",
-					"boxName": "RootFolderBox.ts",
-					"x": 100,
-					"y": 14.990575451823926
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 0,
-					"y": 50
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 30.000438423429348,
+						"y": 6.498863447358208
+					},
+					{
+						"boxId": "8i2aqhl305",
+						"boxName": "RootFolderBox.ts",
+						"x": 100,
+						"y": 14.990575451823926
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0,
+						"y": 50
+					}
+				]
+			}
 		},
 		{
 			"id": "jhjrrdtds4o",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 100,
-					"y": 4.999548835350684
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p1f768sjqmg",
-					"boxName": "Rect.ts",
-					"x": 0.07645065110471191,
-					"y": 55.14780835881753
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 100,
+						"y": 4.999548835350684
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p1f768sjqmg",
+						"boxName": "Rect.ts",
+						"x": 0.07645065110471191,
+						"y": 55.14780835881753
+					}
+				]
+			}
 		},
 		{
 			"id": "44u7ufsllu",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 90.12807842432592,
-					"y": 60.60199865955765
-				},
-				{
-					"boxId": "ujltrbp3r9",
-					"boxName": "BoxBorder.ts",
-					"x": 98.50402044505392,
-					"y": 29.21595242712171
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "82efivc7np8",
-					"boxName": "ScaleManager.ts",
-					"x": 0.6598109064838464,
-					"y": 73.23848238482384
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 90.12807842432592,
+						"y": 60.60199865955765
+					},
+					{
+						"boxId": "ujltrbp3r9",
+						"boxName": "BoxBorder.ts",
+						"x": 98.50402044505392,
+						"y": 29.21595242712171
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 0.6598109064838464,
+						"y": 73.23848238482384
+					}
+				]
+			}
 		},
 		{
 			"id": "8b4vvvp4oug",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 88.30025306244592,
-					"y": 52.16441669340309
-				},
-				{
-					"boxId": "710vhdi6un8",
-					"boxName": "BoxHeader.ts",
-					"x": 99.62296195652173,
-					"y": 84.86445482492914
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p0kd6a1t4vo",
-					"boxName": "Draggable.ts",
-					"x": 0,
-					"y": 50
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 88.30025306244592,
+						"y": 52.16441669340309
+					},
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 99.62296195652173,
+						"y": 84.86445482492914
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0kd6a1t4vo",
+						"boxName": "Draggable.ts",
+						"x": 0,
+						"y": 50
+					}
+				]
+			}
 		},
 		{
 			"id": "b3p70tgfgao",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 88.31449795308363,
-					"y": 52.61234028501028
-				},
-				{
-					"boxId": "710vhdi6un8",
-					"boxName": "BoxHeader.ts",
-					"x": 99.6979327271011,
-					"y": 89.21051333892204
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "ve86au87rlg",
-					"boxName": "DropTarget.ts",
-					"x": 0,
-					"y": 49.9979915645712
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 88.31449795308363,
+						"y": 52.61234028501028
+					},
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 99.6979327271011,
+						"y": 89.21051333892204
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ve86au87rlg",
+						"boxName": "DropTarget.ts",
+						"x": 0,
+						"y": 49.9979915645712
+					}
+				]
+			}
 		},
 		{
 			"id": "873stdvoj1g",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 88.34376312699933,
-					"y": 51.76044348193247
-				},
-				{
-					"boxId": "710vhdi6un8",
-					"boxName": "BoxHeader.ts",
-					"x": 99.85377650300883,
-					"y": 80.94923320994182
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "dub9um70n18",
-					"boxName": "DragManager.ts",
-					"x": 0,
-					"y": 49.994612649498976
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 88.34376312699933,
+						"y": 51.76044348193247
+					},
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 99.85377650300883,
+						"y": 80.94923320994182
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "DragManager.ts",
+						"x": 0,
+						"y": 49.994612649498976
+					}
+				]
+			}
 		},
 		{
 			"id": "pkceusc47ao",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 45.000088548861264,
-					"y": 14.99972006046694
-				},
-				{
-					"boxId": "rjo0gg3uqi",
-					"boxName": "FolderBoxBody.ts",
-					"x": 100,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 0,
-					"y": 49.99778633727365
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 45.000088548861264,
+						"y": 14.99972006046694
+					},
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 100,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0,
+						"y": 49.99778633727365
+					}
+				]
+			}
 		},
 		{
 			"id": "d7thbobrnio",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 54.64002029703936,
-					"y": 85.65693460680997
-				},
-				{
-					"boxId": "153ri2jccq8",
-					"boxName": "LinkEnd.ts",
-					"x": 99.55399177362605,
-					"y": 54.30476759231612
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p0kd6a1t4vo",
-					"boxName": "Draggable.ts",
-					"x": 0,
-					"y": 50
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 54.64002029703936,
+						"y": 85.65693460680997
+					},
+					{
+						"boxId": "153ri2jccq8",
+						"boxName": "LinkEnd.ts",
+						"x": 99.55399177362605,
+						"y": 54.30476759231612
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0kd6a1t4vo",
+						"boxName": "Draggable.ts",
+						"x": 0,
+						"y": 50
+					}
+				]
+			}
 		},
 		{
 			"id": "u0devabee28",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 64.87717676410476,
-					"y": 89.57997356788897
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "dub9um70n18",
-					"boxName": "DragManager.ts",
-					"x": 0,
-					"y": 89.99907158109738
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 64.87717676410476,
+						"y": 89.57997356788897
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "DragManager.ts",
+						"x": 0,
+						"y": 89.99907158109738
+					}
+				]
+			}
 		},
 		{
 			"id": "m5buokbcmmg",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 54.554238261868704,
-					"y": 86.20672136561079
-				},
-				{
-					"boxId": "153ri2jccq8",
-					"boxName": "LinkEnd.ts",
-					"x": 99.11860118744006,
-					"y": 60.954546851470546
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "ve86au87rlg",
-					"boxName": "DropTarget.ts",
-					"x": 0,
-					"y": 49.9979915645712
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 54.554238261868704,
+						"y": 86.20672136561079
+					},
+					{
+						"boxId": "153ri2jccq8",
+						"boxName": "LinkEnd.ts",
+						"x": 99.11860118744006,
+						"y": 60.954546851470546
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ve86au87rlg",
+						"boxName": "DropTarget.ts",
+						"x": 0,
+						"y": 49.9979915645712
+					}
+				]
+			}
 		},
 		{
 			"id": "3lg1iff8tq",
-			"fromWayPoints": [
-				{
-					"boxId": "mlqeakkf1dg",
-					"boxName": "styleAdapter.ts",
-					"x": 0.019885663389302942,
-					"y": 50.24045951014817
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lsosl5fvo8",
-					"boxName": "index.css",
-					"x": 99.99498066026578,
-					"y": 50.00503787940678
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "mlqeakkf1dg",
+						"boxName": "styleAdapter.ts",
+						"x": 0.019885663389302942,
+						"y": 50.24045951014817
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lsosl5fvo8",
+						"boxName": "index.css",
+						"x": 99.99498066026578,
+						"y": 50.00503787940678
+					}
+				]
+			}
 		},
 		{
 			"id": "652jpu6aaa",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 62.70107738027404,
-					"y": 0.043233895373973194
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "mlqeakkf1dg",
-					"boxName": "styleAdapter.ts",
-					"x": 64.99671268902038,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 62.70107738027404,
+						"y": 0.043233895373973194
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "mlqeakkf1dg",
+						"boxName": "styleAdapter.ts",
+						"x": 64.99671268902038,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "8pjjhs3prug",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 49.599157221520734,
-					"y": 58.85431921467106
-				},
-				{
-					"boxId": "iu4msv07ut8",
-					"boxName": "Box.ts",
-					"x": 67.88677549797814,
-					"y": 98.9832970225127
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "sde0jdvhn4o",
-					"boxName": "HoverManager.ts",
-					"x": 0,
-					"y": 54.99850567842199
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 49.599157221520734,
+						"y": 58.85431921467106
+					},
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 67.88677549797814,
+						"y": 98.9832970225127
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "sde0jdvhn4o",
+						"boxName": "HoverManager.ts",
+						"x": 0,
+						"y": 54.99850567842199
+					}
+				]
+			}
 		},
 		{
 			"id": "7eaendcdv5g",
-			"fromWayPoints": [
-				{
-					"boxId": "ffddla14d38",
-					"boxName": "index.ts",
-					"x": 44.99902966247183,
-					"y": 100.00186601977981
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "ita04k5ms68",
-					"boxName": "applicationMenu.ts",
-					"x": 89.99738737730004,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 44.99902966247183,
+						"y": 100.00186601977981
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ita04k5ms68",
+						"boxName": "applicationMenu.ts",
+						"x": 89.99738737730004,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "q3nfkh3qso8",
-			"fromWayPoints": [
-				{
-					"boxId": "ita04k5ms68",
-					"boxName": "applicationMenu.ts",
-					"x": 49.50712410141621,
-					"y": 99.78519729161802
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "6o0ikrr8ru",
-					"boxName": "Map.ts",
-					"x": 52.10523562947853,
-					"y": -0.13903470192662373
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ita04k5ms68",
+						"boxName": "applicationMenu.ts",
+						"x": 49.50712410141621,
+						"y": 99.78519729161802
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 52.10523562947853,
+						"y": -0.13903470192662373
+					}
+				]
+			}
 		},
 		{
 			"id": "26rd2folvfo",
-			"fromWayPoints": [
-				{
-					"boxId": "6o0ikrr8ru",
-					"boxName": "Map.ts",
-					"x": 80.29054109197747,
-					"y": 0.23199801650550775
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "7b4gp3csto8",
-					"boxName": "Settings.ts",
-					"x": 0.7670747897920047,
-					"y": 98.61079846930572
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 80.29054109197747,
+						"y": 0.23199801650550775
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "7b4gp3csto8",
+						"boxName": "Settings.ts",
+						"x": 0.7670747897920047,
+						"y": 98.61079846930572
+					}
+				]
+			}
 		},
 		{
 			"id": "gleo8vqqls8",
-			"fromWayPoints": [
-				{
-					"boxId": "7b4gp3csto8",
-					"boxName": "Settings.ts",
-					"x": 100,
-					"y": 9.996819675606911
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 0,
-					"y": 50
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "7b4gp3csto8",
+						"boxName": "Settings.ts",
+						"x": 100,
+						"y": 9.996819675606911
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0,
+						"y": 50
+					}
+				]
+			}
 		},
 		{
 			"id": "66fugjsccb",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 64.99982128176717,
-					"y": 24.999515713483184
-				},
-				{
-					"boxId": "3n81ck4i5sg",
-					"boxName": "FileBox.ts",
-					"x": 75,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "lr0pi422h1o",
-					"boxName": "contextMenu.ts",
-					"x": 89.99974469606066,
-					"y": 100.00510673067102
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 64.99982128176717,
+						"y": 24.999515713483184
+					},
+					{
+						"boxId": "3n81ck4i5sg",
+						"boxName": "FileBox.ts",
+						"x": 75,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "lr0pi422h1o",
+						"boxName": "contextMenu.ts",
+						"x": 89.99974469606066,
+						"y": 100.00510673067102
+					}
+				]
+			}
 		},
 		{
 			"id": "8pktsjd7amo",
-			"fromWayPoints": [
-				{
-					"boxId": "lr0pi422h1o",
-					"boxName": "contextMenu.ts",
-					"x": 95.00114886772703,
-					"y": 100.00510673067102
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 65.99962213859344,
-					"y": 24.999515713483184
-				},
-				{
-					"boxId": "3n81ck4i5sg",
-					"boxName": "FileBox.ts",
-					"x": 79.99897875816994,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "lr0pi422h1o",
+						"boxName": "contextMenu.ts",
+						"x": 95.00114886772703,
+						"y": 100.00510673067102
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 65.99962213859344,
+						"y": 24.999515713483184
+					},
+					{
+						"boxId": "3n81ck4i5sg",
+						"boxName": "FileBox.ts",
+						"x": 79.99897875816994,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "ahf98ke2718",
-			"fromWayPoints": [
-				{
-					"boxId": "lr0pi422h1o",
-					"boxName": "contextMenu.ts",
-					"x": 4.999738998799395,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 23.7498251248139,
-					"y": 24.999669938238846
-				},
-				{
-					"boxId": "8hst7ghum5o",
-					"boxName": "FolderBox.ts",
-					"x": 74.9993735853469,
-					"y": -0.0026404731727925645
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "lr0pi422h1o",
+						"boxName": "contextMenu.ts",
+						"x": 4.999738998799395,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 23.7498251248139,
+						"y": 24.999669938238846
+					},
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 74.9993735853469,
+						"y": -0.0026404731727925645
+					}
+				]
+			}
 		},
 		{
 			"id": "sp07k6mp3rg",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 24.999952491443707,
-					"y": 25
-				},
-				{
-					"boxId": "8hst7ghum5o",
-					"boxName": "FolderBox.ts",
-					"x": 79.99939189394631,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "lr0pi422h1o",
-					"boxName": "contextMenu.ts",
-					"x": 9.999334897906827,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 24.999952491443707,
+						"y": 25
+					},
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 79.99939189394631,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "lr0pi422h1o",
+						"boxName": "contextMenu.ts",
+						"x": 9.999334897906827,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "u5ne16v474o",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 37.24966739023878,
-					"y": 4.999695612952499
-				},
-				{
-					"boxId": "abdt6a40aoo",
-					"boxName": "BoxBody.ts",
-					"x": 14.999708233646498,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "7b4gp3csto8",
-					"boxName": "Settings.ts",
-					"x": 98.58646419115556,
-					"y": 97.32189742692105
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 37.24966739023878,
+						"y": 4.999695612952499
+					},
+					{
+						"boxId": "abdt6a40aoo",
+						"boxName": "BoxBody.ts",
+						"x": 14.999708233646498,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "7b4gp3csto8",
+						"boxName": "Settings.ts",
+						"x": 98.58646419115556,
+						"y": 97.32189742692105
+					}
+				]
+			}
 		},
 		{
 			"id": "6ooau7blmfg",
-			"fromWayPoints": [
-				{
-					"boxId": "p0d1i1vr268",
-					"boxName": "RenderManager.ts",
-					"x": 50,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "2cnbfh46bf8",
-					"boxName": "/home/michael/programming/ts-visualize-files/src",
-					"x": 84.99958090608105,
-					"y": 9.999580906081054
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "/home/michael/programming/ts-visualize-files/src",
+						"x": 84.99958090608105,
+						"y": 9.999580906081054
+					}
+				]
+			}
 		},
 		{
 			"id": "e8trko2ll9",
-			"fromWayPoints": [
-				{
-					"boxId": "ua13104dlao",
-					"boxName": "pluginLoader.ts",
-					"x": 25,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "ita04k5ms68",
-					"boxName": "applicationMenu.ts",
-					"x": 90.00291177326993,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ua13104dlao",
+						"boxName": "pluginLoader.ts",
+						"x": 25,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ita04k5ms68",
+						"boxName": "applicationMenu.ts",
+						"x": 90.00291177326993,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "1fq2iriks5",
-			"fromWayPoints": [
-				{
-					"boxId": "ffddla14d38",
-					"boxName": "index.ts",
-					"x": 79.99969602091376,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "ua13104dlao",
-					"boxName": "pluginLoader.ts",
-					"x": 50.00189991260402,
-					"y": -0.00001484137537993921
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 79.99969602091376,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ua13104dlao",
+						"boxName": "pluginLoader.ts",
+						"x": 50.00189991260402,
+						"y": -0.00001484137537993921
+					}
+				]
+			}
 		},
 		{
 			"id": "nk43b2cf6j",
-			"fromWayPoints": [
-				{
-					"boxId": "ua13104dlao",
-					"boxName": "pluginLoader.ts",
-					"x": 99.70527389690254,
-					"y": 57.8362755376725
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 0,
-					"y": 50
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ua13104dlao",
+						"boxName": "pluginLoader.ts",
+						"x": 99.70527389690254,
+						"y": 57.8362755376725
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0,
+						"y": 50
+					}
+				]
+			}
 		},
 		{
 			"id": "t8vnvq4liso",
-			"fromWayPoints": [
-				{
-					"boxId": "18tbjkfri3o",
-					"boxName": "pluginFacade.ts",
-					"x": 54.998298984762485,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "6o0ikrr8ru",
-					"boxName": "Map.ts",
-					"x": 49.57028522318311,
-					"y": 99.99194284793468
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "18tbjkfri3o",
+						"boxName": "pluginFacade.ts",
+						"x": 54.998298984762485,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 49.57028522318311,
+						"y": 99.99194284793468
+					}
+				]
+			}
 		},
 		{
 			"id": "vmipsrqebkg",
-			"fromWayPoints": [
-				{
-					"boxId": "18tbjkfri3o",
-					"boxName": "pluginFacade.ts",
-					"x": 100,
-					"y": 50.00260240462187
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 0,
-					"y": 69.9982229944518
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "18tbjkfri3o",
+						"boxName": "pluginFacade.ts",
+						"x": 100,
+						"y": 50.00260240462187
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 0,
+						"y": 69.9982229944518
+					}
+				]
+			}
 		},
 		{
 			"id": "uuvi3g2bitg",
-			"fromWayPoints": [
-				{
-					"boxId": "2cnbfh46bf8",
-					"boxName": "/home/michael/programming/ts-visualize-files/src",
-					"x": -9.999798544145692,
-					"y": 29.999731392194256
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "18tbjkfri3o",
-					"boxName": "pluginFacade.ts",
-					"x": 0,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "/home/michael/programming/ts-visualize-files/src",
+						"x": -9.999798544145692,
+						"y": 29.999731392194256
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "18tbjkfri3o",
+						"boxName": "pluginFacade.ts",
+						"x": 0,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "7natorsupng",
-			"fromWayPoints": [
-				{
-					"boxId": "ua13104dlao",
-					"boxName": "pluginLoader.ts",
-					"x": 0,
-					"y": 49.98939554612937
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "2cnbfh46bf8",
-					"boxName": "/home/michael/programming/ts-visualize-files/src",
-					"x": -9.99936370577755,
-					"y": 25
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ua13104dlao",
+						"boxName": "pluginLoader.ts",
+						"x": 0,
+						"y": 49.98939554612937
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "/home/michael/programming/ts-visualize-files/src",
+						"x": -9.99936370577755,
+						"y": 25
+					}
+				]
+			}
 		},
 		{
 			"id": "56kjgge036g",
-			"fromWayPoints": [
-				{
-					"boxId": "5194u9gf71g",
-					"boxName": "commandLine.ts",
-					"x": 34.99717283407677,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "6o0ikrr8ru",
-					"boxName": "Map.ts",
-					"x": 29.99842940160201,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "5194u9gf71g",
+						"boxName": "commandLine.ts",
+						"x": 34.99717283407677,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 29.99842940160201,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "cmc9pp4r27g",
-			"fromWayPoints": [
-				{
-					"boxId": "5194u9gf71g",
-					"boxName": "commandLine.ts",
-					"x": 100,
-					"y": 49.99602827865597
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "5da77t8c1t8",
-					"boxName": "domAdapter.ts",
-					"x": 0.9677632885417355,
-					"y": 98.8799745809834
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "5194u9gf71g",
+						"boxName": "commandLine.ts",
+						"x": 100,
+						"y": 49.99602827865597
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5da77t8c1t8",
+						"boxName": "domAdapter.ts",
+						"x": 0.9677632885417355,
+						"y": 98.8799745809834
+					}
+				]
+			}
 		},
 		{
 			"id": "08h4ldsnhbg",
-			"fromWayPoints": [
-				{
-					"boxId": "ffddla14d38",
-					"boxName": "index.ts",
-					"x": 19.999677138152585,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "5194u9gf71g",
-					"boxName": "commandLine.ts",
-					"x": 50,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 19.999677138152585,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5194u9gf71g",
+						"boxName": "commandLine.ts",
+						"x": 50,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "k8e14dcc86",
-			"fromWayPoints": [
-				{
-					"boxId": "5194u9gf71g",
-					"boxName": "commandLine.ts",
-					"x": 7.1712984427414295,
-					"y": 99.79241052893796
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "8k5lfaulrs8",
-					"boxName": "commandLinePluginFacade.ts",
-					"x": 48.267732983199544,
-					"y": 0.022318107424490405
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "5194u9gf71g",
+						"boxName": "commandLine.ts",
+						"x": 7.1712984427414295,
+						"y": 99.79241052893796
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8k5lfaulrs8",
+						"boxName": "commandLinePluginFacade.ts",
+						"x": 48.267732983199544,
+						"y": 0.022318107424490405
+					}
+				]
+			}
 		},
 		{
 			"id": "2tkgt4a82j",
-			"fromWayPoints": [
-				{
-					"boxId": "8k5lfaulrs8",
-					"boxName": "commandLinePluginFacade.ts",
-					"x": 50,
-					"y": 100.0043148084225
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "18tbjkfri3o",
-					"boxName": "pluginFacade.ts",
-					"x": 14.999496612924105,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "8k5lfaulrs8",
+						"boxName": "commandLinePluginFacade.ts",
+						"x": 50,
+						"y": 100.0043148084225
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "18tbjkfri3o",
+						"boxName": "pluginFacade.ts",
+						"x": 14.999496612924105,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "dluo8hqirng",
-			"fromWayPoints": [
-				{
-					"boxId": "sde0jdvhn4o",
-					"boxName": "HoverManager.ts",
-					"x": 49.99954089268825,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "4h9g4ghkavg",
-					"boxName": "Hoverable.ts",
-					"x": 100,
-					"y": 50.00229536794748
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "sde0jdvhn4o",
+						"boxName": "HoverManager.ts",
+						"x": 49.99954089268825,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "4h9g4ghkavg",
+						"boxName": "Hoverable.ts",
+						"x": 100,
+						"y": 50.00229536794748
+					}
+				]
+			}
 		},
 		{
 			"id": "t9l55u788c8",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 49.04070835189396,
-					"y": 58.939795232636286
-				},
-				{
-					"boxId": "iu4msv07ut8",
-					"boxName": "Box.ts",
-					"x": 65.64634375587443,
-					"y": 99.57875837304053
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "4h9g4ghkavg",
-					"boxName": "Hoverable.ts",
-					"x": 0,
-					"y": 54.99726498398062
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 49.04070835189396,
+						"y": 58.939795232636286
+					},
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 65.64634375587443,
+						"y": 99.57875837304053
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "4h9g4ghkavg",
+						"boxName": "Hoverable.ts",
+						"x": 0,
+						"y": 54.99726498398062
+					}
+				]
+			}
 		},
 		{
 			"id": "pq1c291hh8o",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 28.733422424370307,
-					"y": 89.43451792702692
-				},
-				{
-					"boxId": "93jcctiarsg",
-					"boxName": "Link.ts",
-					"x": 97.55297904682423,
-					"y": 99.63235294117648
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "4h9g4ghkavg",
-					"boxName": "Hoverable.ts",
-					"x": 0,
-					"y": 54.99726498398062
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 28.733422424370307,
+						"y": 89.43451792702692
+					},
+					{
+						"boxId": "93jcctiarsg",
+						"boxName": "Link.ts",
+						"x": 97.55297904682423,
+						"y": 99.63235294117648
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "4h9g4ghkavg",
+						"boxName": "Hoverable.ts",
+						"x": 0,
+						"y": 54.99726498398062
+					}
+				]
+			}
 		},
 		{
 			"id": "keh4l5llv7g",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 40.00045892935312,
-					"y": 95.00032365421231
-				},
-				{
-					"boxId": "93jcctiarsg",
-					"boxName": "Link.ts",
-					"x": 100,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "sde0jdvhn4o",
-					"boxName": "HoverManager.ts",
-					"x": 0,
-					"y": 84.99867619804077
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 40.00045892935312,
+						"y": 95.00032365421231
+					},
+					{
+						"boxId": "93jcctiarsg",
+						"boxName": "Link.ts",
+						"x": 100,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "sde0jdvhn4o",
+						"boxName": "HoverManager.ts",
+						"x": 0,
+						"y": 84.99867619804077
+					}
+				]
+			}
 		},
 		{
 			"id": "3lvil3pvqog",
-			"fromWayPoints": [
-				{
-					"boxId": "sde0jdvhn4o",
-					"boxName": "HoverManager.ts",
-					"x": 94.99953171163654,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "p0d1i1vr268",
-					"boxName": "RenderManager.ts",
-					"x": 95.0006385786658,
-					"y": 100.00425694947002
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "sde0jdvhn4o",
+						"boxName": "HoverManager.ts",
+						"x": 94.99953171163654,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 95.0006385786658,
+						"y": 100.00425694947002
+					}
+				]
+			}
 		},
 		{
 			"id": "eeu7otbh35g",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 90.00012035287462,
-					"y": 4.999878244776701
-				},
-				{
-					"boxId": "93kjm246u28",
-					"boxName": "BoxMapData.ts",
-					"x": 50,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "81j924kmav",
-					"boxName": "JsonObject.ts",
-					"x": 50.00120345632657,
-					"y": 100.00240702852328
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 90.00012035287462,
+						"y": 4.999878244776701
+					},
+					{
+						"boxId": "93kjm246u28",
+						"boxName": "BoxMapData.ts",
+						"x": 50,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "81j924kmav",
+						"boxName": "JsonObject.ts",
+						"x": 50.00120345632657,
+						"y": 100.00240702852328
+					}
+				]
+			}
 		},
 		{
 			"id": "na8q4es2blg",
-			"fromWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 4.999854796085303,
-					"y": 100
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "81j924kmav",
-					"boxName": "JsonObject.ts",
-					"x": 100,
-					"y": 0
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 4.999854796085303,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "81j924kmav",
+						"boxName": "JsonObject.ts",
+						"x": 100,
+						"y": 0
+					}
+				]
+			}
 		},
 		{
 			"id": "6ma0j7m6huo",
-			"fromWayPoints": [
-				{
-					"boxId": "jnk7eechpkg",
-					"boxName": "ProjectSettings.ts",
-					"x": 100.00119667324836,
-					"y": 49.99880345562017
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "81j924kmav",
-					"boxName": "JsonObject.ts",
-					"x": 0,
-					"y": 49.99880334107173
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "jnk7eechpkg",
+						"boxName": "ProjectSettings.ts",
+						"x": 100.00119667324836,
+						"y": 49.99880345562017
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "81j924kmav",
+						"boxName": "JsonObject.ts",
+						"x": 0,
+						"y": 49.99880334107173
+					}
+				]
+			}
 		},
 		{
 			"id": "o2452qnlsog",
-			"fromWayPoints": [
-				{
-					"boxId": "jnk7eechpkg",
-					"boxName": "ProjectSettings.ts",
-					"x": 100.00045863565066,
-					"y": 34.999541410620935
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "3ht1ieidr2o",
-					"boxName": "fileSystemAdapter.ts",
-					"x": 0,
-					"y": 49.99954138117645
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "jnk7eechpkg",
+						"boxName": "ProjectSettings.ts",
+						"x": 100.00045863565066,
+						"y": 34.999541410620935
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0,
+						"y": 49.99954138117645
+					}
+				]
+			}
 		},
 		{
 			"id": "kmkhvh5bin",
-			"fromWayPoints": [
-				{
-					"boxId": "6o0ikrr8ru",
-					"boxName": "Map.ts",
-					"x": 100,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "jnk7eechpkg",
-					"boxName": "ProjectSettings.ts",
-					"x": 0,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 100,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jnk7eechpkg",
+						"boxName": "ProjectSettings.ts",
+						"x": 0,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "pv4q8rug7o",
-			"fromWayPoints": [
-				{
-					"boxId": "ita04k5ms68",
-					"boxName": "applicationMenu.ts",
-					"x": 100,
-					"y": 84.99879605104744
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "jnk7eechpkg",
-					"boxName": "ProjectSettings.ts",
-					"x": 0,
-					"y": 9.997859703568944
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "ita04k5ms68",
+						"boxName": "applicationMenu.ts",
+						"x": 100,
+						"y": 84.99879605104744
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jnk7eechpkg",
+						"boxName": "ProjectSettings.ts",
+						"x": 0,
+						"y": 9.997859703568944
+					}
+				]
+			}
 		},
 		{
 			"id": "i0lsbt4miqo",
-			"fromWayPoints": [
-				{
-					"boxId": "3lnmuaqr88",
-					"boxName": "box",
-					"x": 15.000125506876635,
-					"y": 5
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "jnk7eechpkg",
-					"boxName": "ProjectSettings.ts",
-					"x": 44.99960065264767,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 15.000125506876635,
+						"y": 5
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jnk7eechpkg",
+						"boxName": "ProjectSettings.ts",
+						"x": 44.99960065264767,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "tmgdcbj0s48",
-			"fromWayPoints": [
-				{
-					"boxId": "cr2q48p1plg",
-					"boxName": "indexHtmlIds.ts",
-					"x": 0,
-					"y": 50
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "perbgpafqk8",
-					"boxName": "index.html",
-					"x": 100,
-					"y": 50
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "cr2q48p1plg",
+						"boxName": "indexHtmlIds.ts",
+						"x": 0,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "perbgpafqk8",
+						"boxName": "index.html",
+						"x": 100,
+						"y": 50
+					}
+				]
+			}
 		},
 		{
 			"id": "gsmk66cm0bo",
-			"fromWayPoints": [
-				{
-					"boxId": "sde0jdvhn4o",
-					"boxName": "HoverManager.ts",
-					"x": 92.00008183760497,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "dub9um70n18",
-					"boxName": "DragManager.ts",
-					"x": 100,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "sde0jdvhn4o",
+						"boxName": "HoverManager.ts",
+						"x": 92.00008183760497,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "DragManager.ts",
+						"x": 100,
+						"y": 100
+					}
+				]
+			}
 		},
 		{
 			"id": "aonvncm0h78",
-			"fromWayPoints": [
-				{
-					"boxId": "sde0jdvhn4o",
-					"boxName": "HoverManager.ts",
-					"x": 92.0000256635635,
-					"y": 0
-				}
-			],
-			"toWayPoints": [
-				{
-					"boxId": "82efivc7np8",
-					"boxName": "ScaleManager.ts",
-					"x": 100,
-					"y": 100
-				}
-			]
+			"from": {
+				"path": [
+					{
+						"boxId": "sde0jdvhn4o",
+						"boxName": "HoverManager.ts",
+						"x": 92.0000256635635,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 100,
+						"y": 100
+					}
+				]
+			}
+		},
+		{
+			"id": "kkjochui0o8",
+			"from": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "/home/michael/programming/ts-visualize-files/src",
+						"x": 44,
+						"y": 32
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "mlqeakkf1dg",
+						"boxName": "styleAdapter.ts",
+						"x": 50.001375538523284,
+						"y": 60.00330129245596
+					}
+				],
+				"floatToBorder": true
+			}
 		}
 	]
 }

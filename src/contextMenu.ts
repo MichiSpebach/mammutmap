@@ -49,7 +49,7 @@ async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise
   const from = new WayPointData(box.getId(), box.getName(), localPosition.x, localPosition.y)
   const to = new WayPointData(box.getId(), box.getName(), localPosition.x, localPosition.y)
 
-  const link: Link = await box.links.addLink(new LinkEndData([from]), new LinkEndData([to]), false)
+  const link: Link = await box.links.addLink(new LinkEndData([from], true), new LinkEndData([to], true), false)
 
   DragManager.startDragWithClickToDropMode(link.getTo())
 }

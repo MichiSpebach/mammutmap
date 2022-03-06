@@ -150,8 +150,8 @@ export class Link implements Hoverable {
   }
 
   private async reorderAndSaveWithEndBoxes(fromBox: Box, toBox: Box): Promise<void|never> {
-    const fromPosition: ClientPosition = await this.from.getPositionInClientCoords()
-    const toPosition: ClientPosition = await this.to.getPositionInClientCoords()
+    const fromPosition: ClientPosition = await this.from.getTargetPositionInClientCoords()
+    const toPosition: ClientPosition = await this.to.getTargetPositionInClientCoords()
     const relation: {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} = Box.findCommonAncestor(fromBox, toBox)
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
