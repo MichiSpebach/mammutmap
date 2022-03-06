@@ -17,7 +17,7 @@ import { DragManager } from '../DragManager'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
-import { ClientPosition, LocalPosition, Transform } from './Transform'
+import { LocalPosition, Transform } from './Transform'
 import { grid } from './Grid'
 
 export abstract class Box implements DropTarget, Hoverable {
@@ -33,6 +33,7 @@ export abstract class Box implements DropTarget, Hoverable {
   private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
   private rendered: boolean = false
   private watchers: BoxWatcher[] = []
+  private cachedClientRect: Rect|null = null
   private unsavedChanges: boolean = false
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
@@ -136,9 +137,12 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async getClientRect(priority: RenderPriority = RenderPriority.NORMAL): Promise<Rect> {
-    // TODO: cache rect for better responsivity?
-    // TODO: but then more complex, needs to be updated on many changes, also when parent boxes change
-    return await renderManager.getClientRectOf(this.getId(), priority)
+    if (!this.cachedClientRect) {
+      this.cachedClientRect = await renderManager.getClientRectOf(this.getId(), priority)
+    } else {
+      renderManager.getClientRectOf(this.getId(), RenderPriority.NORMAL).then(rect => this.cachedClientRect = rect)
+    }
+    return this.cachedClientRect
   }
 
   // TODO: move into Transform
@@ -184,6 +188,8 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async render(): Promise<void> {
+    this.cachedClientRect = null
+
     if (!this.isRendered()) {
       this.renderStyle()
 
@@ -319,7 +325,8 @@ export abstract class Box implements DropTarget, Hoverable {
     const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
     const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
-    return renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle, priority)
+    await renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle, priority)
+    this.cachedClientRect = null
   }
 
   public async updateMeasuresAndBorderingLinks(
