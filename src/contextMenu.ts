@@ -7,6 +7,7 @@ import { WayPointData } from './box/WayPointData'
 import { Link } from './box/Link'
 import { DragManager } from './DragManager'
 import { LinkEndData } from './box/LinkEndData'
+import { ClientPosition, LocalPosition } from './box/Transform'
 
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const atomCommand: string = 'atom '+box.getSrcPath()
@@ -45,9 +46,9 @@ function buildRemoveLinkItem(link: Link): MenuItem {
 
 // TODO: move into Box?
 async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise<void> {
-  const localPosition: {x: number, y: number} = await box.transformClientPositionToLocal(clientX, clientY)
-  const from = new WayPointData(box.getId(), box.getName(), localPosition.x, localPosition.y)
-  const to = new WayPointData(box.getId(), box.getName(), localPosition.x, localPosition.y)
+  const position: LocalPosition = await box.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
+  const from = new WayPointData(box.getId(), box.getName(), position.percentX, position.percentY)
+  const to = new WayPointData(box.getId(), box.getName(), position.percentX, position.percentY)
 
   const link: Link = await box.links.addLink(new LinkEndData([from], true), new LinkEndData([to], true), false)
 

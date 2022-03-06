@@ -141,12 +141,7 @@ export abstract class Box implements DropTarget, Hoverable {
     return await renderManager.getClientRectOf(this.getId(), priority)
   }
 
-  // TODO: remove, deprecated, use delegated method from transform instead
-  public async transformClientPositionToLocal(clientX: number, clientY: number): Promise<{x: number, y: number}> {
-    const locPos: LocalPosition = await this.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-    return {x: locPos.percentX, y: locPos.percentY}
-  }
-
+  // TODO: move into Transform
   public transformLocalToParent(position: LocalPosition): LocalPosition {
     return new LocalPosition(
       this.mapData.x + position.percentX * (this.mapData.width/100),
