@@ -120,7 +120,7 @@ export class DragManager {
     this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, true)
 
     renderManager.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-      this.onDrag(clientX, clientY, ctrlPressed)
+      this.onDrag(clientX, clientY, !ctrlPressed)
     }, RenderPriority.RESPONSIVE)
     renderManager.addEventListenerTo('content', 'click', (_) => {
       renderManager.removeEventListenerFrom('content', 'mousemove', RenderPriority.RESPONSIVE)
