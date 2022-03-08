@@ -136,6 +136,7 @@ export abstract class Box implements DropTarget, Hoverable {
     await Promise.all(this.borderingLinks.map(link => link.reorderAndSave()))
   }
 
+  // TODO: calculate instead of fetching from render thread and remove cache (caches would be needed to be flushed recursive otherwise)
   public async getClientRect(priority: RenderPriority = RenderPriority.NORMAL): Promise<Rect> {
     if (!this.cachedClientRect) {
       this.cachedClientRect = await renderManager.getClientRectOf(this.getId(), priority)

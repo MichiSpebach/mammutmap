@@ -88,4 +88,8 @@ export class ClientPosition {
     const bottomLineEnd: number = Math.max(line.from.y, line.to.y)
     return this.x >= leftLineEnd && this.x <= rightLineEnd && this.y >= topLineEnd && this.y <= bottomLineEnd
   }
+
+  public calculateDistanceTo(other: ClientPosition): number {
+    return Math.sqrt((this.x-other.x)*(this.x-other.x) + (this.y-other.y)*(this.y-other.y))
+  }
 }

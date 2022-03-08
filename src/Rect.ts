@@ -31,35 +31,36 @@ export class Rect {
   }
 
   // TODO: should also be possible for type LocalPosition, or introduce interface for Position
-  public calculateIntersectionWithLine(line: {from: ClientPosition, to: ClientPosition}): ClientPosition|undefined {
+  public calculateIntersectionsWithLine(line: {from: ClientPosition, to: ClientPosition}): ClientPosition[] {
+    const intersections: ClientPosition[] = []
     const deltaX: number = line.to.x - line.from.x
     const deltaY: number = line.to.y - line.from.y
 
     const distanceToTop: number = this.y - line.from.y
     const intersectionTop = new ClientPosition(line.from.x + distanceToTop * (deltaX/deltaY), this.y)
     if (this.isClientPositionInside(intersectionTop) && intersectionTop.isBetweenCoordinateWise(line)) {
-      return intersectionTop
+      intersections.push(intersectionTop)
     }
 
     const distanceToBottom: number = this.getBottomY() - line.from.y
     const intersectionBottom = new ClientPosition(line.from.x + distanceToBottom * (deltaX/deltaY), this.getBottomY())
     if (this.isClientPositionInside(intersectionBottom) && intersectionBottom.isBetweenCoordinateWise(line)) {
-      return intersectionBottom
+      intersections.push(intersectionBottom)
     }
 
     const distanceToLeft: number = this.x - line.from.x
     const intersectionLeft = new ClientPosition(this.x, line.from.y + distanceToLeft * (deltaY/deltaX))
     if (this.isClientPositionInside(intersectionLeft) && intersectionLeft.isBetweenCoordinateWise(line)) {
-      return intersectionLeft
+      intersections.push(intersectionLeft)
     }
 
     const distanceToRight: number = this.getRightX() - line.from.x
     const intersectionRight = new ClientPosition(this.getRightX(), line.from.y + distanceToRight * (deltaY/deltaX))
     if (this.isClientPositionInside(intersectionRight) && intersectionRight.isBetweenCoordinateWise(line)) {
-      return intersectionRight
+      intersections.push(intersectionRight)
     }
 
-    return undefined
+    return intersections
   }
 
 }

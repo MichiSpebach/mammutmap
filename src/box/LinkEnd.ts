@@ -164,13 +164,35 @@ export class LinkEnd implements Draggable<Box> {
       } else {
         clientRect = this.getDeepestRenderedBox().box.getClientRect()
       }
-      const line: {from: ClientPosition, to: ClientPosition} = await this.referenceLink.getLineInClientCoords()
-      const intersectionWithRect: ClientPosition|undefined = (await clientRect).calculateIntersectionWithLine(line)
+      const intersectionWithRect: ClientPosition|undefined = await this.calculateFloatToBorderPositionRegardingClientRect(clientRect)
       if (intersectionWithRect) {
         return this.getManagingBox().transform.clientToLocalPosition(intersectionWithRect)
       }
     //}
     return this.getTargetPositionInManagingBoxCoords()
+  }
+
+  private async calculateFloatToBorderPositionRegardingClientRect(rectInClientCoords: Promise<Rect>): Promise<ClientPosition|undefined> {
+    const line: {from: ClientPosition, to: ClientPosition} = await this.referenceLink.getLineInClientCoords()
+    const intersectionsWithRect: ClientPosition[] = (await rectInClientCoords).calculateIntersectionsWithLine(line)
+
+    if (intersectionsWithRect.length < 1) {
+      return undefined
+    }
+
+    let nearestIntersection: ClientPosition = intersectionsWithRect[0]
+    for (let i = 1; i < intersectionsWithRect.length; i++) {
+      let targetPositionOfOtherLinkEnd: ClientPosition
+      if (this === this.referenceLink.from) {
+        targetPositionOfOtherLinkEnd = line.to
+      } else {
+        targetPositionOfOtherLinkEnd = line.from
+      }
+      if (targetPositionOfOtherLinkEnd.calculateDistanceTo(intersectionsWithRect[i]) < targetPositionOfOtherLinkEnd.calculateDistanceTo(nearestIntersection)) {
+        nearestIntersection = intersectionsWithRect[i]
+      }
+    }
+    return nearestIntersection
   }
 
   public async getTargetPositionInManagingBoxCoords(): Promise<LocalPosition> {

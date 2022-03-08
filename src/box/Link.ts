@@ -14,8 +14,8 @@ import { ClientPosition, LocalPosition } from './Transform'
 export class Link implements Hoverable {
   private readonly data: BoxMapLinkData
   private managingBox: Box
-  private readonly from: LinkEnd
-  private readonly to: LinkEnd
+  public readonly from: LinkEnd
+  public readonly to: LinkEnd
   private rendered: boolean = false
   private highlight: boolean = false
 
