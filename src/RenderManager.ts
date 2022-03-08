@@ -63,7 +63,7 @@ export class RenderManager {
   public addClassTo(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      squashableWith: 'addClass'+className+'to'+id,
+      squashableWith: 'addClass'+className+'to'+id, // TODO: a sequel like removeClass, addClass, removeclass would not execute last removeClass and leave behind class that should have been removed
       //neutralizableWith: 'removeClass'+className+'from'+id, // deactivated because implementation does not work reliable and performance boost is only small
       batchParameters: {elementId: id, method: 'addClassTo', value: className},
       command: () => dom.addClassTo(id, className)
@@ -73,7 +73,7 @@ export class RenderManager {
   public removeClassFrom(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      squashableWith: 'removeClass'+className+'from'+id,
+      squashableWith: 'removeClass'+className+'from'+id, // TODO: a sequel like removeClass, addClass, removeclass would not execute last removeClass and leave behind class that should have been removed
       //neutralizableWith: 'addClass'+className+'to'+id, // deactivated because implementation does not work reliable and performance boost is only small
       batchParameters: {elementId: id, method: 'removeClassFrom', value: className},
       command: () => dom.removeClassFrom(id, className)
@@ -170,8 +170,8 @@ export class RenderManager {
         continue
       }
       if (compareCommand.squashableWith == command.squashableWith) {
-        compareCommand.priority = Math.max(compareCommand.priority.valueOf(), command.priority.valueOf()) // TODO: command should also be resorted in queue
         compareCommand.promise.setCommand(command.promise.getCommand())
+        this.increasePriorityOfCommandIfNecessary(compareCommand, command.priority)
         return compareCommand
       }
     }
@@ -179,7 +179,7 @@ export class RenderManager {
     return undefined
   }
 
-  // TODO: a sequel like addClass, removeClass, removeclass, addClass could be completely neutralized, but last addClass should be executed
+  // TODO: a sequel like addClass, removeClass, removeClass, addClass could be completely neutralized, but last addClass should be executed
   private tryToNeutralizeWithQueuedCommands(command: Command): Command|undefined {
     if (!command.neutralizableWith) {
       return undefined
@@ -193,13 +193,33 @@ export class RenderManager {
       if (compareCommand.neutralizableWith == command.squashableWith) {
         compareCommand.neutralizableWith = undefined
         compareCommand.squashableWith = undefined
-        compareCommand.priority = Math.max(compareCommand.priority.valueOf(), command.priority.valueOf()) // TODO: command should also be resorted in queue
         compareCommand.promise.setCommand(() => Promise.resolve())
+        this.increasePriorityOfCommandIfNecessary(compareCommand, command.priority)
         return compareCommand
       }
     }
 
     return undefined
+  }
+
+  private increasePriorityOfCommandIfNecessary(command: Command, newPriority: RenderPriority): void {
+    if (newPriority <= command.priority.valueOf()) {
+      return
+    }
+    command.priority = newPriority
+
+    const indexOfCommand: number = this.commands.indexOf(command)
+    if (indexOfCommand === -1) {
+      throw Error('trying to resort command that is not contained in commands, this should never happen')
+    }
+
+    for(let i = 0; i < indexOfCommand && this.commands.length; i++) {
+      if(command.priority > this.commands[i].priority) {
+        this.commands.splice(this.commands.indexOf(command), 1)
+        this.commands.splice(i, 0, command)
+        return
+      }
+    }
   }
 
   private batchUpcommingCommandsInto(command: Command): void {
