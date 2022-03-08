@@ -1829,31 +1829,6 @@
 					}
 				]
 			}
-		},
-		{
-			"id": "kkjochui0o8",
-			"from": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "/home/michael/programming/ts-visualize-files/src",
-						"x": 44,
-						"y": 32
-					}
-				],
-				"floatToBorder": true
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "mlqeakkf1dg",
-						"boxName": "styleAdapter.ts",
-						"x": 50.001375538523284,
-						"y": 60.00330129245596
-					}
-				],
-				"floatToBorder": true
-			}
 		}
 	]
 }
