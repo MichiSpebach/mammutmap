@@ -1,6 +1,7 @@
 import { JsonObject } from '../JsonObject'
 import { util } from '../util'
 import { BoxMapLinkData } from './BoxMapLinkData'
+import { LocalPosition } from './Transform'
 
 export class BoxMapData extends JsonObject {
   public readonly id: string
@@ -80,6 +81,14 @@ export class BoxMapData extends JsonObject {
 
   public toJson(): string {
     return util.toFormattedJson(this)
+  }
+
+  public getTopLeftPosition(): LocalPosition {
+    return new LocalPosition(this.x, this.y)
+  }
+
+  public getBottomRightPosition(): LocalPosition {
+    return new LocalPosition(this.x+this.width, this.y+this.height)
   }
 
 }

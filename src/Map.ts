@@ -1,6 +1,6 @@
 import { util } from './util'
 import { dom } from './domAdapter'
-import { renderManager } from './RenderManager'
+import { renderManager, RenderPriority } from './RenderManager'
 import { settings } from './Settings'
 import { DragManager } from './DragManager'
 import { ScaleManager } from './ScaleManager'
@@ -107,17 +107,18 @@ export class Map {
     this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent
     this.scalePercent += scaleChange
 
-    await this.updateStyle(2)
+    await this.updateStyle(RenderPriority.RESPONSIVE)
     await this.rootFolder.render()
     util.logDebug(`zooming ${delta} at x=${clientX} and y=${clientY} finished`)
   }
 
-  private async updateStyle(priority: number = 1): Promise<void> {
+  private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     let basicStyle: string = 'position:relative;'
     let offsetStyle: string = 'top:' + this.marginTopPercent + '%;left:' + this.marginLeftPercent + '%;'
     let scaleStyle: string = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;'
 
     await renderManager.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle, priority)
+    this.rootFolder.clearCachedClientRect()
   }
 
 }

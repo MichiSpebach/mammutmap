@@ -17,7 +17,7 @@ import { DragManager } from '../DragManager'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
-import { LocalPosition, Transform } from './Transform'
+import { ClientPosition, LocalPosition, Transform } from './Transform'
 import { grid } from './Grid'
 
 export abstract class Box implements DropTarget, Hoverable {
@@ -33,7 +33,6 @@ export abstract class Box implements DropTarget, Hoverable {
   private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
   private rendered: boolean = false
   private watchers: BoxWatcher[] = []
-  private cachedClientRect: Rect|null = null
   private unsavedChanges: boolean = false
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
@@ -136,14 +135,11 @@ export abstract class Box implements DropTarget, Hoverable {
     await Promise.all(this.borderingLinks.map(link => link.reorderAndSave()))
   }
 
-  // TODO: calculate instead of fetching from render thread and remove cache (caches would be needed to be flushed recursive otherwise)
-  public async getClientRect(priority: RenderPriority = RenderPriority.NORMAL): Promise<Rect> {
-    if (!this.cachedClientRect) {
-      this.cachedClientRect = await renderManager.getClientRectOf(this.getId(), priority)
-    } else {
-      renderManager.getClientRectOf(this.getId(), RenderPriority.NORMAL).then(rect => this.cachedClientRect = rect)
-    }
-    return this.cachedClientRect
+  public async getClientRect(): Promise<Rect> {
+    const topLeftPositionPromise: Promise<ClientPosition> = this.getParent().transform.localToClientPosition(this.mapData.getTopLeftPosition())
+    const bottomRightPosition: ClientPosition = await this.getParent().transform.localToClientPosition(this.mapData.getBottomRightPosition())
+    const topLeftPosition: ClientPosition = await topLeftPositionPromise
+    return new Rect(topLeftPosition.x, topLeftPosition.y, bottomRightPosition.x-topLeftPosition.x, bottomRightPosition.y-topLeftPosition.y)
   }
 
   // TODO: move into Transform
@@ -189,8 +185,6 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async render(): Promise<void> {
-    this.cachedClientRect = null
-
     if (!this.isRendered()) {
       this.renderStyle()
 
@@ -327,7 +321,6 @@ export abstract class Box implements DropTarget, Hoverable {
     const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
 
     await renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle, priority)
-    this.cachedClientRect = null
   }
 
   public async updateMeasuresAndBorderingLinks(

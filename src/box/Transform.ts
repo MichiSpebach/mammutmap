@@ -1,4 +1,3 @@
-import { RenderPriority } from '../RenderManager'
 import { Rect } from '../Rect'
 import { Box } from './Box'
 import { grid } from './Grid'
@@ -11,14 +10,14 @@ export class Transform {
   }
 
   public async clientToLocalPosition(position: ClientPosition): Promise<LocalPosition> {
-    const clientRect: Rect = await this.referenceBox.getClientRect(RenderPriority.RESPONSIVE)
+    const clientRect: Rect = await this.referenceBox.getClientRect()
     const percentX: number = (position.x - clientRect.x) / clientRect.width * 100
     const percentY: number = (position.y - clientRect.y) / clientRect.height * 100
     return new LocalPosition(percentX, percentY)
   }
 
   public async localToClientPosition(localPosition: LocalPosition): Promise<ClientPosition> {
-    const clientRect: Rect = await this.referenceBox.getClientRect(RenderPriority.RESPONSIVE)
+    const clientRect: Rect = await this.referenceBox.getClientRect()
     const clientX: number = clientRect.x + (localPosition.percentX/100) * clientRect.width
     const clientY: number = clientRect.y + (localPosition.percentY/100) * clientRect.height
     return new ClientPosition(clientX, clientY)

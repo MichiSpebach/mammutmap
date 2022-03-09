@@ -51,7 +51,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
 
   public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
     if (!snapToGrid) {
-      const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect(RenderPriority.RESPONSIVE) // TODO: cache, save in state object when dragStart is called
+      const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect()
       const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
       const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
       this.referenceBox.updateMeasuresAndBorderingLinks({x: newX, y: newY}, RenderPriority.RESPONSIVE)

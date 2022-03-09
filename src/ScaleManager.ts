@@ -116,8 +116,8 @@ export class ScaleManager {
   }
 
   private static async dragstart(scalable: BoxBorder, clientX: number, clientY: number): Promise<void> {
-    let parentClientRect: Promise<Rect> = scalable.referenceBox.getParent().getClientRect(RenderPriority.RESPONSIVE)
-    let clientRect: Promise<Rect> = scalable.referenceBox.getClientRect(RenderPriority.RESPONSIVE)
+    let parentClientRect: Promise<Rect> = scalable.referenceBox.getParent().getClientRect()
+    let clientRect: Promise<Rect> = scalable.referenceBox.getClientRect()
     scalable.scaleStart()
 
     this.state = {

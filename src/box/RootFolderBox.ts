@@ -2,10 +2,12 @@ import { fileSystem } from '../fileSystemAdapter'
 import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
 import { ProjectSettings } from '../ProjectSettings'
+import { Rect } from '../Rect'
+import { renderManager, RenderPriority } from '../RenderManager'
 
 export class RootFolderBox extends FolderBox {
-
   private projectSettings: ProjectSettings
+  private cachedClientRect: Rect|null = null
 
   public static async new(projectSettings: ProjectSettings): Promise<RootFolderBox> {
     let mapData: BoxMapData|null = await fileSystem.loadFromJsonFile(projectSettings.getProjectSettingsFilePath(), BoxMapData.buildFromJson)
@@ -43,6 +45,20 @@ export class RootFolderBox extends FolderBox {
     if (!this.isMapDataFileExisting()) {
       await this.projectSettings.saveToFileSystem()
     }
+  }
+
+  public async getClientRect(): Promise<Rect> {
+    if (!this.cachedClientRect) {
+      this.cachedClientRect = await renderManager.getClientRectOf(this.getId(), RenderPriority.RESPONSIVE)
+    } else {
+      // in case of some weird window changes, fault is fixed asynchronously and is not permanent
+      renderManager.getClientRectOf(this.getId(), RenderPriority.NORMAL).then(rect => this.cachedClientRect = rect)
+    }
+    return this.cachedClientRect
+  }
+
+  public clearCachedClientRect(): void {
+    this.cachedClientRect = null
   }
 
 }
