@@ -60,12 +60,12 @@ export class Link implements Hoverable {
     }
   }
 
-  public async render(priority: RenderPriority = RenderPriority.NORMAL, draggingInProgress: boolean = false): Promise<void> {
+  public async render(priority: RenderPriority = RenderPriority.NORMAL, draggingInProgress: boolean = false, hoveringOver: boolean = false): Promise<void> {
     const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
 
-    const lineHtml: string = await this.formLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
+    const lineHtml: string = await this.formLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
     const proms: Promise<any>[] = []
 
     if (!this.rendered) {
@@ -106,11 +106,11 @@ export class Link implements Hoverable {
     await Promise.all(proms)
   }
 
-  private async formLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean = false): Promise<string> {
+  private async formLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean): Promise<string> {
     // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
     // TODO: move coordinates to svg element, svg element only as big as needed?
     let lineHtml: string = this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
-    if ((draggingInProgress || this.highlight) /*&& (this.from.isFloatToBorder() || this.to.isFloatToBorder())*/) { // TODO: activate floatToBorder option
+    if ((draggingInProgress || hoveringOver) /*&& (this.from.isFloatToBorder() || this.to.isFloatToBorder())*/) { // TODO: activate floatToBorder option
       lineHtml = await this.formTargetLineHtml(draggingInProgress) + lineHtml
     }
     return lineHtml
@@ -147,11 +147,11 @@ export class Link implements Hoverable {
       this,
       () => {
         this.setHighlight(true)
-        this.render(RenderPriority.RESPONSIVE)
+        this.render(RenderPriority.RESPONSIVE, false, true)
       },
       () => {
         this.setHighlight(false)
-        this.render(RenderPriority.RESPONSIVE)
+        this.render(RenderPriority.RESPONSIVE, false, false)
       }
     ))
 
