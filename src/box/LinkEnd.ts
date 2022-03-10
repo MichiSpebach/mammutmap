@@ -1,5 +1,5 @@
 import { util } from '../util'
-import { renderManager } from '../RenderManager'
+import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { Rect } from '../Rect'
 import { Draggable } from '../Draggable'
@@ -60,12 +60,12 @@ export class LinkEnd implements Draggable<Box> {
   public async dragStart(clientX: number, clientY: number): Promise<void> {
     this.watchManagingBox()
     this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: this.getDropTargetAtDragStart(), snapToGrid: false} // TODO add dropTarget and snapToGrid to dragstart(..)
-    return this.referenceLink.render(true)
+    return this.referenceLink.render(RenderPriority.RESPONSIVE, true)
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: Box, snapToGrid: boolean): Promise<void> {
     this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: dropTarget, snapToGrid: snapToGrid}
-    return this.referenceLink.render(true)
+    return this.referenceLink.render(RenderPriority.RESPONSIVE, true)
   }
 
   public async dragCancel(): Promise<void> {
