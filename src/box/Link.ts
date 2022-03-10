@@ -17,7 +17,6 @@ export class Link implements Hoverable {
   public readonly from: LinkEnd
   public readonly to: LinkEnd
   private rendered: boolean = false
-  private targetLineRendered: boolean = false
   private highlight: boolean = false
 
   public constructor(data: BoxMapLinkData, managingBox: Box) {
@@ -105,29 +104,6 @@ export class Link implements Hoverable {
 
     this.rendered = false
     await Promise.all(proms)
-  }
-
-  private async renderTargetLine(draggingInProgress: boolean, priority: RenderPriority): Promise<void> {
-    if (!this.rendered) {
-      util.logWarning('cannot render targetLine because mainLine needs to be rendered first')
-      return Promise.resolve()
-    }
-    this.targetLineRendered = true
-    //await renderManager.addContentTo(this.getId()+'svg', await this.formTargetLineHtml(draggingInProgress), priority)
-
-    const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
-    const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
-    const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
-    const lineHtml: string = await this.formLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
-    await renderManager.addContentTo(this.getId()+'svg', lineHtml)
-  }
-
-  private async unrenderTargetLine(priority: RenderPriority): Promise<void> {
-    if (!this.targetLineRendered) {
-      util.logWarning('cannot unrender targetLine because it is not rendered')
-      return Promise.resolve()
-    }
-    await renderManager.remove(this.getId()+'TargetLine', priority)
   }
 
   private async formLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean = false): Promise<string> {
