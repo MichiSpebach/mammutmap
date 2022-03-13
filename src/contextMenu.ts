@@ -32,12 +32,21 @@ export function openForFolderBox(box: FolderBox, clientX: number, clientY: numbe
 
 export function openForLink(link: Link, clientX: number, clientY: number): void {
   const menu = new Menu()
+  menu.append(buildHideOrShowLinkItem(link))
   menu.append(buildRemoveLinkItem(link))
   menu.popup()
 }
 
 function buildAddLinkItem(box: Box, clientX: number, clientY: number): MenuItem {
   return new MenuItem({label: 'link from here', click: () => addLinkToBox(box, clientX, clientY)})
+}
+
+function buildHideOrShowLinkItem(link: Link): MenuItem {
+  if (link.includesTag('hidden')) {
+    return new MenuItem({label: 'show link', click: () => link.removeTag('hidden')})
+  } else {
+    return new MenuItem({label: 'hide link', click: () => link.addTag('hidden')})
+  }
 }
 
 function buildRemoveLinkItem(link: Link): MenuItem {

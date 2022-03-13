@@ -4,6 +4,7 @@ export class BoxMapLinkData {
   public readonly id: string
   public from: LinkEndData
   public to: LinkEndData
+  public tags: string[]|undefined
 
   public static buildFromRawObject(object: any): BoxMapLinkData {
     let from: LinkEndData
@@ -23,13 +24,14 @@ export class BoxMapLinkData {
       to = LinkEndData.buildFromRawObject(new LinkEndData(object.toWayPoints)) // raw object would have no methods
     }
 
-    return new BoxMapLinkData(object.id, from, to)
+    return new BoxMapLinkData(object.id, from, to, object.tags)
   }
 
-  public constructor(id: string, from: LinkEndData, to: LinkEndData) {
+  public constructor(id: string, from: LinkEndData, to: LinkEndData, tags?: string[]) {
     this.id = id
     this.from = from
     this.to = to
+    this.tags = tags
   }
 
 }

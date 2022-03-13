@@ -18,6 +18,8 @@ export class Link implements Hoverable {
   public readonly to: LinkEnd
   private rendered: boolean = false
   private highlight: boolean = false
+  private currentStyle: string|null = null
+  private styleTimer: NodeJS.Timeout|null = null
 
   public constructor(data: BoxMapLinkData, managingBox: Box) {
     this.data = data
@@ -81,6 +83,8 @@ export class Link implements Hoverable {
       proms.push(renderManager.setContentTo(this.getId()+'svg', lineHtml, priority))
     }
 
+    proms.push(this.updateStyle(priority))
+
     const distance: number[] = [toInManagingBoxCoords.percentX-fromInManagingBoxCoords.percentX, toInManagingBoxCoords.percentY-fromInManagingBoxCoords.percentY]
     const angleInRadians: number = Math.atan2(distance[1], distance[0]) // TODO: improve is only correct when managingBox is quadratic, use clientCoords?
     const fromBox: Box = this.from.getDeepestRenderedBox().box
@@ -104,6 +108,43 @@ export class Link implements Hoverable {
 
     this.rendered = false
     await Promise.all(proms)
+  }
+
+  private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    let style: string = 'display:block;';
+
+    const firstCall: boolean = !this.currentStyle
+    const hideTransitionDurationInMs = 1000
+    let startDisplayNoneTimer: boolean = false
+    if (this.includesTag('hidden')) {
+      if (this.highlight) {
+        style = 'opacity:0.5;'
+      } else if (firstCall) {
+        style = 'display:none;'
+      } else {
+        startDisplayNoneTimer = true
+        style = 'transition-duration:'+hideTransitionDurationInMs+'ms;opacity:0;'
+      }
+    }
+
+    if (this.currentStyle === style) {
+      return
+    }
+    this.currentStyle = style
+
+    if (this.styleTimer) {
+      clearTimeout(this.styleTimer)
+      this.styleTimer = null
+    }
+    if (startDisplayNoneTimer) {
+      this.styleTimer = setTimeout(() => {
+        renderManager.setStyleTo(this.getId(), 'display:none;', priority)
+      }, hideTransitionDurationInMs)
+    }
+
+    if (!firstCall || style !== '') {
+      await renderManager.setStyleTo(this.getId(), style, priority)
+    }
   }
 
   private async formLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean): Promise<string> {
@@ -173,13 +214,18 @@ export class Link implements Hoverable {
     }
 
     this.highlight = highlight
+
+    const proms: Promise<any>[] = []
     if (highlight) {
-      renderManager.addClassTo(this.getId()+'Line', style.getHighlightClass())
+      proms.push(renderManager.addClassTo(this.getId()+'Line', style.getHighlightClass()))
     } else {
-      renderManager.removeClassFrom(this.getId()+'Line', style.getHighlightClass())
+      proms.push(renderManager.removeClassFrom(this.getId()+'Line', style.getHighlightClass()))
     }
-    this.to.setHighlight(highlight)
-    this.from.setHighlight(highlight)
+    proms.push(this.updateStyle())
+    proms.push(this.to.setHighlight(highlight))
+    proms.push(this.from.setHighlight(highlight))
+
+    await Promise.all(proms)
   }
 
   public async reorderAndSave(): Promise<void|never> {
@@ -245,6 +291,36 @@ export class Link implements Hoverable {
       from: await fromPosition,
       to: await toPosition
     }
+  }
+
+  public includesTag(tag: string): boolean {
+    if (!this.data.tags) {
+      return false
+    }
+    return this.data.tags.includes(tag)
+  }
+
+  public async addTag(tag: string): Promise<void> {
+    if (this.includesTag(tag)) {
+      util.logWarning(`tag '${tag}' is already included in link '${this.getId()}'`)
+      return
+    }
+    if (!this.data.tags) {
+      this.data.tags = []
+    }
+    this.data.tags.push(tag)
+    await this.render()
+    await this.managingBox.saveMapData()
+  }
+
+  public async removeTag(tag: string): Promise<void> {
+    if (!this.includesTag(tag) || !this.data.tags) {
+      util.logWarning(`tag '${tag}' is not included in link '${this.getId()}'`)
+      return
+    }
+    this.data.tags.splice(this.data.tags.indexOf(tag), 1)
+    await this.render()
+    await this.managingBox.saveMapData()
   }
 
 }
