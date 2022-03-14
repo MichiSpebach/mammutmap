@@ -111,7 +111,7 @@ export class Link implements Hoverable {
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    let style: string = 'display:block;';
+    let style: string = '';
 
     const firstCall: boolean = !this.currentStyle
     const hideTransitionDurationInMs = 1000
@@ -128,7 +128,7 @@ export class Link implements Hoverable {
     }
 
     if (this.currentStyle === style) {
-      return
+      //return // TODO: reactivate, should be able to jump back here without bug in displaying
     }
     this.currentStyle = style
 
@@ -139,6 +139,7 @@ export class Link implements Hoverable {
     if (startDisplayNoneTimer) {
       this.styleTimer = setTimeout(() => {
         renderManager.setStyleTo(this.getId(), 'display:none;', priority)
+        this.styleTimer = null
       }, hideTransitionDurationInMs)
     }
 
