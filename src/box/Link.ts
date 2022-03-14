@@ -128,7 +128,7 @@ export class Link implements Hoverable {
     }
 
     if (this.currentStyle === style) {
-      //return // TODO: reactivate, should be able to jump back here without bug in displaying
+      return
     }
     this.currentStyle = style
 

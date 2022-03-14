@@ -170,6 +170,7 @@ export class RenderManager {
         continue
       }
       if (compareCommand.squashableWith == command.squashableWith) {
+        compareCommand.batchParameters = command.batchParameters
         compareCommand.promise.setCommand(command.promise.getCommand())
         this.increasePriorityOfCommandIfNecessary(compareCommand, command.priority)
         return compareCommand
@@ -193,6 +194,7 @@ export class RenderManager {
       if (compareCommand.neutralizableWith == command.squashableWith) {
         compareCommand.neutralizableWith = undefined
         compareCommand.squashableWith = undefined
+        compareCommand.batchParameters = undefined
         compareCommand.promise.setCommand(() => Promise.resolve())
         this.increasePriorityOfCommandIfNecessary(compareCommand, command.priority)
         return compareCommand
