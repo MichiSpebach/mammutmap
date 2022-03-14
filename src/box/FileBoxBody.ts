@@ -4,6 +4,7 @@ import { renderManager } from '../RenderManager'
 import { BoxBody } from './BoxBody'
 import { FileBox } from './FileBox'
 import { style } from '../styleAdapter'
+import { Stats } from 'original-fs'
 
 export class FileBoxBody extends BoxBody {
   private readonly referenceFileBox: FileBox
@@ -52,6 +53,15 @@ export class FileBoxBody extends BoxBody {
   }
 
   private async formHtmlContentForTextFile(): Promise<string|never> {
+    const maxFileSizeInKiloBytes: number = 100 // TODO: add setting for this
+    const fileStats: Stats = await fileSystem.getDirentStatsOrThrow(this.referenceFileBox.getSrcPath())
+    if (fileStats.size/1000 > maxFileSizeInKiloBytes) {
+      const tooLargeHint: string = 'File is too large to be displayed as textfile'
+      const sizeHint: string = `(${fileStats.size/1000} kilobytes, maximum is ${maxFileSizeInKiloBytes} kilobytes)`
+      const pluginHint: string = 'Install or write a plugin to display it.' // TODO: add hyperlink to plugin tutorial
+      return this.formHtmlContentForError(`${tooLargeHint} ${sizeHint}.<br>${pluginHint}`)
+    }
+
     const data: string = await fileSystem.readFile(this.referenceFileBox.getSrcPath())
     const mostImportantLines: string = this.extractMostImportantLines(data, 20, 10)
     const dataConvertedToHtml: string = util.escapeForHtml(mostImportantLines)
@@ -122,7 +132,7 @@ export class FileBoxBody extends BoxBody {
   }
 
   private formHtmlContentForError(errorMessage: string): string {
-    return `<div id="${this.getContentId()}" style="color:red;">${errorMessage}</div>`
+    return `<div id="${this.getContentId()}" class="${style.getFileBoxBodyText()}" style="color:red;">${errorMessage}</div>`
   }
 
 }

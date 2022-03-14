@@ -26,21 +26,25 @@ class FileSystem {
   }
 
   public async doesDirentExistAndIsFile(path: string): Promise<boolean> {
-    const direntStats: fs.Stats|null = await this.getDirentStats(path)
+    const direntStats: fs.Stats|null = await this.getDirentStatsIfExists(path)
     return direntStats !== null && direntStats.isFile()
   }
 
   public async doesDirentExist(path: string): Promise<boolean> {
-    const direntStats: fs.Stats|null = await this.getDirentStats(path)
+    const direntStats: fs.Stats|null = await this.getDirentStatsIfExists(path)
     return direntStats !== null
   }
 
-  public async getDirentStats(path: string): Promise<fs.Stats|null> {
+  public async getDirentStatsIfExists(path: string): Promise<fs.Stats|null> {
     try {
-      return await fsPromises.stat(path) // without await catch would not work
+      return await this.getDirentStatsOrThrow(path) // without await, catch would not work
     } catch(_) {
       return null
     }
+  }
+
+  public async getDirentStatsOrThrow(path: string): Promise<fs.Stats|never> {
+    return fsPromises.stat(path)
   }
 
   public readdir(path: string): Promise<Dirent[]> {
