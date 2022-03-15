@@ -32,22 +32,21 @@ export class FolderBox extends Box {
     return 'visible'
   }
 
+  protected getBackgroundStyleClass(): string {
+    return style.getFolderBoxBackgroundClass()
+  }
+
   protected async renderAdditional(): Promise<void> {
     if (this.isRendered()) {
       return
     }
-
-    const proms: Promise<any>[] = []
-    proms.push(renderManager.addClassTo(super.getId(), style.getFolderBoxClass()))
-    proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFolderBox(this, clientX, clientY)))
-    await Promise.all(proms)
+    await renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFolderBox(this, clientX, clientY))
   }
 
   protected async unrenderAdditional(): Promise<void> {
     if (!this.isRendered()) {
       return
     }
-
     await renderManager.removeEventListenerFrom(this.getId(), 'contextmenu')
   }
 

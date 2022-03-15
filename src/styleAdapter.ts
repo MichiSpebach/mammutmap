@@ -1,8 +1,8 @@
 
 interface Style {
   getHintClass(): string
-  getFileBoxClass(): string
-  getFolderBoxClass(): string
+  getFileBoxBackgroundClass(): string
+  getFolderBoxBackgroundClass(): string
   getFileBoxHeaderClass(): string
   getFolderBoxHeaderClass(): string
   getBoxHeaderInnerClass(): string
@@ -24,12 +24,12 @@ class DarkTheme implements Style {
     return 'hint'
   }
 
-  public getFileBoxClass(): string {
-    return 'fileBox'
+  public getFileBoxBackgroundClass(): string {
+    return 'fileBoxBackground'
   }
 
-  public getFolderBoxClass(): string {
-    return 'folderBox'
+  public getFolderBoxBackgroundClass(): string {
+    return 'folderBoxBackground'
   }
 
   public getFileBoxHeaderClass(): string {

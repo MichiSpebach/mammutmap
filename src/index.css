@@ -59,11 +59,11 @@ body {
   stroke: white !important;
 }
 
-.fileBox {
-  background-color: #002060c0;
+.fileBoxBackground {
+  background-color: #002040c0;
 }
 
-.folderBox {
+.folderBoxBackground {
   background-color: #102040a0;
 }
 
@@ -93,7 +93,7 @@ body {
   position: absolute;
   top: 50%;
   padding-left: 5px;
-  color: white;
+  color: #8888;
 }
 
 .fileBoxBodyText {

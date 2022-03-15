@@ -189,13 +189,14 @@ export abstract class Box implements DropTarget, Hoverable {
       this.renderStyle()
 
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
+      const backgroundHtml = `<div style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
       const gridPlaceHolderHtml = `<div id="${this.gridPlaceHolderId}" style="${styleAbsoluteAndStretched}"></div>`
       const headerHtml = `<div id="${this.header.getId()}" style="overflow:hidden;max-height:100%"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}"></div>`
       const headerAndBodyHtml = `<div style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};">${headerHtml+bodyHtml}</div>`
       const borderHtml = `<div id="${this.border.getId()}"></div>`
       const linksHtml = `<div id="${this.links.getId()}"></div>`
-      await renderManager.setContentTo(this.getId(), gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+linksHtml)
+      await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+linksHtml)
 
       await this.header.render()
       await this.border.render()
@@ -352,6 +353,8 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   protected abstract getBodyOverflowStyle(): 'hidden'|'visible'
+
+  protected abstract getBackgroundStyleClass(): string
 
   protected abstract renderAdditional(): Promise<void>
 
