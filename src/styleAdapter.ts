@@ -6,7 +6,9 @@ interface Style {
   getFileBoxHeaderClass(): string
   getFolderBoxHeaderClass(): string
   getBoxHeaderInnerClass(): string
-  getFileBoxBodyText(): string
+  getBoxBodyZoomInToRenderHintClass(): string
+  getBoxBodyZoomInToRenderHintTextClass(): string
+  getFileBoxBodyTextClass(): string
   getBoxBorderLineClass(mapDataFileExisting: boolean): string
   getHorizontalResizeClass(): string
   getVerticalResizeClass(): string
@@ -42,7 +44,15 @@ class DarkTheme implements Style {
     return 'boxHeaderInner'
   }
 
-  public getFileBoxBodyText(): string {
+  public getBoxBodyZoomInToRenderHintClass(): string {
+    return 'boxBodyZoomInToRenderHint'
+  }
+
+  public getBoxBodyZoomInToRenderHintTextClass(): string {
+    return 'boxBodyZoomInToRenderHintText'
+  }
+
+  public getFileBoxBodyTextClass(): string {
     return 'fileBoxBodyText'
   }
 

@@ -3,6 +3,7 @@ import { settings } from '../Settings'
 import { Rect } from '../Rect'
 import { Box } from './Box'
 import { util } from '../util'
+import { style } from '../styleAdapter'
 
 export abstract class BoxBody {
   private readonly referenceBox: Box
@@ -11,6 +12,7 @@ export abstract class BoxBody {
   private rerenderAfterRenderFinished: boolean = false
   private unrenderAfterRenderFinished: boolean = false
   private unrenderAfterRenderFinishedForce?: boolean
+  private zoomInToRenderHintRendered: boolean = false
 
   public constructor(referenceBox: Box) {
     this.referenceBox = referenceBox
@@ -36,9 +38,13 @@ export abstract class BoxBody {
       if (this.isRendered() && await this.shouldBeUnrendered()) {
         await this.unrenderIfPossible()
       }
+      if (!this.isRendered()) {
+        await this.renderZoomInToRenderHint()
+      }
       return
     }
 
+    await this.unrenderZoomInToRenderHint()
     await this.executeRender()
 
     this.rendered = true
@@ -84,6 +90,25 @@ export abstract class BoxBody {
   public abstract executeRender(): Promise<void>
 
   public abstract executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}>
+
+  private async renderZoomInToRenderHint(): Promise<void> {
+    if (this.zoomInToRenderHintRendered) {
+      return
+    }
+    this.zoomInToRenderHintRendered = true
+    let html: string = `<div id="${this.getId()+'ZoomInToRenderHint'}" class="${style.getBoxBodyZoomInToRenderHintClass()}">`
+    html += `<div class="${style.getBoxBodyZoomInToRenderHintTextClass()}">zoom in to render</div>`
+    html += '</div>'
+    await renderManager.addContentTo(this.getId(), html)
+  }
+
+  private async unrenderZoomInToRenderHint(): Promise<void> {
+    if (!this.zoomInToRenderHintRendered) {
+      return
+    }
+    this.zoomInToRenderHintRendered = false
+    await renderManager.remove(this.getId()+'ZoomInToRenderHint')
+  }
 
   private async shouldBeRendered(): Promise<boolean> {
     if (this.referenceBox.hasWatchers()) {

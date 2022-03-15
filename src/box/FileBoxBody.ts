@@ -65,7 +65,7 @@ export class FileBoxBody extends BoxBody {
     const data: string = await fileSystem.readFile(this.referenceFileBox.getSrcPath())
     const mostImportantLines: string = this.extractMostImportantLines(data, 20, 10)
     const dataConvertedToHtml: string = util.escapeForHtml(mostImportantLines)
-    return `<pre id="${this.getContentId()}" class="${style.getFileBoxBodyText()}">${dataConvertedToHtml}</pre>`
+    return `<pre id="${this.getContentId()}" class="${style.getFileBoxBodyTextClass()}">${dataConvertedToHtml}</pre>`
   }
 
   private extractMostImportantLines(code: string, roughNumberOfLines: number, minNumberOfLines: number): string {
@@ -132,7 +132,7 @@ export class FileBoxBody extends BoxBody {
   }
 
   private formHtmlContentForError(errorMessage: string): string {
-    return `<div id="${this.getContentId()}" class="${style.getFileBoxBodyText()}" style="color:red;">${errorMessage}</div>`
+    return `<div id="${this.getContentId()}" class="${style.getFileBoxBodyTextClass()}" style="color:red;">${errorMessage}</div>`
   }
 
 }
