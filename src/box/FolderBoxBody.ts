@@ -137,6 +137,14 @@ export class FolderBoxBody extends BoxBody {
     return this.boxes
   }
 
+  public async addNewFolderAndSave(name: string, mapData: BoxMapData): Promise<void> {
+    const newBox: FolderBox = new FolderBox(name, this.referenceFolderBox, mapData, false)
+    await this.renderBoxPlaceholderFor(newBox)
+    await newBox.render()
+    await fileSystem.makeFolder(newBox.getSrcPath())
+    await newBox.saveMapData()
+  }
+
   public async addBox(box: Box): Promise<void> {
     if (this.containsBox(box)) {
       util.logWarning('trying to add box that is already contained')

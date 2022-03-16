@@ -8,6 +8,7 @@ import { Link } from './box/Link'
 import { DragManager } from './DragManager'
 import { LinkEndData } from './box/LinkEndData'
 import { ClientPosition, LocalPosition } from './box/Transform'
+import { BoxMapData } from './box/BoxMapData'
 
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const atomCommand: string = 'atom '+box.getSrcPath()
@@ -27,6 +28,7 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
 export function openForFolderBox(box: FolderBox, clientX: number, clientY: number): void {
   const menu = new Menu()
   menu.append(buildAddLinkItem(box, clientX, clientY))
+  menu.append(buildAddNewFolderItem(box, clientX, clientY))
   menu.popup()
 }
 
@@ -51,6 +53,14 @@ function buildHideOrShowLinkItem(link: Link): MenuItem {
 
 function buildRemoveLinkItem(link: Link): MenuItem {
   return new MenuItem({label: 'remove link', click: () => link.getManagingBoxLinks().removeLink(link)})
+}
+
+function buildAddNewFolderItem(box: FolderBox, clientX: number, clientY: number): MenuItem {
+  return new MenuItem({label: 'new folder', click: async () => {
+    const position: LocalPosition = await box.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
+    const mapData: BoxMapData = BoxMapData.buildNew(position.percentX, position.percentY, 16, 8)
+    await box.addNewFolderAndSave(mapData.id, mapData)
+  }})
 }
 
 // TODO: move into Box?

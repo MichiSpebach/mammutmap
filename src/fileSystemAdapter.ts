@@ -75,9 +75,12 @@ class FileSystem {
     for (let i = 0; i < fileEntries.length - 1; i++) {
       directory += fileEntries[i] + '/'
     }
-
-    await fsPromises.mkdir(directory, {recursive: true})
+    await this.makeFolder(directory)
     return fsPromises.writeFile(path, data)
+  }
+
+  public async makeFolder(path: string): Promise<void> {
+    await fsPromises.mkdir(path, {recursive: true})
   }
 
   public async rename(oldPath: string, newPath: string): Promise<void> {
