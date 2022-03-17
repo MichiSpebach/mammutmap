@@ -22,12 +22,14 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
   ]
   const menu = Menu.buildFromTemplate(template)
   menu.insert(0, buildAddLinkItem(box, clientX, clientY))
+  menu.append(buildRenameBoxItem(box))
   menu.popup()
 }
 
 export function openForFolderBox(box: FolderBox, clientX: number, clientY: number): void {
   const menu = new Menu()
   menu.append(buildAddLinkItem(box, clientX, clientY))
+  menu.append(buildRenameBoxItem(box))
   menu.append(buildAddNewFolderItem(box, clientX, clientY))
   menu.popup()
 }
@@ -53,6 +55,10 @@ function buildHideOrShowLinkItem(link: Link): MenuItem {
 
 function buildRemoveLinkItem(link: Link): MenuItem {
   return new MenuItem({label: 'remove link', click: () => link.getManagingBoxLinks().removeLink(link)})
+}
+
+function buildRenameBoxItem(box: Box): MenuItem {
+  return new MenuItem({label: 'rename', click: () => box.rename(box.getName()+'renamed')})
 }
 
 function buildAddNewFolderItem(box: FolderBox, clientX: number, clientY: number): MenuItem {

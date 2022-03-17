@@ -125,14 +125,31 @@ export abstract class Box implements DropTarget, Hoverable {
     const newHeight: number = this.mapData.height * scaleY
     await this.updateMeasures({x: newX, y: newY, width: newWidth, height: newHeight})
 
+    await this.renameAndMoveOnFileSystem(oldSrcPath, newSrcPath, oldMapDataFilePath, newMapDataFilePath)
+    await this.saveMapData()
+    await Promise.all(this.borderingLinks.map(link => link.reorderAndSave()))
+  }
+
+  public async rename(newName: string): Promise<void> {
+    const oldSrcPath: string = this.getSrcPath()
+    const oldMapDataFilePath: string = this.getMapDataFilePath()
+    this.name = newName
+    const newSrcPath: string = this.getSrcPath()
+    const newMapDataFilePath: string = this.getMapDataFilePath()
+    await this.renameAndMoveOnFileSystem(oldSrcPath, newSrcPath, oldMapDataFilePath, newMapDataFilePath)
+    await this.header.render()
+  }
+
+  private async renameAndMoveOnFileSystem(
+    oldSrcPath: string, newSrcPath: string,
+    oldMapDataFilePath: string, newMapDataFilePath: string
+  ): Promise<void> {
     await fileSystem.rename(oldSrcPath, newSrcPath)
     util.logInfo('moved ' + oldSrcPath + ' to ' + newSrcPath)
     if (this.isMapDataFileExisting()) {
       await fileSystem.rename(oldMapDataFilePath, newMapDataFilePath)
       util.logInfo('moved ' + oldMapDataFilePath + ' to ' + newMapDataFilePath)
     }
-    await this.saveMapData()
-    await Promise.all(this.borderingLinks.map(link => link.reorderAndSave()))
   }
 
   public async getClientRect(): Promise<Rect> {
