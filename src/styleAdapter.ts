@@ -1,6 +1,7 @@
 
 interface Style {
   getHintClass(): string
+  getPopupClass(): string
   getFileBoxBackgroundClass(): string
   getFolderBoxBackgroundClass(): string
   getFileBoxHeaderClass(): string
@@ -22,6 +23,10 @@ class DarkTheme implements Style {
 
   public getHintClass(): string {
     return 'hint'
+  }
+
+  public getPopupClass(): string {
+    return 'popup'
   }
 
   public getFileBoxBackgroundClass(): string {

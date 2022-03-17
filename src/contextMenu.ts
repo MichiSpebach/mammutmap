@@ -9,6 +9,7 @@ import { DragManager } from './DragManager'
 import { LinkEndData } from './box/LinkEndData'
 import { ClientPosition, LocalPosition } from './box/Transform'
 import { BoxMapData } from './box/BoxMapData'
+import { TextInputPopup } from './TextInputPopup'
 
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const atomCommand: string = 'atom '+box.getSrcPath()
@@ -58,7 +59,12 @@ function buildRemoveLinkItem(link: Link): MenuItem {
 }
 
 function buildRenameBoxItem(box: Box): MenuItem {
-  return new MenuItem({label: 'rename', click: () => box.rename(box.getName()+'renamed')})
+  return new MenuItem({label: 'rename', click: async () => {
+    const newName: string|undefined = await TextInputPopup.buildAndRenderAndAwaitResolve('Rename Box', box.getName())
+    if (newName) {
+      await box.rename(newName)
+    }
+  }})
 }
 
 function buildAddNewFolderItem(box: FolderBox, clientX: number, clientY: number): MenuItem {

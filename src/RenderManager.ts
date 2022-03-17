@@ -20,6 +20,14 @@ export class RenderManager {
     }))
   }
 
+  public getValueOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<string> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'getValueOf'+id,
+      command: () => dom.getValueOf(id)
+    }))
+  }
+
   public appendChildTo(parentId: string, childId: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
