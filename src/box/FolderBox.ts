@@ -116,6 +116,10 @@ export class FolderBox extends Box {
     return this.body.containsBox(box)
   }
 
+  public async addNewFileAndSave(name: string, mapData: BoxMapData): Promise<void> {
+    await this.body.addNewFileAndSave(name, mapData)
+  }
+
   public async addNewFolderAndSave(name: string, mapData: BoxMapData): Promise<void> {
     await this.body.addNewFolderAndSave(name, mapData)
   }

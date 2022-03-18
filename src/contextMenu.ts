@@ -31,6 +31,7 @@ export function openForFolderBox(box: FolderBox, clientX: number, clientY: numbe
   const menu = new Menu()
   menu.append(buildAddLinkItem(box, clientX, clientY))
   menu.append(buildRenameBoxItem(box))
+  menu.append(buildAddNewFileItem(box, clientX, clientY))
   menu.append(buildAddNewFolderItem(box, clientX, clientY))
   menu.popup()
 }
@@ -64,6 +65,14 @@ function buildRenameBoxItem(box: Box): MenuItem {
     if (newName) {
       await box.rename(newName)
     }
+  }})
+}
+
+function buildAddNewFileItem(box: FolderBox, clientX: number, clientY: number): MenuItem {
+  return new MenuItem({label: 'new file', click: async () => {
+    const position: LocalPosition = await box.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
+    const mapData: BoxMapData = BoxMapData.buildNew(position.percentX, position.percentY, 16, 8)
+    await box.addNewFileAndSave(mapData.id, mapData)
   }})
 }
 

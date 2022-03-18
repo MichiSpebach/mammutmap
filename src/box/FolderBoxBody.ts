@@ -137,12 +137,21 @@ export class FolderBoxBody extends BoxBody {
     return this.boxes
   }
 
+  public async addNewFileAndSave(name: string, mapData: BoxMapData): Promise<void> {
+    const newBox: FileBox = new FileBox(name, this.referenceFolderBox, mapData, false)
+    await this.addNewBoxAndSave(newBox, (path: string) => fileSystem.writeFile(path, ""))
+  }
+
   public async addNewFolderAndSave(name: string, mapData: BoxMapData): Promise<void> {
     const newBox: FolderBox = new FolderBox(name, this.referenceFolderBox, mapData, false)
-    await this.renderBoxPlaceholderFor(newBox)
-    await newBox.render()
-    await fileSystem.makeFolder(newBox.getSrcPath())
-    await newBox.saveMapData()
+    await this.addNewBoxAndSave(newBox, fileSystem.makeFolder)
+  }
+
+  private async addNewBoxAndSave(box: Box, saveOnFileSystem: (path: string) => Promise<void>) {
+    await this.renderBoxPlaceholderFor(box)
+    await box.render()
+    await saveOnFileSystem(box.getSrcPath())
+    await box.saveMapData()
   }
 
   public async addBox(box: Box): Promise<void> {
