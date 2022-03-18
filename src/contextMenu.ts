@@ -70,18 +70,23 @@ function buildRenameBoxItem(box: Box): MenuItem {
 
 function buildAddNewFileItem(box: FolderBox, clientX: number, clientY: number): MenuItem {
   return new MenuItem({label: 'new file', click: async () => {
-    const position: LocalPosition = await box.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-    const mapData: BoxMapData = BoxMapData.buildNew(position.percentX, position.percentY, 16, 8)
+    const mapData: BoxMapData = await buildMapDataForNewBox(box, clientX, clientY)
     await box.addNewFileAndSave(mapData.id, mapData)
+    //ScaleManager.startWithClickToDropMode(newBox) // TODO: implement
   }})
 }
 
 function buildAddNewFolderItem(box: FolderBox, clientX: number, clientY: number): MenuItem {
   return new MenuItem({label: 'new folder', click: async () => {
-    const position: LocalPosition = await box.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-    const mapData: BoxMapData = BoxMapData.buildNew(position.percentX, position.percentY, 16, 8)
+    const mapData: BoxMapData = await buildMapDataForNewBox(box, clientX, clientY)
     await box.addNewFolderAndSave(mapData.id, mapData)
+    //ScaleManager.startWithClickToDropMode(newBox) // TODO: implement
   }})
+}
+
+async function buildMapDataForNewBox(parentBox: FolderBox, clientX: number, clientY: number): Promise<BoxMapData> {
+  const position: LocalPosition = await parentBox.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
+  return BoxMapData.buildNew(position.percentX, position.percentY, 16, 8)
 }
 
 // TODO: move into Box?
