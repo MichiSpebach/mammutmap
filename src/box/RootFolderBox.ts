@@ -41,10 +41,10 @@ export class RootFolderBox extends FolderBox {
   }
 
   public async saveMapData(): Promise<void> {
-    await super.saveMapData()
     if (!this.isMapDataFileExisting()) {
       await this.projectSettings.saveToFileSystem()
     }
+    await super.saveMapData()
   }
 
   public async getClientRect(): Promise<Rect> {
