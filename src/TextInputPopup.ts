@@ -29,7 +29,7 @@ export class TextInputPopup {
         let html = `<div id="${this.id}" class="${style.getPopupClass()}">`
         html += `<div style="margin-bottom:5px;">${this.title}<button id="${this.id+'Close'}" style="float:right">X</button></div>`
         html += `<form id="${this.id+'Form'}" onsubmit="return false">` // onsubmit="return false" prevents action from trying to call an url
-        html += `<input id="${this.id+'Input'}" value="${this.defaultValue}">`
+        html += `<input onfocus="this.select()" id="${this.id+'Input'}" value="${this.defaultValue}" autofocus>` // TODO: autofocus only works once
         html += `<button id="${this.id+'Ok'}">ok</button>`
         html += '</form>'
         html += '</div>'
