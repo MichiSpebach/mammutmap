@@ -50,13 +50,15 @@ export class Rect {
 
     const distanceToLeft: number = this.x - line.from.x
     const intersectionLeft = new ClientPosition(this.x, line.from.y + distanceToLeft * (deltaY/deltaX))
-    if (this.isClientPositionInside(intersectionLeft) && intersectionLeft.isBetweenCoordinateWise(line)) {
+    if (this.isClientPositionInside(intersectionLeft) && intersectionLeft.isBetweenCoordinateWise(line)
+    && !intersectionLeft.equals(intersectionTop) && !intersectionLeft.equals(intersectionBottom)) {
       intersections.push(intersectionLeft)
     }
 
     const distanceToRight: number = this.getRightX() - line.from.x
     const intersectionRight = new ClientPosition(this.getRightX(), line.from.y + distanceToRight * (deltaY/deltaX))
-    if (this.isClientPositionInside(intersectionRight) && intersectionRight.isBetweenCoordinateWise(line)) {
+    if (this.isClientPositionInside(intersectionRight) && intersectionRight.isBetweenCoordinateWise(line)
+    && !intersectionRight.equals(intersectionTop) && !intersectionRight.equals(intersectionBottom)) {
       intersections.push(intersectionRight)
     }
 

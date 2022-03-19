@@ -91,4 +91,8 @@ export class ClientPosition {
   public calculateDistanceTo(other: ClientPosition): number {
     return Math.sqrt((this.x-other.x)*(this.x-other.x) + (this.y-other.y)*(this.y-other.y))
   }
+
+  public equals(other: ClientPosition): boolean {
+    return other.x === this.x && other.y === this.y
+  }
 }
