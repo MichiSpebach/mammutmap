@@ -1001,8 +1001,8 @@
 					{
 						"boxId": "7b4gp3csto8",
 						"boxName": "Settings.ts",
-						"x": 100,
-						"y": 9.996819675606911
+						"x": 64,
+						"y": 7.999999999999999
 					}
 				]
 			},
@@ -1829,6 +1829,109 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "rmiaucbpdv",
+			"from": {
+				"path": [
+					{
+						"boxId": "lr0pi422h1o",
+						"boxName": "contextMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "0vh7l3j1gv",
+						"boxName": "TextInputPopup.ts",
+						"x": 50,
+						"y": 50.000000000000085
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "3evf70vgip8",
+			"from": {
+				"path": [
+					{
+						"boxId": "0vh7l3j1gv",
+						"boxName": "TextInputPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 8.000000000000053,
+						"y": 84.00000000000004
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "ijucr9cshl",
+			"from": {
+				"path": [
+					{
+						"boxId": "0vh7l3j1gv",
+						"boxName": "TextInputPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "mlqeakkf1dg",
+						"boxName": "styleAdapter.ts",
+						"x": 49.999999999999964,
+						"y": 49.999999999999964
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "0tj9jbuurko",
+			"from": {
+				"path": [
+					{
+						"boxId": "0vh7l3j1gv",
+						"boxName": "TextInputPopup.ts",
+						"x": 50,
+						"y": 49.999999999999886
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
 		}
 	]
 }
