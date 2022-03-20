@@ -39,7 +39,7 @@ export class BoxBorder {
     return this.getId()+'RightBottom'
   }
 
-  public async render(): Promise<void> {
+  public async render(): Promise<void> { // TODO: rename to renderInto(..), compare to Grid
     if(!this.rendered) {
       const top: string = this.formLine(this.getTopId(), 'width:100%;height:6px;top:0px;', 'width:100%;height:2px;top:0px;')
       const bottom: string = this.formLine(this.getBottomId(), 'width:100%;height:8px;bottom:0px;', 'width:100%;height:2px;bottom:0px;')

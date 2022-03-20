@@ -10,7 +10,7 @@ afterAll(async () => {
 
 test('title of app', async () => {
   const title: string = await gui.getTitle()
-  expect(title).toBe('FileVis')
+  expect(title).toBe('MammutMap')
 })
 
 test('snapshot empty window', async () => {

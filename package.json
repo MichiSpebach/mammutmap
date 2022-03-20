@@ -1,8 +1,8 @@
 {
-  "name": "ts-visualize-files",
-  "productName": "ts-visualize-files",
+  "name": "mammutmap",
+  "productName": "MammutMap",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "TODO",
   "main": "dist/index.js",
   "scripts": {
     "test": "jest --config ./test/jest.config.js",
@@ -15,7 +15,7 @@
   },
   "keywords": [],
   "author": "michael",
-  "license": "",
+  "license": "TODO",
   "config": {
     "forge": {
       "packagerConfig": {},
@@ -56,12 +56,13 @@
     "electron": "10.1.5",
     "eslint": "^7.6.0",
     "eslint-plugin-import": "^2.20.0",
-    "jest": "^27.4.0",
+    "jest": "^27.5.1",
     "jest-image-snapshot": "^4.5.1",
-    "jest-mock-extended": "^1.0.16",
+    "jest-mock-extended": "^2.0.4",
     "puppeteer-core": "^11.0.0",
     "ts-jest": "^27.1.2",
-    "typescript": "^4.3.5"
+    "typescript": "^4.3.5",
+    "yarn": "^1.22.17"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0"
