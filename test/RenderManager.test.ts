@@ -105,7 +105,7 @@ test('runOrSchedule squashable, does not squash into already started command', (
 
 test('runOrSchedule squashable, priority is max of squashed commands', () => {
   const renderManager = new RenderManager()
-  const command1 = buildCommand({})
+  const command1 = buildCommand({priority: RenderPriority.NORMAL})
   const command2 = buildCommand({priority: RenderPriority.NORMAL, squashableWith: 'command'})
   const command3 = buildCommand({priority: RenderPriority.RESPONSIVE, squashableWith: 'command'})
 
@@ -114,9 +114,9 @@ test('runOrSchedule squashable, priority is max of squashed commands', () => {
   renderManager.runOrSchedule(command3)
 
   expect(renderManager.getCommands()).toHaveLength(2)
-  expect(renderManager.getCommands()[0]).toBe(command1)
-  expect(renderManager.getCommands()[1]).toBe(command2)
-  expect(renderManager.getCommands()[1].priority).toBe(RenderPriority.RESPONSIVE)
+  expect(renderManager.getCommands()[0]).toBe(command2)
+  expect(renderManager.getCommands()[0].priority).toBe(RenderPriority.RESPONSIVE)
+  expect(renderManager.getCommands()[1]).toBe(command1)
 })
 
 test('runOrSchedule squashable, redundant commands are skipped', async () => {
