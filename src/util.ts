@@ -145,6 +145,7 @@ class Util {
   public joinPaths(paths: string[]): string {
     let jointedPath: string = ''
     for (let path of paths) {
+      path = this.replaceBackslashesWithSlashes(path)
       if (jointedPath !== '') {
         if (!jointedPath.endsWith('/') && !path.startsWith('/')) {
           jointedPath += '/'
@@ -165,7 +166,12 @@ class Util {
   }
 
   public removeLastElementFromPath(path: string): string {
+    path = this.replaceBackslashesWithSlashes(path)
     return path.replace(/[/][^/]*.$/, '/')
+  }
+
+  private replaceBackslashesWithSlashes(s: string) {
+    return s.split('\\').join('/')
   }
 
   public toFormattedJson(object: any) {
