@@ -24,8 +24,6 @@ when saving mapData don't override whole file, only update edited fields, this i
 
 format mapData.jsons, makes it more human readable
 
-load style from css file, use html/css classes
-
 settings to adapt zoom out
 
 improve box header, should not overlap content
