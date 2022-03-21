@@ -19,7 +19,7 @@ export class BoxLinks {
       return this.referenceBox.getId()+'Links'
     }
 
-    public static changeManagingBoxOfLinkAndSave(oldManagingBox: Box, newManagingBox: Box, link: Link): void {
+    public static async changeManagingBoxOfLinkAndSave(oldManagingBox: Box, newManagingBox: Box, link: Link): Promise<void> {
       if (link.getManagingBox() !== newManagingBox) {
         util.logWarning('baseBox/managingBox '+newManagingBox.getSrcPath()+' of given link '+link.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
       }
@@ -29,15 +29,18 @@ export class BoxLinks {
       if (!oldManagingBox.links.links.includes(link)) {
         util.logWarning('box '+oldManagingBox.getSrcPath()+' does not manage link '+link.getId())
       }
+      const proms: Promise<any>[] = []
 
       newManagingBox.links.links.push(link)
-      renderManager.appendChildTo(newManagingBox.getId(), link.getId())
+      proms.push(renderManager.appendChildTo(newManagingBox.links.getId(), link.getId()))
       oldManagingBox.links.links.splice(oldManagingBox.links.links.indexOf(link), 1)
 
       newManagingBox.getMapLinkData().push(link.getData())
       oldManagingBox.getMapLinkData().splice(oldManagingBox.getMapLinkData().indexOf(link.getData()), 1)
-      newManagingBox.saveMapData()
-      oldManagingBox.saveMapData()
+      proms.push(newManagingBox.saveMapData())
+      proms.push(oldManagingBox.saveMapData())
+
+      await Promise.all(proms)
     }
 
     public async addLink(from: LinkEndData, to: LinkEndData, reorderAndSave: boolean): Promise<Link> {

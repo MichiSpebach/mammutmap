@@ -257,13 +257,14 @@ export class Link implements Hoverable {
     this.managingBox = relation.commonAncestor
     this.registerAtBorderingBoxes()
 
+    const proms: Promise<any>[] = []
     if(oldManagingBox !== this.managingBox) {
-      BoxLinks.changeManagingBoxOfLinkAndSave(oldManagingBox, this.managingBox, this)
+      proms.push(BoxLinks.changeManagingBoxOfLinkAndSave(oldManagingBox, this.managingBox, this))
     } else {
-      this.managingBox.saveMapData()
+      proms.push(this.managingBox.saveMapData())
     }
-
-    await this.render()
+    proms.push(this.render())
+    await Promise.all(proms)
   }
 
   private registerAtBorderingBoxes(): void {
