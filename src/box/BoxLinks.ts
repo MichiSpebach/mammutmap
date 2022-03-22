@@ -78,9 +78,12 @@ export class BoxLinks {
         return
       }
 
-      this.referenceBox.getMapLinkData().forEach((linkData: BoxMapLinkData) => {
+      for (const linkData of this.referenceBox.getMapLinkData()) {
+        if (this.links.find(link => link.getId() === linkData.id)) {
+          continue
+        }
         this.links.push(new Link(linkData, this.referenceBox))
-      })
+      }
 
       await Promise.all(this.links.map(async (link: Link) => {
         await this.addPlaceholderFor(link)

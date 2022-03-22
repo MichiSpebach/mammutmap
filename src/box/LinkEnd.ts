@@ -20,7 +20,7 @@ export class LinkEnd implements Draggable<Box> {
   private shape: 'square'|'arrow'
   private rendered: boolean = false
   private borderingBox: Box|null = null
-  private static watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher|null = null
+  private static watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher|null = null // TODO: should be handled by DragManager
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box
