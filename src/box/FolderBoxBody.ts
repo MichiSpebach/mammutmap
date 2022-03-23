@@ -43,46 +43,61 @@ export class FolderBoxBody extends BoxBody {
   }
 
   private async loadMapDatasAndCreateBoxes(): Promise<void> {
-    const boxesWithMapData: {dirEntry: Dirent, mapData: BoxMapData}[] = []
-    const boxesWithoutMapData: {dirEntry: Dirent}[] = []
-
+    const boxDataPromises: {sourcePath: Dirent, mapData: Promise<BoxMapData|null>}[] = []
     const sourcePaths: Dirent[] = await fileSystem.readdir(this.referenceFolderBox.getSrcPath())
-    await Promise.all(sourcePaths.map(async (dirEntry: Dirent) => {
-      const name: string = dirEntry.name
-      const mapPath: string = this.referenceFolderBox.getMapPath()+'/'+name+'.json'
 
-      const mapData: BoxMapData|null = await fileSystem.loadFromJsonFile(mapPath, BoxMapData.buildFromJson)
-
-      if (mapData !== null) {
-        boxesWithMapData.push({dirEntry, mapData}) // TODO: can this lead to race conditions because of async?
-      } else {
-        boxesWithoutMapData.push({dirEntry})
+    for (const sourcePath of sourcePaths) {
+      if (this.boxes.find(box => box.getName() === sourcePath.name)) {
+        continue
       }
-    }))
+      const mapPath: string = this.referenceFolderBox.getMapPath()+'/'+sourcePath.name+'.json'
+      boxDataPromises.push({sourcePath, mapData: fileSystem.loadFromJsonFile(mapPath, BoxMapData.buildFromJson)})
+    }
 
-    await this.addBoxesWithMapData(boxesWithMapData);
-    await this.addBoxesWithoutMapData(boxesWithoutMapData);
+    const boxesWithMapData: {sourcePath: Dirent, mapData: BoxMapData}[] = []
+    const boxesWithoutMapData: {sourcePath: Dirent}[] = []
+
+    for (const boxDataPromise of boxDataPromises) {
+      const sourcePath: Dirent = boxDataPromise.sourcePath
+      const mapData: BoxMapData|null = await boxDataPromise.mapData
+      if (mapData !== null) {
+        boxesWithMapData.push({sourcePath, mapData})
+      } else {
+        boxesWithoutMapData.push({sourcePath})
+      }
+    }
+
+    this.boxes.push(...await Promise.all(this.createBoxesWithMapData(boxesWithMapData)))
+    this.boxes.push(...await Promise.all(this.createBoxesWithoutMapData(boxesWithoutMapData)))
   }
 
-  private async addBoxesWithMapData(boxes: {dirEntry: Dirent, mapData: BoxMapData}[]): Promise<void> {
-    await Promise.all(boxes.map(async (data: {dirEntry: Dirent, mapData: BoxMapData}) => {
-      this.boxes.push(await this.createBoxAndRenderPlaceholder(data.dirEntry, data.mapData, true))
-    }))
+  private createBoxesWithMapData(boxDatas: {sourcePath: Dirent, mapData: BoxMapData}[]): Promise<Box>[] {
+    const boxPromises: Promise<Box>[] = []
+    
+    for (const boxData of boxDatas) {
+      boxPromises.push(this.createBoxAndRenderPlaceholder(boxData.sourcePath, boxData.mapData, true))
+    }
+
+    return boxPromises
   }
 
-  private async addBoxesWithoutMapData(boxes: {dirEntry: Dirent}[] = []): Promise<void> {
-    const gridSize: number = Math.ceil(Math.sqrt(boxes.length))
+  private createBoxesWithoutMapData(boxDatas: {sourcePath: Dirent}[] = []): Promise<Box>[] {
+    const boxPromises: Promise<Box>[] = []
+
+    const gridSize: number = Math.ceil(Math.sqrt(boxDatas.length))
     const cellSize = 100/gridSize
     const boxSize: number = 100/(gridSize*1.75)
     const spaceBetweenBoxes: number = cellSize-boxSize
 
-    let arrayIndex: number = boxes.length-1
+    let arrayIndex: number = boxDatas.length-1
     for (let rowIndex: number = gridSize-1; rowIndex>=0; rowIndex--) {
       for (let columnIndex: number = gridSize-1; columnIndex>=0 && arrayIndex>=0; columnIndex--, arrayIndex--) {
         const mapData: BoxMapData = BoxMapData.buildNew(spaceBetweenBoxes/2 + columnIndex*cellSize, spaceBetweenBoxes/2 + rowIndex*cellSize, boxSize, boxSize)
-        this.boxes.push(await this.createBoxAndRenderPlaceholder(boxes[arrayIndex].dirEntry, mapData, false))
+        boxPromises.push(this.createBoxAndRenderPlaceholder(boxDatas[arrayIndex].sourcePath, mapData, false))
       }
     }
+
+    return boxPromises
   }
 
   private async createBoxAndRenderPlaceholder(dirEntry: Dirent, mapData: BoxMapData, mapDataFileExists: boolean): Promise<Box> {
@@ -148,6 +163,7 @@ export class FolderBoxBody extends BoxBody {
   }
 
   private async addNewBoxAndSave(box: Box, saveOnFileSystem: (path: string) => Promise<void>) {
+    this.boxes.push(box)
     await this.renderBoxPlaceholderFor(box)
     await box.render()
     await saveOnFileSystem(box.getSrcPath())
