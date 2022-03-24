@@ -116,8 +116,8 @@ export class ScaleManager {
   }
 
   private static async dragstart(scalable: BoxBorder, clientX: number, clientY: number): Promise<void> {
-    let parentClientRect: Promise<Rect> = scalable.referenceBox.getParent().getClientRect()
-    let clientRect: Promise<Rect> = scalable.referenceBox.getClientRect()
+    let parentClientRect: Promise<Rect> = scalable.getBoxRenderedIntoOrFail().getParent().getClientRect()
+    let clientRect: Promise<Rect> = scalable.getBoxRenderedIntoOrFail().getClientRect()
     scalable.scaleStart()
 
     this.state = {
@@ -143,7 +143,7 @@ export class ScaleManager {
 
     const startClientRect: Rect = await this.state.startClientRect
     const startParentClientRect: Rect = await this.state.startParentClientRect
-    const referenceBox: Box = this.state.scaling.referenceBox
+    const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const newWidthInPixel: number = startClientRect.width + clientX - this.state.startClientX
     let newWidthInPercent: number = newWidthInPixel / startParentClientRect.width * 100
@@ -164,7 +164,7 @@ export class ScaleManager {
 
     const startClientRect: Rect = await this.state.startClientRect
     const startParentClientRect: Rect = await this.state.startParentClientRect
-    const referenceBox: Box = this.state.scaling.referenceBox
+    const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const newHeightInPixel: number = startClientRect.height + clientY - this.state.startClientY
     let newHeightInPercent: number = newHeightInPixel / startParentClientRect.height * 100
@@ -185,7 +185,7 @@ export class ScaleManager {
 
     const startClientRect: Rect = await this.state.startClientRect
     const startParentClientRect: Rect = await this.state.startParentClientRect
-    const referenceBox: Box = this.state.scaling.referenceBox
+    const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const dragDistanceInPixel: number = clientY - this.state.startClientY
     const newYInPixel: number = startClientRect.y - startParentClientRect.y + dragDistanceInPixel
@@ -210,7 +210,7 @@ export class ScaleManager {
 
     const startClientRect: Rect = await this.state.startClientRect
     const startParentClientRect: Rect = await this.state.startParentClientRect
-    const referenceBox: Box = this.state.scaling.referenceBox
+    const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const dragDistanceInPixel: number = clientX - this.state.startClientX
     const newXInPixel: number = startClientRect.x - startParentClientRect.x + dragDistanceInPixel
