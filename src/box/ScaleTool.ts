@@ -5,7 +5,7 @@ import { ScaleManager } from '../ScaleManager'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { util } from '../util'
 
-export class BoxBorder { // TODO: rename to ScaleTool or ScaleToolWidget
+export class ScaleTool {
   private readonly id: string = 'scaleTool'
   private readonly sideIds: string[]
   private readonly sideLineIds: string[]
@@ -64,10 +64,6 @@ export class BoxBorder { // TODO: rename to ScaleTool or ScaleToolWidget
       this.boxRenderedInto = box
       await renderManager.appendChildTo(this.idRenderedInto, this.id, RenderPriority.RESPONSIVE)
     }
-
-    // TODO: add boxBorderColor through css border to box:
-    //this.sideLineIds.forEach((id: string) => renderManager.removeClassFrom(id, style.getBoxBorderLineClass(!this.referenceBox.isMapDataFileExisting())))
-    //this.sideLineIds.forEach((id: string) => renderManager.addClassTo(id, style.getBoxBorderLineClass(this.referenceBox.isMapDataFileExisting())))
   }
 
   public async unrenderFrom(box: Box): Promise<void> {
@@ -108,15 +104,6 @@ export class BoxBorder { // TODO: rename to ScaleTool or ScaleToolWidget
     await Promise.all(proms)
   }
 
-  // TODO: can be completely removed?
-  /*public async setHighlight(highlight: boolean): Promise<void> {
-    if (highlight) {
-      await Promise.all(this.sideLineIds.map(id => renderManager.addClassTo(id, style.getHighlightClass())))
-    } else {
-      await Promise.all(this.sideLineIds.map(id => renderManager.removeClassFrom(id, style.getHighlightClass())))
-    }
-  }*/
-
 }
 
-export const scaleTool = new BoxBorder()
+export const scaleTool = new ScaleTool()

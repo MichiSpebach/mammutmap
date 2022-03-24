@@ -80,10 +80,27 @@ body {
   background-color: #102040a0;
 }
 
+.boxBorder {
+  box-sizing: border-box;
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 6px;
+  border-color: slategrey;
+}
+.boxBorderWithMapData {
+  border-color: slategrey;
+}
+.boxBorderWithoutMapData {
+  border-color: red;
+}
+
+.boxHeader {
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
 .fileBoxHeader {
   background-color: steelblue;
 }
-
 .folderBoxHeader {
   background-color: slategrey;
 }
@@ -112,11 +129,4 @@ body {
 .fileBoxBodyText {
   margin: 0px;
   padding-left: 5px;
-}
-
-.boxBorderLine {
-  background-color: slategrey;
-}
-.boxBorderLineNoMapData {
-  background-color: red;
 }

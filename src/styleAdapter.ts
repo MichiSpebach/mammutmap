@@ -4,16 +4,23 @@ interface Style {
   getPopupClass(): string
   getFileBoxBackgroundClass(): string
   getFolderBoxBackgroundClass(): string
+
+  getBoxBorderClass(): string
+  getAdditionalBoxBorderClass(mapDataFileExisting: boolean): string
+
+  getBoxHeaderClass(): string
   getFileBoxHeaderClass(): string
   getFolderBoxHeaderClass(): string
+
   getBoxHeaderInnerClass(): string
   getBoxBodyZoomInToRenderHintClass(): string
   getBoxBodyZoomInToRenderHintTextClass(): string
   getFileBoxBodyTextClass(): string
-  getBoxBorderLineClass(mapDataFileExisting: boolean): string
+
   getHorizontalResizeClass(): string
   getVerticalResizeClass(): string
   getDiagonalResizeClass(): string
+  
   getHighlightTransitionClass(): string
   getHighlightClass(): string
   getLinkColor(): string
@@ -37,10 +44,23 @@ class DarkTheme implements Style {
     return 'folderBoxBackground'
   }
 
+  public getBoxBorderClass(): string {
+    return 'boxBorder'
+  }
+  public getAdditionalBoxBorderClass(mapDataFileExisting: boolean): string {
+    if (mapDataFileExisting) {
+      return 'boxBorderWithMapData'
+    } else {
+      return 'boxBorderWithoutMapData'
+    }
+  }
+
+  public getBoxHeaderClass(): string {
+    return 'boxHeader'
+  }
   public getFileBoxHeaderClass(): string {
     return 'fileBoxHeader'
   }
-
   public getFolderBoxHeaderClass(): string {
     return 'folderBoxHeader'
   }
@@ -59,14 +79,6 @@ class DarkTheme implements Style {
 
   public getFileBoxBodyTextClass(): string {
     return 'fileBoxBodyText'
-  }
-
-  public getBoxBorderLineClass(mapDataFileExisting: boolean): string {
-    if (mapDataFileExisting) {
-      return 'boxBorderLine'
-    } else {
-      return 'boxBorderLineNoMapData'
-    }
   }
 
   public getHorizontalResizeClass(): string {

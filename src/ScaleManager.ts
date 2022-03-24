@@ -1,7 +1,7 @@
 import { util } from './util'
 import { style } from './styleAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
-import { BoxBorder } from './box/BoxBorder'
+import { ScaleTool } from './box/ScaleTool'
 import { Rect } from './Rect'
 import { Box } from './box/Box'
 
@@ -9,7 +9,7 @@ export class ScaleManager {
 
   //private static scalables: Map<string, BoxBorder> = new Map() // TODO: introduce interface Scalable
   private static state: {
-    scaling: BoxBorder,
+    scaling: ScaleTool,
     startParentClientRect: Promise<Rect>,
     startClientRect: Promise<Rect>,
     startClientX: number,
@@ -57,7 +57,7 @@ export class ScaleManager {
     util.setHint(util.hintToDeactivateSnapToGrid, false)
   }
 
-  public static addScalable(scalable: BoxBorder) {
+  public static addScalable(scalable: ScaleTool) {
 
     // TODO: set element draggable="true" or use mousedown instead of drag events
 
@@ -80,7 +80,7 @@ export class ScaleManager {
     //this.scalables.set(scalable.getLeftId(), scalable)
   }
 
-  public static removeScalable(scalable: BoxBorder) {
+  public static removeScalable(scalable: ScaleTool) {
     renderManager.removeClassFrom(scalable.getRightBottomId(), style.getDiagonalResizeClass())
     renderManager.removeClassFrom(scalable.getTopId(), style.getVerticalResizeClass())
     renderManager.removeClassFrom(scalable.getBottomId(), style.getVerticalResizeClass())
@@ -94,7 +94,7 @@ export class ScaleManager {
     this.removeListenersForSide(scalable.getLeftId())
   }
 
-  private static addListenersForSide(scalable: BoxBorder, id: string, drag: (clientX: number, clientY:number, snapToGrid: boolean) => void): void {
+  private static addListenersForSide(scalable: ScaleTool, id: string, drag: (clientX: number, clientY:number, snapToGrid: boolean) => void): void {
     renderManager.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
       this.dragstart(scalable, clientX, clientY)
     })
@@ -115,7 +115,7 @@ export class ScaleManager {
     renderManager.removeEventListenerFrom(id, 'dragend')
   }
 
-  private static async dragstart(scalable: BoxBorder, clientX: number, clientY: number): Promise<void> {
+  private static async dragstart(scalable: ScaleTool, clientX: number, clientY: number): Promise<void> {
     let parentClientRect: Promise<Rect> = scalable.getBoxRenderedIntoOrFail().getParent().getClientRect()
     let clientRect: Promise<Rect> = scalable.getBoxRenderedIntoOrFail().getClientRect()
     scalable.scaleStart()

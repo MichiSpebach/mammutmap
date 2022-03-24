@@ -7,7 +7,7 @@ import { BoxMapData } from './BoxMapData'
 import { Rect } from '../Rect'
 import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
-import { scaleTool } from './BoxBorder'
+import { scaleTool } from './ScaleTool'
 import { BoxLinks } from './BoxLinks'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
@@ -211,7 +211,7 @@ export abstract class Box implements DropTarget, Hoverable {
 
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
       const backgroundHtml = `<div style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
-      const gridPlaceHolderHtml = `<div id="${this.gridPlaceHolderId}" style="${styleAbsoluteAndStretched}"></div>`
+      const gridPlaceHolderHtml = `<div id="${this.gridPlaceHolderId}" style="${styleAbsoluteAndStretched}" class="${style.getBoxBorderClass()} ${style.getAdditionalBoxBorderClass(this.mapDataFileExists)}"></div>`
       const headerHtml = `<div id="${this.header.getId()}" style="overflow:hidden;max-height:100%"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}"></div>`
       const headerAndBodyHtml = `<div style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};">${headerHtml+bodyHtml}</div>`
@@ -220,7 +220,6 @@ export abstract class Box implements DropTarget, Hoverable {
       await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+headerAndBodyHtml+scaleToolPlaceholderHtml+linksHtml)
 
       await this.header.render()
-      //await this.border.render() // TODO: set css border instead
       this.renderAndRegisterBorderingLinks()
     }
 
@@ -301,10 +300,11 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.mapDataFileExists
   }
 
-  private async setMapDataFileExistsAndRenderBorder(exists: boolean): Promise<void> {
+  private async setMapDataFileExistsAndUpdateBorderStyle(exists: boolean): Promise<void> {
     if (this.mapDataFileExists != exists) {
       this.mapDataFileExists = exists
-      //await this.border.render() // TODO: update css borderStyle instead
+      await renderManager.addClassTo(this.gridPlaceHolderId, style.getAdditionalBoxBorderClass(this.mapDataFileExists))
+      await renderManager.removeClassFrom(this.gridPlaceHolderId, style.getAdditionalBoxBorderClass(!this.mapDataFileExists))
     }
   }
 
@@ -329,7 +329,7 @@ export abstract class Box implements DropTarget, Hoverable {
     const mapDataFilePath: string = this.getMapDataFilePath()
     await fileSystem.saveToJsonFile(mapDataFilePath, this.mapData)
     util.logInfo('saved ' + mapDataFilePath)
-    this.setMapDataFileExistsAndRenderBorder(true)
+    this.setMapDataFileExistsAndUpdateBorderStyle(true)
   }
 
   public async onDragEnter(): Promise<void> {

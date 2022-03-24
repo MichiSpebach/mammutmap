@@ -10,7 +10,7 @@ import { style } from '../styleAdapter'
 
 export abstract  class BoxHeader implements Draggable<FolderBox> {
   public readonly referenceBox: Box
-  private addedAsDraggable: boolean = false
+  private rendered: boolean = false
   private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
 
   public constructor(referenceBox: Box) {
@@ -35,18 +35,20 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     html += '</div>'
     await renderManager.setContentTo(this.getId(), html)
 
-    if (!this.addedAsDraggable) {
+    if (!this.rendered) {
+      renderManager.addClassTo(this.getId(), style.getBoxHeaderClass())
       DragManager.addDraggable(this)
-      this.addedAsDraggable = true
+      this.rendered = true
     }
   }
 
   public async unrender(): Promise<void> {
-    if (this.addedAsDraggable) {
-      DragManager.removeDraggable(this)
-      this.addedAsDraggable = false
+    if (!this.rendered) {
+      return
     }
+    DragManager.removeDraggable(this)
     await renderManager.remove(this.getId())
+    this.rendered = false
   }
 
   public async dragStart(clientX: number, clientY: number): Promise<void> {
