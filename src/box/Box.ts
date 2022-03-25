@@ -26,9 +26,7 @@ export abstract class Box implements DropTarget, Hoverable {
   private mapData: BoxMapData
   private mapDataFileExists: boolean
   public readonly transform: Transform
-  private readonly gridPlaceHolderId: string
   private readonly header: BoxHeader
-  private readonly scaleToolPlaceHolderId: string
   public readonly links: BoxLinks
   private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
   private rendered: boolean = false
@@ -41,9 +39,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.mapData = mapData
     this.mapDataFileExists = mapDataFileExists
     this.transform = new Transform(this)
-    this.gridPlaceHolderId = this.getId()+'Grid'
     this.header = this.createHeader()
-    this.scaleToolPlaceHolderId = this.getId()+'ScaleToolPlaceHolder'
     this.links = new BoxLinks(this)
 
     boxManager.addBox(this)
@@ -63,8 +59,16 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.mapData.id
   }
 
+  private getGridPlaceHolderId(): string {
+    return this.getId()+'Grid'
+  }
+
+  private getBorderId(): string {
+    return this.getId()+'Border'
+  }
+
   public getScaleToolPlaceHolderId(): string {
-    return this.scaleToolPlaceHolderId
+    return this.getId()+'ScaleToolPlaceHolder'
   }
 
   public getName(): string {
@@ -211,13 +215,14 @@ export abstract class Box implements DropTarget, Hoverable {
 
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
       const backgroundHtml = `<div style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
-      const gridPlaceHolderHtml = `<div id="${this.gridPlaceHolderId}" style="${styleAbsoluteAndStretched}" class="${style.getBoxBorderClass()} ${style.getAdditionalBoxBorderClass(this.mapDataFileExists)}"></div>`
+      const gridPlaceHolderHtml = `<div id="${this.getGridPlaceHolderId()}" style="${styleAbsoluteAndStretched}"></div>`
       const headerHtml = `<div id="${this.header.getId()}" style="overflow:hidden;max-height:100%"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}"></div>`
       const headerAndBodyHtml = `<div style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};">${headerHtml+bodyHtml}</div>`
-      const scaleToolPlaceholderHtml = `<div id="${this.scaleToolPlaceHolderId}"></div>`
+      const borderHtml = `<div id="${this.getBorderId()}" class="${style.getBoxBorderClass()} ${style.getAdditionalBoxBorderClass(this.mapDataFileExists)}"></div>`
+      const scaleToolPlaceholderHtml = `<div id="${this.getScaleToolPlaceHolderId()}"></div>`
       const linksHtml = `<div id="${this.links.getId()}"></div>`
-      await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+headerAndBodyHtml+scaleToolPlaceholderHtml+linksHtml)
+      await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+scaleToolPlaceholderHtml+linksHtml)
 
       await this.header.render()
       this.renderAndRegisterBorderingLinks()
@@ -303,8 +308,8 @@ export abstract class Box implements DropTarget, Hoverable {
   private async setMapDataFileExistsAndUpdateBorderStyle(exists: boolean): Promise<void> {
     if (this.mapDataFileExists != exists) {
       this.mapDataFileExists = exists
-      await renderManager.addClassTo(this.gridPlaceHolderId, style.getAdditionalBoxBorderClass(this.mapDataFileExists))
-      await renderManager.removeClassFrom(this.gridPlaceHolderId, style.getAdditionalBoxBorderClass(!this.mapDataFileExists))
+      await renderManager.addClassTo(this.getBorderId(), style.getAdditionalBoxBorderClass(this.mapDataFileExists))
+      await renderManager.removeClassFrom(this.getBorderId(), style.getAdditionalBoxBorderClass(!this.mapDataFileExists))
     }
   }
 
@@ -341,11 +346,11 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async attachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    await grid.renderInto(this.gridPlaceHolderId, priority)
+    await grid.renderInto(this.getGridPlaceHolderId(), priority)
   }
 
   public async detachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    await grid.unrenderFrom(this.gridPlaceHolderId, priority)
+    await grid.unrenderFrom(this.getGridPlaceHolderId(), priority)
   }
 
   protected async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
