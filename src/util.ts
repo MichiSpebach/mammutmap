@@ -146,23 +146,29 @@ class Util {
     let jointedPath: string = ''
     for (let path of paths) {
       path = this.replaceBackslashesWithSlashes(path)
-      if (jointedPath !== '') {
-        if (!jointedPath.endsWith('/') && !path.startsWith('/')) {
-          jointedPath += '/'
-        } else if (jointedPath.endsWith('/') && path.startsWith('/')) {
-          path = path.substring(1)
-        }
-        if (path.startsWith('../')) {
-          jointedPath = this.removeLastElementFromPath(jointedPath)
-          path = path.substring(3)
-        }
-        if (path.startsWith('./')) {
-          path = path.substring(2)
-        }
-      }
-      jointedPath += path
+      jointedPath = this.concatPaths(jointedPath, path)
     }
     return jointedPath
+  }
+
+  public concatPaths(left: string, right: string): string {
+    if (left === '') {
+      return right
+    }
+
+    if (!left.endsWith('/') && !right.startsWith('/')) {
+      left += '/'
+    } else if (left.endsWith('/') && right.startsWith('/')) {
+      right = right.substring(1)
+    }
+    if (right.startsWith('../')) {
+      left = this.removeLastElementFromPath(left)
+      right = right.substring(3)
+    }
+    if (right.startsWith('./')) {
+      right = right.substring(2)
+    }
+    return left+right
   }
 
   public removeLastElementFromPath(path: string): string {

@@ -5,6 +5,9 @@ import { util } from '../src/util'
 
 const electronDebugPort: number = 9291
 const timeoutForPuppeteerToConnectToElectronInMs: number = 15000
+const viewportWidth: number = 1600
+const viewportHight: number = 800
+const defaultScreenshotClip = {x:0, y: 0, width: 800, height: 800}
 
 let page: Page|undefined
 let boxIteratorLastFilePath: string|null = null
@@ -26,8 +29,10 @@ export async function getTitle(): Promise<string> {
   return (await getPage()).title()
 }
 
-export async function takeScreenshot(): Promise<Buffer|string> {
-  return await (await getPage()).screenshot({type: 'png'})
+export async function takeScreenshot(
+  clip: {x: number, y: number, width: number, height: number} = defaultScreenshotClip
+): Promise<Buffer|string> {
+  return await (await getPage()).screenshot({type: 'png', clip})
 }
 
 export async function zoom(delta: number): Promise<void> {
@@ -131,9 +136,9 @@ async function removeFocus(): Promise<void> {
 
 async function waitUntilLastLogEndsWith(ending: string, timelimitInMs: number): Promise<string> {
   try {
-    return waitUntilLastLogMatches((log: string) => log.endsWith(ending), timelimitInMs)
-  } catch (_) {
-    throw new Error(`last log does not end with "${ending}" in time of ${timelimitInMs}ms`)
+    return await waitUntilLastLogMatches((log: string) => log.endsWith(ending), timelimitInMs) // await because otherwise catch would not work
+  } catch (e) {
+    throw new Error(`last log does not end with "${ending}" in time of ${timelimitInMs}ms, ${e.message}`)
   }
 }
 
@@ -145,7 +150,7 @@ async function waitUntilLastLogMatches(condition:(log: string) => boolean, timel
       return lastLog
     }
     if (Date.now() > timecap) {
-      throw new Error(`last log does not match condition in time of ${timelimitInMs}ms`)
+      throw new Error(`last log does not match condition in time of ${timelimitInMs}ms, last log is "${lastLog}"`)
     }
     await util.wait(50)
   }
@@ -207,7 +212,11 @@ async function connectToApp(): Promise<Browser> {
   while (!browser) {
     try {
       browser = await puppeteer.connect({
-        browserURL: `http://localhost:${electronDebugPort}`
+        browserURL: `http://localhost:${electronDebugPort}`,
+        defaultViewport: {
+          width: viewportWidth,
+          height: viewportHight
+        }
       })
     } catch (error) {
       if (Date.now() > timecap) {

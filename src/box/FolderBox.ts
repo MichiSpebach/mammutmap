@@ -81,7 +81,10 @@ export class FolderBox extends Box {
   }
 
   private async findBoxInChildsBySourcePathAndRenderIfNecessary(path: string): Promise<BoxWatcher|undefined> {
-    const remainingPath: string = path.substr(this.getName().length+1)
+    let remainingPath: string = path.substring(this.getName().length)
+    if (remainingPath.startsWith('/') || remainingPath.startsWith('\\')) {
+      remainingPath = remainingPath.substring(1)
+    }
 
     for (const box of this.getBoxes()) {
       if (remainingPath.startsWith(box.getName())) {

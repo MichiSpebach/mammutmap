@@ -76,11 +76,11 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public getSrcPath(): string {
-    return this.getParent().getSrcPath()+'/'+this.getName()
+    return util.concatPaths(this.getParent().getSrcPath(), this.getName())
   }
 
   public getMapPath(): string {
-    return this.getParent().getMapPath()+'/'+this.getName()
+    return util.concatPaths(this.getParent().getMapPath(), this.getName())
   }
 
   public getMapDataFilePath(): string {
