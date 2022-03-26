@@ -1932,6 +1932,87 @@
 			"tags": [
 				"hidden"
 			]
+		},
+		{
+			"id": "g71nufvv7cg",
+			"from": {
+				"path": [
+					{
+						"boxId": "5194u9gf71g",
+						"boxName": "commandLine.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "d5jk79di13o",
+						"boxName": "htmlCursor.ts",
+						"x": 50.00000000000006,
+						"y": 49.99999999999993
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "jffo9pnnj08",
+			"from": {
+				"path": [
+					{
+						"boxId": "d5jk79di13o",
+						"boxName": "htmlCursor.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cr2q48p1plg",
+						"boxName": "indexHtmlIds.ts",
+						"x": 50.000000000000064,
+						"y": 49.999999999999964
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "q5nan5n4nb",
+			"from": {
+				"path": [
+					{
+						"boxId": "d5jk79di13o",
+						"boxName": "htmlCursor.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50.000000000000014
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
 		}
 	]
 }

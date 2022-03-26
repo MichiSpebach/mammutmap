@@ -1,8 +1,10 @@
 import { dom } from './domAdapter'
+import { renderManager, RenderPriority } from './RenderManager'
 import * as map from './Map'
 import { util } from './util'
 import * as commandLinePluginFacade from './commandLinePluginFacade'
 import { ProjectSettings } from './ProjectSettings'
+import * as htmlCursor from './htmlCursor'
 
 export function init(): void {
   dom.addKeypressListenerTo('commandLine', 'Enter', processCommand)
@@ -35,8 +37,19 @@ async function processCommand(command: string): Promise<void> {
         util.logWarning('setLogDebugActivated expects true or false as parameter')
       }
       return
+    case 'setHtmlCursorActivated':
+      if (parameter === 'true') {
+        await htmlCursor.activate()
+        util.logInfo('activated htmlCursor')
+      } else if (parameter === 'false') {
+        await htmlCursor.deactivate()
+        util.logInfo('deactivated htmlCursor')
+      } else {
+        util.logWarning('setHtmlCursorActivated expects true or false as parameter')
+      }
+      return
     case 'clear':
-      await dom.setContentTo('log', '')
+      await renderManager.setContentTo('log', '', RenderPriority.RESPONSIVE)
       return
     case 'pluginFacade':
       await commandLinePluginFacade.processCommand(parameter)
