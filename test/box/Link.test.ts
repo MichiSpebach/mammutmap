@@ -11,6 +11,9 @@ import { RenderManager, init as initRenderManager } from '../../src/RenderManage
 import { Transform } from '../../src/box/Transform'
 import { LinkEndData } from '../../src/box/LinkEndData'
 import { BoxMapData } from '../../src/box/BoxMapData'
+import { RootFolderBox } from '../../src/box/RootFolderBox'
+import { ProjectSettings } from '../../src/ProjectSettings'
+import { fileSystem } from '../../src/fileSystemAdapter'
 
 test('render', async () => {
   const scenario = setupSimpleScenario()
@@ -66,9 +69,12 @@ function setupSimpleScenario(): {
   //const managingBox: MockProxy<FolderBox> = mock<FolderBox>() // TODO: fix jest-mock-extended
   //const fromBox: MockProxy<Box> = mock<Box>()
   //const toBox: MockProxy<Box> = (() => mock<Box>())()
-  const managingBox: FolderBox = new FolderBox('ManagingBox', null, new BoxMapData('managingBox', 0, 0, 100, 100, []), false)
+  const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, 'src', 'map')
+  const managingBox: FolderBox = new RootFolderBox(projectSettings, new BoxMapData('managingBox', 0, 0, 100, 100, []), false)
   const fromBox: Box = new FolderBox('FromBox', managingBox, new BoxMapData('fromBox', 5, 5, 10, 10, []), false)
   const toBox: Box = new FolderBox('ToBox', managingBox, new BoxMapData('toBox', 85, 5, 10, 10, []), false)
+
+  fileSystem.saveToJsonFile = (_filePath, _object) => Promise.resolve()
 
   Object.defineProperty(managingBox, 'transform', {value: new Transform(managingBox)})
   //managingBox.getId.mockReturnValue('managingBox')

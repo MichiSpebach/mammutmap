@@ -19,7 +19,7 @@ export class RootFolderBox extends FolderBox {
     return new RootFolderBox(projectSettings, mapData, mapDataFileExists)
   }
 
-  private constructor(projectSettings: ProjectSettings, mapData: BoxMapData, mapDataFileExists: boolean) {
+  public constructor(projectSettings: ProjectSettings, mapData: BoxMapData, mapDataFileExists: boolean) {
     super(projectSettings.getAbsoluteSrcRootPath(), null, mapData, mapDataFileExists)
     this.projectSettings = projectSettings
   }
