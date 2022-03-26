@@ -18,6 +18,7 @@ export async function startApp(): Promise<void> {
   })
   await connectToAppAndFindCorrectPage()
   await command('setLogDebugActivated true')
+  await command('setHtmlCursorActivated true')
 }
 
 export async function shutdownApp(): Promise<void> {
