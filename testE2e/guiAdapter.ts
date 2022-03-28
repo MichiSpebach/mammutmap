@@ -42,7 +42,7 @@ export async function takeScreenshot(
 
 export async function zoom(delta: number): Promise<void> {
   await zoomWithoutWaitingUntilFinished(delta)
-  await waitUntilLastLogMatches((log:string) => log.includes(`zooming ${delta} finished`), 2000)
+  await waitUntilLastLogIncludes(`zooming ${delta} finished`, 2000)
 }
 
 export async function zoomWithoutWaitingInBetween(deltas: number[]): Promise<void> {
@@ -97,9 +97,11 @@ export async function getNextSourcePathOfBoxIterator(): Promise<string|undefined
   const noFurtherBoxesMarker: string = 'Info: no further boxes to iterate'
   const getFilePathIn = (log: string) => log.substring(nextBoxMarker.length)
 
-  const lastLog: string = await waitUntilLastLogMatches((log: string) => {
-    return (log.startsWith(nextBoxMarker) && getFilePathIn(log) !== boxIteratorLastFilePath) || log === noFurtherBoxesMarker
-  }, 500)
+  const lastLog: string = await waitUntilLastLogMatches(
+    (log: string) => (log.startsWith(nextBoxMarker) && getFilePathIn(log) !== boxIteratorLastFilePath) || log === noFurtherBoxesMarker,
+    500,
+    (lastLog: string) => `failed to get source path of box in last log, last log is "${lastLog}"`
+  )
 
   if (lastLog.startsWith(nextBoxMarker)) {
     boxIteratorLastFilePath = getFilePathIn(lastLog)
@@ -139,14 +141,26 @@ async function removeFocus(): Promise<void> {
 }
 
 async function waitUntilLastLogEndsWith(ending: string, timelimitInMs: number): Promise<string> {
-  try {
-    return await waitUntilLastLogMatches((log: string) => log.endsWith(ending), timelimitInMs) // await because otherwise catch would not work
-  } catch (e) {
-    throw new Error(`last log does not end with "${ending}" in time of ${timelimitInMs}ms, ${e.message}`)
-  }
+  return waitUntilLastLogMatches(
+    (log: string) => log.endsWith(ending),
+    timelimitInMs,
+    (lastLog: string) => `last log does not end with "${ending}" in time of ${timelimitInMs}ms, last log is "${lastLog}"`
+  )
 }
 
-async function waitUntilLastLogMatches(condition:(log: string) => boolean, timelimitInMs: number): Promise<string> {
+async function waitUntilLastLogIncludes(substring: string, timelimitInMs: number): Promise<string> {
+  return waitUntilLastLogMatches(
+    (log: string) => log.includes(substring),
+    timelimitInMs,
+    (lastLog: string) => `last log does not include "${substring}" in time of ${timelimitInMs}ms, last log is "${lastLog}"`
+  )
+}
+
+async function waitUntilLastLogMatches(
+  condition: (log: string) => boolean,
+  timelimitInMs: number,
+  generateErrorMessage: (lastLog: string) => string
+): Promise<string> {
   const timecap: number = Date.now() + timelimitInMs
   while(true) {
     const lastLog: string = await getLastLog()
@@ -154,7 +168,7 @@ async function waitUntilLastLogMatches(condition:(log: string) => boolean, timel
       return lastLog
     }
     if (Date.now() > timecap) {
-      throw new Error(`last log does not match condition in time of ${timelimitInMs}ms, last log is "${lastLog}"`)
+      throw new Error(generateErrorMessage(lastLog))
     }
     await util.wait(50)
   }
