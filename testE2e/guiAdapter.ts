@@ -30,6 +30,10 @@ export async function getTitle(): Promise<string> {
   return (await getPage()).title()
 }
 
+export async function moveMouseTo(x: number, y: number): Promise<void> {
+  await (await getPage()).mouse.move(x, y)
+}
+
 export async function takeScreenshot(
   clip: {x: number, y: number, width: number, height: number} = defaultScreenshotClip
 ): Promise<Buffer|string> {
@@ -38,7 +42,7 @@ export async function takeScreenshot(
 
 export async function zoom(delta: number): Promise<void> {
   await zoomWithoutWaitingUntilFinished(delta)
-  await waitUntilLastLogEndsWith(`zooming ${delta} at x=300 and y=300 finished`, 2000)
+  await waitUntilLastLogMatches((log:string) => log.includes(`zooming ${delta} finished`), 2000)
 }
 
 export async function zoomWithoutWaitingInBetween(deltas: number[]): Promise<void> {
@@ -47,7 +51,7 @@ export async function zoomWithoutWaitingInBetween(deltas: number[]): Promise<voi
   }
   await waitUntilLogMatches((log: string): boolean => {
     for (const delta of deltas) {
-      if (!log.includes(`zooming ${delta} at x=300 and y=300 finished`)) {
+      if (!log.includes(`zooming ${delta} finished`)) {
         return false
       }
     }
@@ -55,8 +59,7 @@ export async function zoomWithoutWaitingInBetween(deltas: number[]): Promise<voi
   }, 2000)
 }
 
-export async function zoomWithoutWaitingUntilFinished(delta: number): Promise<void> {
-  await (await getPage()).mouse.move(300, 300)
+async function zoomWithoutWaitingUntilFinished(delta: number): Promise<void> {
   await (await getPage()).focus('#map') // otherwise sometimes wheel does not work immediately
   await (await getPage()).mouse.wheel({deltaY: -delta})
 }
@@ -67,7 +70,7 @@ export async function openFolder(path: string): Promise<void> {
 }
 
 export async function resetWindow(): Promise<void> {
-  await (await getPage()).mouse.move(0, 0)
+  await moveMouseTo(0, 0)
   await closeFolder()
   await clearTerminal()
 }

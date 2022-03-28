@@ -109,7 +109,7 @@ export class Map {
 
     await this.updateStyle(RenderPriority.RESPONSIVE)
     await this.rootFolder.render()
-    util.logDebug(`zooming ${delta} at x=${clientX} and y=${clientY} finished`)
+    util.logDebug(`zooming ${delta} finished at x=${clientX} and y=${clientY}`)
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {

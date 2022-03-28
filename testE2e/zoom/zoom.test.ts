@@ -11,6 +11,7 @@ afterAll(async () => {
 test('zoom into deep folder', async () => {
   await gui.resetWindow()
   await gui.openFolder('testE2e/zoom/scenario')
+  await gui.moveMouseTo(300, 300)
   await gui.zoom(5000)
   const image = await gui.takeScreenshot()
   expect(image).toMatchImageSnapshot(snapshotOptions)
@@ -19,6 +20,7 @@ test('zoom into deep folder', async () => {
 test('zoom in and out', async () => {
   await gui.resetWindow()
   await gui.openFolder('testE2e/zoom/scenario')
+  await gui.moveMouseTo(300, 300)
   await gui.zoom(1500)
   await gui.zoom(2500)
   const image1 = await gui.takeScreenshot()
@@ -40,6 +42,7 @@ test('zoom in and out', async () => {
 test('zoom in and out without waiting', async () => {
   await gui.resetWindow()
   await gui.openFolder('testE2e/zoom/scenario')
+  await gui.moveMouseTo(300, 300)
   await gui.zoomWithoutWaitingInBetween([1500, 2500, -250, 500, -485])
   await gui.clearTerminal()
   const image = await gui.takeScreenshot()
