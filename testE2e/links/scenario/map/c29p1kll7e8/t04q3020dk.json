@@ -1,0 +1,34 @@
+{
+	"id": "t04q3020dk",
+	"x": 16,
+	"y": 28.000000000000004,
+	"width": 68,
+	"height": 52,
+	"links": [
+		{
+			"id": "74l6a151etg",
+			"from": {
+				"path": [
+					{
+						"boxId": "8utckqomiqg",
+						"boxName": "8utckqomiqg",
+						"x": 49.99999999999999,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "vj04im9k5eg",
+						"boxName": "vj04im9k5eg",
+						"x": 50,
+						"y": 49.999999999999986
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	]
+}

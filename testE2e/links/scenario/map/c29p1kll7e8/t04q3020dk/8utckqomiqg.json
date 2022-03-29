@@ -1,0 +1,34 @@
+{
+	"id": "8utckqomiqg",
+	"x": 12,
+	"y": 56.00000000000001,
+	"width": 32.00000000000001,
+	"height": 35.99999999999999,
+	"links": [
+		{
+			"id": "aas5uch3rh8",
+			"from": {
+				"path": [
+					{
+						"boxId": "8utckqomiqg",
+						"boxName": "8utckqomiqg",
+						"x": 15.99999999999999,
+						"y": 24.000000000000004
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8utckqomiqg",
+						"boxName": "8utckqomiqg",
+						"x": 84.00000000000001,
+						"y": 24.000000000000004
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	]
+}

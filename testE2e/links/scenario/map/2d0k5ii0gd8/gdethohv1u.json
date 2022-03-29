@@ -1,0 +1,34 @@
+{
+	"id": "gdethohv1u",
+	"x": 16,
+	"y": 28.000000000000004,
+	"width": 67.99999999999999,
+	"height": 52,
+	"links": [
+		{
+			"id": "8hqe602153",
+			"from": {
+				"path": [
+					{
+						"boxId": "hvejfmg08e8",
+						"boxName": "hvejfmg08e8",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "55a0bmbsiro",
+						"boxName": "55a0bmbsiro",
+						"x": 49.99999999999996,
+						"y": 49.999999999999986
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	]
+}

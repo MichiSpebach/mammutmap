@@ -20,7 +20,7 @@ interface Style {
   getHorizontalResizeClass(): string
   getVerticalResizeClass(): string
   getDiagonalResizeClass(): string
-  
+
   getHighlightTransitionClass(): string
   getHighlightClass(): string
   getLinkColor(): string
@@ -103,6 +103,16 @@ class DarkTheme implements Style {
     return '#2060c0'
   }
 
+}
+
+class CompatibilityTheme extends DarkTheme {
+  public getHighlightTransitionClass(): string {
+    return ''
+  }
+}
+
+export function setCompatibilityTheme(): void {
+  style = new CompatibilityTheme()
 }
 
 export let style: Style = new DarkTheme()

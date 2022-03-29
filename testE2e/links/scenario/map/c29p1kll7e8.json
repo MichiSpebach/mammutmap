@@ -1,0 +1,34 @@
+{
+	"id": "c29p1kll7e8",
+	"x": 56.00000000000001,
+	"y": 23.999999999999996,
+	"width": 39.99999999999999,
+	"height": 52,
+	"links": [
+		{
+			"id": "2vgbtmob97o",
+			"from": {
+				"path": [
+					{
+						"boxId": "c29p1kll7e8",
+						"boxName": "c29p1kll7e8",
+						"x": 8.000000000000002,
+						"y": 32
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t04q3020dk",
+						"boxName": "t04q3020dk",
+						"x": 50,
+						"y": 8
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	]
+}

@@ -5,6 +5,7 @@ import { util } from './util'
 import * as commandLinePluginFacade from './commandLinePluginFacade'
 import { ProjectSettings } from './ProjectSettings'
 import * as htmlCursor from './htmlCursor'
+import { setCompatibilityTheme } from './styleAdapter'
 
 export function init(): void {
   dom.addKeypressListenerTo('commandLine', 'Enter', processCommand)
@@ -25,6 +26,9 @@ async function processCommand(command: string): Promise<void> {
       util.logInfo('closing current opened folder')
       await map.unloadAndUnsetMap()
       util.logInfo('closing finished')
+      return
+    case 'setCompatibilityTheme':
+      setCompatibilityTheme()
       return
     case 'setLogDebugActivated':
       if (parameter === 'true') {

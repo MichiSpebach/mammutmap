@@ -17,6 +17,7 @@ export async function startApp(): Promise<void> {
     shell: true
   })
   await connectToAppAndFindCorrectPage()
+  await command('setCompatibilityTheme')
   await command('setLogDebugActivated true')
   await command('setHtmlCursorActivated true')
 }
