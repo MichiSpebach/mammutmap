@@ -71,8 +71,8 @@ export class RenderManager {
   public addClassTo(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      squashableWith: 'addClass'+className+'to'+id, // TODO: a sequel like removeClass, addClass, removeclass would not execute last removeClass and leave behind class that should have been removed
-      //neutralizableWith: 'removeClass'+className+'from'+id, // deactivated because implementation does not work reliable and performance boost is only small
+      squashableWith: 'addClass'+className+'to'+id,
+      updatableWith: 'removeClass'+className+'from'+id,
       batchParameters: {elementId: id, method: 'addClassTo', value: className},
       command: () => dom.addClassTo(id, className)
     }))
@@ -81,8 +81,8 @@ export class RenderManager {
   public removeClassFrom(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      squashableWith: 'removeClass'+className+'from'+id, // TODO: a sequel like removeClass, addClass, removeclass would not execute last removeClass and leave behind class that should have been removed
-      //neutralizableWith: 'addClass'+className+'to'+id, // deactivated because implementation does not work reliable and performance boost is only small
+      squashableWith: 'removeClass'+className+'from'+id,
+      updatableWith: 'addClass'+className+'to'+id,
       batchParameters: {elementId: id, method: 'removeClassFrom', value: className},
       command: () => dom.removeClassFrom(id, className)
     }))
@@ -131,14 +131,14 @@ export class RenderManager {
   }
 
   public async runOrSchedule<T>(command: Command): Promise<T> { // only public for unit tests
+    const updatedCommand: Command|undefined = this.tryToUpdateQueuedCommands(command)
+    if (updatedCommand) {
+      return updatedCommand.promise.get()
+    }
+
     const squashedCommand: Command|undefined = this.tryToSquashIntoQueuedCommands(command)
     if (squashedCommand) {
       return squashedCommand.promise.get()
-    }
-
-    const neutralizedCommand: Command|undefined = this.tryToNeutralizeWithQueuedCommands(command)
-    if (neutralizedCommand) {
-      return neutralizedCommand.promise.get()
     }
 
     this.addCommand(command)
@@ -167,6 +167,7 @@ export class RenderManager {
     this.commands.splice(i, 0, command)
   }
 
+  // TODO: remove and simply use tryToUpdateQueuedCommands(..)
   private tryToSquashIntoQueuedCommands(command: Command): Command|undefined {
     if (!command.squashableWith) {
       return undefined
@@ -188,9 +189,8 @@ export class RenderManager {
     return undefined
   }
 
-  // TODO: a sequel like addClass, removeClass, removeClass, addClass could be completely neutralized, but last addClass should be executed
-  private tryToNeutralizeWithQueuedCommands(command: Command): Command|undefined {
-    if (!command.neutralizableWith) {
+  private tryToUpdateQueuedCommands(command: Command): Command|undefined {
+    if (!command.updatableWith) {
       return undefined
     }
 
@@ -199,11 +199,11 @@ export class RenderManager {
       if (compareCommand.promise.isStarted()) {
         continue
       }
-      if (compareCommand.neutralizableWith == command.squashableWith) {
-        compareCommand.neutralizableWith = undefined
-        compareCommand.squashableWith = undefined
-        compareCommand.batchParameters = undefined
-        compareCommand.promise.setCommand(() => Promise.resolve())
+      if (compareCommand.updatableWith == command.squashableWith) {
+        compareCommand.updatableWith = command.updatableWith
+        compareCommand.squashableWith = command.squashableWith
+        compareCommand.batchParameters = command.batchParameters
+        compareCommand.promise.setCommand(command.promise.getCommand())
         this.increasePriorityOfCommandIfNecessary(compareCommand, command.priority)
         return compareCommand
       }
@@ -246,7 +246,7 @@ export class RenderManager {
       if (upcommingCommand.batchParameters) {
         batch.push(upcommingCommand.batchParameters)
         upcommingCommand.squashableWith = undefined
-        upcommingCommand.neutralizableWith = undefined
+        upcommingCommand.updatableWith = undefined
         upcommingCommand.batchParameters = undefined
         upcommingCommand.promise.setCommand(() => Promise.resolve())
       }
@@ -271,20 +271,20 @@ export enum RenderPriority {
 export class Command { // only export for unit tests
   public priority: RenderPriority
   public squashableWith: string|undefined
-  public neutralizableWith: string|undefined
+  public updatableWith: string|undefined
   public batchParameters: {elementId: string, method: BatchMethod, value: string}|undefined
   public readonly promise: SchedulablePromise<Promise<any>>
 
   public constructor(options: {
     priority: RenderPriority,
     squashableWith?: string,
-    neutralizableWith?: string,
+    updatableWith?: string,
     batchParameters?: {elementId: string, method: BatchMethod, value: string},
     command: () => Promise<any>
   }) {
     this.priority = options.priority
     this.squashableWith = options.squashableWith
-    this.neutralizableWith = options.neutralizableWith
+    this.updatableWith = options.updatableWith
     this.batchParameters = options.batchParameters
     this.promise = new SchedulablePromise(options.command)
   }
