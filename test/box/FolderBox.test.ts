@@ -3,6 +3,7 @@ import { BoxMapData } from '../../src/box/BoxMapData'
 import { FolderBox } from '../../src/box/FolderBox'
 import { FileBox } from '../../src/box/FileBox'
 import { BoxWatcher } from '../../src/box/BoxWatcher'
+import { util } from '../../src/util'
 
 test('getBoxBySourcePathAndRenderIfNecessary path with one element', async () => {
   const scenario = setupScenarioForGetBoxBySourcePathAndRenderIfNecessary()
@@ -24,14 +25,24 @@ test('getBoxBySourcePathAndRenderIfNecessary path with two element', async () =>
 
 test('getBoxBySourcePathAndRenderIfNecessary invalid path with elements after file', async () => {
   const scenario = setupScenarioForGetBoxBySourcePathAndRenderIfNecessary()
+  const logWarning = jest.fn()
+  util.logWarning = logWarning
+
   const result: BoxWatcher|undefined = await scenario.box.getBoxBySourcePathAndRenderIfNecessary('src/box/innerBox/fileBox/invalid')
+
   expect(result).toBe(undefined)
+  expect(logWarning).toHaveBeenCalledWith('src/box/innerBox/fileBox is not last element in path innerBox/fileBox/invalid but is not a folder')
 })
 
 test('getBoxBySourcePathAndRenderIfNecessary path with not existing element', async () => {
   const scenario = setupScenarioForGetBoxBySourcePathAndRenderIfNecessary()
+  const logWarning = jest.fn()
+  util.logWarning = logWarning
+
   const result: BoxWatcher|undefined = await scenario.box.getBoxBySourcePathAndRenderIfNecessary('src/box/notExisting')
+
   expect(result).toBe(undefined)
+  expect(logWarning).toHaveBeenCalledWith('src/box/notExisting not found')
 })
 
 function setupScenarioForGetBoxBySourcePathAndRenderIfNecessary(): {
