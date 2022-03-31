@@ -160,10 +160,10 @@ test('runOrSchedule squashable, commands not squashable', () => {
   expect(renderManager.getCommands()[2]).toBe(command3)
 })
 
-test('runOrSchedule neutralizable, does not neutralize with already started command', () => {
+test('runOrSchedule updatable, does not update already started command', () => {
   const renderManager = new RenderManager()
-  const commandDirectlyStarted = buildCommand({squashableWith: 'commandPositive', neutralizableWith: 'commandNegative'})
-  const command2 = buildCommand({squashableWith: 'commandNegative', neutralizableWith: 'commandPositive'})
+  const commandDirectlyStarted = buildCommand({squashableWith: 'commandPositive', updatableWith: 'commandNegative'})
+  const command2 = buildCommand({squashableWith: 'commandNegative', updatableWith: 'commandPositive'})
 
   renderManager.runOrSchedule(commandDirectlyStarted)
   renderManager.runOrSchedule(command2)
@@ -173,18 +173,18 @@ test('runOrSchedule neutralizable, does not neutralize with already started comm
   expect(renderManager.getCommands()[1]).toBe(command2)
 })
 
-test('runOrSchedule neutralizable, neutralized commands simply resolve and are not executed', async () => {
+test('runOrSchedule updatable, existing command is updated instead of new added', async () => {
   const renderManager = new RenderManager()
   let counter: number = 0
   const command1 = buildCommand({command: () => {
     counter++
     return Promise.resolve(counter)
   }})
-  const command2 = buildCommand({squashableWith: 'commandPositive', neutralizableWith: 'commandNegative', command: () => {
-    counter++
+  const command2 = buildCommand({squashableWith: 'commandNegative', updatableWith: 'commandPositive', command: () => {
+    counter--
     return Promise.resolve(counter)
   }})
-  const command3 = buildCommand({squashableWith: 'commandNegative', neutralizableWith: 'commandPositive', command: () => {
+  const command3 = buildCommand({squashableWith: 'commandPositive', updatableWith: 'commandNegative', command: () => {
     counter++
     return Promise.resolve(counter)
   }})
@@ -198,13 +198,13 @@ test('runOrSchedule neutralizable, neutralized commands simply resolve and are n
   expect(renderManager.getCommands()[1]).toBe(command2)
 
   expect(await command1Result).toEqual(1)
-  expect(await command2Result).toBe(undefined) // promise should resolve to void result
-  expect(await command3Result).toBe(undefined) // promise should resolve to void result
+  expect(await command2Result).toEqual(2)
+  expect(await command3Result).toEqual(2)
 
-  expect(counter).toEqual(1)
+  expect(counter).toEqual(2)
 })
 
-test('runOrSchedule neutralizable, does not neutralize too much', async () => {
+test('runOrSchedule updatable and squashable, squashable command can be squashed into updated command', async () => {
   const renderManager = new RenderManager()
   let command1Executed: boolean = false
   let command2Executed: boolean = false
@@ -214,15 +214,15 @@ test('runOrSchedule neutralizable, does not neutralize too much', async () => {
     command1Executed = true
     return Promise.resolve()
   }})
-  const command2 = buildCommand({squashableWith: 'commandPositive', neutralizableWith: 'commandNegative', command: () => {
+  const command2 = buildCommand({squashableWith: 'commandPositive', updatableWith: 'commandNegative', command: () => {
     command2Executed = true
     return Promise.resolve()
   }})
-  const command3 = buildCommand({squashableWith: 'commandNegative', neutralizableWith: 'commandPositive', command: () => {
+  const command3 = buildCommand({squashableWith: 'commandNegative', updatableWith: 'commandPositive', command: () => {
     command3Executed = true
     return Promise.resolve()
   }})
-  const command4 = buildCommand({squashableWith: 'commandNegative', neutralizableWith: 'commandPositive', command: () => {
+  const command4 = buildCommand({squashableWith: 'commandNegative', updatableWith: 'commandPositive', command: () => {
     command4Executed = true
     return Promise.resolve()
   }})
@@ -232,10 +232,9 @@ test('runOrSchedule neutralizable, does not neutralize too much', async () => {
   const command3Result: Promise<number> = renderManager.runOrSchedule(command3)
   const command4Result: Promise<number> = renderManager.runOrSchedule(command4)
 
-  expect(renderManager.getCommands()).toHaveLength(3)
+  expect(renderManager.getCommands()).toHaveLength(2)
   expect(renderManager.getCommands()[0]).toBe(command1)
   expect(renderManager.getCommands()[1]).toBe(command2)
-  expect(renderManager.getCommands()[2]).toBe(command4)
 
   await Promise.all([command1Result, command2Result, command3Result, command4Result])
 
@@ -300,7 +299,7 @@ test('addCommand increasing and same priority', () => {
 function buildCommand(options: {
   priority?: RenderPriority,
   squashableWith?: string,
-  neutralizableWith?: string,
+  updatableWith?: string,
   command?: () => Promise<any>
 }): Command {
   if (!options.priority) {
@@ -313,7 +312,7 @@ function buildCommand(options: {
   return new Command({
     priority: options.priority,
     squashableWith: options.squashableWith,
-    neutralizableWith: options.neutralizableWith,
+    updatableWith: options.updatableWith,
     command: options.command
   });
 }
