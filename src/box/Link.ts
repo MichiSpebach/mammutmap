@@ -101,10 +101,12 @@ export class Link implements Hoverable {
     }
 
     const proms: Promise<any>[] = []
+
     proms.push(this.removeContextMenu())
     this.deregisterAtBorderingBoxes()
     proms.push(this.from.unrender())
     proms.push(this.to.unrender())
+    this.clearStyleTimer()
 
     this.rendered = false
     await Promise.all(proms)
@@ -132,10 +134,7 @@ export class Link implements Hoverable {
     }
     this.currentStyle = style
 
-    if (this.styleTimer) {
-      clearTimeout(this.styleTimer)
-      this.styleTimer = null
-    }
+    this.clearStyleTimer()
     if (startDisplayNoneTimer) {
       this.styleTimer = setTimeout(() => {
         renderManager.setStyleTo(this.getId(), 'display:none;', priority)
@@ -145,6 +144,13 @@ export class Link implements Hoverable {
 
     if (!firstCall || style !== '') {
       await renderManager.setStyleTo(this.getId(), style, priority)
+    }
+  }
+
+  private clearStyleTimer() {
+    if (this.styleTimer) {
+      clearTimeout(this.styleTimer)
+      this.styleTimer = null
     }
   }
 
