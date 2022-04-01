@@ -107,6 +107,24 @@ export class FolderBox extends Box {
     return undefined
   }
 
+  public async getBoxByIdPathAndRenderIfNecessary(idPath: string[]): Promise<BoxWatcher> {
+    const id: string|undefined = idPath.shift()
+    if (!id) {
+      util.logError('idPath must not be empty')
+    }
+    if (id !== this.getId()) {
+      util.logError('idPath must start with id of box it is called on')
+    }
+
+    const temporaryBoxWatcher: BoxWatcher = new BoxWatcher(this)
+    await this.addWatcherAndUpdateRender(temporaryBoxWatcher)
+
+    // TODO WIP
+
+    this.removeWatcher(temporaryBoxWatcher)
+    return resultBoxWatcher
+  }
+
   public getBox(id: string): Box {
     return this.body.getBox(id)
   }

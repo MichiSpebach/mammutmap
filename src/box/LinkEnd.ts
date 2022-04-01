@@ -12,6 +12,7 @@ import { ClientPosition, LocalPosition } from './Transform'
 import { WayPointData } from './WayPointData'
 import { LinkEndData } from './LinkEndData'
 import { boxManager } from './BoxManager'
+import { FolderBox } from './FolderBox'
 
 export class LinkEnd implements Draggable<Box> {
   private readonly id: string
@@ -20,11 +21,15 @@ export class LinkEnd implements Draggable<Box> {
   private shape: 'square'|'arrow'
   private rendered: boolean = false
   private borderingBox: Box|null = null
-  private static watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher|null = null // TODO: should be handled by DragManager
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box
     snapToGrid: boolean
+    watchersOfInvolvedBoxes: { // TODO: move to DragManager and add methods watchInvolvedBoxes & unwatchInvolvedBoxes to Draggable?
+      managingBox: Promise<BoxWatcher>
+      fromBox: Promise<BoxWatcher>
+      toBox: Promise<BoxWatcher>
+    }
   } | null = null
 
   public constructor(id: string, data: LinkEndData, referenceLink: Link, shape: 'square'|'arrow') {
@@ -58,45 +63,86 @@ export class LinkEnd implements Draggable<Box> {
   }
 
   public async dragStart(clientX: number, clientY: number): Promise<void> {
-    this.watchManagingBox()
-    this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: this.getDropTargetAtDragStart(), snapToGrid: false} // TODO add dropTarget and snapToGrid to dragstart(..)
+    if (this.dragState) {
+      util.logInfo('Can not start dragging of LinkEnd because LinkEnd is still locked from previous dragging operation, try again.') // TODO improve that this is never a problem
+      return
+    }
+
+    const clientPosition = new ClientPosition(clientX, clientY)
+    const watchersOfInvolvedBoxes = this.watchInvolvedBoxes()
+    this.dragState = {clientPosition, dropTarget: this.getDropTargetAtDragStart(), snapToGrid: false, watchersOfInvolvedBoxes} // TODO add dropTarget and snapToGrid to dragstart(..)
     return this.referenceLink.render(RenderPriority.RESPONSIVE, true)
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: Box, snapToGrid: boolean): Promise<void> {
-    this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: dropTarget, snapToGrid: snapToGrid}
+    if (!this.dragState) {
+      util.logWarning('can not continue dragging of LinkEnd because dragState is null, this should never happen')
+      return
+    }
+
+    const clientPosition = new ClientPosition(clientX, clientY)
+    const watchersOfInvolvedBoxes = this.dragState.watchersOfInvolvedBoxes
+    this.dragState = {clientPosition, dropTarget, snapToGrid, watchersOfInvolvedBoxes}
     return this.referenceLink.render(RenderPriority.RESPONSIVE, true)
   }
 
   public async dragCancel(): Promise<void> {
     await this.referenceLink.render()
-    this.unwatchManagingBox()
+    
+    if (!this.dragState) {
+      util.logWarning('can not cleanly cancel dragging of LinkEnd because dragState is null, this should never happen')
+      return
+    }
+
+    this.unwatchInvolvedBoxes(this.dragState.watchersOfInvolvedBoxes)
     this.dragState = null
   }
 
   public async dragEnd(dropTarget: Box): Promise<void> {
-    await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
-    this.unwatchManagingBox()
-    this.dragState = null
-  }
-
-  private async watchManagingBox(): Promise<void> {
-    if (LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging) {
-      util.logWarning('watcherOfManagingBoxToPreventUnrenderWhileDragging is set at drag start')
-      this.unwatchManagingBox()
-    }
-
-    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = await BoxWatcher.newAndWatch(this.referenceLink.getManagingBox())
-  }
-
-  private unwatchManagingBox(): void {
-    if (!LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging) {
-      util.logWarning('managing box of link is not watched')
+    if (!this.dragState) {
+      util.logWarning('can not cleanly finish dragging of LinkEnd because dragState is null, this should never happen')
+      await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
       return
     }
 
-    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging.unwatch()
-    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = null
+    await this.dragState.watchersOfInvolvedBoxes.managingBox
+    await this.dragState.watchersOfInvolvedBoxes.fromBox
+    await this.dragState.watchersOfInvolvedBoxes.toBox
+
+    await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
+
+    this.unwatchInvolvedBoxes(this.dragState.watchersOfInvolvedBoxes)
+    this.dragState = null
+  }
+
+  private watchInvolvedBoxes(): {
+    managingBox: Promise<BoxWatcher>
+    fromBox: Promise<BoxWatcher>
+    toBox: Promise<BoxWatcher>
+  } {
+    return {
+      managingBox: BoxWatcher.newAndWatch(this.referenceLink.getManagingBox()),
+      fromBox: this.referenceLink.from.getDeepestBoxAndRenderIfNecessary(),
+      toBox:this.referenceLink.to.getDeepestBoxAndRenderIfNecessary()
+    }
+  }
+
+  private async unwatchInvolvedBoxes(involvedBoxes: {
+    managingBox: Promise<BoxWatcher>
+    fromBox: Promise<BoxWatcher>
+    toBox: Promise<BoxWatcher>
+  }): Promise<void> {
+    const managingBox: BoxWatcher = await involvedBoxes.managingBox
+    const fromBox: BoxWatcher = await involvedBoxes.fromBox
+    const toBox: BoxWatcher = await involvedBoxes.toBox
+
+    const pros: Promise<any>[] = []
+
+    pros.push(managingBox.unwatch())
+    pros.push(fromBox.unwatch())
+    pros.push(toBox.unwatch())
+
+    await Promise.all(pros)
   }
 
   public async render(borderingBox: Box, positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
@@ -248,6 +294,14 @@ export class LinkEnd implements Draggable<Box> {
     }
 
     return renderedBoxesInPath
+  }
+
+  public getDeepestBoxAndRenderIfNecessary(): Promise<BoxWatcher> {
+    if (!this.getManagingBox().isFolder()) {
+      // TODO WIP
+      util.logWarning('TODO WIP')
+    }
+    return (this.getManagingBox() as FolderBox).getBoxByIdPathAndRenderIfNecessary(this.data.path.map(wayPoint => wayPoint.boxId))
   }
 
 }

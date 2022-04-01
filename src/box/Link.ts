@@ -255,7 +255,7 @@ export class Link implements Hoverable {
 
     this.deregisterAtBorderingBoxes()
 
-    // TODO: WIP unshift into existing WayPointData[] till inner boxId matches (matters when shallow render gets implemented)
+    // TODO: unshift into existing WayPointData[] till inner boxId matches? (would be faster and more precise than renderIfNecessary (done when LinkEnd is dragged))
     this.data.from.path = await Promise.all(fromWayPoints)
     this.data.to.path = await Promise.all(toWayPoints)
 
