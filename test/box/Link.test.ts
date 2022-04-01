@@ -14,6 +14,7 @@ import { BoxMapData } from '../../src/box/BoxMapData'
 import { RootFolderBox } from '../../src/box/RootFolderBox'
 import { ProjectSettings } from '../../src/ProjectSettings'
 import { fileSystem } from '../../src/fileSystemAdapter'
+import { util } from '../../src/util'
 
 test('render', async () => {
   const scenario = setupSimpleScenario()
@@ -33,8 +34,11 @@ test('render', async () => {
 
 test('reorderAndSave not rendered yet', async () => {
   const scenario = setupSimpleScenario()
+  const logError = jest.fn((message) => {throw new Error(message)})
+  util.logError = logError
 
   await expect(scenario.link.reorderAndSave()).rejects.toThrowError('WayPoint must be rendered before calling getBorderingBox(), but was not.')
+  expect(logError).toHaveBeenCalledWith('WayPoint must be rendered before calling getBorderingBox(), but was not.')
 })
 
 test('reorderAndSave', async () => {
@@ -99,6 +103,8 @@ function setupSimpleScenario(): {
 
   const renderMan: MockProxy<RenderManager> = mock<RenderManager>()
   initRenderManager(renderMan)
+
+  util.logInfo = () => {}
 
   return {
     link: new Link(linkData, managingBox),
