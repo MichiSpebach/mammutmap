@@ -924,6 +924,31 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "egmcpd6pufo",
+			"from": {
+				"path": [
+					{
+						"boxId": "93jcctiarsg",
+						"boxName": "Link.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "biintj5qnmg",
+						"boxName": "linkUtil.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
 		}
 	]
 }

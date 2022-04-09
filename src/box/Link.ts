@@ -10,6 +10,7 @@ import { LinkEnd } from './LinkEnd'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { ClientPosition, LocalPosition } from './Transform'
+import * as linkUtil from './linkUtil'
 
 export class Link implements Hoverable {
   private readonly data: BoxMapLinkData
@@ -54,9 +55,9 @@ export class Link implements Hoverable {
 
   public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
     if (linkEnd === this.to) {
-      await this.reorderAndSaveWithEndBoxes(this.from.getBorderingBox(), dropTarget)
+      await this.reorderAndSaveWithEndBoxes({box: this.from.getBorderingBox(), changed: false}, {box: dropTarget, changed: true})
     } else if (linkEnd === this.from) {
-      await this.reorderAndSaveWithEndBoxes(dropTarget, this.to.getBorderingBox())
+      await this.reorderAndSaveWithEndBoxes({box: dropTarget, changed: true}, {box: this.to.getBorderingBox(), changed: false})
     } else {
       util.logError('Given LinkEnd is not contained by Link.')
     }
@@ -236,13 +237,13 @@ export class Link implements Hoverable {
   }
 
   public async reorderAndSave(): Promise<void|never> {
-    await this.reorderAndSaveWithEndBoxes(this.from.getBorderingBox(), this.to.getBorderingBox())
+    await this.reorderAndSaveWithEndBoxes({box: this.from.getBorderingBox(), changed: false}, {box: this.to.getBorderingBox(), changed: false})
   }
 
-  private async reorderAndSaveWithEndBoxes(fromBox: Box, toBox: Box): Promise<void|never> {
+  private async reorderAndSaveWithEndBoxes(from: {box: Box, changed: boolean}, to: {box: Box, changed: boolean}): Promise<void|never> {
     const fromPosition: ClientPosition = await this.from.getTargetPositionInClientCoords()
     const toPosition: ClientPosition = await this.to.getTargetPositionInClientCoords()
-    const relation: {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} = Box.findCommonAncestor(fromBox, toBox)
+    const relation: {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} = Box.findCommonAncestor(from.box, to.box)
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
       const positionInBoxCoords: LocalPosition = await box.transform.clientToLocalPosition(fromPosition)
@@ -255,9 +256,16 @@ export class Link implements Hoverable {
 
     this.deregisterAtBorderingBoxes()
 
-    // TODO: WIP unshift into existing WayPointData[] till inner boxId matches (matters when shallow render gets implemented)
-    this.data.from.path = await Promise.all(fromWayPoints)
-    this.data.to.path = await Promise.all(toWayPoints)
+    if (from.changed) {
+      this.data.from.path = await Promise.all(fromWayPoints)
+    } else {
+      this.data.from.path = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.from.path, await Promise.all(fromWayPoints))
+    }
+    if (to.changed) {
+      this.data.to.path = await Promise.all(toWayPoints)
+    } else {
+      this.data.to.path = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.to.path, await Promise.all(toWayPoints))
+    }
 
     const oldManagingBox: Box = this.managingBox
     this.managingBox = relation.commonAncestor
