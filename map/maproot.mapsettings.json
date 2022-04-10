@@ -2013,6 +2013,37 @@
 			"tags": [
 				"hidden"
 			]
+		},
+		{
+			"id": "04416g7tb0g",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 68,
+						"y": 17.999999999999996
+					},
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
 		}
 	]
 }

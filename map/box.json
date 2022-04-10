@@ -1,8 +1,8 @@
 {
 	"id": "3lnmuaqr88",
-	"x": 18.96440129449838,
+	"x": 20,
 	"y": 53.88473985561364,
-	"width": 50.000455778127204,
+	"width": 48.96485707262559,
 	"height": 39.539643864421485,
 	"links": [
 		{
@@ -449,18 +449,18 @@
 					{
 						"boxId": "8hst7ghum5o",
 						"boxName": "FolderBox.ts",
-						"x": 98.65324428891792,
-						"y": 2.937166452417124
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
 			"to": {
 				"path": [
 					{
-						"boxId": "3lnmuaqr88",
-						"boxName": "box",
-						"x": 34.9998459784986,
-						"y": 19.999766275957974
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 88
 					}
 				]
 			}
@@ -949,6 +949,190 @@
 				],
 				"floatToBorder": true
 			}
+		},
+		{
+			"id": "vu6b8h4b01g",
+			"from": {
+				"path": [
+					{
+						"boxId": "2e45vnalnbg",
+						"boxName": "SourcelessBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "iroiejjp3l8",
+			"from": {
+				"path": [
+					{
+						"boxId": "2e45vnalnbg",
+						"boxName": "SourcelessBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cc805vhgr3g",
+						"boxName": "SourcelessBoxHeader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "l1nuj0h4jgg",
+			"from": {
+				"path": [
+					{
+						"boxId": "cc805vhgr3g",
+						"boxName": "SourcelessBoxHeader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "14cgcroflu",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "4k7urpfglb",
+			"from": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "asn5cru6lo8",
+						"boxName": "BoxManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "0m5kannqlv",
+			"from": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 56.000000000000014
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 55.99999999999999
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "9i5ipm0v51",
+			"from": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
 		}
 	]
 }
