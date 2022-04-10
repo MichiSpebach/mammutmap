@@ -7,6 +7,8 @@ import { Box } from './Box'
 import { FileBox } from './FileBox'
 import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
+import { SourcelessBox } from './SourcelessBox'
+import { BoxMapDataLoader } from './BoxMapDataLoader'
 
 export class FolderBoxBody extends BoxBody {
   private readonly referenceFolderBox: FolderBox
@@ -43,72 +45,74 @@ export class FolderBoxBody extends BoxBody {
   }
 
   private async loadMapDatasAndCreateBoxes(): Promise<void> {
-    const boxDataPromises: {sourcePath: Dirent, mapData: Promise<BoxMapData|null>}[] = []
-    const sourcePaths: Dirent[] = await fileSystem.readdir(this.referenceFolderBox.getSrcPath())
+    const mapDataLoader = new BoxMapDataLoader(this.referenceFolderBox, this)
 
-    for (const sourcePath of sourcePaths) {
-      if (this.boxes.find(box => box.getName() === sourcePath.name)) {
-        continue
-      }
-      const mapPath: string = this.referenceFolderBox.getMapPath()+'/'+sourcePath.name+'.json'
-      boxDataPromises.push({sourcePath, mapData: fileSystem.loadFromJsonFile(mapPath, BoxMapData.buildFromJson)})
+    const dirents = await mapDataLoader.loadDirents()
+
+    const sourcesWithLoadedMapData = await mapDataLoader.loadMapDatasOfSourcesWithMapData(dirents.sourcesWithMapData)
+
+    if (sourcesWithLoadedMapData.sourcesWithLoadingFailedMapData.length > 0) {
+      dirents.sourcesWithoutMapData = dirents.sourcesWithoutMapData.concat(...sourcesWithLoadedMapData.sourcesWithLoadingFailedMapData)
     }
+    const sourcesWithoutMapData = mapDataLoader.filterSourcesWithoutMapData(dirents.sourcesWithoutMapData)
 
-    const boxesWithMapData: {sourcePath: Dirent, mapData: BoxMapData}[] = []
-    const boxesWithoutMapData: {sourcePath: Dirent}[] = []
+    const mapDataWithoutSourcesLoaded = mapDataLoader.loadMapDatasWithoutSources(dirents.mapDataWithoutSources)
 
-    for (const boxDataPromise of boxDataPromises) {
-      const sourcePath: Dirent = boxDataPromise.sourcePath
-      const mapData: BoxMapData|null = await boxDataPromise.mapData
-      if (mapData !== null) {
-        boxesWithMapData.push({sourcePath, mapData})
-      } else {
-        boxesWithoutMapData.push({sourcePath})
-      }
-    }
-
-    this.boxes.push(...await Promise.all(this.createBoxesWithMapData(boxesWithMapData)))
-    this.boxes.push(...await Promise.all(this.createBoxesWithoutMapData(boxesWithoutMapData)))
+    this.boxes.push(...await Promise.all(this.createBoxesWithMapData(sourcesWithLoadedMapData.sourcesWithLoadedMapData)))
+    this.boxes.push(...await Promise.all(this.createBoxesWithoutSourceData(await mapDataWithoutSourcesLoaded)))
+    this.boxes.push(...await Promise.all(this.createBoxesWithoutMapData(sourcesWithoutMapData)))
   }
 
-  private createBoxesWithMapData(boxDatas: {sourcePath: Dirent, mapData: BoxMapData}[]): Promise<Box>[] {
+  private createBoxesWithMapData(boxDatas: {source: Dirent, mapData: BoxMapData}[]): Promise<Box>[] {
     const boxPromises: Promise<Box>[] = []
-    
+
     for (const boxData of boxDatas) {
-      boxPromises.push(this.createBoxAndRenderPlaceholder(boxData.sourcePath, boxData.mapData, true))
+      boxPromises.push(this.createBoxAndRenderPlaceholder(boxData.source.name, boxData.source, boxData.mapData, true))
     }
 
     return boxPromises
   }
 
-  private createBoxesWithoutMapData(boxDatas: {sourcePath: Dirent}[] = []): Promise<Box>[] {
+  private createBoxesWithoutSourceData(boxDatas: {boxName: string, mapData: BoxMapData}[]): Promise<Box>[] {
     const boxPromises: Promise<Box>[] = []
 
-    const gridSize: number = Math.ceil(Math.sqrt(boxDatas.length))
+    for (const boxData of boxDatas) {
+      boxPromises.push(this.createBoxAndRenderPlaceholder(boxData.boxName, undefined, boxData.mapData, true))
+    }
+
+    return boxPromises
+  }
+
+  private createBoxesWithoutMapData(sources: Dirent[]): Promise<Box>[] {
+    const boxPromises: Promise<Box>[] = []
+
+    const gridSize: number = Math.ceil(Math.sqrt(sources.length))
     const cellSize = 100/gridSize
     const boxSize: number = 100/(gridSize*1.75)
     const spaceBetweenBoxes: number = cellSize-boxSize
 
-    let arrayIndex: number = boxDatas.length-1
+    let arrayIndex: number = sources.length-1
     for (let rowIndex: number = gridSize-1; rowIndex>=0; rowIndex--) {
       for (let columnIndex: number = gridSize-1; columnIndex>=0 && arrayIndex>=0; columnIndex--, arrayIndex--) {
         const mapData: BoxMapData = BoxMapData.buildNew(spaceBetweenBoxes/2 + columnIndex*cellSize, spaceBetweenBoxes/2 + rowIndex*cellSize, boxSize, boxSize)
-        boxPromises.push(this.createBoxAndRenderPlaceholder(boxDatas[arrayIndex].sourcePath, mapData, false))
+        boxPromises.push(this.createBoxAndRenderPlaceholder(sources[arrayIndex].name, sources[arrayIndex], mapData, false))
       }
     }
 
     return boxPromises
   }
 
-  private async createBoxAndRenderPlaceholder(dirEntry: Dirent, mapData: BoxMapData, mapDataFileExists: boolean): Promise<Box> {
+  private async createBoxAndRenderPlaceholder(name: string, dirEntry: Dirent|undefined, mapData: BoxMapData, mapDataFileExists: boolean): Promise<Box> {
     let box: Box
 
-    if (dirEntry.isDirectory()) {
-      box = new FolderBox(dirEntry.name, this.referenceFolderBox, mapData, mapDataFileExists)
+    if (!dirEntry) {
+      box = new SourcelessBox(name, this.referenceFolderBox, mapData, mapDataFileExists)
+    } else if (dirEntry.isDirectory()) {
+      box = new FolderBox(name, this.referenceFolderBox, mapData, mapDataFileExists)
     } else if (dirEntry.isFile()) {
-      box = new FileBox(dirEntry.name, this.referenceFolderBox, mapData, mapDataFileExists)
+      box = new FileBox(name, this.referenceFolderBox, mapData, mapDataFileExists)
     } else {
-      util.logError(this.referenceFolderBox.getMapPath()+'/'+dirEntry+' is neither file nor directory.')
+      util.logError(util.concatPaths(this.referenceFolderBox.getMapPath(), dirEntry.name)+' is neither file nor directory.')
     }
     await this.renderBoxPlaceholderFor(box)
 
@@ -138,6 +142,10 @@ export class FolderBoxBody extends BoxBody {
 
   public containsBox(box: Box): boolean {
     return this.boxes.includes(box)
+  }
+
+  public containsBoxByName(name: string): boolean {
+    return this.boxes.some(box => box.getName() === name)
   }
 
   public getBox(id: string): Box|never {

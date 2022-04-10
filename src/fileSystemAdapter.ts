@@ -3,7 +3,7 @@ import { Dirent, promises as fsPromises } from 'fs'
 import { util } from './util'
 import { JsonObject } from './JsonObject'
 
-class FileSystem {
+export class FileSystem {
 
   public async loadFromJsonFile<T>(filePath: string, buildFromJson: (json: string) => T): Promise<T|null> {
     return this.readFile(filePath)
@@ -90,3 +90,7 @@ class FileSystem {
 }
 
 export let fileSystem: FileSystem = new FileSystem()
+
+export function init(object: FileSystem): void {
+  fileSystem = object
+}

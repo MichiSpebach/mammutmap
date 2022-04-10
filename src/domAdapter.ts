@@ -264,8 +264,8 @@ export class DocumentObjectModelAdapter {
 
     if (result instanceof Error) {
       let jsToExecuteEndings: string = jsToExecute
-      if (jsToExecute.length > 110) {
-        jsToExecuteEndings = jsToExecute.substring(0, 50)+'[...]'+jsToExecute.substring(jsToExecute.length-50)
+      if (jsToExecute.length > 256+10) {
+        jsToExecuteEndings = jsToExecute.substring(0, 128)+'[.'+(jsToExecute.length-256)+'.]'+jsToExecute.substring(jsToExecute.length-128)
       }
       throw new Error('error in render thread occured: '+result.message+'. the javascript that was tried to execute was: '+jsToExecuteEndings)
     }

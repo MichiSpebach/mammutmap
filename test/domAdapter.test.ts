@@ -17,10 +17,10 @@ test('executeJavaScript with error', async () => {
 test('executeJavaScript long javascript with error', async () => {
   const scenario = setupScenario()
 
-  let rendererCode = 'const text = "rendererCode throws Error but is too long to be fully displayed"\n'
+  let rendererCode = 'const text = "'+'rendererCode throws Error but is too long to be fully displayed;'.repeat(4)+'"\n'
   rendererCode += 'throw new Error("error of long rendererCode")'
   expect(async () => await scenario.dom.executeJavaScript(rendererCode)).rejects
-    .toThrow(Error('error in render thread occured: error of long rendererCode. the javascript that was tried to execute was: const text = "rendererCode throws Error but is too[...]yed"\nthrow new Error("error of long rendererCode")'))
+    .toThrow(Error('error in render thread occured: error of long rendererCode. the javascript that was tried to execute was: const text = "rendererCode throws Error but is too long to be fully displayed;rendererCode throws Error but is too long to be fu[.61.] fully displayed;rendererCode throws Error but is too long to be fully displayed;"\nthrow new Error("error of long rendererCode")'))
 })
 
 test('executeJavaScriptSuppressingErrors with error', async () => {
