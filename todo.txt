@@ -1,4 +1,6 @@
 
+fuse SourcelessBoxes with other Boxes, drag SourcelessBox to other box or drop other box inside SourcelessBox to fuse
+
 improve Grid, implement layer2 and layer3 that is visible when clientRectSize is bigger
 
 snapToGrid also for fromEnd when startDragWithClickToDropMode

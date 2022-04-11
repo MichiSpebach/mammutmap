@@ -24,8 +24,7 @@ export class SourcelessBox extends Box {
   }
 
   protected getBackgroundStyleClass(): string {
-    return ''
-    //return style.getSourcelessBoxBackgroundClass() // TODO:
+    return style.getSourcelessBoxBackgroundClass()
   }
 
   protected async renderAdditional(): Promise<void> {

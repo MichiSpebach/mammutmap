@@ -75,9 +75,11 @@ body {
 .fileBoxBackground {
   background-color: #002040c0;
 }
-
 .folderBoxBackground {
   background-color: #102040a0;
+}
+.sourcelessBoxBackground {
+  background-color: #003040c0;
 }
 
 .boxBorder {
@@ -106,6 +108,9 @@ body {
 }
 .folderBoxHeader {
   background-color: slategrey;
+}
+.sourcelessBoxHeader {
+  background-color: orange;
 }
 
 .boxHeaderInner {

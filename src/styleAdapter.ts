@@ -4,6 +4,7 @@ interface Style {
   getPopupClass(): string
   getFileBoxBackgroundClass(): string
   getFolderBoxBackgroundClass(): string
+  getSourcelessBoxBackgroundClass(): string
 
   getBoxBorderClass(): string
   getAdditionalBoxBorderClass(mapDataFileExisting: boolean): string
@@ -11,6 +12,7 @@ interface Style {
   getBoxHeaderClass(): string
   getFileBoxHeaderClass(): string
   getFolderBoxHeaderClass(): string
+  getSourcelessBoxHeaderClass(): string
 
   getBoxHeaderInnerClass(): string
   getBoxBodyZoomInToRenderHintClass(): string
@@ -39,9 +41,11 @@ class DarkTheme implements Style {
   public getFileBoxBackgroundClass(): string {
     return 'fileBoxBackground'
   }
-
   public getFolderBoxBackgroundClass(): string {
     return 'folderBoxBackground'
+  }
+  public getSourcelessBoxBackgroundClass(): string {
+    return 'sourcelessBoxBackground'
   }
 
   public getBoxBorderClass(): string {
@@ -63,6 +67,9 @@ class DarkTheme implements Style {
   }
   public getFolderBoxHeaderClass(): string {
     return 'folderBoxHeader'
+  }
+  public getSourcelessBoxHeaderClass(): string {
+    return 'sourcelessBoxHeader'
   }
 
   public getBoxHeaderInnerClass(): string {
