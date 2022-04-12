@@ -17,7 +17,7 @@ import { DragManager } from '../DragManager'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
-import { ClientPosition, LocalPosition, Transform } from './Transform'
+import { LocalPosition, Transform } from './Transform'
 import { grid } from './Grid'
 
 export abstract class Box implements DropTarget, Hoverable {
@@ -165,10 +165,8 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async getClientRect(): Promise<Rect> {
-    const topLeftPositionPromise: Promise<ClientPosition> = this.getParent().transform.localToClientPosition(this.mapData.getTopLeftPosition())
-    const bottomRightPosition: ClientPosition = await this.getParent().transform.localToClientPosition(this.mapData.getBottomRightPosition())
-    const topLeftPosition: ClientPosition = await topLeftPositionPromise
-    return new Rect(topLeftPosition.x, topLeftPosition.y, bottomRightPosition.x-topLeftPosition.x, bottomRightPosition.y-topLeftPosition.y)
+    const localRect: Rect = new Rect(this.mapData.x, this.mapData.y, this.mapData.width, this.mapData.height) // TODO add getRect(): LocalRect to BoxMapData
+    return this.getParent().transform.localToClientRect(localRect)
   }
 
   // TODO: move into Transform

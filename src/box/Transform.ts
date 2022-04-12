@@ -9,6 +9,19 @@ export class Transform {
     this.referenceBox = referenceBox
   }
 
+  public async localToClientRect(localRect: Rect): Promise<Rect> { // TODO: introduce LocalRect and ClientRect
+    const clientPositions: ClientPosition[] = await this.localToClientPositions([ // important to call
+      new LocalPosition(localRect.x, localRect.y), // TODO: implement getTopLeftPosition and getBottomRightPosition in Rect
+      new LocalPosition(localRect.getRightX(), localRect.getBottomY())
+    ])
+    return new Rect(
+      clientPositions[0].x,
+      clientPositions[0].y,
+      clientPositions[1].x-clientPositions[0].x,
+      clientPositions[1].y-clientPositions[0].y
+    )
+  }
+
   public async clientToLocalPosition(position: ClientPosition): Promise<LocalPosition> {
     const clientRect: Rect = await this.referenceBox.getClientRect()
     const percentX: number = (position.x - clientRect.x) / clientRect.width * 100
@@ -17,10 +30,16 @@ export class Transform {
   }
 
   public async localToClientPosition(localPosition: LocalPosition): Promise<ClientPosition> {
-    const clientRect: Rect = await this.referenceBox.getClientRect()
-    const clientX: number = clientRect.x + (localPosition.percentX/100) * clientRect.width
-    const clientY: number = clientRect.y + (localPosition.percentY/100) * clientRect.height
-    return new ClientPosition(clientX, clientY)
+    return (await this.localToClientPositions([localPosition]))[0]
+  }
+
+  public async localToClientPositions(localPositions: LocalPosition[]): Promise<ClientPosition[]> {
+    const clientRect: Rect = await this.referenceBox.getClientRect() // important that only called once, would lead to branched recursion otherwise
+    return localPositions.map(localPosition => {
+      const clientX: number = clientRect.x + (localPosition.percentX/100) * clientRect.width
+      const clientY: number = clientRect.y + (localPosition.percentY/100) * clientRect.height
+      return new ClientPosition(clientX, clientY)
+    })
   }
 
   public async getNearestGridPositionOfOtherTransform(position: ClientPosition, other: Transform): Promise<LocalPosition> {
