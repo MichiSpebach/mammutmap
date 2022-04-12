@@ -10,6 +10,7 @@ import { LinkEndData } from './box/LinkEndData'
 import { ClientPosition, LocalPosition } from './box/Transform'
 import { BoxMapData } from './box/BoxMapData'
 import { TextInputPopup } from './TextInputPopup'
+import { SourcelessBox } from './box/SourcelessBox'
 
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const atomCommand: string = 'atom '+box.getSrcPath()
@@ -33,6 +34,13 @@ export function openForFolderBox(box: FolderBox, clientX: number, clientY: numbe
   menu.append(buildRenameBoxItem(box))
   menu.append(buildAddNewFileItem(box, clientX, clientY))
   menu.append(buildAddNewFolderItem(box, clientX, clientY))
+  menu.popup()
+}
+
+export function openForSourcelessBox(box: SourcelessBox, clientX: number, clientY: number): void {
+  const menu = new Menu()
+  menu.append(buildAddLinkItem(box, clientX, clientY))
+  menu.append(buildRenameBoxItem(box))
   menu.popup()
 }
 

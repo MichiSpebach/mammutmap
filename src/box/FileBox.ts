@@ -27,6 +27,10 @@ export class FileBox extends Box {
     return true
   }
 
+  public isSourceless(): boolean {
+    return false
+  }
+
   protected getAdditionalStyle(): null {
     return null
   }

@@ -28,6 +28,10 @@ export class FolderBox extends Box {
     return false
   }
 
+  public isSourceless(): boolean {
+    return false
+  }
+
   protected getBodyOverflowStyle(): 'hidden'|'visible' {
     return 'visible'
   }

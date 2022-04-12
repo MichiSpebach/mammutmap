@@ -79,7 +79,7 @@ body {
   background-color: #102040a0;
 }
 .sourcelessBoxBackground {
-  background-color: #003040c0;
+  background-color: #102040c0;
 }
 
 .boxBorder {
@@ -110,7 +110,7 @@ body {
   background-color: slategrey;
 }
 .sourcelessBoxHeader {
-  background-color: orange;
+  background-color: darkorange;
 }
 
 .boxHeaderInner {

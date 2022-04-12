@@ -66,8 +66,11 @@ export class FileBoxDepthTreeIterator {
       } else if (nextBox.isFolder()) {
         this.boxIterators.push(new BoxIterator((nextBox as FolderBox).getBoxes()))
         await this.prepareNext()
+      } else if (nextBox.isSourceless()) {
+        await this.prepareNext()
       } else {
-        util.logError('nextBox (id '+nextBox.getId()+') is neither FileBox nor FolderBox')
+        util.logWarning('nextBox (id '+nextBox.getId()+') is neither FileBox nor FolderBox nor SourcelessBox')
+        await this.prepareNext()
       }
     } else {
       this.boxIterators.pop()

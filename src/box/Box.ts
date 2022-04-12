@@ -102,6 +102,8 @@ export abstract class Box implements DropTarget, Hoverable {
 
   public abstract isFile(): boolean
 
+  public abstract isSourceless(): boolean
+
   protected isRendered(): boolean {
     return this.rendered
   }
@@ -148,12 +150,14 @@ export abstract class Box implements DropTarget, Hoverable {
     await this.header.render()
   }
 
-  private async renameAndMoveOnFileSystem(
+  protected async renameAndMoveOnFileSystem(
     oldSrcPath: string, newSrcPath: string,
     oldMapDataFilePath: string, newMapDataFilePath: string
   ): Promise<void> {
-    await fileSystem.rename(oldSrcPath, newSrcPath)
-    util.logInfo('moved ' + oldSrcPath + ' to ' + newSrcPath)
+    if (!this.isSourceless()) {
+      await fileSystem.rename(oldSrcPath, newSrcPath)
+      util.logInfo('moved ' + oldSrcPath + ' to ' + newSrcPath)
+    }
     if (this.isMapDataFileExisting()) {
       await fileSystem.rename(oldMapDataFilePath, newMapDataFilePath)
       util.logInfo('moved ' + oldMapDataFilePath + ' to ' + newMapDataFilePath)

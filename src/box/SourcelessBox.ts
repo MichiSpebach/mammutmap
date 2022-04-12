@@ -1,8 +1,9 @@
 import { renderManager } from '../RenderManager'
-import { style } from '../styleAdapter';
+import { style } from '../styleAdapter'
+import * as contextMenu from '../contextMenu'
 import { Box } from './Box'
-import { BoxHeader } from './BoxHeader';
-import { SourcelessBoxHeader } from './SourcelessBoxHeader';
+import { BoxHeader } from './BoxHeader'
+import { SourcelessBoxHeader } from './SourcelessBoxHeader'
 
 export class SourcelessBox extends Box {
   private bodyRendered: boolean = false
@@ -19,8 +20,12 @@ export class SourcelessBox extends Box {
     return false
   }
 
+  public isSourceless(): boolean {
+    return false
+  }
+
   protected getBodyOverflowStyle(): 'hidden' | 'visible' {
-    return 'visible'
+    return 'hidden'
   }
 
   protected getBackgroundStyleClass(): string {
@@ -28,11 +33,17 @@ export class SourcelessBox extends Box {
   }
 
   protected async renderAdditional(): Promise<void> {
-    return
+    if (this.isRendered()) {
+      return
+    }
+    await renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForSourcelessBox(this, clientX, clientY))
   }
 
   protected async unrenderAdditional(): Promise<void> {
-    return
+    if (!this.isRendered()) {
+      return
+    }
+    await renderManager.removeEventListenerFrom(this.getId(), 'contextmenu')
   }
 
   protected getBodyId(): string {
