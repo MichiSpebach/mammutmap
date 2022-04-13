@@ -224,8 +224,19 @@ export class LinkEnd implements Draggable<Box> {
     return this.getManagingBox().transformInnerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.getPosition())
   }
 
-  public getDeepestRenderedBox(): {box: Box, wayPoint: WayPointData} | never {
+  public getDeepestRenderedBox(): {box: Box, wayPoint: WayPointData} {
     const renderedBoxes: {box: Box, wayPoint: WayPointData}[] = this.getRenderedBoxes()
+
+    if (renderedBoxes.length === 0) {
+      const managingBox: Box = this.getManagingBox()
+      let message = 'Corrupted mapData detected: '
+      message += `Link with id ${this.referenceLink.getId()} in ${managingBox.getSrcPath()} has path with no rendered boxes, `
+      message += 'this only happens when mapData is corrupted. '
+      message += 'Defaulting LinkEnd to center of managingBox.'
+      util.logWarning(message)
+      return {box: managingBox, wayPoint: new WayPointData(managingBox.getId(), managingBox.getName(), 50, 50)}
+    }
+
     return renderedBoxes[renderedBoxes.length-1]
   }
 
@@ -233,9 +244,11 @@ export class LinkEnd implements Draggable<Box> {
     return this.getRenderedBoxes().map((tuple: {box: Box, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.getManagingBox())
   }
 
-  private getRenderedBoxes(): {box: Box, wayPoint: WayPointData}[] | never {
+  private getRenderedBoxes(): {box: Box, wayPoint: WayPointData}[] {
     if (this.data.path.length === 0) {
-      util.logError(this.getManagingBox().getSrcPath()+' has empty link path.')
+      let message = 'Corrupted mapData detected: '
+      message += `Link with id ${this.referenceLink.getId()} in ${this.getManagingBox().getSrcPath()} has empty path.`
+      util.logWarning(message)
     }
 
     const renderedBoxesInPath: {box: Box, wayPoint: WayPointData}[] = []
