@@ -1,4 +1,5 @@
-import { Rect } from '../Rect'
+import { LocalRect } from '../LocalRect'
+import { ClientRect } from '../ClientRect'
 import { Box } from './Box'
 import { grid } from './Grid'
 
@@ -9,21 +10,16 @@ export class Transform {
     this.referenceBox = referenceBox
   }
 
-  public async localToClientRect(localRect: Rect): Promise<Rect> { // TODO: introduce LocalRect and ClientRect
-    const clientPositions: ClientPosition[] = await this.localToClientPositions([ // important to call
-      new LocalPosition(localRect.x, localRect.y), // TODO: implement getTopLeftPosition and getBottomRightPosition in Rect
-      new LocalPosition(localRect.getRightX(), localRect.getBottomY())
+  public async localToClientRect(localRect: LocalRect): Promise<ClientRect> {
+    const clientPositions: ClientPosition[] = await this.localToClientPositions([
+      localRect.getTopLeftPosition(), // important that array method is called only once, would lead to branched recursion otherwise
+      localRect.getBottomRightPosition()
     ])
-    return new Rect(
-      clientPositions[0].x,
-      clientPositions[0].y,
-      clientPositions[1].x-clientPositions[0].x,
-      clientPositions[1].y-clientPositions[0].y
-    )
+    return ClientRect.fromPositions(clientPositions[0], clientPositions[1])
   }
 
   public async clientToLocalPosition(position: ClientPosition): Promise<LocalPosition> {
-    const clientRect: Rect = await this.referenceBox.getClientRect()
+    const clientRect: ClientRect = await this.referenceBox.getClientRect()
     const percentX: number = (position.x - clientRect.x) / clientRect.width * 100
     const percentY: number = (position.y - clientRect.y) / clientRect.height * 100
     return new LocalPosition(percentX, percentY)
@@ -34,7 +30,7 @@ export class Transform {
   }
 
   public async localToClientPositions(localPositions: LocalPosition[]): Promise<ClientPosition[]> {
-    const clientRect: Rect = await this.referenceBox.getClientRect() // important that only called once, would lead to branched recursion otherwise
+    const clientRect: ClientRect = await this.referenceBox.getClientRect() // important that only called once, would lead to branched recursion otherwise
     return localPositions.map(localPosition => {
       const clientX: number = clientRect.x + (localPosition.percentX/100) * clientRect.width
       const clientY: number = clientRect.y + (localPosition.percentY/100) * clientRect.height

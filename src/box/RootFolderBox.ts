@@ -2,12 +2,12 @@ import { fileSystem } from '../fileSystemAdapter'
 import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
 import { ProjectSettings } from '../ProjectSettings'
-import { Rect } from '../Rect'
+import { ClientRect } from '../ClientRect'
 import { renderManager, RenderPriority } from '../RenderManager'
 
 export class RootFolderBox extends FolderBox {
   private projectSettings: ProjectSettings
-  private cachedClientRect: Rect|null = null
+  private cachedClientRect: ClientRect|null = null
 
   public static async new(projectSettings: ProjectSettings): Promise<RootFolderBox> {
     let mapData: BoxMapData|null = await fileSystem.loadFromJsonFile(projectSettings.getProjectSettingsFilePath(), BoxMapData.buildFromJson)
@@ -47,7 +47,7 @@ export class RootFolderBox extends FolderBox {
     await super.saveMapData()
   }
 
-  public async getClientRect(): Promise<Rect> {
+  public async getClientRect(): Promise<ClientRect> {
     if (!this.cachedClientRect) {
       this.cachedClientRect = await renderManager.getClientRectOf(this.getId(), RenderPriority.RESPONSIVE)
     } else {

@@ -1,8 +1,8 @@
 import { ClientPosition } from '../src/box/Transform'
-import { Rect } from '../src/Rect'
+import { ClientRect } from '../src/ClientRect'
 
 test('calculateIntersectionsWithLine', () => {
-  const rect = new Rect(40, 40, 20, 20)
+  const rect = new ClientRect(40, 40, 20, 20)
 
   expect(rect.calculateIntersectionsWithLine({from: new ClientPosition(50, 50), to: new ClientPosition(0, 0)})).toEqual([new ClientPosition(40, 40)])
   expect(rect.calculateIntersectionsWithLine({from: new ClientPosition(0, 0), to: new ClientPosition(50, 50)})).toEqual([new ClientPosition(40, 40)])

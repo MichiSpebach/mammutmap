@@ -1,6 +1,6 @@
 import { renderManager } from '../RenderManager'
 import { settings } from '../Settings'
-import { Rect } from '../Rect'
+import { ClientRect } from '../ClientRect'
 import { Box } from './Box'
 import { util } from '../util'
 import { style } from '../styleAdapter'
@@ -115,7 +115,7 @@ export abstract class BoxBody {
       return true
     }
 
-    const boxRect: Rect = await renderManager.getClientRectOf(this.referenceBox.getId())
+    const boxRect: ClientRect = await renderManager.getClientRectOf(this.referenceBox.getId())
     return this.isRectLargeEnoughToRender(boxRect) && this.isRectInsideScreen(boxRect)
   }
 
@@ -123,19 +123,19 @@ export abstract class BoxBody {
     if (this.referenceBox.isRoot() || this.referenceBox.hasWatchers()) {
       return false
     }
-    const boxRect: Rect = await renderManager.getClientRectOf(this.referenceBox.getId())
+    const boxRect: ClientRect = await renderManager.getClientRectOf(this.referenceBox.getId())
     return this.isRectSmallEnoughToUnrender(boxRect) || this.isRectNotablyOutsideScreen(boxRect)
   }
 
-  private isRectLargeEnoughToRender(rect: Rect): boolean {
+  private isRectLargeEnoughToRender(rect: ClientRect): boolean {
     return (rect.width+rect.height)/2 >= settings.getBoxMinSizeToRender()
   }
 
-  private isRectSmallEnoughToUnrender(rect: Rect): boolean {
+  private isRectSmallEnoughToUnrender(rect: ClientRect): boolean {
     return (rect.width+rect.height)/2 < settings.getBoxMinSizeToRender()*0.8
   }
 
-  private isRectInsideScreen(rect: Rect): boolean {
+  private isRectInsideScreen(rect: ClientRect): boolean {
     if (rect.x+rect.width < 0) {
       return false
     }
@@ -154,7 +154,7 @@ export abstract class BoxBody {
     return true
   }
 
-  private isRectNotablyOutsideScreen(rect: Rect): boolean {
+  private isRectNotablyOutsideScreen(rect: ClientRect): boolean {
     if (rect.x+rect.width < -20) {
       return true
     }

@@ -9,6 +9,7 @@ import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
 import { SourcelessBox } from './SourcelessBox'
 import { BoxMapDataLoader } from './BoxMapDataLoader'
+import { ClientPosition } from './Transform'
 
 export class FolderBoxBody extends BoxBody {
   private readonly referenceFolderBox: FolderBox
@@ -201,7 +202,7 @@ export class FolderBoxBody extends BoxBody {
     for (var i: number = 0; i < this.boxes.length; i++) {
       let box = this.boxes[i]
       let clientRect = await box.getClientRect() // TODO: parallelize, getBoxesAt(..) is called often
-      if (clientRect.isPositionInside(clientX, clientY)) {
+      if (clientRect.isPositionInside(new ClientPosition(clientX, clientY))) {
         boxesAtPostion.push(box)
       }
     }

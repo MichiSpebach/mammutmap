@@ -1,6 +1,7 @@
 import { util } from './util'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { Rect } from './Rect'
+import { ClientRect } from './ClientRect'
 
 export type BatchMethod = 'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
 
@@ -37,7 +38,7 @@ export class DocumentObjectModelAdapter {
     return {x: cursorScreenPosition.x - contentBounds.x, y: cursorScreenPosition.y - contentBounds.y}
   }
 
-  public async getClientRectOf(id: string): Promise<Rect> {
+  public async getClientRectOf(id: string): Promise<ClientRect> {
     // implemented workaround because following line doesn't work, because 'Error: An object could not be cloned.'
     //return await executeJsOnElement(id, "getBoundingClientRect()").catch(reason => util.logError(reason))
 
@@ -47,7 +48,7 @@ export class DocumentObjectModelAdapter {
     // not executeJavaScript because of "UnhandledPromiseRejectionWarning: Unhandled promise rejection."
     const rect = await this.executeJavaScriptInFunction(js)
 
-    return new Rect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
+    return new ClientRect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
   }
 
   public appendChildTo(parentId: string, childId: string): Promise<void> {

@@ -2,7 +2,7 @@ import { util } from './util'
 import { style } from './styleAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { ScaleTool } from './box/ScaleTool'
-import { Rect } from './Rect'
+import { ClientRect } from './ClientRect'
 import { Box } from './box/Box'
 
 export class ScaleManager {
@@ -10,8 +10,8 @@ export class ScaleManager {
   //private static scalables: Map<string, BoxBorder> = new Map() // TODO: introduce interface Scalable
   private static state: {
     scaling: ScaleTool,
-    startParentClientRect: Promise<Rect>,
-    startClientRect: Promise<Rect>,
+    startParentClientRect: Promise<ClientRect>,
+    startClientRect: Promise<ClientRect>,
     startClientX: number,
     startClientY: number
   } | null = null
@@ -116,8 +116,8 @@ export class ScaleManager {
   }
 
   private static async dragstart(scalable: ScaleTool, clientX: number, clientY: number): Promise<void> {
-    let parentClientRect: Promise<Rect> = scalable.getBoxRenderedIntoOrFail().getParent().getClientRect()
-    let clientRect: Promise<Rect> = scalable.getBoxRenderedIntoOrFail().getClientRect()
+    let parentClientRect: Promise<ClientRect> = scalable.getBoxRenderedIntoOrFail().getParent().getClientRect()
+    let clientRect: Promise<ClientRect> = scalable.getBoxRenderedIntoOrFail().getClientRect()
     scalable.scaleStart()
 
     this.state = {
@@ -141,8 +141,8 @@ export class ScaleManager {
       return
     }
 
-    const startClientRect: Rect = await this.state.startClientRect
-    const startParentClientRect: Rect = await this.state.startParentClientRect
+    const startClientRect: ClientRect = await this.state.startClientRect
+    const startParentClientRect: ClientRect = await this.state.startParentClientRect
     const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const newWidthInPixel: number = startClientRect.width + clientX - this.state.startClientX
@@ -162,8 +162,8 @@ export class ScaleManager {
       return
     }
 
-    const startClientRect: Rect = await this.state.startClientRect
-    const startParentClientRect: Rect = await this.state.startParentClientRect
+    const startClientRect: ClientRect = await this.state.startClientRect
+    const startParentClientRect: ClientRect = await this.state.startParentClientRect
     const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const newHeightInPixel: number = startClientRect.height + clientY - this.state.startClientY
@@ -183,8 +183,8 @@ export class ScaleManager {
       return
     }
 
-    const startClientRect: Rect = await this.state.startClientRect
-    const startParentClientRect: Rect = await this.state.startParentClientRect
+    const startClientRect: ClientRect = await this.state.startClientRect
+    const startParentClientRect: ClientRect = await this.state.startParentClientRect
     const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const dragDistanceInPixel: number = clientY - this.state.startClientY
@@ -208,8 +208,8 @@ export class ScaleManager {
       return
     }
 
-    const startClientRect: Rect = await this.state.startClientRect
-    const startParentClientRect: Rect = await this.state.startParentClientRect
+    const startClientRect: ClientRect = await this.state.startClientRect
+    const startParentClientRect: ClientRect = await this.state.startParentClientRect
     const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const dragDistanceInPixel: number = clientX - this.state.startClientX

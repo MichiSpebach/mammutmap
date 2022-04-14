@@ -4,7 +4,7 @@ import { WayPointData } from '../../src/box/WayPointData'
 import { Box } from '../../src/box/Box'
 import { FolderBox } from '../../src/box/FolderBox'
 import { Link } from '../../src/box/Link'
-import { Rect } from '../../src/Rect'
+import { ClientRect } from '../../src/ClientRect'
 import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
 import { DocumentObjectModelAdapter, init as initDomAdapter } from '../../src/domAdapter'
 import { RenderManager, init as initRenderManager } from '../../src/RenderManager'
@@ -82,8 +82,8 @@ function setupSimpleScenario(): {
 
   Object.defineProperty(managingBox, 'transform', {value: new Transform(managingBox)})
   //managingBox.getId.mockReturnValue('managingBox')
-  //managingBox.getClientRect.mockReturnValue(Promise.resolve(new Rect(0, 0, 100, 100)))
-  managingBox.getClientRect = () => Promise.resolve(new Rect(0, 0, 100, 100))
+  //managingBox.getClientRect.mockReturnValue(Promise.resolve(new ClientRect(0, 0, 100, 100)))
+  managingBox.getClientRect = () => Promise.resolve(new ClientRect(0, 0, 100, 100))
 
   //fromBox.getId.mockReturnValue('fromBox')
   //fromBox.getName.mockReturnValue('FromBox')

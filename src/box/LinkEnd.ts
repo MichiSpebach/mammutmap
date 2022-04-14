@@ -1,7 +1,7 @@
 import { util } from '../util'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
-import { Rect } from '../Rect'
+import { ClientRect } from '../ClientRect'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
@@ -158,7 +158,7 @@ export class LinkEnd implements Draggable<Box> {
 
   public async getRenderPositionInManagingBoxCoords(): Promise<LocalPosition> {
     //if (this.data.floatToBorder) { // TODO: activate
-      let clientRect: Promise<Rect>
+      let clientRect: Promise<ClientRect>
       if (this.dragState) {
         clientRect = this.dragState.dropTarget.getClientRect()
       } else {
@@ -172,7 +172,7 @@ export class LinkEnd implements Draggable<Box> {
     return this.getTargetPositionInManagingBoxCoords()
   }
 
-  private async calculateFloatToBorderPositionRegardingClientRect(rectInClientCoords: Promise<Rect>): Promise<ClientPosition|undefined> {
+  private async calculateFloatToBorderPositionRegardingClientRect(rectInClientCoords: Promise<ClientRect>): Promise<ClientPosition|undefined> {
     const line: {from: ClientPosition, to: ClientPosition} = await this.referenceLink.getLineInClientCoords()
     const intersectionsWithRect: ClientPosition[] = (await rectInClientCoords).calculateIntersectionsWithLine(line)
 

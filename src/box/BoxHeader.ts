@@ -2,7 +2,7 @@ import { renderManager, RenderPriority } from '../RenderManager'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
-import { Rect } from '../Rect'
+import { ClientRect } from '../ClientRect'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { ClientPosition, LocalPosition } from './Transform'
@@ -52,7 +52,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async dragStart(clientX: number, clientY: number): Promise<void> {
-    let clientRect: Rect = await this.referenceBox.getClientRect()
+    let clientRect: ClientRect = await this.referenceBox.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
 
     renderManager.addClassTo(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
@@ -60,7 +60,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
 
   public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
     if (!snapToGrid) {
-      const parentClientRect: Rect = await this.referenceBox.getParent().getClientRect()
+      const parentClientRect: ClientRect = await this.referenceBox.getParent().getClientRect()
       const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
       const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
       this.referenceBox.updateMeasuresAndBorderingLinks({x: newX, y: newY}, RenderPriority.RESPONSIVE)

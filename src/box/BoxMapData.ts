@@ -1,3 +1,4 @@
+import { LocalRect } from '../LocalRect'
 import { JsonObject } from '../JsonObject'
 import { util } from '../util'
 import { BoxMapLinkData } from './BoxMapLinkData'
@@ -89,6 +90,10 @@ export class BoxMapData extends JsonObject {
 
   public getBottomRightPosition(): LocalPosition {
     return new LocalPosition(this.x+this.width, this.y+this.height)
+  }
+
+  public getRect(): LocalRect {
+    return new LocalRect(this.x, this.y, this.width, this.height)
   }
 
 }

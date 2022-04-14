@@ -1,5 +1,5 @@
 import { dom, BatchMethod } from './domAdapter'
-import { Rect } from './Rect'
+import { ClientRect } from './ClientRect'
 
 export class RenderManager {
   private commands: Command[] = []
@@ -12,7 +12,7 @@ export class RenderManager {
     return dom.getClientSize()
   }
 
-  public getClientRectOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<Rect> {
+  public getClientRectOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<ClientRect> {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'getClientRectOf'+id,

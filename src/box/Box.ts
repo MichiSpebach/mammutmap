@@ -4,7 +4,8 @@ import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { BoxMapData } from './BoxMapData'
-import { Rect } from '../Rect'
+import { LocalRect } from '../LocalRect'
+import { ClientRect } from '../ClientRect'
 import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { scaleTool } from './ScaleTool'
@@ -112,8 +113,8 @@ export abstract class Box implements DropTarget, Hoverable {
     if (this.parent == null) {
       util.logError('Box.setParent() cannot be called on root.')
     }
-    const parentClientRect: Rect = await this.parent.getClientRect()
-    const newParentClientRect: Rect = await newParent.getClientRect()
+    const parentClientRect: ClientRect = await this.parent.getClientRect()
+    const newParentClientRect: ClientRect = await newParent.getClientRect()
 
     this.parent.removeBox(this)
     newParent.addBox(this)
@@ -164,9 +165,8 @@ export abstract class Box implements DropTarget, Hoverable {
     }
   }
 
-  public async getClientRect(): Promise<Rect> {
-    const localRect: Rect = new Rect(this.mapData.x, this.mapData.y, this.mapData.width, this.mapData.height) // TODO add getRect(): LocalRect to BoxMapData
-    return this.getParent().transform.localToClientRect(localRect)
+  public async getClientRect(): Promise<ClientRect> {
+    return this.getParent().transform.localToClientRect(this.mapData.getRect())
   }
 
   // TODO: move into Transform
