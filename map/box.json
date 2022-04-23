@@ -1188,34 +1188,6 @@
 			}
 		},
 		{
-			"id": "3mp2isqgbng",
-			"from": {
-				"path": [
-					{
-						"boxId": "ddk085fu74",
-						"boxName": "EmptySpaceFinder.ts",
-						"x": 50,
-						"y": 50
-					}
-				],
-				"floatToBorder": true
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "iu4msv07ut8",
-						"boxName": "Box.ts",
-						"x": 50,
-						"y": 50
-					}
-				],
-				"floatToBorder": true
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
 			"id": "prafgl8pk4g",
 			"from": {
 				"path": [

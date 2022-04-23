@@ -7,6 +7,53 @@ test('findEmptySpaces empty before and count 1', () => {
   expect(emptySpaces).toEqual([new LocalRect(4, 8, 92, 88)])
 })
 
+test('findEmptySpaces 2 boxes before and count 2', () => {
+  const emptySpaceFinder = new EmptySpaceFinder([
+    new LocalRect(60, 12, 28, 28), new LocalRect(12, 60, 28, 28)
+  ])
+
+  const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(2)
+
+  expect(emptySpaces).toEqual([
+    new LocalRect(12, 12, 28, 28), new LocalRect(60, 60, 28, 28),
+  ])
+})
+
+test('findEmptySpaces 4 boxes before and count 1', () => {
+  const emptySpaceFinder = new EmptySpaceFinder([
+    new LocalRect(12, 12, 28, 28), new LocalRect(60, 12, 28, 28),
+    new LocalRect(12, 60, 28, 28), new LocalRect(60, 60, 28, 28),
+  ])
+
+  const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(1)
+
+  expect(emptySpaces).toEqual([new LocalRect(4, 48, 8, 8)])
+})
+
+test('findEmptySpaces 4 boxes before and count 3', () => {
+  const emptySpaceFinder = new EmptySpaceFinder([
+    new LocalRect(12, 12, 28, 28), new LocalRect(60, 12, 28, 28),
+    new LocalRect(12, 60, 28, 28), new LocalRect(60, 60, 28, 28),
+  ])
+
+  const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(3)
+
+  expect(emptySpaces).toEqual([
+    new LocalRect(4, 48, 8, 8), new LocalRect(20, 48, 8, 8), new LocalRect(36, 48, 8, 8)
+  ])
+})
+
+test('findEmptySpaces no space left and count 4', () => {
+  const emptySpaceFinder = new EmptySpaceFinder([new LocalRect(0, 0, 100, 100)])
+
+  const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(4)
+
+  expect(emptySpaces).toEqual([
+    new LocalRect(4, 8, 20, 20), new LocalRect(36, 8, 20, 20), new LocalRect(68, 8, 20, 20),
+    new LocalRect(4, 40, 20, 20),
+  ])
+})
+
 test('findEmptySpaces empty before and count 4', () => {
   const emptySpaceFinder = new EmptySpaceFinder([])
 

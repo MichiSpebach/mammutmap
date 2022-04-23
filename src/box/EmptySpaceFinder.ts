@@ -1,63 +1,92 @@
 import { LocalRect } from '../LocalRect'
-import { Box } from './Box'
 import { Grid } from './Grid'
 
 export class EmptySpaceFinder {
-  private static freeSpaceRatio: number = 0.4
+  private static readonly freeSpaceRatio: number = 0.4
+  private static readonly maxLayerToFollowNiceRules: number = 3
 
-  private readonly boxes: Box[]
+  private readonly occupiedSpaces: LocalRect[]
 
-  public constructor(boxes: Box[]) {
-    this.boxes = boxes
+  public constructor(occupiedSpaces: LocalRect[]) {
+    this.occupiedSpaces = occupiedSpaces
   }
 
   public findEmptySpaces(count: number): LocalRect[] {
-    if (count === 1 && this.boxes.length === 0) {
+    return this.findEmptySpacesWithStartLayer(count, 1)
+  }
+
+  private findEmptySpacesWithStartLayer(
+    count: number,
+    startLayer: number,
+    occupiedSpacesMultiplier: number = 1,
+    ignoreLeftAndRightMargins: boolean = false,
+    ignoreExistingBoxes: boolean = false
+  ): LocalRect[] {
+    if (count === 1 && this.occupiedSpaces.length === 0) {
       return [new LocalRect(4, 8, 92, 88)]
     }
 
-    const columnOrRowCount: number = Math.ceil(Math.sqrt(count+this.boxes.length))
-    let layer: number = 1
-    let stepSize: number = Grid.getStepSizeOfLayer(layer)
-    while (columnOrRowCount*2+1 >= 100/stepSize) {
-      stepSize = Grid.getStepSizeOfLayer(layer)
+    const soughtElementCount: number = count + this.occupiedSpaces.length*occupiedSpacesMultiplier
+    const columnOrRowCount: number = Math.ceil(Math.sqrt(soughtElementCount))
+    let layer: number = startLayer-1
+    let stepSize: number
+    let stepCount: number
+    do {
       layer++
-    }
+      stepSize = Grid.getStepSizeOfLayer(layer)
+      stepCount = 100/stepSize
+    } while (columnOrRowCount*2+1 >= stepCount) // TODO: calculate instead of loop?
 
-    // TODO: remove stepSize everwhere and factor in in loop (calculate in stepSize space)
     const freeSpaceRatio: number = EmptySpaceFinder.freeSpaceRatio
     const columnCount: number = columnOrRowCount
     const rowCount: number = columnOrRowCount
-    const stepsPerColumn: number = Math.floor(((100-stepSize) / columnCount) / stepSize)
-    const stepsPerRow: number = Math.floor(((100-stepSize) / rowCount) / stepSize)
-    const columnSize: number = stepsPerColumn*stepSize
-    const rowSize: number = stepsPerRow*stepSize
-    const xDistanceBetweenBoxes: number = Math.max(stepSize, Math.round(columnSize*freeSpaceRatio / stepSize) * stepSize)
-    const yDistanceBetweenBoxes: number = Math.max(stepSize, Math.round(rowSize*freeSpaceRatio / stepSize) * stepSize)
+    const columnSize: number = Math.floor((stepCount-1) / columnCount)
+    const rowSize: number = Math.floor((stepCount-1) / rowCount)
+    const xDistanceBetweenBoxes: number = Math.max(1, Math.round(columnSize*freeSpaceRatio))
+    const yDistanceBetweenBoxes: number = Math.max(1, Math.round(rowSize*freeSpaceRatio))
     const boxSize: number = Math.min(columnSize-xDistanceBetweenBoxes, rowSize-yDistanceBetweenBoxes)
-    const startX: number = Math.round((100 - columnSize*columnCount + xDistanceBetweenBoxes) / 2 / stepSize) * stepSize
-    const startY: number = Math.round((100 - rowSize*rowCount + yDistanceBetweenBoxes) / 2 / stepSize) * stepSize
+    let startX: number = Math.round((stepCount - columnSize*columnCount + xDistanceBetweenBoxes) / 2)
+    const startY: number = Math.round((stepCount - rowSize*rowCount + yDistanceBetweenBoxes) / 2)
+
+    if (ignoreLeftAndRightMargins) {
+      startX = 1
+    }
 
     const rects: LocalRect[] = []
-    for (let y: number = startY; y < 100-startY; y += rowSize) {
+    for (let y: number = startY; y <= stepCount-startY-boxSize; y += rowSize) {
       if (rects.length >= count) {
         break
       }
-      for (let x: number = startX; x < 100-startX; x += columnSize) {
-        rects.push(new LocalRect(x, y, boxSize, boxSize))
+      for (let x: number = startX; x <= stepCount-startX-boxSize; x += columnSize) {
+        const rect = new LocalRect(x*stepSize, y*stepSize, boxSize*stepSize, boxSize*stepSize)
+        if (this.isSpaceEmpty(rect) || ignoreExistingBoxes) {
+          rects.push(rect)
+        }
         if (rects.length >= count) {
           break
         }
       }
     }
 
+    if (rects.length < count) {
+      let nextLayer = layer+1
+      if (nextLayer > EmptySpaceFinder.maxLayerToFollowNiceRules && !ignoreLeftAndRightMargins) {
+        nextLayer = 1
+        occupiedSpacesMultiplier = 4*nextLayer
+        ignoreLeftAndRightMargins = true
+      } else if (nextLayer > EmptySpaceFinder.maxLayerToFollowNiceRules && !ignoreExistingBoxes) {
+        nextLayer = 1
+        ignoreExistingBoxes = true
+      }
+      return this.findEmptySpacesWithStartLayer(count, nextLayer, occupiedSpacesMultiplier, ignoreLeftAndRightMargins, ignoreExistingBoxes)
+    }
+
     return rects
   }
 
-  // TODO: use
   private isSpaceEmpty(rect: LocalRect): boolean {
-    for (const box of this.boxes) {
-      if (box.getLocalRect().isOverlappingWith(rect)) {
+    for (const occupiedSpace of this.occupiedSpaces) {
+      if (occupiedSpace.isOverlappingWith(rect)) {
         return false
       }
     }

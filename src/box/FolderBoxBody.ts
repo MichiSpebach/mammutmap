@@ -89,7 +89,7 @@ export class FolderBoxBody extends BoxBody {
   private createBoxesWithoutMapData(sources: Dirent[]): Promise<Box>[] {
     const boxPromises: Promise<Box>[] = []
 
-    const emptySpaceFinder = new EmptySpaceFinder(this.boxes)
+    const emptySpaceFinder = new EmptySpaceFinder(this.boxes.map(box => box.getLocalRect()))
     const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(sources.length)
     if (emptySpaces.length !== sources.length) {
       let message = `Can not load all boxes in ${this.referenceFolderBox.getSrcPath()}`
