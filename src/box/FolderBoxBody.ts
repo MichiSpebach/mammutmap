@@ -10,6 +10,8 @@ import { BoxMapData } from './BoxMapData'
 import { SourcelessBox } from './SourcelessBox'
 import { BoxMapDataLoader } from './BoxMapDataLoader'
 import { ClientPosition } from './Transform'
+import { EmptySpaceFinder } from './EmptySpaceFinder'
+import { LocalRect } from '../LocalRect'
 
 export class FolderBoxBody extends BoxBody {
   private readonly referenceFolderBox: FolderBox
@@ -87,17 +89,18 @@ export class FolderBoxBody extends BoxBody {
   private createBoxesWithoutMapData(sources: Dirent[]): Promise<Box>[] {
     const boxPromises: Promise<Box>[] = []
 
-    const gridSize: number = Math.ceil(Math.sqrt(sources.length))
-    const cellSize = 100/gridSize
-    const boxSize: number = 100/(gridSize*1.75)
-    const spaceBetweenBoxes: number = cellSize-boxSize
+    const emptySpaceFinder = new EmptySpaceFinder(this.boxes)
+    const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(sources.length)
+    if (emptySpaces.length !== sources.length) {
+      let message = `Can not load all boxes in ${this.referenceFolderBox.getSrcPath()}`
+      message += `, because number of emptySpaces (${emptySpaces.length}) does not match number of sources (${sources.length})`
+      message += ', this should never happen.'
+      util.logWarning(message)
+    }
 
-    let arrayIndex: number = sources.length-1
-    for (let rowIndex: number = gridSize-1; rowIndex>=0; rowIndex--) {
-      for (let columnIndex: number = gridSize-1; columnIndex>=0 && arrayIndex>=0; columnIndex--, arrayIndex--) {
-        const mapData: BoxMapData = BoxMapData.buildNew(spaceBetweenBoxes/2 + columnIndex*cellSize, spaceBetweenBoxes/2 + rowIndex*cellSize, boxSize, boxSize)
-        boxPromises.push(this.createBoxAndRenderPlaceholder(sources[arrayIndex].name, sources[arrayIndex], mapData, false))
-      }
+    for (let i: number = 0; i < sources.length && i < emptySpaces.length; i++) {
+      const mapData: BoxMapData = BoxMapData.buildNewFromRect(emptySpaces[i])
+      boxPromises.push(this.createBoxAndRenderPlaceholder(sources[i].name, sources[i], mapData, false))
     }
 
     return boxPromises

@@ -1,7 +1,12 @@
 import { renderManager, RenderPriority } from '../RenderManager'
 import * as indexHtmlIds from '../indexHtmlIds'
+import { LocalPosition } from './Transform'
 
-class Grid {
+export class Grid {
+
+  public static getStepSizeOfLayer(layer: number): number {
+    return 8 / Math.pow(2, layer)
+  }
 
   private static readonly layer1Steps: number[] = [
     0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 50, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100
@@ -54,7 +59,18 @@ class Grid {
     return '<div id="'+id+'" style="position:absolute;width:100%;height:100%">'+lines+'</div>'
   }
 
-  public roundToGridPosition(position: number): number {
+  public roundToGridPosition(position: number): number { // TODO: change signature to (position: LocalPosition): LocalPosition
+    return Grid.roundToLayer1GridScalar(position)
+  }
+
+  public static roundToLayer1GridPosition(position: LocalPosition): LocalPosition {
+    return new LocalPosition(
+      this.roundToLayer1GridScalar(position.percentX),
+      this.roundToLayer1GridScalar(position.percentY)
+    )
+  }
+
+  private static roundToLayer1GridScalar(position: number): number {
     let nearestGridPosition: number = 50
 
     for (const gridPosition of Grid.layer1Steps) {

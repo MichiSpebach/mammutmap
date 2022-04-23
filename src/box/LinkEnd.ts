@@ -221,7 +221,7 @@ export class LinkEnd implements Draggable<Box> {
 
   private getDeepestRenderedWayPointPositionInManagingBoxCoords(): LocalPosition {
     const deepestRendered: {box: Box, wayPoint: WayPointData} = this.getDeepestRenderedBox()
-    return this.getManagingBox().transformInnerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.getPosition())
+    return this.getManagingBox().transform.innerCoordsRecursiveToLocal(deepestRendered.box, deepestRendered.wayPoint.getPosition())
   }
 
   public getDeepestRenderedBox(): {box: Box, wayPoint: WayPointData} {

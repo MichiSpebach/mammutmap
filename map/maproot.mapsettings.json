@@ -114,13 +114,16 @@
 			"to": {
 				"path": [
 					{
-						"boxId": "p1f768sjqmg",
-						"boxName": "Rect.ts",
-						"x": 25,
-						"y": 0
+						"boxId": "1a5e3kn3reo",
+						"boxName": "ClientRect.ts",
+						"x": 50,
+						"y": 56.000000000000014
 					}
 				]
-			}
+			},
+			"tags": [
+				"hidden"
+			]
 		},
 		{
 			"id": "kngmr4gvmpo",
@@ -256,18 +259,18 @@
 					{
 						"boxId": "82efivc7np8",
 						"boxName": "ScaleManager.ts",
-						"x": 25,
-						"y": 0
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
 			"to": {
 				"path": [
 					{
-						"boxId": "p1f768sjqmg",
-						"boxName": "Rect.ts",
+						"boxId": "1a5e3kn3reo",
+						"boxName": "ClientRect.ts",
 						"x": 50,
-						"y": 100
+						"y": 50
 					}
 				]
 			}
@@ -606,10 +609,10 @@
 			"from": {
 				"path": [
 					{
-						"boxId": "3lnmuaqr88",
-						"boxName": "box",
-						"x": 100,
-						"y": 4.999548835350684
+						"boxId": "1a5e3kn3reo",
+						"boxName": "ClientRect.ts",
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -618,8 +621,8 @@
 					{
 						"boxId": "p1f768sjqmg",
 						"boxName": "Rect.ts",
-						"x": 0.07645065110471191,
-						"y": 55.14780835881753
+						"x": 50,
+						"y": 50
 					}
 				]
 			}
@@ -805,8 +808,14 @@
 					{
 						"boxId": "3lnmuaqr88",
 						"boxName": "box",
-						"x": 64.87717676410476,
-						"y": 89.57997356788897
+						"x": 59.99987050657827,
+						"y": 89.60030354183769
+					},
+					{
+						"boxId": "153ri2jccq8",
+						"boxName": "LinkEnd.ts",
+						"x": 50,
+						"y": 56.000000000000036
 					}
 				]
 			},
@@ -2039,6 +2048,81 @@
 						"boxId": "3ht1ieidr2o",
 						"boxName": "fileSystemAdapter.ts",
 						"x": 0,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "bn4n26bgreo",
+			"from": {
+				"path": [
+					{
+						"boxId": "j6acd5oeiog",
+						"boxName": "LocalRect.ts",
+						"x": 45.93194693116811,
+						"y": 54.8759946327554
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p1f768sjqmg",
+						"boxName": "Rect.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "flhj0s2bvo",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 100,
+						"y": 8
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "1a5e3kn3reo",
+						"boxName": "ClientRect.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "169r1gptt8o",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 100,
+						"y": 12
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "j6acd5oeiog",
+						"boxName": "LocalRect.ts",
+						"x": 50,
 						"y": 50
 					}
 				],

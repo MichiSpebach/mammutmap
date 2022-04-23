@@ -38,6 +38,24 @@ export class Transform {
     })
   }
 
+  public toParentPosition(position: LocalPosition): LocalPosition {
+    const rect: LocalRect = this.referenceBox.getLocalRect()
+    return new LocalPosition(
+      rect.x + position.percentX * (rect.width/100),
+      rect.y + position.percentY * (rect.height/100)
+    )
+  }
+
+  public innerCoordsRecursiveToLocal(innerBox: Box, innerPosition: LocalPosition): LocalPosition {
+    let tempBox: Box = innerBox
+    let tempPosition: LocalPosition = innerPosition
+    while (tempBox !== this.referenceBox) {
+      tempPosition = tempBox.transform.toParentPosition(tempPosition)
+      tempBox = tempBox.getParent() // TODO: warn if called with bad arguments?
+    }
+    return tempPosition
+  }
+
   public async getNearestGridPositionOfOtherTransform(position: ClientPosition, other: Transform): Promise<LocalPosition> {
     const clientPositionSnappedToGrid: ClientPosition = await other.getNearestGridPositionInClientCoords(position)
     return this.referenceBox.transform.clientToLocalPosition(clientPositionSnappedToGrid)

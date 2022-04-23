@@ -12,6 +12,10 @@ export class BoxMapData extends JsonObject {
   public height: number
   public links: BoxMapLinkData[]
 
+  public static buildNewFromRect(rect: LocalRect): BoxMapData {
+    return this.buildNew(rect.x, rect.y, rect.width, rect.height)
+  }
+
   public static buildNew(x: number, y: number, width: number, height: number): BoxMapData {
     return new BoxMapData(util.generateId(), x, y, width, height, [])
   }

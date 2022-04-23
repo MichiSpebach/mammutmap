@@ -169,22 +169,8 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.getParent().transform.localToClientRect(this.mapData.getRect())
   }
 
-  // TODO: move into Transform
-  public transformLocalToParent(position: LocalPosition): LocalPosition {
-    return new LocalPosition(
-      this.mapData.x + position.percentX * (this.mapData.width/100),
-      this.mapData.y + position.percentY * (this.mapData.height/100)
-    )
-  }
-
-  public transformInnerCoordsRecursiveToLocal(inner: Box, innerPosition: LocalPosition): LocalPosition {
-    let tempBox: Box = inner
-    let tempPosition: LocalPosition = innerPosition
-    while (tempBox !== this) {
-      tempPosition = tempBox.transformLocalToParent(tempPosition)
-      tempBox = tempBox.getParent()
-    }
-    return tempPosition
+  public getLocalRect(): LocalRect {
+    return this.mapData.getRect()
   }
 
   public async addWatcherAndUpdateRender(watcher: BoxWatcher): Promise<void> {

@@ -1,6 +1,5 @@
 import { util } from './util'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
-import { Rect } from './Rect'
 import { ClientRect } from './ClientRect'
 
 export type BatchMethod = 'innerHTML'|'style'|'addClassTo'|'removeClassFrom'

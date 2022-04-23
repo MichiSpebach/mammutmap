@@ -449,7 +449,7 @@
 					{
 						"boxId": "8hst7ghum5o",
 						"boxName": "FolderBox.ts",
-						"x": 50,
+						"x": 72,
 						"y": 50
 					}
 				]
@@ -459,8 +459,8 @@
 					{
 						"boxId": "rjo0gg3uqi",
 						"boxName": "FolderBoxBody.ts",
-						"x": 50,
-						"y": 88
+						"x": 43.999999999999986,
+						"y": 80
 					}
 				]
 			}
@@ -1126,6 +1126,171 @@
 						"boxName": "FolderBox.ts",
 						"x": 50,
 						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "bno2cafe2r",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 44,
+						"y": 84
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 72,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "v7l777n4ino",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ddk085fu74",
+						"boxName": "EmptySpaceFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "3mp2isqgbng",
+			"from": {
+				"path": [
+					{
+						"boxId": "ddk085fu74",
+						"boxName": "EmptySpaceFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "prafgl8pk4g",
+			"from": {
+				"path": [
+					{
+						"boxId": "ddk085fu74",
+						"boxName": "EmptySpaceFinder.ts",
+						"x": 49.68169941438982,
+						"y": 59.33303417656215
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2rhi7ulgmt8",
+						"boxName": "Grid.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "firph8ve3t",
+			"from": {
+				"path": [
+					{
+						"boxId": "ddk085fu74",
+						"boxName": "EmptySpaceFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 100,
+						"y": 11.999999999999998
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "fp80916o0qo",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 100,
+						"y": 11.999999999999996
 					}
 				],
 				"floatToBorder": true

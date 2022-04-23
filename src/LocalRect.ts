@@ -13,4 +13,17 @@ export class LocalRect extends Rect<LocalPosition> {
         return new LocalPosition(this.getRightX(), this.getBottomY())
     }
 
+    // TODO: make generic and move into Rect
+    public isPositionInside(position: LocalPosition): boolean {
+        return this.isPositionInsideRaw(position.percentX, position.percentY)
+    }
+
+    // TODO: make generic and move into Rect
+    public isOverlappingWith(other: LocalRect): boolean {
+      return this.isPositionInside(other.getTopLeftPosition())
+        || this.isPositionInside(other.getBottomRightPosition())
+        || other.isPositionInside(this.getTopLeftPosition())
+        || other.isPositionInside(this.getBottomRightPosition())
+    }
+
 }
