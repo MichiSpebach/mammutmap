@@ -81,7 +81,7 @@ export class BoxMapData extends JsonObject {
   }
 
   private warn(message: string): void {
-    util.logWarning('BoxData: ' + message)
+    util.logWarning('BoxData with id '+this.id+': ' + message)
   }
 
   public toJson(): string {
