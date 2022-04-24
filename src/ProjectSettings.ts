@@ -16,6 +16,10 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
   private srcRootPath: string
   private mapRootPath: string
 
+  public static isProjectSettingsFileName(fileName: string): boolean {
+    return fileName === this.preferredFileName || this.alternativeFileNames.includes(fileName)
+  }
+
   public static async loadFromFileSystem(filePath: string): Promise<ProjectSettings> {
     const settingsJson: string = await fileSystem.readFile(filePath) // TODO: implement and use fileSystem.readJsonFile(path: string): Object|any
     const settingsParsed: any = JSON.parse(settingsJson)

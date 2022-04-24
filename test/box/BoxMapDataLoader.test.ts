@@ -6,6 +6,7 @@ import { FolderBox } from '../../src/box/FolderBox'
 import { FolderBoxBody } from '../../src/box/FolderBoxBody'
 import { BoxMapData } from '../../src/box/BoxMapData'
 import { util } from '../../src/util'
+import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 
@@ -336,6 +337,38 @@ test('loadMapDatasWithoutSources referenceBox contains already a box', async () 
   expect(result).toEqual([{boxName: 'dirent2', mapData: mapDataDirent2}])
   expect(referenceBoxBody.containsBoxByName).toBeCalledTimes(2)
   expect(fileSystem.loadFromJsonFile).toBeCalledTimes(1)
+})
+
+test('loadMapDatasWithoutSources boxId is already used by another box', async () => {
+  const mapDirent1: MockProxy<Dirent> = buildDirentMock('dirent1.json')
+  const mapDirent2: MockProxy<Dirent> = buildDirentMock('dirent2.json')
+  const mapDataDirent1: BoxMapData = buildBoxMapData('dirent1')
+  const mapDataDirent2: BoxMapData = buildBoxMapData('dirent2')
+
+  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  fileSystem.loadFromJsonFile.calledWith('mapPath/dirent1.json', BoxMapData.buildFromJson).mockReturnValue(Promise.resolve(mapDataDirent1))
+  fileSystem.loadFromJsonFile.calledWith('mapPath/dirent2.json', BoxMapData.buildFromJson).mockReturnValue(Promise.resolve(mapDataDirent2))
+  initFileSystem(fileSystem)
+
+  const referenceBox: FolderBox = mock<FolderBox>()
+  referenceBox.getMapPath = () => 'mapPath'
+  const referenceBoxBody: MockProxy<FolderBoxBody> = mock<FolderBoxBody>()
+  referenceBoxBody.containsBoxByName.calledWith('dirent1').mockReturnValue(false)
+  referenceBoxBody.containsBoxByName.calledWith('dirent2').mockReturnValue(false)
+
+  const boxManager: MockProxy<BoxManager> = mock<BoxManager>()
+  boxManager.getBoxIfExists.calledWith(mapDataDirent1.id).mockReturnValue(mock())
+  boxManager.getBoxIfExists.calledWith(mapDataDirent2.id).mockReturnValue(undefined)
+  initBoxManager(boxManager)
+
+  const logWarning = jest.fn()
+  util.logWarning = logWarning
+
+  const loader: BoxMapDataLoader = new BoxMapDataLoader(referenceBox, referenceBoxBody)
+  const result = await loader.loadMapDatasWithoutSources([mapDirent1, mapDirent2])
+
+  expect(logWarning).toBeCalledWith('skipping mapPath/dirent1.json because its id dirent1BoxId is already in use by another box')
+  expect(result).toEqual([{boxName: 'dirent2', mapData: mapDataDirent2}])
 })
 
 function setupScenarioForLoadDirents(sourceDirents: Dirent[], mapDirents: Dirent[]): {

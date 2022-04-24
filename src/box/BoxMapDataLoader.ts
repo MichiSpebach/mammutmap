@@ -5,6 +5,7 @@ import { BoxMapData } from './BoxMapData'
 import { FolderBox } from './FolderBox'
 import { FolderBoxBody } from './FolderBoxBody'
 import { boxManager } from './BoxManager'
+import { ProjectSettings } from '../ProjectSettings'
 
 export class BoxMapDataLoader {
   private readonly referenceBox: FolderBox
@@ -123,7 +124,11 @@ export class BoxMapDataLoader {
         continue
       }
       if (boxManager.getBoxIfExists(mapData.id)) {
-        util.logWarning('skipping '+mapDataLoading.mapFilePath+' because its id '+mapData.id+' is already in use by another box')
+        if (!ProjectSettings.isProjectSettingsFileName(mapDataLoading.boxName+'.json')) {
+          let message = 'skipping '+mapDataLoading.mapFilePath
+          message += ' because its id '+mapData.id+' is already in use by another box'
+          util.logWarning(message)
+        }
         continue
       }
       mapDatasLoaded.push({boxName: mapDataLoading.boxName, mapData})
