@@ -1,8 +1,12 @@
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: auto;
   color: #ccc;
   background-color: #242832;
+}
+
+pre {
+  font-family: "Source Code Pro", Monaco, Consolas, "Courier New", monospace;
 }
 
 .terminal {

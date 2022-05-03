@@ -28,7 +28,8 @@ async function processCommand(command: string): Promise<void> {
       util.logInfo('closing finished')
       return
     case 'setCompatibilityTheme':
-      setCompatibilityTheme()
+      await setCompatibilityTheme()
+      util.logInfo('activated compatibilityTheme')
       return
     case 'setLogDebugActivated':
       if (parameter === 'true') {

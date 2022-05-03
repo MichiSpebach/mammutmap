@@ -1,3 +1,5 @@
+import * as indexHtmlIds from './indexHtmlIds'
+import { renderManager } from './RenderManager'
 
 interface Style {
   getHintClass(): string
@@ -113,13 +115,21 @@ class DarkTheme implements Style {
 }
 
 class CompatibilityTheme extends DarkTheme {
+
+  public static async new(): Promise<CompatibilityTheme> {
+    let additionalStyleSheets = '<link href="../node_modules/@fontsource/source-sans-pro/400.css" rel="stylesheet" type="text/css">'
+    additionalStyleSheets += '<link href="../node_modules/@fontsource/source-code-pro/400.css" rel="stylesheet" type="text/css">'
+    await renderManager.addContentTo(indexHtmlIds.headId, additionalStyleSheets)
+    return new CompatibilityTheme()
+  }
+
   public getHighlightTransitionClass(): string {
     return ''
   }
 }
 
-export function setCompatibilityTheme(): void {
-  style = new CompatibilityTheme()
+export async function setCompatibilityTheme(): Promise<void> {
+  style = await CompatibilityTheme.new()
 }
 
 export let style: Style = new DarkTheme()

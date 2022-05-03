@@ -45,6 +45,7 @@ test('zoom in and out without waiting', async () => {
   await gui.moveMouseTo(300, 300)
   await gui.zoomWithoutWaitingInBetween([1500, 2500, -250, 500, -485])
   await gui.clearTerminal()
+  await gui.moveMouseTo(300, 300)
   const image = await gui.takeScreenshot()
   expect(image).toMatchImageSnapshot(snapshotOptions)
 })

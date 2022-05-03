@@ -19,7 +19,7 @@ test('iterate over boxes', async () => {
   await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/c/a/a')
   expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
 
-  await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/b/a/a')
+  await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/d/a/a/a')
   expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
 
   expect(await gui.getNextSourcePathOfBoxIterator()).toBeUndefined()

@@ -1,4 +1,5 @@
 
+export const headId: string = 'head'
 export const bodyId: string = 'body'
 export const contentId: string = 'content'
 export const terminalId: string = 'terminal'
