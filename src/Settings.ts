@@ -3,13 +3,30 @@ import { fileSystem } from './fileSystemAdapter'
 
 class Settings {
 
-  private static readonly settingsFilePath: string = './settings.json'
+  private static readonly settingsFileName: string = 'settings.json'
+  private static readonly settingsFilePath: string = './'+Settings.settingsFileName
+  private static readonly alternativeSettingsFilePath: string = 'resources/app/'+Settings.settingsFileName
 
   private zoomSpeed: number
   private boxMinSizeToRender: number
 
-  public constructor() {
-    const settingsJson: string = fileSystem.readFileSync(Settings.settingsFilePath)
+  public static async loadFromFileSystem(): Promise<Settings> {
+    let settingsJson: string
+    if (await fileSystem.doesDirentExistAndIsFile(Settings.settingsFilePath)) {
+      settingsJson = await fileSystem.readFile(Settings.settingsFilePath)
+    } else { // happens when deployed application is started for the first time
+      let message = Settings.settingsFilePath+' not found'
+      message += ', loading application settings from '+Settings.alternativeSettingsFilePath+'.'
+      util.logInfo(message)
+      settingsJson = await fileSystem.readFile(Settings.alternativeSettingsFilePath).catch((reason) => {
+        util.logError('Failed to load application settings because: '+reason)
+      })
+    }
+
+    return new Settings(settingsJson)
+  }
+
+  private constructor(settingsJson: string) {
     const settingsParsed: any = JSON.parse(settingsJson)
 
     this.zoomSpeed = settingsParsed['zoomSpeed']
@@ -44,4 +61,10 @@ class Settings {
 
 }
 
-export const settings = new Settings()
+export let settings: Settings
+
+export const settingsOnStartup: Promise<Settings> = Settings.loadFromFileSystem() // TODO: use async module loading and get rid of this workaround
+
+settingsOnStartup.then((loadedSettings: Settings) => {
+  settings = loadedSettings
+})

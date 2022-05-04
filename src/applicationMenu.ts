@@ -1,7 +1,7 @@
 import { Menu, MenuItem, dialog } from 'electron'
 import { util } from './util'
 import { fileSystem } from './fileSystemAdapter'
-import { settings } from './Settings'
+import { settings, settingsOnStartup } from './Settings'
 import * as map from './Map'
 import { ProjectSettings } from './ProjectSettings'
 
@@ -27,16 +27,7 @@ export function setApplicationMenu(): void {
     {
       label: 'Settings',
       submenu: [
-        {
-          label: 'Zoom speed',
-          submenu: [
-            buildZoomSpeedMenuItem(1),
-            buildZoomSpeedMenuItem(2),
-            buildZoomSpeedMenuItem(3),
-            buildZoomSpeedMenuItem(4),
-            buildZoomSpeedMenuItem(5)
-          ]
-        }
+        buildZoomSpeedMenu()
       ]
     },
     {
@@ -175,11 +166,22 @@ async function openProjectFile(): Promise<void> {
   }
 }
 
-function buildZoomSpeedMenuItem(zoomSpeed: number): MenuItem {
+function buildZoomSpeedMenu(): MenuItem {
+  const zoomSpeedMenu = new MenuItem({
+    label: 'Zoom speed',
+    submenu: []
+  })
+  for (let i = 1; i <= 5; i++) {
+    buildZoomSpeedMenuItem(i).then(item => zoomSpeedMenu.submenu?.append(item))
+  }
+  return zoomSpeedMenu
+}
+
+async function buildZoomSpeedMenuItem(zoomSpeed: number): Promise<MenuItem> {
   return new MenuItem({
     label: zoomSpeed.toString(),
     type: 'radio',
-    checked: settings.getZoomSpeed() === zoomSpeed,
+    checked: (await settingsOnStartup).getZoomSpeed() === zoomSpeed,
     click: () => settings.setZoomSpeed(zoomSpeed)
   })
 }
