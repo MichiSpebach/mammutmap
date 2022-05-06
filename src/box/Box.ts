@@ -18,8 +18,9 @@ import { DragManager } from '../DragManager'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
-import { LocalPosition, Transform } from './Transform'
+import { Transform } from './Transform'
 import { grid } from './Grid'
+import { BoxNodesWidget } from './BoxNodesWidget'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -28,6 +29,7 @@ export abstract class Box implements DropTarget, Hoverable {
   private mapDataFileExists: boolean
   public readonly transform: Transform
   private readonly header: BoxHeader
+  public readonly nodes: BoxNodesWidget
   public readonly links: BoxLinks
   private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
   private rendered: boolean = false
@@ -41,6 +43,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.mapDataFileExists = mapDataFileExists
     this.transform = new Transform(this)
     this.header = this.createHeader()
+    this.nodes = new BoxNodesWidget(this.getId()+'Nodes', []) // TODO pass reference of mapData.nodes
     this.links = new BoxLinks(this)
 
     boxManager.addBox(this)
@@ -209,18 +212,21 @@ export abstract class Box implements DropTarget, Hoverable {
       const headerAndBodyHtml = `<div style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};">${headerHtml+bodyHtml}</div>`
       const borderHtml = `<div id="${this.getBorderId()}" class="${style.getBoxBorderClass()} ${style.getAdditionalBoxBorderClass(this.mapDataFileExists)}"></div>`
       const scaleToolPlaceholderHtml = `<div id="${this.getScaleToolPlaceHolderId()}"></div>`
+      const nodesHtml = `<div id="${this.nodes.getId()}"></div>`
       const linksHtml = `<div id="${this.links.getId()}"></div>`
-      await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+scaleToolPlaceholderHtml+linksHtml)
+      await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+scaleToolPlaceholderHtml+nodesHtml+linksHtml)
 
       await this.header.render()
-      this.renderAndRegisterBorderingLinks()
+      await this.renderAndRegisterBorderingLinks()
     }
 
     await this.renderBody()
     if (this.isBodyRendered()) {
+      await this.nodes.render()
       await this.links.render()
     } else {
       await this.links.unrender()
+      await this.nodes.unrender()
     }
 
     if (!this.isRendered()) {
@@ -255,22 +261,23 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(scaleTool.unrenderFrom(this))
     proms.push(this.links.unrender())
     //proms.push(this.borderingLinks.updateLinkEnds()) // TODO: otherwise links reference to not existing borderingBoxes
+    proms.push(this.nodes.unrender())
     proms.push(this.unrenderAdditional())
     await Promise.all(proms)
 
-    this.rendered = false
+  this.rendered = false
     return {rendered: false}
   }
 
-  private renderAndRegisterBorderingLinks(): void {
+  private async renderAndRegisterBorderingLinks(): Promise<void> {
     if (this.isRoot()) {
       return
     }
     const linksToUpdate: Link[] = this.getParent().filterBorderingLinksFor(this.getId())
-    linksToUpdate.forEach((link: Link) => {
-      link.render()
-      this.registerBorderingLink(link)
-    })
+    await Promise.all(linksToUpdate.map(async (link: Link) => {
+      await link.render()
+      this.registerBorderingLink(link) // TODO: move up?
+    }))
   }
 
   private onHoverOver(): void {

@@ -157,7 +157,7 @@ export class LinkEnd implements Draggable<Box> {
   }
 
   public async getRenderPositionInManagingBoxCoords(): Promise<LocalPosition> {
-    //if (this.data.floatToBorder) { // TODO: activate
+    //if (this.data.floatToBorder) { // TODO: activate or rename to renderInsideBox|renderInsideTargetBox
       let clientRect: Promise<ClientRect>
       if (this.dragState) {
         clientRect = this.dragState.dropTarget.getClientRect()

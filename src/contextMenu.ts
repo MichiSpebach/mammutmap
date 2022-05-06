@@ -11,19 +11,21 @@ import { ClientPosition, LocalPosition } from './box/Transform'
 import { BoxMapData } from './box/BoxMapData'
 import { TextInputPopup } from './TextInputPopup'
 import { SourcelessBox } from './box/SourcelessBox'
+import { NodeData } from './mapData/NodeData'
 
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
-  const atomCommand: string = 'atom '+box.getSrcPath()
+  const command: string = 'code '+box.getSrcPath()
   const template: any = [
     {
-      label: 'run '+atomCommand,
+      label: 'run '+command,
       click: () => {
-        util.runShellCommand(atomCommand)
+        util.runShellCommand(command)
       }
     }
   ]
   const menu = Menu.buildFromTemplate(template)
-  menu.insert(0, buildAddLinkItem(box, clientX, clientY))
+  menu.append(buildAddLinkItem(box, clientX, clientY))
+  menu.append(buildAddNodeItem(box, clientX, clientY))
   menu.append(buildRenameBoxItem(box))
   menu.popup()
 }
@@ -31,6 +33,7 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
 export function openForFolderBox(box: FolderBox, clientX: number, clientY: number): void {
   const menu = new Menu()
   menu.append(buildAddLinkItem(box, clientX, clientY))
+  menu.append(buildAddNodeItem(box, clientX, clientY))
   menu.append(buildRenameBoxItem(box))
   menu.append(buildAddNewFileItem(box, clientX, clientY))
   menu.append(buildAddNewFolderItem(box, clientX, clientY))
@@ -40,6 +43,7 @@ export function openForFolderBox(box: FolderBox, clientX: number, clientY: numbe
 export function openForSourcelessBox(box: SourcelessBox, clientX: number, clientY: number): void {
   const menu = new Menu()
   menu.append(buildAddLinkItem(box, clientX, clientY))
+  menu.append(buildAddNodeItem(box, clientX, clientY))
   menu.append(buildRenameBoxItem(box))
   menu.popup()
 }
@@ -53,6 +57,10 @@ export function openForLink(link: Link, clientX: number, clientY: number): void 
 
 function buildAddLinkItem(box: Box, clientX: number, clientY: number): MenuItem {
   return new MenuItem({label: 'link from here', click: () => addLinkToBox(box, clientX, clientY)})
+}
+
+function buildAddNodeItem(box: Box, clientX: number, clientY: number): MenuItem {
+  return new MenuItem({label: 'add link node here', click: () => addNodeToBox(box, new ClientPosition(clientX, clientY))})
 }
 
 function buildHideOrShowLinkItem(link: Link): MenuItem {
@@ -106,4 +114,9 @@ async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise
   const link: Link = await box.links.addLink(new LinkEndData([from], true), new LinkEndData([to], true), false)
 
   DragManager.startDragWithClickToDropMode(link.getTo())
+}
+
+async function addNodeToBox(box: Box, position: ClientPosition): Promise<void> {
+  const positionInBox: LocalPosition = await box.transform.clientToLocalPosition(position)
+  await box.nodes.add(NodeData.buildNew(positionInBox.percentX, positionInBox.percentY))
 }
