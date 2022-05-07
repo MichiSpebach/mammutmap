@@ -37,11 +37,13 @@ export abstract class BoxBody {
       this.renderInProgress = false
       if (this.isRendered() && await this.shouldBeUnrendered()) {
         await this.unrenderIfPossible()
+        return
       }
       if (!this.isRendered()) {
         await this.renderZoomInToRenderHint()
+        return
       }
-      return
+      // no return here, stays rendered, render needs to be propagated
     }
 
     await this.unrenderZoomInToRenderHint()
@@ -115,7 +117,7 @@ export abstract class BoxBody {
       return true
     }
 
-    const boxRect: ClientRect = await renderManager.getClientRectOf(this.referenceBox.getId())
+    const boxRect: ClientRect = await this.referenceBox.getClientRect()
     return this.isRectLargeEnoughToRender(boxRect) && this.isRectInsideScreen(boxRect)
   }
 
@@ -123,7 +125,7 @@ export abstract class BoxBody {
     if (this.referenceBox.isRoot() || this.referenceBox.hasWatchers()) {
       return false
     }
-    const boxRect: ClientRect = await renderManager.getClientRectOf(this.referenceBox.getId())
+    const boxRect: ClientRect = await this.referenceBox.getClientRect()
     return this.isRectSmallEnoughToUnrender(boxRect) || this.isRectNotablyOutsideScreen(boxRect)
   }
 
