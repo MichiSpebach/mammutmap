@@ -31,11 +31,13 @@ export class HoverManager {
     })
   }
 
-  public static async removeHoverable(hoverable: Hoverable): Promise<void> {
+  public static async removeHoverable(hoverable: Hoverable, callOnHoverOutIfHovered: boolean = false): Promise<void> {
     await renderManager.removeEventListenerFrom(hoverable.getId(), 'mouseover')
 
     if (this.state !== null && this.state.hovering === hoverable) {
-      this.state.onHoverOut()
+      if (callOnHoverOutIfHovered) {
+        this.state.onHoverOut()
+      }
       this.state = null
     }
   }

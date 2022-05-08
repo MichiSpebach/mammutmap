@@ -1,0 +1,72 @@
+{
+	"srcRootPath": "../",
+	"mapRootPath": "./",
+	"id": "seqo19e49e8",
+	"x": 5,
+	"y": 5,
+	"width": 90,
+	"height": 90,
+	"links": [
+		{
+			"id": "84f786f45ao",
+			"from": {
+				"path": [
+					{
+						"boxId": "2dqgm2pes88",
+						"boxName": "2dqgm2pes88",
+						"x": 52.713123839999994,
+						"y": 69.15362304
+					},
+					{
+						"boxId": "9p7bn9beig8",
+						"boxName": "9p7bn9beig8",
+						"x": 53.98988799999999,
+						"y": 48.372352
+					},
+					{
+						"boxId": "33tlvcjic0o",
+						"boxName": "33tlvcjic0o",
+						"x": 43.31647999999999,
+						"y": 47.606399999999994
+					},
+					{
+						"boxId": "eea4o8tsrng",
+						"boxName": "eea4o8tsrng",
+						"x": 51.93599999999999,
+						"y": 46.48
+					},
+					{
+						"boxId": "vdtdrp5vm8g",
+						"boxName": "vdtdrp5vm8g",
+						"x": 66.55999999999999,
+						"y": 41.99999999999999
+					},
+					{
+						"boxId": "mqb9kv7gjvg",
+						"boxName": "mqb9kv7gjvg",
+						"x": 96,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "hu6b9vkohpg",
+						"boxName": "hu6b9vkohpg",
+						"x": 53.6,
+						"y": 50
+					},
+					{
+						"boxId": "faokom090og",
+						"boxName": "faokom090og",
+						"x": 60,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	]
+}

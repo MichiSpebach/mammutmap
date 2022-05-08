@@ -1,0 +1,40 @@
+{
+	"id": "33tlvcjic0o",
+	"x": 28.000000000000004,
+	"y": 16,
+	"width": 44,
+	"height": 68,
+	"links": [
+		{
+			"id": "7f9fpmoncco",
+			"from": {
+				"path": [
+					{
+						"boxId": "eea4o8tsrng",
+						"boxName": "eea4o8tsrng",
+						"x": 63.680000000000014,
+						"y": 64.96
+					},
+					{
+						"boxId": "vdtdrp5vm8g",
+						"boxName": "vdtdrp5vm8g",
+						"x": 68,
+						"y": 84
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "33tlvcjic0o",
+						"boxName": "33tlvcjic0o",
+						"x": 60,
+						"y": 92
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	]
+}

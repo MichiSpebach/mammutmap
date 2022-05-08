@@ -78,7 +78,7 @@ export class Link implements Hoverable {
       await renderManager.setContentTo(this.getId(), svgHtml+fromHtml+toHtml, priority)
       proms.push(renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;', priority))
       this.registerAtBorderingBoxes()
-      proms.push(this.addContextMenu())
+      proms.push(this.addEventListeners())
       this.rendered = true
     } else {
       proms.push(renderManager.setContentTo(this.getId()+'svg', lineHtml, priority))
@@ -103,7 +103,7 @@ export class Link implements Hoverable {
 
     const proms: Promise<any>[] = []
 
-    proms.push(this.removeContextMenu())
+    proms.push(this.removeEventListeners())
     this.deregisterAtBorderingBoxes()
     proms.push(this.from.unrender())
     proms.push(this.to.unrender())
@@ -188,31 +188,39 @@ export class Link implements Hoverable {
     return 'style="stroke:'+style.getLinkColor()+';stroke-width:2px;'+pointerEventsStyle+'"'
   }
 
-  private async addContextMenu(): Promise<void> {
+  private async addEventListeners(): Promise<void> {
     const proms: Promise<any>[] = []
-
     proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, clientX, clientY)))
-    proms.push(HoverManager.addHoverable(
-      this,
-      () => {
-        this.setHighlight(true)
-        this.render(RenderPriority.RESPONSIVE, false, true)
-      },
-      () => {
-        this.setHighlight(false)
-        this.render(RenderPriority.RESPONSIVE, false, false)
-      }
-    ))
-
+    proms.push(HoverManager.addHoverable(this, () => this.handleHoverOver(),() => this.handleHoverOut()))
     await Promise.all(proms)
   }
 
-  private async removeContextMenu(): Promise<void> {
+  private async removeEventListeners(): Promise<void> {
     const proms: Promise<any>[] = []
-
     proms.push(HoverManager.removeHoverable(this))
     proms.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))
+    await Promise.all(proms)
+  }
 
+  private async handleHoverOver(): Promise<void> {
+    if (!this.rendered) {
+      util.logWarning('handleHoverHover() called on link with id '+this.getId()+' altough link is not rendered.')
+      return
+    }
+    const proms: Promise<any>[] = []
+    proms.push(this.setHighlight(true))
+    proms.push(this.render(RenderPriority.RESPONSIVE, false, true))
+    await Promise.all(proms)
+  }
+
+  private async handleHoverOut(): Promise<void> {
+    if (!this.rendered) {
+      util.logWarning('handleHoverOut() called on link with id '+this.getId()+' altough link is not rendered.')
+      return
+    }
+    const proms: Promise<any>[] = []
+    proms.push(this.setHighlight(false))
+    proms.push(this.render(RenderPriority.RESPONSIVE, false, false))
     await Promise.all(proms)
   }
 

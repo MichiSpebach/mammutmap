@@ -8,14 +8,16 @@ const snapshotOptions: MatchImageSnapshotOptions = {
   customDiffConfig: {threshold: 0.15}
 }
 
+beforeEach(async () => {
+  await gui.resetWindow()
+  await gui.openFolder('testE2e/links/scenario')
+})
+
 afterAll(async () => {
   await gui.resetWindow()
 })
 
 test('highlighting of bordering links of hovered box', async () => {
-  await gui.resetWindow()
-  await gui.openFolder('testE2e/links/scenario')
-
   expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
 
   await gui.moveMouseTo(400, 200)
@@ -32,9 +34,6 @@ test('highlighting of bordering links of hovered box', async () => {
 }, 10000)
 
 test('highlighting when spamming changing mouse position', async () => {
-  await gui.resetWindow()
-  await gui.openFolder('testE2e/links/scenario')
-
   for (let round = 0; round < 10; round++) {
     let x: number = 100
     let y: number = 100

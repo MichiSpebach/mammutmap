@@ -1,0 +1,249 @@
+{
+	"id": "9p7bn9beig8",
+	"x": 16,
+	"y": 44,
+	"width": 68,
+	"height": 52,
+	"links": [
+		{
+			"id": "o6viacjj45g",
+			"from": {
+				"path": [
+					{
+						"boxId": "36cern10u38",
+						"boxName": "36cern10u38",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "33tlvcjic0o",
+						"boxName": "33tlvcjic0o",
+						"x": 35.44447999999999,
+						"y": 46.864384
+					},
+					{
+						"boxId": "eea4o8tsrng",
+						"boxName": "eea4o8tsrng",
+						"x": 30.848000000000003,
+						"y": 45.3888
+					},
+					{
+						"boxId": "vdtdrp5vm8g",
+						"boxName": "vdtdrp5vm8g",
+						"x": 24.800000000000004,
+						"y": 39.519999999999996
+					},
+					{
+						"boxId": "mqb9kv7gjvg",
+						"boxName": "mqb9kv7gjvg",
+						"x": 7.999999999999999,
+						"y": 31.999999999999996
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "ohtfvvn1rb",
+			"from": {
+				"path": [
+					{
+						"boxId": "9p7bn9beig8",
+						"boxName": "9p7bn9beig8",
+						"x": 44,
+						"y": 92.00000000000001
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "33tlvcjic0o",
+						"boxName": "33tlvcjic0o",
+						"x": 36.83071999999999,
+						"y": 48.803200000000004
+					},
+					{
+						"boxId": "eea4o8tsrng",
+						"boxName": "eea4o8tsrng",
+						"x": 32.672,
+						"y": 48.24
+					},
+					{
+						"boxId": "vdtdrp5vm8g",
+						"boxName": "vdtdrp5vm8g",
+						"x": 27.200000000000003,
+						"y": 46
+					},
+					{
+						"boxId": "mqb9kv7gjvg",
+						"boxName": "mqb9kv7gjvg",
+						"x": 12.000000000000002,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "q2mg9fp0tlg",
+			"from": {
+				"path": [
+					{
+						"boxId": "33tlvcjic0o",
+						"boxName": "33tlvcjic0o",
+						"x": 63.16928000000001,
+						"y": 48.8032
+					},
+					{
+						"boxId": "eea4o8tsrng",
+						"boxName": "eea4o8tsrng",
+						"x": 67.328,
+						"y": 48.24
+					},
+					{
+						"boxId": "vdtdrp5vm8g",
+						"boxName": "vdtdrp5vm8g",
+						"x": 72.80000000000001,
+						"y": 46
+					},
+					{
+						"boxId": "mqb9kv7gjvg",
+						"boxName": "mqb9kv7gjvg",
+						"x": 88.00000000000001,
+						"y": 50.000000000000014
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "9p7bn9beig8",
+						"boxName": "9p7bn9beig8",
+						"x": 56.00000000000001,
+						"y": 11.999999999999998
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "ka9me5ll9ag",
+			"from": {
+				"path": [
+					{
+						"boxId": "36cern10u38",
+						"boxName": "36cern10u38",
+						"x": 50.000000000000014,
+						"y": 68.00000000000001
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "33tlvcjic0o",
+						"boxName": "33tlvcjic0o",
+						"x": 28.051199999999994,
+						"y": 51.795199999999994
+					},
+					{
+						"boxId": "eea4o8tsrng",
+						"boxName": "eea4o8tsrng",
+						"x": 21.11999999999999,
+						"y": 52.64
+					},
+					{
+						"boxId": "vdtdrp5vm8g",
+						"boxName": "vdtdrp5vm8g",
+						"x": 11.999999999999996,
+						"y": 56.00000000000001
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "akvsvb8oceo",
+			"from": {
+				"path": [
+					{
+						"boxId": "9p7bn9beig8",
+						"boxName": "9p7bn9beig8",
+						"x": 44,
+						"y": 8.000000000000002
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "33tlvcjic0o",
+						"boxName": "33tlvcjic0o",
+						"x": 36.83072,
+						"y": 48.80319999999999
+					},
+					{
+						"boxId": "eea4o8tsrng",
+						"boxName": "eea4o8tsrng",
+						"x": 32.672,
+						"y": 48.239999999999995
+					},
+					{
+						"boxId": "vdtdrp5vm8g",
+						"boxName": "vdtdrp5vm8g",
+						"x": 27.200000000000003,
+						"y": 46
+					},
+					{
+						"boxId": "mqb9kv7gjvg",
+						"boxName": "mqb9kv7gjvg",
+						"x": 12,
+						"y": 49.999999999999986
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "ji6dnjkqbp",
+			"from": {
+				"path": [
+					{
+						"boxId": "33tlvcjic0o",
+						"boxName": "33tlvcjic0o",
+						"x": 18.08,
+						"y": 43.2
+					},
+					{
+						"boxId": "eea4o8tsrng",
+						"boxName": "eea4o8tsrng",
+						"x": 7.999999999999997,
+						"y": 40
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "36cern10u38",
+						"boxName": "36cern10u38",
+						"x": 50,
+						"y": 36.00000000000001
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	]
+}
