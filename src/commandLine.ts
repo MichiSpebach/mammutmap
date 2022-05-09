@@ -27,6 +27,10 @@ async function processCommand(command: string): Promise<void> {
       await map.unloadAndUnsetMap()
       util.logInfo('closing finished')
       return
+    case 'openDevTools':
+      util.logInfo('opening developerTools')
+      renderManager.openDevTools()
+      return
     case 'setCompatibilityTheme':
       await setCompatibilityTheme()
       util.logInfo('activated compatibilityTheme')

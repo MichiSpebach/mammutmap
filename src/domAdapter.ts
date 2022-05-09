@@ -25,6 +25,10 @@ export class DocumentObjectModelAdapter {
     // TODO: define 'let ipc = require("electron").ipcRenderer;' in renderer only once
   }
 
+  public openDevTools(): void {
+    this.webContents.openDevTools()
+  }
+
   public getClientSize(): {width: number, height: number} {
     const size: number[] = this.renderWindow.getContentSize()
     return {width: size[0], height: size[1]}
