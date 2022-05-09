@@ -4,9 +4,17 @@ import * as contextMenu from '../contextMenu'
 import { Box } from './Box'
 import { BoxHeader } from './BoxHeader'
 import { SourcelessBoxHeader } from './SourcelessBoxHeader'
+import { FolderBox } from './FolderBox'
+import { BoxMapData } from './BoxMapData'
 
 export class SourcelessBox extends Box {
+  private content: string
   private bodyRendered: boolean = false
+
+  public constructor(name: string, parent: FolderBox, mapData: BoxMapData, mapDataFileExists: boolean, content: string) {
+    super(name, parent, mapData, mapDataFileExists)
+    this.content = content
+  }
 
   protected createHeader(): BoxHeader {
     return new SourcelessBoxHeader(this)
@@ -51,7 +59,7 @@ export class SourcelessBox extends Box {
   }
 
   protected async renderBody(): Promise<void> {
-    await renderManager.setContentTo(this.getBodyId(), 'source not found') // TODO: drag to other box or drop other box here to fuse
+    await renderManager.setContentTo(this.getBodyId(), this.content) // TODO: if source not found 'drag to other box or drop other box here to fuse'
     this.bodyRendered = true
   }
 
