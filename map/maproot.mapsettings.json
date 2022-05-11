@@ -2128,6 +2128,34 @@
 				],
 				"floatToBorder": true
 			}
+		},
+		{
+			"id": "3asabotdq1g",
+			"from": {
+				"path": [
+					{
+						"boxId": "ita04k5ms68",
+						"boxName": "applicationMenu.ts",
+						"x": 43.00736937308744,
+						"y": 53.30400796056149
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 56.000000000000014
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
 		}
 	]
 }

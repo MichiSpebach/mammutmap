@@ -4,7 +4,6 @@ import * as domAdapter from './domAdapter'
 import * as commandLine from './commandLine'
 import * as applicationMenu from './applicationMenu'
 import * as pluginLoader from './pluginLoader'
-import { Map } from './Map'
 
 var mainWindow: BrowserWindow
 
@@ -16,7 +15,6 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 const createWindow = () => {
   applicationMenu.setApplicationMenu()
 
-  // Create the browser window.
   mainWindow = new BrowserWindow({
     height: 800,
     width: 1600,
@@ -25,16 +23,10 @@ const createWindow = () => {
     }
   });
 
-  // and load the index.html of the app.
   mainWindow.loadFile(path.join(__dirname, '../src/index.html'))
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools();
 
   domAdapter.initFromBrowserWindow(mainWindow)
   commandLine.init()
-
-  //Map.new('./src', './map')
 
   pluginLoader.loadPlugins()
 };

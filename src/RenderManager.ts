@@ -8,6 +8,10 @@ export class RenderManager {
     this.commands = []
   }
 
+  public openDevTools(): void {
+    dom.openDevTools()
+  }
+
   public getClientSize(): {width: number, height: number} {
     return dom.getClientSize()
   }

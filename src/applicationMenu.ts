@@ -4,6 +4,7 @@ import { fileSystem } from './fileSystemAdapter'
 import { settings, settingsOnStartup } from './Settings'
 import * as map from './Map'
 import { ProjectSettings } from './ProjectSettings'
+import { renderManager } from './RenderManager'
 
 export function setApplicationMenu(): void {
   const template: any = [
@@ -27,6 +28,12 @@ export function setApplicationMenu(): void {
     {
       label: 'Settings',
       submenu: [
+        {
+          label: 'Open DeveloperTools',
+          click: () => {
+            renderManager.openDevTools()
+          }
+        },
         buildZoomSpeedMenu()
       ]
     },
