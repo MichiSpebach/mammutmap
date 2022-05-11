@@ -7,6 +7,7 @@ import { Box } from './Box'
 import { FolderBox } from './FolderBox'
 import { ClientPosition, LocalPosition } from './Transform'
 import { style } from '../styleAdapter'
+import { settings } from '../Settings'
 
 export abstract  class BoxHeader implements Draggable<FolderBox> {
   public readonly referenceBox: Box
@@ -26,7 +27,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public canBeDroppedInto(dropTarget: DropTarget): boolean {
-    return dropTarget instanceof FolderBox
+    return settings.getBoxesDraggableIntoOtherBoxes() && dropTarget instanceof FolderBox
   }
 
   public async render(): Promise<void> {

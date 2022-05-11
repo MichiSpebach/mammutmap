@@ -9,6 +9,7 @@ class Settings {
 
   private zoomSpeed: number
   private boxMinSizeToRender: number
+  private boxesDraggableIntoOtherBoxes: boolean
 
   public static async loadFromFileSystem(): Promise<Settings> {
     let settingsJson: string
@@ -31,6 +32,7 @@ class Settings {
 
     this.zoomSpeed = settingsParsed['zoomSpeed']
     this.boxMinSizeToRender = settingsParsed['boxMinSizeToRender']
+    this.boxesDraggableIntoOtherBoxes = settingsParsed['boxesDraggableIntoOtherBoxes']
   }
 
   private async save(): Promise<void> {
@@ -56,6 +58,15 @@ class Settings {
 
   public async setBoxMinSizeToRender(value: number) {
     this.boxMinSizeToRender = value
+    await this.save()
+  }
+
+  public getBoxesDraggableIntoOtherBoxes(): boolean {
+    return this.boxesDraggableIntoOtherBoxes
+  }
+
+  public async setBoxesDraggableIntoOtherBoxes(value: boolean) {
+    this.boxesDraggableIntoOtherBoxes = value
     await this.save()
   }
 
