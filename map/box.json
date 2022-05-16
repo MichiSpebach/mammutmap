@@ -735,8 +735,8 @@
 					{
 						"boxId": "abdt6a40aoo",
 						"boxName": "BoxBody.ts",
-						"x": 50.000835743059156,
-						"y": 100
+						"x": 50,
+						"y": 50
 					}
 				]
 			}
@@ -1270,6 +1270,125 @@
 			"tags": [
 				"hidden"
 			]
+		},
+		{
+			"id": "rj3ns38hvt8",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 53.8786334088756,
+						"y": 35.628191696044794
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 50,
+						"y": 0
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "04416g7tb0g",
+			"from": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 50,
+						"y": 0
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "8k1ggo7bqkg",
+			"from": {
+				"path": [
+					{
+						"boxId": "96nihtd8s1",
+						"boxName": "FileBoxBody.ts",
+						"x": 100,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 50,
+						"y": 0
+					}
+				]
+			}
+		},
+		{
+			"id": "pqgjpkifd1o",
+			"from": {
+				"path": [
+					{
+						"boxId": "8i2aqhl305",
+						"boxName": "RootFolderBox.ts",
+						"x": 100,
+						"y": 14.990575451823926
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 50,
+						"y": 0
+					}
+				]
+			}
+		},
+		{
+			"id": "dp372otc5fo",
+			"from": {
+				"path": [
+					{
+						"boxId": "abdt6a40aoo",
+						"boxName": "BoxBody.ts",
+						"x": 69.99871569844599,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 50,
+						"y": 0
+					}
+				]
+			}
 		}
 	]
 }
