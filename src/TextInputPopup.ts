@@ -1,10 +1,8 @@
+import { PopupWidget } from './PopupWidget'
 import { renderManager } from './RenderManager'
-import { style } from './styleAdapter'
 import { util } from './util'
 
-export class TextInputPopup {
-    private readonly id: string
-    private readonly title: string
+export class TextInputPopup extends PopupWidget {
     private readonly defaultValue: string
     private readonly resolve: (text: string|undefined) => void
 
@@ -19,38 +17,29 @@ export class TextInputPopup {
     }
 
     private constructor(title: string, defaultValue: string, resolve: (text: string|undefined) => void) {
-        this.id = 'textInputPopup'+util.generateId()
-        this.title = title
+        super('textInputPopup'+util.generateId(), title)
         this.defaultValue = defaultValue
         this.resolve = resolve
     }
 
-    private async render(): Promise<void> {
-        let html = `<div id="${this.id}" class="${style.getPopupClass()}">`
-        html += `<div style="margin-bottom:5px;">${this.title}<button id="${this.id+'Close'}" style="float:right">X</button></div>`
-        html += `<form id="${this.id+'Form'}" onsubmit="return false">` // onsubmit="return false" prevents action from trying to call an url
-        html += `<input onfocus="this.select()" id="${this.id+'Input'}" value="${this.defaultValue}" autofocus>` // TODO: autofocus only works once
-        html += `<button id="${this.id+'Ok'}">ok</button>`
-        html += '</form>'
-        html += '</div>'
+    protected formContentHtml(): string {
+      let html = `<form id="${this.getId()+'Form'}" onsubmit="return false">` // onsubmit="return false" prevents action from trying to call an url
+      html += `<input onfocus="this.select()" id="${this.getId()+'Input'}" value="${this.defaultValue}" autofocus>` // TODO: autofocus only works once
+      html += `<button id="${this.getId()+'Ok'}">ok</button>`
+      html += '</form>'
+      return html
+    }
 
-        await renderManager.addContentTo('body', html)
-
-        await renderManager.addEventListenerTo(this.id+'Close', 'click', async () => {
-            this.resolve(undefined)
-            this.unrender()
-        })
-        await renderManager.addEventListenerTo(this.id+'Ok', 'click', async () => {
-            const value: string = await renderManager.getValueOf(this.id+'Input')
+    protected async afterRender(): Promise<void> {
+        await renderManager.addEventListenerTo(this.getId()+'Ok', 'click', async () => {
+            const value: string = await renderManager.getValueOf(this.getId()+'Input')
             this.resolve(value)
             this.unrender()
         })
     }
 
-    private async unrender(): Promise<void> {
-        await renderManager.removeEventListenerFrom(this.id+'Close', 'click')
-        await renderManager.removeEventListenerFrom(this.id+'Ok', 'click')
-        await renderManager.remove(this.id)
+    protected async beforeUnrender(): Promise<void> {
+        await renderManager.removeEventListenerFrom(this.getId()+'Ok', 'click')
     }
 
 }
