@@ -241,7 +241,7 @@ export class DocumentObjectModelAdapter {
   public async executeJavaScriptSuppressingErrors(jsToExecute: string): Promise<void> { // public only for unit tests
     try {
       await this.executeJavaScript(jsToExecute)
-    } catch(error) {
+    } catch(error: any) {
       util.logWarning(error.message)
     }
   }

@@ -43,7 +43,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.mapDataFileExists = mapDataFileExists
     this.transform = new Transform(this)
     this.header = this.createHeader()
-    this.nodes = new BoxNodesWidget(this.getId()+'Nodes', []) // TODO pass reference of mapData.nodes
+    this.nodes = new BoxNodesWidget(this.getId()+'Nodes', mapData.nodes, () => this.saveMapData())
     this.links = new BoxLinks(this)
 
     boxManager.addBox(this)
