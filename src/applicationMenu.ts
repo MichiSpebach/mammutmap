@@ -1,10 +1,10 @@
 import { Menu, MenuItem, dialog } from 'electron'
 import { util } from './util'
 import { fileSystem } from './fileSystemAdapter'
-import { settings, settingsOnStartup } from './Settings'
 import * as map from './Map'
 import { ProjectSettings } from './ProjectSettings'
 import { renderManager } from './RenderManager'
+import * as settingsWidget from './settingsWidget'
 
 export function setApplicationMenu(): void {
   const template: any = [
@@ -29,12 +29,17 @@ export function setApplicationMenu(): void {
       label: 'Settings',
       submenu: [
         {
-          label: 'Open DeveloperTools',
+          label: 'ApplicationSettings',
+          click: () => {
+            settingsWidget.openIfNotOpened()
+          }
+        },
+        {
+          label: 'DeveloperTools',
           click: () => {
             renderManager.openDevTools()
           }
-        },
-        buildZoomSpeedMenu()
+        }
       ]
     },
     {
@@ -171,24 +176,4 @@ async function openProjectFile(): Promise<void> {
   } catch (error) {
     util.logError('Failed to open ProjectSettings at '+filePath+'. '+error)
   }
-}
-
-function buildZoomSpeedMenu(): MenuItem {
-  const zoomSpeedMenu = new MenuItem({
-    label: 'Zoom speed',
-    submenu: []
-  })
-  for (let i = 1; i <= 5; i++) {
-    buildZoomSpeedMenuItem(i).then(item => zoomSpeedMenu.submenu?.append(item))
-  }
-  return zoomSpeedMenu
-}
-
-async function buildZoomSpeedMenuItem(zoomSpeed: number): Promise<MenuItem> {
-  return new MenuItem({
-    label: zoomSpeed.toString(),
-    type: 'radio',
-    checked: (await settingsOnStartup).getZoomSpeed() === zoomSpeed,
-    click: () => settings.setZoomSpeed(zoomSpeed)
-  })
 }

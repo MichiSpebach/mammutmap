@@ -139,6 +139,24 @@ export class DocumentObjectModelAdapter {
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, value: string) => callback(value))
   }
 
+  public async addChangeListenerTo<RETURN_TYPE>(
+    id: string,
+    returnField: 'value'|'checked',
+    callback: (value: RETURN_TYPE) => void
+  ): Promise<void> {
+    let ipcChannelName = 'change_'+id
+
+    let rendererFunction: string = '(event) => {'
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+    //rendererFunction += 'console.log(event);'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.target.'+returnField+');'
+    rendererFunction += '}'
+
+    await this.executeJavaScriptInFunction("document.getElementById('"+id+"').onchange = "+rendererFunction)
+
+    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
+  }
+
   public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
     let ipcChannelName = 'wheel_'+id
 
@@ -195,7 +213,7 @@ export class DocumentObjectModelAdapter {
 
   public async removeEventListenerFrom(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'change'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
   ): Promise<void> {
     const ipcChannelName = eventType+'_'+id
     await this.executeJsOnElement(id, "on"+eventType+" = null")

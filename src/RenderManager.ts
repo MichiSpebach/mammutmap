@@ -99,6 +99,18 @@ export class RenderManager {
     }))
   }
 
+  public addChangeListenerTo<RETURN_TYPE>(
+    id: string,
+    returnField: 'value'|'checked',
+    callback: (value: RETURN_TYPE) => void,
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addChangeListenerTo<RETURN_TYPE>(id, returnField, callback)
+    }))
+  }
+
   public addEventListenerTo(
     id: string,
     eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove',
@@ -125,7 +137,7 @@ export class RenderManager {
 
   public removeEventListenerFrom(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter',
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'change'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter',
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
     return this.runOrSchedule(new Command({
