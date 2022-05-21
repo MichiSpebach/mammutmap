@@ -10,6 +10,11 @@ export class NodeData extends JsonObject {
         return new NodeData(util.generateId(), x, y)
     }
 
+    public static buildFromRawObject(object: any): NodeData {
+        // TODO: implement validate like in BoxMapData to warn when loaded data is corrupted
+        return new NodeData(object.id, object.x, object.y) // raw object would have no methods
+    }
+
     public constructor(id: string, x: number, y: number) {
         super()
         this.id = id

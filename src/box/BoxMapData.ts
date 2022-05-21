@@ -3,6 +3,7 @@ import { JsonObject } from '../JsonObject'
 import { util } from '../util'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { LocalPosition } from './Transform'
+import { NodeData } from '../mapData/NodeData'
 
 export class BoxMapData extends JsonObject {
   public readonly id: string
@@ -10,14 +11,15 @@ export class BoxMapData extends JsonObject {
   public y: number
   public width: number
   public height: number
-  public links: BoxMapLinkData[]
+  public readonly links: BoxMapLinkData[]
+  public readonly nodes: NodeData[]
 
   public static buildNewFromRect(rect: LocalRect): BoxMapData {
     return this.buildNew(rect.x, rect.y, rect.width, rect.height)
   }
 
   public static buildNew(x: number, y: number, width: number, height: number): BoxMapData {
-    return new BoxMapData(util.generateId(), x, y, width, height, [])
+    return new BoxMapData(util.generateId(), x, y, width, height, [], [])
   }
 
   public static buildFromJson(json: string ): BoxMapData /*| SyntaxError*/ {
@@ -29,17 +31,25 @@ export class BoxMapData extends JsonObject {
     }
 
     let links: BoxMapLinkData[]
-    let rawLinks: BoxMapLinkData[] = parsedData.links
+    let rawLinks: BoxMapLinkData[]|undefined = parsedData.links
     if (!rawLinks) {
       links = []
     } else {
-      links = rawLinks.map(BoxMapLinkData.buildFromRawObject)
+      links = rawLinks.map(BoxMapLinkData.buildFromRawObject) // raw object would have no methods
     }
 
-    return new BoxMapData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height, links)
+    let nodes: NodeData[]
+    let rawNodes: NodeData[]|undefined = parsedData.nodes
+    if (!rawNodes) {
+      nodes = []
+    } else {
+      nodes = rawNodes.map(NodeData.buildFromRawObject) // raw object would have no methods
+    }
+
+    return new BoxMapData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height, links, nodes)
   }
 
-  public constructor(id: string, x: number, y: number, width: number, height: number, links: BoxMapLinkData[]) {
+  public constructor(id: string, x: number, y: number, width: number, height: number, links: BoxMapLinkData[], nodes: NodeData[]) {
     super()
     this.id = id
     this.x = x
@@ -47,6 +57,7 @@ export class BoxMapData extends JsonObject {
     this.width = width
     this.height = height
     this.links = links
+    this.nodes = nodes
 
     this.validate()
   }

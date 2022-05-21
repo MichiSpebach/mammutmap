@@ -5,14 +5,16 @@ import { NodeData } from '../mapData/NodeData'
 
 export class BoxNodesWidget extends Widget {
     private readonly id: string
-    private readonly datas: NodeData[]
+    private readonly nodeDatas: NodeData[]
+    private readonly onNodeDatasChanged: () => Promise<void>
     private nodeWidgets: NodeWidget[] = []
     private rendered: boolean = false
 
-    public constructor(id: string, data: NodeData[]) {
+    public constructor(id: string, nodeDatas: NodeData[], onNodeDatasChanged: () => Promise<void>) {
       super()
       this.id = id
-      this.datas = data
+      this.nodeDatas = nodeDatas
+      this.onNodeDatasChanged = onNodeDatasChanged
     }
 
     public getId(): string {
@@ -24,7 +26,7 @@ export class BoxNodesWidget extends Widget {
         return
       }
 
-      for (const data of this.datas) {
+      for (const data of this.nodeDatas) {
         this.nodeWidgets.push(new NodeWidget(data))
       }
 
@@ -53,7 +55,7 @@ export class BoxNodesWidget extends Widget {
     }
 
     public async add(data: NodeData) {
-      this.datas.push(data)
+      this.nodeDatas.push(data)
 
       if (!this.rendered) {
         return
@@ -64,6 +66,7 @@ export class BoxNodesWidget extends Widget {
       
       await renderManager.addContentTo(this.getId(), this.formHtmlPlaceholderFor(nodeWidget))
       await nodeWidget.render()
+      await this.onNodeDatasChanged()
     }
 
     private formHtmlPlaceholderFor(node: NodeWidget): string {
