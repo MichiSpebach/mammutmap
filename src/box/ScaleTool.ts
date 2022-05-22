@@ -4,6 +4,7 @@ import { Box } from './Box'
 import { ScaleManager } from '../ScaleManager'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { util } from '../util'
+import { ClientRect } from '../ClientRect'
 
 export class ScaleTool {
   private readonly id: string = 'scaleTool'
@@ -34,7 +35,7 @@ export class ScaleTool {
     return ScaleManager.isScalingInProgress()
   }
 
-  public getBoxRenderedIntoOrFail(): Box|never {
+  private getBoxRenderedIntoOrFail(): Box|never {
     if (!this.boxRenderedInto) {
       util.logError('ScaleTool can not get boxRenderedInto because it is not set at this state.')
     }
@@ -74,12 +75,34 @@ export class ScaleTool {
           +'</div>'
   }
 
+  public async getClientRect(): Promise<ClientRect> {
+    return this.getBoxRenderedIntoOrFail().getClientRect()
+  }
+
+  public async getParentClientRect(): Promise<ClientRect> {
+    return this.getBoxRenderedIntoOrFail().getParentClientRect()
+  }
+
+  public roundToParentGridPosition(localPosition: number): number {
+    const boxRenderedInto: Box = this.getBoxRenderedIntoOrFail()
+    if (boxRenderedInto.isRoot()) {
+      return boxRenderedInto.transform.roundToGridPosition(localPosition)
+    }
+    return boxRenderedInto.getParent().transform.roundToGridPosition(localPosition)
+  }
+
   public async scaleStart(): Promise<void> {
     if (!this.boxRenderedInto) {
       util.logWarning('scaleStart is called altough ScaleTool is not rendered into a box => cannot start scaling.')
       return
     }
-    await this.boxRenderedInto.getParent().attachGrid(RenderPriority.RESPONSIVE)
+    if (!this.boxRenderedInto.isRoot()) {
+      await this.boxRenderedInto.getParent().attachGrid(RenderPriority.RESPONSIVE)
+    }
+  }
+
+  public async scale(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
+    await this.getBoxRenderedIntoOrFail().updateMeasuresAndBorderingLinks(measuresInPercentIfChanged, RenderPriority.RESPONSIVE)
   }
 
   public async scaleEnd(): Promise<void> {
@@ -88,7 +111,9 @@ export class ScaleTool {
       return
     }
     const proms: Promise<any>[] = []
-    proms.push(this.boxRenderedInto.getParent().detachGrid(RenderPriority.RESPONSIVE))
+    if (!this.boxRenderedInto.isRoot()) {
+      proms.push(this.boxRenderedInto.getParent().detachGrid(RenderPriority.RESPONSIVE))
+    }
     proms.push(this.boxRenderedInto.saveMapData())
     await Promise.all(proms)
   }

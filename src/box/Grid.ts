@@ -8,8 +8,8 @@ export class Grid {
     return 8 / Math.pow(2, layer)
   }
 
-  private static readonly layer1Steps: number[] = [
-    0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 50, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96, 100
+  private static readonly layer1Lines: number[] = [
+    4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 50, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96
   ]
 
   private readonly id: string = 'grid'
@@ -41,11 +41,11 @@ export class Grid {
   }
 
   private formLayer1Columns(): string {
-    return this.formLayerLines(this.idLayer1Columns, Grid.layer1Steps, 'left', 'width:1px;height:100%;')
+    return this.formLayerLines(this.idLayer1Columns, Grid.layer1Lines, 'left', 'width:1px;height:100%;')
   }
 
   private formLayer1Rows(): string {
-    return this.formLayerLines(this.idLayer1Rows, Grid.layer1Steps, 'top', 'width:100%;height:1px;')
+    return this.formLayerLines(this.idLayer1Rows, Grid.layer1Lines, 'top', 'width:100%;height:1px;')
   }
 
   private formLayerLines(id: string, steps: number[], startingEdge: 'left'|'top', sizeStyle: string): string {
@@ -73,10 +73,10 @@ export class Grid {
   private static roundToLayer1GridScalar(position: number): number {
     let nearestGridPosition: number = 50
 
-    for (const gridPosition of Grid.layer1Steps) {
-      if (Math.abs(position-gridPosition) < Math.abs(position-nearestGridPosition)) {
-        nearestGridPosition = gridPosition
-      }
+    const stepSize: number = this.getStepSizeOfLayer(1)
+    const gridPosition: number = Math.round(position/stepSize) * stepSize
+    if (Math.abs(position-gridPosition) < Math.abs(position-nearestGridPosition)) {
+      nearestGridPosition = gridPosition
     }
 
     return nearestGridPosition

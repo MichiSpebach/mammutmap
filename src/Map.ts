@@ -58,7 +58,7 @@ export class Map {
   private readonly mapRatioAdjusterSizePx: number = 600
 
   public static async new(idToRenderIn: string, projectSettings: ProjectSettings): Promise<Map> {
-    const map = new Map(idToRenderIn, projectSettings, await RootFolderBox.new(projectSettings))
+    const map = new Map(idToRenderIn, projectSettings, await RootFolderBox.new(projectSettings, 'mapMover'))
     await map.rootFolder.render()
     await dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY))
     return map
@@ -73,8 +73,6 @@ export class Map {
     renderManager.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
     renderManager.setContentTo('mapMover', '<div id="'+root.getId()+'" style="width:100%; height:100%;"></div>')
     this.updateStyle()
-
-    //this.addBoxes()
   }
 
   public async destruct(): Promise<void> {
@@ -85,17 +83,6 @@ export class Map {
 
   public getRootFolder(): RootFolderBox {
     return this.rootFolder
-  }
-
-  private addBoxes(): void {
-    this.addBox('green');this.addBox('blue');this.addBox('green');this.addBox('blue')
-    this.addBox('blue');this.addBox('green');this.addBox('blue');this.addBox('green')
-    this.addBox('green');this.addBox('blue');this.addBox('green');this.addBox('blue')
-    this.addBox('blue');this.addBox('green');this.addBox('blue');this.addBox('green')
-  }
-
-  private addBox(color: string) {
-    renderManager.addContentTo(this.rootFolder.getId(), '<div style="display:inline-block;width:25%;height:25%;margin:0px;padding:0px;background-color:' + color + ';"><div>')
   }
 
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {

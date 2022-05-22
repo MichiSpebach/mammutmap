@@ -1,52 +1,17 @@
 import { util } from './util'
 import { style } from './styleAdapter'
-import { renderManager, RenderPriority } from './RenderManager'
+import { renderManager } from './RenderManager'
 import { ScaleTool } from './box/ScaleTool'
 import { ClientRect } from './ClientRect'
-import { Box } from './box/Box'
 
 export class ScaleManager {
-
-  //private static scalables: Map<string, BoxBorder> = new Map() // TODO: introduce interface Scalable
   private static state: {
-    scaling: ScaleTool,
+    scaling: ScaleTool, // TODO: introduce interface Scalable?
     startParentClientRect: Promise<ClientRect>,
     startClientRect: Promise<ClientRect>,
     startClientX: number,
     startClientY: number
   } | null = null
-  //private static onScaling: ((clientX: number, clientY: number) => void) | null
-  //private static initialized: boolean = false
-
-  /*public static init(listenerElementId: string): void {
-    dom.addDragListenerTo('map', 'mousedown', async (clientX: number, clientY:number, targetId: string): Promise<void> => {
-      const classes: string[] = await dom.getClassesOf(targetId)
-      util.logInfo(classes.toString())
-      if (classes.includes(this.horizontalStyleClass)) {
-        util.logInfo('horizontal resize')
-      } else if (classes.includes(this.verticalStyleClass)) {
-        util.logInfo('vertical resize')
-      } else {
-        return
-      }
-
-      const scaling : BoxBorder|undefined = this.scalables.get(targetId)
-      if (scaling == null) {
-        util.logWarning('scalables is expected to contain "' + targetId + '" but does not')
-        return
-      }
-      this.scaling = scaling
-    })
-
-    dom.addDragListenerTo('map', 'mousemove', (clientX: number, clientY:number, targetId: string): void => {
-      //util.logInfo('resize continue, targetId: ' + targetId)
-
-    })
-
-    dom.addDragListenerTo('map', 'mouseup', (clientX: number, clientY:number, targetId: string): void => {
-      util.logInfo('resize end, targetId: ' + targetId)
-    })
-  }*/
 
   public static isScalingInProgress(): boolean {
     return this.state !== null
@@ -58,9 +23,7 @@ export class ScaleManager {
   }
 
   public static addScalable(scalable: ScaleTool) {
-
     // TODO: set element draggable="true" or use mousedown instead of drag events
-
     renderManager.addClassTo(scalable.getRightBottomId(), style.getDiagonalResizeClass())
     renderManager.addClassTo(scalable.getTopId(), style.getVerticalResizeClass())
     renderManager.addClassTo(scalable.getBottomId(), style.getVerticalResizeClass())
@@ -72,12 +35,6 @@ export class ScaleManager {
     this.addListenersForSide(scalable, scalable.getBottomId(), (x: number, y:number, snapToGrid: boolean) => this.dragSouthBorder(x, y, snapToGrid))
     this.addListenersForSide(scalable, scalable.getTopId(), (x: number, y:number, snapToGrid: boolean) => this.dragNorthBorder(x, y, snapToGrid))
     this.addListenersForSide(scalable, scalable.getLeftId(), (x: number, y:number, snapToGrid: boolean) => this.dragWestBorder(x, y, snapToGrid))
-
-    //this.scalables.set(scalable.getRightBottomId(), scalable)
-    //this.scalables.set(scalable.getTopId(), scalable)
-    //this.scalables.set(scalable.getBottomId(), scalable)
-    //this.scalables.set(scalable.getRightId(), scalable)
-    //this.scalables.set(scalable.getLeftId(), scalable)
   }
 
   public static removeScalable(scalable: ScaleTool) {
@@ -116,8 +73,8 @@ export class ScaleManager {
   }
 
   private static async dragstart(scalable: ScaleTool, clientX: number, clientY: number): Promise<void> {
-    let parentClientRect: Promise<ClientRect> = scalable.getBoxRenderedIntoOrFail().getParent().getClientRect()
-    let clientRect: Promise<ClientRect> = scalable.getBoxRenderedIntoOrFail().getClientRect()
+    let parentClientRect: Promise<ClientRect> = scalable.getParentClientRect()
+    let clientRect: Promise<ClientRect> = scalable.getClientRect()
     scalable.scaleStart()
 
     this.state = {
@@ -143,17 +100,16 @@ export class ScaleManager {
 
     const startClientRect: ClientRect = await this.state.startClientRect
     const startParentClientRect: ClientRect = await this.state.startParentClientRect
-    const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const newWidthInPixel: number = startClientRect.width + clientX - this.state.startClientX
     let newWidthInPercent: number = newWidthInPixel / startParentClientRect.width * 100
     if (snapToGrid) {
       const leftBorderPositionInPercent: number = (startClientRect.x-startParentClientRect.x) / startParentClientRect.width * 100
-      const newRightBorderPositionInPercent: number = referenceBox.getParent().transform.roundToGridPosition(leftBorderPositionInPercent+newWidthInPercent)
+      const newRightBorderPositionInPercent: number = this.state.scaling.roundToParentGridPosition(leftBorderPositionInPercent+newWidthInPercent)
       newWidthInPercent = newRightBorderPositionInPercent-leftBorderPositionInPercent
     }
 
-    referenceBox.updateMeasuresAndBorderingLinks({width: newWidthInPercent}, RenderPriority.RESPONSIVE)
+    this.state.scaling.scale({width: newWidthInPercent})
   }
 
   private static async dragSouthBorder(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {
@@ -164,17 +120,16 @@ export class ScaleManager {
 
     const startClientRect: ClientRect = await this.state.startClientRect
     const startParentClientRect: ClientRect = await this.state.startParentClientRect
-    const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const newHeightInPixel: number = startClientRect.height + clientY - this.state.startClientY
     let newHeightInPercent: number = newHeightInPixel / startParentClientRect.height * 100
     if (snapToGrid) {
       const topBorderPositionInPercent: number = (startClientRect.y-startParentClientRect.y) / startParentClientRect.height * 100
-      const newBottomBorderPositionInPercent: number = referenceBox.getParent().transform.roundToGridPosition(topBorderPositionInPercent+newHeightInPercent)
+      const newBottomBorderPositionInPercent: number = this.state.scaling.roundToParentGridPosition(topBorderPositionInPercent+newHeightInPercent)
       newHeightInPercent = newBottomBorderPositionInPercent-topBorderPositionInPercent
     }
 
-    referenceBox.updateMeasuresAndBorderingLinks({height: newHeightInPercent}, RenderPriority.RESPONSIVE)
+    this.state.scaling.scale({height: newHeightInPercent})
   }
 
   private static async dragNorthBorder(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {
@@ -185,7 +140,6 @@ export class ScaleManager {
 
     const startClientRect: ClientRect = await this.state.startClientRect
     const startParentClientRect: ClientRect = await this.state.startParentClientRect
-    const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const dragDistanceInPixel: number = clientY - this.state.startClientY
     const newYInPixel: number = startClientRect.y - startParentClientRect.y + dragDistanceInPixel
@@ -194,12 +148,12 @@ export class ScaleManager {
     let newYInPercent: number = newYInPixel / startParentClientRect.height * 100
     let newHeightInPercent: number = newHeightInPixel / startParentClientRect.height * 100
     if (snapToGrid) {
-      const snapToGridDelta: number = referenceBox.getParent().transform.roundToGridPosition(newYInPercent)-newYInPercent
+      const snapToGridDelta: number = this.state.scaling.roundToParentGridPosition(newYInPercent)-newYInPercent
       newYInPercent += snapToGridDelta
       newHeightInPercent -= snapToGridDelta
     }
 
-    referenceBox.updateMeasuresAndBorderingLinks({y: newYInPercent, height: newHeightInPercent}, RenderPriority.RESPONSIVE)
+    this.state.scaling.scale({y: newYInPercent, height: newHeightInPercent})
   }
 
   private static async dragWestBorder(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {
@@ -210,7 +164,6 @@ export class ScaleManager {
 
     const startClientRect: ClientRect = await this.state.startClientRect
     const startParentClientRect: ClientRect = await this.state.startParentClientRect
-    const referenceBox: Box = this.state.scaling.getBoxRenderedIntoOrFail()
 
     const dragDistanceInPixel: number = clientX - this.state.startClientX
     const newXInPixel: number = startClientRect.x - startParentClientRect.x + dragDistanceInPixel
@@ -219,12 +172,12 @@ export class ScaleManager {
     let newXInPercent: number = newXInPixel / startParentClientRect.width * 100
     let newWidthInPercent: number = newWidthInPixel / startParentClientRect.width * 100
     if (snapToGrid) {
-      const snapToGridDelta: number = referenceBox.getParent().transform.roundToGridPosition(newXInPercent)-newXInPercent
+      const snapToGridDelta: number = this.state.scaling.roundToParentGridPosition(newXInPercent)-newXInPercent
       newXInPercent += snapToGridDelta
       newWidthInPercent -= snapToGridDelta
     }
 
-    referenceBox.updateMeasuresAndBorderingLinks({x: newXInPercent, width: newWidthInPercent}, RenderPriority.RESPONSIVE)
+    this.state.scaling.scale({x: newXInPercent, width: newWidthInPercent})
   }
 
   private static dragEnd(): void {
