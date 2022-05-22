@@ -23,6 +23,9 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public getDropTargetAtDragStart(): FolderBox {
+    if (this.referenceBox.isRoot()) {
+      return this.referenceBox as FolderBox // in order that RootFolderBox can be dragged
+    }
     return this.referenceBox.getParent()
   }
 
@@ -60,16 +63,27 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
+    const clientPosition = new ClientPosition(clientX-this.dragOffset.x, clientY-this.dragOffset.y)
+
+    let positionInParentBoxCoords: LocalPosition
     if (!snapToGrid) {
-      const parentClientRect: ClientRect = await this.referenceBox.getParent().getClientRect()
-      const newX = (clientX - parentClientRect.x - this.dragOffset.x) / parentClientRect.width * 100
-      const newY = (clientY - parentClientRect.y - this.dragOffset.y) / parentClientRect.height * 100
-      this.referenceBox.updateMeasuresAndBorderingLinks({x: newX, y: newY}, RenderPriority.RESPONSIVE)
+      positionInParentBoxCoords = await this.clientToParentLocalPosition(clientPosition)
+    } else if (this.referenceBox.isRoot()) {
+      positionInParentBoxCoords = this.referenceBox.transform.getNearestGridPositionOf(await this.clientToParentLocalPosition(clientPosition))
     } else {
-      const clientPosition = new ClientPosition(clientX-this.dragOffset.x, clientY-this.dragOffset.y)
-      const positionInParentBoxCoords: LocalPosition = await this.referenceBox.getParent().transform.getNearestGridPositionOfOtherTransform(clientPosition, dropTarget.transform)
-      this.referenceBox.updateMeasuresAndBorderingLinks({x: positionInParentBoxCoords.percentX, y: positionInParentBoxCoords.percentY})
+      positionInParentBoxCoords = await this.referenceBox.getParent().transform.getNearestGridPositionOfOtherTransform(clientPosition, dropTarget.transform)
     }
+
+    this.referenceBox.updateMeasuresAndBorderingLinks({x: positionInParentBoxCoords.percentX, y: positionInParentBoxCoords.percentY}, RenderPriority.RESPONSIVE)
+  }
+
+  // TODO: move into Transform?
+  private async clientToParentLocalPosition(position: ClientPosition): Promise<LocalPosition> {
+    const parentClientRect: ClientRect = await this.referenceBox.getParentClientRect()
+    return new LocalPosition(
+      (position.x - parentClientRect.x) / parentClientRect.width * 100,
+      (position.y - parentClientRect.y) / parentClientRect.height * 100
+    )
   }
 
   public async dragCancel(): Promise<void> {
@@ -79,7 +93,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
 
   public async dragEnd(dropTarget: FolderBox): Promise<void> {
     renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
-    if (this.referenceBox.getParent() != dropTarget) {
+    if (!this.referenceBox.isRoot() && this.referenceBox.getParent() != dropTarget) {
       await this.referenceBox.setParentAndFlawlesslyResizeAndSave(dropTarget)
     } else {
       await this.referenceBox.saveMapData()
