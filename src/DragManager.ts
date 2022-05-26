@@ -3,16 +3,19 @@ import { dom } from './domAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { Draggable } from './Draggable'
 import { DropTarget } from './DropTarget'
+import { BoxWatcher } from './box/BoxWatcher'
+
+type State = {
+  dragging: Draggable<DropTarget>
+  draggingOver: DropTarget
+  clickToDropMode: boolean
+  watcherOfManagingBoxToPreventUnrenderWhileDragging: Promise<BoxWatcher>
+}
 
 export class DragManager {
   private static readonly draggableStyleClass: string = 'draggable'
   public static readonly draggingInProgressStyleClass: string = 'draggingInProgress'
-
-  private static state: {
-    dragging: Draggable<DropTarget>
-    draggingOver: DropTarget
-    clickToDropMode: boolean
-  } | null = null
+  private static state: State|null = null
 
   public static isDraggingInProgress(): boolean {
     return this.state !== null
@@ -25,15 +28,34 @@ export class DragManager {
     return this.state
   }
 
-  private static setState(newState: {dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean} | null): void {
-    if (this.state != null) {
-      this.state.draggingOver.onDragLeave()
-    }
-    if (newState != null) {
-      newState.draggingOver.onDragEnter()
-    }
+  private static setState(newState: State|null): void {
+    this.handleDraggingOverStateChange(newState)
+    this.handleWatcherOfManagingBoxStateChange(newState)
 
     this.state = newState
+  }
+
+  private static handleDraggingOverStateChange(newState: State|null) {
+    if (this.state?.draggingOver === newState?.draggingOver) {
+      return
+    }
+
+    if (this.state) {
+      this.state.draggingOver.onDragLeave()
+    }
+    if (newState) {
+      newState.draggingOver.onDragEnter()
+    }
+  }
+
+  private static handleWatcherOfManagingBoxStateChange(newState: State|null) {
+    if (this.state?.watcherOfManagingBoxToPreventUnrenderWhileDragging === newState?.watcherOfManagingBoxToPreventUnrenderWhileDragging) {
+      return
+    }
+    
+    if (this.state) {
+      this.state.watcherOfManagingBoxToPreventUnrenderWhileDragging.then(watcher => watcher.unwatch())
+    }
   }
 
   public static clear(): void {
@@ -70,7 +92,12 @@ export class DragManager {
   }
 
   private static onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean): void {
-    this.setState({dragging: elementToDrag, draggingOver: elementToDrag.getDropTargetAtDragStart(), clickToDropMode: clickToDropMode})
+    this.setState({
+      dragging: elementToDrag, 
+      draggingOver: elementToDrag.getDropTargetAtDragStart(), 
+      clickToDropMode: clickToDropMode,
+      watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher.newAndWatch(elementToDrag.getManagingBox())
+    })
     renderManager.addClassTo(elementToDrag.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
     elementToDrag.dragStart(clientX, clientY)
   }
@@ -112,7 +139,12 @@ export class DragManager {
     if (!this.state.dragging.canBeDroppedInto(dropTarget)) {
       return
     }
-    this.setState({dragging: this.state.dragging, draggingOver: dropTarget, clickToDropMode: this.state.clickToDropMode})
+    this.setState({
+      dragging: this.state.dragging, 
+      draggingOver: dropTarget, 
+      clickToDropMode: this.state.clickToDropMode,
+      watcherOfManagingBoxToPreventUnrenderWhileDragging: this.state.watcherOfManagingBoxToPreventUnrenderWhileDragging
+    })
   }
 
   public static startDragWithClickToDropMode(elementToDrag: Draggable<DropTarget>) {

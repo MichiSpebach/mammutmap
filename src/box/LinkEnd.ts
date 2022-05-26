@@ -7,7 +7,6 @@ import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 import { Box } from './Box'
 import { Link } from './Link'
-import { BoxWatcher } from './BoxWatcher'
 import { ClientPosition, LocalPosition } from './Transform'
 import { WayPointData } from './WayPointData'
 import { LinkEndData } from './LinkEndData'
@@ -20,7 +19,6 @@ export class LinkEnd implements Draggable<Box> {
   private shape: 'square'|'arrow'
   private rendered: boolean = false
   private borderingBox: Box|null = null
-  private static watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher|null = null // TODO: should be handled by DragManager
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box
@@ -38,7 +36,7 @@ export class LinkEnd implements Draggable<Box> {
     return this.id
   }
 
-  private getManagingBox(): Box {
+  public getManagingBox(): Box {
     return this.referenceLink.getManagingBox()
   }
 
@@ -58,7 +56,6 @@ export class LinkEnd implements Draggable<Box> {
   }
 
   public async dragStart(clientX: number, clientY: number): Promise<void> {
-    this.watchManagingBox()
     this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: this.getDropTargetAtDragStart(), snapToGrid: false} // TODO add dropTarget and snapToGrid to dragstart(..)
     return this.referenceLink.render(RenderPriority.RESPONSIVE, true)
   }
@@ -70,33 +67,12 @@ export class LinkEnd implements Draggable<Box> {
 
   public async dragCancel(): Promise<void> {
     await this.referenceLink.render()
-    this.unwatchManagingBox()
     this.dragState = null
   }
 
   public async dragEnd(dropTarget: Box): Promise<void> {
     await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
-    this.unwatchManagingBox()
     this.dragState = null
-  }
-
-  private async watchManagingBox(): Promise<void> {
-    if (LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging) {
-      util.logWarning('watcherOfManagingBoxToPreventUnrenderWhileDragging is set at drag start')
-      this.unwatchManagingBox()
-    }
-
-    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = await BoxWatcher.newAndWatch(this.referenceLink.getManagingBox())
-  }
-
-  private unwatchManagingBox(): void {
-    if (!LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging) {
-      util.logWarning('managing box of link is not watched')
-      return
-    }
-
-    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging.unwatch()
-    LinkEnd.watcherOfManagingBoxToPreventUnrenderWhileDragging = null
   }
 
   public async render(borderingBox: Box, positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {

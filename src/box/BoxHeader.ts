@@ -22,6 +22,10 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     return this.referenceBox.getId()+'Header'
   }
 
+  public getManagingBox(): Box {
+    return this.referenceBox.getParent()
+  }
+
   public getDropTargetAtDragStart(): FolderBox {
     if (this.referenceBox.isRoot()) {
       return this.referenceBox as FolderBox // in order that RootFolderBox can be dragged

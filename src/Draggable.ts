@@ -1,7 +1,9 @@
+import { Box } from './box/Box'
 import { DropTarget } from './DropTarget'
 
 export interface Draggable<DropTargetType extends DropTarget> {
   getId(): string
+  getManagingBox(): Box
   getDropTargetAtDragStart(): DropTargetType
   canBeDroppedInto(dropTarget: DropTarget): boolean
 
