@@ -289,7 +289,7 @@ export class DocumentObjectModelAdapter {
       if (jsToExecute.length > 256+10) {
         jsToExecuteEndings = jsToExecute.substring(0, 128)+'[.'+(jsToExecute.length-256)+'.]'+jsToExecute.substring(jsToExecute.length-128)
       }
-      throw new Error('error in render thread occured: '+result.message+'. the javascript that was tried to execute was: '+jsToExecuteEndings)
+      util.logWarning('error in render thread occured: '+result.message+'. the javascript that was tried to execute was: '+jsToExecuteEndings)
     }
 
     return result
