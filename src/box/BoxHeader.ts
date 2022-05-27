@@ -38,25 +38,28 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async render(): Promise<void> {
+    const proms: Promise<any>[] = []
+
     let html: string = '<div draggable="true" class="'+style.getBoxHeaderInnerClass()+'">'
     html += this.referenceBox.getName()
     html += '</div>'
-    await renderManager.setContentTo(this.getId(), html)
+    proms.push(renderManager.setContentTo(this.getId(), html))
 
     if (!this.rendered) {
-      renderManager.addClassTo(this.getId(), style.getBoxHeaderClass())
-      DragManager.addDraggable(this)
+      proms.push(renderManager.addClassTo(this.getId(), style.getBoxHeaderClass()))
+      proms.push(DragManager.addDraggable(this))
       this.rendered = true
     }
+
+    await Promise.all(proms)
   }
 
   public async unrender(): Promise<void> {
     if (!this.rendered) {
       return
     }
-    DragManager.removeDraggable(this)
-    await renderManager.remove(this.getId())
-    this.rendered = false
+    await DragManager.removeDraggable(this)
+    this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
   }
 
   public async dragStart(clientX: number, clientY: number): Promise<void> {

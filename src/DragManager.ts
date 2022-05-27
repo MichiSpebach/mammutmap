@@ -63,32 +63,34 @@ export class DragManager {
     util.setHint(util.hintToDeactivateSnapToGrid, false)
   }
 
-  public static addDraggable(elementToDrag: Draggable<DropTarget>): void {
+  public static async addDraggable(elementToDrag: Draggable<DropTarget>, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const draggableId: string = elementToDrag.getId()
 
-    renderManager.addClassTo(draggableId, this.draggableStyleClass)
-
-    renderManager.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
-      this.onDragStart(elementToDrag, clientX, clientY, false)
-    })
-
-    renderManager.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-      this.onDrag(clientX, clientY, !ctrlPressed)
-    })
-
-    renderManager.addDragListenerTo(draggableId, 'dragend', (_) => {
-      this.onDragEnd()
-    })
+    await Promise.all([
+      renderManager.addClassTo(draggableId, this.draggableStyleClass, priority),
+      renderManager.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
+        this.onDragStart(elementToDrag, clientX, clientY, false)
+      }, priority),
+      renderManager.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number, ctrlPressed: boolean) => {
+        this.onDrag(clientX, clientY, !ctrlPressed)
+      }, priority),
+      renderManager.addDragListenerTo(draggableId, 'dragend', (_) => {
+        this.onDragEnd()
+      }, priority)
+    ])
 
     // TODO: call elementToDrag.dragCancel() if esc is pressed (and remove draggingInProgressStyleClass)
   }
 
-  public static removeDraggable(elementToDrag: Draggable<DropTarget>): void {
+  public static async removeDraggable(elementToDrag: Draggable<DropTarget>, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const draggableId: string = elementToDrag.getId()
-    renderManager.removeClassFrom(draggableId, this.draggableStyleClass)
-    renderManager.removeEventListenerFrom(draggableId, 'dragstart')
-    renderManager.removeEventListenerFrom(draggableId, 'drag')
-    renderManager.removeEventListenerFrom(draggableId, 'dragend')
+
+    await Promise.all([
+      renderManager.removeClassFrom(draggableId, this.draggableStyleClass, priority),
+      renderManager.removeEventListenerFrom(draggableId, 'dragstart', priority),
+      renderManager.removeEventListenerFrom(draggableId, 'drag', priority),
+      renderManager.removeEventListenerFrom(draggableId, 'dragend', priority)
+    ])
   }
 
   private static onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean): void {
