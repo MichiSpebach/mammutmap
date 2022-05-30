@@ -24,12 +24,15 @@ export class BoxNodesWidget extends Widget {
         return
       }
 
-      for (const data of this.referenceBox.getMapNodeData()) {
-        this.nodeWidgets.push(new NodeWidget(data, this.referenceBox))
+      for (const nodeData of this.referenceBox.getMapNodeData()) {
+        if (this.nodeWidgets.find(nodeWidget => nodeWidget.getId() === nodeData.id)) {
+          continue
+        }
+        this.nodeWidgets.push(new NodeWidget(nodeData, this.referenceBox))
       }
 
       const nodePlaceholders: string = this.nodeWidgets.reduce<string>((placeholders, node) => placeholders += this.formHtmlPlaceholderFor(node), '')
-      await renderManager.setContentTo(this.getId(), nodePlaceholders)
+      await renderManager.addContentTo(this.getId(), nodePlaceholders)
 
       await Promise.all(this.nodeWidgets.map(async (node: NodeWidget) => {
         await node.render()
