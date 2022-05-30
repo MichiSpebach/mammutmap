@@ -21,6 +21,7 @@ import { BoxWatcher } from './BoxWatcher'
 import { Transform } from './Transform'
 import { grid } from './Grid'
 import { BoxNodesWidget } from './BoxNodesWidget'
+import { NodeData } from '../mapData/NodeData'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -43,7 +44,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.mapDataFileExists = mapDataFileExists
     this.transform = new Transform(this)
     this.header = this.createHeader()
-    this.nodes = new BoxNodesWidget(this.getId()+'Nodes', mapData.nodes, () => this.saveMapData())
+    this.nodes = new BoxNodesWidget(this)
     this.links = new BoxLinks(this)
 
     boxManager.addBox(this)
@@ -310,6 +311,10 @@ export abstract class Box implements DropTarget, Hoverable {
       await renderManager.addClassTo(this.getBorderId(), style.getAdditionalBoxBorderClass(this.mapDataFileExists))
       await renderManager.removeClassFrom(this.getBorderId(), style.getAdditionalBoxBorderClass(!this.mapDataFileExists))
     }
+  }
+
+  public getMapNodeData(): NodeData[] {
+    return this.mapData.nodes
   }
 
   public getMapLinkData(): BoxMapLinkData[] {

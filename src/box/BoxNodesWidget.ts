@@ -2,23 +2,21 @@ import { renderManager } from '../RenderManager'
 import { NodeWidget } from '../node/NodeWidget'
 import { Widget } from '../Widget'
 import { NodeData } from '../mapData/NodeData'
+import { Box } from './Box'
+import { util } from '../util'
 
 export class BoxNodesWidget extends Widget {
-    private readonly id: string
-    private readonly nodeDatas: NodeData[]
-    private readonly onNodeDatasChanged: () => Promise<void>
+    private readonly referenceBox: Box
     private nodeWidgets: NodeWidget[] = []
     private rendered: boolean = false
 
-    public constructor(id: string, nodeDatas: NodeData[], onNodeDatasChanged: () => Promise<void>) {
+    public constructor(referenceBox: Box) {
       super()
-      this.id = id
-      this.nodeDatas = nodeDatas
-      this.onNodeDatasChanged = onNodeDatasChanged
+      this.referenceBox = referenceBox
     }
 
     public getId(): string {
-      return this.id
+      return this.referenceBox.getId()+'Nodes'
     }
 
     public async render(): Promise<void> {
@@ -26,8 +24,8 @@ export class BoxNodesWidget extends Widget {
         return
       }
 
-      for (const data of this.nodeDatas) {
-        this.nodeWidgets.push(new NodeWidget(data))
+      for (const data of this.referenceBox.getMapNodeData()) {
+        this.nodeWidgets.push(new NodeWidget(data, this.referenceBox))
       }
 
       const nodePlaceholders: string = this.nodeWidgets.reduce<string>((placeholders, node) => placeholders += this.formHtmlPlaceholderFor(node), '')
@@ -54,23 +52,47 @@ export class BoxNodesWidget extends Widget {
       this.rendered = false
     }
 
+    public static async changeManagingBoxOfNodeAndSave(oldManagingBox: Box, newManagingBox: Box, node: NodeWidget): Promise<void> {
+      if (node.getManagingBox() !== newManagingBox) {
+        util.logWarning('managingBox '+node.getManagingBox().getSrcPath()+' of given node '+node.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
+      }
+      if (newManagingBox.nodes.nodeWidgets.includes(node)) {
+        util.logWarning('box '+newManagingBox.getSrcPath()+' already manages node '+node.getId())
+      }
+      if (!oldManagingBox.nodes.nodeWidgets.includes(node)) {
+        util.logWarning('box '+oldManagingBox.getSrcPath()+' does not manage node '+node.getId())
+      }
+      const proms: Promise<any>[] = []
+
+      newManagingBox.nodes.nodeWidgets.push(node)
+      proms.push(renderManager.appendChildTo(newManagingBox.nodes.getId(), node.getId()))
+      oldManagingBox.nodes.nodeWidgets.splice(oldManagingBox.nodes.nodeWidgets.indexOf(node), 1)
+
+      newManagingBox.getMapNodeData().push(node.getMapData())
+      oldManagingBox.getMapNodeData().splice(oldManagingBox.getMapNodeData().indexOf(node.getMapData()), 1)
+      proms.push(newManagingBox.saveMapData())
+      proms.push(oldManagingBox.saveMapData())
+
+      await Promise.all(proms)
+    }
+
     public async add(data: NodeData) {
-      this.nodeDatas.push(data)
+      this.referenceBox.getMapNodeData().push(data)
 
       if (!this.rendered) {
         return
       }
 
-      const nodeWidget: NodeWidget = new NodeWidget(data)
+      const nodeWidget: NodeWidget = new NodeWidget(data, this.referenceBox)
       this.nodeWidgets.push(nodeWidget)
       
       await renderManager.addContentTo(this.getId(), this.formHtmlPlaceholderFor(nodeWidget))
       await nodeWidget.render()
-      await this.onNodeDatasChanged()
+      await this.referenceBox.saveMapData()
     }
 
     private formHtmlPlaceholderFor(node: NodeWidget): string {
-      return `<div id="${node.getId()}"></div>`
+      return `<div id="${node.getId()}" draggable="true"></div>`
     }
 
 }

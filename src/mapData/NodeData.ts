@@ -1,5 +1,6 @@
 import { util } from '../util'
 import { JsonObject } from '../JsonObject'
+import { LocalPosition } from '../box/Transform'
 
 export class NodeData extends JsonObject {
     public readonly id: string
@@ -20,6 +21,15 @@ export class NodeData extends JsonObject {
         this.id = id
         this.x = x
         this.y = y
+    }
+
+    public getPosition(): LocalPosition {
+        return new LocalPosition(this.x, this.y)
+    }
+
+    public setPosition(position: LocalPosition): void {
+        this.x = position.percentX
+        this.y = position.percentY
     }
 
 }

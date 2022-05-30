@@ -21,7 +21,7 @@ export class BoxLinks {
 
     public static async changeManagingBoxOfLinkAndSave(oldManagingBox: Box, newManagingBox: Box, link: Link): Promise<void> {
       if (link.getManagingBox() !== newManagingBox) {
-        util.logWarning('baseBox/managingBox '+newManagingBox.getSrcPath()+' of given link '+link.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
+        util.logWarning('managingBox '+link.getManagingBox().getSrcPath()+' of given link '+link.getId()+' does not match newManagingBox '+newManagingBox.getSrcPath())
       }
       if (newManagingBox.links.links.includes(link)) {
         util.logWarning('box '+newManagingBox.getSrcPath()+' already manages link '+link.getId())
