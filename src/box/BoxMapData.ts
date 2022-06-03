@@ -77,12 +77,8 @@ export class BoxMapData extends JsonObject {
     this.warnIf(this.width == undefined, 'width is undefined')
     this.warnIf(this.height == undefined, 'height is undefined')
 
-    this.warnIf(this.x < 0, 'x is less than 0')
-    this.warnIf(this.y < 0, 'y is less than 0')
     this.warnIf(this.width <= 0, 'width is not positive')
     this.warnIf(this.height <= 0, 'height is not positive')
-    this.warnIf(this.x + this.width > 100, 'sum of x and width is greater than 100')
-    this.warnIf(this.y + this.height > 100, 'sum of y and height is greater than 100')
   }
 
   private warnIf(condition: boolean, message: string) {
