@@ -9,10 +9,12 @@ import { LocalPosition } from '../box/Transform'
 import { util } from '../util'
 import { DragManager } from '../DragManager'
 import { BoxNodesWidget } from '../box/BoxNodesWidget'
+import { BorderingLinks } from '../link/BorderingLinks'
 
-export class NodeWidget extends Widget implements Draggable<Box> {
+export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     private readonly mapData: NodeData
     private managingBox: Box
+    private readonly borderingLinks: BorderingLinks
     private rendered: boolean = false
     private dragState: {
         positionInManagingBoxCoords: LocalPosition
@@ -22,6 +24,7 @@ export class NodeWidget extends Widget implements Draggable<Box> {
         super()
         this.mapData = mapData
         this.managingBox = managingBox
+        this.borderingLinks = new BorderingLinks(managingBox)
     }
 
     public getId(): string {
@@ -68,6 +71,14 @@ export class NodeWidget extends Widget implements Draggable<Box> {
         }
         await DragManager.removeDraggable(this, priority)
         this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
+    }
+
+    public async onDragEnter(): Promise<void> {
+        return Promise.resolve() // TODO: highlight
+    }
+
+    public async onDragLeave(): Promise<void> {
+        return Promise.resolve() // TODO: stop highlight
     }
 
     public getDropTargetAtDragStart(): Box {

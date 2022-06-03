@@ -12,7 +12,6 @@ import { scaleTool } from './ScaleTool'
 import { BoxLinks } from './BoxLinks'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
-import { WayPointData } from './WayPointData'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 import { Hoverable } from '../Hoverable'
@@ -22,6 +21,7 @@ import { Transform } from './Transform'
 import { grid } from './Grid'
 import { BoxNodesWidget } from './BoxNodesWidget'
 import { NodeData } from '../mapData/NodeData'
+import { BorderingLinks } from '../link/BorderingLinks'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -31,8 +31,8 @@ export abstract class Box implements DropTarget, Hoverable {
   public readonly transform: Transform
   private readonly header: BoxHeader
   public readonly nodes: BoxNodesWidget
-  public readonly links: BoxLinks
-  private readonly borderingLinks: Link[] = [] // TODO: move into BoxLinks?
+  public readonly links: BoxLinks // TODO: rename to managedLinks?
+  public readonly borderingLinks: BorderingLinks
   private rendered: boolean = false
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
@@ -46,6 +46,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.header = this.createHeader()
     this.nodes = new BoxNodesWidget(this)
     this.links = new BoxLinks(this)
+    this.borderingLinks = new BorderingLinks(this)
 
     boxManager.addBox(this)
   }
@@ -142,7 +143,7 @@ export abstract class Box implements DropTarget, Hoverable {
 
     await this.renameAndMoveOnFileSystem(oldSrcPath, newSrcPath, oldMapDataFilePath, newMapDataFilePath)
     await this.saveMapData()
-    await Promise.all(this.borderingLinks.map(link => link.reorderAndSave()))
+    await this.borderingLinks.reorderAndSaveAll()
   }
 
   public async rename(newName: string): Promise<void> {
@@ -265,7 +266,7 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.header.unrender())
     proms.push(scaleTool.unrenderFrom(this))
     proms.push(this.links.unrender())
-    //proms.push(this.borderingLinks.updateLinkEnds()) // TODO: otherwise links reference to not existing borderingBoxes
+    //proms.push(this.borderingLinks.updateLinkEnds()) // TODO: implement, otherwise links reference to not existing borderingBoxes
     proms.push(this.nodes.unrender())
     proms.push(this.unrenderAdditional())
     await Promise.all(proms)
@@ -278,10 +279,10 @@ export abstract class Box implements DropTarget, Hoverable {
     if (this.isRoot()) {
       return
     }
-    const linksToUpdate: Link[] = this.getParent().filterBorderingLinksFor(this.getId())
+    const linksToUpdate: Link[] = this.getParent().borderingLinks.filterFor(this.getId())
     await Promise.all(linksToUpdate.map(async (link: Link) => {
+      this.borderingLinks.register(link)
       await link.render()
-      this.registerBorderingLink(link) // TODO: move up?
     }))
   }
 
@@ -290,7 +291,7 @@ export abstract class Box implements DropTarget, Hoverable {
       return
     }
     scaleTool.renderInto(this)
-    this.borderingLinks.forEach(link => link.setHighlight(true))
+    this.borderingLinks.setHighlightAll(true)
   }
 
   private onHoverOut(): void {
@@ -298,7 +299,7 @@ export abstract class Box implements DropTarget, Hoverable {
       return
     }
     scaleTool.unrenderFrom(this)
-    this.borderingLinks.forEach(link => link.setHighlight(false))
+    this.borderingLinks.setHighlightAll(false)
   }
 
   public isMapDataFileExisting(): boolean {
@@ -370,7 +371,7 @@ export abstract class Box implements DropTarget, Hoverable {
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
     await this.updateMeasures(measuresInPercentIfChanged, priority)
-    await Promise.all(this.borderingLinks.map(link => link.render()))
+    await this.borderingLinks.renderAll()
   }
 
   private async updateMeasures(
@@ -414,32 +415,6 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   protected abstract formBody(): string*/
-
-  public registerBorderingLink(link: Link) {
-    if (this.borderingLinks.includes(link)) {
-      util.logWarning('trying to register borderingLink that is already registered')
-    }
-    this.borderingLinks.push(link)
-    if (!this.mapDataFileExists) {
-      // otherwise managingBox of link would save linkPath with not persisted boxId
-      this.saveMapData()
-    }
-  }
-
-  public deregisterBorderingLink(link: Link) {
-    if (!this.borderingLinks.includes(link)) {
-      util.logWarning('trying to deregister borderingLink that is not registered')
-    }
-    this.borderingLinks.splice(this.borderingLinks.indexOf(link), 1)
-  }
-
-  public filterBorderingLinksFor(boxId: string): Link[] {
-    return this.borderingLinks.filter((link: Link) => {
-        return link.getData().from.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
-            || link.getData().to.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
-      }
-    )
-  }
 
   public static findCommonAncestor(fromBox: Box, toBox: Box): {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} | never {
     const fromBoxes: Box[] = [fromBox]

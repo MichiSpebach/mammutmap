@@ -291,13 +291,13 @@ export class Link implements Hoverable {
   }
 
   private registerAtBorderingBoxes(): void {
-    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.registerBorderingLink(this))
-    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.registerBorderingLink(this))
+    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.borderingLinks.register(this))
+    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.borderingLinks.register(this))
   }
 
   private deregisterAtBorderingBoxes(): void {
-    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.deregisterBorderingLink(this))
-    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.deregisterBorderingLink(this))
+    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.borderingLinks.deregister(this))
+    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.borderingLinks.deregister(this))
   }
 
   public async getLineInClientCoords(): Promise<{from: ClientPosition, to: ClientPosition}> {
