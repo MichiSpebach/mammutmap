@@ -81,16 +81,12 @@ export class BoxNodesWidget extends Widget {
 
     public async add(data: NodeData) {
       this.referenceBox.getMapNodeData().push(data)
-
-      if (!this.rendered) {
-        return
-      }
-
+      
       const nodeWidget: NodeWidget = new NodeWidget(data, this.referenceBox)
       this.nodeWidgets.push(nodeWidget)
-      
       await renderManager.addContentTo(this.getId(), this.formHtmlPlaceholderFor(nodeWidget))
       await nodeWidget.render()
+
       await this.referenceBox.saveMapData()
     }
 
