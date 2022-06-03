@@ -59,7 +59,7 @@ export class Link implements Hoverable {
     } else if (linkEnd === this.from) {
       await this.reorderAndSaveWithEndBoxes({box: dropTarget, changed: true}, {box: this.to.getBorderingBox(), changed: false})
     } else {
-      util.logError('Given LinkEnd is not contained by Link.')
+      util.logWarning('Given LinkEnd is not contained by Link.')
     }
   }
 
@@ -70,6 +70,8 @@ export class Link implements Hoverable {
 
     const lineHtml: string = await this.formLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
     const proms: Promise<any>[] = []
+
+    proms.push(this.updateStyle(priority)) // called before setContentTo(..) to avoid misplacement for short time
 
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
@@ -83,8 +85,6 @@ export class Link implements Hoverable {
     } else {
       proms.push(renderManager.setContentTo(this.getId()+'svg', lineHtml, priority))
     }
-
-    proms.push(this.updateStyle(priority))
 
     const distance: number[] = [toInManagingBoxCoords.percentX-fromInManagingBoxCoords.percentX, toInManagingBoxCoords.percentY-fromInManagingBoxCoords.percentY]
     const angleInRadians: number = Math.atan2(distance[1], distance[0]) // TODO: improve is only correct when managingBox is quadratic, use clientCoords?
@@ -225,11 +225,12 @@ export class Link implements Hoverable {
   }
 
   public async setHighlight(highlight: boolean): Promise<void> {
+    this.highlight = highlight
+
     if (!this.rendered) {
       util.logWarning('setHighlight(..) called although Link is not rendered yet.')
+      return // TODO: trigger rerender when renderInProgress
     }
-
-    this.highlight = highlight
 
     const proms: Promise<any>[] = []
     if (highlight) {
