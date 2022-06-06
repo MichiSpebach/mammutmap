@@ -36,8 +36,6 @@ improve box header, should not overlap content
 
 double click on FileBoxHeader should open file in editor/ide that is specified in settings
 
-check when directory is loaded that sourceFiles and mapFiles match
-
 use fs.watchFile(filename[, options], listener) to be notified when files are changed
   - usable for source files because they are changed from arbitrary editor
   - also usable for map files because they can be changed through git
