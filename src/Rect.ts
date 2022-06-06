@@ -1,12 +1,15 @@
 import { Position } from './box/Transform'
+import { Shape } from './shape/Shape'
 
-export abstract class Rect<POSITION extends Position<POSITION>> {
+// TODO: move into shape
+export abstract class Rect<POSITION extends Position<POSITION>> extends Shape<POSITION> {
   public readonly x: number
   public readonly y: number
   public readonly width: number
   public readonly height: number
 
   public constructor(x: number, y: number, width: number, height: number) {
+    super()
     this.x = x
     this.y = y
     this.width = width

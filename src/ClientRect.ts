@@ -1,6 +1,7 @@
 import { ClientPosition } from './box/Transform'
 import { Rect } from './Rect'
 
+// TODO: move into shape
 export class ClientRect extends Rect<ClientPosition> {
 
     // TODO: should also be available in LocalRect, make generic and move into Rect

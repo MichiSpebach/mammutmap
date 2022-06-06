@@ -11,6 +11,7 @@ import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { ClientPosition, LocalPosition } from './Transform'
 import * as linkUtil from './linkUtil'
+import { NodeWidget } from '../node/NodeWidget'
 
 export class Link implements Hoverable {
   private readonly data: BoxMapLinkData
@@ -53,7 +54,7 @@ export class Link implements Hoverable {
     return this.to
   }
 
-  public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box): Promise<void> {
+  public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box|NodeWidget): Promise<void> {
     if (linkEnd === this.to) {
       await this.reorderAndSaveWithEndBoxes({box: this.from.getBorderingBox(), changed: false}, {box: dropTarget, changed: true})
     } else if (linkEnd === this.from) {
@@ -88,9 +89,9 @@ export class Link implements Hoverable {
 
     const distance: number[] = [toInManagingBoxCoords.percentX-fromInManagingBoxCoords.percentX, toInManagingBoxCoords.percentY-fromInManagingBoxCoords.percentY]
     const angleInRadians: number = Math.atan2(distance[1], distance[0]) // TODO: improve is only correct when managingBox is quadratic, use clientCoords?
-    const fromBox: Box = this.from.getDeepestRenderedBox().box
+    const fromBox: Box|NodeWidget = this.from.getDeepestRenderedBox().box
     proms.push(this.from.render(fromBox, fromInManagingBoxCoords, angleInRadians))
-    const toBox: Box = this.to.getDeepestRenderedBox().box
+    const toBox: Box|NodeWidget = this.to.getDeepestRenderedBox().box
     proms.push(this.to.render(toBox, toInManagingBoxCoords, angleInRadians))
 
     await Promise.all(proms)
@@ -249,16 +250,30 @@ export class Link implements Hoverable {
     await this.reorderAndSaveWithEndBoxes({box: this.from.getBorderingBox(), changed: false}, {box: this.to.getBorderingBox(), changed: false})
   }
 
-  private async reorderAndSaveWithEndBoxes(from: {box: Box, changed: boolean}, to: {box: Box, changed: boolean}): Promise<void|never> {
+  private async reorderAndSaveWithEndBoxes(from: {box: Box|NodeWidget, changed: boolean}, to: {box: Box|NodeWidget, changed: boolean}): Promise<void|never> {
     const fromPosition: ClientPosition = await this.from.getTargetPositionInClientCoords()
     const toPosition: ClientPosition = await this.to.getTargetPositionInClientCoords()
-    const relation: {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} = Box.findCommonAncestor(from.box, to.box)
+    const fromBox: Box = from.box instanceof NodeWidget ? from.box.getManagingBox() : from.box
+    const toBox: Box = to.box instanceof NodeWidget ? to.box.getManagingBox() : to.box
+    const relation: {commonAncestor: Box, fromBoxes: (Box|NodeWidget)[], toBoxes: (Box|NodeWidget)[]} = Box.findCommonAncestor(fromBox, toBox)
+    if (from.box instanceof NodeWidget) {
+      relation.fromBoxes.push(from.box)
+    }
+    if (to.box instanceof NodeWidget) {
+      relation.toBoxes.push(to.box)
+    }
 
     const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
+      if (box instanceof NodeWidget) {
+        return new WayPointData(box.getId(), box.getId()+'Node', 50, 50)
+      }
       const positionInBoxCoords: LocalPosition = await box.transform.clientToLocalPosition(fromPosition)
       return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.percentX, positionInBoxCoords.percentY)
     })
     const toWayPoints: Promise<WayPointData>[] = relation.toBoxes.map(async box => {
+      if (box instanceof NodeWidget) {
+        return new WayPointData(box.getId(), box.getId()+'Node', 50, 50)
+      }
       const positionInBoxCoords: LocalPosition = await box.transform.clientToLocalPosition(toPosition)
       return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.percentX, positionInBoxCoords.percentY)
     })
@@ -291,13 +306,13 @@ export class Link implements Hoverable {
   }
 
   private registerAtBorderingBoxes(): void {
-    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.borderingLinks.register(this))
-    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.borderingLinks.register(this))
+    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box|NodeWidget) => box.borderingLinks.register(this))
+    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box|NodeWidget) => box.borderingLinks.register(this))
   }
 
   private deregisterAtBorderingBoxes(): void {
-    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.borderingLinks.deregister(this))
-    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box) => box.borderingLinks.deregister(this))
+    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box|NodeWidget) => box.borderingLinks.deregister(this))
+    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box|NodeWidget) => box.borderingLinks.deregister(this))
   }
 
   public async getLineInClientCoords(): Promise<{from: ClientPosition, to: ClientPosition}> {

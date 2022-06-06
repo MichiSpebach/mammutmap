@@ -10,11 +10,12 @@ import { util } from '../util'
 import { DragManager } from '../DragManager'
 import { BoxNodesWidget } from '../box/BoxNodesWidget'
 import { BorderingLinks } from '../link/BorderingLinks'
+import { ClientCircle } from '../shape/ClientCircle'
 
 export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     private readonly mapData: NodeData
     private managingBox: Box
-    private readonly borderingLinks: BorderingLinks
+    public readonly borderingLinks: BorderingLinks
     private rendered: boolean = false
     private dragState: {
         positionInManagingBoxCoords: LocalPosition
@@ -39,6 +40,15 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         return this.managingBox
     }
 
+    public async getClientShape(): Promise<ClientCircle> {
+        const clientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(this.getPosition())
+        return new ClientCircle(clientPosition.x, clientPosition.y, 5)
+    }
+
+    private getPosition(): LocalPosition {
+        return this.dragState ? this.dragState.positionInManagingBoxCoords : this.mapData.getPosition()
+    }
+
     private async setDragStateAndRender(
         dragState: {positionInManagingBoxCoords: LocalPosition} | null,
         priority: RenderPriority
@@ -50,7 +60,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
         const proms: Promise<any>[] = []
 
-        const position: LocalPosition = this.dragState ? this.dragState.positionInManagingBoxCoords : this.mapData.getPosition()
+        const position: LocalPosition = this.getPosition()
         const positionStyle = `position:absolute;top:${position.percentY}%;left:${position.percentX}%;`
         const sizeStyle = 'width:10px;height:10px;transform:translate(-5px,-5px);'
         const borderStyle = 'border-style:solid;border-width:1px;border-radius:50%;'
@@ -58,6 +68,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         proms.push(renderManager.setStyleTo(this.getId(), positionStyle+sizeStyle+borderStyle+colorStyle, priority))
 
         if (!this.rendered) {
+            DragManager.addDropTarget(this)
             proms.push(DragManager.addDraggable(this, priority))
             this.rendered = true
         }
@@ -69,6 +80,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         if (!this.rendered) {
             return
         }
+        DragManager.removeDropTarget(this)
         await DragManager.removeDraggable(this, priority)
         this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
     }
@@ -104,10 +116,12 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         }
 
         await this.setDragStateAndRender({positionInManagingBoxCoords}, RenderPriority.RESPONSIVE)
+        await this.borderingLinks.renderAll()
     }
 
     public async dragCancel(): Promise<void> {
         await this.setDragStateAndRender(null, RenderPriority.RESPONSIVE)
+        await this.borderingLinks.renderAll()
     }
 
     public async dragEnd(dropTarget: Box): Promise<void> {
@@ -127,7 +141,8 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
             this.mapData.setPosition(positionInDropTargetCoords)
             const oldManagingBox: Box = this.managingBox
             this.managingBox = dropTarget
-            proms.push(BoxNodesWidget.changeManagingBoxOfNodeAndSave(oldManagingBox, dropTarget, this))
+            await BoxNodesWidget.changeManagingBoxOfNodeAndSave(oldManagingBox, dropTarget, this)
+            proms.push(this.borderingLinks.reorderAndSaveAll())
         }
 
         proms.push(this.setDragStateAndRender(null, RenderPriority.RESPONSIVE))

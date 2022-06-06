@@ -174,6 +174,9 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.getParent().getClientRect()
   }
 
+  public async getClientShape(): Promise<ClientRect> {
+    return this.getClientRect()
+  }
   public async getClientRect(): Promise<ClientRect> {
     return this.getParent().transform.localToClientRect(this.mapData.getRect())
   }

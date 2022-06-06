@@ -19,6 +19,10 @@ export class BoxNodesWidget extends Widget {
       return this.referenceBox.getId()+'Nodes'
     }
 
+    public getNodeById(id: string): NodeWidget|undefined {
+      return this.nodeWidgets.find(node => node.getId() === id)
+    }
+
     public async render(): Promise<void> {
       if (this.rendered) {
         return
@@ -81,7 +85,7 @@ export class BoxNodesWidget extends Widget {
 
     public async add(data: NodeData) {
       this.referenceBox.getMapNodeData().push(data)
-      
+
       const nodeWidget: NodeWidget = new NodeWidget(data, this.referenceBox)
       this.nodeWidgets.push(nodeWidget)
       await renderManager.addContentTo(this.getId(), this.formHtmlPlaceholderFor(nodeWidget))
