@@ -3,10 +3,6 @@ fix WARNING: error in render thread occured:
 Failed to execute 'appendChild' on 'Node': parameter 1 is not of type 'Node'..
 the javascript that was tried to execute was: (() => {document.getElementById("unplacedElements").appendChild(document.getElementById("scaleTool"))}).call()
 
-repair removing of links, causes exception in renderer thread that let's application freeze when unrendering/zooming out
-
-deploy settings.json or pull settings from resources if not existing
-
 fuse SourcelessBoxes with other Boxes, drag SourcelessBox to other box or drop other box inside SourcelessBox to fuse
 
 improve Grid, implement layer2 and layer3 that is visible when clientRectSize is bigger

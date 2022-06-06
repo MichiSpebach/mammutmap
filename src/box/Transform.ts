@@ -94,38 +94,66 @@ export class Transform {
 
 }
 
-export class LocalPosition {
+// TODO: move positions to own classes
+export abstract class Position<POSITION extends Position<POSITION>> {
+
+  public abstract getX(): number
+
+  public abstract getY(): number
+
+  public isBetweenCoordinateWise(line: {from: POSITION, to: POSITION}): boolean {
+    const leftLineEnd: number = Math.min(line.from.getX(), line.to.getX())
+    const rightLineEnd: number = Math.max(line.from.getX(), line.to.getX())
+    const topLineEnd: number = Math.min(line.from.getY(), line.to.getY())
+    const bottomLineEnd: number = Math.max(line.from.getY(), line.to.getY())
+    return this.getX() >= leftLineEnd && this.getX() <= rightLineEnd && this.getY() >= topLineEnd && this.getY() <= bottomLineEnd
+  }
+
+  public equals(other: POSITION): boolean {
+    return other.getX() === this.getX() && other.getY() === this.getY()
+  }
+
+}
+
+export class LocalPosition extends Position<LocalPosition> {
   public readonly percentX: number
   public readonly percentY: number
 
   public constructor(percentX: number, percentY: number) {
+    super()
     this.percentX = percentX
     this.percentY = percentY
   }
+
+  public getX(): number {
+    return this.percentX
+  }
+
+  public getY(): number {
+    return this.percentY
+  }
 }
 
-export class ClientPosition {
+export class ClientPosition extends Position<ClientPosition> {
   public readonly x: number
   public readonly y: number
 
   public constructor(x: number, y: number) {
+    super()
     this.x = x
     this.y = y
   }
 
-  public isBetweenCoordinateWise(line: {from: ClientPosition, to: ClientPosition}): boolean {
-    const leftLineEnd: number = Math.min(line.from.x, line.to.x)
-    const rightLineEnd: number = Math.max(line.from.x, line.to.x)
-    const topLineEnd: number = Math.min(line.from.y, line.to.y)
-    const bottomLineEnd: number = Math.max(line.from.y, line.to.y)
-    return this.x >= leftLineEnd && this.x <= rightLineEnd && this.y >= topLineEnd && this.y <= bottomLineEnd
+  public getX(): number {
+    return this.x
+  }
+
+  public getY(): number {
+    return this.y
   }
 
   public calculateDistanceTo(other: ClientPosition): number {
     return Math.sqrt((this.x-other.x)*(this.x-other.x) + (this.y-other.y)*(this.y-other.y))
   }
 
-  public equals(other: ClientPosition): boolean {
-    return other.x === this.x && other.y === this.y
-  }
 }
