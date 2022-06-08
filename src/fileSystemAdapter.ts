@@ -84,6 +84,10 @@ export class FileSystem {
   }
 
   public async rename(oldPath: string, newPath: string): Promise<void> {
+    const newFolderPath: string = util.removeLastElementFromPath(newPath)
+    if (!await this.doesDirentExist(newFolderPath)) {
+      await this.makeFolder(newFolderPath)
+    }
     return fsPromises.rename(oldPath, newPath)
   }
 
