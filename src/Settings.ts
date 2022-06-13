@@ -10,6 +10,7 @@ class Settings {
   private zoomSpeed: number
   private boxMinSizeToRender: number
   private boxesDraggableIntoOtherBoxes: boolean
+  private developerMode: boolean
 
   public static async loadFromFileSystem(): Promise<Settings> {
     let settingsJson: string
@@ -33,6 +34,7 @@ class Settings {
     this.zoomSpeed = settingsParsed['zoomSpeed']
     this.boxMinSizeToRender = settingsParsed['boxMinSizeToRender']
     this.boxesDraggableIntoOtherBoxes = settingsParsed['boxesDraggableIntoOtherBoxes']
+    this.developerMode = settingsParsed['developerMode']
   }
 
   private async save(): Promise<void> {
@@ -61,12 +63,30 @@ class Settings {
     await this.save()
   }
 
-  public getBoxesDraggableIntoOtherBoxes(): boolean {
-    return this.boxesDraggableIntoOtherBoxes
+  public getBoolean(name: 'boxesDraggableIntoOtherBoxes'|'developerMode'): boolean {
+    switch (name) {
+      case 'boxesDraggableIntoOtherBoxes':
+        return this.boxesDraggableIntoOtherBoxes
+      case 'developerMode':
+        return this.developerMode
+      default:
+        util.logWarning(`Cannot getBoolean setting with name ${name} and returning false, this happens most likely because of a plugin.`)
+        return false
+    }
   }
 
-  public async setBoxesDraggableIntoOtherBoxes(value: boolean) {
-    this.boxesDraggableIntoOtherBoxes = value
+  public async setBoolean(name: 'boxesDraggableIntoOtherBoxes'|'developerMode', value: boolean): Promise<void> {
+    switch (name) {
+      case 'boxesDraggableIntoOtherBoxes':
+        this.boxesDraggableIntoOtherBoxes = value
+        break
+      case 'developerMode':
+        this.developerMode = value
+        break
+      default:
+        util.logWarning(`Cannot setBoolean setting with name ${name}, this happens most likely because of a plugin.`)
+        return
+    }
     await this.save()
   }
 

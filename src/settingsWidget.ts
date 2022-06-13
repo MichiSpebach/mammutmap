@@ -15,6 +15,7 @@ class SettingsWidget extends PopupWidget {
   private readonly zoomSpeedInputId: string
   private readonly boxMinSizeToRenderInputId: string
   private readonly boxesDraggableIntoOtherBoxesInputId: string
+  private readonly developerModeInputId: string
 
   public constructor() {
     super('applicationSettingsWidget', 'ApplicationSettings')
@@ -22,6 +23,7 @@ class SettingsWidget extends PopupWidget {
     this.zoomSpeedInputId = this.getId()+'ZoomSpeed'
     this.boxMinSizeToRenderInputId = this.getId()+'BoxMinSizeToRender'
     this.boxesDraggableIntoOtherBoxesInputId = this.getId()+'BoxesDraggableIntoOtherBoxes'
+    this.developerModeInputId = this.getId()+'DeveloperMode'
   }
 
   protected formContentHtml(): string {
@@ -43,21 +45,25 @@ class SettingsWidget extends PopupWidget {
     boxMinSizeToRenderHtml += `>`
     boxMinSizeToRenderHtml += '</td>'
 
-    let boxesDraggableIntoOtherBoxesHtml = '<td>'
-    boxesDraggableIntoOtherBoxesHtml += `<label for="${this.boxesDraggableIntoOtherBoxesInputId}">boxesDraggableIntoOtherBoxes: </label>`
-    boxesDraggableIntoOtherBoxesHtml += '</td><td>'
-    boxesDraggableIntoOtherBoxesHtml += `<input id="${this.boxesDraggableIntoOtherBoxesInputId}"`
-    boxesDraggableIntoOtherBoxesHtml += ` type="checkbox" ${settings.getBoxesDraggableIntoOtherBoxes() ? 'checked' : ''}`
-    boxesDraggableIntoOtherBoxesHtml += `>`
-    boxesDraggableIntoOtherBoxesHtml += '</td>'
-
     let html = '<table>'
     html += `<tr>${zoomSpeedHtml}</tr>`
     html += `<tr>${boxMinSizeToRenderHtml}</tr>`
-    html += `<tr>${boxesDraggableIntoOtherBoxesHtml}</tr>`
+    html += this.formCheckboxRowHtml(this.boxesDraggableIntoOtherBoxesInputId, 'boxesDraggableIntoOtherBoxes')
+    html += this.formCheckboxRowHtml(this.developerModeInputId, 'developerMode')
     html += '</table>'
 
     return html
+  }
+
+  private formCheckboxRowHtml(id: string, settingsName: 'boxesDraggableIntoOtherBoxes'|'developerMode'): string {
+    let dataCellsHtml = '<td>'
+    dataCellsHtml += `<label for="${id}">${settingsName}: </label>`
+    dataCellsHtml += '</td><td>'
+    dataCellsHtml += `<input id="${id}"`
+    dataCellsHtml += ` type="checkbox" ${settings.getBoolean(settingsName) ? 'checked' : ''}`
+    dataCellsHtml += `>`
+    dataCellsHtml += '</td>'
+    return `<tr>${dataCellsHtml}</tr>`
   }
 
   protected async afterRender(): Promise<void> {
@@ -70,11 +76,13 @@ class SettingsWidget extends PopupWidget {
         this.boxMinSizeToRenderInputId, 'value',
         (value: string) => settings.setBoxMinSizeToRender(parseInt(value))
       ),
-      renderManager.addChangeListenerTo<boolean>(
-        this.boxesDraggableIntoOtherBoxesInputId, 'checked',
-        (value: boolean) => settings.setBoxesDraggableIntoOtherBoxes(value)
-      )
+      this.addChangeListenerToCheckbox(this.boxesDraggableIntoOtherBoxesInputId, 'boxesDraggableIntoOtherBoxes'),
+      this.addChangeListenerToCheckbox(this.developerModeInputId, 'developerMode')
     ])
+  }
+
+  private async addChangeListenerToCheckbox(id: string, settingsName: 'boxesDraggableIntoOtherBoxes'|'developerMode'): Promise<void> {
+    await renderManager.addChangeListenerTo<boolean>(id, 'checked', (value: boolean) => settings.setBoolean(settingsName, value))
   }
 
   protected async beforeUnrender(): Promise<void> {
@@ -82,7 +90,8 @@ class SettingsWidget extends PopupWidget {
     await Promise.all([
       renderManager.removeEventListenerFrom(this.zoomSpeedInputId, 'change'),
       renderManager.removeEventListenerFrom(this.boxMinSizeToRenderInputId, 'change'),
-      renderManager.removeEventListenerFrom(this.boxesDraggableIntoOtherBoxesInputId, 'change')
+      renderManager.removeEventListenerFrom(this.boxesDraggableIntoOtherBoxesInputId, 'change'),
+      renderManager.removeEventListenerFrom(this.developerModeInputId, 'change')
     ])
   }
 

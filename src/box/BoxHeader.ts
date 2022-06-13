@@ -34,7 +34,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public canBeDroppedInto(dropTarget: DropTarget): boolean {
-    return settings.getBoxesDraggableIntoOtherBoxes() && dropTarget instanceof FolderBox
+    return settings.getBoolean('boxesDraggableIntoOtherBoxes') && dropTarget instanceof FolderBox
   }
 
   public async render(): Promise<void> {
