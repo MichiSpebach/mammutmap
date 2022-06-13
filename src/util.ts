@@ -79,13 +79,15 @@ class Util {
   }
 
   public stringify(object: any): string {
-    var stringifiedObject: string = object + ': '
-    for (var key in object) {
-      //if(typeof rect[key] !== 'function') {
-        stringifiedObject += key + '=' + object[key] + '; '
-      //}
-    }
-    return stringifiedObject
+    const visitedObjects: any[] = []
+    
+    return JSON.stringify(object, (key: string, value: string) => {
+      if (value && visitedObjects.includes(value)) {
+        return value.toString() // TODO: getId() if existing
+      }
+      visitedObjects.push(value)
+      return value
+    }, '\t')
   }
 
   public getIndentationDepth(line: string, numberOfSpacesMatchingOneTab: number = 2): number {

@@ -12,6 +12,8 @@ import { BoxMapData } from './box/BoxMapData'
 import { TextInputPopup } from './TextInputPopup'
 import { SourcelessBox } from './box/SourcelessBox'
 import { NodeData } from './mapData/NodeData'
+import { PopupWidget } from './PopupWidget'
+import { settings } from './Settings'
 
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const command: string = 'code '+box.getSrcPath()
@@ -27,6 +29,9 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
   menu.append(buildAddLinkItem(box, clientX, clientY))
   menu.append(buildAddNodeItem(box, clientX, clientY))
   menu.append(buildRenameBoxItem(box))
+  if (settings.getBoolean('developerMode')) {
+    menu.append(buildDetailsItem('FileBoxDetails', box))
+  }
   menu.popup()
 }
 
@@ -37,6 +42,9 @@ export function openForFolderBox(box: FolderBox, clientX: number, clientY: numbe
   menu.append(buildRenameBoxItem(box))
   menu.append(buildAddNewFileItem(box, clientX, clientY))
   menu.append(buildAddNewFolderItem(box, clientX, clientY))
+  if (settings.getBoolean('developerMode')) {
+    menu.append(buildDetailsItem('FolderBoxDetails', box))
+  }
   menu.popup()
 }
 
@@ -45,6 +53,9 @@ export function openForSourcelessBox(box: SourcelessBox, clientX: number, client
   menu.append(buildAddLinkItem(box, clientX, clientY))
   menu.append(buildAddNodeItem(box, clientX, clientY))
   menu.append(buildRenameBoxItem(box))
+  if (settings.getBoolean('developerMode')) {
+    menu.append(buildDetailsItem('SourcelessBoxDetails', box))
+  }
   menu.popup()
 }
 
@@ -52,6 +63,9 @@ export function openForLink(link: Link, clientX: number, clientY: number): void 
   const menu = new Menu()
   menu.append(buildHideOrShowLinkItem(link))
   menu.append(buildRemoveLinkItem(link))
+  if (settings.getBoolean('developerMode')) {
+    menu.append(buildDetailsItem('LinkDetails', link))
+  }
   menu.popup()
 }
 
@@ -103,6 +117,37 @@ function buildAddNewFolderItem(box: FolderBox, clientX: number, clientY: number)
 async function buildMapDataForNewBox(parentBox: FolderBox, clientX: number, clientY: number): Promise<BoxMapData> {
   const position: LocalPosition = await parentBox.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
   return BoxMapData.buildNew(position.percentX, position.percentY, 16, 8)
+}
+
+function buildDetailsItem(title: string, object: any): MenuItem {
+  return new MenuItem({
+    label: 'details',
+    click: () => {
+      buildDetailsPopupWidget(title, object).render()
+    }
+  })
+}
+
+function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
+  // TODO: move to own file
+  return new class extends PopupWidget {
+    public constructor() {
+      super(util.generateId()+title, title)
+    }
+    protected formContentHtml(): string {
+      // TODO: render this in zoomable map with would be cool
+      let html = '<pre style="max-width:1500px;max-height:750px;overflow:auto;">'
+      html += util.escapeForHtml(util.stringify(object))
+      html += '</pre>'
+      return html
+    }
+    protected afterRender(): Promise<void> {
+      return Promise.resolve()
+    }
+    protected beforeUnrender(): Promise<void> {
+      return Promise.resolve()
+    }
+  }
 }
 
 // TODO: move into Box?
