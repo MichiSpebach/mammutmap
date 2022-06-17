@@ -16,6 +16,7 @@ import { LocalRect } from '../LocalRect'
 export class FolderBoxBody extends BoxBody {
   private readonly referenceFolderBox: FolderBox
   private boxes: Box[] = []
+  private tooManyFilesNoticeRendered: boolean = false
 
   public constructor(referenceBox: FolderBox) {
     super(referenceBox)
@@ -41,13 +42,53 @@ export class FolderBoxBody extends BoxBody {
       }
     }))
     if (!rendered) {
+      await this.unrenderTooManyFilesNotice()
       await this.unrenderBoxPlaceholders()
       await this.destructBoxes()
     }
     return {rendered: rendered}
   }
 
-  private async loadMapDatasAndCreateBoxes(): Promise<void> {
+  private async renderTooManyFilesNotice(count: number): Promise<void> {
+    if (this.tooManyFilesNoticeRendered) {
+      return
+    }
+
+    const style = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;'
+    let html = `<div id="${this.getTooManyFilesNoticeId()}" style="${style}">`
+    html += `There are ${count} files and folders.<br>`
+    html += `<button id="${this.getTooManyFilesNoticeButtonId()}">render</button>`
+    html += '</div>'
+    await renderManager.addContentTo(this.getId(), html)
+    await renderManager.addEventListenerTo(this.getTooManyFilesNoticeButtonId(), 'click', async () => {
+      await this.unrenderTooManyFilesNotice()
+      await this.loadMapDatasAndCreateBoxes(true)
+      await this.renderBoxes()
+    })
+
+    this.tooManyFilesNoticeRendered = true
+  }
+
+  private async unrenderTooManyFilesNotice(): Promise<void> {
+    if (!this.tooManyFilesNoticeRendered) {
+      return
+    }
+
+    await renderManager.removeEventListenerFrom(this.getTooManyFilesNoticeButtonId(), 'click')
+    await renderManager.remove(this.getTooManyFilesNoticeId())
+
+    this.tooManyFilesNoticeRendered = false
+  }
+
+  private getTooManyFilesNoticeId(): string {
+    return this.getId()+'TooManyFiles'
+  }
+
+  private getTooManyFilesNoticeButtonId(): string {
+    return this.getTooManyFilesNoticeId()+'Button'
+  }
+
+  private async loadMapDatasAndCreateBoxes(unlimitedCount: boolean = false): Promise<void> {
     const mapDataLoader = new BoxMapDataLoader(this.referenceFolderBox, this)
 
     const dirents = await mapDataLoader.loadDirents()
@@ -60,6 +101,12 @@ export class FolderBoxBody extends BoxBody {
     const sourcesWithoutMapData = mapDataLoader.filterSourcesWithoutMapData(dirents.sourcesWithoutMapData)
 
     const mapDataWithoutSourcesLoaded = mapDataLoader.loadMapDatasWithoutSources(dirents.mapDataWithoutSources)
+
+    const sourceCount: number = sourcesWithLoadedMapData.sourcesWithLoadedMapData.length+sourcesWithoutMapData.length
+    if (sourceCount > 200 && !unlimitedCount) {
+      await this.renderTooManyFilesNotice(sourceCount)
+      return
+    }
 
     this.boxes.push(...await Promise.all(this.createBoxesWithMapData(sourcesWithLoadedMapData.sourcesWithLoadedMapData)))
     this.boxes.push(...await Promise.all(this.createBoxesWithoutSourceData(await mapDataWithoutSourcesLoaded)))
@@ -124,7 +171,11 @@ export class FolderBoxBody extends BoxBody {
   }
 
   private async renderBoxPlaceholderFor(box: Box): Promise<void> {
-    return renderManager.addContentTo(this.getId(), '<div id="' + box.getId() + '" style="display:inline-block;">loading... ' + box.getName() + '</div>')
+    const rect: LocalRect = box.getLocalRect()
+    let style = `position:absolute;`
+    style += `left:${rect.x}%;top:${rect.y}%;width:${rect.width}%;height:${rect.height}%;`
+    style += 'overflow:hidden;'
+    return renderManager.addContentTo(this.getId(), `<div id="${box.getId()}" style="${style}">wait for box ${box.getName()} to render</div>`)
   }
 
   private async unrenderBoxPlaceholders(): Promise<void> {
