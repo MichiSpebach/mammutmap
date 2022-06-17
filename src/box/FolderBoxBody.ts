@@ -22,14 +22,14 @@ export class FolderBoxBody extends BoxBody {
     this.referenceFolderBox = referenceBox
   }
 
-  public async executeRender(): Promise<void> {
+  protected async executeRender(): Promise<void> {
     if (!this.isRendered()) {
       await this.loadMapDatasAndCreateBoxes()
     }
     await this.renderBoxes()
   }
 
-  public async executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
+  protected async executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
     if (!this.isRendered()) {
       return {rendered: false}
     }
@@ -152,12 +152,8 @@ export class FolderBoxBody extends BoxBody {
     return this.boxes.some(box => box.getName() === name)
   }
 
-  public getBox(id: string): Box|never {
-    const box: Box|undefined = this.boxes.find((candidate: Box) => candidate.getId() === id)
-    if (!box) {
-      util.logError(this.referenceFolderBox.getSrcPath() + ' does not contain a box with id ' + id)
-    }
-    return box
+  public getBox(id: string): Box|undefined {
+    return this.boxes.find((candidate: Box) => candidate.getId() === id)
   }
 
   public getBoxes(): Box[] {

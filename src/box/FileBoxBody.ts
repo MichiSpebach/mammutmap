@@ -18,7 +18,7 @@ export class FileBoxBody extends BoxBody {
     return this.getId()+'Content'
   }
 
-  public async executeRender(): Promise<void> {
+  protected async executeRender(): Promise<void> {
     if (this.isRendered()) {
       return
     }
@@ -31,8 +31,8 @@ export class FileBoxBody extends BoxBody {
       } else {
         this.setContent(await this.formHtmlContentForTextFile())
       }
-    } catch(e) {
-      this.setContent(this.formHtmlContentForError(e))
+    } catch(error: any) {
+      this.setContent(this.formHtmlContentForError(error))
     }
   }
 
@@ -40,7 +40,7 @@ export class FileBoxBody extends BoxBody {
     await renderManager.setContentTo(this.getId(), content)
   }
 
-  public async executeUnrenderIfPossible(): Promise<{rendered: boolean}> {
+  protected async executeUnrenderIfPossible(): Promise<{rendered: boolean}> {
     if (!this.isRendered()) {
       return {rendered: false}
     }

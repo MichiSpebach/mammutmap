@@ -23,9 +23,10 @@ export class BorderingLinks {
     await Promise.all(this.links.map(link => link.setHighlight(highlight)))
   }
 
-  public register(link: Link) {
+  public register(link: Link): void {
     if (this.links.includes(link)) {
       util.logWarning('trying to register borderingLink that is already registered')
+      return
     }
     this.links.push(link)
     if (!this.referenceBox.isMapDataFileExisting()) {
@@ -34,9 +35,10 @@ export class BorderingLinks {
     }
   }
   
-  public deregister(link: Link) {
+  public deregister(link: Link): void {
     if (!this.links.includes(link)) {
       util.logWarning('trying to deregister borderingLink that is not registered')
+      return
     }
     this.links.splice(this.links.indexOf(link), 1)
   }

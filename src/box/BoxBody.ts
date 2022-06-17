@@ -89,9 +89,9 @@ export abstract class BoxBody {
     }
   }
 
-  public abstract executeRender(): Promise<void>
+  protected abstract executeRender(): Promise<void>
 
-  public abstract executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}>
+  protected abstract executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}>
 
   private async renderZoomInToRenderHint(): Promise<void> {
     if (this.zoomInToRenderHintRendered) {

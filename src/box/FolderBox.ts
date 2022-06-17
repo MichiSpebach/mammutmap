@@ -111,7 +111,7 @@ export class FolderBox extends Box {
     return undefined
   }
 
-  public getBox(id: string): Box {
+  public getBox(id: string): Box|undefined {
     return this.body.getBox(id)
   }
 
