@@ -34,6 +34,7 @@ export abstract class Box implements DropTarget, Hoverable {
   public readonly links: BoxLinks // TODO: rename to managedLinks?
   public readonly borderingLinks: BorderingLinks
   private rendered: boolean = false
+  private unrenderInProgress: boolean = false
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
 
@@ -260,6 +261,7 @@ export abstract class Box implements DropTarget, Hoverable {
       }
       util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
     }
+    this.unrenderInProgress = true
 
     DragManager.removeDropTarget(this)
     HoverManager.removeHoverable(this)
@@ -274,7 +276,8 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.unrenderAdditional())
     await Promise.all(proms)
 
-  this.rendered = false
+    this.unrenderInProgress = false
+    this.rendered = false
     return {rendered: false}
   }
 
@@ -290,7 +293,7 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   private onHoverOver(): void {
-    if (scaleTool.isScalingInProgress()) {
+    if (scaleTool.isScalingInProgress() || this.unrenderInProgress) {
       return
     }
     scaleTool.renderInto(this)
@@ -354,6 +357,10 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async attachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    if (this.unrenderInProgress) {
+      util.logWarning('prevented attaching grid to box that gets unrendered') // TODO: only to check that this gets triggered, remove
+      return
+    }
     await grid.renderInto(this.getGridPlaceHolderId(), priority)
   }
 
