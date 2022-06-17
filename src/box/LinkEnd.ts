@@ -12,6 +12,7 @@ import { LinkEndData } from './LinkEndData'
 import { boxManager } from './BoxManager'
 import { NodeWidget } from '../node/NodeWidget'
 import { Shape } from '../shape/Shape'
+import { FolderBox } from './FolderBox'
 
 export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly id: string
@@ -19,7 +20,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly referenceLink: Link
   private shape: 'square'|'arrow'
   private rendered: boolean = false
-  private borderingBox: Box|NodeWidget|null = null
+  private renderedBoxes: (Box|NodeWidget)[] = []
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box|NodeWidget
@@ -41,11 +42,28 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return this.referenceLink.getManagingBox()
   }
 
+  public updateMapDataPath(newPath: WayPointData[]): void {
+    this.data.path = newPath
+    const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxes().map(value => value.box)
+    for (const box of newRenderedBoxes) {
+      if (!this.renderedBoxes.includes(box)) {
+        box.borderingLinks.register(this.referenceLink)
+      }
+    }
+    for (const box of this.renderedBoxes) {
+      if (!newRenderedBoxes.includes(box)) {
+        box.borderingLinks.deregister(this.referenceLink)
+      }
+    }
+    this.renderedBoxes = newRenderedBoxes
+  }
+
   public getBorderingBox(): Box|NodeWidget|never {
-    if (!this.borderingBox) {
+    const cachedDeepestRenderedBox: Box|NodeWidget = this.renderedBoxes[this.renderedBoxes.length-1]
+    if (!cachedDeepestRenderedBox) {
       util.logError('WayPoint must be rendered before calling getBorderingBox(), but was not.')
     }
-    return this.borderingBox
+    return cachedDeepestRenderedBox
   }
 
   public getDropTargetAtDragStart(): Box|NodeWidget|never {
@@ -77,11 +95,12 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   public async render(borderingBox: Box|NodeWidget, positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
-    this.borderingBox = borderingBox
+    this.renderedBoxes = this.getRenderedBoxes().map(value => value.box)
 
     await this.renderShape(positionInManagingBoxCoords, angleInRadians)
 
     if (!this.rendered) {
+      this.renderedBoxes.forEach(box => box.borderingLinks.register(this.referenceLink))
       DragManager.addDraggable(this)
       this.rendered = true
     }
@@ -92,6 +111,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       return
     }
 
+    this.renderedBoxes.forEach(box => box.borderingLinks.deregister(this.referenceLink))
     DragManager.removeDraggable(this)
     await renderManager.setStyleTo(this.getId(), '')
 
@@ -227,6 +247,54 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public getRenderedBoxesWithoutManagingBox(): (Box|NodeWidget)[] {
     return this.getRenderedBoxes().map((tuple: {box: Box|NodeWidget, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.getManagingBox())
+  }
+
+  private getRenderedBoxesNew(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
+    if (this.data.path.length === 0) {
+      let message = 'Corrupted mapData detected: '
+      message += `Link with id ${this.referenceLink.getId()} in ${this.getManagingBox().getSrcPath()} has empty path.`
+      util.logWarning(message)
+    }
+
+    const renderedBoxesInPath: {box: Box|NodeWidget, wayPoint: WayPointData}[] = []
+
+    let parentBox: Box = this.getManagingBox()
+    for(let i = 0; i < this.data.path.length; i++) {
+      const wayPoint: WayPointData = this.data.path[i]
+
+      let linkable: Box|NodeWidget|undefined
+      if (parentBox.getId() === wayPoint.boxId) {
+        linkable = parentBox
+      } else if (parentBox instanceof FolderBox) {
+        linkable = parentBox.getBox(wayPoint.boxId)
+      }
+      if (!linkable) {
+        linkable = parentBox.nodes.getNodeById(wayPoint.boxId)
+      }
+      if (!linkable) {
+        break // box is not rendered
+      }
+
+      renderedBoxesInPath.push({box: linkable, wayPoint})
+
+      if (linkable instanceof Box) {
+        parentBox = linkable
+      } else {
+        break
+      }
+    }
+
+    if (renderedBoxesInPath.length === 0) {
+      const managingBox: Box = this.getManagingBox()
+      let message = 'Corrupted mapData detected: '
+      message += `Link with id ${this.referenceLink.getId()} in ${managingBox.getSrcPath()} has path with no rendered boxes, `
+      message += 'this only happens when mapData is corrupted. '
+      message += 'Defaulting LinkEnd to center of managingBox.'
+      util.logWarning(message)
+      renderedBoxesInPath.push({box: managingBox, wayPoint: new WayPointData(managingBox.getId(), managingBox.getName(), 50, 50)})
+    }
+
+    return renderedBoxesInPath
   }
 
   private getRenderedBoxes(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {

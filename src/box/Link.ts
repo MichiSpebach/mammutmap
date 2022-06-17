@@ -80,7 +80,6 @@ export class Link implements Hoverable {
       const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
       await renderManager.setContentTo(this.getId(), svgHtml+fromHtml+toHtml, priority)
       proms.push(renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;', priority))
-      this.registerAtBorderingBoxes()
       proms.push(this.addEventListeners())
       this.rendered = true
     } else {
@@ -105,7 +104,6 @@ export class Link implements Hoverable {
     const proms: Promise<any>[] = []
 
     proms.push(this.removeEventListeners())
-    this.deregisterAtBorderingBoxes()
     proms.push(this.from.unrender())
     proms.push(this.to.unrender())
     this.clearStyleTimer()
@@ -278,22 +276,19 @@ export class Link implements Hoverable {
       return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.percentX, positionInBoxCoords.percentY)
     })
 
-    this.deregisterAtBorderingBoxes()
-
     if (from.changed) {
-      this.data.from.path = await Promise.all(fromWayPoints)
+      this.from.updateMapDataPath(await Promise.all(fromWayPoints))
     } else {
-      this.data.from.path = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.from.path, await Promise.all(fromWayPoints))
+      this.from.updateMapDataPath(linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.from.path, await Promise.all(fromWayPoints)))
     }
     if (to.changed) {
-      this.data.to.path = await Promise.all(toWayPoints)
+      this.to.updateMapDataPath(await Promise.all(toWayPoints))
     } else {
-      this.data.to.path = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.to.path, await Promise.all(toWayPoints))
+      this.to.updateMapDataPath(linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.to.path, await Promise.all(toWayPoints)))
     }
 
     const oldManagingBox: Box = this.managingBox
     this.managingBox = relation.commonAncestor
-    this.registerAtBorderingBoxes()
 
     const proms: Promise<any>[] = []
     if(oldManagingBox !== this.managingBox) {
@@ -303,16 +298,6 @@ export class Link implements Hoverable {
     }
     proms.push(this.render())
     await Promise.all(proms)
-  }
-
-  private registerAtBorderingBoxes(): void {
-    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box|NodeWidget) => box.borderingLinks.register(this))
-    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box|NodeWidget) => box.borderingLinks.register(this))
-  }
-
-  private deregisterAtBorderingBoxes(): void {
-    this.from.getRenderedBoxesWithoutManagingBox().forEach((box: Box|NodeWidget) => box.borderingLinks.deregister(this))
-    this.to.getRenderedBoxesWithoutManagingBox().forEach((box: Box|NodeWidget) => box.borderingLinks.deregister(this))
   }
 
   public async getLineInClientCoords(): Promise<{from: ClientPosition, to: ClientPosition}> {
