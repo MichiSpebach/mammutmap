@@ -276,19 +276,19 @@ export class Link implements Hoverable {
       return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.percentX, positionInBoxCoords.percentY)
     })
 
-    if (from.changed) {
-      this.from.updateMapDataPath(await Promise.all(fromWayPoints))
-    } else {
-      this.from.updateMapDataPath(linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.from.path, await Promise.all(fromWayPoints)))
-    }
-    if (to.changed) {
-      this.to.updateMapDataPath(await Promise.all(toWayPoints))
-    } else {
-      this.to.updateMapDataPath(linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.to.path, await Promise.all(toWayPoints)))
-    }
-
     const oldManagingBox: Box = this.managingBox
     this.managingBox = relation.commonAncestor
+
+    if (from.changed) {
+      this.from.updateMapDataPath(await Promise.all(fromWayPoints)) // TODO: fromWayPoints should be calculated by LinkEnd itself
+    } else {
+      this.from.updatePathForUnchangedEnd()
+    }
+    if (to.changed) {
+      this.to.updateMapDataPath(await Promise.all(toWayPoints)) // TODO: toWayPoints should be calculated by LinkEnd itself
+    } else {
+      this.to.updatePathForUnchangedEnd()
+    }
 
     const proms: Promise<any>[] = []
     if(oldManagingBox !== this.managingBox) {

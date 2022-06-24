@@ -13,6 +13,7 @@ import { boxManager } from './BoxManager'
 import { NodeWidget } from '../node/NodeWidget'
 import { Shape } from '../shape/Shape'
 import { FolderBox } from './FolderBox'
+import * as linkUtil from './linkUtil'
 
 export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly id: string
@@ -40,22 +41,6 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public getManagingBox(): Box {
     return this.referenceLink.getManagingBox()
-  }
-
-  public updateMapDataPath(newPath: WayPointData[]): void {
-    this.data.path = newPath
-    const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxes().map(value => value.box)
-    for (const box of newRenderedBoxes) {
-      if (!this.renderedBoxes.includes(box)) {
-        box.borderingLinks.register(this.referenceLink)
-      }
-    }
-    for (const box of this.renderedBoxes) {
-      if (!newRenderedBoxes.includes(box)) {
-        box.borderingLinks.deregister(this.referenceLink)
-      }
-    }
-    this.renderedBoxes = newRenderedBoxes
   }
 
   public getBorderingBox(): Box|NodeWidget|never {
@@ -92,6 +77,68 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   public async dragEnd(dropTarget: Box|NodeWidget): Promise<void> {
     await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
     this.dragState = null
+  }
+
+  // TODO: rename to ..WithoutRender
+  public updatePathForUnchangedEnd(): void { // TODO: add parameter newManagingBoxForCheck?
+    const deepestRenderedBox: Box|NodeWidget = this.renderedBoxes[this.renderedBoxes.length-1]
+    const deepestRenderedWayPoint: WayPointData = this.getWayPointOf(deepestRenderedBox)
+
+    const shallowRenderedPath: {box: Box, wayPoint: WayPointData}[] = []
+    if (deepestRenderedBox instanceof NodeWidget) {
+      shallowRenderedPath.unshift({box: deepestRenderedBox.getManagingBox(), wayPoint: deepestRenderedWayPoint})
+    } else {
+      shallowRenderedPath.unshift({box: deepestRenderedBox, wayPoint: deepestRenderedWayPoint});
+    }
+
+    for (let previous: {box: Box, wayPoint: WayPointData} = shallowRenderedPath[0]; !previous.box.isRoot(); previous = shallowRenderedPath[0]) {
+      const nextBox: Box = previous.box.getParent()
+      if (nextBox === this.getManagingBox()) {
+        break
+      }
+      const nextPosition: LocalPosition = previous.box.transform.toParentPosition(previous.wayPoint.getPosition())
+      const nextWayPoint: WayPointData = new WayPointData(nextBox.getId(), nextBox.getName(), nextPosition.percentX, nextPosition.percentY)
+      shallowRenderedPath.unshift({box: nextBox, wayPoint: nextWayPoint})
+    }
+
+    const firstBoxInPath: Box = shallowRenderedPath[0].box
+    const parentIsManagingBox = !firstBoxInPath.isRoot() && firstBoxInPath.getParent() === this.getManagingBox()
+    const firstBoxIsManagingBox = firstBoxInPath === this.getManagingBox()
+    if (!parentIsManagingBox && !firstBoxIsManagingBox) {
+      let message = `did not find managingBox while updatePath() of LinkEnd with id ${this.getId()}`
+      message += ', this could happen when LinkEnd::updatePath() is called before the new managingBox is set'
+      util.logWarning(message)
+    }
+
+    const newPath: WayPointData[] = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.path, shallowRenderedPath.map(value => value.wayPoint))
+    this.updateMapDataPath(newPath)
+  }
+
+  private getWayPointOf(box: Box|NodeWidget): WayPointData {
+    for (const wayPoint of this.data.path) {
+      if (wayPoint.boxId === box.getId()) {
+        return wayPoint
+      }
+    }
+    util.logWarning('wayPoint not found, this should never happen')
+    return new WayPointData(box.getId(), 'workaround', 50, 50)
+  }
+
+  // TODO: rename to ..WithoutRender?
+  public updateMapDataPath(newPath: WayPointData[]): void { // TODO: make this private
+    this.data.path = newPath
+    const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxes().map(value => value.box)
+    for (const box of newRenderedBoxes) {
+      if (!this.renderedBoxes.includes(box)) {
+        box.borderingLinks.register(this.referenceLink)
+      }
+    }
+    for (const box of this.renderedBoxes) {
+      if (!newRenderedBoxes.includes(box)) {
+        box.borderingLinks.deregister(this.referenceLink)
+      }
+    }
+    this.renderedBoxes = newRenderedBoxes
   }
 
   public async render(borderingBox: Box|NodeWidget, positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
@@ -249,6 +296,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return this.getRenderedBoxes().map((tuple: {box: Box|NodeWidget, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.getManagingBox())
   }
 
+  // TODO: use ASAP
   private getRenderedBoxesNew(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
     if (this.data.path.length === 0) {
       let message = 'Corrupted mapData detected: '
