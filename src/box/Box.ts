@@ -287,7 +287,6 @@ export abstract class Box implements DropTarget, Hoverable {
     }
     const linksToUpdate: Link[] = this.getParent().borderingLinks.filterFor(this.getId())
     await Promise.all(linksToUpdate.map(async (link: Link) => {
-      this.borderingLinks.register(link)
       await link.render()
     }))
   }

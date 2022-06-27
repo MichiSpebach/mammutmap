@@ -39,6 +39,10 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return this.id
   }
 
+  public getReferenceLink(): Link {
+    return this.referenceLink
+  }
+
   public getManagingBox(): Box {
     return this.referenceLink.getManagingBox()
   }
@@ -127,7 +131,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   // TODO: rename to ..WithoutRender?
   public updateMapDataPath(newPath: WayPointData[]): void { // TODO: make this private
     this.data.path = newPath
-    const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxes().map(value => value.box)
+    const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxesWithoutManagingBox()
     for (const box of newRenderedBoxes) {
       if (!this.renderedBoxes.includes(box)) {
         box.borderingLinks.register(this.referenceLink)
@@ -142,12 +146,11 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   public async render(borderingBox: Box|NodeWidget, positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
-    this.renderedBoxes = this.getRenderedBoxes().map(value => value.box)
+    this.updateMapDataPath(this.data.path) // update is important because zooming could have happened
 
     await this.renderShape(positionInManagingBoxCoords, angleInRadians)
 
     if (!this.rendered) {
-      this.renderedBoxes.forEach(box => box.borderingLinks.register(this.referenceLink))
       DragManager.addDraggable(this)
       this.rendered = true
     }

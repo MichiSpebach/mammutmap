@@ -28,6 +28,7 @@ test('updatePathForUnchangedEnd zero depth, without any changes', () => {
 
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path[0]).toEqual({boxId: 'managingBoxId', boxName: 'managingBoxName', x: 75, y: 50})
+    expect(scene.linkEnd.getManagingBox().borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
 })
 
 test('updatePathForUnchangedEnd deep, without any changes', () => {
@@ -45,6 +46,9 @@ test('updatePathForUnchangedEnd deep, without any changes', () => {
         {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
 test('updatePathForUnchangedEnd deep, move managingBox inside', () => {
@@ -62,6 +66,9 @@ test('updatePathForUnchangedEnd deep, move managingBox inside', () => {
     expect(scene.linkEndData.path).toEqual([
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
 test('updatePathForUnchangedEnd deep, move managingBox outside', () => {
@@ -81,6 +88,10 @@ test('updatePathForUnchangedEnd deep, move managingBox outside', () => {
         {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
+    expect(scene.rootBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
 test('updatePathForUnchangedEnd deep, without any changes, shallow rendered', () => {
@@ -98,6 +109,8 @@ test('updatePathForUnchangedEnd deep, without any changes, shallow rendered', ()
         {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
 function setupRenderedScenarioWithDepthZero(): {linkEnd: LinkEnd, linkEndData: LinkEndData} {

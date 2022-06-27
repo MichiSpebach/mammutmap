@@ -24,8 +24,10 @@ export class BorderingLinks {
   }
 
   public register(link: Link): void {
-    if (this.links.includes(link)) {
-      util.logWarning('trying to register borderingLink that is already registered')
+    if (this.includes(link)) {
+      let message = `Trying to register borderingLink with id ${link.getId()}`
+      message += ` to box with name ${this.referenceBox.getName()} that is already registered at this box.`
+      util.logWarning(message)
       return
     }
     this.links.push(link)
@@ -36,11 +38,17 @@ export class BorderingLinks {
   }
   
   public deregister(link: Link): void {
-    if (!this.links.includes(link)) {
-      util.logWarning('trying to deregister borderingLink that is not registered')
+    if (!this.includes(link)) {
+      let message = `Trying to deregister borderingLink with id ${link.getId()}`
+      message += ` from box with name ${this.referenceBox.getName()} that is not registered at this box.`
+      util.logWarning(message)
       return
     }
     this.links.splice(this.links.indexOf(link), 1)
+  }
+
+  public includes(link: Link): boolean {
+    return this.links.includes(link)
   }
 
   public filterFor(boxId: string): Link[] {
