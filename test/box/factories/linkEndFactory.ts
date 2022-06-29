@@ -4,13 +4,14 @@ import { LinkEnd } from '../../../src/box/LinkEnd'
 import { LinkEndData } from '../../../src/box/LinkEndData'
 import * as linkFactory from './linkFactory'
 
-export function renderedOf(linkEndData: LinkEndData, managingBox: Box, renderedBoxes: Box[]): LinkEnd {
+export function renderedOf(linkEndData: LinkEndData, managingBox: Box, boxesRegisteredAt: Box[]): LinkEnd {
     const {linkEnd, referenceLink} = of(linkEndData, managingBox)
 
     const linkEndModifiable = linkEnd as any
-    linkEndModifiable.renderedBoxes = renderedBoxes
+    linkEndModifiable.boxesRegisteredAt = boxesRegisteredAt
+    linkEndModifiable.borderingBox = boxesRegisteredAt.length > 0 ? boxesRegisteredAt[boxesRegisteredAt.length-1] : managingBox
 
-    renderedBoxes.forEach(box => box.borderingLinks.register(referenceLink))
+    boxesRegisteredAt.forEach(box => box.borderingLinks.register(referenceLink))
 
     return linkEnd
 }

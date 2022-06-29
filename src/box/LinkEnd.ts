@@ -21,7 +21,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly referenceLink: Link
   private shape: 'square'|'arrow'
   private rendered: boolean = false
-  private renderedBoxes: (Box|NodeWidget)[] = []
+  private boxesRegisteredAt: (Box|NodeWidget)[] = []
+  private borderingBox: Box|NodeWidget|undefined
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box|NodeWidget
@@ -48,11 +49,10 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   public getBorderingBox(): Box|NodeWidget|never {
-    const cachedDeepestRenderedBox: Box|NodeWidget = this.renderedBoxes[this.renderedBoxes.length-1]
-    if (!cachedDeepestRenderedBox) {
+    if (!this.borderingBox) {
       util.logError('WayPoint must be rendered before calling getBorderingBox(), but was not.')
     }
-    return cachedDeepestRenderedBox
+    return this.borderingBox
   }
 
   public getDropTargetAtDragStart(): Box|NodeWidget|never {
@@ -79,13 +79,14 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   public async dragEnd(dropTarget: Box|NodeWidget): Promise<void> {
+    //this.dragState.dropTarget = dropTarget
     await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
     this.dragState = null
   }
 
   // TODO: rename to ..WithoutRender
   public updatePathForUnchangedEnd(): void { // TODO: add parameter newManagingBoxForCheck?
-    const deepestRenderedBox: Box|NodeWidget = this.renderedBoxes[this.renderedBoxes.length-1]
+    const deepestRenderedBox: Box|NodeWidget = this.getBorderingBox()
     const deepestRenderedWayPoint: WayPointData = this.getWayPointOf(deepestRenderedBox)
 
     const shallowRenderedPath: {box: Box, wayPoint: WayPointData}[] = []
@@ -131,18 +132,26 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   // TODO: rename to ..WithoutRender?
   public updateMapDataPath(newPath: WayPointData[]): void { // TODO: make this private
     this.data.path = newPath
+    
     const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxesWithoutManagingBox()
     for (const box of newRenderedBoxes) {
-      if (!this.renderedBoxes.includes(box)) {
+      if (!this.boxesRegisteredAt.includes(box)) {
         box.borderingLinks.register(this.referenceLink)
       }
     }
-    for (const box of this.renderedBoxes) {
+    for (const box of this.boxesRegisteredAt) {
       if (!newRenderedBoxes.includes(box)) {
         box.borderingLinks.deregister(this.referenceLink)
       }
     }
-    this.renderedBoxes = newRenderedBoxes
+
+    this.boxesRegisteredAt = newRenderedBoxes
+
+    if (newRenderedBoxes.length > 0) {
+      this.borderingBox = newRenderedBoxes[newRenderedBoxes.length-1]
+    } else {
+      this.borderingBox = this.getManagingBox()
+    }
   }
 
   public async render(borderingBox: Box|NodeWidget, positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
@@ -161,7 +170,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       return
     }
 
-    this.renderedBoxes.forEach(box => box.borderingLinks.deregister(this.referenceLink))
+    this.boxesRegisteredAt.forEach(box => box.borderingLinks.deregister(this.referenceLink))
     DragManager.removeDraggable(this)
     await renderManager.setStyleTo(this.getId(), '')
 
