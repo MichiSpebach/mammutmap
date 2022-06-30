@@ -282,12 +282,12 @@ export class Link implements Hoverable {
     if (from.changed) {
       this.from.updateMapDataPath(await Promise.all(fromWayPoints)) // TODO: fromWayPoints should be calculated by LinkEnd itself
     } else {
-      this.from.updatePathForUnchangedEnd()
+      this.from.updatePathForUnchangedEnd(this.managingBox)
     }
     if (to.changed) {
       this.to.updateMapDataPath(await Promise.all(toWayPoints)) // TODO: toWayPoints should be calculated by LinkEnd itself
     } else {
-      this.to.updatePathForUnchangedEnd()
+      this.to.updatePathForUnchangedEnd(this.managingBox)
     }
 
     const proms: Promise<any>[] = []

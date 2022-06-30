@@ -85,7 +85,13 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   // TODO: rename to ..WithoutRender
-  public updatePathForUnchangedEnd(): void { // TODO: add parameter newManagingBoxForCheck?
+  public updatePathForUnchangedEnd(newManagingBoxForValidation: Box): void {
+    if (newManagingBoxForValidation !== this.getManagingBox()) {
+      let message = 'newManagingBox should already be set to referenceLink when calling updatePathForUnchangedEnd(..)'
+      message += ', this will likely lead to further problems'
+      util.logWarning(message)
+    }
+
     const deepestRenderedBox: Box|NodeWidget = this.getBorderingBox()
     const deepestRenderedWayPoint: WayPointData = this.getWayPointOf(deepestRenderedBox)
 
@@ -96,7 +102,13 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       shallowRenderedPath.unshift({box: deepestRenderedBox, wayPoint: deepestRenderedWayPoint});
     }
 
-    for (let previous: {box: Box, wayPoint: WayPointData} = shallowRenderedPath[0]; !previous.box.isRoot(); previous = shallowRenderedPath[0]) {
+    for (let previous: {box: Box, wayPoint: WayPointData} = shallowRenderedPath[0]; previous.box !== this.getManagingBox(); previous = shallowRenderedPath[0]) {
+      if (previous.box.isRoot()) {
+        let message = `did not find managingBox while updatePath() of LinkEnd with id ${this.getId()}`
+        message += ', this could happen when LinkEnd::updatePath() is called before the new managingBox is set'
+        util.logWarning(message)
+        break
+      }
       const nextBox: Box = previous.box.getParent()
       if (nextBox === this.getManagingBox()) {
         break
@@ -104,15 +116,6 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       const nextPosition: LocalPosition = previous.box.transform.toParentPosition(previous.wayPoint.getPosition())
       const nextWayPoint: WayPointData = new WayPointData(nextBox.getId(), nextBox.getName(), nextPosition.percentX, nextPosition.percentY)
       shallowRenderedPath.unshift({box: nextBox, wayPoint: nextWayPoint})
-    }
-
-    const firstBoxInPath: Box = shallowRenderedPath[0].box
-    const parentIsManagingBox = !firstBoxInPath.isRoot() && firstBoxInPath.getParent() === this.getManagingBox()
-    const firstBoxIsManagingBox = firstBoxInPath === this.getManagingBox()
-    if (!parentIsManagingBox && !firstBoxIsManagingBox) {
-      let message = `did not find managingBox while updatePath() of LinkEnd with id ${this.getId()}`
-      message += ', this could happen when LinkEnd::updatePath() is called before the new managingBox is set'
-      util.logWarning(message)
     }
 
     const newPath: WayPointData[] = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.path, shallowRenderedPath.map(value => value.wayPoint))
@@ -132,7 +135,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   // TODO: rename to ..WithoutRender?
   public updateMapDataPath(newPath: WayPointData[]): void { // TODO: make this private
     this.data.path = newPath
-    
+
     const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxesWithoutManagingBox()
     for (const box of newRenderedBoxes) {
       if (!this.boxesRegisteredAt.includes(box)) {

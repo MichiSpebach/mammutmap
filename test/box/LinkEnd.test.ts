@@ -6,8 +6,11 @@ import { LinkEndData } from '../../src/box/LinkEndData'
 import { RootFolderBox } from '../../src/box/RootFolderBox'
 import { WayPointData } from '../../src/box/WayPointData'
 import { DocumentObjectModelAdapter, init as initDocumentObjectModelAdapter } from '../../src/domAdapter'
+import { util } from '../../src/util'
 import * as boxFactory from './factories/boxFactory'
 import * as linkEndFactory from './factories/linkEndFactory'
+
+const actualLogWarning: (message: string) => void = util.logWarning
 
 beforeAll(() => {
     const domAdapterMock: DocumentObjectModelAdapter = {} as DocumentObjectModelAdapter
@@ -16,6 +19,9 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
+    // reset logWarning in case that a test mocked and overwrote it to prevent unexpected warnings to be suppressed
+    util.logWarning = actualLogWarning
+
     initBoxManager(new BoxManager)
 })
 
@@ -24,11 +30,29 @@ test('updatePathForUnchangedEnd zero depth, without any changes', () => {
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path[0]).toEqual({boxId: 'managingBoxId', boxName: 'managingBoxName', x: 75, y: 50})
 
-    scene.linkEnd.updatePathForUnchangedEnd()
+    scene.linkEnd.updatePathForUnchangedEnd(scene.linkEnd.getManagingBox())
 
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path[0]).toEqual({boxId: 'managingBoxId', boxName: 'managingBoxName', x: 75, y: 50})
     expect(scene.linkEnd.getManagingBox().borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+})
+
+test('updatePathForUnchangedEnd misplaced managingBox', () => {
+    const logWarning = jest.fn()
+    util.logWarning = logWarning
+
+    const scene = setupRenderedScenarioWithDepthZero()
+    expect(scene.linkEndData.path.length).toBe(1)
+    expect(scene.linkEndData.path[0]).toEqual({boxId: 'managingBoxId', boxName: 'managingBoxName', x: 75, y: 50})
+    const actualManagingBox: Box = scene.linkEnd.getManagingBox()
+    const misplacedManagingBox: Box = boxFactory.rootFolderOf('misplacedManagingBoxId')
+    scene.linkEnd.getManagingBox = () => misplacedManagingBox
+
+    scene.linkEnd.updatePathForUnchangedEnd(actualManagingBox)
+
+    expect(logWarning).toBeCalledWith('newManagingBox should already be set to referenceLink when calling updatePathForUnchangedEnd(..), this will likely lead to further problems')
+    expect(logWarning).toBeCalledWith('did not find managingBox while updatePath() of LinkEnd with id linkEndId, this could happen when LinkEnd::updatePath() is called before the new managingBox is set')
+    expect(logWarning).toBeCalledTimes(2)
 })
 
 test('updatePathForUnchangedEnd deep, without any changes', () => {
@@ -39,7 +63,7 @@ test('updatePathForUnchangedEnd deep, without any changes', () => {
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
 
-    scene.linkEnd.updatePathForUnchangedEnd()
+    scene.linkEnd.updatePathForUnchangedEnd(scene.outerBox)
 
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -60,7 +84,7 @@ test('updatePathForUnchangedEnd deep, move managingBox inside', () => {
     ])
     scene.linkEnd.getManagingBox = () => scene.innerBox
 
-    scene.linkEnd.updatePathForUnchangedEnd()
+    scene.linkEnd.updatePathForUnchangedEnd(scene.innerBox)
 
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path).toEqual([
@@ -80,7 +104,7 @@ test('updatePathForUnchangedEnd deep, move managingBox outside', () => {
     ])
     scene.linkEnd.getManagingBox = () => scene.rootBox
 
-    scene.linkEnd.updatePathForUnchangedEnd()
+    scene.linkEnd.updatePathForUnchangedEnd(scene.rootBox)
 
     expect(scene.linkEndData.path.length).toBe(3)
     expect(scene.linkEndData.path).toEqual([
@@ -102,7 +126,7 @@ test('updatePathForUnchangedEnd deep, without any changes, shallow rendered', ()
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
 
-    scene.linkEnd.updatePathForUnchangedEnd()
+    scene.linkEnd.updatePathForUnchangedEnd(scene.outerBox)
 
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
