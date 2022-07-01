@@ -79,21 +79,34 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   public async dragEnd(dropTarget: Box|NodeWidget): Promise<void> {
-    //this.dragState.dropTarget = dropTarget
+    if (!this.dragState) {
+      util.logWarning('dragState is null while calling dragEnd(..) on LinkEnd, this should never happen')
+    } else {
+      this.dragState.dropTarget = dropTarget
+    }
     await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
     this.dragState = null
   }
 
-  // TODO: rename to ..WithoutRender
-  public updatePathForUnchangedEnd(newManagingBoxForValidation: Box): void {
+  public async reorderMapDataPathWithoutRender(newManagingBoxForValidation: Box): Promise<void> {
     if (newManagingBoxForValidation !== this.getManagingBox()) {
-      let message = 'newManagingBox should already be set to referenceLink when calling updatePathForUnchangedEnd(..)'
+      let message = 'newManagingBox should already be set to referenceLink when calling reorderMapDataPathWithoutRender(..)'
       message += ', this will likely lead to further problems'
       util.logWarning(message)
     }
 
-    const deepestRenderedBox: Box|NodeWidget = this.getBorderingBox()
-    const deepestRenderedWayPoint: WayPointData = this.getWayPointOf(deepestRenderedBox)
+    let deepestRenderedBox: Box|NodeWidget
+    let deepestRenderedWayPoint: WayPointData
+    if (this.dragState) {
+      deepestRenderedBox = this.dragState.dropTarget
+      const name: string = deepestRenderedBox instanceof NodeWidget ? 'node'+deepestRenderedBox.getId() : deepestRenderedBox.getName()
+      const box: Box = deepestRenderedBox instanceof NodeWidget ? deepestRenderedBox.getManagingBox() : deepestRenderedBox
+      const position = await box.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
+      deepestRenderedWayPoint = new WayPointData(deepestRenderedBox.getId(), name, position.percentX, position.percentY)
+    } else {
+      deepestRenderedBox = this.getBorderingBox()
+      deepestRenderedWayPoint = this.getWayPointOf(deepestRenderedBox)
+    }
 
     const shallowRenderedPath: {box: Box, wayPoint: WayPointData}[] = []
     if (deepestRenderedBox instanceof NodeWidget) {
@@ -104,8 +117,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
     for (let previous: {box: Box, wayPoint: WayPointData} = shallowRenderedPath[0]; previous.box !== this.getManagingBox(); previous = shallowRenderedPath[0]) {
       if (previous.box.isRoot()) {
-        let message = `did not find managingBox while updatePath() of LinkEnd with id ${this.getId()}`
-        message += ', this could happen when LinkEnd::updatePath() is called before the new managingBox is set'
+        let message = `did not find managingBox while reorderMapDataPathWithoutRender(..) of LinkEnd with id ${this.getId()}`
+        message += ', this could happen when reorderMapDataPathWithoutRender(..) is called before the new managingBox is set'
         util.logWarning(message)
         break
       }
@@ -118,7 +131,12 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       shallowRenderedPath.unshift({box: nextBox, wayPoint: nextWayPoint})
     }
 
-    const newPath: WayPointData[] = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.path, shallowRenderedPath.map(value => value.wayPoint))
+    let newPath: WayPointData[]
+    if (this.dragState) {
+      newPath = shallowRenderedPath.map(tuple => tuple.wayPoint)
+    } else {
+      newPath = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.path, shallowRenderedPath.map(tuple => tuple.wayPoint))
+    }
     this.updateMapDataPath(newPath)
   }
 
@@ -132,8 +150,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return new WayPointData(box.getId(), 'workaround', 50, 50)
   }
 
-  // TODO: rename to ..WithoutRender?
-  public updateMapDataPath(newPath: WayPointData[]): void { // TODO: make this private
+  // TODO: rename to updateBoxesRegisteredAtAndBorderingBox and remove parameter
+  private updateMapDataPath(newPath: WayPointData[]): void {
     this.data.path = newPath
 
     const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxesWithoutManagingBox()

@@ -249,8 +249,6 @@ export class Link implements Hoverable {
   }
 
   private async reorderAndSaveWithEndBoxes(from: {box: Box|NodeWidget, changed: boolean}, to: {box: Box|NodeWidget, changed: boolean}): Promise<void|never> {
-    const fromPosition: ClientPosition = await this.from.getTargetPositionInClientCoords()
-    const toPosition: ClientPosition = await this.to.getTargetPositionInClientCoords()
     const fromBox: Box = from.box instanceof NodeWidget ? from.box.getManagingBox() : from.box
     const toBox: Box = to.box instanceof NodeWidget ? to.box.getManagingBox() : to.box
     const relation: {commonAncestor: Box, fromBoxes: (Box|NodeWidget)[], toBoxes: (Box|NodeWidget)[]} = Box.findCommonAncestor(fromBox, toBox)
@@ -261,34 +259,11 @@ export class Link implements Hoverable {
       relation.toBoxes.push(to.box)
     }
 
-    const fromWayPoints: Promise<WayPointData>[] = relation.fromBoxes.map(async box => {
-      if (box instanceof NodeWidget) {
-        return new WayPointData(box.getId(), box.getId()+'Node', 50, 50)
-      }
-      const positionInBoxCoords: LocalPosition = await box.transform.clientToLocalPosition(fromPosition)
-      return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.percentX, positionInBoxCoords.percentY)
-    })
-    const toWayPoints: Promise<WayPointData>[] = relation.toBoxes.map(async box => {
-      if (box instanceof NodeWidget) {
-        return new WayPointData(box.getId(), box.getId()+'Node', 50, 50)
-      }
-      const positionInBoxCoords: LocalPosition = await box.transform.clientToLocalPosition(toPosition)
-      return new WayPointData(box.getId(), box.getName(), positionInBoxCoords.percentX, positionInBoxCoords.percentY)
-    })
-
     const oldManagingBox: Box = this.managingBox
     this.managingBox = relation.commonAncestor
 
-    if (from.changed) {
-      this.from.updateMapDataPath(await Promise.all(fromWayPoints)) // TODO: fromWayPoints should be calculated by LinkEnd itself
-    } else {
-      this.from.updatePathForUnchangedEnd(this.managingBox)
-    }
-    if (to.changed) {
-      this.to.updateMapDataPath(await Promise.all(toWayPoints)) // TODO: toWayPoints should be calculated by LinkEnd itself
-    } else {
-      this.to.updatePathForUnchangedEnd(this.managingBox)
-    }
+    this.from.reorderMapDataPathWithoutRender(this.managingBox)
+    this.to.reorderMapDataPathWithoutRender(this.managingBox)
 
     const proms: Promise<any>[] = []
     if(oldManagingBox !== this.managingBox) {

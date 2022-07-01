@@ -25,19 +25,19 @@ beforeEach(() => {
     initBoxManager(new BoxManager)
 })
 
-test('updatePathForUnchangedEnd zero depth, without any changes', () => {
+test('reorderMapDataPathWithoutRender zero depth, without any changes', async () => {
     const scene = setupRenderedScenarioWithDepthZero()
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path[0]).toEqual({boxId: 'managingBoxId', boxName: 'managingBoxName', x: 75, y: 50})
 
-    scene.linkEnd.updatePathForUnchangedEnd(scene.linkEnd.getManagingBox())
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.linkEnd.getManagingBox())
 
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path[0]).toEqual({boxId: 'managingBoxId', boxName: 'managingBoxName', x: 75, y: 50})
     expect(scene.linkEnd.getManagingBox().borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
 })
 
-test('updatePathForUnchangedEnd misplaced managingBox', () => {
+test('reorderMapDataPathWithoutRender misplaced managingBox', async () => {
     const logWarning = jest.fn()
     util.logWarning = logWarning
 
@@ -48,14 +48,14 @@ test('updatePathForUnchangedEnd misplaced managingBox', () => {
     const misplacedManagingBox: Box = boxFactory.rootFolderOf('misplacedManagingBoxId')
     scene.linkEnd.getManagingBox = () => misplacedManagingBox
 
-    scene.linkEnd.updatePathForUnchangedEnd(actualManagingBox)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(actualManagingBox)
 
-    expect(logWarning).toBeCalledWith('newManagingBox should already be set to referenceLink when calling updatePathForUnchangedEnd(..), this will likely lead to further problems')
-    expect(logWarning).toBeCalledWith('did not find managingBox while updatePath() of LinkEnd with id linkEndId, this could happen when LinkEnd::updatePath() is called before the new managingBox is set')
+    expect(logWarning).toBeCalledWith('newManagingBox should already be set to referenceLink when calling reorderMapDataPathWithoutRender(..), this will likely lead to further problems')
+    expect(logWarning).toBeCalledWith('did not find managingBox while reorderMapDataPathWithoutRender(..) of LinkEnd with id linkEndId, this could happen when reorderMapDataPathWithoutRender(..) is called before the new managingBox is set')
     expect(logWarning).toBeCalledTimes(2)
 })
 
-test('updatePathForUnchangedEnd deep, without any changes', () => {
+test('reorderMapDataPathWithoutRender deep, without any changes', async () => {
     const scene = setupRenderedScenarioWithDepth()
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -63,7 +63,7 @@ test('updatePathForUnchangedEnd deep, without any changes', () => {
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
 
-    scene.linkEnd.updatePathForUnchangedEnd(scene.outerBox)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
 
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -75,7 +75,58 @@ test('updatePathForUnchangedEnd deep, without any changes', () => {
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
-test('updatePathForUnchangedEnd deep, move managingBox inside', () => {
+test('reorderMapDataPathWithoutRender deep, without any changes, while dragging', async () => {
+    const scene = setupRenderedScenarioWithDepth()
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+        {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+    ])
+    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+
+    await scene.linkEnd.dragStart(800, 400)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 50, y: 50},
+        {boxId: 'deepBoxId', boxName: 'deepBoxIdName', x: 50, y: 50}
+    ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+})
+
+test('reorderMapDataPathWithoutRender deep, drag into parentBox', async () => {
+    const scene = setupRenderedScenarioWithDepth()
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+        {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+    ])
+    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+
+    await scene.linkEnd.drag(825, 390, scene.innerBox, false) // TODO: use better values
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+
+    expect(scene.linkEndData.path.length).toBe(1)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 74.41406249999997, y: 30.468750000000018}
+    ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+})
+
+test('reorderMapDataPathWithoutRender deep, drag into managingBox', () => {
+    // TODO WIP
+})
+
+test('reorderMapDataPathWithoutRender deep, drag into rootBox', () => {
+    // TODO WIP
+})
+
+test('reorderMapDataPathWithoutRender deep, move managingBox inside', async () => {
     const scene = setupRenderedScenarioWithDepth()
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -84,7 +135,7 @@ test('updatePathForUnchangedEnd deep, move managingBox inside', () => {
     ])
     scene.linkEnd.getManagingBox = () => scene.innerBox
 
-    scene.linkEnd.updatePathForUnchangedEnd(scene.innerBox)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.innerBox)
 
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path).toEqual([
@@ -95,7 +146,7 @@ test('updatePathForUnchangedEnd deep, move managingBox inside', () => {
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
-test('updatePathForUnchangedEnd deep, move managingBox outside', () => {
+test('reorderMapDataPathWithoutRender deep, move managingBox outside', async () => {
     const scene = setupRenderedScenarioWithDepth()
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -104,7 +155,7 @@ test('updatePathForUnchangedEnd deep, move managingBox outside', () => {
     ])
     scene.linkEnd.getManagingBox = () => scene.rootBox
 
-    scene.linkEnd.updatePathForUnchangedEnd(scene.rootBox)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.rootBox)
 
     expect(scene.linkEndData.path.length).toBe(3)
     expect(scene.linkEndData.path).toEqual([
@@ -118,7 +169,7 @@ test('updatePathForUnchangedEnd deep, move managingBox outside', () => {
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
-test('updatePathForUnchangedEnd deep, without any changes, shallow rendered', () => {
+test('reorderMapDataPathWithoutRender deep, without any changes, shallow rendered', async () => {
     const scene = setupShallowRenderedScenarioWithDepth()
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -126,7 +177,7 @@ test('updatePathForUnchangedEnd deep, without any changes, shallow rendered', ()
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
 
-    scene.linkEnd.updatePathForUnchangedEnd(scene.outerBox)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
 
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
