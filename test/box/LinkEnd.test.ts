@@ -97,6 +97,28 @@ test('reorderMapDataPathWithoutRender deep, without any changes, while dragging'
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
+test('reorderMapDataPathWithoutRender deep, change only position, while dragging with snapToGrid', async () => {
+    const scene = setupRenderedScenarioWithDepth()
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+        {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+    ])
+    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+
+    await scene.linkEnd.drag(850, 420, scene.deepBox, true)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 65.6, y: 60.8},
+        {boxId: 'deepBoxId', boxName: 'deepBoxIdName', x: 76, y: 68}
+    ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+})
+
 test('reorderMapDataPathWithoutRender deep, drag into parentBox', async () => {
     const scene = setupRenderedScenarioWithDepth()
     expect(scene.linkEndData.path.length).toBe(2)
@@ -106,24 +128,80 @@ test('reorderMapDataPathWithoutRender deep, drag into parentBox', async () => {
     ])
     scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
 
-    await scene.linkEnd.drag(825, 390, scene.innerBox, false) // TODO: use better values
+    await scene.linkEnd.drag(627.2+345.6*0.25, 313.6+172.8*0.31, scene.innerBox, false)
     await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
 
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path).toEqual([
-        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 74.41406249999997, y: 30.468750000000018}
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 25, y: 31}
     ])
     expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
     expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
 })
 
-test('reorderMapDataPathWithoutRender deep, drag into managingBox', () => {
-    // TODO WIP
+test('reorderMapDataPathWithoutRender deep, drag into parentBox with snapToGrid', async () => {
+    const scene = setupRenderedScenarioWithDepth()
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+        {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+    ])
+    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+
+    await scene.linkEnd.drag(627.2+345.6*0.25, 313.6+172.8*0.31, scene.innerBox, true)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+
+    expect(scene.linkEndData.path.length).toBe(1)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 24, y: 32}
+    ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
 })
 
-test('reorderMapDataPathWithoutRender deep, drag into rootBox', () => {
-    // TODO WIP
+test('reorderMapDataPathWithoutRender deep, drag into managingBox', async () => {
+  const scene = setupRenderedScenarioWithDepth()
+  expect(scene.linkEndData.path.length).toBe(2)
+  expect(scene.linkEndData.path).toEqual([
+      {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+      {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+  ])
+  scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+
+  await scene.linkEnd.drag(512+576*0.75, 256+288*0.25, scene.outerBox, false)
+  await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+
+  expect(scene.linkEndData.path.length).toBe(1)
+  expect(scene.linkEndData.path).toEqual([
+      {boxId: 'outerBoxId', boxName: 'outerBoxIdName', x: 75, y: 25}
+  ])
+  expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+  expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+  expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+})
+
+test('reorderMapDataPathWithoutRender deep, drag into rootBox', async () => {
+  const scene = setupRenderedScenarioWithDepth()
+  expect(scene.linkEndData.path.length).toBe(2)
+  expect(scene.linkEndData.path).toEqual([
+      {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+      {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+  ])
+  scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+
+  await scene.linkEnd.drag(320+960*0.9, 160+480*0.6, scene.rootBox, false)
+  await scene.linkEnd.reorderMapDataPathWithoutRender(scene.rootBox)
+
+  expect(scene.linkEndData.path.length).toBe(1)
+  expect(scene.linkEndData.path).toEqual([
+      {boxId: 'rootBoxId', boxName: 'fakeProjectSettingsFilePath/fakeSrcRootPath', x: 90, y: 60}
+  ])
+  expect(scene.rootBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+  expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+  expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+  expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
 })
 
 test('reorderMapDataPathWithoutRender deep, move managingBox inside', async () => {
@@ -200,8 +278,8 @@ function setupRenderedScenarioWithDepthZero(): {linkEnd: LinkEnd, linkEndData: L
 }
 
 function setupRenderedScenarioWithDepth(): {
-    linkEnd: LinkEnd, 
-    linkEndData: LinkEndData, 
+    linkEnd: LinkEnd,
+    linkEndData: LinkEndData,
     rootBox: Box,
     outerBox: Box,
     innerBox: Box,
@@ -226,8 +304,8 @@ function setupRenderedScenarioWithDepth(): {
 }
 
 function setupShallowRenderedScenarioWithDepth(): {
-    linkEnd: LinkEnd, 
-    linkEndData: LinkEndData, 
+    linkEnd: LinkEnd,
+    linkEndData: LinkEndData,
     rootBox: Box,
     outerBox: Box,
     innerBox: Box
