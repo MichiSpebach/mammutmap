@@ -137,7 +137,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     } else {
       newPath = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.path, shallowRenderedPath.map(tuple => tuple.wayPoint))
     }
-    this.updateMapDataPath(newPath)
+    this.data.path = newPath
+    this.updateBoxesRegisteredAtAndBorderingBox()
   }
 
   private getWayPointOf(box: Box|NodeWidget): WayPointData {
@@ -150,10 +151,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return WayPointData.buildNew(box.getId(), 'workaround', 50, 50)
   }
 
-  // TODO: rename to updateBoxesRegisteredAtAndBorderingBox and remove parameter
-  private updateMapDataPath(newPath: WayPointData[]): void {
-    this.data.path = newPath
-
+  private updateBoxesRegisteredAtAndBorderingBox(): void {
     const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedBoxesWithoutManagingBox()
     for (const box of newRenderedBoxes) {
       if (!this.boxesRegisteredAt.includes(box)) {
@@ -176,7 +174,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   public async render(borderingBox: Box|NodeWidget, positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
-    this.updateMapDataPath(this.data.path) // update is important because zooming could have happened
+    this.updateBoxesRegisteredAtAndBorderingBox() // important because zooming could have happened
 
     await this.renderShape(positionInManagingBoxCoords, angleInRadians)
 
