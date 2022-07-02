@@ -153,8 +153,8 @@ function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
 // TODO: move into Box?
 async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise<void> {
   const position: LocalPosition = await box.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-  const from = new WayPointData(box.getId(), box.getName(), position.percentX, position.percentY)
-  const to = new WayPointData(box.getId(), box.getName(), position.percentX, position.percentY)
+  const from = WayPointData.buildNew(box.getId(), box.getName(), position.percentX, position.percentY)
+  const to = WayPointData.buildNew(box.getId(), box.getName(), position.percentX, position.percentY)
 
   const link: Link = await box.links.addLink(new LinkEndData([from], true), new LinkEndData([to], true), false)
 

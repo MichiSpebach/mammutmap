@@ -267,7 +267,7 @@ test('reorderMapDataPathWithoutRender deep, without any changes, shallow rendere
 })
 
 function setupRenderedScenarioWithDepthZero(): {linkEnd: LinkEnd, linkEndData: LinkEndData} {
-    const wayPoint = new WayPointData('managingBoxId', 'managingBoxName', 75, 50)
+    const wayPoint = WayPointData.buildNew('managingBoxId', 'managingBoxName', 75, 50)
     const linkEndData = new LinkEndData([wayPoint])
 
     const managingBox: RootFolderBox = boxFactory.rootFolderOf('managingBoxId')
@@ -285,8 +285,8 @@ function setupRenderedScenarioWithDepth(): {
     innerBox: Box,
     deepBox: Box,
 } {
-    const innerWayPoint = new WayPointData('innerBoxId', 'innerBoxName', 50, 50)
-    const deepWayPoint = new WayPointData('deepBoxId', 'deepBoxName', 50, 50)
+    const innerWayPoint = WayPointData.buildNew('innerBoxId', 'innerBoxName', 50, 50)
+    const deepWayPoint = WayPointData.buildNew('deepBoxId', 'deepBoxName', 50, 50)
     const linkEndData = new LinkEndData([innerWayPoint, deepWayPoint])
 
     const rootBox: RootFolderBox = boxFactory.rootFolderOf('rootBoxId')
@@ -310,8 +310,8 @@ function setupShallowRenderedScenarioWithDepth(): {
     outerBox: Box,
     innerBox: Box
 } {
-    const innerWayPoint = new WayPointData('innerBoxId', 'innerBoxName', 50, 50)
-    const deepWayPoint = new WayPointData('deepBoxId', 'deepBoxName', 50, 50)
+    const innerWayPoint = WayPointData.buildNew('innerBoxId', 'innerBoxName', 50, 50)
+    const deepWayPoint = WayPointData.buildNew('deepBoxId', 'deepBoxName', 50, 50)
     const linkEndData = new LinkEndData([innerWayPoint, deepWayPoint])
 
     const rootBox: RootFolderBox = boxFactory.rootFolderOf('rootBoxId')

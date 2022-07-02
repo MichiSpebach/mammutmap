@@ -133,8 +133,8 @@ export async function addLink(fromFilePath: string, toFilePath: string): Promise
     return
   }
 
-  const fromWayPoint = new WayPointData(from.getId(), from.getName(), 50, 50)
-  const toWayPoint = new WayPointData(to.getId(), to.getName(), 50, 50)
+  const fromWayPoint = WayPointData.buildNew(from.getId(), from.getName(), 50, 50)
+  const toWayPoint = WayPointData.buildNew(to.getId(), to.getName(), 50, 50)
 
   await managingBox.links.addLink(new LinkEndData([fromWayPoint]), new LinkEndData([toWayPoint]), true)
 }

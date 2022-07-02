@@ -102,7 +102,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       const name: string = deepestRenderedBox instanceof NodeWidget ? 'node'+deepestRenderedBox.getId() : deepestRenderedBox.getName()
       const box: Box = deepestRenderedBox instanceof NodeWidget ? deepestRenderedBox.getManagingBox() : deepestRenderedBox
       const position = await box.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
-      deepestRenderedWayPoint = new WayPointData(deepestRenderedBox.getId(), name, position.percentX, position.percentY)
+      deepestRenderedWayPoint = WayPointData.buildNew(deepestRenderedBox.getId(), name, position.percentX, position.percentY)
     } else {
       deepestRenderedBox = this.getBorderingBox()
       deepestRenderedWayPoint = this.getWayPointOf(deepestRenderedBox)
@@ -127,7 +127,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
         break
       }
       const nextPosition: LocalPosition = previous.box.transform.toParentPosition(previous.wayPoint.getPosition())
-      const nextWayPoint: WayPointData = new WayPointData(nextBox.getId(), nextBox.getName(), nextPosition.percentX, nextPosition.percentY)
+      const nextWayPoint: WayPointData = WayPointData.buildNew(nextBox.getId(), nextBox.getName(), nextPosition.percentX, nextPosition.percentY)
       shallowRenderedPath.unshift({box: nextBox, wayPoint: nextWayPoint})
     }
 
@@ -147,7 +147,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       }
     }
     util.logWarning('wayPoint not found, this should never happen')
-    return new WayPointData(box.getId(), 'workaround', 50, 50)
+    return WayPointData.buildNew(box.getId(), 'workaround', 50, 50)
   }
 
   // TODO: rename to updateBoxesRegisteredAtAndBorderingBox and remove parameter
@@ -319,7 +319,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       message += 'this only happens when mapData is corrupted. '
       message += 'Defaulting LinkEnd to center of managingBox.'
       util.logWarning(message)
-      return {box: managingBox, wayPoint: new WayPointData(managingBox.getId(), managingBox.getName(), 50, 50)}
+      return {box: managingBox, wayPoint: WayPointData.buildNew(managingBox.getId(), managingBox.getName(), 50, 50)}
     }
 
     return renderedBoxes[renderedBoxes.length-1]
@@ -372,7 +372,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       message += 'this only happens when mapData is corrupted. '
       message += 'Defaulting LinkEnd to center of managingBox.'
       util.logWarning(message)
-      renderedBoxesInPath.push({box: managingBox, wayPoint: new WayPointData(managingBox.getId(), managingBox.getName(), 50, 50)})
+      renderedBoxesInPath.push({box: managingBox, wayPoint: WayPointData.buildNew(managingBox.getId(), managingBox.getName(), 50, 50)})
     }
 
     return renderedBoxesInPath

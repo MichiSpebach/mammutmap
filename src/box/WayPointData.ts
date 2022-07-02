@@ -6,11 +6,15 @@ export class WayPointData {
   public x: number
   public y: number
 
+  public static buildNew(boxId: string, boxName: string, x: number, y: number) {
+    return new WayPointData(boxId, boxName, Math.round(x*1000)/1000, Math.round(y*1000)/1000)
+  }
+
   public static buildFromRawObject(object: any): WayPointData {
     return new WayPointData(object.boxId, object.boxName, object.x, object.y) // raw object would have no methods
   }
 
-  public constructor(boxId: string, boxName: string, x: number, y: number) {
+  private constructor(boxId: string, boxName: string, x: number, y: number) {
     this.boxId = boxId
     this.boxName = boxName
     this.x = x
