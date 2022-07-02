@@ -5,12 +5,10 @@ import * as contextMenu from '../contextMenu'
 import { Box } from './Box'
 import { BoxLinks } from './BoxLinks'
 import { BoxMapLinkData } from './BoxMapLinkData'
-import { WayPointData } from './WayPointData'
 import { LinkEnd } from './LinkEnd'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { ClientPosition, LocalPosition } from './Transform'
-import * as linkUtil from './linkUtil'
 import { NodeWidget } from '../node/NodeWidget'
 
 export class Link implements Hoverable {
@@ -52,16 +50,6 @@ export class Link implements Hoverable {
 
   public getTo(): LinkEnd {
     return this.to
-  }
-
-  public async renderLinkEndInDropTargetAndSave(linkEnd: LinkEnd, dropTarget: Box|NodeWidget): Promise<void> {
-    if (linkEnd === this.to) {
-      await this.reorderAndSaveWithEndBoxes({box: this.from.getBorderingBox(), changed: false}, {box: dropTarget, changed: true})
-    } else if (linkEnd === this.from) {
-      await this.reorderAndSaveWithEndBoxes({box: dropTarget, changed: true}, {box: this.to.getBorderingBox(), changed: false})
-    } else {
-      util.logWarning('Given LinkEnd is not contained by Link.')
-    }
   }
 
   public async render(priority: RenderPriority = RenderPriority.NORMAL, draggingInProgress: boolean = false, hoveringOver: boolean = false): Promise<void> {
@@ -244,23 +232,10 @@ export class Link implements Hoverable {
     await Promise.all(proms)
   }
 
-  public async reorderAndSave(): Promise<void|never> {
-    await this.reorderAndSaveWithEndBoxes({box: this.from.getBorderingBox(), changed: false}, {box: this.to.getBorderingBox(), changed: false})
-  }
-
-  private async reorderAndSaveWithEndBoxes(from: {box: Box|NodeWidget, changed: boolean}, to: {box: Box|NodeWidget, changed: boolean}): Promise<void|never> {
-    const fromBox: Box = from.box instanceof NodeWidget ? from.box.getManagingBox() : from.box
-    const toBox: Box = to.box instanceof NodeWidget ? to.box.getManagingBox() : to.box
-    const relation: {commonAncestor: Box, fromBoxes: (Box|NodeWidget)[], toBoxes: (Box|NodeWidget)[]} = Box.findCommonAncestor(fromBox, toBox)
-    if (from.box instanceof NodeWidget) {
-      relation.fromBoxes.push(from.box)
-    }
-    if (to.box instanceof NodeWidget) {
-      relation.toBoxes.push(to.box)
-    }
-
+  public async reorderAndSave(): Promise<void> {
+    const commonAncestor: Box = Box.findCommonAncestor(this.from.getRenderedTargetBox(), this.to.getRenderedTargetBox()).commonAncestor
     const oldManagingBox: Box = this.managingBox
-    this.managingBox = relation.commonAncestor
+    this.managingBox = commonAncestor
 
     this.from.reorderMapDataPathWithoutRender(this.managingBox)
     this.to.reorderMapDataPathWithoutRender(this.managingBox)

@@ -22,7 +22,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private shape: 'square'|'arrow'
   private rendered: boolean = false
   private boxesRegisteredAt: (Box|NodeWidget)[] = []
-  private borderingBox: Box|NodeWidget|undefined
+  private renderedTarget: Box|NodeWidget|undefined
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box|NodeWidget
@@ -48,15 +48,21 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return this.referenceLink.getManagingBox()
   }
 
-  public getBorderingBox(): Box|NodeWidget|never {
-    if (!this.borderingBox) {
-      util.logError('WayPoint must be rendered before calling getBorderingBox(), but was not.')
+  public getRenderedTargetBox(): Box {
+    const target: Box|NodeWidget = this.getRenderedTarget()
+    return target instanceof NodeWidget ? target.getManagingBox() : target
+  }
+
+  public getRenderedTarget(): Box|NodeWidget {
+    if (!this.renderedTarget) {
+      util.logWarning('LinkEnd should be rendered before calling getRenderedTarget(), but was not.')
+      this.renderedTarget = this.getManagingBox()
     }
-    return this.borderingBox
+    return this.renderedTarget
   }
 
   public getDropTargetAtDragStart(): Box|NodeWidget|never {
-    return this.getBorderingBox()
+    return this.getRenderedTarget()
   }
 
   public canBeDroppedInto(dropTarget: DropTarget): boolean {
@@ -84,7 +90,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     } else {
       this.dragState.dropTarget = dropTarget
     }
-    await this.referenceLink.renderLinkEndInDropTargetAndSave(this, dropTarget)
+    this.renderedTarget = dropTarget
+    await this.referenceLink.reorderAndSave()
     this.dragState = null
   }
 
@@ -95,24 +102,24 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       util.logWarning(message)
     }
 
-    let deepestRenderedBox: Box|NodeWidget
-    let deepestRenderedWayPoint: WayPointData
+    let target: Box|NodeWidget
+    let targetWayPoint: WayPointData
     if (this.dragState) {
-      deepestRenderedBox = this.dragState.dropTarget
-      const name: string = deepestRenderedBox instanceof NodeWidget ? 'node'+deepestRenderedBox.getId() : deepestRenderedBox.getName()
-      const box: Box = deepestRenderedBox instanceof NodeWidget ? deepestRenderedBox.getManagingBox() : deepestRenderedBox
+      target = this.dragState.dropTarget
+      const name: string = target instanceof NodeWidget ? 'node'+target.getId() : target.getName()
+      const box: Box = target instanceof NodeWidget ? target.getManagingBox() : target
       const position = await box.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
-      deepestRenderedWayPoint = WayPointData.buildNew(deepestRenderedBox.getId(), name, position.percentX, position.percentY)
+      targetWayPoint = WayPointData.buildNew(target.getId(), name, position.percentX, position.percentY)
     } else {
-      deepestRenderedBox = this.getBorderingBox()
-      deepestRenderedWayPoint = this.getWayPointOf(deepestRenderedBox)
+      target = this.getRenderedTarget()
+      targetWayPoint = this.getWayPointOf(target)
     }
 
     const shallowRenderedPath: {box: Box, wayPoint: WayPointData}[] = []
-    if (deepestRenderedBox instanceof NodeWidget) {
-      shallowRenderedPath.unshift({box: deepestRenderedBox.getManagingBox(), wayPoint: deepestRenderedWayPoint})
+    if (target instanceof NodeWidget) {
+      shallowRenderedPath.unshift({box: target.getManagingBox(), wayPoint: targetWayPoint})
     } else {
-      shallowRenderedPath.unshift({box: deepestRenderedBox, wayPoint: deepestRenderedWayPoint});
+      shallowRenderedPath.unshift({box: target, wayPoint: targetWayPoint});
     }
 
     for (let previous: {box: Box, wayPoint: WayPointData} = shallowRenderedPath[0]; previous.box !== this.getManagingBox(); previous = shallowRenderedPath[0]) {
@@ -167,9 +174,9 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     this.boxesRegisteredAt = newRenderedBoxes
 
     if (newRenderedBoxes.length > 0) {
-      this.borderingBox = newRenderedBoxes[newRenderedBoxes.length-1]
+      this.renderedTarget = newRenderedBoxes[newRenderedBoxes.length-1]
     } else {
-      this.borderingBox = this.getManagingBox()
+      this.renderedTarget = this.getManagingBox()
     }
   }
 
