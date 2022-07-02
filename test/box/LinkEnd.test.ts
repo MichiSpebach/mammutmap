@@ -190,6 +190,7 @@ test('reorderMapDataPathWithoutRender deep, drag into rootBox', async () => {
       {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
   ])
   scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+  scene.linkEnd.getManagingBox = () => scene.rootBox
 
   await scene.linkEnd.drag(320+960*0.9, 160+480*0.6, scene.rootBox, false)
   await scene.linkEnd.reorderMapDataPathWithoutRender(scene.rootBox)
