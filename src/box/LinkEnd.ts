@@ -333,9 +333,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   public getRenderedBoxesWithoutManagingBox(): (Box|NodeWidget)[] {
     return this.getRenderedBoxes().map((tuple: {box: Box|NodeWidget, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.getManagingBox())
   }
-
-  // TODO: use ASAP
-  private getRenderedBoxesNew(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
+  
+  private getRenderedBoxes(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
     if (this.data.path.length === 0) {
       let message = 'Corrupted mapData detected: '
       message += `Link with id ${this.referenceLink.getId()} in ${this.getManagingBox().getSrcPath()} has empty path.`
@@ -383,7 +382,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return renderedBoxesInPath
   }
 
-  private getRenderedBoxes(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
+  // TODO: remove as soon as new implementation is stable
+  private getRenderedBoxesOld(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
     if (this.data.path.length === 0) {
       let message = 'Corrupted mapData detected: '
       message += `Link with id ${this.referenceLink.getId()} in ${this.getManagingBox().getSrcPath()} has empty path.`

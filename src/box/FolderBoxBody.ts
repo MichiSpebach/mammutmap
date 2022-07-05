@@ -189,10 +189,11 @@ export class FolderBoxBody extends BoxBody {
   }
 
   private async destructBoxes(): Promise<void> {
-    await Promise.all(this.boxes.map(async (box: Box): Promise<void> => {
+    const boxes = this.boxes
+    this.boxes = []
+    await Promise.all(boxes.map(async (box: Box): Promise<void> => {
       await box.destruct()
     }))
-    this.boxes = []
   }
 
   public containsBox(box: Box): boolean {
