@@ -58,6 +58,7 @@ export abstract class Box implements DropTarget, Hoverable {
       await this.unrenderIfPossible(true)
     }
     boxManager.removeBox(this)
+    await this.renderBorderingLinks() // otherwise borderingLinks would not float back to border of parent
   }
 
   protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
@@ -227,7 +228,7 @@ export abstract class Box implements DropTarget, Hoverable {
       await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+scaleToolPlaceholderHtml+nodesHtml+linksHtml)
 
       await this.header.render()
-      await this.renderAndRegisterBorderingLinks()
+      await this.renderBorderingLinks()
     }
 
     await this.renderBody()
@@ -271,7 +272,6 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.header.unrender())
     proms.push(scaleTool.unrenderFrom(this))
     proms.push(this.links.unrender())
-    //proms.push(this.borderingLinks.updateLinkEnds()) // TODO: implement, otherwise links reference to not existing borderingBoxes
     proms.push(this.nodes.unrender())
     proms.push(this.unrenderAdditional())
     await Promise.all(proms)
@@ -281,7 +281,7 @@ export abstract class Box implements DropTarget, Hoverable {
     return {rendered: false}
   }
 
-  private async renderAndRegisterBorderingLinks(): Promise<void> {
+  private async renderBorderingLinks(): Promise<void> {
     if (this.isRoot()) {
       return
     }
