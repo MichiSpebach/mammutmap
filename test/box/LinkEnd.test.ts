@@ -52,7 +52,8 @@ test('reorderMapDataPathWithoutRender misplaced managingBox', async () => {
 
     expect(logWarning).toBeCalledWith('newManagingBox should already be set to referenceLink when calling reorderMapDataPathWithoutRender(..), this will likely lead to further problems')
     expect(logWarning).toBeCalledWith('did not find managingBox while reorderMapDataPathWithoutRender(..) of LinkEnd with id linkEndId, this could happen when reorderMapDataPathWithoutRender(..) is called before the new managingBox is set')
-    expect(logWarning).toBeCalledTimes(2)
+    expect(logWarning).toBeCalledWith('Corrupted mapData detected: Link with id linkId in fakeProjectSettingsFilePath/fakeSrcRootPath has path with no rendered boxes, this only happens when mapData is corrupted. Defaulting LinkEnd to center of managingBox.')
+    expect(logWarning).toBeCalledTimes(3)
 })
 
 test('reorderMapDataPathWithoutRender deep, without any changes', async () => {

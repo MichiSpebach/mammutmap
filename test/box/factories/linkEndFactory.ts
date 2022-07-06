@@ -9,7 +9,7 @@ export function renderedOf(linkEndData: LinkEndData, managingBox: Box, boxesRegi
 
     const linkEndModifiable = linkEnd as any
     linkEndModifiable.boxesRegisteredAt = boxesRegisteredAt
-    linkEndModifiable.borderingBox = boxesRegisteredAt.length > 0 ? boxesRegisteredAt[boxesRegisteredAt.length-1] : managingBox
+    linkEndModifiable.renderedTarget = boxesRegisteredAt.length > 0 ? boxesRegisteredAt[boxesRegisteredAt.length-1] : managingBox
 
     boxesRegisteredAt.forEach(box => box.borderingLinks.register(referenceLink))
 
