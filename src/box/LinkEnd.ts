@@ -117,11 +117,15 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
     const shallowRenderedPath: {box: Box, wayPoint: WayPointData}[] = []
     if (target instanceof NodeWidget) {
-      shallowRenderedPath.unshift({box: target.getManagingBox(), wayPoint: targetWayPoint})
+      const targetBox: Box = target.getManagingBox()
+      shallowRenderedPath.unshift({box: targetBox, wayPoint: targetWayPoint})
+      if (targetBox !== this.getManagingBox()) {
+        shallowRenderedPath.unshift({box: targetBox, wayPoint: WayPointData.buildNew(targetBox.getId(), targetBox.getName(), targetWayPoint.x, targetWayPoint.y)})
+      }
     } else {
       shallowRenderedPath.unshift({box: target, wayPoint: targetWayPoint});
     }
-
+    
     for (let previous: {box: Box, wayPoint: WayPointData} = shallowRenderedPath[0]; previous.box !== this.getManagingBox(); previous = shallowRenderedPath[0]) {
       if (previous.box.isRoot()) {
         let message = `did not find managingBox while reorderMapDataPathWithoutRender(..) of LinkEnd with id ${this.getId()}`
@@ -333,7 +337,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   public getRenderedBoxesWithoutManagingBox(): (Box|NodeWidget)[] {
     return this.getRenderedBoxes().map((tuple: {box: Box|NodeWidget, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.getManagingBox())
   }
-  
+
   private getRenderedBoxes(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
     if (this.data.path.length === 0) {
       let message = 'Corrupted mapData detected: '
