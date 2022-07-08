@@ -14,6 +14,7 @@ import { SourcelessBox } from './box/SourcelessBox'
 import { NodeData } from './mapData/NodeData'
 import { PopupWidget } from './PopupWidget'
 import { settings } from './Settings'
+import { NodeWidget } from './node/NodeWidget'
 
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const command: string = 'code '+box.getSrcPath()
@@ -55,6 +56,14 @@ export function openForSourcelessBox(box: SourcelessBox, clientX: number, client
   menu.append(buildRenameBoxItem(box))
   if (settings.getBoolean('developerMode')) {
     menu.append(buildDetailsItem('SourcelessBoxDetails', box))
+  }
+  menu.popup()
+}
+
+export function openForNode(node: NodeWidget, clientX: number, clientY: number): void {
+  const menu = new Menu()
+  if (settings.getBoolean('developerMode')) {
+    menu.append(buildDetailsItem('NodeDetails', node))
   }
   menu.popup()
 }

@@ -11,6 +11,7 @@ import { DragManager } from '../DragManager'
 import { BoxNodesWidget } from '../box/BoxNodesWidget'
 import { BorderingLinks } from '../link/BorderingLinks'
 import { ClientCircle } from '../shape/ClientCircle'
+import * as contextMenu from '../contextMenu'
 
 export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     private readonly mapData: NodeData
@@ -70,6 +71,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         if (!this.rendered) {
             DragManager.addDropTarget(this)
             proms.push(DragManager.addDraggable(this, priority))
+            proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, clientX, clientY)))
             this.rendered = true
         }
 
@@ -80,8 +82,11 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         if (!this.rendered) {
             return
         }
+        const proms: Promise<any>[] = []
         DragManager.removeDropTarget(this)
-        await DragManager.removeDraggable(this, priority)
+        proms.push(DragManager.removeDraggable(this, priority))
+        proms.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))
+        await Promise.all(proms)
         this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
     }
 
