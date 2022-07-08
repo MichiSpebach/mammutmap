@@ -23,6 +23,21 @@ export class BorderingLinks {
     await Promise.all(this.links.map(link => link.setHighlight(highlight)))
   }
 
+  public async renderLinksThatIncludeWayPointFor(boxOrNodeId: string): Promise<void> {
+    const linksToUpdate: Link[] = this.filterFor(boxOrNodeId)
+    await Promise.all(linksToUpdate.map(async (link: Link) => {
+      await link.render()
+    }))
+  }
+
+  private filterFor(boxId: string): Link[] {
+    return this.links.filter((link: Link) => {
+        return link.getData().from.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
+            || link.getData().to.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
+      }
+    )
+  }
+
   public register(link: Link): void {
     if (this.includes(link)) {
       let message = `Trying to register borderingLink with id ${link.getId()}`
@@ -49,14 +64,6 @@ export class BorderingLinks {
 
   public includes(link: Link): boolean {
     return this.links.includes(link)
-  }
-
-  public filterFor(boxId: string): Link[] {
-    return this.links.filter((link: Link) => {
-        return link.getData().from.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
-            || link.getData().to.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
-      }
-    )
   }
 
 }

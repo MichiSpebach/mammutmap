@@ -285,10 +285,7 @@ export abstract class Box implements DropTarget, Hoverable {
     if (this.isRoot()) {
       return
     }
-    const linksToUpdate: Link[] = this.getParent().borderingLinks.filterFor(this.getId())
-    await Promise.all(linksToUpdate.map(async (link: Link) => {
-      await link.render()
-    }))
+    await this.getParent().borderingLinks.renderLinksThatIncludeWayPointFor(this.getId())
   }
 
   private onHoverOver(): void {

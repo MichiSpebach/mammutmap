@@ -358,7 +358,10 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
         linkable = parentBox.getBox(wayPoint.boxId)
       }
       if (!linkable) {
-        linkable = parentBox.nodes.getNodeById(wayPoint.boxId)
+        const node: NodeWidget|undefined = parentBox.nodes.getNodeById(wayPoint.boxId)
+        if (node && node.shouldBeRendered()) {
+          linkable = node
+        }
       }
       if (!linkable) {
         break // box is not rendered

@@ -18,6 +18,8 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     private managingBox: Box
     public readonly borderingLinks: BorderingLinks
     private rendered: boolean = false
+    private renderInProgress: boolean = false
+    private unrenderInProgress: boolean = false
     private dragState: {
         positionInManagingBoxCoords: LocalPosition
     } | null = null
@@ -41,6 +43,16 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         return this.managingBox
     }
 
+    public shouldBeRendered(): boolean {
+        if (this.renderInProgress) {
+            return true
+        } else if (this.unrenderInProgress) {
+            return false
+        } else {
+            return this.rendered
+        }
+    }
+
     public async getClientShape(): Promise<ClientCircle> {
         const clientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(this.getPosition())
         return new ClientCircle(clientPosition.x, clientPosition.y, 5)
@@ -59,6 +71,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     }
 
     public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+        this.renderInProgress = true
         const proms: Promise<any>[] = []
 
         const position: LocalPosition = this.getPosition()
@@ -69,25 +82,30 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         proms.push(renderManager.setStyleTo(this.getId(), positionStyle+sizeStyle+borderStyle+colorStyle, priority))
 
         if (!this.rendered) {
+            proms.push(this.getManagingBox().borderingLinks.renderLinksThatIncludeWayPointFor(this.getId()))
             DragManager.addDropTarget(this)
             proms.push(DragManager.addDraggable(this, priority))
             proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, clientX, clientY)))
-            this.rendered = true
         }
-
+        
         await Promise.all(proms)
+        this.rendered = true
+        this.renderInProgress = false
     }
 
     public async unrender(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
         if (!this.rendered) {
             return
         }
+        this.unrenderInProgress = true
         const proms: Promise<any>[] = []
+        proms.push(this.getManagingBox().borderingLinks.renderLinksThatIncludeWayPointFor(this.getId()))
         DragManager.removeDropTarget(this)
         proms.push(DragManager.removeDraggable(this, priority))
         proms.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))
         await Promise.all(proms)
         this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
+        this.unrenderInProgress = false
     }
 
     public async onDragEnter(): Promise<void> {
