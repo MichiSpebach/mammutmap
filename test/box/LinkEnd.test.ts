@@ -6,15 +6,25 @@ import { LinkEndData } from '../../src/box/LinkEndData'
 import { RootFolderBox } from '../../src/box/RootFolderBox'
 import { WayPointData } from '../../src/box/WayPointData'
 import { DocumentObjectModelAdapter, init as initDocumentObjectModelAdapter } from '../../src/domAdapter'
+import { RenderManager, init as initRenderManager } from '../../src/RenderManager'
+import { NodeData} from '../../src/mapData/NodeData'
+import { NodeWidget } from '../../src/node/NodeWidget'
 import { util } from '../../src/util'
 import * as boxFactory from './factories/boxFactory'
 import * as linkEndFactory from './factories/linkEndFactory'
+import { BoxMapLinkData } from '../../src/box/BoxMapLinkData'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 
 beforeAll(() => {
     const domAdapterMock: DocumentObjectModelAdapter = {} as DocumentObjectModelAdapter
     domAdapterMock.appendChildTo = () => Promise.resolve()
+    domAdapterMock.addContentTo = () => Promise.resolve()
+    domAdapterMock.setStyleTo = () => Promise.resolve()
+    domAdapterMock.addClassTo = () => Promise.resolve()
+    domAdapterMock.batch = () => Promise.resolve()
+    domAdapterMock.addDragListenerTo = () => Promise.resolve()
+    domAdapterMock.addEventListenerTo = () => Promise.resolve()
     initDocumentObjectModelAdapter(domAdapterMock)
 })
 
@@ -22,7 +32,8 @@ beforeEach(() => {
     // reset logWarning in case that a test mocked and overwrote it to prevent unexpected warnings to be suppressed
     util.logWarning = actualLogWarning
 
-    initBoxManager(new BoxManager)
+    initBoxManager(new BoxManager())
+    initRenderManager(new RenderManager()) // TODO: runs into timeout but only for multiple tests
 })
 
 test('reorderMapDataPathWithoutRender zero depth, without any changes', async () => {
@@ -118,6 +129,62 @@ test('reorderMapDataPathWithoutRender deep, change only position, while dragging
     expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
     expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+})
+
+test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag nodeWidget into parentBox; then drag nodeWidget back', async () => {
+    const scene = await setupRenderedScenarioWithDepthAndNode()
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+        {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+    ])
+    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+
+    // drag linkEnd into nodeWidget
+    await scene.linkEnd.drag(627.2+345.6*0.8, 313.6+172.8*0.2, scene.node, false)
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 80, y: 20},
+        {boxId: 'nodeId', boxName: 'nodenodeId', x: 50, y: 50}
+    ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.node.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+
+    // drag nodeWidget into parentBox
+    ;(scene.node as any).managingBox = scene.outerBox
+    // TODO: remove from innerBox
+    ;(scene.outerBox.nodes as any).nodeWidgets.push(scene.node)
+
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'nodeId', boxName: 'nodenodeId', x: 50, y: 50}
+    ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.node.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+
+    // drag nodeWidget back
+    ;(scene.node as any).managingBox = scene.innerBox
+    // TODO: remove from outerBox
+    ;(scene.innerBox.nodes as any).nodeWidgets.push(scene.node)
+
+    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 80, y: 20},
+        {boxId: 'nodeId', boxName: 'nodenodeId', x: 50, y: 50}
+    ])
+    expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
+    expect(scene.innerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.node.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
+    expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
 })
 
 test('reorderMapDataPathWithoutRender deep, drag into parentBox', async () => {
@@ -277,6 +344,22 @@ function setupRenderedScenarioWithDepthZero(): {linkEnd: LinkEnd, linkEndData: L
     const linkEnd = linkEndFactory.renderedOf(linkEndData, managingBox, [managingBox])
 
     return {linkEnd, linkEndData}
+}
+
+async function setupRenderedScenarioWithDepthAndNode(): Promise<{
+    linkEnd: LinkEnd
+    linkEndData: LinkEndData
+    rootBox: Box
+    outerBox: Box
+    innerBox: Box
+    deepBox: Box
+    node: NodeWidget
+}> {
+    const scene = setupRenderedScenarioWithDepth()
+    const boxMapLinkData = new BoxMapLinkData('linkId', scene.linkEndData, scene.linkEndData)
+    scene.linkEnd.getReferenceLink().getData = () => boxMapLinkData
+    await scene.innerBox.nodes.add(new NodeData('nodeId', 75, 25))
+    return { ...scene, node: scene.innerBox.nodes.getNodeById('nodeId')! }
 }
 
 function setupRenderedScenarioWithDepth(): {

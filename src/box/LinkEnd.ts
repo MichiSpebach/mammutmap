@@ -106,10 +106,12 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     let targetWayPoint: WayPointData
     if (this.dragState) {
       target = this.dragState.dropTarget
-      const name: string = target instanceof NodeWidget ? 'node'+target.getId() : target.getName()
-      const box: Box = target instanceof NodeWidget ? target.getManagingBox() : target
-      const position = await box.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
-      targetWayPoint = WayPointData.buildNew(target.getId(), name, position.percentX, position.percentY)
+      if (target instanceof NodeWidget) {
+        targetWayPoint = WayPointData.buildNew(target.getId(), 'node'+target.getId(), 50, 50)
+      } else {
+        const position = await target.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
+        targetWayPoint = WayPointData.buildNew(target.getId(), target.getName(), position.percentX, position.percentY)
+      }
     } else {
       target = this.getRenderedTarget()
       targetWayPoint = this.getWayPointOf(target)
@@ -120,7 +122,9 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       const targetBox: Box = target.getManagingBox()
       shallowRenderedPath.unshift({box: targetBox, wayPoint: targetWayPoint})
       if (targetBox !== this.getManagingBox()) {
-        shallowRenderedPath.unshift({box: targetBox, wayPoint: WayPointData.buildNew(targetBox.getId(), targetBox.getName(), targetWayPoint.x, targetWayPoint.y)})
+        const targetBoxPosition: LocalPosition = await targetBox.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
+        const targetBoxWayPoint: WayPointData = WayPointData.buildNew(targetBox.getId(), targetBox.getName(), targetBoxPosition.percentX, targetBoxPosition.percentY)
+        shallowRenderedPath.unshift({box: targetBox, wayPoint: targetBoxWayPoint})
       }
     } else {
       shallowRenderedPath.unshift({box: target, wayPoint: targetWayPoint});
@@ -298,7 +302,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       if (this.dragState.snapToGrid && this.dragState.dropTarget instanceof Box) {
         return this.dragState.dropTarget.transform.getNearestGridPositionInClientCoords(this.dragState.clientPosition)
       } else {
-        return this.dragState.clientPosition
+        return this.dragState.clientPosition // TODO: should snap to center of NodeWidget
       }
     } else {
       return this.getManagingBox().transform.localToClientPosition(this.getDeepestRenderedWayPointPositionInManagingBoxCoords())
@@ -308,29 +312,21 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private getDeepestRenderedWayPointPositionInManagingBoxCoords(): LocalPosition {
     const deepestRendered: {box: Box|NodeWidget, wayPoint: WayPointData} = this.getDeepestRenderedBox()
 
-    let deepestRenderedReferenceBox: Box
+    let deepestRenderedBox: Box
+    let positionInDeepestRenderedBoxCoords: LocalPosition
     if (deepestRendered.box instanceof NodeWidget) {
-      deepestRenderedReferenceBox = deepestRendered.box.getManagingBox()
+      deepestRenderedBox = deepestRendered.box.getManagingBox()
+      positionInDeepestRenderedBoxCoords = deepestRendered.box.getMapData().getPosition()
     } else {
-      deepestRenderedReferenceBox = deepestRendered.box
+      deepestRenderedBox = deepestRendered.box
+      positionInDeepestRenderedBoxCoords = deepestRendered.wayPoint.getPosition()
     }
 
-    return this.getManagingBox().transform.innerCoordsRecursiveToLocal(deepestRenderedReferenceBox, deepestRendered.wayPoint.getPosition())
+    return this.getManagingBox().transform.innerCoordsRecursiveToLocal(deepestRenderedBox, positionInDeepestRenderedBoxCoords)
   }
 
   public getDeepestRenderedBox(): {box: Box|NodeWidget, wayPoint: WayPointData} {
     const renderedBoxes: {box: Box|NodeWidget, wayPoint: WayPointData}[] = this.getRenderedBoxes()
-
-    if (renderedBoxes.length === 0) {
-      const managingBox: Box = this.getManagingBox()
-      let message = 'Corrupted mapData detected: '
-      message += `Link with id ${this.referenceLink.getId()} in ${managingBox.getSrcPath()} has path with no rendered boxes, `
-      message += 'this only happens when mapData is corrupted. '
-      message += 'Defaulting LinkEnd to center of managingBox.'
-      util.logWarning(message)
-      return {box: managingBox, wayPoint: WayPointData.buildNew(managingBox.getId(), managingBox.getName(), 50, 50)}
-    }
-
     return renderedBoxes[renderedBoxes.length-1]
   }
 
@@ -338,6 +334,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return this.getRenderedBoxes().map((tuple: {box: Box|NodeWidget, wayPoint: WayPointData}) => tuple.box).filter(box => box !== this.getManagingBox())
   }
 
+  // TODO: rename to getRenderedPath(..)
   private getRenderedBoxes(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
     if (this.data.path.length === 0) {
       let message = 'Corrupted mapData detected: '
@@ -384,39 +381,6 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       message += 'Defaulting LinkEnd to center of managingBox.'
       util.logWarning(message)
       renderedBoxesInPath.push({box: managingBox, wayPoint: WayPointData.buildNew(managingBox.getId(), managingBox.getName(), 50, 50)})
-    }
-
-    return renderedBoxesInPath
-  }
-
-  // TODO: remove as soon as new implementation is stable
-  private getRenderedBoxesOld(): {box: Box|NodeWidget, wayPoint: WayPointData}[] {
-    if (this.data.path.length === 0) {
-      let message = 'Corrupted mapData detected: '
-      message += `Link with id ${this.referenceLink.getId()} in ${this.getManagingBox().getSrcPath()} has empty path.`
-      util.logWarning(message)
-    }
-
-    const renderedBoxesInPath: {box: Box|NodeWidget, wayPoint: WayPointData}[] = []
-
-    for(let i = 0; i < this.data.path.length; i++) {
-      const box: Box|undefined = boxManager.getBoxIfExists(this.data.path[i].boxId)
-      if (!box) {
-        // TODO: not nice, refactor
-        let lastBox: Box
-        if (renderedBoxesInPath.length > 0) {
-          lastBox = renderedBoxesInPath[renderedBoxesInPath.length-1].box as Box
-        } else {
-          lastBox = this.getManagingBox()
-        }
-        const nodeWidget: NodeWidget|undefined = lastBox.nodes.getNodeById(this.data.path[i].boxId)
-        if (nodeWidget) {
-          renderedBoxesInPath.push({box: nodeWidget, wayPoint: this.data.path[i]})
-        }
-      }
-      if (box) { // TODO: also check if box is rendered
-        renderedBoxesInPath.push({box: box, wayPoint: this.data.path[i]})
-      }
     }
 
     return renderedBoxesInPath

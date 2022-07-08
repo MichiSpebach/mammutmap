@@ -83,7 +83,7 @@ export class BoxNodesWidget extends Widget {
       await Promise.all(proms)
     }
 
-    public async add(data: NodeData) {
+    public async add(data: NodeData): Promise<void> {
       this.referenceBox.getMapNodeData().push(data)
 
       const nodeWidget: NodeWidget = new NodeWidget(data, this.referenceBox)

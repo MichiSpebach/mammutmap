@@ -237,10 +237,12 @@ export class Link implements Hoverable {
     const oldManagingBox: Box = this.managingBox
     this.managingBox = commonAncestor
 
-    this.from.reorderMapDataPathWithoutRender(this.managingBox)
-    this.to.reorderMapDataPathWithoutRender(this.managingBox)
+    let proms: Promise<any>[] = []
+    proms.push(this.from.reorderMapDataPathWithoutRender(this.managingBox))
+    proms.push(this.to.reorderMapDataPathWithoutRender(this.managingBox))
+    await Promise.all(proms)
 
-    const proms: Promise<any>[] = []
+    proms = []
     if(oldManagingBox !== this.managingBox) {
       proms.push(BoxLinks.changeManagingBoxOfLinkAndSave(oldManagingBox, this.managingBox, this))
     } else {
