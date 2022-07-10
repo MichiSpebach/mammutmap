@@ -9,7 +9,6 @@ import { Link } from './Link'
 import { ClientPosition, LocalPosition } from './Transform'
 import { WayPointData } from './WayPointData'
 import { LinkEndData } from './LinkEndData'
-import { boxManager } from './BoxManager'
 import { NodeWidget } from '../node/NodeWidget'
 import { Shape } from '../shape/Shape'
 import { FolderBox } from './FolderBox'
@@ -109,7 +108,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       if (target instanceof NodeWidget) {
         targetWayPoint = WayPointData.buildNew(target.getId(), 'node'+target.getId(), 50, 50)
       } else {
-        const position = await target.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
+        const position: LocalPosition = await target.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
         targetWayPoint = WayPointData.buildNew(target.getId(), target.getName(), position.percentX, position.percentY)
       }
     } else {
@@ -122,8 +121,13 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       const targetBox: Box = target.getManagingBox()
       shallowRenderedPath.unshift({box: targetBox, wayPoint: targetWayPoint})
       if (targetBox !== this.getManagingBox()) {
-        const targetBoxPosition: LocalPosition = await targetBox.transform.clientToLocalPosition(await this.getTargetPositionInClientCoords())
-        const targetBoxWayPoint: WayPointData = WayPointData.buildNew(targetBox.getId(), targetBox.getName(), targetBoxPosition.percentX, targetBoxPosition.percentY)
+        const positionInTargetBoxCoords: LocalPosition = target.getMapData().getPosition()
+        const targetBoxWayPoint: WayPointData = WayPointData.buildNew(
+          targetBox.getId(),
+          targetBox.getName(),
+          positionInTargetBoxCoords.percentX,
+          positionInTargetBoxCoords.percentY
+        )
         shallowRenderedPath.unshift({box: targetBox, wayPoint: targetBoxWayPoint})
       }
     } else {
