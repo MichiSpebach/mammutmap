@@ -1,10 +1,11 @@
 import { util } from '../util'
-import { renderManager } from '../RenderManager'
+import { renderManager, RenderPriority } from '../RenderManager'
 import { Box } from './Box'
 import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
 import { LinkEndData } from './LinkEndData'
+import { NodeWidget } from '../node/NodeWidget'
 
 export class BoxLinks {
     private readonly referenceBox: Box
@@ -75,6 +76,12 @@ export class BoxLinks {
 
     public async render(): Promise<void> {
       if (this.rendered) {
+        // links that are connected to NodeWidgets need to be rerendered
+        // because size of NodeWidgets is not percental // TODO: use smart css attributes to handle this
+        this.links.filter(link => {
+          return link.from.getDeepestRenderedBox().box instanceof NodeWidget
+            || link.to.getDeepestRenderedBox().box instanceof NodeWidget
+        }).forEach(link => link.render())
         return
       }
 
