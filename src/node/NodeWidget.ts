@@ -10,7 +10,7 @@ import { util } from '../util'
 import { DragManager } from '../DragManager'
 import { BoxNodesWidget } from '../box/BoxNodesWidget'
 import { BorderingLinks } from '../link/BorderingLinks'
-import { ClientCircle } from '../shape/ClientCircle'
+import { ClientRect } from '../ClientRect'
 import * as contextMenu from '../contextMenu'
 
 export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
@@ -53,9 +53,9 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         }
     }
 
-    public async getClientShape(): Promise<ClientCircle> {
+    public async getClientShape(): Promise<ClientRect> {
         const clientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(this.getPosition())
-        return new ClientCircle(clientPosition.x, clientPosition.y, 5)
+        return new ClientRect(clientPosition.x-7, clientPosition.y-7, 14, 14)
     }
 
     private getPosition(): LocalPosition {
@@ -76,9 +76,9 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
 
         const position: LocalPosition = this.getPosition()
         const positionStyle = `position:absolute;top:${position.percentY}%;left:${position.percentX}%;`
-        const sizeStyle = 'width:10px;height:10px;transform:translate(-5px,-5px);'
-        const borderStyle = 'border-style:solid;border-width:1px;border-radius:50%;'
-        const colorStyle = 'border-color:grey;background-color:#0ff8;'
+        const sizeStyle = 'width:14px;height:14px;transform:translate(-7px,-7px);'
+        const borderStyle = 'border-radius:30%;'
+        const colorStyle = 'background-color:#0aa8;'
         proms.push(renderManager.setStyleTo(this.getId(), positionStyle+sizeStyle+borderStyle+colorStyle, priority))
 
         if (!this.rendered) {
