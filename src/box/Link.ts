@@ -74,8 +74,12 @@ export class Link implements Hoverable {
       proms.push(renderManager.setContentTo(this.getId()+'svg', lineHtml, priority))
     }
 
-    const distance: number[] = [toInManagingBoxCoords.percentX-fromInManagingBoxCoords.percentX, toInManagingBoxCoords.percentY-fromInManagingBoxCoords.percentY]
-    const angleInRadians: number = Math.atan2(distance[1], distance[0]) // TODO: improve is only correct when managingBox is quadratic, use clientCoords?
+    // TODO: too many awaits, optimize
+    const fromClientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(fromInManagingBoxCoords)
+    const toClientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(toInManagingBoxCoords)
+    const distanceX: number = toClientPosition.x-fromClientPosition.x
+    const distanceY: number = toClientPosition.y-fromClientPosition.y
+    const angleInRadians: number = Math.atan2(distanceY, distanceX)
     proms.push(this.from.render(fromInManagingBoxCoords, angleInRadians))
     proms.push(this.to.render(toInManagingBoxCoords, angleInRadians))
 
