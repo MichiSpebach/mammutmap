@@ -54,12 +54,16 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     }
 
     public async getClientShape(): Promise<ClientRect> {
-        const clientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(this.getPosition())
+        const clientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(this.getRenderPosition())
         return new ClientRect(clientPosition.x-7, clientPosition.y-7, 14, 14)
     }
 
-    private getPosition(): LocalPosition {
+    public getRenderPosition(): LocalPosition {
         return this.dragState ? this.dragState.positionInManagingBoxCoords : this.mapData.getPosition()
+    }
+
+    public getSavePosition(): LocalPosition {
+        return this.mapData.getPosition()
     }
 
     private async setDragStateAndRender(
@@ -74,7 +78,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         this.renderInProgress = true
         const proms: Promise<any>[] = []
 
-        const position: LocalPosition = this.getPosition()
+        const position: LocalPosition = this.getRenderPosition()
         const positionStyle = `position:absolute;top:${position.percentY}%;left:${position.percentX}%;`
         const sizeStyle = 'width:14px;height:14px;transform:translate(-7px,-7px);'
         const borderStyle = 'border-radius:30%;'

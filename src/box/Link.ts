@@ -76,10 +76,8 @@ export class Link implements Hoverable {
 
     const distance: number[] = [toInManagingBoxCoords.percentX-fromInManagingBoxCoords.percentX, toInManagingBoxCoords.percentY-fromInManagingBoxCoords.percentY]
     const angleInRadians: number = Math.atan2(distance[1], distance[0]) // TODO: improve is only correct when managingBox is quadratic, use clientCoords?
-    const fromBox: Box|NodeWidget = this.from.getDeepestRenderedBox().box
-    proms.push(this.from.render(fromBox, fromInManagingBoxCoords, angleInRadians))
-    const toBox: Box|NodeWidget = this.to.getDeepestRenderedBox().box
-    proms.push(this.to.render(toBox, toInManagingBoxCoords, angleInRadians))
+    proms.push(this.from.render(fromInManagingBoxCoords, angleInRadians))
+    proms.push(this.to.render(toInManagingBoxCoords, angleInRadians))
 
     await Promise.all(proms)
   }

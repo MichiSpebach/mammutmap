@@ -79,8 +79,8 @@ export class BoxLinks {
         // links that are connected to NodeWidgets need to be rerendered
         // because size of NodeWidgets is not percental // TODO: use smart css attributes to handle this
         this.links.filter(link => {
-          return link.from.getDeepestRenderedBox().box instanceof NodeWidget
-            || link.to.getDeepestRenderedBox().box instanceof NodeWidget
+          return link.from.getDeepestRenderedWayPoint().linkable instanceof NodeWidget
+            || link.to.getDeepestRenderedWayPoint().linkable instanceof NodeWidget
         }).forEach(link => link.render())
         return
       }
