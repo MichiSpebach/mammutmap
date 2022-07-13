@@ -7,6 +7,7 @@
     "module": "commonjs",
     "noImplicitAny": true,
     "sourceMap": true,
+    "declaration": true,
     "baseUrl": ".",
     "outDir": "dist",
     "moduleResolution": "node",

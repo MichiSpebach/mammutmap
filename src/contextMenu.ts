@@ -16,6 +16,12 @@ import { PopupWidget } from './PopupWidget'
 import { settings } from './Settings'
 import { NodeWidget } from './node/NodeWidget'
 
+const fileBoxMenuItemGenerators: ((box: FileBox) => {label: string, action: () => void} | undefined)[] = []
+
+export function addFileBoxMenuItem(generator: (box: FileBox) => {label: string, action: () => void} | undefined): void {
+  fileBoxMenuItemGenerators.push(generator)
+}
+
 export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
   const command: string = 'code '+box.getSrcPath()
   const template: any = [
@@ -33,6 +39,14 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
   if (settings.getBoolean('developerMode')) {
     menu.append(buildDetailsItem('FileBoxDetails', box))
   }
+
+  fileBoxMenuItemGenerators.forEach(async generator => {
+    const menuItemParams: {label: string, action: () => void} | undefined = generator(box)
+    if (menuItemParams) {
+      menu.append(new MenuItem({label: menuItemParams.label, click: menuItemParams.action}))
+    }
+  })
+  
   menu.popup()
 }
 

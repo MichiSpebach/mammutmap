@@ -1,13 +1,21 @@
 import * as ts from 'typescript'
 import { Program, SourceFile } from 'typescript'
 import { MenuItem } from 'electron'
-import * as util from '../dist/util'
+import { util } from '../dist/util'
 import * as applicationMenu from '../dist/applicationMenu'
+import * as contextMenu from '../dist/contextMenu'
 import * as pluginFacade from '../dist/pluginFacade'
 import { Box, FileBoxDepthTreeIterator } from '../dist/pluginFacade'
 
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Generate links', click: generateLinks}))
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Join on GitHub (coming soon)'}))
+
+contextMenu.addFileBoxMenuItem((box: pluginFacade.FileBox) => {
+  if (!box.getName().endsWith('.ts')) {
+    return undefined
+  }
+  return {label: 'generate outgoing links', action: () => generateOutgoingLinksForBoxes([box])}
+})
 
 async function generateLinks(): Promise<void> {
   util.logInfo('generateLinks')
@@ -29,7 +37,7 @@ async function generateLinks(): Promise<void> {
 }
 
 async function generateOutgoingLinksForBoxes(boxes: Box[]) {
-  const filePaths: Box[] = boxes.map(box => box.getSrcPath())
+  const filePaths: string[] = boxes.map(box => box.getSrcPath())
   const program: Program = ts.createProgram(filePaths, {}) // TODO: blocks for about a second, use workers and run in other thread
 
   for (const box of boxes) {
