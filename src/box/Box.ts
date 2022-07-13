@@ -218,14 +218,13 @@ export abstract class Box implements DropTarget, Hoverable {
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
       const backgroundHtml = `<div style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
       const gridPlaceHolderHtml = `<div id="${this.getGridPlaceHolderId()}" style="${styleAbsoluteAndStretched}"></div>`
-      const headerHtml = `<div id="${this.header.getId()}" style="overflow:hidden;max-height:100%"></div>`
-      const bodyHtml = `<div id="${this.getBodyId()}"></div>`
-      const headerAndBodyHtml = `<div style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};">${headerHtml+bodyHtml}</div>`
+      const bodyHtml = `<div id="${this.getBodyId()}" style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};"></div>`
+      const headerHtml = `<div id="${this.header.getId()}" style="position:absolute;overflow:hidden;width:100%;"></div>`
       const borderHtml = `<div id="${this.getBorderId()}" class="${style.getBoxBorderClass()} ${style.getAdditionalBoxBorderClass(this.mapDataFileExists)}"></div>`
       const scaleToolPlaceholderHtml = `<div id="${this.getScaleToolPlaceHolderId()}"></div>`
       const nodesHtml = `<div id="${this.nodes.getId()}"></div>`
       const linksHtml = `<div id="${this.links.getId()}"></div>`
-      await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+headerAndBodyHtml+borderHtml+scaleToolPlaceholderHtml+nodesHtml+linksHtml)
+      await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+bodyHtml+headerHtml+borderHtml+scaleToolPlaceholderHtml+nodesHtml+linksHtml)
 
       await this.header.render()
       await this.renderBorderingLinks()

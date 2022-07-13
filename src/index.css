@@ -106,6 +106,7 @@ pre {
 .boxHeader {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
+  border-bottom: 1px solid #404040a0;
 }
 .fileBoxHeader {
   background-color: steelblue;
@@ -140,5 +141,6 @@ pre {
 
 .fileBoxBodyText {
   margin: 0px;
+  padding-top: 30px;
   padding-left: 5px;
 }
