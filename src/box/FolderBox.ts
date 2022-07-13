@@ -72,7 +72,8 @@ export class FolderBox extends Box {
 
   public async getBoxBySourcePathAndRenderIfNecessary(path: string): Promise<BoxWatcher|undefined> {
     if (!path.startsWith(this.getName())) {
-      util.logError('path '+path+' must start with name of box '+this.getName())
+      util.logWarning('path '+path+' must start with name of box '+this.getName())
+      return undefined
     }
 
     const temporaryBoxWatcher: BoxWatcher = new BoxWatcher(this)

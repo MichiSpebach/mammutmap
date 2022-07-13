@@ -79,7 +79,7 @@ async function addLinks(fromFilePath: string, parentFilePath: string, relativeTo
       continue
     }
     const normalizedImportPath = normalizeRelativeImportPath(importPath)
-    const normalizedToFilePath = normalizePath(parentFilePath+'/'+normalizedImportPath)
+    const normalizedToFilePath = util.concatPaths(parentFilePath, normalizedImportPath)
     await pluginFacade.addLink(fromFilePath, normalizedToFilePath)
   }
 }
@@ -88,18 +88,11 @@ function isImportFromLibrary(importPath: string): boolean {
   return !importPath.includes('/')
 }
 
-function normalizePath(path: string): string {
-  return path.replaceAll(new RegExp('/[^/]+/(..)/', 'g'), '/')
-}
-
 function normalizeRelativeImportPath(path: string): string {
   path = path.replaceAll('\'', '')
   path = path.replaceAll('"', '')
   if (!path.endsWith('.ts')) {
     path += '.ts'
-  }
-  if (path.startsWith('./')) {
-    path = path.substring(2)
   }
   return path
 }

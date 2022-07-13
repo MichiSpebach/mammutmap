@@ -12,10 +12,7 @@ contextMenu.addFileBoxMenuItem((box) => {
     if (!box.getName().endsWith('.ts')) {
         return undefined;
     }
-    return {
-        label: 'generate outgoing links',
-        action: () => generateOutgoingLinksForBoxes([box])
-    };
+    return { label: 'generate outgoing links', action: () => generateOutgoingLinksForBoxes([box]) };
 });
 async function generateLinks() {
     util_1.util.logInfo('generateLinks');
@@ -68,24 +65,18 @@ async function addLinks(fromFilePath, parentFilePath, relativeToFilePaths) {
             continue;
         }
         const normalizedImportPath = normalizeRelativeImportPath(importPath);
-        const normalizedToFilePath = normalizePath(parentFilePath + '/' + normalizedImportPath);
+        const normalizedToFilePath = util_1.util.concatPaths(parentFilePath, normalizedImportPath);
         await pluginFacade.addLink(fromFilePath, normalizedToFilePath);
     }
 }
 function isImportFromLibrary(importPath) {
     return !importPath.includes('/');
 }
-function normalizePath(path) {
-    return path.replaceAll(new RegExp('/[^/]+/(..)/', 'g'), '/');
-}
 function normalizeRelativeImportPath(path) {
     path = path.replaceAll('\'', '');
     path = path.replaceAll('"', '');
     if (!path.endsWith('.ts')) {
         path += '.ts';
-    }
-    if (path.startsWith('./')) {
-        path = path.substring(2);
     }
     return path;
 }
