@@ -189,5 +189,5 @@ test('calculatePathOfUnchangedLinkEndOfChangedLink link shallow rendered and box
 })
 
 function buildWayPoint(idPrefix: string): WayPointData {
-    return new WayPointData(idPrefix+'BoxId', idPrefix+'BoxName', 50, 50)
+    return WayPointData.buildNew(idPrefix+'BoxId', idPrefix+'BoxName', 50, 50)
 }
