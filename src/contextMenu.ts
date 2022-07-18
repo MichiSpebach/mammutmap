@@ -176,10 +176,12 @@ function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
 // TODO: move into Box?
 async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise<void> {
   const position: LocalPosition = await box.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-  const from = WayPointData.buildNew(box.getId(), box.getName(), position.percentX, position.percentY)
-  const to = WayPointData.buildNew(box.getId(), box.getName(), position.percentX, position.percentY)
+  const fromWayPoint = WayPointData.buildNew(box.getId(), box.getName(), position.percentX, position.percentY)
+  const toWayPoint = WayPointData.buildNew(box.getId(), box.getName(), position.percentX, position.percentY)
 
-  const link: Link = await box.links.addLink(new LinkEndData([from], true), new LinkEndData([to], true), false)
+  const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint], true)}
+  const toLinkEnd = {mapData: new LinkEndData([toWayPoint], true)}
+  const link: Link = await box.links.addLink(fromLinkEnd, toLinkEnd, false)
 
   DragManager.startDragWithClickToDropMode(link.getTo())
 }

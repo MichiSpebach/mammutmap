@@ -28,11 +28,12 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     snapToGrid: boolean
   } | null = null
 
-  public constructor(id: string, data: LinkEndData, referenceLink: Link, shape: 'square'|'arrow') {
+  public constructor(id: string, data: LinkEndData, referenceLink: Link, shape: 'square'|'arrow', renderedTarget?: Box|NodeWidget) {
     this.id = id
     this.data = data
     this.referenceLink = referenceLink
     this.shape = shape
+    this.renderedTarget = renderedTarget
   }
 
   public getId(): string {
@@ -54,7 +55,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public getRenderedTarget(): Box|NodeWidget {
     if (!this.renderedTarget) {
-      util.logWarning('LinkEnd should be rendered before calling getRenderedTarget(), but was not.')
+      util.logWarning('LinkEnd should be rendered before calling getRenderedTarget() or renderedTarget should be set in constructor, but was not.')
       this.renderedTarget = this.getManagingBox()
     }
     return this.renderedTarget

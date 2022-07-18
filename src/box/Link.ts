@@ -21,11 +21,11 @@ export class Link implements Hoverable {
   private currentStyle: string|null = null
   private styleTimer: NodeJS.Timeout|null = null
 
-  public constructor(data: BoxMapLinkData, managingBox: Box) {
+  public constructor(data: BoxMapLinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget) {
     this.data = data
     this.managingBox = managingBox
-    this.from = new LinkEnd(this.data.id+'from', this.data.from, this, 'square')
-    this.to = new LinkEnd(this.data.id+'to', this.data.to, this, 'arrow')
+    this.from = new LinkEnd(this.data.id+'from', this.data.from, this, 'square', from)
+    this.to = new LinkEnd(this.data.id+'to', this.data.to, this, 'arrow', to)
   }
 
   public getId(): string {

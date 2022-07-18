@@ -44,17 +44,23 @@ export class BoxLinks {
       await Promise.all(proms)
     }
 
-    public async addLink(from: LinkEndData, to: LinkEndData, reorderAndSave: boolean): Promise<Link> {
-      const linkData = new BoxMapLinkData(util.generateId(), from, to)
+    public async addLink(
+      from: {mapData: LinkEndData, linkable?: Box|NodeWidget}, 
+      to: {mapData: LinkEndData, linkable?: Box|NodeWidget}, 
+      reorderAndSave: boolean
+    ): Promise<Link> {
+      const linkData = new BoxMapLinkData(util.generateId(), from.mapData, to.mapData)
       this.referenceBox.getMapLinkData().push(linkData)
 
-      const link: Link = new Link(linkData, this.referenceBox)
+      const link: Link = new Link(linkData, this.referenceBox, from.linkable, to.linkable)
       this.links.push(link)
 
       await this.addPlaceholderFor(link)
-      await link.render()
+
       if (reorderAndSave) {
         await link.reorderAndSave()
+      } else {
+        await link.render()
       }
 
       return link

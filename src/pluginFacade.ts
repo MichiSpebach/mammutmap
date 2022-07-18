@@ -136,7 +136,9 @@ export async function addLink(fromFilePath: string, toFilePath: string): Promise
   const fromWayPoint = WayPointData.buildNew(from.getId(), from.getName(), 50, 50)
   const toWayPoint = WayPointData.buildNew(to.getId(), to.getName(), 50, 50)
 
-  await managingBox.links.addLink(new LinkEndData([fromWayPoint]), new LinkEndData([toWayPoint]), true)
+  const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint]), linkable: from}
+  const toLinkEnd = {mapData: new LinkEndData([toWayPoint]), linkable: to}
+  await managingBox.links.addLink(fromLinkEnd, toLinkEnd, true)
 }
 
 async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
