@@ -57,6 +57,10 @@ export class FileBox extends Box {
     await renderManager.removeEventListenerFrom(this.getId(), 'contextmenu')
   }
 
+  public getBody(): FileBoxBody {
+    return this.body
+  }
+
   protected getBodyId(): string {
     return this.body.getId()
   }

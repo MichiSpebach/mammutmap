@@ -62,10 +62,14 @@ export class FileBoxBody extends BoxBody {
       return this.formHtmlContentForError(`${tooLargeHint} ${sizeHint}.<br>${pluginHint}`)
     }
 
-    const data: string = await fileSystem.readFile(this.referenceFileBox.getSrcPath())
+    const data: string = await this.getFileContent()
     const mostImportantLines: string = this.extractMostImportantLines(data, 20, 10)
     const dataConvertedToHtml: string = util.escapeForHtml(mostImportantLines)
     return `<pre id="${this.getContentId()}" class="${style.getFileBoxBodyTextClass()}">${dataConvertedToHtml}</pre>`
+  }
+
+  public getFileContent(): Promise<string> {
+    return fileSystem.readFile(this.referenceFileBox.getSrcPath())
   }
 
   private extractMostImportantLines(code: string, roughNumberOfLines: number, minNumberOfLines: number): string {

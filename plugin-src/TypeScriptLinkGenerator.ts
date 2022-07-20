@@ -52,7 +52,6 @@ async function generateOutgoingLinksForBox(box: Box, program: Program): Promise<
   const sourceFile: SourceFile|undefined = program.getSourceFile(filePath)
   if (!sourceFile) {
     util.logError('failed to get '+ filePath +' as SourceFile')
-    return // TODO: compiler does not know that util.logError(..) returns never
   }
 
   const parentFilePath: string = box.getParent().getSrcPath()

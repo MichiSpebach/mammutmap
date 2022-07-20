@@ -1,0 +1,17 @@
+{
+  "name": "neuralnetlinkgenerator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "neuralNetLinkGenerator",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "neural",
+    "net",
+    "link",
+    "generator"
+  ],
+  "author": "",
+  "license": "ISC"
+}
