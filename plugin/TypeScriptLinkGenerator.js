@@ -68,7 +68,7 @@ async function addLinks(fromFilePath, parentFilePath, relativeToFilePaths) {
         }
         const normalizedImportPath = normalizeRelativeImportPath(importPath);
         const normalizedToFilePath = util_1.util.concatPaths(parentFilePath, normalizedImportPath);
-        await pluginFacade.addLink(fromFilePath, normalizedToFilePath);
+        await pluginFacade.addLink(fromFilePath, normalizedToFilePath, true);
     }
 }
 function isImportFromLibrary(importPath) {
