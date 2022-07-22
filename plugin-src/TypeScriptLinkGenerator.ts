@@ -14,7 +14,10 @@ contextMenu.addFileBoxMenuItem((box: pluginFacade.FileBox) => {
   if (!box.getName().endsWith('.ts')) {
     return undefined
   }
-  return {label: 'generate outgoing links', action: () => generateOutgoingLinksForBoxes([box])}
+  return {label: 'generate outgoing links', action: async () => {
+    await generateOutgoingLinksForBoxes([box])
+    await pluginFacade.clearWatchedBoxes() // TODO: potential bug, clears all boxWatchers not only the ones that were added
+  }}
 })
 
 async function generateLinks(): Promise<void> {

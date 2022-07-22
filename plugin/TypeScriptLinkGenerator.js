@@ -12,7 +12,10 @@ contextMenu.addFileBoxMenuItem((box) => {
     if (!box.getName().endsWith('.ts')) {
         return undefined;
     }
-    return { label: 'generate outgoing links', action: () => generateOutgoingLinksForBoxes([box]) };
+    return { label: 'generate outgoing links', action: async () => {
+            await generateOutgoingLinksForBoxes([box]);
+            await pluginFacade.clearWatchedBoxes(); // TODO: potential bug, clears all boxWatchers not only the ones that were added
+        } };
 });
 async function generateLinks() {
     util_1.util.logInfo('generateLinks');
@@ -43,7 +46,6 @@ async function generateOutgoingLinksForBox(box, program) {
     const sourceFile = program.getSourceFile(filePath);
     if (!sourceFile) {
         util_1.util.logError('failed to get ' + filePath + ' as SourceFile');
-        return; // TODO: compiler does not know that util.logError(..) returns never
     }
     const parentFilePath = box.getParent().getSrcPath();
     const importPaths = extractImportPaths(sourceFile);
