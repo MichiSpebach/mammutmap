@@ -202,6 +202,13 @@ class Util {
     return s.split('\\').join('/')
   }
 
+  public matchFileNames(name: string, otherName: string, options?: {ignoreFileEndings?: boolean}): boolean {
+    if (!options?.ignoreFileEndings) {
+      return name === otherName
+    }
+    return name.split('.')[0] === otherName.split('.')[0]
+  }
+
   public toFormattedJson(object: any) {
     return JSON.stringify(object, null, '\t')
   }

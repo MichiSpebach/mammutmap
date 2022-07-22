@@ -156,3 +156,12 @@ test('getElementCountOfPath', () => {
   expect(util.getElementCountOfPath('./relative/path')).toBe(2)
   expect(util.getElementCountOfPath('../relative/path')).toBe(3)
 })
+
+test('matchFileNames', () => {
+  expect(util.matchFileNames('fileName', 'otherFileName')).toBe(false)
+  expect(util.matchFileNames('fileName', 'fileName')).toBe(true)
+  expect(util.matchFileNames('fileName', 'fileName.fileEnding')).toBe(false)
+  expect(util.matchFileNames('fileName.fileEnding', 'fileName')).toBe(false)
+  expect(util.matchFileNames('fileName', 'fileName.fileEnding', {ignoreFileEndings: true})).toBe(true)
+  expect(util.matchFileNames('fileName.fileEnding', 'fileName', {ignoreFileEndings: true})).toBe(true)
+})
