@@ -138,3 +138,21 @@ test('joinPaths backslashes instead of slashes', () => {
 test('concatPaths', () => {
   expect(util.concatPaths('projectFolder/path/to/file', '../../../relative/import')).toBe('projectFolder/relative/import')
 })
+
+test('getElementCountOfPath', () => {
+  expect(util.getElementCountOfPath('oneElement')).toBe(1)
+  expect(util.getElementCountOfPath('oneElement.fileEnding')).toBe(1)
+  expect(util.getElementCountOfPath('oneElement/')).toBe(1)
+  
+  expect(util.getElementCountOfPath('two/elements')).toBe(2)
+  expect(util.getElementCountOfPath('two/elements.fileEnding')).toBe(2)
+  expect(util.getElementCountOfPath('two/elements/')).toBe(2)
+  
+  expect(util.getElementCountOfPath('/')).toBe(1)
+  expect(util.getElementCountOfPath('file://absolute/path')).toBe(2)
+  expect(util.getElementCountOfPath('/absolute/path')).toBe(2)
+  
+  expect(util.getElementCountOfPath('./')).toBe(1)
+  expect(util.getElementCountOfPath('./relative/path')).toBe(2)
+  expect(util.getElementCountOfPath('../relative/path')).toBe(3)
+})

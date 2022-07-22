@@ -186,6 +186,13 @@ class Util {
     return left+right
   }
 
+  public getElementCountOfPath(path: string): number {
+    if (path.startsWith('./')) {
+      path = path.substring(2)
+    }
+    return path.split(/[^/][/][^/]/).length
+  }
+
   public removeLastElementFromPath(path: string): string {
     path = this.replaceBackslashesWithSlashes(path)
     return path.replace(/[/][^/]*.$/, '/')
