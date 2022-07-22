@@ -176,12 +176,12 @@ class Util {
     } else if (left.endsWith('/') && right.startsWith('/')) {
       right = right.substring(1)
     }
-    if (right.startsWith('../')) {
-      left = this.removeLastElementFromPath(left)
-      right = right.substring(3)
-    }
     if (right.startsWith('./')) {
       right = right.substring(2)
+    }
+    while (right.startsWith('../')) {
+      left = this.removeLastElementFromPath(left)
+      right = right.substring(3)
     }
     return left+right
   }

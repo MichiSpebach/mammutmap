@@ -134,3 +134,7 @@ test('joinPaths backslashes instead of slashes', () => {
   expect(util.joinPaths(['projectFolder\\map\\', '.\\', 'file.json'])).toBe('projectFolder/map/file.json')
   expect(util.joinPaths(['projectFolder\\map\\', '.\\', '\\file.json'])).toBe('projectFolder/map/file.json')
 })
+
+test('concatPaths', () => {
+  expect(util.concatPaths('projectFolder/path/to/file', '../../../relative/import')).toBe('projectFolder/relative/import')
+})
