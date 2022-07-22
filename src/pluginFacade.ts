@@ -7,6 +7,7 @@ import { util } from './util'
 import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
 import { LinkEndData } from './box/LinkEndData'
+import * as boxFinder from './pluginUtil/boxFinder'
 
 export { Box, FileBox, RootFolderBox }
 
@@ -116,19 +117,34 @@ class BoxIterator {
   }
 }
 
-export async function addLink(fromFilePath: string, toFilePath: string, registerBoxWatchersInsteadOfUnwatch?: boolean): Promise<void> {
-  const from: BoxWatcher|undefined = await getBoxBySourcePath(fromFilePath, {registerBoxWatcher: registerBoxWatchersInsteadOfUnwatch})
+export async function addLink(
+  fromFilePath: string, 
+  toFilePath: string, 
+  boxThatIncludesToPath: FileBox, 
+  registerBoxWatchersInsteadOfUnwatch?: boolean
+): Promise<void> {
+  const from: BoxWatcher|undefined = await getBoxBySourcePath(fromFilePath, boxThatIncludesToPath, {registerBoxWatcher: registerBoxWatchersInsteadOfUnwatch})
   if (!from) {
     util.logWarning('failed to add link because file for fromFilePath "'+fromFilePath+'" was not found')
     return
   }
-  const to: BoxWatcher|undefined = await getBoxBySourcePath(toFilePath, {registerBoxWatcher: registerBoxWatchersInsteadOfUnwatch})
+  const fromBox: Box = await from.get()
+
+  // TODO: refactor, as FileBox not nice
+  await addLinkFromBox(fromBox as FileBox, toFilePath, registerBoxWatchersInsteadOfUnwatch)
+
+  if (!registerBoxWatchersInsteadOfUnwatch) {
+    from.unwatch()
+  }
+}
+
+export async function addLinkFromBox(fromBox: FileBox, toFilePath: string, registerBoxWatchersInsteadOfUnwatch?: boolean): Promise<void> {
+  const to: BoxWatcher|undefined = await getBoxBySourcePath(toFilePath, fromBox, {registerBoxWatcher: registerBoxWatchersInsteadOfUnwatch})
   if (!to) {
     util.logWarning('failed to add link because file for toFilePath "'+toFilePath+'" was not found')
     return
   }
 
-  const fromBox: Box = await from.get()
   const toBox: Box = await to.get()
   const managingBox: Box = Box.findCommonAncestor(fromBox, toBox).commonAncestor;
   if (managingBox.links.hasLinkWithEndBoxes(fromBox, toBox)) {
@@ -143,7 +159,6 @@ export async function addLink(fromFilePath: string, toFilePath: string, register
   await managingBox.links.addLink(fromLinkEnd, toLinkEnd, true)
 
   if (!registerBoxWatchersInsteadOfUnwatch) {
-    from.unwatch()
     to.unwatch()
   }
 }
@@ -154,8 +169,12 @@ async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
   boxWatchers.push(boxWatcher)
 }
 
-async function getBoxBySourcePath(path: string, options?: {registerBoxWatcher?: boolean}): Promise<BoxWatcher|undefined> {
-  const boxWatcher: BoxWatcher|undefined = await getRootFolder().getBoxBySourcePathAndRenderIfNecessary(path)
+async function getBoxBySourcePath(
+  path: string, 
+  boxThatIncludesPath: FileBox,
+  options?: {registerBoxWatcher?: boolean}
+): Promise<BoxWatcher|undefined> {
+  const boxWatcher: BoxWatcher|undefined = await boxFinder.findBox(path, boxThatIncludesPath)
   if (!boxWatcher) {
     return undefined
   }

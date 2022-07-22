@@ -12,7 +12,7 @@ contextMenu.addFileBoxMenuItem((box) => {
     if (!box.getName().endsWith('.ts')) {
         return undefined;
     }
-    return { label: 'generate outgoing links', action: async () => {
+    return { label: 'generate outgoing ts links', action: async () => {
             await generateOutgoingLinksForBoxes([box]);
             await pluginFacade.clearWatchedBoxes(); // TODO: potential bug, clears all boxWatchers not only the ones that were added
         } };
@@ -47,9 +47,8 @@ async function generateOutgoingLinksForBox(box, program) {
     if (!sourceFile) {
         util_1.util.logError('failed to get ' + filePath + ' as SourceFile');
     }
-    const parentFilePath = box.getParent().getSrcPath();
     const importPaths = extractImportPaths(sourceFile);
-    await addLinks(filePath, parentFilePath, importPaths);
+    await addLinks(filePath, box, importPaths);
 }
 function extractImportPaths(sourceFile) {
     const importPaths = [];
@@ -61,14 +60,13 @@ function extractImportPaths(sourceFile) {
     });
     return importPaths;
 }
-async function addLinks(fromFilePath, parentFilePath, relativeToFilePaths) {
-    for (let importPath of relativeToFilePaths) {
-        if (isImportFromLibrary(importPath)) {
+async function addLinks(fromFilePath, boxThatIncludesToPaths, relativeToFilePaths) {
+    for (let relativeToFilePath of relativeToFilePaths) {
+        if (isImportFromLibrary(relativeToFilePath)) {
             continue;
         }
-        const normalizedImportPath = normalizeRelativeImportPath(importPath);
-        const normalizedToFilePath = util_1.util.concatPaths(parentFilePath, normalizedImportPath);
-        await pluginFacade.addLink(fromFilePath, normalizedToFilePath, true);
+        const normalizedRelativeToFilePath = normalizeRelativeImportPath(relativeToFilePath);
+        await pluginFacade.addLink(fromFilePath, normalizedRelativeToFilePath, boxThatIncludesToPaths, true);
     }
 }
 function isImportFromLibrary(importPath) {
