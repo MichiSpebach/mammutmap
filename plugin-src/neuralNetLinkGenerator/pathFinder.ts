@@ -22,6 +22,7 @@ function findPathsWithMarkersAndNormalize(text: string, start: string, separator
 }
 
 function findPathsWithMarkers(text: string, start: string, separator: string, end: string, additionalForbiddings: string = ''): string[] {
+    // there is no neural net yet, for now the name just stays as buzzword xD
     const paths: string[] = []
 
     const forbiddings: string = `'"/\\\\${additionalForbiddings}`

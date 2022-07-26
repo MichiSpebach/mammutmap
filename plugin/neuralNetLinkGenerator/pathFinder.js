@@ -19,6 +19,7 @@ function findPathsWithMarkersAndNormalize(text, start, separator, end, additiona
     return findPathsWithMarkers(text, start, separator, end, additionalForbiddings).map(path => path.replaceAll(separator, '/'));
 }
 function findPathsWithMarkers(text, start, separator, end, additionalForbiddings = '') {
+    // there is no neural net yet, for now the name just stays as buzzword xD
     const paths = [];
     const forbiddings = `'"/\\\\${additionalForbiddings}`;
     const pathElement = `[^${forbiddings}]*[\\${separator}][^${forbiddings}]*`;
