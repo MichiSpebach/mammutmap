@@ -58,7 +58,7 @@ async function generateOutgoingLinksForBox(box: FileBox, program: Program): Prom
   }
 
   const importPaths: string[] = extractImportPaths(sourceFile)
-  await addLinks(filePath, box, importPaths)
+  await addLinks(box, importPaths)
 }
 
 function extractImportPaths(sourceFile: SourceFile): string[] {
@@ -74,13 +74,13 @@ function extractImportPaths(sourceFile: SourceFile): string[] {
   return importPaths
 }
 
-async function addLinks(fromFilePath: string, boxThatIncludesToPaths: FileBox, relativeToFilePaths: string[]): Promise<void> {
+async function addLinks(fromBox: FileBox, relativeToFilePaths: string[]): Promise<void> {
   for (let relativeToFilePath of relativeToFilePaths) {
     if (isImportFromLibrary(relativeToFilePath)) {
       continue
     }
     const normalizedRelativeToFilePath: string = normalizeRelativeImportPath(relativeToFilePath)
-    await pluginFacade.addLink(fromFilePath, normalizedRelativeToFilePath, boxThatIncludesToPaths, true)
+    await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, true)
   }
 }
 

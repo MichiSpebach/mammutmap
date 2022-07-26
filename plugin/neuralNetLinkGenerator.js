@@ -10,6 +10,6 @@ async function generateOutgoingLinksForBox(box) {
     const fileContent = await box.getBody().getFileContent();
     const paths = pathFinder.findPaths(fileContent);
     await Promise.all(paths.map(async (path) => {
-        await pluginFacade.addLinkFromBox(box, path);
+        await pluginFacade.addLink(box, path);
     }));
 }

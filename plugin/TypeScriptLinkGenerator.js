@@ -48,7 +48,7 @@ async function generateOutgoingLinksForBox(box, program) {
         util_1.util.logError('failed to get ' + filePath + ' as SourceFile');
     }
     const importPaths = extractImportPaths(sourceFile);
-    await addLinks(filePath, box, importPaths);
+    await addLinks(box, importPaths);
 }
 function extractImportPaths(sourceFile) {
     const importPaths = [];
@@ -60,13 +60,13 @@ function extractImportPaths(sourceFile) {
     });
     return importPaths;
 }
-async function addLinks(fromFilePath, boxThatIncludesToPaths, relativeToFilePaths) {
+async function addLinks(fromBox, relativeToFilePaths) {
     for (let relativeToFilePath of relativeToFilePaths) {
         if (isImportFromLibrary(relativeToFilePath)) {
             continue;
         }
         const normalizedRelativeToFilePath = normalizeRelativeImportPath(relativeToFilePath);
-        await pluginFacade.addLink(fromFilePath, normalizedRelativeToFilePath, boxThatIncludesToPaths, true);
+        await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, true);
     }
 }
 function isImportFromLibrary(importPath) {

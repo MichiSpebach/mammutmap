@@ -12,6 +12,6 @@ async function generateOutgoingLinksForBox(box: FileBox): Promise<void> {
     const paths: string[] = pathFinder.findPaths(fileContent)
 
     await Promise.all(paths.map(async path => {
-        await pluginFacade.addLinkFromBox(box, path)
+        await pluginFacade.addLink(box, path)
     }))
 }

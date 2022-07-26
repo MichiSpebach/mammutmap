@@ -117,28 +117,7 @@ class BoxIterator {
   }
 }
 
-export async function addLink(
-  fromFilePath: string, 
-  toFilePath: string, 
-  boxThatIncludesToPath: FileBox, 
-  registerBoxWatchersInsteadOfUnwatch?: boolean
-): Promise<void> {
-  const from: BoxWatcher|undefined = await getBoxBySourcePath(fromFilePath, boxThatIncludesToPath, {registerBoxWatcher: registerBoxWatchersInsteadOfUnwatch})
-  if (!from) {
-    util.logWarning('failed to add link because file for fromFilePath "'+fromFilePath+'" was not found')
-    return
-  }
-  const fromBox: Box = await from.get()
-
-  // TODO: refactor, as FileBox not nice
-  await addLinkFromBox(fromBox as FileBox, toFilePath, registerBoxWatchersInsteadOfUnwatch)
-
-  if (!registerBoxWatchersInsteadOfUnwatch) {
-    from.unwatch()
-  }
-}
-
-export async function addLinkFromBox(fromBox: FileBox, toFilePath: string, registerBoxWatchersInsteadOfUnwatch?: boolean): Promise<void> {
+export async function addLink(fromBox: FileBox, toFilePath: string, registerBoxWatchersInsteadOfUnwatch?: boolean): Promise<void> {
   const to: BoxWatcher|undefined = await getBoxBySourcePath(toFilePath, fromBox, {registerBoxWatcher: registerBoxWatchersInsteadOfUnwatch})
   if (!to) {
     util.logWarning('failed to add link because file for toFilePath "'+toFilePath+'" was not found')

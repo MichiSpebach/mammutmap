@@ -1,4 +1,6 @@
 
+introduce SnapMode: {none, snapToGrid, snapToObject}
+
 fix WARNING: error in render thread occured:
 Failed to execute 'appendChild' on 'Node': parameter 1 is not of type 'Node'..
 the javascript that was tried to execute was: (() => {document.getElementById("unplacedElements").appendChild(document.getElementById("scaleTool"))}).call()
