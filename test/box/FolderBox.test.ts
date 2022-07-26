@@ -14,9 +14,18 @@ test('getBoxBySourcePathAndRenderIfNecessary path with one element', async () =>
   expect(await result.get()).toBe(scenario.innerBox)
 })
 
-test('getBoxBySourcePathAndRenderIfNecessary path with two element', async () => {
+test('getBoxBySourcePathAndRenderIfNecessary path with two elements', async () => {
   const scenario = setupScenarioForGetBoxBySourcePathAndRenderIfNecessary()
   const result: BoxWatcher|undefined = await scenario.box.getBoxBySourcePathAndRenderIfNecessary('src/box/innerBox/fileBox')
+  if (!result) {
+    fail()
+  }
+  expect(await result.get()).toBe(scenario.fileBox)
+})
+
+test('getBoxBySourcePathAndRenderIfNecessary ignoreFileEndings', async () => {
+  const scenario = setupScenarioForGetBoxBySourcePathAndRenderIfNecessary()
+  const result: BoxWatcher|undefined = await scenario.box.getBoxBySourcePathAndRenderIfNecessary('src/box/innerBox/fileBox.fileEnding', {ignoreFileEndings: true})
   if (!result) {
     fail()
   }

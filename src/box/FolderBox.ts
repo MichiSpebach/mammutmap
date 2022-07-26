@@ -103,7 +103,7 @@ export class FolderBox extends Box {
           util.logWarning(box.getSrcPath()+' is not last element in path '+path+' but is not a folder')
           return undefined
         }
-        const boxWatcher: BoxWatcher|undefined = await (box as FolderBox).getBoxBySourcePathAndRenderIfNecessary(remainingPath)
+        const boxWatcher: BoxWatcher|undefined = await (box as FolderBox).getBoxBySourcePathAndRenderIfNecessary(remainingPath, options)
         return boxWatcher
       }
     }
