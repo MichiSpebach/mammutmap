@@ -128,15 +128,14 @@ export class BoxLinks {
       this.rendered = false
     }
 
-    public hasLinkWithEndBoxes(from: Box, to: Box): boolean {
-      const link: Link|undefined = this.links.find((link: Link) => {
+    public getLinkWithEndBoxes(from: Box, to: Box): Link|undefined {
+      return this.links.find((link: Link) => {
         const linkFromWayPoints: WayPointData[] = link.getData().from.path
         const linkToWayPoints: WayPointData[] = link.getData().to.path
         const linkFromBoxId: string = linkFromWayPoints[linkFromWayPoints.length-1].boxId
         const linkToBoxId: string = linkToWayPoints[linkToWayPoints.length-1].boxId
         return linkFromBoxId === from.getId() && linkToBoxId === to.getId()
       })
-      return link !== undefined
     }
 
 }

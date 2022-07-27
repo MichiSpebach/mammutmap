@@ -8,6 +8,7 @@ import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
 import { LinkEndData } from './box/LinkEndData'
 import * as boxFinder from './pluginUtil/boxFinder'
+import { Link } from './box/Link'
 
 export { Box, FileBox, RootFolderBox }
 
@@ -120,31 +121,39 @@ class BoxIterator {
 export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   onlyReturnWarnings?: boolean
   registerBoxWatchersInsteadOfUnwatch?: boolean
-}): Promise<{warnings?: string[]}|void> {
+}): Promise<{
+  link: Link|undefined,
+  linkAlreadyExisted: boolean,
+  warnings?: string[]
+}> {
   const to: BoxWatcher|undefined = await getBoxBySourcePath(toFilePath, fromBox, {registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch})
   if (!to) {
     const message: string = 'failed to add link because file for toFilePath "'+toFilePath+'" was not found'
     if (!options?.onlyReturnWarnings) {
       util.logWarning(message)
     }
-    return {warnings: [message]}
+    return {link: undefined, linkAlreadyExisted: false, warnings: [message]}
   }
 
   const toBox: Box = await to.get()
   const managingBox: Box = Box.findCommonAncestor(fromBox, toBox).commonAncestor;
-  
-  if (!managingBox.links.hasLinkWithEndBoxes(fromBox, toBox)) {
+
+  let link: Link|undefined = managingBox.links.getLinkWithEndBoxes(fromBox, toBox)
+  const linkAlreadyExisted: boolean = !!link
+  if (!link) {
     const fromWayPoint = WayPointData.buildNew(fromBox.getId(), fromBox.getName(), 50, 50)
     const toWayPoint = WayPointData.buildNew(toBox.getId(), toBox.getName(), 50, 50)
 
     const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint]), linkable: fromBox}
     const toLinkEnd = {mapData: new LinkEndData([toWayPoint]), linkable: toBox}
-    await managingBox.links.addLink(fromLinkEnd, toLinkEnd, true)
+    link = await managingBox.links.addLink(fromLinkEnd, toLinkEnd, true)
   }
 
   if (!options?.registerBoxWatchersInsteadOfUnwatch) {
     to.unwatch()
   }
+
+  return {link, linkAlreadyExisted}
 }
 
 async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {

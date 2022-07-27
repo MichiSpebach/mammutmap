@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const contextMenu = require("../dist/contextMenu");
 const pluginFacade = require("../dist/pluginFacade");
+const util_1 = require("../dist/util");
 const pathFinder = require("./neuralNetLinkGenerator/pathFinder");
 const typeFinder = require("./neuralNetLinkGenerator/typeFinder");
 contextMenu.addFileBoxMenuItem((box) => {
@@ -12,9 +13,14 @@ async function generateOutgoingLinksForBox(box) {
     let paths = pathFinder.findPaths(fileContent);
     const otherTypesInFolder = getSiblingFileNamesWithoutEndings(box);
     paths = paths.concat(typeFinder.findTypesInText(otherTypesInFolder, fileContent));
+    let foundLinksCount = 0;
+    let foundLinksAlreadyExistedCount = 0;
     await Promise.all(paths.map(async (path) => {
-        await pluginFacade.addLink(box, path, { onlyReturnWarnings: true });
+        const report = await pluginFacade.addLink(box, path, { onlyReturnWarnings: true });
+        foundLinksCount += report.link ? 1 : 0;
+        foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0;
     }));
+    util_1.util.logInfo(`Found ${foundLinksCount} links for '${box.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`);
 }
 function getSiblingFileNamesWithoutEndings(box) {
     return getSiblings(box).map((sibling) => sibling.getName().split('.')[0]);

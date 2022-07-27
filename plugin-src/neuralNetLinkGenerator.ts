@@ -1,6 +1,7 @@
 import * as contextMenu from '../dist/contextMenu'
 import * as pluginFacade from '../dist/pluginFacade'
 import { Box, FileBox } from '../dist/pluginFacade'
+import { util } from '../dist/util'
 import * as pathFinder from './neuralNetLinkGenerator/pathFinder'
 import * as typeFinder from './neuralNetLinkGenerator/typeFinder'
 
@@ -16,9 +17,15 @@ async function generateOutgoingLinksForBox(box: FileBox): Promise<void> {
     const otherTypesInFolder: string[] = getSiblingFileNamesWithoutEndings(box)
     paths = paths.concat(typeFinder.findTypesInText(otherTypesInFolder, fileContent))
 
+    let foundLinksCount: number = 0
+    let foundLinksAlreadyExistedCount: number = 0
     await Promise.all(paths.map(async path => {
-        await pluginFacade.addLink(box, path, {onlyReturnWarnings: true})
+        const report = await pluginFacade.addLink(box, path, {onlyReturnWarnings: true})
+        foundLinksCount += report.link ? 1 : 0
+        foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0
     }))
+
+    util.logInfo(`Found ${foundLinksCount} links for '${box.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`)
 }
 
 function getSiblingFileNamesWithoutEndings(box: Box): string[] {

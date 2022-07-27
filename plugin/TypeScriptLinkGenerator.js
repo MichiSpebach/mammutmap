@@ -61,13 +61,18 @@ function extractImportPaths(sourceFile) {
     return importPaths;
 }
 async function addLinks(fromBox, relativeToFilePaths) {
+    let foundLinksCount = 0;
+    let foundLinksAlreadyExistedCount = 0;
     for (let relativeToFilePath of relativeToFilePaths) {
         if (isImportFromLibrary(relativeToFilePath)) {
             continue;
         }
         const normalizedRelativeToFilePath = normalizeRelativeImportPath(relativeToFilePath);
-        await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, { registerBoxWatchersInsteadOfUnwatch: true });
+        const report = await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, { registerBoxWatchersInsteadOfUnwatch: true });
+        foundLinksCount += report.link ? 1 : 0;
+        foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0;
     }
+    util_1.util.logInfo(`Found ${foundLinksCount} links for '${fromBox.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`);
 }
 function isImportFromLibrary(importPath) {
     return !importPath.includes('/');

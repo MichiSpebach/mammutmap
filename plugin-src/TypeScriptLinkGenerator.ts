@@ -75,13 +75,21 @@ function extractImportPaths(sourceFile: SourceFile): string[] {
 }
 
 async function addLinks(fromBox: FileBox, relativeToFilePaths: string[]): Promise<void> {
+  let foundLinksCount: number = 0
+  let foundLinksAlreadyExistedCount: number = 0
+
   for (let relativeToFilePath of relativeToFilePaths) {
     if (isImportFromLibrary(relativeToFilePath)) {
       continue
     }
     const normalizedRelativeToFilePath: string = normalizeRelativeImportPath(relativeToFilePath)
-    await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, {registerBoxWatchersInsteadOfUnwatch: true})
+    const report = await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, {registerBoxWatchersInsteadOfUnwatch: true})
+
+    foundLinksCount += report.link ? 1 : 0
+    foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0
   }
+
+  util.logInfo(`Found ${foundLinksCount} links for '${fromBox.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`)
 }
 
 function isImportFromLibrary(importPath: string): boolean {
