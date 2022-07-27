@@ -87,3 +87,13 @@ test('findPaths multiple paths in text', () => {
         'other/path/separated/with/slashes'
     ])
 })
+
+test('findPaths same path repeats', () => {
+    let text: string = 'path/separated/with/slashes\n'
+    text += 'not a path'
+    text += '"path/separated/with/slashes"'
+
+    expect(pathFinder.findPaths(text)).toEqual([
+        'path/separated/with/slashes'
+    ])
+})

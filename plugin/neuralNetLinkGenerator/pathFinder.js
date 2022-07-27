@@ -3,18 +3,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.findPaths = void 0;
 function findPaths(text) {
     let paths = [];
-    paths = paths.concat(findPathsWithMarkers(text, '^', '/', '', '\\s;'));
-    paths = paths.concat(findPathsWithMarkers(text, '\\s', '/', '', '\\s;').map(path => path.trim()));
-    paths = paths.concat(findPathsWithMarkers(text, "'", '/', "'"));
-    paths = paths.concat(findPathsWithMarkers(text, '"', '/', '"'));
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, '^', '\\', '', '\\s;'));
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, '\\s', '\\', '', '\\s;').map(path => path.trim()));
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, "'", '\\', "'"));
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, '"', '\\', '"'));
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, 'import ', '.', '', '\\s\\*;'));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '^', '/', '', '\\s;'));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '\\s', '/', '', '\\s;').map(path => path.trim()));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, "'", '/', "'"));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '"', '/', '"'));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '^', '\\', '', '\\s;'));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '\\s', '\\', '', '\\s;').map(path => path.trim()));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, "'", '\\', "'"));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '"', '\\', '"'));
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, 'import ', '.', '', '\\s\\*;'));
     return paths;
 }
 exports.findPaths = findPaths;
+function concatToPathsIfNotIncluded(paths, otherPaths) {
+    for (const otherPath of otherPaths) {
+        if (!paths.includes(otherPath)) {
+            paths.push(otherPath);
+        }
+    }
+}
 function findPathsWithMarkersAndNormalize(text, start, separator, end, additionalForbiddings) {
     return findPathsWithMarkers(text, start, separator, end, additionalForbiddings).map(path => path.replaceAll(separator, '/'));
 }

@@ -2,19 +2,27 @@
 export function findPaths(text: string): string[] {
     let paths: string[] = []
 
-    paths = paths.concat(findPathsWithMarkers(text, '^', '/', '', '\\s;'))
-    paths = paths.concat(findPathsWithMarkers(text, '\\s', '/', '', '\\s;').map(path => path.trim()))
-    paths = paths.concat(findPathsWithMarkers(text, "'", '/', "'"))
-    paths = paths.concat(findPathsWithMarkers(text, '"', '/', '"'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '^', '/', '', '\\s;'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '\\s', '/', '', '\\s;').map(path => path.trim()))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, "'", '/', "'"))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '"', '/', '"'))
 
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, '^', '\\', '', '\\s;'))
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, '\\s', '\\', '', '\\s;').map(path => path.trim()))
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, "'", '\\', "'"))
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, '"', '\\', '"'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '^', '\\', '', '\\s;'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '\\s', '\\', '', '\\s;').map(path => path.trim()))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, "'", '\\', "'"))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '"', '\\', '"'))
 
-    paths = paths.concat(findPathsWithMarkersAndNormalize(text, 'import ', '.', '', '\\s\\*;'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, 'import ', '.', '', '\\s\\*;'))
 
     return paths
+}
+
+function concatToPathsIfNotIncluded(paths: string[], otherPaths: string[]): void {
+    for (const otherPath of otherPaths) {
+        if (!paths.includes(otherPath)) {
+            paths.push(otherPath)
+        }
+    }
 }
 
 function findPathsWithMarkersAndNormalize(text: string, start: string, separator: string, end: string, additionalForbiddings?: string): string[] {
