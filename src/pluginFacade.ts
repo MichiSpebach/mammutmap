@@ -117,27 +117,32 @@ class BoxIterator {
   }
 }
 
-export async function addLink(fromBox: FileBox, toFilePath: string, registerBoxWatchersInsteadOfUnwatch?: boolean): Promise<void> {
-  const to: BoxWatcher|undefined = await getBoxBySourcePath(toFilePath, fromBox, {registerBoxWatcher: registerBoxWatchersInsteadOfUnwatch})
+export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
+  onlyReturnWarnings?: boolean
+  registerBoxWatchersInsteadOfUnwatch?: boolean
+}): Promise<{warnings?: string[]}|void> {
+  const to: BoxWatcher|undefined = await getBoxBySourcePath(toFilePath, fromBox, {registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch})
   if (!to) {
-    util.logWarning('failed to add link because file for toFilePath "'+toFilePath+'" was not found')
-    return
+    const message: string = 'failed to add link because file for toFilePath "'+toFilePath+'" was not found'
+    if (!options?.onlyReturnWarnings) {
+      util.logWarning(message)
+    }
+    return {warnings: [message]}
   }
 
   const toBox: Box = await to.get()
   const managingBox: Box = Box.findCommonAncestor(fromBox, toBox).commonAncestor;
-  if (managingBox.links.hasLinkWithEndBoxes(fromBox, toBox)) {
-    return
+  
+  if (!managingBox.links.hasLinkWithEndBoxes(fromBox, toBox)) {
+    const fromWayPoint = WayPointData.buildNew(fromBox.getId(), fromBox.getName(), 50, 50)
+    const toWayPoint = WayPointData.buildNew(toBox.getId(), toBox.getName(), 50, 50)
+
+    const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint]), linkable: fromBox}
+    const toLinkEnd = {mapData: new LinkEndData([toWayPoint]), linkable: toBox}
+    await managingBox.links.addLink(fromLinkEnd, toLinkEnd, true)
   }
 
-  const fromWayPoint = WayPointData.buildNew(fromBox.getId(), fromBox.getName(), 50, 50)
-  const toWayPoint = WayPointData.buildNew(toBox.getId(), toBox.getName(), 50, 50)
-
-  const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint]), linkable: fromBox}
-  const toLinkEnd = {mapData: new LinkEndData([toWayPoint]), linkable: toBox}
-  await managingBox.links.addLink(fromLinkEnd, toLinkEnd, true)
-
-  if (!registerBoxWatchersInsteadOfUnwatch) {
+  if (!options?.registerBoxWatchersInsteadOfUnwatch) {
     to.unwatch()
   }
 }

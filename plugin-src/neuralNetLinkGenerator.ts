@@ -17,7 +17,7 @@ async function generateOutgoingLinksForBox(box: FileBox): Promise<void> {
     paths = paths.concat(typeFinder.findTypesInText(otherTypesInFolder, fileContent))
 
     await Promise.all(paths.map(async path => {
-        await pluginFacade.addLink(box, path)
+        await pluginFacade.addLink(box, path, {onlyReturnWarnings: true})
     }))
 }
 

@@ -66,7 +66,7 @@ async function addLinks(fromBox, relativeToFilePaths) {
             continue;
         }
         const normalizedRelativeToFilePath = normalizeRelativeImportPath(relativeToFilePath);
-        await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, true);
+        await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, { registerBoxWatchersInsteadOfUnwatch: true });
     }
 }
 function isImportFromLibrary(importPath) {

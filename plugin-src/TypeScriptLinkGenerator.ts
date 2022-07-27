@@ -80,7 +80,7 @@ async function addLinks(fromBox: FileBox, relativeToFilePaths: string[]): Promis
       continue
     }
     const normalizedRelativeToFilePath: string = normalizeRelativeImportPath(relativeToFilePath)
-    await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, true)
+    await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, {registerBoxWatchersInsteadOfUnwatch: true})
   }
 }
 
