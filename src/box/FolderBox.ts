@@ -71,22 +71,29 @@ export class FolderBox extends Box {
   }
 
   // TODO: only used by plugins, move into pluginUtil/boxFinder?
-  public async getBoxBySourcePathAndRenderIfNecessary(path: string, options?: {ignoreFileEndings?: boolean}): Promise<BoxWatcher|undefined> {
+  public async getBoxBySourcePathAndRenderIfNecessary(
+    path: string, 
+    options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean}
+  ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
     if (!path.startsWith(this.getName())) {
-      util.logWarning('path '+path+' must start with name of box '+this.getName())
-      return undefined
+      return this.warn('path '+path+' must start with name of box '+this.getName(), options)
     }
 
     const temporaryBoxWatcher: BoxWatcher = new BoxWatcher(this)
     await this.addWatcherAndUpdateRender(temporaryBoxWatcher)
 
-    const resultBoxWatcher: BoxWatcher|undefined = await this.findBoxInChildsBySourcePathAndRenderIfNecessary(path, options)
+    const resultBoxWatcherWithWarnings: {
+      boxWatcher?: BoxWatcher, warnings?: string[]
+    } = await this.findBoxInChildsBySourcePathAndRenderIfNecessary(path, options)
 
     this.removeWatcher(temporaryBoxWatcher)
-    return resultBoxWatcher
+    return resultBoxWatcherWithWarnings
   }
 
-  private async findBoxInChildsBySourcePathAndRenderIfNecessary(path: string, options?: {ignoreFileEndings?: boolean}): Promise<BoxWatcher|undefined> {
+  private async findBoxInChildsBySourcePathAndRenderIfNecessary(
+    path: string, 
+    options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean}
+  ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
     let remainingPath: string = path.substring(this.getName().length)
     if (remainingPath.startsWith('/') || remainingPath.startsWith('\\')) {
       remainingPath = remainingPath.substring(1)
@@ -96,20 +103,25 @@ export class FolderBox extends Box {
       if (util.getElementCountOfPath(remainingPath) === 1 && util.matchFileNames(remainingPath, box.getName(), options)) {
         const boxWatcher: BoxWatcher = new BoxWatcher(box)
         await box.addWatcherAndUpdateRender(boxWatcher)
-        return boxWatcher
+        return {boxWatcher}
       }
       if (remainingPath.startsWith(box.getName())) {
         if (!box.isFolder()) {
-          util.logWarning(box.getSrcPath()+' is not last element in path '+path+' but is not a folder')
-          return undefined
+          return this.warn(box.getSrcPath()+' is not last element in path '+path+' but is not a folder', options)
         }
-        const boxWatcher: BoxWatcher|undefined = await (box as FolderBox).getBoxBySourcePathAndRenderIfNecessary(remainingPath, options)
-        return boxWatcher
+        return (box as FolderBox).getBoxBySourcePathAndRenderIfNecessary(remainingPath, options)
       }
     }
 
-    util.logWarning(path+' not found')
-    return undefined
+    return this.warn(path+' not found', options)
+  }
+
+  // TODO: move to util?
+  private warn(message: string, options: {onlyReturnWarnings?: boolean} | undefined): {warnings: string[]} {
+    if (!options?.onlyReturnWarnings) {
+      util.logWarning(message)
+    }
+    return {warnings: [message]}
   }
 
   public getBox(id: string): Box|undefined {

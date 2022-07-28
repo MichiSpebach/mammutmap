@@ -50,7 +50,7 @@ async function clearWatchedBoxes(): Promise<void> {
 }
 
 async function watchBox(sourcePath: string): Promise<void> {
-  const boxWatcher: BoxWatcher|undefined = await pluginFacade.getRootFolder().getBoxBySourcePathAndRenderIfNecessary(sourcePath)
+  const boxWatcher: BoxWatcher|undefined = (await pluginFacade.getRootFolder().getBoxBySourcePathAndRenderIfNecessary(sourcePath)).boxWatcher
   if (!boxWatcher) {
     util.logWarning('box with sourcePath '+sourcePath+' does not exist')
   } else {

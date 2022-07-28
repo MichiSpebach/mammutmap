@@ -126,16 +126,17 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   linkAlreadyExisted: boolean,
   warnings?: string[]
 }> {
-  const to: BoxWatcher|undefined = await getBoxBySourcePath(toFilePath, fromBox, {registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch})
-  if (!to) {
+  const toReport = await getBoxBySourcePath(toFilePath, fromBox, {...options, registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch})
+  if (!toReport.boxWatcher) {
     const message: string = 'failed to add link because file for toFilePath "'+toFilePath+'" was not found'
     if (!options?.onlyReturnWarnings) {
       util.logWarning(message)
     }
-    return {link: undefined, linkAlreadyExisted: false, warnings: [message]}
+    const warnings: string[] = toReport.warnings? toReport.warnings.concat(message) : [message]
+    return {link: undefined, linkAlreadyExisted: false, warnings}
   }
 
-  const toBox: Box = await to.get()
+  const toBox: Box = await toReport.boxWatcher.get()
   const managingBox: Box = Box.findCommonAncestor(fromBox, toBox).commonAncestor;
 
   let link: Link|undefined = managingBox.links.getLinkWithEndBoxes(fromBox, toBox)
@@ -150,7 +151,7 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   }
 
   if (!options?.registerBoxWatchersInsteadOfUnwatch) {
-    to.unwatch()
+    toReport.boxWatcher.unwatch()
   }
 
   return {link, linkAlreadyExisted}
@@ -165,16 +166,18 @@ async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
 async function getBoxBySourcePath(
   path: string, 
   boxThatIncludesPath: FileBox,
-  options?: {registerBoxWatcher?: boolean}
-): Promise<BoxWatcher|undefined> {
-  const boxWatcher: BoxWatcher|undefined = await boxFinder.findBox(path, boxThatIncludesPath)
-  if (!boxWatcher) {
-    return undefined
+  options?: {
+    onlyReturnWarnings?: boolean
+    registerBoxWatcher?: boolean
   }
-  if (options?.registerBoxWatcher) {
-    boxWatchers.push(boxWatcher)
+): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
+  const report = await boxFinder.findBox(path, boxThatIncludesPath, options)
+
+  if (report.boxWatcher && options?.registerBoxWatcher) {
+    boxWatchers.push(report.boxWatcher)
   }
-  return boxWatcher
+
+  return report
 }
 
 export async function clearWatchedBoxes(): Promise<void> {
