@@ -154,7 +154,7 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
     toReport.boxWatcher.unwatch()
   }
 
-  return {link, linkAlreadyExisted}
+  return {link, linkAlreadyExisted, warnings: toReport.warnings}
 }
 
 async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
