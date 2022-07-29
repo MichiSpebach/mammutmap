@@ -2,17 +2,17 @@
 export function findPaths(text: string): string[] {
     let paths: string[] = []
 
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '^', '/', '', '\\s;'))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '\\s', '/', '', '\\s;').map(path => path.trim()))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, "'", '/', "'"))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '"', '/', '"'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '^', '/', '\\s;'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '\\s', '/', '\\s;').map(path => path.trim()))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, "'", '/', '', "'"))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '"', '/', '', '"'))
 
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '^', '\\', '', '\\s;'))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '\\s', '\\', '', '\\s;').map(path => path.trim()))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, "'", '\\', "'"))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '"', '\\', '"'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '^', '\\', '\\s;'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '\\s', '\\','\\s;').map(path => path.trim()))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, "'", '\\', '', "'"))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '"', '\\', '', '"'))
 
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, 'import ', '.', '', '\\s\\*;'))
+    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, 'import ', '.', '\\s\\*;'))
 
     return paths
 }
@@ -25,24 +25,29 @@ function concatToPathsIfNotIncluded(paths: string[], otherPaths: string[]): void
     }
 }
 
-function findPathsWithMarkersAndNormalize(text: string, start: string, separator: string, end: string, additionalForbiddings?: string): string[] {
-    return findPathsWithMarkers(text, start, separator, end, additionalForbiddings).map(path => path.replaceAll(separator, '/'))
+function findPathsWithMarkersAndNormalize(text: string, start: string, separator: string, additionalForbiddings?: string, end?: string): string[] {
+    return findPathsWithMarkers(text, start, separator, additionalForbiddings, end).map(path => path.replaceAll(separator, '/'))
 }
 
-function findPathsWithMarkers(text: string, start: string, separator: string, end: string, additionalForbiddings: string = ''): string[] {
+function findPathsWithMarkers(text: string, start: string, separator: string, additionalForbiddings: string = '', end?: string): string[] {
     // there is no neural net yet, for now the name just stays as buzzword xD
     const paths: string[] = []
 
-    const forbiddings: string = `'"/\\\\${additionalForbiddings}`
+    const forbiddings: string = `'"/\\\\\n${additionalForbiddings}`
     const pathElement: string = `[^${forbiddings}]*[\\${separator}][^${forbiddings}]*`
-    const pathMatches: IterableIterator<RegExpMatchArray> = text.matchAll(new RegExp(`${start}(?:${pathElement})+${end}`, 'g'))
+    const suffixCaptor: string = '(.|\\s|$)' // using capturing group that matches everything to avoid catastrophic backtracking
+    const pathMatches: IterableIterator<RegExpMatchArray> = text.matchAll(new RegExp(`${start}(?:${pathElement})+${suffixCaptor}`, 'g'))
     for (const pathMatch of pathMatches) {
-        let path: string = pathMatch.toString()
+        let path: string = pathMatch[0]
+        let suffix: string = pathMatch[1]
+        if (end && end !== suffix) {
+            continue
+        }
         if (path.startsWith(start)) {
             path = path.substring(start.length)
         }
-        if (path.endsWith(end)) {
-            path = path.substring(0, path.length-end.length)
+        if (path.endsWith(suffix)) {
+            path = path.substring(0, path.length-suffix.length)
         }
         if (path.length > 1) {
             paths.push(path)

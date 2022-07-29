@@ -88,6 +88,25 @@ test('findPaths multiple paths in text', () => {
     ])
 })
 
+test('findPaths multiple unquoted paths in text', () => {
+    let text: string = 'path/separated/with/slashes\n'
+    text += 'other/path/separated/with/slashes'
+
+    expect(pathFinder.findPaths(text)).toEqual([
+        'path/separated/with/slashes',
+        'other/path/separated/with/slashes'
+    ])
+})
+
+test('findPaths quotes in text not belonging to paths', () => {
+    let text: string = '"some text" path/separated/with/slashes\n'
+    text += 'some "other text"'
+
+    expect(pathFinder.findPaths(text)).toEqual([
+        'path/separated/with/slashes'
+    ])
+})
+
 test('findPaths same path repeats', () => {
     let text: string = 'path/separated/with/slashes\n'
     text += 'not a path'
@@ -97,3 +116,28 @@ test('findPaths same path repeats', () => {
         'path/separated/with/slashes'
     ])
 })
+
+test('findPaths mulitple paths embedded in text', () => {
+    let text: string = 'some longer text before that is not a path\n'
+    text += '"path/separated/with/slashes"\n'
+    text += 'some text path/without/quotes some text\n'
+    text += '"other/path/separated/with/slashes"\n'
+    text += 'some longer text after that is not a path'
+
+    expect(pathFinder.findPaths(text)).toEqual([
+        'path/without/quotes',
+        'path/separated/with/slashes',
+        'other/path/separated/with/slashes'
+    ])
+})
+
+test('findPaths open quote without ending does not lead to catastrophic backtracking', () => {
+    let text: string = '\'sometextsometextsometextsometextsometextsometext'
+    text += '/sometextsometextsometextsometextsometextsometext'
+    text += '/sometextsometextsometextsometextsometextsometext'
+    text += '/sometextsometextsometextsometextsometextsometext'
+    text += '/sometextsometextsometextsometextsometextsometext'
+    text += '/sometextsometextsometextsometextsometextsometext'
+    text += '/sometextsometextsometextsometextsometextsometext'
+    expect(pathFinder.findPaths(text)).toEqual([])
+}, 50)
