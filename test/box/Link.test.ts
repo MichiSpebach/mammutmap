@@ -66,17 +66,17 @@ function setupSimpleScenario(): {
   toBox: Box,
   renderMan: MockProxy<RenderManager>
 } {
-  const fromWayPoints: WayPointData[] = [new WayPointData('fromBox', 'FromBox', 50, 50)]
-  const toWayPoints: WayPointData[] = [new WayPointData('toBox', 'ToBox', 50, 50)]
+  const fromWayPoints: WayPointData[] = [WayPointData.buildNew('fromBox', 'FromBox', 50, 50)]
+  const toWayPoints: WayPointData[] = [WayPointData.buildNew('toBox', 'ToBox', 50, 50)]
   const linkData: BoxMapLinkData = new BoxMapLinkData('link', new LinkEndData(fromWayPoints), new LinkEndData(toWayPoints))
 
   //const managingBox: MockProxy<FolderBox> = mock<FolderBox>() // TODO: fix jest-mock-extended
   //const fromBox: MockProxy<Box> = mock<Box>()
   //const toBox: MockProxy<Box> = (() => mock<Box>())()
   const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, 'src', 'map')
-  const managingBox: FolderBox = new RootFolderBox(projectSettings, new BoxMapData('managingBox', 0, 0, 100, 100, []), false)
-  const fromBox: Box = new FolderBox('FromBox', managingBox, new BoxMapData('fromBox', 5, 5, 10, 10, []), false)
-  const toBox: Box = new FolderBox('ToBox', managingBox, new BoxMapData('toBox', 85, 5, 10, 10, []), false)
+  const managingBox: FolderBox = new RootFolderBox(projectSettings, 'map', BoxMapData.buildNewWithId('managingBox', 0, 0, 100, 100), false)
+  const fromBox: Box = new FolderBox('FromBox', managingBox, BoxMapData.buildNewWithId('fromBox', 5, 5, 10, 10), false)
+  const toBox: Box = new FolderBox('ToBox', managingBox, BoxMapData.buildNewWithId('toBox', 85, 5, 10, 10), false)
 
   fileSystem.saveToJsonFile = (_filePath, _object) => Promise.resolve()
 

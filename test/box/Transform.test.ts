@@ -12,9 +12,9 @@ test('localToClientPosition', async () => {
 
 test('getNearestGridPositionOfOtherTransform', async () => {
   const scenario = setupScenario()
-  const result: LocalPosition = await setupScenario().transform.getNearestGridPositionOfOtherTransform(new ClientPosition(609, 346), scenario.otherTransform)
+  const result: LocalPosition = await setupScenario().transform.getNearestGridPositionOfOtherTransform(new ClientPosition(609, 354), scenario.otherTransform)
   expect(result.percentX).toBeCloseTo(26.5, 10)
-  expect(result.percentY).toBeCloseTo(25, 10)
+  expect(result.percentY).toBeCloseTo(27, 10)
 })
 
 test('getNearestGridPositionOf rounds to multiple of 4', () => {

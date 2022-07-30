@@ -18,7 +18,7 @@ export class FileBoxBody extends BoxBody {
     return this.getId()+'Content'
   }
 
-  protected async executeRender(): Promise<void> {
+  public async executeRender(): Promise<void> {
     if (this.isRendered()) {
       return
     }

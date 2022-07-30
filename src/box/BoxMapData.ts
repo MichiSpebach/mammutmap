@@ -19,7 +19,11 @@ export class BoxMapData extends JsonObject {
   }
 
   public static buildNew(x: number, y: number, width: number, height: number): BoxMapData {
-    return new BoxMapData(util.generateId(), x, y, width, height, [], [])
+    return this.buildNewWithId(util.generateId(), x, y, width, height)
+  }
+
+  public static buildNewWithId(id: string, x: number, y: number, width: number, height: number): BoxMapData {
+    return new BoxMapData(id, x, y, width, height, [], [])
   }
 
   public static buildFromJson(json: string ): BoxMapData /*| SyntaxError*/ {

@@ -260,6 +260,7 @@ export class DocumentObjectModelAdapter {
     try {
       await this.executeJavaScript(jsToExecute)
     } catch(error: any) {
+      // TODO this should never happen anymore, remove as soon as save
       util.logWarning(error.message)
     }
   }

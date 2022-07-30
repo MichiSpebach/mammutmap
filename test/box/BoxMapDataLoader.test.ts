@@ -402,5 +402,5 @@ function buildDirentMock(name: string): MockProxy<Dirent> {
 }
 
 function buildBoxMapData(idPrefix: string): BoxMapData {
-  return new BoxMapData(idPrefix+'BoxId', 40, 40, 20, 20, [])
+  return BoxMapData.buildNewWithId(idPrefix+'BoxId', 40, 40, 20, 20)
 }
