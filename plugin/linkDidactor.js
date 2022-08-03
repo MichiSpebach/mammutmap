@@ -1,10 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Link_1 = require("../dist/box/Link");
+const applicationMenu = require("../dist/applicationMenu");
+const electron_1 = require("electron");
+const util_1 = require("../dist/util");
+const deactivateToggleMenuItem = new electron_1.MenuItem({ label: 'deactivate', click: deactivate });
+const activateMenuItem = new electron_1.MenuItem({ label: 'activate', click: activate });
+applicationMenu.addMenuItemTo('linkDidactor.js', deactivateToggleMenuItem);
+applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem);
+function deactivate() {
+    DidactedLink.deactivateAndPlugout();
+    deactivateToggleMenuItem.enabled = false;
+    activateMenuItem.enabled = true;
+    util_1.util.logInfo('deactivated linkDidactor plugin');
+}
+function activate() {
+    DidactedLink.activateAndPlugin();
+    deactivateToggleMenuItem.enabled = true;
+    activateMenuItem.enabled = false;
+    util_1.util.logInfo('activated linkDidactor plugin');
+}
 const colors = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal'];
 class DidactedLink extends Link_1.Link {
-    static initAndPlugin() {
+    static activateAndPlugin() {
+        this.getColorBackup = Link_1.Link.prototype.getColor;
         Link_1.Link.prototype.getColor = DidactedLink.prototype.getColor;
+    }
+    static deactivateAndPlugout() {
+        Link_1.Link.prototype.getColor = DidactedLink.getColorBackup;
     }
     getColor() {
         let toBoxId;
@@ -20,4 +43,4 @@ class DidactedLink extends Link_1.Link {
         return colors[hash % colors.length];
     }
 }
-DidactedLink.initAndPlugin();
+activate();
