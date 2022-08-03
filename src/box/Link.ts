@@ -174,7 +174,11 @@ export class Link implements Hoverable {
 
   private formLineStyleHtml(draggingInProgress: boolean): string {
     const pointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
-    return 'style="stroke:'+style.getLinkColor()+';stroke-width:2px;'+pointerEventsStyle+'"'
+    return 'style="stroke:'+this.getColor()+';stroke-width:2px;'+pointerEventsStyle+'"'
+  }
+
+  public getColor(): string {
+    return style.getLinkColor()
   }
 
   private async addEventListeners(): Promise<void> {

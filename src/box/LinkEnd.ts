@@ -69,6 +69,11 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return dropTarget instanceof Box || dropTarget instanceof NodeWidget
   }
 
+  // TODO: only workaround, remove asap
+  public getDropTargetIfRenderInProgress(): Box|NodeWidget|null {
+    return this.dragState && this.dragState.dropTarget
+  }
+
   public async dragStart(clientX: number, clientY: number): Promise<void> {
     this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: this.getDropTargetAtDragStart(), snapToGrid: false} // TODO add dropTarget and snapToGrid to dragstart(..)
     return this.referenceLink.render(RenderPriority.RESPONSIVE, true)
@@ -224,11 +229,11 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
     switch (this.shape) {
       case 'square':
-        shapeStyle = 'width:10px;height:10px;background-color:'+style.getLinkColor()+';'
+        shapeStyle = 'width:10px;height:10px;background-color:'+this.referenceLink.getColor()+';'
         transformStyle = 'transform:translate(-5px,-5px);'
         break
       case 'arrow':
-        shapeStyle = 'width:28px;height:10px;background-color:'+style.getLinkColor()+';clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
+        shapeStyle = 'width:28px;height:10px;background-color:'+this.referenceLink.getColor()+';clip-path:polygon(0% 0%, 55% 50%, 0% 100%);'
         transformStyle = 'transform:translate(-14px,-5px)rotate('+angleInRadians+'rad);'
         break
       default:
