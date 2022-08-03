@@ -3,6 +3,8 @@ import { WayPointData } from '../dist/box/WayPointData'
 import { NodeWidget } from '../dist/node/NodeWidget'
 import { Box } from '../dist/pluginFacade'
 
+const colors: string[] = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal']
+
 class DidactedLink extends Link {
 
     public static initAndPlugin(): void {
@@ -19,7 +21,8 @@ class DidactedLink extends Link {
             toBoxId = path[path.length-1].boxId
         }
         
-        return ['red',  'green', 'blue', 'yellow', 'orange', 'magenta', 'cyan'][toBoxId.charCodeAt(0) % 7]
+        const hash: number = toBoxId.charCodeAt(0) + toBoxId.charCodeAt(toBoxId.length/2) + toBoxId.charCodeAt(toBoxId.length-1)
+        return colors[hash % colors.length]
     }
 
 }
