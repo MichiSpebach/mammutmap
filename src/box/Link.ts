@@ -18,6 +18,7 @@ export class Link implements Hoverable {
   public readonly to: LinkEnd
   private rendered: boolean = false
   private highlight: boolean = false
+  private highlightFancy: boolean = false
   private currentStyle: string|null = null
   private styleTimer: NodeJS.Timeout|null = null
 
@@ -168,7 +169,7 @@ export class Link implements Hoverable {
   }
 
   private formLineClassHtml(): string {
-    const highlightClass: string = this.highlight ? ' '+style.getHighlightClass() : ''
+    const highlightClass: string = this.highlight ? ' '+this.getHighlightClass() : ''
     return `class="${style.getHighlightTransitionClass()}${highlightClass}"`
   }
 
@@ -201,7 +202,7 @@ export class Link implements Hoverable {
       return
     }
     const proms: Promise<any>[] = []
-    proms.push(this.setHighlight(true))
+    proms.push(this.setHighlight(true, true))
     proms.push(this.render(RenderPriority.RESPONSIVE, false, true))
     await Promise.all(proms)
   }
@@ -212,30 +213,38 @@ export class Link implements Hoverable {
       return
     }
     const proms: Promise<any>[] = []
-    proms.push(this.setHighlight(false))
+    proms.push(this.setHighlight(false, true))
     proms.push(this.render(RenderPriority.RESPONSIVE, false, false))
     await Promise.all(proms)
   }
 
-  public async setHighlight(highlight: boolean): Promise<void> {
+  public async setHighlight(highlight: boolean, fancy?: boolean): Promise<void> {
     this.highlight = highlight
+    this.highlightFancy = !!fancy
 
     if (!this.rendered) {
       util.logWarning('setHighlight(..) called although Link is not rendered yet.')
       return // TODO: trigger rerender when renderInProgress
     }
 
+    const highlightClass: string = this.getHighlightClass()
     const proms: Promise<any>[] = []
     if (highlight) {
-      proms.push(renderManager.addClassTo(this.getId()+'Line', style.getHighlightClass()))
+      proms.push(renderManager.addClassTo(this.getId()+'svg', highlightClass))
+      proms.push(renderManager.addClassTo(this.getId()+'Line', highlightClass))
     } else {
-      proms.push(renderManager.removeClassFrom(this.getId()+'Line', style.getHighlightClass()))
+      proms.push(renderManager.removeClassFrom(this.getId()+'svg', highlightClass))
+      proms.push(renderManager.removeClassFrom(this.getId()+'Line', highlightClass))
     }
     proms.push(this.updateStyle())
     proms.push(this.to.setHighlight(highlight))
     proms.push(this.from.setHighlight(highlight))
 
     await Promise.all(proms)
+  }
+
+  public getHighlightClass(): string {
+    return this.highlightFancy? style.getHighlightLinkFancyClass() : style.getHighlightLinkClass()
   }
 
   public async reorderAndSave(): Promise<void> {

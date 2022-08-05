@@ -250,10 +250,11 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       util.logWarning('setHighlight(..) called although LinkEnd '+this.getId()+' is not rendered yet.')
     }
 
+    const highlightClass: string = this.referenceLink.getHighlightClass()
     if (highlight) {
-      await renderManager.addClassTo(this.getId(), style.getHighlightClass())
+      await renderManager.addClassTo(this.getId(), highlightClass)
     } else {
-      await renderManager.removeClassFrom(this.getId(), style.getHighlightClass())
+      await renderManager.removeClassFrom(this.getId(), highlightClass)
     }
   }
 
