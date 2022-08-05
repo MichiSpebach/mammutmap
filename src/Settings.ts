@@ -5,7 +5,7 @@ class Settings {
 
   private static readonly settingsFileName: string = 'settings.json'
   private static readonly settingsFilePath: string = './'+Settings.settingsFileName
-  private static readonly alternativeSettingsFilePath: string = 'resources/app/'+Settings.settingsFileName
+  private static readonly alternativeSettingsFilePath: string = './resources/app/'+Settings.settingsFileName
 
   private zoomSpeed: number
   private boxMinSizeToRender: number

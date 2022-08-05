@@ -4,10 +4,24 @@ import { util } from './util'
 import { fileSystem } from './fileSystemAdapter'
 import * as applicationMenu from './applicationMenu'
 
-export async function loadPlugins(): Promise<void> {
-  util.logInfo('load plugins')
+const pluginFolderName: string = 'plugin'
+const pluginFolderPath: string = './'+pluginFolderName
+const alternativePluginFolderPath: string = './resources/app/'+pluginFolderName
 
-  const entries: Dirent[] = await fileSystem.readdir('./plugin')
+export async function loadPlugins(): Promise<void> {
+  if (await fileSystem.doesDirentExist(pluginFolderPath)) {
+    await loadPluginsFrom(pluginFolderPath)
+  } else if (await fileSystem.doesDirentExist(alternativePluginFolderPath)) {
+    await loadPluginsFrom(alternativePluginFolderPath)
+  } else {
+    util.logWarning(`Failed to load plugins because: found neither '${pluginFolderPath}' nor '${alternativePluginFolderPath}'.`)
+  }
+}
+
+async function loadPluginsFrom(pluginFolderPath: string): Promise<void> {
+  util.logInfo('load plugins from '+pluginFolderPath)
+
+  const entries: Dirent[] = await fileSystem.readdir(pluginFolderPath)
   for (const entry of entries) {
     if (!entry.isFile()) {
       continue
@@ -16,13 +30,17 @@ export async function loadPlugins(): Promise<void> {
       util.logWarning('cannot load '+entry.name+' as plugin because only .js files are supported')
       continue
     }
-
-    util.logInfo('load '+entry.name+' plugin')
-    applicationMenu.addMenuItemToPlugins(new MenuItem({id: entry.name, label: entry.name, submenu:[]}))
-    await import('../plugin/'+entry.name)
-      .then(() => util.logInfo(entry.name+' plugin loaded'))
-      .catch(error => util.logWarning('failed to load '+entry.name+' plugin, reason: '+error))
+    await loadPlugin(entry.name)
   }
 
   util.logInfo('plugins loaded')
+}
+
+async function loadPlugin(fileName: string): Promise<void> {
+  util.logInfo('load '+fileName+' plugin')
+  applicationMenu.addMenuItemToPlugins(new MenuItem({id: fileName, label: fileName, submenu:[]}))
+
+  await import(util.joinPaths(['../', pluginFolderName, fileName]))
+    .then(() => util.logInfo(fileName+' plugin loaded'))
+    .catch(error => util.logWarning('failed to load '+fileName+' plugin, reason: '+error))
 }

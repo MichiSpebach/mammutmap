@@ -47,8 +47,10 @@ export class FileSystem {
     return fsPromises.stat(path)
   }
 
-  public readdir(path: string): Promise<Dirent[]> {
-    return fsPromises.readdir(path, {withFileTypes: true})
+  public async readdir(path: string): Promise<Dirent[]> {
+    return fsPromises.readdir(path, {withFileTypes: true}).catch((reason) => {
+      util.logWarning('Failed to readdir because: '+reason)
+    }).then()
   }
 
   public async readFileAndConvertToHtml(path: string): Promise<string> {
