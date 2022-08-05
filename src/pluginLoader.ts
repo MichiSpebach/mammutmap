@@ -9,12 +9,23 @@ const pluginFolderPath: string = './'+pluginFolderName
 const alternativePluginFolderPath: string = './resources/app/'+pluginFolderName
 
 export async function loadPlugins(): Promise<void> {
+  if (!await fileSystem.doesDirentExist(pluginFolderPath)) {
+    await tryToSymlinkToAlternativeFolder()
+  }
+  
   if (await fileSystem.doesDirentExist(pluginFolderPath)) {
     await loadPluginsFrom(pluginFolderPath)
   } else if (await fileSystem.doesDirentExist(alternativePluginFolderPath)) {
     await loadPluginsFrom(alternativePluginFolderPath)
   } else {
     util.logWarning(`Failed to load plugins because: found neither '${pluginFolderPath}' nor '${alternativePluginFolderPath}'.`)
+  }
+}
+
+async function tryToSymlinkToAlternativeFolder(): Promise<void> {
+  if (await fileSystem.doesDirentExist(alternativePluginFolderPath)) {
+    util.logInfo(pluginFolderPath+' not found, make link folder for convenience that links to '+alternativePluginFolderPath+'.')
+    await fileSystem.symlink(alternativePluginFolderPath, pluginFolderPath, 'dir')
   }
 }
 

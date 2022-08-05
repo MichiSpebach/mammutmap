@@ -85,6 +85,12 @@ export class FileSystem {
     await fsPromises.mkdir(path, {recursive: true})
   }
 
+  public async symlink(existingPath: string, newPath: string, type?: 'dir'|'file'|'junction'): Promise<void> {
+    await fsPromises.symlink(existingPath, newPath, type).catch((reason) => {
+      util.logWarning('Failed to symlink because: '+reason)
+    }).then()
+  }
+
   public async rename(oldPath: string, newPath: string): Promise<void> {
     const newFolderPath: string = util.removeLastElementFromPath(newPath)
     if (!await this.doesDirentExist(newFolderPath)) {
