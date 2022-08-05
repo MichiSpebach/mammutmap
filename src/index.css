@@ -83,7 +83,7 @@ pre {
 
 .highlightLinkFancy {
   stroke-width: 4px !important;
-  filter: contrast(0.35) brightness(1.5) drop-shadow(0 0 2px white);
+  filter: contrast(0.5) brightness(1.2) drop-shadow(0 0 3px white);
 }
 
 .fileBoxBackground {
