@@ -3,6 +3,7 @@ import { MenuItem } from 'electron'
 import { util } from '../dist/util'
 import { dom } from '../dist/domAdapter'
 import { style } from '../dist/styleAdapter'
+import { BorderingLinks } from '../dist/link/BorderingLinks'
 
 const deactivateMenuItem: MenuItem = new MenuItem({label: 'deactivate', click: deactivate})
 const activateMenuItem: MenuItem = new MenuItem({label: 'activate', click: activate})
@@ -13,25 +14,59 @@ let highlightLinkFilterPropertyValueBefore: string | undefined
 const highlightLinkFilterPropertyValueFancy: string = 'contrast(0.5) brightness(1.2) drop-shadow(0 0 3px white)'
 
 async function deactivate(): Promise<void> {
-    if (!highlightLinkFilterPropertyValueBefore) {
-        let message: string = 'failed to deactivate fancyHighlighting plugin'
-        message += ', because highlightLinkFilterPropertyValueBefore is not set, this should never happen.'
-        util.logWarning(message)
-        return
-    }
-    await dom.modifyCssRule('.'+style.getHighlightLinkClass(), 'filter', highlightLinkFilterPropertyValueBefore)
-    highlightLinkFilterPropertyValueBefore = undefined
+    ToggableFancyBorderingLinks.deactivateAndPlugout()
+    await ensureDeactivation()
     deactivateMenuItem.enabled = false
     activateMenuItem.enabled = true
     util.logInfo('deactivated fancyHighlighting plugin')
 }
 
 async function activate(): Promise<void> {
-    const result = await dom.modifyCssRule('.'+style.getHighlightLinkClass(), 'filter', highlightLinkFilterPropertyValueFancy)
-    highlightLinkFilterPropertyValueBefore = result.propertyValueBefore
+    ToggableFancyBorderingLinks.activateAndPlugin()
+    await ensureActivation()
     deactivateMenuItem.enabled = true
     activateMenuItem.enabled = false
     util.logInfo('activated fancyHighlighting plugin')
+}
+
+async function ensureDeactivation(): Promise<void> {
+    if (!highlightLinkFilterPropertyValueBefore) {
+        return
+    }
+    await dom.modifyCssRule('.'+style.getHighlightLinkClass(), 'filter', highlightLinkFilterPropertyValueBefore)
+    highlightLinkFilterPropertyValueBefore = undefined
+}
+
+async function ensureActivation(): Promise<void> {
+    if (highlightLinkFilterPropertyValueBefore) {
+        return
+    }
+    const result = await dom.modifyCssRule('.'+style.getHighlightLinkClass(), 'filter', highlightLinkFilterPropertyValueFancy)
+    highlightLinkFilterPropertyValueBefore = result.propertyValueBefore
+}
+
+class ToggableFancyBorderingLinks extends BorderingLinks {
+
+    private static setHighlightAllBackup: (highlight: boolean) => Promise<void>
+
+    public static activateAndPlugin(): void {
+        this.setHighlightAllBackup = BorderingLinks.prototype.setHighlightAll
+        BorderingLinks.prototype.setHighlightAll = ToggableFancyBorderingLinks.prototype.setHighlightAll
+    }
+
+    public static deactivateAndPlugout(): void {
+        BorderingLinks.prototype.setHighlightAll = ToggableFancyBorderingLinks.setHighlightAllBackup
+    }
+
+    public async setHighlightAll(highlight: boolean): Promise<void> {
+        if (this.links.length > 15) {
+            await ensureDeactivation()
+        } else {
+            await ensureActivation()
+        }
+        return ToggableFancyBorderingLinks.setHighlightAllBackup.call(this, highlight)
+    }
+
 }
 
 activate()

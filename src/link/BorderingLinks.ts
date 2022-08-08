@@ -5,7 +5,7 @@ import { Box } from "../box/Box";
 
 export class BorderingLinks {
   private readonly referenceBox: Box
-  private readonly links: Link[] = []
+  protected readonly links: Link[] = []
   
   public constructor(referenceBox: Box) {
     this.referenceBox = referenceBox
