@@ -4,19 +4,19 @@ const Link_1 = require("../dist/box/Link");
 const applicationMenu = require("../dist/applicationMenu");
 const electron_1 = require("electron");
 const util_1 = require("../dist/util");
-const deactivateToggleMenuItem = new electron_1.MenuItem({ label: 'deactivate', click: deactivate });
+const deactivateMenuItem = new electron_1.MenuItem({ label: 'deactivate', click: deactivate });
 const activateMenuItem = new electron_1.MenuItem({ label: 'activate', click: activate });
-applicationMenu.addMenuItemTo('linkDidactor.js', deactivateToggleMenuItem);
+applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem);
 applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem);
 function deactivate() {
     DidactedLink.deactivateAndPlugout();
-    deactivateToggleMenuItem.enabled = false;
+    deactivateMenuItem.enabled = false;
     activateMenuItem.enabled = true;
     util_1.util.logInfo('deactivated linkDidactor plugin');
 }
 function activate() {
     DidactedLink.activateAndPlugin();
-    deactivateToggleMenuItem.enabled = true;
+    deactivateMenuItem.enabled = true;
     activateMenuItem.enabled = false;
     util_1.util.logInfo('activated linkDidactor plugin');
 }

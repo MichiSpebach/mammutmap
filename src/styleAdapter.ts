@@ -28,7 +28,6 @@ interface Style {
   getHighlightTransitionClass(): string
   getHighlightClass(): string
   getHighlightLinkClass(): string
-  getHighlightLinkFancyClass(): string
   getLinkColor(): string
 }
 
@@ -112,10 +111,6 @@ class DarkTheme implements Style {
 
   public getHighlightLinkClass(): string {
     return 'highlightLink'
-  }
-
-  public getHighlightLinkFancyClass(): string {
-    return 'highlightLinkFancy'
   }
 
   public getLinkColor(): string {

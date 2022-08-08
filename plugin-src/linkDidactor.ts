@@ -6,21 +6,21 @@ import * as applicationMenu from '../dist/applicationMenu'
 import { MenuItem } from 'electron'
 import { util } from '../dist/util'
 
-const deactivateToggleMenuItem: MenuItem = new MenuItem({label: 'deactivate', click: deactivate})
+const deactivateMenuItem: MenuItem = new MenuItem({label: 'deactivate', click: deactivate})
 const activateMenuItem: MenuItem = new MenuItem({label: 'activate', click: activate})
-applicationMenu.addMenuItemTo('linkDidactor.js', deactivateToggleMenuItem)
+applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem)
 applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem)
 
 function deactivate(): void {
     DidactedLink.deactivateAndPlugout()
-    deactivateToggleMenuItem.enabled = false
+    deactivateMenuItem.enabled = false
     activateMenuItem.enabled = true
     util.logInfo('deactivated linkDidactor plugin')
 }
 
 function activate(): void {
     DidactedLink.activateAndPlugin()
-    deactivateToggleMenuItem.enabled = true
+    deactivateMenuItem.enabled = true
     activateMenuItem.enabled = false
     util.logInfo('activated linkDidactor plugin')
 }

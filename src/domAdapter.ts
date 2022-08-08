@@ -111,6 +111,20 @@ export class DocumentObjectModelAdapter {
     return this.executeJsOnElement(id, "classList")  // throws error: object could not be cloned
   }
 
+  public async modifyCssRule(cssRuleName: string, propertyName: string, propertyValue: string): Promise<{propertyValueBefore: string}> {
+    let jsToExecute: string = `let styleSheet = document.styleSheets[0]
+    for (const rule of styleSheet.rules) {
+      if (rule.selectorText === "${cssRuleName}") {
+        const propertyValueBefore = rule.style.${propertyName}
+        rule.style.${propertyName} = "${propertyValue}"
+        return propertyValueBefore
+      }
+    }
+    throw new Error("CssRule with name '${cssRuleName}' not found.")`
+
+    return {propertyValueBefore: await this.executeJavaScriptInFunction(jsToExecute)}
+  }
+
   public getValueOf(id: string): Promise<string> {
     return this.executeJsOnElement(id, "value")
   }

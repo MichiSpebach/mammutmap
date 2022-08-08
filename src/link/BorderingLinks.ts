@@ -20,8 +20,7 @@ export class BorderingLinks {
   }
 
   public async setHighlightAll(highlight: boolean): Promise<void> {
-    const highlightFancy: boolean = this.links.length <= 15
-    await Promise.all(this.links.map(link => link.setHighlight(highlight, highlightFancy)))
+    await Promise.all(this.links.map(link => link.setHighlight(highlight)))
   }
 
   public async renderLinksThatIncludeWayPointFor(boxOrNodeId: string): Promise<void> {
