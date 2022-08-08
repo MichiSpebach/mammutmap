@@ -153,6 +153,28 @@ export class FolderBoxBody extends BoxBody {
     return boxPromises
   }
 
+  public async rearrangeBoxesWithoutMapData(grabbedBox: Box): Promise<void> {
+    const boxesWithMapData: Box[] = this.boxes.filter(box => box.isMapDataFileExisting() || box === grabbedBox)
+    const boxesWithoutMapData: Box[] = this.boxes.filter(box => !box.isMapDataFileExisting() && box !== grabbedBox)
+    if (!boxesWithMapData.includes(grabbedBox)) {
+      boxesWithMapData.push(grabbedBox) // in case grabbedBox is dragged from another parent
+    }
+
+    const emptySpaceFinder = new EmptySpaceFinder(boxesWithMapData.map(box => box.getLocalRect()))
+    const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(boxesWithoutMapData.length)
+    if (emptySpaces.length !== boxesWithoutMapData.length) {
+      let message = `Can not rearrange unplaced boxes in ${this.referenceFolderBox.getSrcPath()}`
+      message += `, because number of emptySpaces (${emptySpaces.length}) does not match number of unplaced boxes (${boxesWithoutMapData.length})`
+      message += ', this should never happen.'
+      util.logWarning(message)
+    }
+
+    for (let i: number = 0; i < boxesWithoutMapData.length && i < emptySpaces.length; i++) {
+      const box: Box = boxesWithoutMapData[i]
+      await box.updateMeasuresAndBorderingLinks(emptySpaces[i])
+    }
+  }
+
   private async createBoxAndRenderPlaceholder(name: string, dirEntry: Dirent|undefined, mapData: BoxMapData, mapDataFileExists: boolean): Promise<Box> {
     let box: Box
 

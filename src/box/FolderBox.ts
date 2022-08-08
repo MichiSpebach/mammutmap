@@ -152,4 +152,8 @@ export class FolderBox extends Box {
     return this.body.removeBox(box)
   }
 
+  public rearrangeBoxesWithoutMapData(grabbedBox: Box): Promise<void> {
+    return this.body.rearrangeBoxesWithoutMapData(grabbedBox)
+  }
+
 }

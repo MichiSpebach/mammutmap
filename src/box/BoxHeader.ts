@@ -81,7 +81,8 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
       positionInParentBoxCoords = await this.referenceBox.getParent().transform.getNearestGridPositionOfOtherTransform(clientPosition, dropTarget.transform)
     }
 
-    this.referenceBox.updateMeasuresAndBorderingLinks({x: positionInParentBoxCoords.percentX, y: positionInParentBoxCoords.percentY}, RenderPriority.RESPONSIVE)
+    await this.referenceBox.updateMeasuresAndBorderingLinks({x: positionInParentBoxCoords.percentX, y: positionInParentBoxCoords.percentY}, RenderPriority.RESPONSIVE)
+    await dropTarget.rearrangeBoxesWithoutMapData(this.referenceBox)
   }
 
   // TODO: move into Transform?
