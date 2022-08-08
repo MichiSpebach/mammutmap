@@ -10,6 +10,7 @@ const activateMenuItem: MenuItem = new MenuItem({label: 'activate', click: activ
 applicationMenu.addMenuItemTo('fancyHighlighting.js', deactivateMenuItem)
 applicationMenu.addMenuItemTo('fancyHighlighting.js', activateMenuItem)
 
+let activated: boolean = false
 let highlightLinkFilterPropertyValueBefore: string | undefined
 const highlightLinkFilterPropertyValueFancy: string = 'contrast(0.5) brightness(1.2) drop-shadow(0 0 3px white)'
 
@@ -30,19 +31,23 @@ async function activate(): Promise<void> {
 }
 
 async function ensureDeactivation(): Promise<void> {
-    if (!highlightLinkFilterPropertyValueBefore) {
+    if (!activated || !highlightLinkFilterPropertyValueBefore) {
         return
     }
     await dom.modifyCssRule('.'+style.getHighlightLinkClass(), 'filter', highlightLinkFilterPropertyValueBefore)
     highlightLinkFilterPropertyValueBefore = undefined
+    activated = false
 }
 
 async function ensureActivation(): Promise<void> {
-    if (highlightLinkFilterPropertyValueBefore) {
+    if (activated) {
         return
     }
     const result = await dom.modifyCssRule('.'+style.getHighlightLinkClass(), 'filter', highlightLinkFilterPropertyValueFancy)
-    highlightLinkFilterPropertyValueBefore = result.propertyValueBefore
+    if (!highlightLinkFilterPropertyValueBefore) {
+        highlightLinkFilterPropertyValueBefore = result.propertyValueBefore
+    }
+    activated = true
 }
 
 class ToggableFancyBorderingLinks extends BorderingLinks {
