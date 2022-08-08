@@ -18,7 +18,7 @@ export class Link implements Hoverable {
   public readonly to: LinkEnd
   private rendered: boolean = false
   private highlight: boolean = false
-  private highlightFancy: boolean = false
+  private highlightFancy: boolean = false // TODO: causus complex, not essential logic, move into plugin
   private currentStyle: string|null = null
   private styleTimer: NodeJS.Timeout|null = null
 
@@ -219,6 +219,7 @@ export class Link implements Hoverable {
   }
 
   public async setHighlight(highlight: boolean, fancy?: boolean): Promise<void> {
+    const oldHighlightClass: string = this.getHighlightClass()
     this.highlight = highlight
     this.highlightFancy = !!fancy
 
@@ -227,14 +228,14 @@ export class Link implements Hoverable {
       return // TODO: trigger rerender when renderInProgress
     }
 
-    const highlightClass: string = this.getHighlightClass()
+    const newHighlightClass: string = this.getHighlightClass()
     const proms: Promise<any>[] = []
     if (highlight) {
-      proms.push(renderManager.addClassTo(this.getId()+'svg', highlightClass))
-      proms.push(renderManager.addClassTo(this.getId()+'Line', highlightClass))
+      proms.push(renderManager.addClassTo(this.getId()+'svg', newHighlightClass))
+      proms.push(renderManager.addClassTo(this.getId()+'Line', newHighlightClass))
     } else {
-      proms.push(renderManager.removeClassFrom(this.getId()+'svg', highlightClass))
-      proms.push(renderManager.removeClassFrom(this.getId()+'Line', highlightClass))
+      proms.push(renderManager.removeClassFrom(this.getId()+'svg', oldHighlightClass))
+      proms.push(renderManager.removeClassFrom(this.getId()+'Line', oldHighlightClass))
     }
     proms.push(this.updateStyle())
     proms.push(this.to.setHighlight(highlight))
