@@ -10,6 +10,12 @@ export class Transform {
     this.referenceBox = referenceBox
   }
 
+  public async clientToLocalRect(clientRect: ClientRect): Promise<LocalRect> {
+    const topLeft: Promise<LocalPosition> = this.clientToLocalPosition(clientRect.getTopLeftPosition())
+    const bottomRight: Promise<LocalPosition> = this.clientToLocalPosition(clientRect.getBottomRightPosition())
+    return LocalRect.fromPositions(await topLeft, await bottomRight)
+  }
+
   public async localToClientRect(localRect: LocalRect): Promise<ClientRect> {
     const clientPositions: ClientPosition[] = await this.localToClientPositions([
       localRect.getTopLeftPosition(), // important that array method is called only once, would lead to branched recursion otherwise

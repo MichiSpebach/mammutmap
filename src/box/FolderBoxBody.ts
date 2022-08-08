@@ -156,11 +156,14 @@ export class FolderBoxBody extends BoxBody {
   public async rearrangeBoxesWithoutMapData(grabbedBox: Box): Promise<void> {
     const boxesWithMapData: Box[] = this.boxes.filter(box => box.isMapDataFileExisting() || box === grabbedBox)
     const boxesWithoutMapData: Box[] = this.boxes.filter(box => !box.isMapDataFileExisting() && box !== grabbedBox)
+
+    const occupiedSpaces: LocalRect[] = boxesWithMapData.map(box => box.getLocalRect())
     if (!boxesWithMapData.includes(grabbedBox)) {
-      boxesWithMapData.push(grabbedBox) // in case grabbedBox is dragged from another parent
+       // in case grabbedBox is dragged from another parent
+      occupiedSpaces.push(await this.referenceFolderBox.transform.clientToLocalRect(await grabbedBox.getClientRect()))
     }
 
-    const emptySpaceFinder = new EmptySpaceFinder(boxesWithMapData.map(box => box.getLocalRect()))
+    const emptySpaceFinder = new EmptySpaceFinder(occupiedSpaces)
     const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(boxesWithoutMapData.length)
     if (emptySpaces.length !== boxesWithoutMapData.length) {
       let message = `Can not rearrange unplaced boxes in ${this.referenceFolderBox.getSrcPath()}`

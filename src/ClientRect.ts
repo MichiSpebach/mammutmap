@@ -4,7 +4,7 @@ import { Rect } from './Rect'
 // TODO: move into shape
 export class ClientRect extends Rect<ClientPosition> {
 
-    // TODO: should also be available in LocalRect, make generic and move into Rect
+    // TODO: works same as in LocalRect, make generic and move into Rect
     public static fromPositions(position1: ClientPosition, position2: ClientPosition): ClientRect {
         // TODO: handle case that positions are swapped
         return new ClientRect(
