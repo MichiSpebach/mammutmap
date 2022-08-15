@@ -63,15 +63,16 @@ export function addMenuItemToPlugins(menuItem: MenuItem): void {
   addMenuItemTo('Plugins', menuItem)
 }
 
-export function addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void|never {
-  const menu: Menu|undefined = getMenuItemById(parentMenuItemId).submenu
+export function addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void {
+  const menu: Menu|undefined = getMenuItemById(parentMenuItemId)?.submenu
   if (!menu) {
-    util.logError('cannot add MenuItem "'+menuItem.label+'" because parentMenuItem with id "'+parentMenuItemId+'" has to be initialized with submenu field')
+    util.logWarning('cannot add MenuItem "'+menuItem.label+'" because parentMenuItem with id "'+parentMenuItemId+'" has to be initialized with submenu field')
+    return
   }
   menu.append(menuItem)
 }
 
-function getMenuItemById(id: string): MenuItem|never {
+function getMenuItemById(id: string): MenuItem|null {
   return getApplicationMenu().getMenuItemById(id)
 }
 
