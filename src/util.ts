@@ -1,12 +1,14 @@
-import { exec } from 'child_process'
+import { exec, ChildProcess } from 'child_process'
 import { renderManager } from './RenderManager'
 import { style } from './styleAdapter'
+
+export { ChildProcess }
 
 class Util {
   private logDebugActivated: boolean = false
 
-  public runShellCommand(command: string) {
-    exec(command)
+  public runShellCommand(command: string): ChildProcess {
+    return exec(command)
   }
 
   public setLogDebugActivated(activated: boolean): void {
