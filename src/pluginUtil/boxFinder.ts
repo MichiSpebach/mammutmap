@@ -1,13 +1,11 @@
 import { BoxWatcher } from '../box/BoxWatcher'
-import { Box } from '../box/Box'
 import { RootFolderBox } from '../box/RootFolderBox'
 import { map } from '../Map'
 import { util } from '../util'
 import { FolderBox } from '../box/FolderBox'
-import { FileBox } from '../box/FileBox'
 
 export async function findBox(
-    path: string, boxThatIncludesPath: FileBox, options?: {onlyReturnWarnings?: boolean}
+    path: string, baseOfPath: FolderBox, options?: {onlyReturnWarnings?: boolean}
 ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
     const rootFolder: RootFolderBox|undefined = getRootFolder()
     if (!rootFolder) {
@@ -17,7 +15,7 @@ export async function findBox(
     let warnings: string[]|undefined = undefined
 
     if (looksLikeRelativePath(path)) {
-        const report = await findBoxForRelativePath(path, boxThatIncludesPath, rootFolder, options)
+        const report = await findBoxForRelativePath(path, baseOfPath, rootFolder, options)
         warnings = concatWarnings(warnings, report.warnings)
         if (report.boxWatcher) {
             return {boxWatcher: report.boxWatcher, warnings}
@@ -32,14 +30,14 @@ export async function findBox(
         }
     }
 
-    const report = await findBoxForPathThatStartsInTheMiddle(path, boxThatIncludesPath, rootFolder, options)
+    const report = await findBoxForPathThatStartsInTheMiddle(path, baseOfPath, rootFolder, options)
     warnings = concatWarnings(warnings, report.warnings)
     if (report.boxWatcher) {
         return {boxWatcher: report.boxWatcher, warnings}
     }
 
     if (!looksLikeRelativePath(path)) {
-        const report = await findBoxForRelativePath(path, boxThatIncludesPath, rootFolder, options)
+        const report = await findBoxForRelativePath(path, baseOfPath, rootFolder, options)
         warnings = concatWarnings(warnings, report.warnings)
         if (report.boxWatcher) {
             return {boxWatcher: report.boxWatcher, warnings}
@@ -67,11 +65,11 @@ function getRootFolder(): RootFolderBox|undefined {
 
 async function findBoxForRelativePath(
     path: string, 
-    boxThatIncludesPath: FileBox, 
+    baseOfPath: FolderBox, 
     rootFolder: RootFolderBox, 
     options?: {onlyReturnWarnings?: boolean}
 ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
-    const absolutePath: string = util.concatPaths(boxThatIncludesPath.getParent().getSrcPath(), path)
+    const absolutePath: string = util.concatPaths(baseOfPath.getSrcPath(), path)
     let report = await rootFolder.getBoxBySourcePathAndRenderIfNecessary(absolutePath, options)
     let warnings: string[]|undefined = report.warnings
     if (!report.boxWatcher) {
@@ -105,13 +103,13 @@ function looksLikeAbsolutePath(path: string): boolean {
 
 async function findBoxForPathThatStartsInTheMiddle(
     path: string, 
-    boxThatIncludesPath: FileBox, 
+    baseOfPath: FolderBox, 
     rootFolder: RootFolderBox,
     options?: {onlyReturnWarnings?: boolean}
 ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
     let warnings: string[]|undefined = undefined
 
-    for (let base: FolderBox = boxThatIncludesPath.getParent();!base.isRoot(); base = base.getParent()) {
+    for (let base: FolderBox = baseOfPath;!base.isRoot(); base = base.getParent()) {
         let report = await base.getBoxBySourcePathAndRenderIfNecessary(path, options)
         warnings = concatWarnings(warnings, report.warnings)
         if (!report.boxWatcher) {

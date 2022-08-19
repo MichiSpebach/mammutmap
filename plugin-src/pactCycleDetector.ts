@@ -4,26 +4,25 @@ import { PopupWidget } from '../dist/PopupWidget'
 import { renderManager } from '../dist/RenderManager'
 import { ChildProcess, util } from '../dist/util'
 import * as pluginFacade from '../dist/pluginFacade'
-import { Box, FileBox, RootFolderBox } from '../dist/pluginFacade'
+import { FileBox, RootFolderBox } from '../dist/pluginFacade'
 import { BoxWatcher } from '../dist/box/BoxWatcher'
+import { Widget } from '../dist/Widget'
 
 applicationMenu.addMenuItemTo('pactCycleDetector.js', new MenuItem({label: 'detect...', click: openWizard}))
 
 async function openWizard(): Promise<void> {
-    new Wizard().render()
+    new WizardWidget().render()
 }
 
-class Wizard extends PopupWidget {
+class WizardWidget extends PopupWidget {
 
     private readonly commandInputId = this.getId()+'CommandInput'
     private readonly commandSubmitId = this.getId()+'CommandSubmit'
     private readonly outputId = this.getId()+'Output'
-    private readonly pathInputIdPrefix = this.getId()+'PathInput'
-    private readonly resultsSubmitId = this.getId()+'ResultsSubmit'
-
-    private beforeUnrenderTasks: (() => Promise<void>)[] = []
 
     private results: string[] = []
+
+    private resultsWidget: ResultsWidget|undefined
 
     public constructor() {
         super('pactCycleDetectorWizard', 'Pact Cycle Detector')
@@ -44,10 +43,13 @@ class Wizard extends PopupWidget {
 
     protected async beforeUnrender(): Promise<void> {
         await renderManager.removeEventListenerFrom(this.commandSubmitId, 'click')
-        await Promise.all(this.beforeUnrenderTasks.map(task => task()))
     }
 
     private async runCommand(): Promise<void> {
+        this.results = []
+        await this.resultsWidget?.unrender()
+        this.resultsWidget = undefined
+        
         const command: string = await renderManager.getValueOf(this.commandInputId)
         let process: ChildProcess
         try {
@@ -57,7 +59,7 @@ class Wizard extends PopupWidget {
             return
         }
         if (!process.stdout) {
-            await renderManager.setContentTo(this.outputId, 'Error: process has no stdout.')
+            await renderManager.addContentTo(this.outputId, 'Error: process has no stdout.')
             return
         }
 
@@ -68,16 +70,47 @@ class Wizard extends PopupWidget {
             this.results.push(data)
             renderManager.addContentTo(this.outputId, util.escapeForHtml(data))
         })
-        process.stdout.on('end', (data: string) => {
-            let message: string = 'finished'
+        process.stdout.on('end', async (data: string) => {
+            let html: string = 'finished'
             if (data) {
-                message += ' with '+data
+                html += ' with '+data
             }
-            renderManager.addContentTo(this.outputId, message)
-            this.displayResults()
+            html += '<br><div id="pactCycleDetectorResults"></div>'
+            await renderManager.addContentTo(this.outputId, html)
+            const resultsWidget = new ResultsWidget('pactCycleDetectorResults', this.results, async () => {
+                await resultsWidget.unrender()
+                await this.unrender()
+            })
+            this.resultsWidget = resultsWidget
+            await resultsWidget.render()
         })
 
         await renderManager.setContentTo(this.outputId, 'started<br>')
+    }
+
+}
+
+class ResultsWidget extends Widget {
+    private readonly id: string
+    private readonly pathInputIdPrefix = this.getId()+'PathInput'
+    private readonly resultsSubmitId = this.getId()+'ResultsSubmit'
+
+    private readonly results: string[]
+    private readonly afterSubmit: () => Promise<void>
+
+    public constructor(id: string, results: string[], afterSubmit: () => Promise<void>) {
+        super ()
+        this.id = id
+        this.results = results
+        this.afterSubmit = afterSubmit
+    }
+
+    public getId(): string {
+        return this.id
+    }
+
+    public async render(): Promise<void> {
+        await this.displayResults()
     }
 
     private async displayResults(): Promise<void> {
@@ -93,14 +126,14 @@ class Wizard extends PopupWidget {
     }
 
     private async displayCycles(cycles: Cycle[]): Promise<void> {
-        await renderManager.addContentTo(this.outputId, '<br>')
+        await renderManager.addContentTo(this.getId(), '<br>')
         let cyclesHtml: string = '<details>'
         cyclesHtml += '<summary>cycles</summary>'
         for (const cycle of cycles) {
             cyclesHtml += util.escapeForHtml(cycle.involvedModulesChain.toString())+'<br>'
         }
         cyclesHtml += '</details>'
-        await renderManager.addContentTo(this.outputId, cyclesHtml)
+        await renderManager.addContentTo(this.getId(), cyclesHtml)
     }
 
     private async displayResultsMapTable(cycles: Cycle[]): Promise<void> {
@@ -111,18 +144,22 @@ class Wizard extends PopupWidget {
             tableHtml += `<tr> <td>${uniqueModuleName}</td> <td><input id="${this.pathInputIdPrefix+uniqueModuleName}" value="${uniqueModuleName}"></td> </tr>`
         }
         tableHtml += '</table>'
-        await renderManager.addContentTo(this.outputId, tableHtml)
-        await renderManager.addContentTo(this.outputId, `<button id ="${this.resultsSubmitId}">submit and add links</button>`)
+        await renderManager.addContentTo(this.getId(), tableHtml)
+        await renderManager.addContentTo(this.getId(), `<button id ="${this.resultsSubmitId}">submit and add links</button>`)
         await renderManager.addEventListenerTo(this.resultsSubmitId, 'click', async () => {
             const moduleNamePathDictionary: Map<string, string> = new Map()
             for (const uniqueModuleName of uniqueModuleNames) {
                 moduleNamePathDictionary.set(uniqueModuleName, await renderManager.getValueOf(this.pathInputIdPrefix+uniqueModuleName))
             }
             await addLinks(cycles, moduleNamePathDictionary)
+            await this.afterSubmit()
         })
-        this.beforeUnrenderTasks.push(() => renderManager.removeEventListenerFrom(this.resultsSubmitId, 'click'))
     }
 
+    public async unrender(): Promise<void> {
+        await renderManager.removeEventListenerFrom(this.resultsSubmitId, 'click')
+    }
+    
 }
 
 function extractUniqueModuleNames(cycles: Cycle[]): string[] {
@@ -174,12 +211,12 @@ async function addLinks(cycles: Cycle[], moduleNamePathDictionary: Map<string, s
             }
 
             const rootFolder: RootFolderBox = pluginFacade.getRootFolder()
-            const fromBox: BoxWatcher|undefined = (await rootFolder.getBoxBySourcePathAndRenderIfNecessary(fromPath)).boxWatcher
+            const fromBox: BoxWatcher|undefined = (await pluginFacade.findBoxBySourcePath(fromPath, rootFolder)).boxWatcher
             if (!fromBox) {
                 util.logWarning('could not find box for fromPath '+fromPath)
                 continue
             }
-            const toBox: BoxWatcher|undefined = (await rootFolder.getBoxBySourcePathAndRenderIfNecessary(toPath)).boxWatcher
+            const toBox: BoxWatcher|undefined = (await pluginFacade.findBoxBySourcePath(toPath, rootFolder)).boxWatcher
             if (!toBox) {
                 util.logWarning('could not find box for toPath '+toPath)
                 continue

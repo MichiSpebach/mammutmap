@@ -6,19 +6,17 @@ const PopupWidget_1 = require("../dist/PopupWidget");
 const RenderManager_1 = require("../dist/RenderManager");
 const util_1 = require("../dist/util");
 const pluginFacade = require("../dist/pluginFacade");
+const Widget_1 = require("../dist/Widget");
 applicationMenu.addMenuItemTo('pactCycleDetector.js', new electron_1.MenuItem({ label: 'detect...', click: openWizard }));
 async function openWizard() {
-    new Wizard().render();
+    new WizardWidget().render();
 }
-class Wizard extends PopupWidget_1.PopupWidget {
+class WizardWidget extends PopupWidget_1.PopupWidget {
     constructor() {
         super('pactCycleDetectorWizard', 'Pact Cycle Detector');
         this.commandInputId = this.getId() + 'CommandInput';
         this.commandSubmitId = this.getId() + 'CommandSubmit';
         this.outputId = this.getId() + 'Output';
-        this.pathInputIdPrefix = this.getId() + 'PathInput';
-        this.resultsSubmitId = this.getId() + 'ResultsSubmit';
-        this.beforeUnrenderTasks = [];
         this.results = [];
     }
     formContentHtml() {
@@ -34,9 +32,11 @@ class Wizard extends PopupWidget_1.PopupWidget {
     }
     async beforeUnrender() {
         await RenderManager_1.renderManager.removeEventListenerFrom(this.commandSubmitId, 'click');
-        await Promise.all(this.beforeUnrenderTasks.map(task => task()));
     }
     async runCommand() {
+        this.results = [];
+        await this.resultsWidget?.unrender();
+        this.resultsWidget = undefined;
         const command = await RenderManager_1.renderManager.getValueOf(this.commandInputId);
         let process;
         try {
@@ -47,7 +47,7 @@ class Wizard extends PopupWidget_1.PopupWidget {
             return;
         }
         if (!process.stdout) {
-            await RenderManager_1.renderManager.setContentTo(this.outputId, 'Error: process has no stdout.');
+            await RenderManager_1.renderManager.addContentTo(this.outputId, 'Error: process has no stdout.');
             return;
         }
         process.stdout.on('error', (data) => {
@@ -57,15 +57,37 @@ class Wizard extends PopupWidget_1.PopupWidget {
             this.results.push(data);
             RenderManager_1.renderManager.addContentTo(this.outputId, util_1.util.escapeForHtml(data));
         });
-        process.stdout.on('end', (data) => {
-            let message = 'finished';
+        process.stdout.on('end', async (data) => {
+            let html = 'finished';
             if (data) {
-                message += ' with ' + data;
+                html += ' with ' + data;
             }
-            RenderManager_1.renderManager.addContentTo(this.outputId, message);
-            this.displayResults();
+            html += '<br><div id="pactCycleDetectorResults"></div>';
+            await RenderManager_1.renderManager.addContentTo(this.outputId, html);
+            const resultsWidget = new ResultsWidget('pactCycleDetectorResults', this.results, async () => {
+                await resultsWidget.unrender();
+                await this.unrender();
+            });
+            this.resultsWidget = resultsWidget;
+            await resultsWidget.render();
         });
         await RenderManager_1.renderManager.setContentTo(this.outputId, 'started<br>');
+    }
+}
+class ResultsWidget extends Widget_1.Widget {
+    constructor(id, results, afterSubmit) {
+        super();
+        this.pathInputIdPrefix = this.getId() + 'PathInput';
+        this.resultsSubmitId = this.getId() + 'ResultsSubmit';
+        this.id = id;
+        this.results = results;
+        this.afterSubmit = afterSubmit;
+    }
+    getId() {
+        return this.id;
+    }
+    async render() {
+        await this.displayResults();
     }
     async displayResults() {
         let cycleStrings = [];
@@ -77,14 +99,14 @@ class Wizard extends PopupWidget_1.PopupWidget {
         await this.displayResultsMapTable(cycles);
     }
     async displayCycles(cycles) {
-        await RenderManager_1.renderManager.addContentTo(this.outputId, '<br>');
+        await RenderManager_1.renderManager.addContentTo(this.getId(), '<br>');
         let cyclesHtml = '<details>';
         cyclesHtml += '<summary>cycles</summary>';
         for (const cycle of cycles) {
             cyclesHtml += util_1.util.escapeForHtml(cycle.involvedModulesChain.toString()) + '<br>';
         }
         cyclesHtml += '</details>';
-        await RenderManager_1.renderManager.addContentTo(this.outputId, cyclesHtml);
+        await RenderManager_1.renderManager.addContentTo(this.getId(), cyclesHtml);
     }
     async displayResultsMapTable(cycles) {
         const uniqueModuleNames = extractUniqueModuleNames(cycles);
@@ -94,16 +116,19 @@ class Wizard extends PopupWidget_1.PopupWidget {
             tableHtml += `<tr> <td>${uniqueModuleName}</td> <td><input id="${this.pathInputIdPrefix + uniqueModuleName}" value="${uniqueModuleName}"></td> </tr>`;
         }
         tableHtml += '</table>';
-        await RenderManager_1.renderManager.addContentTo(this.outputId, tableHtml);
-        await RenderManager_1.renderManager.addContentTo(this.outputId, `<button id ="${this.resultsSubmitId}">submit and add links</button>`);
+        await RenderManager_1.renderManager.addContentTo(this.getId(), tableHtml);
+        await RenderManager_1.renderManager.addContentTo(this.getId(), `<button id ="${this.resultsSubmitId}">submit and add links</button>`);
         await RenderManager_1.renderManager.addEventListenerTo(this.resultsSubmitId, 'click', async () => {
             const moduleNamePathDictionary = new Map();
             for (const uniqueModuleName of uniqueModuleNames) {
                 moduleNamePathDictionary.set(uniqueModuleName, await RenderManager_1.renderManager.getValueOf(this.pathInputIdPrefix + uniqueModuleName));
             }
             await addLinks(cycles, moduleNamePathDictionary);
+            await this.afterSubmit();
         });
-        this.beforeUnrenderTasks.push(() => RenderManager_1.renderManager.removeEventListenerFrom(this.resultsSubmitId, 'click'));
+    }
+    async unrender() {
+        await RenderManager_1.renderManager.removeEventListenerFrom(this.resultsSubmitId, 'click');
     }
 }
 function extractUniqueModuleNames(cycles) {
@@ -150,12 +175,12 @@ async function addLinks(cycles, moduleNamePathDictionary) {
                 continue;
             }
             const rootFolder = pluginFacade.getRootFolder();
-            const fromBox = (await rootFolder.getBoxBySourcePathAndRenderIfNecessary(fromPath)).boxWatcher;
+            const fromBox = (await pluginFacade.findBoxBySourcePath(fromPath, rootFolder)).boxWatcher;
             if (!fromBox) {
                 util_1.util.logWarning('could not find box for fromPath ' + fromPath);
                 continue;
             }
-            const toBox = (await rootFolder.getBoxBySourcePathAndRenderIfNecessary(toPath)).boxWatcher;
+            const toBox = (await pluginFacade.findBoxBySourcePath(toPath, rootFolder)).boxWatcher;
             if (!toBox) {
                 util_1.util.logWarning('could not find box for toPath ' + toPath);
                 continue;

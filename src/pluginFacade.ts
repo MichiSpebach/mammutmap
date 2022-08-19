@@ -126,7 +126,7 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   linkAlreadyExisted: boolean,
   warnings?: string[]
 }> {
-  const toReport = await getBoxBySourcePath(toFilePath, fromBox, {...options, registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch})
+  const toReport = await findBoxBySourcePath(toFilePath, fromBox.getParent(), {...options, registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch})
   if (!toReport.boxWatcher) {
     const message: string = 'failed to add link because file for toFilePath "'+toFilePath+'" was not found'
     if (!options?.onlyReturnWarnings) {
@@ -137,6 +137,20 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   }
 
   const toBox: Box = await toReport.boxWatcher.get()
+  
+  const {link, linkAlreadyExisted} = await addLinkBetweenBoxes(fromBox, toBox)
+
+  if (!options?.registerBoxWatchersInsteadOfUnwatch) {
+    toReport.boxWatcher.unwatch()
+  }
+
+  return {link, linkAlreadyExisted, warnings: toReport.warnings}
+}
+
+export async function addLinkBetweenBoxes(fromBox: Box, toBox: Box): Promise<{
+  link: Link|undefined,
+  linkAlreadyExisted: boolean
+}> {
   const managingBox: Box = Box.findCommonAncestor(fromBox, toBox).commonAncestor;
 
   let link: Link|undefined = managingBox.links.getLinkWithEndBoxes(fromBox, toBox)
@@ -150,11 +164,7 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
     link = await managingBox.links.addLink(fromLinkEnd, toLinkEnd, true)
   }
 
-  if (!options?.registerBoxWatchersInsteadOfUnwatch) {
-    toReport.boxWatcher.unwatch()
-  }
-
-  return {link, linkAlreadyExisted, warnings: toReport.warnings}
+  return {link, linkAlreadyExisted}
 }
 
 async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
@@ -163,15 +173,15 @@ async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
   boxWatchers.push(boxWatcher)
 }
 
-async function getBoxBySourcePath(
+export async function findBoxBySourcePath(
   path: string, 
-  boxThatIncludesPath: FileBox,
+  baseOfPath: FolderBox,
   options?: {
     onlyReturnWarnings?: boolean
     registerBoxWatcher?: boolean
   }
 ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
-  const report = await boxFinder.findBox(path, boxThatIncludesPath, options)
+  const report = await boxFinder.findBox(path, baseOfPath, options)
 
   if (report.boxWatcher && options?.registerBoxWatcher) {
     boxWatchers.push(report.boxWatcher)
