@@ -43,13 +43,14 @@ class WizardWidget extends PopupWidget {
 
     protected async beforeUnrender(): Promise<void> {
         await renderManager.removeEventListenerFrom(this.commandSubmitId, 'click')
+        await this.resultsWidget?.unrender()
     }
 
     private async runCommand(): Promise<void> {
         this.results = []
         await this.resultsWidget?.unrender()
         this.resultsWidget = undefined
-        
+
         const command: string = await renderManager.getValueOf(this.commandInputId)
         let process: ChildProcess
         try {
@@ -71,30 +72,31 @@ class WizardWidget extends PopupWidget {
             renderManager.addContentTo(this.outputId, util.escapeForHtml(data))
         })
         process.stdout.on('end', async (data: string) => {
-            let html: string = 'finished'
+            let message: string = 'finished'
             if (data) {
-                html += ' with '+data
+                message += ' with '+data
             }
-            html += '<br><div id="pactCycleDetectorResults"></div>'
-            await renderManager.addContentTo(this.outputId, html)
-            const resultsWidget = new ResultsWidget('pactCycleDetectorResults', this.results, async () => {
-                await resultsWidget.unrender()
-                await this.unrender()
-            })
-            this.resultsWidget = resultsWidget
-            await resultsWidget.render()
+            await renderManager.addContentTo(this.outputId, message)
+            await this.displayResults()
         })
 
         await renderManager.setContentTo(this.outputId, 'started<br>')
+    }
+
+    private async displayResults(): Promise<void> {
+        if (this.resultsWidget) {
+            util.logWarning('expected resultsWidget not to be set at this state')
+            this.resultsWidget.unrender()
+        }
+        await renderManager.addContentTo(this.outputId, `<div id="${this.getId()+'Results'}"></div>`)
+        this.resultsWidget = new ResultsWidget(this.getId()+'Results', this.results, () => this.unrender())
+        await this.resultsWidget.render()
     }
 
 }
 
 class ResultsWidget extends Widget {
     private readonly id: string
-    private readonly pathInputIdPrefix = this.getId()+'PathInput'
-    private readonly resultsSubmitId = this.getId()+'ResultsSubmit'
-
     private readonly results: string[]
     private readonly afterSubmit: () => Promise<void>
 
@@ -109,11 +111,15 @@ class ResultsWidget extends Widget {
         return this.id
     }
 
-    public async render(): Promise<void> {
-        await this.displayResults()
+    private getPathInputIdPrefix(): string {
+        return this.getId()+'PathInput'
     }
 
-    private async displayResults(): Promise<void> {
+    private getResultsSubmitId(): string {
+        return this.getId()+'Submit'
+    }
+
+    public async render(): Promise<void> {
         let cycleStrings: string[] = []
         for (const result of this.results) {
             cycleStrings = cycleStrings.concat(result.trim().split('\n'))
@@ -121,11 +127,11 @@ class ResultsWidget extends Widget {
 
         const cycles: Cycle[] = cycleStrings.map(cycleString => Cycle.fromString(cycleString))
 
-        await this.displayCycles(cycles)
-        await this.displayResultsMapTable(cycles)
+        await this.renderCycles(cycles)
+        await this.renderResultsMapTable(cycles)
     }
 
-    private async displayCycles(cycles: Cycle[]): Promise<void> {
+    private async renderCycles(cycles: Cycle[]): Promise<void> {
         await renderManager.addContentTo(this.getId(), '<br>')
         let cyclesHtml: string = '<details>'
         cyclesHtml += '<summary>cycles</summary>'
@@ -136,20 +142,20 @@ class ResultsWidget extends Widget {
         await renderManager.addContentTo(this.getId(), cyclesHtml)
     }
 
-    private async displayResultsMapTable(cycles: Cycle[]): Promise<void> {
+    private async renderResultsMapTable(cycles: Cycle[]): Promise<void> {
         const uniqueModuleNames: string[] = extractUniqueModuleNames(cycles)
         let tableHtml: string = '<table>'
         tableHtml += '<tr> <th>moduleName</th> <th>path<th> </tr>'
         for (const uniqueModuleName of uniqueModuleNames) {
-            tableHtml += `<tr> <td>${uniqueModuleName}</td> <td><input id="${this.pathInputIdPrefix+uniqueModuleName}" value="${uniqueModuleName}"></td> </tr>`
+            tableHtml += `<tr> <td>${uniqueModuleName}</td> <td><input id="${this.getPathInputIdPrefix()+uniqueModuleName}" value="${uniqueModuleName}"></td> </tr>`
         }
         tableHtml += '</table>'
         await renderManager.addContentTo(this.getId(), tableHtml)
-        await renderManager.addContentTo(this.getId(), `<button id ="${this.resultsSubmitId}">submit and add links</button>`)
-        await renderManager.addEventListenerTo(this.resultsSubmitId, 'click', async () => {
+        await renderManager.addContentTo(this.getId(), `<button id ="${this.getResultsSubmitId()}">submit and add links</button>`)
+        await renderManager.addEventListenerTo(this.getResultsSubmitId(), 'click', async () => {
             const moduleNamePathDictionary: Map<string, string> = new Map()
             for (const uniqueModuleName of uniqueModuleNames) {
-                moduleNamePathDictionary.set(uniqueModuleName, await renderManager.getValueOf(this.pathInputIdPrefix+uniqueModuleName))
+                moduleNamePathDictionary.set(uniqueModuleName, await renderManager.getValueOf(this.getPathInputIdPrefix()+uniqueModuleName))
             }
             await addLinks(cycles, moduleNamePathDictionary)
             await this.afterSubmit()
@@ -157,7 +163,8 @@ class ResultsWidget extends Widget {
     }
 
     public async unrender(): Promise<void> {
-        await renderManager.removeEventListenerFrom(this.resultsSubmitId, 'click')
+        await renderManager.removeEventListenerFrom(this.getResultsSubmitId(), 'click')
+        await renderManager.setContentTo(this.getId(), '')
     }
     
 }

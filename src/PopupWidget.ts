@@ -25,8 +25,7 @@ export abstract class PopupWidget extends Widget {
         await renderManager.addContentTo('body', html)
 
         await renderManager.addEventListenerTo(this.id+'Close', 'click', async () => {
-            await this.beforeUnrender()
-            this.unrender()
+            await this.unrender()
         })
 
         await this.afterRender()
@@ -39,6 +38,7 @@ export abstract class PopupWidget extends Widget {
     protected abstract beforeUnrender(): Promise<void>
 
     public async unrender(): Promise<void> {
+        await this.beforeUnrender()
         await renderManager.removeEventListenerFrom(this.id+'Close', 'click')
         await renderManager.remove(this.id)
     }

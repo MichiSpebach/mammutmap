@@ -32,6 +32,7 @@ class WizardWidget extends PopupWidget_1.PopupWidget {
     }
     async beforeUnrender() {
         await RenderManager_1.renderManager.removeEventListenerFrom(this.commandSubmitId, 'click');
+        await this.resultsWidget?.unrender();
     }
     async runCommand() {
         this.results = [];
@@ -58,27 +59,28 @@ class WizardWidget extends PopupWidget_1.PopupWidget {
             RenderManager_1.renderManager.addContentTo(this.outputId, util_1.util.escapeForHtml(data));
         });
         process.stdout.on('end', async (data) => {
-            let html = 'finished';
+            let message = 'finished';
             if (data) {
-                html += ' with ' + data;
+                message += ' with ' + data;
             }
-            html += '<br><div id="pactCycleDetectorResults"></div>';
-            await RenderManager_1.renderManager.addContentTo(this.outputId, html);
-            const resultsWidget = new ResultsWidget('pactCycleDetectorResults', this.results, async () => {
-                await resultsWidget.unrender();
-                await this.unrender();
-            });
-            this.resultsWidget = resultsWidget;
-            await resultsWidget.render();
+            await RenderManager_1.renderManager.addContentTo(this.outputId, message);
+            await this.displayResults();
         });
         await RenderManager_1.renderManager.setContentTo(this.outputId, 'started<br>');
+    }
+    async displayResults() {
+        if (this.resultsWidget) {
+            util_1.util.logWarning('expected resultsWidget not to be set at this state');
+            this.resultsWidget.unrender();
+        }
+        await RenderManager_1.renderManager.addContentTo(this.outputId, `<div id="${this.getId() + 'Results'}"></div>`);
+        this.resultsWidget = new ResultsWidget(this.getId() + 'Results', this.results, () => this.unrender());
+        await this.resultsWidget.render();
     }
 }
 class ResultsWidget extends Widget_1.Widget {
     constructor(id, results, afterSubmit) {
         super();
-        this.pathInputIdPrefix = this.getId() + 'PathInput';
-        this.resultsSubmitId = this.getId() + 'ResultsSubmit';
         this.id = id;
         this.results = results;
         this.afterSubmit = afterSubmit;
@@ -86,19 +88,22 @@ class ResultsWidget extends Widget_1.Widget {
     getId() {
         return this.id;
     }
-    async render() {
-        await this.displayResults();
+    getPathInputIdPrefix() {
+        return this.getId() + 'PathInput';
     }
-    async displayResults() {
+    getResultsSubmitId() {
+        return this.getId() + 'Submit';
+    }
+    async render() {
         let cycleStrings = [];
         for (const result of this.results) {
             cycleStrings = cycleStrings.concat(result.trim().split('\n'));
         }
         const cycles = cycleStrings.map(cycleString => Cycle.fromString(cycleString));
-        await this.displayCycles(cycles);
-        await this.displayResultsMapTable(cycles);
+        await this.renderCycles(cycles);
+        await this.renderResultsMapTable(cycles);
     }
-    async displayCycles(cycles) {
+    async renderCycles(cycles) {
         await RenderManager_1.renderManager.addContentTo(this.getId(), '<br>');
         let cyclesHtml = '<details>';
         cyclesHtml += '<summary>cycles</summary>';
@@ -108,27 +113,28 @@ class ResultsWidget extends Widget_1.Widget {
         cyclesHtml += '</details>';
         await RenderManager_1.renderManager.addContentTo(this.getId(), cyclesHtml);
     }
-    async displayResultsMapTable(cycles) {
+    async renderResultsMapTable(cycles) {
         const uniqueModuleNames = extractUniqueModuleNames(cycles);
         let tableHtml = '<table>';
         tableHtml += '<tr> <th>moduleName</th> <th>path<th> </tr>';
         for (const uniqueModuleName of uniqueModuleNames) {
-            tableHtml += `<tr> <td>${uniqueModuleName}</td> <td><input id="${this.pathInputIdPrefix + uniqueModuleName}" value="${uniqueModuleName}"></td> </tr>`;
+            tableHtml += `<tr> <td>${uniqueModuleName}</td> <td><input id="${this.getPathInputIdPrefix() + uniqueModuleName}" value="${uniqueModuleName}"></td> </tr>`;
         }
         tableHtml += '</table>';
         await RenderManager_1.renderManager.addContentTo(this.getId(), tableHtml);
-        await RenderManager_1.renderManager.addContentTo(this.getId(), `<button id ="${this.resultsSubmitId}">submit and add links</button>`);
-        await RenderManager_1.renderManager.addEventListenerTo(this.resultsSubmitId, 'click', async () => {
+        await RenderManager_1.renderManager.addContentTo(this.getId(), `<button id ="${this.getResultsSubmitId()}">submit and add links</button>`);
+        await RenderManager_1.renderManager.addEventListenerTo(this.getResultsSubmitId(), 'click', async () => {
             const moduleNamePathDictionary = new Map();
             for (const uniqueModuleName of uniqueModuleNames) {
-                moduleNamePathDictionary.set(uniqueModuleName, await RenderManager_1.renderManager.getValueOf(this.pathInputIdPrefix + uniqueModuleName));
+                moduleNamePathDictionary.set(uniqueModuleName, await RenderManager_1.renderManager.getValueOf(this.getPathInputIdPrefix() + uniqueModuleName));
             }
             await addLinks(cycles, moduleNamePathDictionary);
             await this.afterSubmit();
         });
     }
     async unrender() {
-        await RenderManager_1.renderManager.removeEventListenerFrom(this.resultsSubmitId, 'click');
+        await RenderManager_1.renderManager.removeEventListenerFrom(this.getResultsSubmitId(), 'click');
+        await RenderManager_1.renderManager.setContentTo(this.getId(), '');
     }
 }
 function extractUniqueModuleNames(cycles) {
