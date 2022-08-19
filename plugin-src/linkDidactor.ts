@@ -2,7 +2,7 @@ import { Link } from '../dist/box/Link'
 import { WayPointData } from '../dist/box/WayPointData'
 import { NodeWidget } from '../dist/node/NodeWidget'
 import { Box } from '../dist/pluginFacade'
-import * as applicationMenu from '../dist/applicationMenu'
+import { applicationMenu } from '../dist/applicationMenu'
 import { MenuItem } from 'electron'
 import { util } from '../dist/util'
 

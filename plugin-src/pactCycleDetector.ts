@@ -1,5 +1,5 @@
 import { MenuItem } from 'electron'
-import * as applicationMenu from '../dist/applicationMenu'
+import { applicationMenu } from '../dist/applicationMenu'
 import { WizardWidget } from './pactCycleDetector/WizardWidget'
 
 applicationMenu.addMenuItemTo('pactCycleDetector.js', new MenuItem({label: 'detect...', click: openWizard}))

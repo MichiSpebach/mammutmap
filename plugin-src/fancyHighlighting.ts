@@ -1,4 +1,4 @@
-import * as applicationMenu from '../dist/applicationMenu'
+import { applicationMenu } from '../dist/applicationMenu'
 import { MenuItem } from 'electron'
 import { util } from '../dist/util'
 import { dom } from '../dist/domAdapter'

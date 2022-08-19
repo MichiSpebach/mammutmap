@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Link_1 = require("../dist/box/Link");
-const applicationMenu = require("../dist/applicationMenu");
+const applicationMenu_1 = require("../dist/applicationMenu");
 const electron_1 = require("electron");
 const util_1 = require("../dist/util");
 const deactivateMenuItem = new electron_1.MenuItem({ label: 'deactivate', click: deactivate });
 const activateMenuItem = new electron_1.MenuItem({ label: 'activate', click: activate });
-applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem);
-applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem);
+applicationMenu_1.applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem);
+applicationMenu_1.applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem);
 function deactivate() {
     DidactedLink.deactivateAndPlugout();
     deactivateMenuItem.enabled = false;

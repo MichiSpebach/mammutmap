@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ts = require("typescript");
 const electron_1 = require("electron");
 const util_1 = require("../dist/util");
-const applicationMenu = require("../dist/applicationMenu");
+const applicationMenu_1 = require("../dist/applicationMenu");
 const contextMenu = require("../dist/contextMenu");
 const pluginFacade = require("../dist/pluginFacade");
-applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new electron_1.MenuItem({ label: 'Generate links', click: generateLinks }));
-applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new electron_1.MenuItem({ label: 'Join on GitHub (coming soon)' }));
+applicationMenu_1.applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new electron_1.MenuItem({ label: 'Generate links', click: generateLinks }));
+applicationMenu_1.applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new electron_1.MenuItem({ label: 'Join on GitHub (coming soon)' }));
 contextMenu.addFileBoxMenuItem((box) => {
     if (!box.getName().endsWith('.ts')) {
         return undefined;

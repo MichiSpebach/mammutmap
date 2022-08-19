@@ -2,10 +2,10 @@ import * as ts from 'typescript'
 import { Program, SourceFile } from 'typescript'
 import { MenuItem } from 'electron'
 import { util } from '../dist/util'
-import * as applicationMenu from '../dist/applicationMenu'
+import { applicationMenu } from '../dist/applicationMenu'
 import * as contextMenu from '../dist/contextMenu'
 import * as pluginFacade from '../dist/pluginFacade'
-import { Box, FileBox, FileBoxDepthTreeIterator } from '../dist/pluginFacade'
+import { FileBox, FileBoxDepthTreeIterator } from '../dist/pluginFacade'
 
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Generate links', click: generateLinks}))
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Join on GitHub (coming soon)'}))
