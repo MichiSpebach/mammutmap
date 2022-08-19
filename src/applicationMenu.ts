@@ -6,7 +6,17 @@ import { ProjectSettings } from './ProjectSettings'
 import { renderManager } from './RenderManager'
 import * as settingsWidget from './settingsWidget'
 
-class ElectronApplicationMenu {
+abstract class ApplicationMenu {
+
+  public abstract setApplicationMenu(): void
+
+  public abstract addMenuItemToPlugins(menuItem: MenuItem): void // TODO change type of menuItem
+
+  public abstract addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void // TODO change type of menuItem
+
+}
+
+class ElectronApplicationMenu extends ApplicationMenu {
 
   public setApplicationMenu(): void {
     const template: any = [
@@ -183,4 +193,4 @@ class ElectronApplicationMenu {
 
 }
 
-export let applicationMenu: ElectronApplicationMenu = new ElectronApplicationMenu()
+export let applicationMenu: ApplicationMenu = new ElectronApplicationMenu()
