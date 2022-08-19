@@ -1,4 +1,13 @@
 
+add option to contextMenu of boxes: remove all outgoing links
+add option to contextMenu of boxes: hide all outgoing/incoming links
+add option to contextMenu of boxes: add tag to all outgoing/incoming links
+
+make it possible to partially set mapData, when links are added position and size should not be set
+option to unmpat boxes over contextMenu->unmap/unplace (sets position and size of mapData to undefined)
+
+improve EmptySpaceFinder, should find smaller spaces
+
 introduce SnapMode: {none, snapToGrid, snapToObject}
 
 fix WARNING: error in render thread occured:

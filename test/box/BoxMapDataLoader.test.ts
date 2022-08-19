@@ -7,6 +7,7 @@ import { FolderBoxBody } from '../../src/box/FolderBoxBody'
 import { BoxMapData } from '../../src/box/BoxMapData'
 import { util } from '../../src/util'
 import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
+import { Box } from '../../src/box/Box'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 
@@ -357,7 +358,7 @@ test('loadMapDatasWithoutSources boxId is already used by another box', async ()
   referenceBoxBody.containsBoxByName.calledWith('dirent2').mockReturnValue(false)
 
   const boxManager: MockProxy<BoxManager> = mock<BoxManager>()
-  boxManager.getBoxIfExists.calledWith(mapDataDirent1.id).mockReturnValue(mock())
+  boxManager.getBoxIfExists.calledWith(mapDataDirent1.id).mockReturnValue(mock<Box>())
   boxManager.getBoxIfExists.calledWith(mapDataDirent2.id).mockReturnValue(undefined)
   initBoxManager(boxManager)
 
