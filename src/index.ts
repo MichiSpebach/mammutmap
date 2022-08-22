@@ -12,9 +12,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit();
 }
 
-const createWindow = () => {
-  applicationMenu.setApplicationMenu()
-
+const createWindow = async () => {
   mainWindow = new BrowserWindow({
     height: 800,
     width: 1600,
@@ -23,13 +21,14 @@ const createWindow = () => {
       contextIsolation: false
     }
   });
-
+  
   mainWindow.loadFile(path.join(__dirname, '../src/index.html'))
-
+  
   domAdapter.initFromBrowserWindow(mainWindow)
   commandLine.init()
+  await applicationMenu.initAndRender()
 
-  pluginLoader.loadPlugins()
+  await pluginLoader.loadPlugins()
 };
 
 // This method will be called when Electron has finished
