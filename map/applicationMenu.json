@@ -1,0 +1,148 @@
+{
+	"id": "u7lnivj4sq",
+	"x": 8.000000000000002,
+	"y": 44,
+	"width": 8,
+	"height": 4,
+	"links": [
+		{
+			"id": "i20bbnp0vgo",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "98b5brpsvog",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "926mlu0o98",
+						"boxName": "ApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ablrrlh81f",
+			"from": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "926mlu0o98",
+						"boxName": "ApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "5658agvftg8",
+			"from": {
+				"path": [
+					{
+						"boxId": "04oprug3u3o",
+						"boxName": "ElectronAndHtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "r5amcb4o79",
+			"from": {
+				"path": [
+					{
+						"boxId": "04oprug3u3o",
+						"boxName": "ElectronAndHtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "86s12omf2ig",
+			"from": {
+				"path": [
+					{
+						"boxId": "04oprug3u3o",
+						"boxName": "ElectronAndHtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "926mlu0o98",
+						"boxName": "ApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		}
+	],
+	"nodes": []
+}

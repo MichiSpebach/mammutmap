@@ -77,29 +77,6 @@
 			}
 		},
 		{
-			"id": "i02328f46c",
-			"from": {
-				"path": [
-					{
-						"boxId": "ita04k5ms68",
-						"boxName": "menu.ts",
-						"x": 99.74352076046992,
-						"y": 29.730803427857964
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "7b4gp3csto8",
-						"boxName": "Settings.ts",
-						"x": 0.6181887706328468,
-						"y": 57.17977215893304
-					}
-				]
-			}
-		},
-		{
 			"id": "vjlb3hs7fo",
 			"from": {
 				"path": [
@@ -664,7 +641,13 @@
 						"boxId": "3lnmuaqr88",
 						"boxName": "box",
 						"x": 50,
-						"y": 0
+						"y": 4
+					},
+					{
+						"boxId": "jvta9jokfd8",
+						"boxName": "nodejvta9jokfd8",
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -858,31 +841,8 @@
 					{
 						"boxId": "ita04k5ms68",
 						"boxName": "applicationMenu.ts",
-						"x": 89.99738737730004,
-						"y": 0
-					}
-				]
-			}
-		},
-		{
-			"id": "q3nfkh3qso8",
-			"from": {
-				"path": [
-					{
-						"boxId": "ita04k5ms68",
-						"boxName": "applicationMenu.ts",
-						"x": 49.50712410141621,
-						"y": 99.78519729161802
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "6o0ikrr8ru",
-						"boxName": "Map.ts",
-						"x": 52.10523562947853,
-						"y": -0.13903470192662373
+						"x": 92,
+						"y": 4
 					}
 				]
 			}
@@ -1118,8 +1078,8 @@
 					{
 						"boxId": "ita04k5ms68",
 						"boxName": "applicationMenu.ts",
-						"x": 90.00291177326993,
-						"y": 0
+						"x": 96,
+						"y": 8
 					}
 				]
 			}
@@ -1269,8 +1229,8 @@
 					{
 						"boxId": "5194u9gf71g",
 						"boxName": "commandLine.ts",
-						"x": 34.99717283407677,
-						"y": 100
+						"x": 12,
+						"y": 52
 					}
 				]
 			},
@@ -1279,8 +1239,8 @@
 					{
 						"boxId": "6o0ikrr8ru",
 						"boxName": "Map.ts",
-						"x": 29.99842940160201,
-						"y": 0
+						"x": 12,
+						"y": 56
 					}
 				]
 			}
@@ -1627,29 +1587,6 @@
 						"boxName": "ProjectSettings.ts",
 						"x": 0,
 						"y": 100
-					}
-				]
-			}
-		},
-		{
-			"id": "pv4q8rug7o",
-			"from": {
-				"path": [
-					{
-						"boxId": "ita04k5ms68",
-						"boxName": "applicationMenu.ts",
-						"x": 100,
-						"y": 84.99879605104744
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "jnk7eechpkg",
-						"boxName": "ProjectSettings.ts",
-						"x": 0,
-						"y": 9.997859703568944
 					}
 				]
 			}
@@ -2006,34 +1943,6 @@
 			}
 		},
 		{
-			"id": "3asabotdq1g",
-			"from": {
-				"path": [
-					{
-						"boxId": "ita04k5ms68",
-						"boxName": "applicationMenu.ts",
-						"x": 43.00736937308744,
-						"y": 53.30400796056149
-					}
-				],
-				"floatToBorder": true
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "p0d1i1vr268",
-						"boxName": "RenderManager.ts",
-						"x": 50,
-						"y": 56.000000000000014
-					}
-				],
-				"floatToBorder": true
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
 			"id": "v17j409ofjg",
 			"from": {
 				"path": [
@@ -2273,6 +2182,436 @@
 				],
 				"floatToBorder": true
 			}
+		},
+		{
+			"id": "22n8dt6hvf",
+			"from": {
+				"path": [
+					{
+						"boxId": "ita04k5ms68",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 50,
+						"y": 18
+					},
+					{
+						"boxId": "04oprug3u3o",
+						"boxName": "ElectronAndHtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "m8g60p0s4ro",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 82,
+						"y": 50.4
+					},
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 52
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cr2q48p1plg",
+						"boxName": "indexHtmlIds.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "1uk18mghk4o",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 18,
+						"y": 50
+					},
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "k502tn0u5l8",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 50,
+						"y": 50
+					},
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "v12f3i9e6eg",
+						"boxName": "Widget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "lgksq3b0ib8",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 50,
+						"y": 50
+					},
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "qhpr9822fe",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 82,
+						"y": 18
+					},
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jnk7eechpkg",
+						"boxName": "ProjectSettings.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "g5igs3vqh1",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 82,
+						"y": 18
+					},
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "2257b1g9bto",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 18,
+						"y": 50
+					},
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "g56m7uk3ce8",
+						"boxName": "settingsWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "drastlhj5jo",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 82,
+						"y": 18
+					},
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "drnat1pcbvg",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 82,
+						"y": 18
+					},
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 0,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "sq9pjjahuco",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 18,
+						"y": 51.2
+					},
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 56
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "btfgi08c3tg",
+			"from": {
+				"path": [
+					{
+						"boxId": "0vh7l3j1gv",
+						"boxName": "TextInputPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "umparj97v8",
+						"boxName": "PopupWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "909kkslmdh",
+			"from": {
+				"path": [
+					{
+						"boxId": "umparj97v8",
+						"boxName": "PopupWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "mlqeakkf1dg",
+						"boxName": "styleAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "sjloirl3c5",
+			"from": {
+				"path": [
+					{
+						"boxId": "umparj97v8",
+						"boxName": "PopupWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "v12f3i9e6eg",
+						"boxName": "Widget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ve979bmlofg",
+			"from": {
+				"path": [
+					{
+						"boxId": "umparj97v8",
+						"boxName": "PopupWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
 		}
-	]
+	],
+	"nodes": []
 }
