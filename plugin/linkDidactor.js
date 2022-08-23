@@ -2,22 +2,22 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Link_1 = require("../dist/box/Link");
 const applicationMenu_1 = require("../dist/applicationMenu");
-const electron_1 = require("electron");
+const MenuItemFile_1 = require("../dist/applicationMenu/MenuItemFile");
 const util_1 = require("../dist/util");
-const deactivateMenuItem = new electron_1.MenuItem({ label: 'deactivate', click: deactivate });
-const activateMenuItem = new electron_1.MenuItem({ label: 'activate', click: activate });
+const deactivateMenuItem = new MenuItemFile_1.MenuItemFile({ label: 'deactivate', click: deactivate });
+const activateMenuItem = new MenuItemFile_1.MenuItemFile({ label: 'activate', click: activate });
 applicationMenu_1.applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem);
 applicationMenu_1.applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem);
-function deactivate() {
+async function deactivate() {
     DidactedLink.deactivateAndPlugout();
-    deactivateMenuItem.enabled = false;
-    activateMenuItem.enabled = true;
+    await applicationMenu_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, false);
+    await applicationMenu_1.applicationMenu.setMenuItemEnabled(activateMenuItem, true);
     util_1.util.logInfo('deactivated linkDidactor plugin');
 }
-function activate() {
+async function activate() {
     DidactedLink.activateAndPlugin();
-    deactivateMenuItem.enabled = true;
-    activateMenuItem.enabled = false;
+    await applicationMenu_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, true);
+    await applicationMenu_1.applicationMenu.setMenuItemEnabled(activateMenuItem, false);
     util_1.util.logInfo('activated linkDidactor plugin');
 }
 const colors = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal'];
