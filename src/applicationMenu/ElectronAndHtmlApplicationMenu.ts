@@ -1,7 +1,8 @@
 import { ApplicationMenu } from './applicationMenu'
 import { ElectronApplicationMenu } from './ElectronApplicationMenu'
 import { HtmlApplicationMenu } from './HtmlApplicationMenu'
-import { MenuItem } from 'electron'
+import { MenuItemFile } from './MenuItemFile'
+import { MenuItemFolder } from './MenuItemFolder'
 
 export class ElectronAndHtmlApplicationMenu extends ApplicationMenu {
     private readonly electronApplicationMenu: ElectronApplicationMenu
@@ -20,14 +21,21 @@ export class ElectronAndHtmlApplicationMenu extends ApplicationMenu {
         ])
     }
   
-    public addMenuItemToPlugins(menuItem: MenuItem): void {
+    public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
         this.electronApplicationMenu.addMenuItemToPlugins(menuItem)
         this.htmlApplicatioinMenu.addMenuItemToPlugins(menuItem)
     }
   
-    public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void {
+    public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
         this.electronApplicationMenu.addMenuItemTo(parentMenuItemId, menuItem)
         this.htmlApplicatioinMenu.addMenuItemTo(parentMenuItemId, menuItem)
+    }
+
+    public async setMenuItemEnabled(menuItem: MenuItemFile | MenuItemFolder, enabled: boolean): Promise<void> {
+        await Promise.all([
+            this.electronApplicationMenu.setMenuItemEnabled(menuItem, enabled),
+            this.htmlApplicatioinMenu.setMenuItemEnabled(menuItem, enabled)
+        ])
     }
     
   }

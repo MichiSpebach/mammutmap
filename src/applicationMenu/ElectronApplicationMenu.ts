@@ -2,7 +2,9 @@ import { ApplicationMenu } from './applicationMenu'
 import { ProjectSettings } from '../ProjectSettings'
 import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
-import { Menu, MenuItem, dialog } from 'electron'
+import { Menu, MenuItem as ElectronMenuItem, dialog } from 'electron'
+import { MenuItemFile } from './MenuItemFile'
+import { MenuItemFolder } from './MenuItemFolder'
 import { util } from '../util'
 import { fileSystem } from '../fileSystemAdapter'
 import * as map from '../Map'
@@ -60,24 +62,34 @@ export class ElectronApplicationMenu extends ApplicationMenu {
       ]
       const menu = Menu.buildFromTemplate(template)
       Menu.setApplicationMenu(menu)
-      
+
       return Promise.resolve()
     }
   
-    public addMenuItemToPlugins(menuItem: MenuItem): void {
+    public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
       this.addMenuItemTo('Plugins', menuItem)
     }
   
-    public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void {
-      const menu: Menu|undefined = this.getMenuItemById(parentMenuItemId)?.submenu
+    public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
+      const menu: Menu|undefined = this.getElectronMenuItemById(parentMenuItemId)?.submenu
       if (!menu) {
         util.logWarning('cannot add MenuItem "'+menuItem.label+'" because parentMenuItem with id "'+parentMenuItemId+'" has to be initialized with submenu field')
         return
       }
-      menu.append(menuItem)
+      menu.append(new ElectronMenuItem(menuItem))
+    }
+
+    public setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
+        const electronMenuItem: ElectronMenuItem|null = this.getElectronMenuItemById(menuItem.id)
+        if (!electronMenuItem) {
+            util.logWarning('Failed to setMenuItemEnabled with id '+menuItem.id+' to '+enabled+' because it was not found.')
+            return Promise.resolve()
+        }
+        electronMenuItem.enabled = enabled
+        return Promise.resolve()
     }
   
-    private getMenuItemById(id: string): MenuItem|null {
+    private getElectronMenuItemById(id: string): ElectronMenuItem|null {
       return this.getApplicationMenu().getMenuItemById(id)
     }
   

@@ -1,13 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const applicationMenu_1 = require("../dist/applicationMenu");
-const electron_1 = require("electron");
+const MenuItemFile_1 = require("../dist/applicationMenu/MenuItemFile");
 const util_1 = require("../dist/util");
 const domAdapter_1 = require("../dist/domAdapter");
 const styleAdapter_1 = require("../dist/styleAdapter");
 const BorderingLinks_1 = require("../dist/link/BorderingLinks");
-const deactivateMenuItem = new electron_1.MenuItem({ label: 'deactivate', click: deactivate });
-const activateMenuItem = new electron_1.MenuItem({ label: 'activate', click: activate });
+const deactivateMenuItem = new MenuItemFile_1.MenuItemFile({ label: 'deactivate', click: deactivate });
+const activateMenuItem = new MenuItemFile_1.MenuItemFile({ label: 'activate', click: activate });
 applicationMenu_1.applicationMenu.addMenuItemTo('fancyHighlighting.js', deactivateMenuItem);
 applicationMenu_1.applicationMenu.addMenuItemTo('fancyHighlighting.js', activateMenuItem);
 let activated = false;
@@ -16,15 +16,15 @@ const highlightLinkFilterPropertyValueFancy = 'contrast(0.5) brightness(1.2) dro
 async function deactivate() {
     ToggableFancyBorderingLinks.deactivateAndPlugout();
     await ensureDeactivation();
-    deactivateMenuItem.enabled = false;
-    activateMenuItem.enabled = true;
+    await applicationMenu_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, false);
+    await applicationMenu_1.applicationMenu.setMenuItemEnabled(activateMenuItem, true);
     util_1.util.logInfo('deactivated fancyHighlighting plugin');
 }
 async function activate() {
     ToggableFancyBorderingLinks.activateAndPlugin();
     await ensureActivation();
-    deactivateMenuItem.enabled = true;
-    activateMenuItem.enabled = false;
+    await applicationMenu_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, true);
+    await applicationMenu_1.applicationMenu.setMenuItemEnabled(activateMenuItem, false);
     util_1.util.logInfo('activated fancyHighlighting plugin');
 }
 async function ensureDeactivation() {

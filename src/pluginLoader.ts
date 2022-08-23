@@ -1,5 +1,5 @@
 import { Dirent } from 'fs'
-import { MenuItem } from 'electron'
+import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
 import { util } from './util'
 import { fileSystem } from './fileSystemAdapter'
 import { applicationMenu } from './applicationMenu'
@@ -49,7 +49,7 @@ async function loadPluginsFrom(pluginFolderPath: string): Promise<void> {
 
 async function loadPlugin(fileName: string): Promise<void> {
   util.logInfo('load '+fileName+' plugin')
-  applicationMenu.addMenuItemToPlugins(new MenuItem({id: fileName, label: fileName, submenu:[]}))
+  applicationMenu.addMenuItemToPlugins(new MenuItemFolder(fileName, fileName, []))
 
   await import(util.joinPaths(['../', pluginFolderName, fileName]))
     .then(() => util.logInfo(fileName+' plugin loaded'))

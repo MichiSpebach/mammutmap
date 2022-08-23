@@ -3,25 +3,25 @@ import { WayPointData } from '../dist/box/WayPointData'
 import { NodeWidget } from '../dist/node/NodeWidget'
 import { Box } from '../dist/pluginFacade'
 import { applicationMenu } from '../dist/applicationMenu'
-import { MenuItem } from 'electron'
+import { MenuItemFile } from '../dist/applicationMenu/MenuItemFile'
 import { util } from '../dist/util'
 
-const deactivateMenuItem: MenuItem = new MenuItem({label: 'deactivate', click: deactivate})
-const activateMenuItem: MenuItem = new MenuItem({label: 'activate', click: activate})
+const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate})
+const activateMenuItem: MenuItemFile = new MenuItemFile({label: 'activate', click: activate})
 applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem)
 applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem)
 
-function deactivate(): void {
+async function deactivate(): Promise<void> {
     DidactedLink.deactivateAndPlugout()
-    deactivateMenuItem.enabled = false
-    activateMenuItem.enabled = true
+    await applicationMenu.setMenuItemEnabled(deactivateMenuItem, false)
+    await applicationMenu.setMenuItemEnabled(activateMenuItem, true)
     util.logInfo('deactivated linkDidactor plugin')
 }
 
-function activate(): void {
+async function activate(): Promise<void> {
     DidactedLink.activateAndPlugin()
-    deactivateMenuItem.enabled = true
-    activateMenuItem.enabled = false
+    await applicationMenu.setMenuItemEnabled(deactivateMenuItem, true)
+    await applicationMenu.setMenuItemEnabled(activateMenuItem, false)
     util.logInfo('activated linkDidactor plugin')
 }
 

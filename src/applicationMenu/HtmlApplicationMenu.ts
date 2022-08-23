@@ -1,5 +1,6 @@
 import { ApplicationMenu } from './applicationMenu'
-import { MenuItem } from 'electron'
+import { MenuItemFile } from './MenuItemFile'
+import { MenuItemFolder } from './MenuItemFolder'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { renderManager } from '../RenderManager'
 import { HtmlApplicationMenuWidget } from './HtmlApplicationMenuWidget'
@@ -14,17 +15,23 @@ export class HtmlApplicationMenu extends ApplicationMenu {
     }
 
     public async initAndRender(): Promise<void> {
+        return Promise.resolve() // TODO WIP
         const style = 'position:fixed;top:0;'
         await renderManager.addContentTo(indexHtmlIds.bodyId, `<div id="${this.widget.getId()}" style="${style}"></div>`)
         await this.widget.render()
     }
   
-    public addMenuItemToPlugins(menuItem: MenuItem): void {
-      // TODO
+    public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
+        // TODO
     }
   
-    public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void {
-      // TODO
+    public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
+        // TODO
+    }
+
+    public setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
+        // TODO
+        return Promise.resolve()
     }
     
   }

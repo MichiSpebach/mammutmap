@@ -1,14 +1,14 @@
 import * as ts from 'typescript'
 import { Program, SourceFile } from 'typescript'
-import { MenuItem } from 'electron'
+import { MenuItemFile } from '../dist/applicationMenu/MenuItemFile'
 import { util } from '../dist/util'
 import { applicationMenu } from '../dist/applicationMenu'
 import * as contextMenu from '../dist/contextMenu'
 import * as pluginFacade from '../dist/pluginFacade'
 import { FileBox, FileBoxDepthTreeIterator } from '../dist/pluginFacade'
 
-applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Generate links', click: generateLinks}))
-applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItem({label: 'Join on GitHub (coming soon)'}))
+applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItemFile({label: 'Generate links', click: generateLinks}))
+applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItemFile({label: 'Join on GitHub (coming soon)', click: () => util.logInfo('Join on GitHub is coming soon')}))
 
 contextMenu.addFileBoxMenuItem((box: pluginFacade.FileBox) => {
   if (!box.getName().endsWith('.ts')) {

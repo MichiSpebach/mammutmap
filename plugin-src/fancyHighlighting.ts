@@ -1,12 +1,12 @@
 import { applicationMenu } from '../dist/applicationMenu'
-import { MenuItem } from 'electron'
+import { MenuItemFile } from '../dist/applicationMenu/MenuItemFile'
 import { util } from '../dist/util'
 import { dom } from '../dist/domAdapter'
 import { style } from '../dist/styleAdapter'
 import { BorderingLinks } from '../dist/link/BorderingLinks'
 
-const deactivateMenuItem: MenuItem = new MenuItem({label: 'deactivate', click: deactivate})
-const activateMenuItem: MenuItem = new MenuItem({label: 'activate', click: activate})
+const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate})
+const activateMenuItem: MenuItemFile = new MenuItemFile({label: 'activate', click: activate})
 applicationMenu.addMenuItemTo('fancyHighlighting.js', deactivateMenuItem)
 applicationMenu.addMenuItemTo('fancyHighlighting.js', activateMenuItem)
 
@@ -17,16 +17,16 @@ const highlightLinkFilterPropertyValueFancy: string = 'contrast(0.5) brightness(
 async function deactivate(): Promise<void> {
     ToggableFancyBorderingLinks.deactivateAndPlugout()
     await ensureDeactivation()
-    deactivateMenuItem.enabled = false
-    activateMenuItem.enabled = true
+    await applicationMenu.setMenuItemEnabled(deactivateMenuItem, false)
+    await applicationMenu.setMenuItemEnabled(activateMenuItem, true)
     util.logInfo('deactivated fancyHighlighting plugin')
 }
 
 async function activate(): Promise<void> {
     ToggableFancyBorderingLinks.activateAndPlugin()
     await ensureActivation()
-    deactivateMenuItem.enabled = true
-    activateMenuItem.enabled = false
+    await applicationMenu.setMenuItemEnabled(deactivateMenuItem, true)
+    await applicationMenu.setMenuItemEnabled(activateMenuItem, false)
     util.logInfo('activated fancyHighlighting plugin')
 }
 
