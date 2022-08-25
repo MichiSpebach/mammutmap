@@ -1,5 +1,5 @@
 import { ApplicationMenu } from './applicationMenu'
-import { Menu, MenuItem as ElectronMenuItem, dialog } from 'electron'
+import { Menu, MenuItem as ElectronMenuItem } from 'electron'
 import { MenuItemFile } from './MenuItemFile'
 import { MenuItemFolder } from './MenuItemFolder'
 import { util } from '../util'
@@ -7,13 +7,9 @@ import { util } from '../util'
 export class ElectronApplicationMenu extends ApplicationMenu {
 
     public initAndRender(): Promise<void> {
-      const menu = Menu.buildFromTemplate(this.menuTree)
+      const menu = Menu.buildFromTemplate(this.menuTree.submenu)
       Menu.setApplicationMenu(menu)
       return Promise.resolve()
-    }
-  
-    public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
-      this.addMenuItemTo('Plugins', menuItem)
     }
   
     public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {

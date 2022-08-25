@@ -10,7 +10,7 @@ import { renderManager } from '../RenderManager'
 
 export abstract class ApplicationMenu {
   
-  protected readonly menuTree: MenuItemFolder[]
+  protected readonly menuTree: MenuItemFolder
 
   public constructor() {
     const fileMenu: MenuItemFolder = new MenuItemFolder('File', 'File', [
@@ -28,16 +28,22 @@ export abstract class ApplicationMenu {
       new MenuItemFile({label: 'Tutorial to create plugins (coming soon)', click: () => util.logInfo('Tutorial to create plugins is coming soon')})
     ])
 
-    this.menuTree = [fileMenu, settingsMenu, pluginsMenu]
+    this.menuTree = new MenuItemFolder('ApplicationMenu', 'ApplicationMenu', [fileMenu, settingsMenu, pluginsMenu])
   }
 
   public abstract initAndRender(): Promise<void>
 
-  public abstract addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void
+  public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
+    this.addMenuItemTo('Plugins', menuItem)
+  }
 
   public abstract addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void
 
   public abstract setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void>
+
+  protected findMenuItemById(menuItemId: string): MenuItemFile|MenuItemFolder|undefined {
+    return this.menuTree.findMenuItemById(menuItemId)
+  }
   
   private async openFolder(): Promise<void> {
     const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
