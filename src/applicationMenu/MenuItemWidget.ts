@@ -1,3 +1,4 @@
+import { style } from '../styleAdapter';
 import { renderManager } from '../RenderManager';
 import { Widget } from '../Widget'
 import { MenuItemFile } from './MenuItemFile';
@@ -17,6 +18,7 @@ export abstract class MenuItemWidget<MENU_ITEM extends MenuItemFile|MenuItemFold
     }
 
     public async render(): Promise<void> {
+        renderManager.addClassTo(this.getId(), style.getApplicationMenuItemClass(''))
         await renderManager.setContentTo(this.getId(), this.formHtml())
         await this.afterRender()
     }

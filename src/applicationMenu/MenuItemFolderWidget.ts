@@ -2,6 +2,7 @@ import { renderManager } from '../RenderManager'
 import { MenuItemWidget } from './MenuItemWidget'
 import { MenuItemFolder } from './MenuItemFolder'
 import { MenuItemFolderContainerWidget } from './MenuItemFolderContainerWidget'
+import { style } from '../styleAdapter'
 
 export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
 
@@ -14,12 +15,13 @@ export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
 
     protected formHtml(): string {
         const labelHtml: string = this.menuItem.label+' &gt;'
-        const submenuContainerPlaceholder: string = `<div id="${this.submenuContainer.getId()}"></div>`
-        return labelHtml+submenuContainerPlaceholder
+        const submenuContainerHtml: string = `<span id="${this.submenuContainer.getId()}"></span>`
+        return labelHtml+submenuContainerHtml
     }
 
     protected async afterRender(): Promise<void> {
         await Promise.all([
+            renderManager.addClassTo(this.getId(), style.getApplicationMenuItemClass('Folder')),
             renderManager.addEventListenerTo(this.getId(), 'mouseenter', () => this.submenuContainer.render()),
             renderManager.addEventListenerTo(this.getId(), 'mouseleave', () => this.submenuContainer.unrender())
         ])

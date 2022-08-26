@@ -2,6 +2,8 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { renderManager } from './RenderManager'
 
 interface Style {
+  getApplicationMenuItemClass(suffix: ''|'File'|'Folder'|'FolderContainer'): string
+
   getHintClass(): string
   getPopupClass(): string
   getFileBoxBackgroundClass(): string
@@ -32,6 +34,10 @@ interface Style {
 }
 
 class DarkTheme implements Style {
+
+  public getApplicationMenuItemClass(suffix: ''|'File'|'Folder'|'FolderContainer'): string {
+    return 'applicationMenuItem'+suffix
+  }
 
   public getHintClass(): string {
     return 'hint'

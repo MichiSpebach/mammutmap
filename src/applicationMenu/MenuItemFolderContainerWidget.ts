@@ -1,3 +1,4 @@
+import { style } from '../styleAdapter'
 import { renderManager } from '../RenderManager'
 import { Widget } from '../Widget'
 import { MenuItemFile } from './MenuItemFile'
@@ -29,6 +30,7 @@ export class MenuItemFolderContainerWidget extends Widget {
         if (this.isRendered()) {
             return Promise.resolve()
         }
+        renderManager.addClassTo(this.getId(), style.getApplicationMenuItemClass('FolderContainer'))
 
         this.menuItemWidgets = this.menuItems.map(item => menuItemWidgetFactory.of(item))
 
