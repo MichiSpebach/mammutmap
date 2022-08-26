@@ -187,7 +187,7 @@ export class DocumentObjectModelAdapter {
 
   public async addEventListenerTo(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove',
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'mouseenter'|'mouseleave',
     callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void> {
     let ipcChannelName = eventType+'_'+id
@@ -227,7 +227,7 @@ export class DocumentObjectModelAdapter {
 
   public async removeEventListenerFrom(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'change'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'mouseenter'|'mouseleave'|'change'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
   ): Promise<void> {
     const ipcChannelName = eventType+'_'+id
     await this.executeJsOnElement(id, "on"+eventType+" = null")

@@ -1,12 +1,16 @@
 import { renderManager } from '../RenderManager'
 import { Widget } from '../Widget'
-import { MenuItemFile } from './MenuItemFile'
 import { MenuItemFolder } from './MenuItemFolder'
+import { MenuItemWidget } from './MenuItemWidget'
+import { util } from '../util'
+import * as menuItemWidgetFactory from './menuItemWidgetFactory'
+import { MenuItemFile } from './MenuItemFile'
 
 export class HtmlApplicationMenuWidget extends Widget {
 
     private readonly id: string
     private readonly menuTree: MenuItemFolder
+    private submenuWidgets: MenuItemWidget<MenuItemFile|MenuItemFolder>[]|undefined
 
     public constructor(id: string, menuTree: MenuItemFolder) {
         super()
@@ -18,24 +22,17 @@ export class HtmlApplicationMenuWidget extends Widget {
         return this.id
     }
 
-    private getHtmlIdOf(menuItem: MenuItemFile|MenuItemFolder): string {
-        return this.getId()+menuItem.id
-    }
-
     public async render(): Promise<void> {
-        await renderManager.setContentTo(this.getId(), this.formMenuBarHtml())
-    }
+        if (this.submenuWidgets) {
+            util.logWarning('Expected HtmlApplicationMenuWidget to only get rendered once.')
+        }
 
-    private formMenuBarHtml(): string {
-        return this.menuTree.submenu.map(menu => this.formTopMenuHtml(menu)).join(' ')
-    }
+        this.submenuWidgets = this.menuTree.submenu.map(item => menuItemWidgetFactory.of(item))
 
-    private formTopMenuHtml(menuItem: MenuItemFile|MenuItemFolder): string {
-        return `<span id="${this.getHtmlIdOf(menuItem)}">${menuItem.label}</span>`
-    }
+        const html: string = this.submenuWidgets.map(widget => `<span id="${widget.getId()}"></span>`).join(' ')
+        await renderManager.setContentTo(this.getId(), html)
 
-    private formMenuFolderHtml(menuItem: MenuItemFolder): string {
-        return `<div id="${menuItem.id}">${menuItem.label}</div>`
+        await Promise.all(this.submenuWidgets.map(widget => widget.render()))
     }
 
 }

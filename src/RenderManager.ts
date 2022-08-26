@@ -113,7 +113,7 @@ export class RenderManager {
 
   public addEventListenerTo(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove',
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'mouseenter'|'mouseleave',
     callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void,
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
@@ -137,7 +137,7 @@ export class RenderManager {
 
   public removeEventListenerFrom(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'change'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter',
+    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'mouseenter'|'mouseleave'|'change'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter',
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
     return this.runOrSchedule(new Command({
