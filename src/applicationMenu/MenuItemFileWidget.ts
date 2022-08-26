@@ -11,7 +11,7 @@ export class MenuItemFileWidget extends MenuItemWidget<MenuItemFile> {
 
     protected async afterRender(): Promise<void> {
         await Promise.all([
-            renderManager.addClassTo(this.getId(), style.getApplicationMenuItemClass('File')),
+            renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemFile')),
             renderManager.addEventListenerTo(this.getId(), 'click', () => this.menuItem.click())
         ])
     }

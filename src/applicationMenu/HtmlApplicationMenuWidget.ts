@@ -5,6 +5,7 @@ import { MenuItemWidget } from './MenuItemWidget'
 import { util } from '../util'
 import * as menuItemWidgetFactory from './menuItemWidgetFactory'
 import { MenuItemFile } from './MenuItemFile'
+import { style } from '../styleAdapter'
 
 export class HtmlApplicationMenuWidget extends Widget {
 
@@ -26,6 +27,7 @@ export class HtmlApplicationMenuWidget extends Widget {
         if (this.submenuWidgets) {
             util.logWarning('Expected HtmlApplicationMenuWidget to only get rendered once.')
         }
+        renderManager.addClassTo(this.getId(), style.getApplicationMenuClass(''))
 
         this.submenuWidgets = this.menuTree.submenu.map(item => menuItemWidgetFactory.of(item))
 

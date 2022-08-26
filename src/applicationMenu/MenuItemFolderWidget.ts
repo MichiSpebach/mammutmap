@@ -21,7 +21,7 @@ export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
 
     protected async afterRender(): Promise<void> {
         await Promise.all([
-            renderManager.addClassTo(this.getId(), style.getApplicationMenuItemClass('Folder')),
+            renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemFolder')),
             renderManager.addEventListenerTo(this.getId(), 'mouseenter', () => this.submenuContainer.render()),
             renderManager.addEventListenerTo(this.getId(), 'mouseleave', () => this.submenuContainer.unrender())
         ])

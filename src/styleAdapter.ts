@@ -2,7 +2,7 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { renderManager } from './RenderManager'
 
 interface Style {
-  getApplicationMenuItemClass(suffix: ''|'File'|'Folder'|'FolderContainer'): string
+  getApplicationMenuClass(suffix: ''|'Item'|'ItemFile'|'ItemFolder'|'ItemFolderContainer'): string
 
   getHintClass(): string
   getPopupClass(): string
@@ -35,8 +35,8 @@ interface Style {
 
 class DarkTheme implements Style {
 
-  public getApplicationMenuItemClass(suffix: ''|'File'|'Folder'|'FolderContainer'): string {
-    return 'applicationMenuItem'+suffix
+  public getApplicationMenuClass(suffix: ''|'Item'|'ItemFile'|'ItemFolder'|'ItemFolderContainer'): string {
+    return 'applicationMenu'+suffix
   }
 
   public getHintClass(): string {

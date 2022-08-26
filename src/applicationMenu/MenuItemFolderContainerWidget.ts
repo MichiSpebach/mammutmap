@@ -5,12 +5,14 @@ import { MenuItemFile } from './MenuItemFile'
 import { MenuItemFolder } from './MenuItemFolder'
 import { MenuItemWidget } from './MenuItemWidget'
 import * as menuItemWidgetFactory from './menuItemWidgetFactory'
+import { util } from '../util'
 
 export class MenuItemFolderContainerWidget extends Widget {
 
     private readonly id: string
     private readonly menuItems: (MenuItemFile|MenuItemFolder)[]
     private menuItemWidgets: MenuItemWidget<MenuItemFile|MenuItemFolder>[] | undefined
+    private ongoingUnrender: Promise<void> = Promise.resolve()
 
     public constructor(id: string, menuItems: (MenuItemFile|MenuItemFolder)[]) {
         super()
@@ -30,7 +32,7 @@ export class MenuItemFolderContainerWidget extends Widget {
         if (this.isRendered()) {
             return Promise.resolve()
         }
-        renderManager.addClassTo(this.getId(), style.getApplicationMenuItemClass('FolderContainer'))
+        renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemFolderContainer'))
 
         this.menuItemWidgets = this.menuItems.map(item => menuItemWidgetFactory.of(item))
 
@@ -41,7 +43,17 @@ export class MenuItemFolderContainerWidget extends Widget {
     }
 
     public async unrender(): Promise<void> {
-        if (!this.isRendered() || !this.menuItemWidgets) { // nullcheck redundant but needed to make compiler understand
+        if (!this.isRendered()) {
+            return this.ongoingUnrender // prevents parent widget from removing this widget before ongoing unrender is completed
+        }
+
+        this.ongoingUnrender = this.unrenderExecute()
+        await this.ongoingUnrender
+    }
+
+    private async unrenderExecute(): Promise<void> {
+        if (!this.menuItemWidgets) {
+            util.logWarning('menuItemWidgets is not set, this should be impossible at this state')
             return
         }
 
@@ -49,6 +61,7 @@ export class MenuItemFolderContainerWidget extends Widget {
         this.menuItemWidgets = undefined
 
         await Promise.all(menuItemWidgetsToUnrender.map(widget => widget.unrender()))
+        await renderManager.setContentTo(this.getId(), '')
     }
     
 }

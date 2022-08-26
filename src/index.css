@@ -9,6 +9,37 @@ pre {
   font-family: "Source Code Pro", Monaco, Consolas, "Courier New", monospace;
 }
 
+.applicationMenu {
+  padding: 4px;
+  background-color: #333;
+}
+.applicationMenuItem {
+  padding: 4px;
+  background-color: #333;
+  box-sizing: border-box;
+  border-style: solid;
+  border-color: #555;
+  border-width: 1px;
+  border-radius: 3px;
+}
+.applicationMenuItem:hover {
+  background-color: #468;
+}
+
+.applicationMenuItemFile {
+  cursor: pointer;
+}
+.applicationMenuItemFolder {
+  cursor: default;
+}
+
+.applicationMenuItemFolderContainer {
+  display: inline-block;
+  position: absolute;
+  margin-top: -4px;
+  white-space: nowrap;
+}
+
 .terminal {
   background-color: #202428;
 }
