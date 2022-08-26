@@ -35,6 +35,9 @@ export class MenuItemFolderContainerWidget extends Widget {
         renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemFolderContainer'))
 
         this.menuItemWidgets = this.menuItems.map(item => menuItemWidgetFactory.of(item))
+        if (this.menuItemWidgets.length === 0) {
+            this.menuItemWidgets.push(menuItemWidgetFactory.of(new MenuItemFile({label: 'empty', click: () => {}})))
+        }
 
         let html = this.menuItemWidgets.map(widget => `<div id="${widget.getId()}"></div>`).join('')
         await renderManager.setContentTo(this.getId(), html)

@@ -10,17 +10,16 @@ pre {
 }
 
 .applicationMenu {
-  padding: 4px;
+  padding: 7px;
   background-color: #333;
 }
 .applicationMenuItem {
-  padding: 4px;
+  padding: 7px;
   background-color: #333;
   box-sizing: border-box;
   border-style: solid;
   border-color: #555;
   border-width: 1px;
-  border-radius: 3px;
 }
 .applicationMenuItem:hover {
   background-color: #468;
@@ -36,7 +35,7 @@ pre {
 .applicationMenuItemFolderContainer {
   display: inline-block;
   position: absolute;
-  margin-top: -4px;
+  margin-top: -7px;
   white-space: nowrap;
 }
 
