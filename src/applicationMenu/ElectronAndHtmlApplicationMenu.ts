@@ -1,4 +1,4 @@
-import { ApplicationMenu } from './applicationMenu'
+import { ApplicationMenu } from './ApplicationMenu'
 import { ElectronApplicationMenu } from './ElectronApplicationMenu'
 import { HtmlApplicationMenu } from './HtmlApplicationMenu'
 import { MenuItemFile } from './MenuItemFile'
@@ -7,25 +7,25 @@ import { MenuItemFolder } from './MenuItemFolder'
 export class ElectronAndHtmlApplicationMenu extends ApplicationMenu {
     private readonly electronApplicationMenu: ElectronApplicationMenu
     private readonly htmlApplicatioinMenu: HtmlApplicationMenu
-  
+
     public constructor() {
         super()
         this.electronApplicationMenu = new ElectronApplicationMenu()
         this.htmlApplicatioinMenu = new HtmlApplicationMenu()
     }
-  
+
     public async initAndRender(): Promise<void> {
         await Promise.all([
             this.electronApplicationMenu.initAndRender(),
             this.htmlApplicatioinMenu.initAndRender()
         ])
     }
-  
+
     public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
         this.electronApplicationMenu.addMenuItemToPlugins(menuItem)
         this.htmlApplicatioinMenu.addMenuItemToPlugins(menuItem)
     }
-  
+
     public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
         this.electronApplicationMenu.addMenuItemTo(parentMenuItemId, menuItem)
         this.htmlApplicatioinMenu.addMenuItemTo(parentMenuItemId, menuItem)
@@ -37,5 +37,5 @@ export class ElectronAndHtmlApplicationMenu extends ApplicationMenu {
             this.htmlApplicatioinMenu.setMenuItemEnabled(menuItem, enabled)
         ])
     }
-    
+
   }

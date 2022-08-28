@@ -1,4 +1,4 @@
-import { ApplicationMenu } from './applicationMenu'
+import { ApplicationMenu } from './ApplicationMenu'
 import { Menu, MenuItem as ElectronMenuItem } from 'electron'
 import { MenuItemFile } from './MenuItemFile'
 import { MenuItemFolder } from './MenuItemFolder'
@@ -11,7 +11,7 @@ export class ElectronApplicationMenu extends ApplicationMenu {
       Menu.setApplicationMenu(menu)
       return Promise.resolve()
     }
-  
+
     public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
       const menu: Menu|undefined = this.getElectronMenuItemById(parentMenuItemId)?.submenu
       if (!menu) {
@@ -30,11 +30,11 @@ export class ElectronApplicationMenu extends ApplicationMenu {
         electronMenuItem.enabled = enabled
         return Promise.resolve()
     }
-  
+
     private getElectronMenuItemById(id: string): ElectronMenuItem|null {
       return this.getApplicationMenu().getMenuItemById(id)
     }
-  
+
     private getApplicationMenu(): Menu|never {
       const applicationMenu: Menu|null = Menu.getApplicationMenu()
       if (!applicationMenu) {
@@ -42,5 +42,5 @@ export class ElectronApplicationMenu extends ApplicationMenu {
       }
       return applicationMenu
     }
-  
+
 }

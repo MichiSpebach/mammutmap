@@ -1,4 +1,4 @@
-import { ApplicationMenu } from './applicationMenu/applicationMenu'
+import { ApplicationMenu } from './applicationMenu/ApplicationMenu'
 import { ElectronAndHtmlApplicationMenu } from './applicationMenu/ElectronAndHtmlApplicationMenu'
 
 // TODO: move into applicationMenu folder or context file?

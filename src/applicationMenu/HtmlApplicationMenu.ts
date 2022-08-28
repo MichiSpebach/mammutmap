@@ -1,4 +1,4 @@
-import { ApplicationMenu } from './applicationMenu'
+import { ApplicationMenu } from './ApplicationMenu'
 import { MenuItemFile } from './MenuItemFile'
 import { MenuItemFolder } from './MenuItemFolder'
 import * as indexHtmlIds from '../indexHtmlIds'
@@ -21,7 +21,7 @@ export class HtmlApplicationMenu extends ApplicationMenu {
         await renderManager.addContentTo(indexHtmlIds.bodyId, `<div id="${this.widget.getId()}" style="${style}"></div>`)
         await this.widget.render()
     }
-  
+
     public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
         const parentMenuItem: MenuItemFolder|MenuItemFile|undefined = this.findMenuItemById(parentMenuItemId)
         if (!parentMenuItem) {
@@ -40,5 +40,5 @@ export class HtmlApplicationMenu extends ApplicationMenu {
         // TODO
         return Promise.resolve()
     }
-    
+
   }
