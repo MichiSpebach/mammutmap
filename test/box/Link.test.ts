@@ -5,7 +5,6 @@ import { Box } from '../../src/box/Box'
 import { FolderBox } from '../../src/box/FolderBox'
 import { Link } from '../../src/box/Link'
 import { ClientRect } from '../../src/ClientRect'
-import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
 import { DocumentObjectModelAdapter, init as initDomAdapter } from '../../src/domAdapter'
 import { RenderManager, init as initRenderManager } from '../../src/RenderManager'
 import { Transform } from '../../src/box/Transform'
@@ -15,6 +14,7 @@ import { RootFolderBox } from '../../src/box/RootFolderBox'
 import { ProjectSettings } from '../../src/ProjectSettings'
 import { fileSystem } from '../../src/fileSystemAdapter'
 import { util } from '../../src/util'
+import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
 
 test('render', async () => {
   const scenario = setupSimpleScenario()
@@ -34,11 +34,12 @@ test('render', async () => {
 
 test('reorderAndSave not rendered yet', async () => {
   const scenario = setupSimpleScenario()
-  const logError = jest.fn((message) => {throw new Error(message)})
-  util.logError = logError
+  const logWarning = jest.fn()
+  util.logWarning = logWarning
 
-  await expect(scenario.link.reorderAndSave()).rejects.toThrowError('WayPoint must be rendered before calling getBorderingBox(), but was not.')
-  expect(logError).toHaveBeenCalledWith('WayPoint must be rendered before calling getBorderingBox(), but was not.')
+  await scenario.link.reorderAndSave()
+
+  expect(logWarning).toHaveBeenCalledWith('LinkEnd should be rendered before calling getRenderedTarget() or renderedTarget should be set in constructor, but was not.')
 })
 
 test('reorderAndSave', async () => {
@@ -78,31 +79,28 @@ function setupSimpleScenario(): {
   const fromBox: Box = new FolderBox('FromBox', managingBox, BoxMapData.buildNewWithId('fromBox', 5, 5, 10, 10), false)
   const toBox: Box = new FolderBox('ToBox', managingBox, BoxMapData.buildNewWithId('toBox', 85, 5, 10, 10), false)
 
-  fileSystem.saveToJsonFile = (_filePath, _object) => Promise.resolve()
-
   Object.defineProperty(managingBox, 'transform', {value: new Transform(managingBox)})
-  //managingBox.getId.mockReturnValue('managingBox')
-  //managingBox.getClientRect.mockReturnValue(Promise.resolve(new ClientRect(0, 0, 100, 100)))
   managingBox.getClientRect = () => Promise.resolve(new ClientRect(0, 0, 100, 100))
-
-  //fromBox.getId.mockReturnValue('fromBox')
-  //fromBox.getName.mockReturnValue('FromBox')
-  //fromBox.getParent.mockReturnValue(managingBox)
-
-  //toBox.getId.mockReturnValue('toBox')
-  //toBox.getName.mockReturnValue('ToBox')
-  //toBox.getParent.mockReturnValue(managingBox)
-
-  const boxManager: MockProxy<BoxManager> = mock<BoxManager>()
-  boxManager.getBoxIfExists.calledWith('fromBox').mockReturnValue(fromBox)
-  boxManager.getBoxIfExists.calledWith('toBox').mockReturnValue(toBox)
-  initBoxManager(boxManager)
+  managingBox.getBox = (id: string) => {
+    if (id === 'fromBox') {
+      return fromBox
+    }
+    if (id === 'toBox') {
+      return toBox
+    }
+    return undefined
+  }
 
   const domAdapter: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
   initDomAdapter(domAdapter)
 
   const renderMan: MockProxy<RenderManager> = mock<RenderManager>()
   initRenderManager(renderMan)
+
+  const boxManager: MockProxy<BoxManager> = mock<BoxManager>()
+  initBoxManager(boxManager)
+
+  fileSystem.saveToJsonFile = (_filePath, _object) => Promise.resolve()
 
   util.logInfo = () => {}
 
