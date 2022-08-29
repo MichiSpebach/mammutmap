@@ -162,6 +162,13 @@ test('matchFileNames', () => {
   expect(util.matchFileNames('fileName', 'fileName')).toBe(true)
   expect(util.matchFileNames('fileName', 'fileName.fileEnding')).toBe(false)
   expect(util.matchFileNames('fileName.fileEnding', 'fileName')).toBe(false)
+
+  expect(util.matchFileNames('fileName.fileEnding', 'fileName.fileEnding', {ignoreFileEndings: true})).toBe(true)
   expect(util.matchFileNames('fileName', 'fileName.fileEnding', {ignoreFileEndings: true})).toBe(true)
   expect(util.matchFileNames('fileName.fileEnding', 'fileName', {ignoreFileEndings: true})).toBe(true)
+  expect(util.matchFileNames('fileName.fileEnding', 'fileName.otherFileEnding', {ignoreFileEndings: true})).toBe(true)
+  expect(util.matchFileNames('fileName', 'fileName.file.endings', {ignoreFileEndings: true})).toBe(false)
+  expect(util.matchFileNames('fileName.file.endings', 'fileName', {ignoreFileEndings: true})).toBe(false)
+  expect(util.matchFileNames('fileName.component', 'fileName.component.tsx', {ignoreFileEndings: true})).toBe(true)
+  expect(util.matchFileNames('fileName.component.tsx', 'fileName.component', {ignoreFileEndings: true})).toBe(true)
 })

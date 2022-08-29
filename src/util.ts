@@ -208,7 +208,13 @@ class Util {
     if (!options?.ignoreFileEndings) {
       return name === otherName
     }
-    return name.split('.')[0] === otherName.split('.')[0]
+
+    const nameFileEndingIndex: number = name.lastIndexOf('.')
+    const otherNameFileEndingIndex: number = otherName.lastIndexOf('.')
+    const nameWithoutFileEnding: string = nameFileEndingIndex > 0 ? name.substring(0, nameFileEndingIndex) : name
+    const otherNameWithoutFileEnding: string = otherNameFileEndingIndex > 0 ? otherName.substring(0, otherNameFileEndingIndex) : otherName
+
+    return name === otherNameWithoutFileEnding || nameWithoutFileEnding === otherName || nameWithoutFileEnding === otherNameWithoutFileEnding
   }
 
   public toFormattedJson(object: any) {
