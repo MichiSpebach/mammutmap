@@ -7,10 +7,14 @@ import { ProjectSettings } from '../ProjectSettings'
 import { dialog } from 'electron'
 import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
+import { ElectronApplicationMenu } from './ElectronApplicationMenu'
+import { HtmlApplicationMenu } from './HtmlApplicationMenu'
 
-export abstract class ApplicationMenu {
+export class ApplicationMenu {
   
-  protected readonly menuTree: MenuItemFolder
+  private readonly menuTree: MenuItemFolder
+  private readonly electronApplicationMenu: ElectronApplicationMenu
+  private readonly htmlApplicatioinMenu: HtmlApplicationMenu
 
   public constructor() {
     const fileMenu: MenuItemFolder = new MenuItemFolder({id: 'File', label: 'File', submenu: [
@@ -29,9 +33,16 @@ export abstract class ApplicationMenu {
     ]})
 
     this.menuTree = new MenuItemFolder({id: 'ApplicationMenu', label: 'ApplicationMenu', submenu: [fileMenu, settingsMenu, pluginsMenu]})
+    this.electronApplicationMenu = new ElectronApplicationMenu(this.menuTree)
+    this.htmlApplicatioinMenu = new HtmlApplicationMenu(this.menuTree)
   }
 
-  public abstract initAndRender(): Promise<void>
+  public async initAndRender(): Promise<void> {
+    await Promise.all([
+      this.electronApplicationMenu.initAndRender(),
+      //this.htmlApplicatioinMenu.initAndRender() // TODO WIP
+    ])
+  }
 
   public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
     this.addMenuItemTo('Plugins', menuItem)
@@ -50,17 +61,18 @@ export abstract class ApplicationMenu {
 
     parentMenuItem.submenu.push(menuItem)
 
-    this.afterAddMenuItemTo(parentMenuItem, menuItem)
+    this.electronApplicationMenu.addMenuItemTo(parentMenuItem, menuItem)
+    this.htmlApplicatioinMenu.addMenuItemTo(parentMenuItem, menuItem)
   }
-
-  protected abstract afterAddMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItemFile|MenuItemFolder): void
 
   public async setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
     menuItem.enabled = enabled
-    await this.afterSetMenuItemEnabled(menuItem, enabled)
-  }
 
-  protected abstract afterSetMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void>
+    await Promise.all([
+      this.electronApplicationMenu.setMenuItemEnabled(menuItem, enabled),
+      this.htmlApplicatioinMenu.setMenuItemEnabled(menuItem, enabled)
+    ])
+  }
 
   private findMenuItemById(menuItemId: string): MenuItemFile|MenuItemFolder|undefined {
     return this.menuTree.findMenuItemById(menuItemId)
