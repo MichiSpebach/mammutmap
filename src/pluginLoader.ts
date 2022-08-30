@@ -2,7 +2,7 @@ import { Dirent } from 'fs'
 import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
 import { util } from './util'
 import { fileSystem } from './fileSystemAdapter'
-import { applicationMenu } from './applicationMenu'
+import { applicationMenu } from './applicationMenu/applicationMenu'
 
 const pluginFolderName: string = 'plugin'
 const pluginFolderPath: string = './'+pluginFolderName

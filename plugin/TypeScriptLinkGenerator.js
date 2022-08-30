@@ -1,13 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const ts = require("typescript");
-const MenuItemFile_1 = require("../dist/applicationMenu/MenuItemFile");
+const pluginFacade_1 = require("../dist/pluginFacade");
 const util_1 = require("../dist/util");
-const applicationMenu_1 = require("../dist/applicationMenu");
 const contextMenu = require("../dist/contextMenu");
 const pluginFacade = require("../dist/pluginFacade");
-applicationMenu_1.applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItemFile_1.MenuItemFile({ label: 'Generate links', click: generateLinks }));
-applicationMenu_1.applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItemFile_1.MenuItemFile({ label: 'Join on GitHub (coming soon)', click: () => util_1.util.logInfo('Join on GitHub is coming soon') }));
+pluginFacade_1.applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new pluginFacade_1.MenuItemFile({ label: 'Generate links', click: generateLinks }));
+pluginFacade_1.applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new pluginFacade_1.MenuItemFile({ label: 'Join on GitHub (coming soon)', click: () => util_1.util.logInfo('Join on GitHub is coming soon') }));
 contextMenu.addFileBoxMenuItem((box) => {
     if (!box.getName().endsWith('.ts')) {
         return undefined;

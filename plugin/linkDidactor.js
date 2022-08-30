@@ -1,23 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const Link_1 = require("../dist/box/Link");
-const applicationMenu_1 = require("../dist/applicationMenu");
-const MenuItemFile_1 = require("../dist/applicationMenu/MenuItemFile");
+const pluginFacade_1 = require("../dist/pluginFacade");
 const util_1 = require("../dist/util");
-const deactivateMenuItem = new MenuItemFile_1.MenuItemFile({ label: 'deactivate', click: deactivate });
-const activateMenuItem = new MenuItemFile_1.MenuItemFile({ label: 'activate', click: activate });
-applicationMenu_1.applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem);
-applicationMenu_1.applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem);
+const deactivateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'deactivate', click: deactivate });
+const activateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'activate', click: activate });
+pluginFacade_1.applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem);
+pluginFacade_1.applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem);
 async function deactivate() {
     DidactedLink.deactivateAndPlugout();
-    await applicationMenu_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, false);
-    await applicationMenu_1.applicationMenu.setMenuItemEnabled(activateMenuItem, true);
+    await pluginFacade_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, false);
+    await pluginFacade_1.applicationMenu.setMenuItemEnabled(activateMenuItem, true);
     util_1.util.logInfo('deactivated linkDidactor plugin');
 }
 async function activate() {
     DidactedLink.activateAndPlugin();
-    await applicationMenu_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, true);
-    await applicationMenu_1.applicationMenu.setMenuItemEnabled(activateMenuItem, false);
+    await pluginFacade_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, true);
+    await pluginFacade_1.applicationMenu.setMenuItemEnabled(activateMenuItem, false);
     util_1.util.logInfo('activated linkDidactor plugin');
 }
 const colors = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal'];

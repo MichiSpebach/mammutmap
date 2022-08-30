@@ -9,8 +9,11 @@ import { BoxWatcher } from './box/BoxWatcher'
 import { LinkEndData } from './box/LinkEndData'
 import * as boxFinder from './pluginUtil/boxFinder'
 import { Link } from './box/Link'
+import { applicationMenu } from './applicationMenu/applicationMenu'
+import { MenuItemFile } from './applicationMenu/MenuItemFile'
 
 export { Box, FileBox, RootFolderBox }
+export { applicationMenu, MenuItemFile }
 
 let boxWatchers: BoxWatcher[] = []
 

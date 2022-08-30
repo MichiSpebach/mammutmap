@@ -1,5 +1,4 @@
-import { MenuItemFile } from '../dist/applicationMenu/MenuItemFile'
-import { applicationMenu } from '../dist/applicationMenu'
+import { applicationMenu, MenuItemFile } from '../dist/pluginFacade'
 import { WizardWidget } from './pactCycleDetector/WizardWidget'
 
 applicationMenu.addMenuItemTo('pactCycleDetector.js', new MenuItemFile({label: 'detect...', click: openWizard}))

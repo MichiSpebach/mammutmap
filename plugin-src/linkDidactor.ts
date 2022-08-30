@@ -2,8 +2,7 @@ import { Link } from '../dist/box/Link'
 import { WayPointData } from '../dist/box/WayPointData'
 import { NodeWidget } from '../dist/node/NodeWidget'
 import { Box } from '../dist/pluginFacade'
-import { applicationMenu } from '../dist/applicationMenu'
-import { MenuItemFile } from '../dist/applicationMenu/MenuItemFile'
+import { applicationMenu, MenuItemFile } from '../dist/pluginFacade'
 import { util } from '../dist/util'
 
 const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate})

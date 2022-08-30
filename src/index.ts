@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
 import * as domAdapter from './domAdapter'
 import * as commandLine from './commandLine'
-import { applicationMenu } from './applicationMenu'
+import { applicationMenu } from './applicationMenu/applicationMenu'
 import * as pluginLoader from './pluginLoader'
 
 var mainWindow: BrowserWindow

@@ -1,5 +1,4 @@
-import { applicationMenu } from '../dist/applicationMenu'
-import { MenuItemFile } from '../dist/applicationMenu/MenuItemFile'
+import { applicationMenu, MenuItemFile } from '../dist/pluginFacade'
 import { util } from '../dist/util'
 import { dom } from '../dist/domAdapter'
 import { style } from '../dist/styleAdapter'

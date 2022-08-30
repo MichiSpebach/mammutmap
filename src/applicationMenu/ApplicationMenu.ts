@@ -10,7 +10,7 @@ import { renderManager } from '../RenderManager'
 import { ElectronApplicationMenu } from './ElectronApplicationMenu'
 import { HtmlApplicationMenu } from './HtmlApplicationMenu'
 
-export class ApplicationMenu {
+class ApplicationMenu {
   
   private readonly menuTree: MenuItemFolder
   private readonly electronApplicationMenu: ElectronApplicationMenu
@@ -174,3 +174,5 @@ export class ApplicationMenu {
   }
 
 }
+
+export let applicationMenu: ApplicationMenu = new ApplicationMenu()
