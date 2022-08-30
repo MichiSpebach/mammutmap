@@ -13,22 +13,22 @@ export abstract class ApplicationMenu {
   protected readonly menuTree: MenuItemFolder
 
   public constructor() {
-    const fileMenu: MenuItemFolder = new MenuItemFolder('File', 'File', [
+    const fileMenu: MenuItemFolder = new MenuItemFolder({id: 'File', label: 'File', submenu: [
       new MenuItemFile({label: 'Open Folder...', click: () => this.openFolder()}),
       new MenuItemFile({label: 'Open ProjectFile '+ProjectSettings.preferredFileNameExtension+'...', click: () => this.openProjectFile()})
-    ])
+    ]})
 
-    const settingsMenu: MenuItemFolder = new MenuItemFolder('Settings', 'Settings', [
+    const settingsMenu: MenuItemFolder = new MenuItemFolder({id: 'Settings', label: 'Settings', submenu: [
       new MenuItemFile({label: 'ApplicationSettings', click: () => settingsWidget.openIfNotOpened()}),
       new MenuItemFile({label: 'DeveloperTools', click: () => renderManager.openDevTools()})
-    ])
+    ]})
 
-    const pluginsMenu: MenuItemFolder = new MenuItemFolder('Plugins', 'Plugins', [
+    const pluginsMenu: MenuItemFolder = new MenuItemFolder({id: 'Plugins', label: 'Plugins', submenu: [
       new MenuItemFile({label: 'MarketPlace (coming soon)', click: () => util.logInfo('MarketPlace is coming soon')}),
       new MenuItemFile({label: 'Tutorial to create plugins (coming soon)', click: () => util.logInfo('Tutorial to create plugins is coming soon')})
-    ])
+    ]})
 
-    this.menuTree = new MenuItemFolder('ApplicationMenu', 'ApplicationMenu', [fileMenu, settingsMenu, pluginsMenu])
+    this.menuTree = new MenuItemFolder({id: 'ApplicationMenu', label: 'ApplicationMenu', submenu: [fileMenu, settingsMenu, pluginsMenu]})
   }
 
   public abstract initAndRender(): Promise<void>
@@ -37,11 +37,32 @@ export abstract class ApplicationMenu {
     this.addMenuItemTo('Plugins', menuItem)
   }
 
-  public abstract addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void
+  public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
+    const parentMenuItem: MenuItemFolder|MenuItemFile|undefined = this.findMenuItemById(parentMenuItemId)
+    if (!parentMenuItem) {
+        util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItemId}' because it was not found.`)
+        return
+    }
+    if (!(parentMenuItem instanceof MenuItemFolder)) {
+        util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItemId}' because it is not a MenuItemFolder.`)
+        return
+    }
 
-  public abstract setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void>
+    parentMenuItem.submenu.push(menuItem)
 
-  protected findMenuItemById(menuItemId: string): MenuItemFile|MenuItemFolder|undefined {
+    this.afterAddMenuItemTo(parentMenuItem, menuItem)
+  }
+
+  protected abstract afterAddMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItemFile|MenuItemFolder): void
+
+  public async setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
+    menuItem.enabled = enabled
+    await this.afterSetMenuItemEnabled(menuItem, enabled)
+  }
+
+  protected abstract afterSetMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void>
+
+  private findMenuItemById(menuItemId: string): MenuItemFile|MenuItemFolder|undefined {
     return this.menuTree.findMenuItemById(menuItemId)
   }
   

@@ -1,17 +1,10 @@
-import { util } from '../util'
+import { MenuItem } from './MenuItem'
 
-export class MenuItemFile {
-    public readonly id: string
-    public readonly label: string
+export class MenuItemFile extends MenuItem {
     public readonly click: () => void|Promise<void>
 
-    public constructor(params: {id?: string, label: string, click: () => void|Promise<void>}) {
-        if (params.id) {
-            this.id = params.id
-        } else {
-            this.id = params.label+util.generateId()
-        }
-        this.label = params.label
+    public constructor(params: {id?: string, label: string, enabled?: boolean, click: () => void|Promise<void>}) {
+        super(params)
         this.click = params.click
     }
 

@@ -49,7 +49,7 @@ async function loadPluginsFrom(pluginFolderPath: string): Promise<void> {
 
 async function loadPlugin(fileName: string): Promise<void> {
   util.logInfo('load '+fileName+' plugin')
-  applicationMenu.addMenuItemToPlugins(new MenuItemFolder(fileName, fileName, []))
+  applicationMenu.addMenuItemToPlugins(new MenuItemFolder({id: fileName, label: fileName, submenu: []}))
 
   await import(util.joinPaths(['../', pluginFolderName, fileName]))
     .then(() => util.logInfo(fileName+' plugin loaded'))

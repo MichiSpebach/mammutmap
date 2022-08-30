@@ -4,7 +4,6 @@ import { MenuItemFolder } from './MenuItemFolder'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { renderManager } from '../RenderManager'
 import { HtmlApplicationMenuWidget } from './HtmlApplicationMenuWidget'
-import { util } from '../util'
 
 export class HtmlApplicationMenu extends ApplicationMenu {
 
@@ -22,22 +21,12 @@ export class HtmlApplicationMenu extends ApplicationMenu {
         await this.widget.render()
     }
 
-    public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
-        const parentMenuItem: MenuItemFolder|MenuItemFile|undefined = this.findMenuItemById(parentMenuItemId)
-        if (!parentMenuItem) {
-            util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItem}' because it was not found.`)
-            return
-        }
-        if (!(parentMenuItem instanceof MenuItemFolder)) {
-            util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItem}' because it is not a MenuItemFolder.`)
-            return
-        }
-
-        parentMenuItem.submenu.push(menuItem)
+    protected afterAddMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItemFile|MenuItemFolder): void {
+        // TODO implement for case that parentMenuItem is opened at the moment
     }
 
-    public setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
-        // TODO
+    protected afterSetMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
+        // TODO implement for case that parentMenuItem is opened at the moment
         return Promise.resolve()
     }
 

@@ -21,17 +21,12 @@ export class ElectronAndHtmlApplicationMenu extends ApplicationMenu {
         ])
     }
 
-    public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
-        this.electronApplicationMenu.addMenuItemToPlugins(menuItem)
-        this.htmlApplicatioinMenu.addMenuItemToPlugins(menuItem)
+    protected afterAddMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItemFile|MenuItemFolder): void {
+        this.electronApplicationMenu.addMenuItemTo(parentMenuItem.id, menuItem)
+        this.htmlApplicatioinMenu.addMenuItemTo(parentMenuItem.id, menuItem)
     }
 
-    public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
-        this.electronApplicationMenu.addMenuItemTo(parentMenuItemId, menuItem)
-        this.htmlApplicatioinMenu.addMenuItemTo(parentMenuItemId, menuItem)
-    }
-
-    public async setMenuItemEnabled(menuItem: MenuItemFile | MenuItemFolder, enabled: boolean): Promise<void> {
+    protected async afterSetMenuItemEnabled(menuItem: MenuItemFile | MenuItemFolder, enabled: boolean): Promise<void> {
         await Promise.all([
             this.electronApplicationMenu.setMenuItemEnabled(menuItem, enabled),
             this.htmlApplicatioinMenu.setMenuItemEnabled(menuItem, enabled)

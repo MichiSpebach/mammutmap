@@ -26,7 +26,7 @@ const createWindow = async () => {
   
   domAdapter.initFromBrowserWindow(mainWindow)
   commandLine.init()
-  await applicationMenu.initAndRender()
+  await applicationMenu.initAndRender() // TODO: handle dynamic menus for mac
 
   await pluginLoader.loadPlugins()
 };
