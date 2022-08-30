@@ -2,7 +2,7 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { renderManager } from './RenderManager'
 
 interface Style {
-  getApplicationMenuClass(suffix: ''|'Item'|'ItemFile'|'ItemFolder'|'ItemFolderContainer'): string
+  getApplicationMenuClass(suffix: ''|'Item'|'ItemDisabled'|'ItemFile'|'ItemFolder'|'ItemFolderContainer'): string
 
   getHintClass(): string
   getPopupClass(): string

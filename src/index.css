@@ -24,6 +24,10 @@ pre {
 .applicationMenuItem:hover {
   background-color: #468;
 }
+.applicationMenuItemDisabled {
+  color: #888;
+  cursor: default !important;
+}
 
 .applicationMenuItemFile {
   cursor: pointer;

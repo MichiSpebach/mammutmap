@@ -11,8 +11,14 @@ export abstract class MenuItem {
         } else {
             this.id = params.label+util.generateId()
         }
+        
         this.label = params.label
-        this.enabled = params.enabled ? params.enabled : true
+
+        if (params.enabled === undefined) {
+            this.enabled = true
+        } else {
+            this.enabled = params.enabled
+        }
     }
 
 }

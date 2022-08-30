@@ -12,12 +12,18 @@ export class MenuItemFileWidget extends MenuItemWidget<MenuItemFile> {
     protected async afterRender(): Promise<void> {
         await Promise.all([
             renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemFile')),
-            renderManager.addEventListenerTo(this.getId(), 'click', () => this.menuItem.click())
+            renderManager.addEventListenerTo(this.getId(), 'click', () => this.onClick())
         ])
     }
 
     protected beforeUnrender(): Promise<void> {
         return renderManager.removeEventListenerFrom(this.getId(), 'click')
+    }
+
+    private onClick() {
+        if (this.menuItem.enabled) {
+            this.menuItem.click()
+        }
     }
 
 }

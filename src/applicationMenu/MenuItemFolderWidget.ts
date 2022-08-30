@@ -22,8 +22,8 @@ export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
     protected async afterRender(): Promise<void> {
         await Promise.all([
             renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemFolder')),
-            renderManager.addEventListenerTo(this.getId(), 'mouseenter', () => this.submenuContainer.render()),
-            renderManager.addEventListenerTo(this.getId(), 'mouseleave', () => this.submenuContainer.unrender())
+            renderManager.addEventListenerTo(this.getId(), 'mouseenter', () => this.onMouseenter()),
+            renderManager.addEventListenerTo(this.getId(), 'mouseleave', () => this.onMouseleave())
         ])
     }
 
@@ -33,6 +33,16 @@ export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
             renderManager.removeEventListenerFrom(this.getId(), 'mouseenter'),
             renderManager.removeEventListenerFrom(this.getId(), 'mouseleave')
         ])
+    }
+
+    private onMouseenter() {
+        if (this.menuItem.enabled) {
+            this.submenuContainer.render()
+        }
+    }
+
+    private onMouseleave() {
+        this.submenuContainer.unrender()
     }
 
 }

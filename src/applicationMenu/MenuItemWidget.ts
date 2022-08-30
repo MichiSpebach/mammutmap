@@ -19,6 +19,9 @@ export abstract class MenuItemWidget<MENU_ITEM extends MenuItemFile|MenuItemFold
 
     public async render(): Promise<void> {
         renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('Item'))
+        if (!this.menuItem.enabled) {
+            renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemDisabled'))
+        }
         await renderManager.setContentTo(this.getId(), this.formHtml())
         await this.afterRender()
     }

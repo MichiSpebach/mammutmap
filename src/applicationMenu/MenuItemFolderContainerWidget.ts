@@ -36,7 +36,7 @@ export class MenuItemFolderContainerWidget extends Widget {
 
         this.menuItemWidgets = this.menuItems.map(item => menuItemWidgetFactory.of(item))
         if (this.menuItemWidgets.length === 0) {
-            this.menuItemWidgets.push(menuItemWidgetFactory.of(new MenuItemFile({label: 'empty', click: () => {}})))
+            this.menuItemWidgets.push(menuItemWidgetFactory.of(new MenuItemFile({label: 'empty', enabled: false, click: () => {}})))
         }
 
         let html = this.menuItemWidgets.map(widget => `<div id="${widget.getId()}"></div>`).join('')
