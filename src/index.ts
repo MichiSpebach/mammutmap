@@ -4,6 +4,7 @@ import * as domAdapter from './domAdapter'
 import * as commandLine from './commandLine'
 import { applicationMenu } from './applicationMenu/applicationMenu'
 import * as pluginLoader from './pluginLoader'
+import { util } from './util'
 
 var mainWindow: BrowserWindow
 
@@ -26,9 +27,20 @@ const createWindow = async () => {
   
   domAdapter.initFromBrowserWindow(mainWindow)
   commandLine.init()
-  await applicationMenu.initAndRender() // TODO: handle dynamic menus for mac
+
+  if (process.platform !== 'darwin') {
+    await applicationMenu.initAndRender()
+  }
 
   await pluginLoader.loadPlugins()
+
+  if (process.platform === 'darwin') {
+    let message: string = 'macOS detected, initializing applicationMenu after plugins have loaded'
+    message += ' because dynamically changing menus might not work in macOS.\n'
+    message += 'When problems with the applicationMenu occur you can activate htmlApplicationMenu in the settings.'
+    util.logInfo(message)
+    await applicationMenu.initAndRender()
+  }
 };
 
 // This method will be called when Electron has finished
