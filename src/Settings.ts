@@ -1,6 +1,9 @@
 import { util } from './util'
 import { fileSystem } from './fileSystemAdapter'
 
+export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
+export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'htmlApplicationMenu'
+
 class Settings {
 
   private static readonly settingsFileName: string = 'settings.json'
@@ -11,6 +14,9 @@ class Settings {
   private boxMinSizeToRender: number
   private boxesDraggableIntoOtherBoxes: boolean
   private developerMode: boolean
+  private htmlApplicationMenu: boolean
+
+  private booleanSubscribers: {setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>}[] = []
 
   public static async loadFromFileSystem(): Promise<Settings> {
     let settingsJson: string
@@ -24,7 +30,7 @@ class Settings {
         util.logError('Failed to load application settings because: '+reason)
       })
     }
-
+    
     return new Settings(settingsJson)
   }
 
@@ -35,10 +41,14 @@ class Settings {
     this.boxMinSizeToRender = settingsParsed['boxMinSizeToRender']
     this.boxesDraggableIntoOtherBoxes = settingsParsed['boxesDraggableIntoOtherBoxes']
     this.developerMode = settingsParsed['developerMode']
+    this.htmlApplicationMenu = settingsParsed['htmlApplicationMenu']
   }
 
   private async save(): Promise<void> {
-    await fileSystem.writeFile(Settings.settingsFilePath, util.toFormattedJson(this)) // TODO: merge into existing settings file (not replacing whole file)
+    const thisWithoutLogic: any = {...this}
+    thisWithoutLogic.booleanSubscribers = undefined
+    
+    await fileSystem.writeFile(Settings.settingsFilePath, util.toFormattedJson(thisWithoutLogic)) // TODO: merge into existing settings file (not replacing whole file)
       .then(() => {
         util.logInfo('saved ' + Settings.settingsFilePath)
       })
@@ -63,31 +73,36 @@ class Settings {
     await this.save()
   }
 
-  public getBoolean(name: 'boxesDraggableIntoOtherBoxes'|'developerMode'): boolean {
-    switch (name) {
-      case 'boxesDraggableIntoOtherBoxes':
-        return this.boxesDraggableIntoOtherBoxes
-      case 'developerMode':
-        return this.developerMode
-      default:
-        util.logWarning(`Cannot getBoolean setting with name ${name} and returning false, this happens most likely because of a plugin.`)
-        return false
-    }
+  public getNumber(setting: NumberSetting): number {
+    return this[setting]
   }
 
-  public async setBoolean(name: 'boxesDraggableIntoOtherBoxes'|'developerMode', value: boolean): Promise<void> {
-    switch (name) {
-      case 'boxesDraggableIntoOtherBoxes':
-        this.boxesDraggableIntoOtherBoxes = value
-        break
-      case 'developerMode':
-        this.developerMode = value
-        break
-      default:
-        util.logWarning(`Cannot setBoolean setting with name ${name}, this happens most likely because of a plugin.`)
-        return
-    }
+  public async setNumber(setting: NumberSetting, value: number): Promise<void> {
+    this[setting] = value
     await this.save()
+  }
+
+  public getBoolean(setting: BooleanSetting): boolean {
+    return this[setting]
+  }
+
+  public async setBoolean(setting: BooleanSetting, value: boolean): Promise<void> {
+    this[setting] = value
+    await Promise.all([
+      this.save(),
+      this.notifyBooleanSubscribersFor(setting)
+    ])
+  }
+
+  private async notifyBooleanSubscribersFor(setting: BooleanSetting): Promise<void> {
+    await Promise.all(this.booleanSubscribers
+      .filter(subscriber => subscriber.setting === setting)
+      .map(subscriber => subscriber.onSet(this[setting]))
+    )
+  }
+
+  public async subscribeBoolean(setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>) {
+    this.booleanSubscribers.push({setting, onSet})
   }
 
 }

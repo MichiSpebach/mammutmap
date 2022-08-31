@@ -9,6 +9,7 @@ import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
 import { ElectronApplicationMenu } from './ElectronApplicationMenu'
 import { HtmlApplicationMenu } from './HtmlApplicationMenu'
+import { settingsOnStartup } from '../Settings'
 
 class ApplicationMenu {
   
@@ -38,10 +39,22 @@ class ApplicationMenu {
   }
 
   public async initAndRender(): Promise<void> {
-    await Promise.all([
-      this.electronApplicationMenu.initAndRender(),
-      //this.htmlApplicatioinMenu.initAndRender() // TODO WIP
-    ])
+    const pros: Promise<void>[] = []
+
+    pros.push(this.electronApplicationMenu.initAndRender())
+    const settings = await settingsOnStartup
+    pros.push(this.setHtmlApplicationMenuActive(settings.getBoolean('htmlApplicationMenu')));
+    settings.subscribeBoolean('htmlApplicationMenu', (active) => this.setHtmlApplicationMenuActive(active))
+
+    await Promise.all(pros)
+  }
+
+  private setHtmlApplicationMenuActive(active: boolean): Promise<void> {
+    if (active) {
+      return this.htmlApplicatioinMenu.renderUp()
+    } else {
+      return this.htmlApplicatioinMenu.renderDown()
+    }
   }
 
   public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {

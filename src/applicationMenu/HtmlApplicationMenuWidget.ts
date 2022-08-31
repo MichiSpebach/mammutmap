@@ -37,4 +37,17 @@ export class HtmlApplicationMenuWidget extends Widget {
         await Promise.all(this.submenuWidgets.map(widget => widget.render()))
     }
 
+    public async unrender(): Promise<void> {
+        if (!this.submenuWidgets) {
+            util.logWarning('Unrender called on HtmlApplicationMenuWidget altough it is not rendered.')
+            return
+        }
+
+        await Promise.all(this.submenuWidgets.map(widget => widget.unrender()))
+        await renderManager.setContentTo(this.getId(), '')
+        await renderManager.removeClassFrom(this.getId(), style.getApplicationMenuClass(''))
+        
+        this.submenuWidgets = undefined
+    }
+
 }
