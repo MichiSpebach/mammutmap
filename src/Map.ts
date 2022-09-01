@@ -144,12 +144,12 @@ export class Map {
     if (!this.latestMousePositionWhenMoving) {
       util.logWarning('moveend should be called after move')
     }
-    this.latestMousePositionWhenMoving = undefined
     await Promise.all([
       renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousemove', RenderPriority.RESPONSIVE),
       renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseup', RenderPriority.RESPONSIVE),
       renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseleave', RenderPriority.RESPONSIVE)
     ])
+    this.latestMousePositionWhenMoving = undefined
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
