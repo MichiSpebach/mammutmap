@@ -9,6 +9,7 @@ import { boxManager } from './box/BoxManager'
 import { RootFolderBox } from './box/RootFolderBox'
 import { ProjectSettings } from './ProjectSettings'
 import { ClientPosition } from './box/Transform'
+import * as indexHtmlIds from './indexHtmlIds'
 
 export let map: Map|undefined
 
@@ -65,8 +66,6 @@ export class Map {
       map.rootFolder.render(),
       renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY)),
       renderManager.addEventListenerTo('map', 'mousedown', (clientX: number, clientY: number, ctrlPressed: boolean) => map.movestart(clientX, clientY)),
-      renderManager.addEventListenerTo('map', 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => map.move(clientX, clientY)),
-      renderManager.addEventListenerTo('map', 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => map.moveend(clientX, clientY))
     ])
     return map
   }
@@ -86,9 +85,7 @@ export class Map {
     await this.rootFolder.destruct()
     await Promise.all([
       renderManager.removeEventListenerFrom('map', 'wheel'),
-      renderManager.removeEventListenerFrom('map', 'mousedown'),
-      renderManager.removeEventListenerFrom('map', 'mousemove'),
-      renderManager.removeEventListenerFrom('map', 'mouseup'),
+      renderManager.removeEventListenerFrom('map', 'mousedown')
     ])
     await renderManager.remove('map')
   }
@@ -111,16 +108,21 @@ export class Map {
     util.logDebug(`zooming ${delta} finished at x=${clientX} and y=${clientY}`)
   }
 
-  private movestart(clientX: number, clientY: number): void {
+  private async movestart(clientX: number, clientY: number): Promise<void> {
     if (this.latestMousePositionWhenMoving) {
       util.logWarning('moveend should be called before move')
     }
     this.latestMousePositionWhenMoving = new ClientPosition(clientX, clientY)
+    await Promise.all([
+      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY), RenderPriority.RESPONSIVE),
+      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE),
+      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseleave', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE)
+    ])
   }
 
   private async move(clientX: number, clientY: number): Promise<void> {
     if (!this.latestMousePositionWhenMoving) {
-      //util.logWarning('move should be called between movestart and moveend')
+      util.logWarning('move should be called between movestart and moveend')
       return
     }
     const marginTopOffsetPx: number = clientY - this.latestMousePositionWhenMoving.y
@@ -138,11 +140,16 @@ export class Map {
     await this.rootFolder.render()
   }
 
-  private moveend(clientX: number, clientY: number): void {
+  private async moveend(): Promise<void> {
     if (!this.latestMousePositionWhenMoving) {
       util.logWarning('moveend should be called after move')
     }
     this.latestMousePositionWhenMoving = undefined
+    await Promise.all([
+      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousemove', RenderPriority.RESPONSIVE),
+      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseup', RenderPriority.RESPONSIVE),
+      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseleave', RenderPriority.RESPONSIVE)
+    ])
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
