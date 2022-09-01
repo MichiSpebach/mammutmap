@@ -1,5 +1,7 @@
-import { dom, BatchMethod } from './domAdapter'
+import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType } from './domAdapter'
 import { ClientRect } from './ClientRect'
+
+export { MouseEventType, DragEventType, WheelEventType, InputEventType }
 
 export class RenderManager {
   private commands: Command[] = []
@@ -111,9 +113,20 @@ export class RenderManager {
     }))
   }
 
+  public addWheelListenerTo(
+    id: string,
+    callback: (delta: number, clientX: number, clientY: number) => void,
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addWheelListenerTo(id, callback)
+    }))
+  }
+
   public addEventListenerTo(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'mouseenter'|'mouseleave',
+    eventType: MouseEventType,
     callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void,
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
@@ -125,7 +138,7 @@ export class RenderManager {
 
   public async addDragListenerTo(
     id: string,
-    eventType: 'dragstart'|'drag'|'dragend'|'dragenter',
+    eventType: DragEventType,
     callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
@@ -137,7 +150,7 @@ export class RenderManager {
 
   public removeEventListenerFrom(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'mouseenter'|'mouseleave'|'change'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter',
+    eventType: MouseEventType|DragEventType|WheelEventType|InputEventType,
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
     return this.runOrSchedule(new Command({

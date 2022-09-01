@@ -2,6 +2,11 @@ import { util } from './util'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from './ClientRect'
 
+export type MouseEventType = 'click'|'contextmenu'|'mousedown'|'mouseup'|'mousemove'|'mouseover'|'mouseout'|'mouseenter'|'mouseleave'
+export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'
+export type WheelEventType = 'wheel'
+export type InputEventType = 'change'
+
 export type BatchMethod = 'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
 
 export let dom: DocumentObjectModelAdapter
@@ -187,7 +192,7 @@ export class DocumentObjectModelAdapter {
 
   public async addEventListenerTo(
     id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'mouseenter'|'mouseleave',
+    eventType: MouseEventType,
     callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void> {
     let ipcChannelName = eventType+'_'+id
@@ -206,7 +211,7 @@ export class DocumentObjectModelAdapter {
 
   public async addDragListenerTo(
     id: string,
-    eventType: 'dragstart'|'drag'|'dragend'|'dragenter',
+    eventType: DragEventType,
     callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void> {
     let ipcChannelName = eventType+'_'+id
@@ -225,10 +230,7 @@ export class DocumentObjectModelAdapter {
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed))
   }
 
-  public async removeEventListenerFrom(
-    id: string,
-    eventType: 'click'|'contextmenu'|'mouseover'|'mouseout'|'mousemove'|'mouseenter'|'mouseleave'|'change'|'wheel'|'dragstart'|'drag'|'dragend'|'dragenter'
-  ): Promise<void> {
+  public async removeEventListenerFrom(id: string, eventType: MouseEventType|DragEventType|WheelEventType|InputEventType): Promise<void> {
     const ipcChannelName = eventType+'_'+id
     await this.executeJsOnElement(id, "on"+eventType+" = null")
     this.removeIpcChannelListener(ipcChannelName)

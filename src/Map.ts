@@ -8,6 +8,7 @@ import { HoverManager } from './HoverManager'
 import { boxManager } from './box/BoxManager'
 import { RootFolderBox } from './box/RootFolderBox'
 import { ProjectSettings } from './ProjectSettings'
+import { ClientPosition } from './box/Transform'
 
 export let map: Map|undefined
 
@@ -56,11 +57,17 @@ export class Map {
   private marginTopPercent: number = 0
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
+  private latestMousePositionWhenMoving: ClientPosition|undefined
 
   public static async new(idToRenderIn: string, projectSettings: ProjectSettings): Promise<Map> {
     const map = new Map(idToRenderIn, projectSettings, await RootFolderBox.new(projectSettings, 'mapMover'))
-    await map.rootFolder.render()
-    await dom.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY))
+    await Promise.all([
+      map.rootFolder.render(),
+      renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY)),
+      renderManager.addEventListenerTo('map', 'mousedown', (clientX: number, clientY: number, ctrlPressed: boolean) => map.movestart(clientX, clientY)),
+      renderManager.addEventListenerTo('map', 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => map.move(clientX, clientY)),
+      renderManager.addEventListenerTo('map', 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => map.moveend(clientX, clientY))
+    ])
     return map
   }
 
@@ -77,7 +84,12 @@ export class Map {
 
   public async destruct(): Promise<void> {
     await this.rootFolder.destruct()
-    dom.removeEventListenerFrom('map', 'wheel')
+    await Promise.all([
+      renderManager.removeEventListenerFrom('map', 'wheel'),
+      renderManager.removeEventListenerFrom('map', 'mousedown'),
+      renderManager.removeEventListenerFrom('map', 'mousemove'),
+      renderManager.removeEventListenerFrom('map', 'mouseup'),
+    ])
     await renderManager.remove('map')
   }
 
@@ -97,6 +109,40 @@ export class Map {
     await this.updateStyle(RenderPriority.RESPONSIVE)
     await this.rootFolder.render()
     util.logDebug(`zooming ${delta} finished at x=${clientX} and y=${clientY}`)
+  }
+
+  private movestart(clientX: number, clientY: number): void {
+    if (this.latestMousePositionWhenMoving) {
+      util.logWarning('moveend should be called before move')
+    }
+    this.latestMousePositionWhenMoving = new ClientPosition(clientX, clientY)
+  }
+
+  private async move(clientX: number, clientY: number): Promise<void> {
+    if (!this.latestMousePositionWhenMoving) {
+      //util.logWarning('move should be called between movestart and moveend')
+      return
+    }
+    const marginTopOffsetPx: number = clientY - this.latestMousePositionWhenMoving.y
+    const marginLeftOffsetPx: number = clientX - this.latestMousePositionWhenMoving.x
+
+    const marginTopOffsetPercent: number = marginTopOffsetPx / (this.mapRatioAdjusterSizePx/100)
+    const marginLeftOffsetPercent: number = marginLeftOffsetPx / (this.mapRatioAdjusterSizePx/100)
+
+    this.marginTopPercent += marginTopOffsetPercent
+    this.marginLeftPercent += marginLeftOffsetPercent
+
+    this.latestMousePositionWhenMoving = new ClientPosition(clientX, clientY)
+
+    await this.updateStyle(RenderPriority.RESPONSIVE)
+    await this.rootFolder.render()
+  }
+
+  private moveend(clientX: number, clientY: number): void {
+    if (!this.latestMousePositionWhenMoving) {
+      util.logWarning('moveend should be called after move')
+    }
+    this.latestMousePositionWhenMoving = undefined
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
