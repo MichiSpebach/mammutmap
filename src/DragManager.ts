@@ -94,6 +94,10 @@ export class DragManager {
   }
 
   private static onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean): void {
+    if (this.state) {
+      util.logWarning('Expected state to be not set onDragstart.')
+    }
+    
     this.setState({
       dragging: elementToDrag, 
       draggingOver: elementToDrag.getDropTargetAtDragStart(), 
