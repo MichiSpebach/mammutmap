@@ -52,6 +52,9 @@ function clearManagers(): void {
 }
 
 export class Map {
+
+  private static readonly hintToPreventMoving: string = 'Press CTRL to prevent moving'
+
   private projectSettings: ProjectSettings
   private rootFolder: RootFolderBox
   private scalePercent: number = 100
@@ -109,25 +112,32 @@ export class Map {
   }
 
   private async movestart(eventResult: MouseEventResultAdvanced): Promise<void> {
-    if (eventResult.cursor !== 'auto' && eventResult.cursor !== 'default') {
+    if (eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed) {
       return
     }
     if (this.latestMousePositionWhenMoving) {
-      util.logWarning('moveend should be called before move')
+      util.logWarning('movestart should be called before move')
     }
+
     this.latestMousePositionWhenMoving = new ClientPosition(eventResult.clientX, eventResult.clientY)
     await Promise.all([
-      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY), RenderPriority.RESPONSIVE),
+      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY, ctrlPressed), RenderPriority.RESPONSIVE),
       renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE),
       renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseleave', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE)
     ])
+    util.setHint(Map.hintToPreventMoving, true)
   }
 
-  private async move(clientX: number, clientY: number): Promise<void> {
+  private async move(clientX: number, clientY: number, ctrlPressed: boolean): Promise<void> {
+    if (ctrlPressed) {
+      await this.moveend()
+      return
+    }
     if (!this.latestMousePositionWhenMoving) {
       util.logWarning('move should be called between movestart and moveend')
       return
     }
+
     const marginTopOffsetPx: number = clientY - this.latestMousePositionWhenMoving.y
     const marginLeftOffsetPx: number = clientX - this.latestMousePositionWhenMoving.x
 
@@ -147,12 +157,14 @@ export class Map {
     if (!this.latestMousePositionWhenMoving) {
       util.logWarning('moveend should be called after move')
     }
+
     await Promise.all([
       renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousemove', RenderPriority.RESPONSIVE),
       renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseup', RenderPriority.RESPONSIVE),
       renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseleave', RenderPriority.RESPONSIVE)
     ])
     this.latestMousePositionWhenMoving = undefined
+    util.setHint(Map.hintToPreventMoving, false)
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
