@@ -5,7 +5,7 @@ const util_1 = require("../dist/util");
 const domAdapter_1 = require("../dist/domAdapter");
 const styleAdapter_1 = require("../dist/styleAdapter");
 const BorderingLinks_1 = require("../dist/link/BorderingLinks");
-const deactivateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'deactivate', click: deactivate });
+const deactivateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'deactivate', click: deactivate, enabled: false });
 const activateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'activate', click: activate });
 pluginFacade_1.applicationMenu.addMenuItemTo('fancyHighlighting.js', deactivateMenuItem);
 pluginFacade_1.applicationMenu.addMenuItemTo('fancyHighlighting.js', activateMenuItem);
@@ -62,4 +62,3 @@ class ToggableFancyBorderingLinks extends BorderingLinks_1.BorderingLinks {
         return ToggableFancyBorderingLinks.setHighlightAllBackup.call(this, highlight);
     }
 }
-activate();

@@ -4,7 +4,7 @@ import { dom } from '../dist/domAdapter'
 import { style } from '../dist/styleAdapter'
 import { BorderingLinks } from '../dist/link/BorderingLinks'
 
-const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate})
+const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate, enabled: false})
 const activateMenuItem: MenuItemFile = new MenuItemFile({label: 'activate', click: activate})
 applicationMenu.addMenuItemTo('fancyHighlighting.js', deactivateMenuItem)
 applicationMenu.addMenuItemTo('fancyHighlighting.js', activateMenuItem)
@@ -72,5 +72,3 @@ class ToggableFancyBorderingLinks extends BorderingLinks {
     }
 
 }
-
-activate()
