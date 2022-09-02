@@ -1,6 +1,4 @@
 
-now higher priority: implement map moving by drag and drop
-
 option to hide or downsize unimportant files and folders
 
 add option to contextMenu of boxes: remove all outgoing links
