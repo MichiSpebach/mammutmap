@@ -65,8 +65,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   public async dragStart(clientX: number, clientY: number): Promise<void> {
     let clientRect: ClientRect = await this.referenceBox.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
-
-    renderManager.addClassTo(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
+    await renderManager.addClassTo(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
@@ -95,17 +94,23 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async dragCancel(): Promise<void> {
-    renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
-    this.referenceBox.restoreMapData()
+    await Promise.all([
+      renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE),
+      this.referenceBox.restoreMapData()
+    ])
   }
 
   public async dragEnd(dropTarget: FolderBox): Promise<void> {
-    renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass)
+    const pros: Promise<void>[] = []
+
+    pros.push(renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE))
     if (!this.referenceBox.isRoot() && this.referenceBox.getParent() != dropTarget) {
-      await this.referenceBox.setParentAndFlawlesslyResizeAndSave(dropTarget)
+      pros.push(this.referenceBox.setParentAndFlawlesslyResizeAndSave(dropTarget))
     } else {
-      await this.referenceBox.saveMapData()
+      pros.push(this.referenceBox.saveMapData())
     }
+
+    await Promise.all(pros)
   }
 
 }
