@@ -7,6 +7,13 @@ export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'
 export type WheelEventType = 'wheel'
 export type InputEventType = 'change'
 
+export type MouseEventResultAdvanced = {
+  clientX: number,
+  clientY: number,
+  ctrlPressed: boolean,
+  cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'
+}
+
 export type BatchMethod = 'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
 
 export let dom: DocumentObjectModelAdapter
@@ -190,10 +197,33 @@ export class DocumentObjectModelAdapter {
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
   }
 
+  public async addEventListenerAdvancedTo(
+    id: string,
+    eventType: MouseEventType,
+    callback: (result: MouseEventResultAdvanced) => void
+  ): Promise<void> {
+    let ipcChannelName = eventType+'_'+id
+
+    let rendererFunction: string = '(event) => {'
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+    //rendererFunction += 'console.log(event);'
+    rendererFunction += 'event.stopPropagation();'
+    rendererFunction += 'let cursor = window.getComputedStyle(event.target)["cursor"];'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey, cursor);'
+    rendererFunction += '}'
+
+    await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
+
+    this.addIpcChannelListener(
+      ipcChannelName, 
+      (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any) => callback({clientX, clientY, ctrlPressed, cursor})
+    )
+  }
+
   public async addEventListenerTo(
     id: string,
     eventType: MouseEventType,
-    callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void
+    callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void> {
     let ipcChannelName = eventType+'_'+id
 

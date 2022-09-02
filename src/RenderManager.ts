@@ -1,7 +1,7 @@
-import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType } from './domAdapter'
+import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced } from './domAdapter'
 import { ClientRect } from './ClientRect'
 
-export { MouseEventType, DragEventType, WheelEventType, InputEventType }
+export { MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced }
 
 export class RenderManager {
   private commands: Command[] = []
@@ -121,6 +121,18 @@ export class RenderManager {
     return this.runOrSchedule(new Command({
       priority: priority,
       command: () => dom.addWheelListenerTo(id, callback)
+    }))
+  }
+
+  public addEventListenerAdvancedTo(
+    id: string,
+    eventType: MouseEventType,
+    callback: (result: MouseEventResultAdvanced) => void,
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addEventListenerAdvancedTo(id, eventType, callback)
     }))
   }
 

@@ -1,5 +1,5 @@
 import { util } from './util'
-import { dom } from './domAdapter'
+import { dom, MouseEventResultAdvanced } from './domAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { settings } from './Settings'
 import { DragManager } from './DragManager'
@@ -65,7 +65,7 @@ export class Map {
     await Promise.all([
       map.rootFolder.render(),
       renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY)),
-      renderManager.addEventListenerTo('map', 'mousedown', (clientX: number, clientY: number, ctrlPressed: boolean) => map.movestart(clientX, clientY)),
+      renderManager.addEventListenerAdvancedTo('map', 'mousedown', (result: MouseEventResultAdvanced) => map.movestart(result)),
     ])
     return map
   }
@@ -108,11 +108,14 @@ export class Map {
     util.logDebug(`zooming ${delta} finished at x=${clientX} and y=${clientY}`)
   }
 
-  private async movestart(clientX: number, clientY: number): Promise<void> {
+  private async movestart(eventResult: MouseEventResultAdvanced): Promise<void> {
+    if (eventResult.cursor !== 'auto' && eventResult.cursor !== 'default') {
+      return
+    }
     if (this.latestMousePositionWhenMoving) {
       util.logWarning('moveend should be called before move')
     }
-    this.latestMousePositionWhenMoving = new ClientPosition(clientX, clientY)
+    this.latestMousePositionWhenMoving = new ClientPosition(eventResult.clientX, eventResult.clientY)
     await Promise.all([
       renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY), RenderPriority.RESPONSIVE),
       renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE),
