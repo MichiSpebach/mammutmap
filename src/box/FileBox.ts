@@ -35,8 +35,8 @@ export class FileBox extends Box {
     return null
   }
 
-  protected getBodyOverflowStyle(): 'hidden'|'visible' {
-    return 'hidden'
+  protected getBodyOverflowStyle(): 'auto'|'hidden'|'visible' {
+    return 'auto'
   }
 
   protected getBackgroundStyleClass(): string {

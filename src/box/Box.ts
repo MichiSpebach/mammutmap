@@ -399,7 +399,7 @@ export abstract class Box implements DropTarget, Hoverable {
     await this.renderStyle(priority)
   }
 
-  protected abstract getBodyOverflowStyle(): 'hidden'|'visible'
+  protected abstract getBodyOverflowStyle(): 'auto'|'hidden'|'visible'
 
   protected abstract getBackgroundStyleClass(): string
 

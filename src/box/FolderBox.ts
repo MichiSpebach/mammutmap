@@ -32,7 +32,7 @@ export class FolderBox extends Box {
     return false
   }
 
-  protected getBodyOverflowStyle(): 'hidden'|'visible' {
+  protected getBodyOverflowStyle(): 'auto'|'hidden'|'visible' {
     return 'visible'
   }
 

@@ -200,7 +200,8 @@ export class FolderBoxBody extends BoxBody {
     let style = `position:absolute;`
     style += `left:${rect.x}%;top:${rect.y}%;width:${rect.width}%;height:${rect.height}%;`
     style += 'overflow:hidden;'
-    return renderManager.addContentTo(this.getId(), `<div id="${box.getId()}" style="${style}">wait for box ${box.getName()} to render</div>`)
+    let onwheel = 'return false/*prevents scrolling*/'
+    return renderManager.addContentTo(this.getId(), `<div id="${box.getId()}" style="${style}" onwheel="${onwheel}">wait for box ${box.getName()} to render</div>`)
   }
 
   private async unrenderBoxPlaceholders(): Promise<void> {
