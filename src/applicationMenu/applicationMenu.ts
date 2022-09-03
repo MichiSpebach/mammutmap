@@ -12,7 +12,7 @@ import { HtmlApplicationMenu } from './HtmlApplicationMenu'
 import { settingsOnStartup } from '../Settings'
 
 class ApplicationMenu {
-  
+
   private readonly menuTree: MenuItemFolder
   private readonly electronApplicationMenu: ElectronApplicationMenu
   private readonly htmlApplicatioinMenu: HtmlApplicationMenu
@@ -90,7 +90,7 @@ class ApplicationMenu {
   private findMenuItemById(menuItemId: string): MenuItemFile|MenuItemFolder|undefined {
     return this.menuTree.findMenuItemById(menuItemId)
   }
-  
+
   private async openFolder(): Promise<void> {
     const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
       title:'Open a folder',
