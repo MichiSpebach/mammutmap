@@ -6,6 +6,10 @@ export { MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEve
 export class RenderManager {
   private commands: Command[] = []
 
+  public isReady(): boolean {
+    return !!dom
+  }
+
   public clear(): void {
     this.commands = []
   }

@@ -45,16 +45,16 @@ class Util {
 
   private async logToGui(message: string, color: string, triesLeft: number = 5): Promise<void> {
     const division: string = '<div style="color:' + color + '">'+this.escapeForHtml(message)+'</div>'
-    try {
+    if (renderManager.isReady()) {
       await renderManager.addContentTo('log', division)
       await renderManager.scrollToBottom('terminal')
-    } catch (error: any) { // happens when called before gui is ready // TODO find better solution
+    } else { // happens when called before gui is ready // TODO find better solution
       if (triesLeft > 0) {
         await this.wait(1000)
         message += ' -1s'
         await this.logToGui(message, color, triesLeft--)
       } else {
-        console.trace('WARNING: failed to print log on gui: '+message+', reason: '+error)
+        console.trace('WARNING: failed to print log on gui: '+message+', because gui seems not to load.')
       }
     }
   }
@@ -82,7 +82,7 @@ class Util {
 
   public stringify(object: any): string {
     const visitedObjects: any[] = []
-    
+
     return JSON.stringify(object, (key: string, value: string) => {
       if (value && visitedObjects.includes(value)) {
         return value.toString() // TODO: getId() if existing
