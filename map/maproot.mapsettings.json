@@ -842,10 +842,16 @@
 			"to": {
 				"path": [
 					{
-						"boxId": "ita04k5ms68",
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34.24
+					},
+					{
+						"boxId": "04oprug3u3o",
 						"boxName": "applicationMenu.ts",
-						"x": 92,
-						"y": 4
+						"x": 50,
+						"y": 52
 					}
 				]
 			}
@@ -1082,10 +1088,16 @@
 			"to": {
 				"path": [
 					{
-						"boxId": "ita04k5ms68",
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34.24
+					},
+					{
+						"boxId": "04oprug3u3o",
 						"boxName": "applicationMenu.ts",
-						"x": 96,
-						"y": 8
+						"x": 50,
+						"y": 52
 					}
 				]
 			}
@@ -2196,35 +2208,6 @@
 			}
 		},
 		{
-			"id": "22n8dt6hvf",
-			"from": {
-				"path": [
-					{
-						"boxId": "ita04k5ms68",
-						"boxName": "applicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 50,
-						"y": 18
-					},
-					{
-						"boxId": "04oprug3u3o",
-						"boxName": "ElectronAndHtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "m8g60p0s4ro",
 			"from": {
 				"path": [
@@ -2420,8 +2403,8 @@
 					{
 						"boxId": "u7lnivj4sq",
 						"boxName": "applicationMenu",
-						"x": 18,
-						"y": 50
+						"x": 66,
+						"y": 90
 					},
 					{
 						"boxId": "dm650n82gqg",
@@ -3172,14 +3155,14 @@
 					{
 						"boxId": "u7lnivj4sq",
 						"boxName": "applicationMenu",
-						"x": 58,
-						"y": 46
+						"x": 54,
+						"y": 66.24
 					},
 					{
 						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
+						"boxName": "ApplicationMenuOld.ts",
 						"x": 50,
-						"y": 50
+						"y": 52
 					}
 				]
 			},

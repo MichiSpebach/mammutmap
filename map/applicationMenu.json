@@ -1,7 +1,7 @@
 {
 	"id": "u7lnivj4sq",
-	"x": 8.000000000000002,
-	"y": 44,
+	"x": 8,
+	"y": 40,
 	"width": 7.999999999999998,
 	"height": 4,
 	"links": [
@@ -832,6 +832,58 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "dkmnr4vbho",
+			"from": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "57qo9t792s8",
+			"from": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
 		}
 	],
 	"nodes": []
