@@ -1,8 +1,8 @@
 import { style } from '../styleAdapter'
 import { renderManager } from '../RenderManager'
 import { Widget } from '../Widget'
+import { MenuItem } from './MenuItem'
 import { MenuItemFile } from './MenuItemFile'
-import { MenuItemFolder } from './MenuItemFolder'
 import { MenuItemWidget } from './MenuItemWidget'
 import * as menuItemWidgetFactory from './menuItemWidgetFactory'
 import { util } from '../util'
@@ -10,11 +10,11 @@ import { util } from '../util'
 export class MenuItemFolderContainerWidget extends Widget {
 
     private readonly id: string
-    private readonly menuItems: (MenuItemFile|MenuItemFolder)[]
-    private menuItemWidgets: MenuItemWidget<MenuItemFile|MenuItemFolder>[] | undefined
+    private readonly menuItems: MenuItem[]
+    private menuItemWidgets: MenuItemWidget<MenuItem>[] | undefined
     private ongoingUnrender: Promise<void> = Promise.resolve()
 
-    public constructor(id: string, menuItems: (MenuItemFile|MenuItemFolder)[]) {
+    public constructor(id: string, menuItems: MenuItem[]) {
         super()
         this.id = id
         this.menuItems = menuItems
@@ -60,7 +60,7 @@ export class MenuItemFolderContainerWidget extends Widget {
             return
         }
 
-        const menuItemWidgetsToUnrender: MenuItemWidget<MenuItemFile|MenuItemFolder>[] = this.menuItemWidgets
+        const menuItemWidgetsToUnrender: MenuItemWidget<MenuItem>[] = this.menuItemWidgets
         this.menuItemWidgets = undefined
 
         await Promise.all(menuItemWidgetsToUnrender.map(widget => widget.unrender()))

@@ -283,6 +283,13 @@ export class Link implements Hoverable {
     }
   }
 
+  public getTags(): string[] {
+    if (!this.data.tags) {
+      return []
+    }
+    return this.data.tags
+  }
+
   public includesTag(tag: string): boolean {
     if (!this.data.tags) {
       return false

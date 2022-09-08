@@ -1,16 +1,15 @@
-import { MenuItem } from "./MenuItem"
-import { MenuItemFile } from "./MenuItemFile"
+import { MenuItem } from './MenuItem'
 
 export class MenuItemFolder extends MenuItem {
-    public readonly submenu: (MenuItemFile|MenuItemFolder)[]
+    public readonly submenu: MenuItem[]
 
-    public constructor(params: {id?: string, label: string, enabled?: boolean, submenu: (MenuItemFile|MenuItemFolder)[]}) {
+    public constructor(params: {id?: string, label: string, enabled?: boolean, submenu: MenuItem[]}) {
         super(params)
         this.submenu = params.submenu
     }
 
-    public findMenuItemById(id: string): MenuItemFile|MenuItemFolder|undefined {
-        let matchingItem: MenuItemFile|MenuItemFolder|undefined = this.submenu.find(item => item.id === id)
+    public findMenuItemById(id: string): MenuItem|undefined {
+        let matchingItem: MenuItem|undefined = this.submenu.find(item => item.id === id)
 
         for (const item of this.submenu) {
             if (matchingItem) {

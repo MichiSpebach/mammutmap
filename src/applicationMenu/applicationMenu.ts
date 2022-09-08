@@ -10,6 +10,7 @@ import { renderManager } from '../RenderManager'
 import { ElectronApplicationMenu } from './ElectronApplicationMenu'
 import { HtmlApplicationMenu } from './HtmlApplicationMenu'
 import { settingsOnStartup } from '../Settings'
+import { MenuItem } from './MenuItem'
 
 class ApplicationMenu {
 
@@ -57,12 +58,12 @@ class ApplicationMenu {
     }
   }
 
-  public addMenuItemToPlugins(menuItem: MenuItemFile|MenuItemFolder): void {
+  public addMenuItemToPlugins(menuItem: MenuItem): void {
     this.addMenuItemTo('Plugins', menuItem)
   }
 
-  public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItemFile|MenuItemFolder): void {
-    const parentMenuItem: MenuItemFolder|MenuItemFile|undefined = this.findMenuItemById(parentMenuItemId)
+  public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void {
+    const parentMenuItem: MenuItem|undefined = this.findMenuItemById(parentMenuItemId)
     if (!parentMenuItem) {
         util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItemId}' because it was not found.`)
         return
@@ -78,7 +79,7 @@ class ApplicationMenu {
     this.htmlApplicatioinMenu.addMenuItemTo(parentMenuItem, menuItem)
   }
 
-  public async setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
+  public async setMenuItemEnabled(menuItem: MenuItem, enabled: boolean): Promise<void> {
     menuItem.enabled = enabled
 
     await Promise.all([
@@ -87,7 +88,7 @@ class ApplicationMenu {
     ])
   }
 
-  private findMenuItemById(menuItemId: string): MenuItemFile|MenuItemFolder|undefined {
+  private findMenuItemById(menuItemId: string): MenuItem|undefined {
     return this.menuTree.findMenuItemById(menuItemId)
   }
 

@@ -1,4 +1,4 @@
-import { MenuItemFile } from './MenuItemFile'
+import { MenuItem } from './MenuItem'
 import { MenuItemFolder } from './MenuItemFolder'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { renderManager } from '../RenderManager'
@@ -59,11 +59,11 @@ export class HtmlApplicationMenu {
         await renderManager.remove(this.widget.getId())
     }
 
-    public addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItemFile|MenuItemFolder): void {
+    public addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItem): void {
         // TODO implement for case that parentMenuItem is opened at the moment
     }
 
-    public setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
+    public setMenuItemEnabled(menuItem: MenuItem, enabled: boolean): Promise<void> {
         // TODO implement for case that parentMenuItem is opened at the moment
         return Promise.resolve()
     }

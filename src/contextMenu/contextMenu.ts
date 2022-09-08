@@ -116,16 +116,35 @@ function buildAddNodeItem(box: Box, clientX: number, clientY: number): MenuItemF
 }
 
 function buildTagLinkItemFolder(link: Link): MenuItemFolder {
-  const tagMenuItem = new MenuItemFolder({label: 'tag', submenu: []})
+  const items: MenuItem[] = [
+    buildTagLinkItem(link, 'hidden'),
+    buildTagLinkItem(link, 'isA'), // TODO: add description "inheritance"
+    buildTagLinkItem(link, 'has'), // TODO: add description "composition"
+    buildTagLinkItem(link, 'important'), // TODO: add description "visible although other tag would hide it"
+    buildTagLinkItem(link, 'falsePositive'), // TODO: add description "wrongly recognized by plugin"
+    buildAddOtherTagLinkItem(link)
+  ]
 
-  tagMenuItem.submenu.push(buildTagLinkItem(link, 'hidden'))
-  tagMenuItem.submenu.push(buildTagLinkItem(link, 'isA'))
-  tagMenuItem.submenu.push(buildTagLinkItem(link, 'has'))
-  tagMenuItem.submenu.push(buildTagLinkItem(link, 'important'))
-  tagMenuItem.submenu.push(buildTagLinkItem(link, 'falsePositive'))
-  tagMenuItem.submenu.push(new MenuItemFile({label: 'other...', click: () => util.logInfo('TODO implement')})) // TODO
+  for (const includedTag of link.getTags()) {
+    if (!items.find(item => item.label === includedTag)) {
+      items.unshift(buildTagLinkItem(link, includedTag))
+    }
+  }
 
-  return tagMenuItem
+  return new MenuItemFolder({label: 'tag', submenu: items})
+}
+
+function buildAddOtherTagLinkItem(link: Link): MenuItemFile {
+  return new MenuItemFile({label: 'other...', click: async () => {
+    const fromBoxName: string = link.from.getRenderedTargetBox().getName()
+    const toBoxName: string = link.to.getRenderedTargetBox().getName()
+    const tagName: string|undefined = await TextInputPopup.buildAndRenderAndAwaitResolve(`tag link ${link.getId()} between ${fromBoxName} and ${toBoxName}`, '')
+    if (tagName) {
+      link.addTag(tagName)
+    } else {
+      util.logInfo('Dialog to add tag to link was closed without input.')
+    }
+  }})
 }
 
 function buildTagLinkItem(link: Link, tag: string): MenuItemFile {

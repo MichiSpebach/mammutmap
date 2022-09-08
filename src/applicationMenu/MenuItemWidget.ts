@@ -1,10 +1,9 @@
 import { style } from '../styleAdapter';
 import { renderManager } from '../RenderManager';
 import { Widget } from '../Widget'
-import { MenuItemFile } from './MenuItemFile';
-import { MenuItemFolder } from './MenuItemFolder';
+import { MenuItem } from './MenuItem';
 
-export abstract class MenuItemWidget<MENU_ITEM extends MenuItemFile|MenuItemFolder> extends Widget {
+export abstract class MenuItemWidget<MENU_ITEM extends MenuItem> extends Widget {
 
     protected readonly menuItem: MENU_ITEM
 

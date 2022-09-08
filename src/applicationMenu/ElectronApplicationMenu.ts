@@ -1,5 +1,5 @@
 import { Menu, MenuItem as ElectronMenuItem } from 'electron'
-import { MenuItemFile } from './MenuItemFile'
+import { MenuItem } from './MenuItem'
 import { MenuItemFolder } from './MenuItemFolder'
 import { util } from '../util'
 
@@ -19,7 +19,7 @@ export class ElectronApplicationMenu {
     return Promise.resolve()
   }
 
-  public addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItemFile|MenuItemFolder): void {
+  public addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItem): void {
     if (!this.rendered) {
       return
     }
@@ -34,7 +34,7 @@ export class ElectronApplicationMenu {
     menu.append(new ElectronMenuItem(menuItem))
   }
 
-  public setMenuItemEnabled(menuItem: MenuItemFile|MenuItemFolder, enabled: boolean): Promise<void> {
+  public setMenuItemEnabled(menuItem: MenuItem, enabled: boolean): Promise<void> {
     if (!this.rendered) {
       return Promise.resolve()
     }

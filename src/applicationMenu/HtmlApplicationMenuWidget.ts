@@ -4,14 +4,14 @@ import { MenuItemFolder } from './MenuItemFolder'
 import { MenuItemWidget } from './MenuItemWidget'
 import { util } from '../util'
 import * as menuItemWidgetFactory from './menuItemWidgetFactory'
-import { MenuItemFile } from './MenuItemFile'
+import { MenuItem } from './MenuItem'
 import { style } from '../styleAdapter'
 
 export class HtmlApplicationMenuWidget extends Widget {
 
     private readonly id: string
     private readonly menuTree: MenuItemFolder
-    private submenuWidgets: MenuItemWidget<MenuItemFile|MenuItemFolder>[]|undefined
+    private submenuWidgets: MenuItemWidget<MenuItem>[]|undefined
 
     public constructor(id: string, menuTree: MenuItemFolder) {
         super()
