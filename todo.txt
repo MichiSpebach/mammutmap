@@ -1,9 +1,17 @@
 
-option to hide or downsize unimportant files and folders
+toolbars, sidebar
 
 add option to contextMenu of boxes: remove all outgoing links
-add option to contextMenu of boxes: hide all outgoing/incoming links
-add option to contextMenu of boxes: add tag to all outgoing/incoming links
+
+add option to contextMenu of boxes: tag[
+  'hidden|unimportant'(e.g. files that start with '.'),
+  'common'(used everywhere => incoming links are hidden, linkStart and linkEnd visible),
+  'important|expanding'? (sizes up to all available space)
+]
+
+show start and end of hidden links to see the direction in which they are going
+
+plugin that that hides or downsizes unimportant files and folders
 
 make it possible to partially set mapData, when links are added position and size should not be set
 option to unmpat boxes over contextMenu->unmap/unplace (sets position and size of mapData to undefined)
