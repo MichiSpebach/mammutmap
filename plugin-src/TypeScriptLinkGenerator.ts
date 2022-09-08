@@ -1,8 +1,7 @@
 import * as ts from 'typescript'
 import { Program, SourceFile } from 'typescript'
-import { applicationMenu, MenuItemFile } from '../dist/pluginFacade'
+import { applicationMenu, contextMenu, MenuItemFile } from '../dist/pluginFacade'
 import { util } from '../dist/util'
-import * as contextMenu from '../dist/contextMenu'
 import * as pluginFacade from '../dist/pluginFacade'
 import { FileBox, FileBoxDepthTreeIterator } from '../dist/pluginFacade'
 
@@ -13,10 +12,10 @@ contextMenu.addFileBoxMenuItem((box: pluginFacade.FileBox) => {
   if (!box.getName().endsWith('.ts')) {
     return undefined
   }
-  return {label: 'generate outgoing ts links', action: async () => {
+  return new MenuItemFile({label: 'generate outgoing ts links', click: async () => {
     await generateOutgoingLinksForBoxes([box])
     await pluginFacade.clearWatchedBoxes() // TODO: potential bug, clears all boxWatchers not only the ones that were added
-  }}
+  }})
 })
 
 async function generateLinks(): Promise<void> {

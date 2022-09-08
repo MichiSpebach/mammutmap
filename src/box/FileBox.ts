@@ -1,6 +1,6 @@
 import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
-import * as contextMenu from '../contextMenu'
+import * as contextMenu from '../contextMenu/contextMenu'
 import { Box } from './Box'
 import { BoxMapData } from './BoxMapData'
 import { FolderBox } from './FolderBox'

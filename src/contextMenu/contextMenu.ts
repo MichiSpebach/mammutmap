@@ -1,27 +1,27 @@
-import { util } from './util'
-import { Box } from './box/Box'
-import { FileBox } from './box/FileBox'
-import { FolderBox } from './box/FolderBox'
-import { WayPointData } from './box/WayPointData'
-import { Link } from './box/Link'
-import { DragManager } from './DragManager'
-import { LinkEndData } from './box/LinkEndData'
-import { ClientPosition, LocalPosition } from './box/Transform'
-import { BoxMapData } from './box/BoxMapData'
-import { TextInputPopup } from './TextInputPopup'
-import { SourcelessBox } from './box/SourcelessBox'
-import { NodeData } from './mapData/NodeData'
-import { PopupWidget } from './PopupWidget'
-import { settings } from './Settings'
-import { NodeWidget } from './node/NodeWidget'
-import { MenuItem } from './applicationMenu/MenuItem'
-import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
-import { MenuItemFile } from './applicationMenu/MenuItemFile'
-import { ElectronContextMenu } from './contextMenu/ElectronContextMenu'
+import { util } from '../util'
+import { Box } from '../box/Box'
+import { FileBox } from '../box/FileBox'
+import { FolderBox } from '../box/FolderBox'
+import { WayPointData } from '../box/WayPointData'
+import { Link } from '../box/Link'
+import { DragManager } from '../DragManager'
+import { LinkEndData } from '../box/LinkEndData'
+import { ClientPosition, LocalPosition } from '../box/Transform'
+import { BoxMapData } from '../box/BoxMapData'
+import { TextInputPopup } from '../TextInputPopup'
+import { SourcelessBox } from '../box/SourcelessBox'
+import { NodeData } from '../mapData/NodeData'
+import { PopupWidget } from '../PopupWidget'
+import { settings } from '../Settings'
+import { NodeWidget } from '../node/NodeWidget'
+import { MenuItem } from '../applicationMenu/MenuItem'
+import { MenuItemFolder } from '../applicationMenu/MenuItemFolder'
+import { MenuItemFile } from '../applicationMenu/MenuItemFile'
+import { ElectronContextMenu } from './ElectronContextMenu'
 
-const fileBoxMenuItemGenerators: ((box: FileBox) => {label: string, action: () => void} | undefined)[] = []
+const fileBoxMenuItemGenerators: ((box: FileBox) => MenuItem|undefined)[] = []
 
-export function addFileBoxMenuItem(generator: (box: FileBox) => {label: string, action: () => void} | undefined): void {
+export function addFileBoxMenuItem(generator: (box: FileBox) => MenuItem|undefined): void {
   fileBoxMenuItemGenerators.push(generator)
 }
 
@@ -38,9 +38,9 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
   }
 
   fileBoxMenuItemGenerators.forEach(async generator => {
-    const menuItemParams: {label: string, action: () => void} | undefined = generator(box)
-    if (menuItemParams) {
-      items.push(new MenuItemFile({label: menuItemParams.label, click: menuItemParams.action}))
+    const menuItem: MenuItem|undefined = generator(box)
+    if (menuItem) {
+      items.push(menuItem)
     }
   })
   

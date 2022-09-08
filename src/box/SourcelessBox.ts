@@ -1,6 +1,6 @@
 import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
-import * as contextMenu from '../contextMenu'
+import * as contextMenu from '../contextMenu/contextMenu'
 import { Box } from './Box'
 import { BoxHeader } from './BoxHeader'
 import { SourcelessBoxHeader } from './SourcelessBoxHeader'

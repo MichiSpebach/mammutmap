@@ -1,12 +1,11 @@
-import * as contextMenu from '../dist/contextMenu'
 import * as pluginFacade from '../dist/pluginFacade'
-import { Box, FileBox } from '../dist/pluginFacade'
+import { contextMenu, MenuItemFile, Box, FileBox } from '../dist/pluginFacade'
 import { util } from '../dist/util'
 import * as pathFinder from './neuralNetLinkGenerator/pathFinder'
 import * as typeFinder from './neuralNetLinkGenerator/typeFinder'
 
 contextMenu.addFileBoxMenuItem((box: FileBox) => {
-    return {label: 'generate outgoing links', action: () => generateOutgoingLinksForBox(box)}
+    return new MenuItemFile({label: 'generate outgoing links', click: () => generateOutgoingLinksForBox(box)})
 })
 
 async function generateOutgoingLinksForBox(box: FileBox): Promise<void> {

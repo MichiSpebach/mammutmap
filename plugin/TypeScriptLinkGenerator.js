@@ -3,18 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ts = require("typescript");
 const pluginFacade_1 = require("../dist/pluginFacade");
 const util_1 = require("../dist/util");
-const contextMenu = require("../dist/contextMenu");
 const pluginFacade = require("../dist/pluginFacade");
 pluginFacade_1.applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new pluginFacade_1.MenuItemFile({ label: 'Generate links', click: generateLinks }));
 pluginFacade_1.applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new pluginFacade_1.MenuItemFile({ label: 'Join on GitHub (coming soon)', click: () => util_1.util.logInfo('Join on GitHub is coming soon') }));
-contextMenu.addFileBoxMenuItem((box) => {
+pluginFacade_1.contextMenu.addFileBoxMenuItem((box) => {
     if (!box.getName().endsWith('.ts')) {
         return undefined;
     }
-    return { label: 'generate outgoing ts links', action: async () => {
+    return new pluginFacade_1.MenuItemFile({ label: 'generate outgoing ts links', click: async () => {
             await generateOutgoingLinksForBoxes([box]);
             await pluginFacade.clearWatchedBoxes(); // TODO: potential bug, clears all boxWatchers not only the ones that were added
-        } };
+        } });
 });
 async function generateLinks() {
     util_1.util.logInfo('generateLinks');

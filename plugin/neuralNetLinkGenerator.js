@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const contextMenu = require("../dist/contextMenu");
 const pluginFacade = require("../dist/pluginFacade");
+const pluginFacade_1 = require("../dist/pluginFacade");
 const util_1 = require("../dist/util");
 const pathFinder = require("./neuralNetLinkGenerator/pathFinder");
 const typeFinder = require("./neuralNetLinkGenerator/typeFinder");
-contextMenu.addFileBoxMenuItem((box) => {
-    return { label: 'generate outgoing links', action: () => generateOutgoingLinksForBox(box) };
+pluginFacade_1.contextMenu.addFileBoxMenuItem((box) => {
+    return new pluginFacade_1.MenuItemFile({ label: 'generate outgoing links', click: () => generateOutgoingLinksForBox(box) });
 });
 async function generateOutgoingLinksForBox(box) {
     const fileContent = await box.getBody().getFileContent();

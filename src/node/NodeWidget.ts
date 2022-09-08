@@ -11,7 +11,7 @@ import { DragManager } from '../DragManager'
 import { BoxNodesWidget } from '../box/BoxNodesWidget'
 import { BorderingLinks } from '../link/BorderingLinks'
 import { ClientRect } from '../ClientRect'
-import * as contextMenu from '../contextMenu'
+import * as contextMenu from '../contextMenu/contextMenu'
 
 export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     private readonly mapData: NodeData
