@@ -17,7 +17,7 @@ export class TextInputPopup extends PopupWidget {
     }
 
     private constructor(title: string, defaultValue: string, resolve: (text: string|undefined) => void) {
-        super('textInputPopup'+util.generateId(), title)
+        super('textInputPopup'+util.generateId(), title, () => resolve(undefined))
         this.defaultValue = defaultValue
         this.resolve = resolve
     }

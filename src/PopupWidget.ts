@@ -5,11 +5,13 @@ import { Widget } from './Widget'
 export abstract class PopupWidget extends Widget {
     private readonly id: string
     private readonly title: string
+    private readonly onClose: (() => void) | undefined
 
-    protected constructor(id: string, title: string) {
+    protected constructor(id: string, title: string, onClose?: (() => void)) {
         super()
         this.id = id
         this.title = title
+        this.onClose = onClose
     }
 
     public getId(): string {
@@ -25,7 +27,10 @@ export abstract class PopupWidget extends Widget {
         await renderManager.addContentTo('body', html)
 
         await renderManager.addEventListenerTo(this.id+'Close', 'click', async () => {
-            await this.unrender()
+            this.unrender()
+            if (this.onClose) {
+                this.onClose()
+            }
         })
 
         await this.afterRender()
