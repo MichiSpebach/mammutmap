@@ -2,19 +2,28 @@
 export function findPaths(text: string): string[] {
     let paths: string[] = []
 
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '^', '/', '\\s;'))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '\\s', '/', '\\s;').map(path => path.trim()))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, "'", '/', '', "'"))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '"', '/', '', '"'))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '^', '/', '\\s;')))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '\\s', '/', '\\s;').map(path => path.trim())))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, "'", '/', '', "'")))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '"', '/', '', '"')))
 
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '^', '\\', '\\s;'))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '\\s', '\\','\\s;').map(path => path.trim()))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, "'", '\\', '', "'"))
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '"', '\\', '', '"'))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '^', '\\', '\\s;')))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '\\s', '\\','\\s;').map(path => path.trim())))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, "'", '\\', '', "'")))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '"', '\\', '', '"')))
 
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, 'import ', '.', '\\s\\*;'))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, 'import ', '.', '\\s\\*;')))
 
     return paths
+}
+
+function postProcessPaths(paths: string[]): string[] {
+    return paths.map(path => {
+        if (path.startsWith('package:')) {
+            path = path.substring('package:'.length)
+        }
+        return path.trim()
+    })
 }
 
 function concatToPathsIfNotIncluded(paths: string[], otherPaths: string[]): void {

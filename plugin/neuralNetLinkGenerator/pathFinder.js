@@ -3,18 +3,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.findPaths = void 0;
 function findPaths(text) {
     let paths = [];
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '^', '/', '\\s;'));
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '\\s', '/', '\\s;').map(path => path.trim()));
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, "'", '/', '', "'"));
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkers(text, '"', '/', '', '"'));
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '^', '\\', '\\s;'));
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '\\s', '\\', '\\s;').map(path => path.trim()));
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, "'", '\\', '', "'"));
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, '"', '\\', '', '"'));
-    concatToPathsIfNotIncluded(paths, findPathsWithMarkersAndNormalize(text, 'import ', '.', '\\s\\*;'));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '^', '/', '\\s;')));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '\\s', '/', '\\s;').map(path => path.trim())));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, "'", '/', '', "'")));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '"', '/', '', '"')));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '^', '\\', '\\s;')));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '\\s', '\\', '\\s;').map(path => path.trim())));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, "'", '\\', '', "'")));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '"', '\\', '', '"')));
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, 'import ', '.', '\\s\\*;')));
     return paths;
 }
 exports.findPaths = findPaths;
+function postProcessPaths(paths) {
+    return paths.map(path => {
+        if (path.startsWith('package:')) {
+            path = path.substring('package:'.length);
+        }
+        return path.trim();
+    });
+}
 function concatToPathsIfNotIncluded(paths, otherPaths) {
     for (const otherPath of otherPaths) {
         if (!paths.includes(otherPath)) {

@@ -26,6 +26,11 @@ test('findPaths', () => {
 
     expect(pathFinder.findPaths("'path/in/quotes/with/white spaces'")).toEqual(['path/in/quotes/with/white spaces'])
     expect(pathFinder.findPaths('"path/in/quotes/with/white spaces"')).toEqual(['path/in/quotes/with/white spaces'])
+
+    expect(pathFinder.findPaths("'package:path/to/package'")).toEqual(['path/to/package'])
+    expect(pathFinder.findPaths('"package:path/to/package"')).toEqual(['path/to/package'])
+    expect(pathFinder.findPaths("'package: path/to/package'")).toEqual(['path/to/package'])
+    expect(pathFinder.findPaths("'package:path/to/package.fileEnding'")).toEqual(['path/to/package.fileEnding'])
 })
 
 test('findPaths with surroundings', () => {
