@@ -1,4 +1,6 @@
 
+watch/unwatch box or links via contextMenu/boxHeader/sidebar (prevents unrendering)
+
 toolbars, sidebar
 
 add option to contextMenu of boxes: remove all outgoing links

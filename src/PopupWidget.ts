@@ -27,10 +27,10 @@ export abstract class PopupWidget extends Widget {
         await renderManager.addContentTo('body', html)
 
         await renderManager.addEventListenerTo(this.id+'Close', 'click', async () => {
-            this.unrender()
             if (this.onClose) {
                 this.onClose()
             }
+            this.unrender()
         })
 
         await this.afterRender()
