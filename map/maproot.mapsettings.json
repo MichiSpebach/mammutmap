@@ -844,13 +844,13 @@
 					{
 						"boxId": "u7lnivj4sq",
 						"boxName": "applicationMenu",
-						"x": 74,
+						"x": 74.24,
 						"y": 34.24
 					},
 					{
-						"boxId": "04oprug3u3o",
+						"boxId": "8do6ol70k2g",
 						"boxName": "applicationMenu.ts",
-						"x": 50,
+						"x": 52,
 						"y": 52
 					}
 				]
@@ -1090,14 +1090,14 @@
 					{
 						"boxId": "u7lnivj4sq",
 						"boxName": "applicationMenu",
-						"x": 74,
-						"y": 34.24
+						"x": 74.24,
+						"y": 33.76
 					},
 					{
-						"boxId": "04oprug3u3o",
+						"boxId": "8do6ol70k2g",
 						"boxName": "applicationMenu.ts",
-						"x": 50,
-						"y": 52
+						"x": 52,
+						"y": 48
 					}
 				]
 			}
@@ -2336,189 +2336,6 @@
 			]
 		},
 		{
-			"id": "qhpr9822fe",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 66,
-						"y": 90
-					},
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "jnk7eechpkg",
-						"boxName": "ProjectSettings.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "g5igs3vqh1",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 82,
-						"y": 18
-					},
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "p0d1i1vr268",
-						"boxName": "RenderManager.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
-			"id": "2257b1g9bto",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 66,
-						"y": 90
-					},
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "g56m7uk3ce8",
-						"boxName": "settingsWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "drastlhj5jo",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 82,
-						"y": 18
-					},
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "l84ccd69v6g",
-						"boxName": "util.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
-			"id": "drnat1pcbvg",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 82,
-						"y": 18
-					},
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "3ht1ieidr2o",
-						"boxName": "fileSystemAdapter.ts",
-						"x": 0,
-						"y": 50
-					}
-				]
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
-			"id": "sq9pjjahuco",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 66,
-						"y": 90
-					},
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "6o0ikrr8ru",
-						"boxName": "Map.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "btfgi08c3tg",
 			"from": {
 				"path": [
@@ -3027,189 +2844,6 @@
 			]
 		},
 		{
-			"id": "ksj8p4t496",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 58,
-						"y": 46
-					},
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "l84ccd69v6g",
-						"boxName": "util.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
-			"id": "oc3a87hj4eg",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 54,
-						"y": 66
-					},
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "6o0ikrr8ru",
-						"boxName": "Map.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "ae190rq52m",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 58,
-						"y": 46
-					},
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "3ht1ieidr2o",
-						"boxName": "fileSystemAdapter.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
-			"id": "v13rpkc7g7g",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 54,
-						"y": 66
-					},
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "jnk7eechpkg",
-						"boxName": "ProjectSettings.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "g05lolss99g",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 54,
-						"y": 66.24
-					},
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenuOld.ts",
-						"x": 50,
-						"y": 52
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "g56m7uk3ce8",
-						"boxName": "settingsWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "285n5l4fbig",
-			"from": {
-				"path": [
-					{
-						"boxId": "u7lnivj4sq",
-						"boxName": "applicationMenu",
-						"x": 58,
-						"y": 46
-					},
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "p0d1i1vr268",
-						"boxName": "RenderManager.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
 			"id": "10i27qsgff8",
 			"from": {
 				"path": [
@@ -3371,6 +3005,250 @@
 					{
 						"boxId": "umparj97v8",
 						"boxName": "PopupWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "72sclqaeo58",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34
+					},
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "7b4gp3csto8",
+						"boxName": "Settings.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "h9g2760g4d",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34
+					},
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "fiithebop9o",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34
+					},
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "huo1hsnb658",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34
+					},
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "2cg3vg3b1h",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34
+					},
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jnk7eechpkg",
+						"boxName": "ProjectSettings.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "u91ifsiqooo",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34
+					},
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "g56m7uk3ce8",
+						"boxName": "settingsWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "oudhhqkgf08",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34
+					},
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "ik34rt1nes8",
+			"from": {
+				"path": [
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 66,
+						"y": 90
+					},
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
 						"x": 50,
 						"y": 50
 					}

@@ -29,60 +29,14 @@
 			}
 		},
 		{
-			"id": "98b5brpsvog",
-			"from": {
-				"path": [
-					{
-						"boxId": "8vq6o31k6o",
-						"boxName": "HtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "ablrrlh81f",
-			"from": {
-				"path": [
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "5658agvftg8",
 			"from": {
 				"path": [
 					{
-						"boxId": "04oprug3u3o",
-						"boxName": "ElectronAndHtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 48,
+						"y": 48
 					}
 				]
 			},
@@ -95,16 +49,19 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"has"
+			]
 		},
 		{
 			"id": "r5amcb4o79",
 			"from": {
 				"path": [
 					{
-						"boxId": "04oprug3u3o",
-						"boxName": "ElectronAndHtmlApplicationMenu.ts",
-						"x": 50,
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 44,
 						"y": 50
 					}
 				]
@@ -118,53 +75,10 @@
 						"y": 50
 					}
 				]
-			}
-		},
-		{
-			"id": "86s12omf2ig",
-			"from": {
-				"path": [
-					{
-						"boxId": "04oprug3u3o",
-						"boxName": "ElectronAndHtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
 			},
-			"to": {
-				"path": [
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "qbaboi1d10o",
-			"from": {
-				"path": [
-					{
-						"boxId": "ailbihcmovo",
-						"boxName": "MenuItemFileWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
+			"tags": [
+				"has"
+			]
 		},
 		{
 			"id": "0rtks9flf28",
@@ -187,76 +101,10 @@
 						"y": 50
 					}
 				]
-			}
-		},
-		{
-			"id": "i83ob4bu18g",
-			"from": {
-				"path": [
-					{
-						"boxId": "60bge439j38",
-						"boxName": "MenuItemWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
 			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "21khbhncgj8",
-			"from": {
-				"path": [
-					{
-						"boxId": "60bge439j38",
-						"boxName": "MenuItemWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "9scer6ncf7o",
-			"from": {
-				"path": [
-					{
-						"boxId": "60bge439j38",
-						"boxName": "MenuItemWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
+			"tags": [
+				"isA"
+			]
 		},
 		{
 			"id": "ug16a0hmm9",
@@ -275,29 +123,6 @@
 					{
 						"boxId": "t0binfk5n7o",
 						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "84bc68cb6go",
-			"from": {
-				"path": [
-					{
-						"boxId": "qnq1biukui8",
-						"boxName": "MenuItemFolderWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -325,7 +150,10 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"isA"
+			]
 		},
 		{
 			"id": "djrqhdnuee8",
@@ -344,52 +172,6 @@
 					{
 						"boxId": "4n8l9r5jg8g",
 						"boxName": "MenuItemFolderContainerWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "nsh5d0ve57",
-			"from": {
-				"path": [
-					{
-						"boxId": "4n8l9r5jg8g",
-						"boxName": "MenuItemFolderContainerWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "r5m7947cpbo",
-			"from": {
-				"path": [
-					{
-						"boxId": "4n8l9r5jg8g",
-						"boxName": "MenuItemFolderContainerWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -512,259 +294,6 @@
 			}
 		},
 		{
-			"id": "vn7jslj5s0o",
-			"from": {
-				"path": [
-					{
-						"boxId": "hnnhblg2pto",
-						"boxName": "menuItemWidgetFactory.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "ennmg3gifrg",
-			"from": {
-				"path": [
-					{
-						"boxId": "hnnhblg2pto",
-						"boxName": "menuItemWidgetFactory.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "b3oqdmuc1a",
-			"from": {
-				"path": [
-					{
-						"boxId": "04oprug3u3o",
-						"boxName": "ElectronAndHtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "qf9ugeqb3mo",
-			"from": {
-				"path": [
-					{
-						"boxId": "04oprug3u3o",
-						"boxName": "ElectronAndHtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "p97qp0mr9u",
-			"from": {
-				"path": [
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "r2esb0g33e",
-			"from": {
-				"path": [
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "gn6g0ju7n8",
-			"from": {
-				"path": [
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "dcstuu1t5vg",
-			"from": {
-				"path": [
-					{
-						"boxId": "926mlu0o98",
-						"boxName": "ApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "upvakpff1qg",
-			"from": {
-				"path": [
-					{
-						"boxId": "8vq6o31k6o",
-						"boxName": "HtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "1e9cl59von",
-			"from": {
-				"path": [
-					{
-						"boxId": "8vq6o31k6o",
-						"boxName": "HtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "21m1k9tlsk",
-			"from": {
-				"path": [
-					{
-						"boxId": "6uv8oo9aafo",
-						"boxName": "HtmlApplicationMenuWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "ft585jg5dp",
 			"from": {
 				"path": [
@@ -804,29 +333,6 @@
 					{
 						"boxId": "hnnhblg2pto",
 						"boxName": "menuItemWidgetFactory.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "23mprkmmg18",
-			"from": {
-				"path": [
-					{
-						"boxId": "6uv8oo9aafo",
-						"boxName": "HtmlApplicationMenuWidget.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "t0binfk5n7o",
-						"boxName": "MenuItemFile.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -884,6 +390,423 @@
 			"tags": [
 				"isA"
 			]
+		},
+		{
+			"id": "bjghineg7m8",
+			"from": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "tg8pu44gvko",
+			"from": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "esnih1fe3a",
+			"from": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ji9a1jjv6e8",
+			"from": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ue7m21plk5g",
+			"from": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "mii1j92q1hg",
+			"from": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "bajhr5nkbuo",
+			"from": {
+				"path": [
+					{
+						"boxId": "qnq1biukui8",
+						"boxName": "MenuItemFolderWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ua8vkj4mb",
+			"from": {
+				"path": [
+					{
+						"boxId": "ailbihcmovo",
+						"boxName": "MenuItemFileWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "fuj26htf658",
+			"from": {
+				"path": [
+					{
+						"boxId": "4n8l9r5jg8g",
+						"boxName": "MenuItemFolderContainerWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "8ophrp3uuu",
+			"from": {
+				"path": [
+					{
+						"boxId": "4n8l9r5jg8g",
+						"boxName": "MenuItemFolderContainerWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ocv2juv0gro",
+			"from": {
+				"path": [
+					{
+						"boxId": "60bge439j38",
+						"boxName": "MenuItemWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "b3decu1m498",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "u3vgrec1chg",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "sb78d5emebo",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "sc1ed5s9us",
+			"from": {
+				"path": [
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "bun10rhprqg",
+			"from": {
+				"path": [
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "0v5d8e2tjso",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "apvcoaef11o",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
 		}
 	],
 	"nodes": []
