@@ -30,7 +30,8 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
     buildOpenFileInEditorItem(box),
     buildAddLinkItem(box, clientX, clientY),
     buildAddNodeItem(box, clientX, clientY),
-    buildRenameBoxItem(box)
+    buildRenameBoxItem(box),
+    buildRemoveOutgoingLinksItem(box)
   ]
 
   if (settings.getBoolean('developerMode')) {
@@ -43,7 +44,7 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
       items.push(menuItem)
     }
   })
-  
+
   popupMenu(items)
 }
 
@@ -54,6 +55,7 @@ export function openForFolderBox(box: FolderBox, clientX: number, clientY: numbe
     buildRenameBoxItem(box),
     buildAddNewFileItem(box, clientX, clientY),
     buildAddNewFolderItem(box, clientX, clientY),
+    buildRemoveOutgoingLinksItem(box)
   ]
 
   if (settings.getBoolean('developerMode')) {
@@ -73,7 +75,7 @@ export function openForSourcelessBox(box: SourcelessBox, clientX: number, client
   if (settings.getBoolean('developerMode')) {
     items.push(buildDetailsItem('SourcelessBoxDetails', box))
   }
-  
+
   popupMenu(items)
 }
 
@@ -96,7 +98,7 @@ export function openForLink(link: Link, clientX: number, clientY: number): void 
   if (settings.getBoolean('developerMode')) {
     items.push(buildDetailsItem('LinkDetails', link))
   }
-  
+
   popupMenu(items)
 }
 
@@ -109,6 +111,12 @@ function buildOpenFileInEditorItem(box: FileBox): MenuItemFile {
 
 function buildAddLinkItem(box: Box, clientX: number, clientY: number): MenuItemFile {
   return new MenuItemFile({label: 'link from here', click: () => addLinkToBox(box, clientX, clientY)})
+}
+
+function buildRemoveOutgoingLinksItem(box: Box): MenuItemFile {
+  return new MenuItemFile({label: 'remove all outgoing links', click: () => {
+    box.borderingLinks.getOutgoingLinks().forEach(link => link.getManagingBoxLinks().removeLink(link))
+  }})
 }
 
 function buildAddNodeItem(box: Box, clientX: number, clientY: number): MenuItemFile {

@@ -6,7 +6,7 @@ import { Box } from "../box/Box";
 export class BorderingLinks {
   private readonly referenceBox: Box
   protected readonly links: Link[] = []
-  
+
   public constructor(referenceBox: Box) {
     this.referenceBox = referenceBox
   }
@@ -51,7 +51,7 @@ export class BorderingLinks {
       this.referenceBox.saveMapData()
     }
   }
-  
+
   public deregister(link: Link): void {
     if (!this.includes(link)) {
       let message = `Trying to deregister borderingLink with id ${link.getId()}`
@@ -64,6 +64,10 @@ export class BorderingLinks {
 
   public includes(link: Link): boolean {
     return this.links.includes(link)
+  }
+
+  public getOutgoingLinks(): Link[] {
+    return this.links.filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBox))
   }
 
 }

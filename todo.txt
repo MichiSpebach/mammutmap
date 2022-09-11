@@ -3,8 +3,6 @@ watch/unwatch box or links via contextMenu/boxHeader/sidebar (prevents unrenderi
 
 toolbars, sidebar
 
-add option to contextMenu of boxes: remove all outgoing links
-
 add option to contextMenu of boxes: tag[
   'hidden|unimportant'(e.g. files that start with '.'),
   'common'(used everywhere => incoming links are hidden, linkStart and linkEnd visible),
