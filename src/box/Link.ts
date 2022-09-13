@@ -11,6 +11,13 @@ import { HoverManager } from '../HoverManager'
 import { ClientPosition, LocalPosition } from './Transform'
 import { NodeWidget } from '../node/NodeWidget'
 
+export function override(implementation: typeof LinkImplementation): void {
+  LinkImplementation = implementation
+}
+
+export let LinkImplementation: typeof Link/* = Link*/ // assigned after decleration at end of file
+
+// important: always extend from LinkImplementation (important for plugins)
 export class Link implements Hoverable {
   private readonly data: BoxMapLinkData
   private managingBox: Box
@@ -21,7 +28,11 @@ export class Link implements Hoverable {
   private currentStyle: string|null = null
   private styleTimer: NodeJS.Timeout|null = null
 
-  public constructor(data: BoxMapLinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget) {
+  public static new(data: BoxMapLinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget): Link {
+    return new LinkImplementation(data, managingBox, from, to)
+  }
+
+  protected constructor(data: BoxMapLinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget) {
     this.data = data
     this.managingBox = managingBox
     this.from = new LinkEnd(this.data.id+'from', this.data.from, this, 'square', from)
@@ -321,3 +332,5 @@ export class Link implements Hoverable {
   }
 
 }
+
+LinkImplementation = Link

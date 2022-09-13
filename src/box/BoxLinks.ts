@@ -52,7 +52,7 @@ export class BoxLinks {
       const linkData = new BoxMapLinkData(util.generateId(), from.mapData, to.mapData)
       this.referenceBox.getMapLinkData().push(linkData)
 
-      const link: Link = new Link(linkData, this.referenceBox, from.linkable, to.linkable)
+      const link: Link = Link.new(linkData, this.referenceBox, from.linkable, to.linkable)
       this.links.push(link)
 
       await this.addPlaceholderFor(link)
@@ -95,7 +95,7 @@ export class BoxLinks {
         if (this.links.find(link => link.getId() === linkData.id)) {
           continue
         }
-        this.links.push(new Link(linkData, this.referenceBox))
+        this.links.push(Link.new(linkData, this.referenceBox))
       }
 
       await Promise.all(this.links.map(async (link: Link) => {

@@ -1,4 +1,4 @@
-import { Link } from '../dist/box/Link'
+import { LinkImplementation, override as overrideLink } from '../dist/box/Link'
 import { WayPointData } from '../dist/box/WayPointData'
 import { NodeWidget } from '../dist/node/NodeWidget'
 import { Box } from '../dist/pluginFacade'
@@ -11,14 +11,14 @@ applicationMenu.addMenuItemTo('linkDidactor.js', deactivateMenuItem)
 applicationMenu.addMenuItemTo('linkDidactor.js', activateMenuItem)
 
 async function deactivate(): Promise<void> {
-    DidactedLink.deactivateAndPlugout()
+    overrideLink(DidactedLink.getSuperClass())
     await applicationMenu.setMenuItemEnabled(deactivateMenuItem, false)
     await applicationMenu.setMenuItemEnabled(activateMenuItem, true)
     util.logInfo('deactivated linkDidactor plugin')
 }
 
 async function activate(): Promise<void> {
-    DidactedLink.activateAndPlugin()
+    overrideLink(DidactedLink)
     await applicationMenu.setMenuItemEnabled(deactivateMenuItem, true)
     await applicationMenu.setMenuItemEnabled(activateMenuItem, false)
     util.logInfo('activated linkDidactor plugin')
@@ -26,17 +26,10 @@ async function activate(): Promise<void> {
 
 const colors: string[] = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal']
 
-class DidactedLink extends Link {
+class DidactedLink extends LinkImplementation {
 
-    private static getColorBackup: () => string
-
-    public static activateAndPlugin(): void {
-        this.getColorBackup = Link.prototype.getColor
-        Link.prototype.getColor = DidactedLink.prototype.getColor
-    }
-
-    public static deactivateAndPlugout(): void {
-        Link.prototype.getColor = DidactedLink.getColorBackup
+    public static getSuperClass(): typeof LinkImplementation {
+        return Object.getPrototypeOf(DidactedLink.prototype).constructor
     }
 
     public getColor(): string {
