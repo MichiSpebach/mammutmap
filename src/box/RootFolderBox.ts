@@ -38,6 +38,10 @@ export class RootFolderBox extends FolderBox {
     return this.projectSettings.getProjectSettingsFilePath()
   }
 
+  public getProjectSettings(): ProjectSettings {
+    return this.projectSettings
+  }
+
   public isRoot(): boolean {
     return true
   }

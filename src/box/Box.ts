@@ -10,7 +10,6 @@ import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { scaleTool } from './ScaleTool'
 import { BoxLinks } from './BoxLinks'
-import { Link } from './Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
@@ -22,6 +21,7 @@ import { grid } from './Grid'
 import { BoxNodesWidget } from './BoxNodesWidget'
 import { NodeData } from '../mapData/NodeData'
 import { BorderingLinks } from '../link/BorderingLinks'
+import { ProjectSettings } from '../ProjectSettings'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -93,6 +93,10 @@ export abstract class Box implements DropTarget, Hoverable {
 
   public getMapDataFilePath(): string {
     return this.getMapPath()+'.json'
+  }
+
+  public getProjectSettings(): ProjectSettings {
+    return this.getParent().getProjectSettings()
   }
 
   public getParent(): FolderBox|never {

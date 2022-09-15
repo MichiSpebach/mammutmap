@@ -1,5 +1,6 @@
 import { fileSystem } from './fileSystemAdapter'
 import { JsonObject } from './JsonObject'
+import { LinkTagData } from './mapData/LinkTagData'
 import { util } from './util'
 
 export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings?
@@ -15,6 +16,7 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
 
   private srcRootPath: string
   private mapRootPath: string
+  private linkTags: LinkTagData[] // TODO: move into data of boxes for tree structure?
 
   public static isProjectSettingsFileName(fileName: string): boolean {
     return fileName === this.preferredFileName || this.alternativeFileNames.includes(fileName)
@@ -23,10 +25,11 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
   public static async loadFromFileSystem(filePath: string): Promise<ProjectSettings> {
     const settingsJson: string = await fileSystem.readFile(filePath) // TODO: implement and use fileSystem.readJsonFile(path: string): Object|any
     const settingsParsed: any = JSON.parse(settingsJson)
-    return new ProjectSettings(filePath, settingsParsed['srcRootPath'], settingsParsed['mapRootPath'])
+    const linkTags: LinkTagData[]|undefined = settingsParsed.linkTags?.map((rawTag: any) => LinkTagData.ofRawObject(rawTag))
+    return new ProjectSettings(filePath, settingsParsed['srcRootPath'], settingsParsed['mapRootPath'], linkTags)
   }
 
-  public constructor(projectSettingsFilePath: string, srcRootPath: string, mapRootPath: string) {
+  public constructor(projectSettingsFilePath: string, srcRootPath: string, mapRootPath: string, linkTags: LinkTagData[] = []) {
     if (!srcRootPath || !mapRootPath) { // can happen when called with type any
       let errorMessage = 'ProjectSettings need to have a srcRootPath and a mapRootPath'
       errorMessage += ', but specified srcRootPath is '+srcRootPath+' and mapRootPath is '+mapRootPath+'.'
@@ -40,6 +43,7 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
     this.absoluteMapRootPath = util.joinPaths([projectSettingsFolderPath, mapRootPath])
     this.srcRootPath = srcRootPath
     this.mapRootPath = mapRootPath
+    this.linkTags = linkTags
   }
 
   public async saveToFileSystem(): Promise<void> {
@@ -48,15 +52,25 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
   }
 
   public toJson(): string {
-    return util.toFormattedJson({srcRootPath: this.srcRootPath, mapRootPath: this.mapRootPath})
+    return util.toFormattedJson(this.copyWithoutVolatileFields())
   }
 
   public mergeIntoJson(jsonToMergeInto: string): string {
     // TODO: improve, jsonToMergeInto should only be changed where needed (not completely reformatted)
     const objectToMergeInto: Object = JSON.parse(jsonToMergeInto)
-    const mergedObject: Object = {...objectToMergeInto, ...{srcRootPath: this.srcRootPath, mapRootPath: this.mapRootPath}}
+    const mergedObject: Object = {...objectToMergeInto, ...this.copyWithoutVolatileFields()}
     const mergedJson: string = util.toFormattedJson(mergedObject)
     return mergedJson
+  }
+
+  private copyWithoutVolatileFields(): ProjectSettings {
+    let thisWithoutVolatileFields: any = {...this}
+
+    thisWithoutVolatileFields[this.projectSettingsFilePath] = undefined // [this.<field>] keeps typesafety
+    thisWithoutVolatileFields[this.absoluteSrcRootPath] = undefined
+    thisWithoutVolatileFields[this.absoluteMapRootPath] = undefined
+
+    return thisWithoutVolatileFields
   }
 
   public getProjectSettingsFilePath(): string {
@@ -77,6 +91,45 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
 
   public getMapRootPath(): string {
     return this.mapRootPath
+  }
+
+  public getLinkTagNamesWithDefaults(): string[] {
+    let tagNames: string[] = this.linkTags.map(tag => tag.name)
+    
+    for (const defaultTagName of LinkTagData.defaultTagNames) {
+      if (!tagNames.includes(defaultTagName)) {
+        tagNames.push(defaultTagName)
+      }
+    }
+
+    return tagNames
+  }
+
+  public async countUpLinkTagAndSave(tagName: string): Promise<void> {
+    let tag: LinkTagData|undefined = this.linkTags.find(tag => tag.name === tagName)
+    if (!tag) {
+      tag = new LinkTagData(tagName, 1)
+      this.linkTags.push(tag)
+    }
+
+    tag.count += 1
+    await this.saveToFileSystem()
+  }
+
+  public async countDownLinkTagAndSave(tagName: string): Promise<void> {
+    let tag: LinkTagData|undefined = this.linkTags.find(tag => tag.name === tagName)
+
+    if (!tag) {
+      util.logWarning(`cannot count down tag ${tagName} because it is not known`)
+      return
+    }
+
+    tag.count -= 1
+
+    if (tag.count < 1) {
+      this.linkTags.splice(this.linkTags.indexOf(tag), 1)
+    }
+    await this.saveToFileSystem()
   }
 
 }

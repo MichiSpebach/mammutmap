@@ -15,7 +15,7 @@ export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
 }
 
-export let LinkImplementation: typeof Link/* = Link*/ // assigned after decleration at end of file
+export let LinkImplementation: typeof Link /*= Link*/ // assigned after declaration at end of file
 
 // important: always extend from LinkImplementation (important for plugins)
 export class Link implements Hoverable {
@@ -313,12 +313,17 @@ export class Link implements Hoverable {
       util.logWarning(`tag '${tag}' is already included in link '${this.getId()}'`)
       return
     }
+
     if (!this.data.tags) {
       this.data.tags = []
     }
     this.data.tags.push(tag)
-    await this.render()
-    await this.managingBox.saveMapData()
+    
+    await Promise.all([
+      this.render(),
+      this.managingBox.saveMapData(),
+      this.managingBox.getProjectSettings().countUpLinkTagAndSave(tag)
+    ])
   }
 
   public async removeTag(tag: string): Promise<void> {
@@ -326,9 +331,14 @@ export class Link implements Hoverable {
       util.logWarning(`tag '${tag}' is not included in link '${this.getId()}'`)
       return
     }
+
     this.data.tags.splice(this.data.tags.indexOf(tag), 1)
-    await this.render()
-    await this.managingBox.saveMapData()
+
+    await Promise.all([
+      this.render(),
+      this.managingBox.saveMapData(),
+      this.managingBox.getProjectSettings().countDownLinkTagAndSave(tag)
+    ])
   }
 
 }

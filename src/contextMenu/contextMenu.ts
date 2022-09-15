@@ -124,26 +124,17 @@ function buildAddNodeItem(box: Box, clientX: number, clientY: number): MenuItemF
 }
 
 function buildTagLinkItemFolder(link: Link): MenuItemFolder {
-  const defaultTags: string[] = [
-    'hidden',
-    'isA', // TODO: add description "inheritance"
-    'has', // TODO: add description "composition"
-    'important', // TODO: add description "visible although other tag would hide it"
-    'falsePositive', // TODO: add description "wrongly recognized by plugin"
-  ]
+  let tags: string[] = link.getManagingBox().getProjectSettings().getLinkTagNamesWithDefaults()
 
-  const items: MenuItem[] = []
-
-  for (const includedTag of link.getTags().reverse()) { // reverse to display latest on top
-    if (!defaultTags.find(defaultTag => defaultTag === includedTag)) {
-      items.unshift(buildTagLinkItem(link, includedTag))
+  for (const includedTag of link.getTags()) {
+    if (!tags.find(tag => tag === includedTag)) {
+      util.logWarning('Corrupted projectSettings detected, expected all linkTags to be registered in projectSettings, but '+includedTag+' was not.')
+      link.getManagingBox().getProjectSettings().countUpLinkTagAndSave(includedTag)
+      tags.push(includedTag)
     }
   }
 
-  for (const defaultTag of defaultTags) {
-    items.push(buildTagLinkItem(link, defaultTag))
-  }
-
+  const items: MenuItem[] =  tags.map(tag => buildTagLinkItem(link, tag))
   items.push(buildAddOtherTagLinkItem(link))
 
   return new MenuItemFolder({label: 'tag', submenu: items})

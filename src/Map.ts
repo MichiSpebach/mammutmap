@@ -93,6 +93,10 @@ export class Map {
     await renderManager.remove('map')
   }
 
+  public getProjectSettings(): ProjectSettings {
+    return this.projectSettings
+  }
+
   public getRootFolder(): RootFolderBox {
     return this.rootFolder
   }
