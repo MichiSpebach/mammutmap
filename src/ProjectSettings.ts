@@ -107,12 +107,14 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
 
   public async countUpLinkTagAndSave(tagName: string): Promise<void> {
     let tag: LinkTagData|undefined = this.linkTags.find(tag => tag.name === tagName)
+
     if (!tag) {
       tag = new LinkTagData(tagName, 1)
       this.linkTags.push(tag)
+    } else {
+      tag.count += 1
     }
 
-    tag.count += 1
     await this.saveToFileSystem()
   }
 
@@ -123,12 +125,13 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
       util.logWarning(`cannot count down tag ${tagName} because it is not known`)
       return
     }
-
-    tag.count -= 1
-
-    if (tag.count < 1) {
+    
+    if (tag.count <= 1) {
       this.linkTags.splice(this.linkTags.indexOf(tag), 1)
+    } else {
+      tag.count -= 1
     }
+
     await this.saveToFileSystem()
   }
 
