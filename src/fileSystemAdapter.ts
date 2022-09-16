@@ -5,6 +5,25 @@ import { JsonObject } from './JsonObject'
 
 export class FileSystem {
 
+  private ongoingOperations: {path: string, promise: Promise<unknown>}[] = []
+
+  /** in some operating systems files can get corrupted when accessed concurrently */
+  // TODO: use this for all file operations
+  private async scheduleOperation<T>(pathToWaitFor: string, action: () => Promise<T>): Promise<T> {
+    const ongoing: {path: string, promise: Promise<unknown>} | undefined = this.ongoingOperations.find(ongoing => ongoing.path === pathToWaitFor)
+    if (ongoing) {
+      await ongoing.promise
+      return this.scheduleOperation(pathToWaitFor, action)
+    }
+
+    const promise: Promise<T> = action()
+
+    this.ongoingOperations.push({path: pathToWaitFor, promise})
+    await promise
+    this.ongoingOperations.splice(this.ongoingOperations.findIndex(finished => finished.promise === promise), 1)
+    return promise
+  }
+
   public async loadFromJsonFile<T>(filePath: string, buildFromJson: (json: string) => T): Promise<T|null> {
     return this.readFile(filePath)
       .then(json => {
@@ -66,9 +85,11 @@ export class FileSystem {
   }
 
   public async mergeObjectIntoJsonFile(path: string, object: JsonObject): Promise<void> {
-    const originalJson: string = await this.readFile(path)
-    const mergedJson: string = object.mergeIntoJson(originalJson)
-    await this.writeFile(path, mergedJson)
+    await this.scheduleOperation(path, async (): Promise<void> => {
+      const originalJson: string = await this.readFile(path)
+      const mergedJson: string = object.mergeIntoJson(originalJson)
+      await this.writeFile(path, mergedJson)
+    })
   }
 
   public async writeFile(path: string, data: string): Promise<void> {

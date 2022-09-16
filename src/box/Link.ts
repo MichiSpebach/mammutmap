@@ -318,7 +318,7 @@ export class Link implements Hoverable {
       this.data.tags = []
     }
     this.data.tags.push(tag)
-    
+
     await Promise.all([
       this.render(),
       this.managingBox.saveMapData(),
