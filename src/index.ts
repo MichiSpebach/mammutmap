@@ -5,6 +5,7 @@ import * as commandLine from './commandLine'
 import { applicationMenu } from './applicationMenu/applicationMenu'
 import * as pluginLoader from './pluginLoader'
 import { util } from './util'
+import * as sidebarWidget from './toolbars/sidebarWidget'
 
 var mainWindow: BrowserWindow
 
@@ -22,11 +23,12 @@ const createWindow = async () => {
       contextIsolation: false
     }
   });
-  
+
   mainWindow.loadFile(path.join(__dirname, '../src/index.html'))
-  
+
   domAdapter.initFromBrowserWindow(mainWindow)
   commandLine.init()
+  //sidebarWidget.init()
 
   if (process.platform !== 'darwin') {
     await applicationMenu.initAndRender()
