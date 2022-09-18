@@ -17,6 +17,7 @@ class SettingsWidget extends PopupWidget {
   private readonly boxesDraggableIntoOtherBoxesInputId: string
   private readonly developerModeInputId: string
   private readonly htmlApplicationMenuInputId: string
+  private readonly sidebarInputId: string
 
   public constructor() {
     super('applicationSettingsWidget', 'ApplicationSettings')
@@ -26,6 +27,7 @@ class SettingsWidget extends PopupWidget {
     this.boxesDraggableIntoOtherBoxesInputId = this.getId()+'BoxesDraggableIntoOtherBoxes'
     this.developerModeInputId = this.getId()+'DeveloperMode'
     this.htmlApplicationMenuInputId = this.getId()+'HtmlApplicationMenu'
+    this.sidebarInputId = this.getId()+'Sidebar'
   }
 
   protected formContentHtml(): string {
@@ -53,6 +55,7 @@ class SettingsWidget extends PopupWidget {
     html += this.formCheckboxRowHtml(this.boxesDraggableIntoOtherBoxesInputId, 'boxesDraggableIntoOtherBoxes')
     html += this.formCheckboxRowHtml(this.developerModeInputId, 'developerMode')
     html += this.formCheckboxRowHtml(this.htmlApplicationMenuInputId, 'htmlApplicationMenu')
+    html += this.formCheckboxRowHtml(this.sidebarInputId, 'sidebar')
     html += '</table>'
 
     return html
@@ -81,7 +84,8 @@ class SettingsWidget extends PopupWidget {
       ),
       this.addChangeListenerToCheckbox(this.boxesDraggableIntoOtherBoxesInputId, 'boxesDraggableIntoOtherBoxes'),
       this.addChangeListenerToCheckbox(this.developerModeInputId, 'developerMode'),
-      this.addChangeListenerToCheckbox(this.htmlApplicationMenuInputId, 'htmlApplicationMenu')
+      this.addChangeListenerToCheckbox(this.htmlApplicationMenuInputId, 'htmlApplicationMenu'),
+      this.addChangeListenerToCheckbox(this.sidebarInputId, 'sidebar')
     ])
   }
 
@@ -96,7 +100,8 @@ class SettingsWidget extends PopupWidget {
       renderManager.removeEventListenerFrom(this.boxMinSizeToRenderInputId, 'change'),
       renderManager.removeEventListenerFrom(this.boxesDraggableIntoOtherBoxesInputId, 'change'),
       renderManager.removeEventListenerFrom(this.developerModeInputId, 'change'),
-      renderManager.removeEventListenerFrom(this.htmlApplicationMenuInputId, 'change')
+      renderManager.removeEventListenerFrom(this.htmlApplicationMenuInputId, 'change'),
+      renderManager.removeEventListenerFrom(this.sidebarInputId, 'change')
     ])
   }
 

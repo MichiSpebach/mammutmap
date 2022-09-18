@@ -2,7 +2,7 @@ import { util } from './util'
 import { fileSystem } from './fileSystemAdapter'
 
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
-export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'htmlApplicationMenu'
+export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'htmlApplicationMenu'|'sidebar'
 
 class Settings {
 
@@ -15,6 +15,7 @@ class Settings {
   private boxesDraggableIntoOtherBoxes: boolean
   private developerMode: boolean
   private htmlApplicationMenu: boolean
+  private sidebar: boolean
 
   private booleanSubscribers: {setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>}[] = []
 
@@ -30,7 +31,7 @@ class Settings {
         util.logError('Failed to load application settings because: '+reason)
       })
     }
-    
+
     return new Settings(settingsJson)
   }
 
@@ -42,12 +43,13 @@ class Settings {
     this.boxesDraggableIntoOtherBoxes = settingsParsed['boxesDraggableIntoOtherBoxes']
     this.developerMode = settingsParsed['developerMode']
     this.htmlApplicationMenu = settingsParsed['htmlApplicationMenu']
+    this.sidebar = settingsParsed['sidebar']
   }
 
   private async save(): Promise<void> {
     const thisWithoutLogic: any = {...this}
     thisWithoutLogic.booleanSubscribers = undefined
-    
+
     await fileSystem.writeFile(Settings.settingsFilePath, util.toFormattedJson(thisWithoutLogic)) // TODO: merge into existing settings file (not replacing whole file)
       .then(() => {
         util.logInfo('saved ' + Settings.settingsFilePath)

@@ -28,7 +28,7 @@ const createWindow = async () => {
 
   domAdapter.initFromBrowserWindow(mainWindow)
   commandLine.init()
-  //sidebarWidget.init()
+  sidebarWidget.init()
 
   if (process.platform !== 'darwin') {
     await applicationMenu.initAndRender()
