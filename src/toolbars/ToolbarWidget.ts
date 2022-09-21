@@ -48,6 +48,15 @@ export class ToolbarWidget extends Widget {
     await this.selectedView.getWidget().render()
   }
 
+  public async unrender(): Promise<void> {
+    this.shouldBeRendered = false
+    
+    if (this.selectedView) {
+      //await this.selectedView.getWidget().unrender() // TODO: implement unrender for ToolbarView
+    }
+    await renderManager.setContentTo(this.getId(), '')
+  }
+
   private formHeaderHtml(): string {
     let html = ''
 

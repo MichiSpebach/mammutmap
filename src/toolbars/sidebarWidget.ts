@@ -8,19 +8,31 @@ const id = 'sidebar'
 export const sidebarWidget = new ToolbarWidget(id)
 
 export async function init(): Promise<void> {
-  await renderManager.addContentTo(indexHtmlIds.bodyId, `<div id="${id}" style="${(await getStyle())}"></div>`);
+  await renderManager.addContentTo(indexHtmlIds.bodyId, `<div id="${id}" style="display:none;"></div>`)
 
-  (await settingsOnStartup).subscribeBoolean('sidebar', async () => {
-    await renderManager.setStyleTo(id, await getStyle())
-  })
-
-  await sidebarWidget.render()
+  const settings = await settingsOnStartup
+  settings.subscribeBoolean('sidebar', async (active: boolean) => updateRender(active))
+  await updateRender(settings.getBoolean('sidebar'))
 }
 
-async function getStyle(): Promise<string> {
-  if ((await settingsOnStartup).getBoolean('sidebar')) {
-    return 'position:absolute;top:0;right:0;height:100%;width:20%;background-color:#303438;'
+async function updateRender(active: boolean): Promise<void> {
+  if (active) {
+    await render()
   } else {
-    return 'display:none;'
+    await unrender()
   }
+}
+
+async function render(): Promise<void> {
+  await Promise.all([
+    renderManager.setStyleTo(id, 'position:absolute;top:0;right:0;height:100%;width:20%;background-color:#303438;'),
+    sidebarWidget.render()
+  ])
+}
+
+async function unrender(): Promise<void> {
+  await Promise.all([
+    renderManager.setStyleTo(id, 'display:none;'),
+    sidebarWidget.unrender()
+  ])
 }

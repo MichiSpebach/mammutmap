@@ -93,6 +93,10 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
     return this.mapRootPath
   }
 
+  public getLinkTags(): LinkTagData[] {
+    return this.linkTags
+  }
+
   public getLinkTagNamesWithDefaults(): string[] {
     let tagNames: string[] = this.linkTags.map(tag => tag.name)
     

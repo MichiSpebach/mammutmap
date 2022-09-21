@@ -2,7 +2,7 @@ import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
 import { RootFolderBox } from './box/RootFolderBox'
-import { map } from './Map'
+import { Map, map } from './Map'
 import { util } from './util'
 import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
@@ -14,7 +14,7 @@ import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import * as contextMenu from './contextMenu/contextMenu'
 
 export { Box, FileBox, RootFolderBox }
-export { applicationMenu, contextMenu, MenuItemFile }
+export { Map, applicationMenu, contextMenu, MenuItemFile }
 
 let boxWatchers: BoxWatcher[] = []
 
@@ -23,10 +23,14 @@ export function getFileBoxIterator(): FileBoxDepthTreeIterator {
 }
 
 export function getRootFolder(): RootFolderBox|never {
+  return getMap().getRootFolder()
+}
+
+export function getMap(): Map|never {
   if (!map) {
     util.logError('a folder has to be openend first to execute this plugin')
   }
-  return map.getRootFolder()
+  return map
 }
 
 export class FileBoxDepthTreeIterator {
