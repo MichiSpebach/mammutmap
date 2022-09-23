@@ -1,20 +1,16 @@
 import * as pluginFacade from '../../dist/pluginFacade'
-import { Message, Map, subscribeMap, Subscribers } from '../../dist/pluginFacade'
+import { Message, Map, onMapLoaded, onMapUnload, Subscribers } from '../../dist/pluginFacade'
 import { util } from '../../dist/util'
 import { DidactedLinkTag, LinkTagMode } from './DidactedLinkTag'
 
-export const linkTagSubscribers: Subscribers<DidactedLinkTag[]|Message> = new Subscribers()
+export const linkTags: Subscribers<DidactedLinkTag[]|Message> = new Subscribers()
 
-subscribeMap(onMapLoaded, onMapUnloaded)
+onMapLoaded.subscribe((map: Map) => {
+    map.getProjectSettings().linkTags.subscribe(() => linkTags.callSubscribers(getLinkTags()))
+    linkTags.callSubscribers(getLinkTags())
+})
 
-function onMapLoaded(map: Map): void {
-    map.getProjectSettings().linkTagSubscribers.subscribe(() => linkTagSubscribers.call(getLinkTags()))
-    linkTagSubscribers.call(getLinkTags())
-}
-
-function onMapUnloaded(): void {
-    linkTagSubscribers.call(getLinkTags())
-}
+onMapUnload.subscribe(() => linkTags.callSubscribers(getLinkTags()))
 
 export function getComputedModeForLinkTag(tagName: string): LinkTagMode {
     const tag: DidactedLinkTag|undefined = findLinkTagByName(tagName)

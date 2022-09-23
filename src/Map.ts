@@ -11,23 +11,25 @@ import { ProjectSettings } from './ProjectSettings'
 import { ClientPosition } from './box/Transform'
 import * as indexHtmlIds from './indexHtmlIds'
 import { fileSystem } from './fileSystemAdapter'
+import { Subscribers } from './pluginFacade'
+
+export const onMapLoaded: Subscribers<Map> = new Subscribers()
+export const onMapUnload: Subscribers<void> = new Subscribers()
 
 export let map: Map|undefined
 
-const onLoadedSubscribers: ((map: Map) => void)[] = []
-const onUnloadSubscribers: (() => void)[] = []
-
-export function subscribe(onLoaded: (map: Map) => void, onUnload: () => void): void {
-  onLoadedSubscribers.push(onLoaded)
-  onUnloadSubscribers.push(onUnload)
-}
-
 export function setMap(object: Map): void {
   if (map) {
-    callOnUnloadSubscribers()
+    onMapUnload.callSubscribers()
   }
+
   map = object
-  callOnLoadedSubscribers()
+
+  if (!map) {
+    util.logWarning('cannot call onLoadedSubscribers because map is not set')
+  } else {
+    onMapLoaded.callSubscribers(map)
+  }
 }
 
 export async function searchAndLoadMapCloseTo(folderPath: string): Promise<void> {
@@ -82,7 +84,7 @@ export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<v
     await unloadAndUnsetMap()
   }
   map = await Map.new('content', projectSettings)
-  callOnLoadedSubscribers()
+  onMapLoaded.callSubscribers(map)
 }
 
 export async function unloadAndUnsetMap(): Promise<void> {
@@ -90,7 +92,7 @@ export async function unloadAndUnsetMap(): Promise<void> {
     util.logWarning('cannot unload map because no map is loaded')
     return
   }
-  callOnUnloadSubscribers()
+  onMapUnload.callSubscribers()
   await map.destruct()
   checkMapUnloaded()
   clearManagers()
@@ -111,22 +113,6 @@ function clearManagers(): void {
   ScaleManager.clear()
   HoverManager.clear()
   renderManager.clear()
-}
-
-function callOnLoadedSubscribers(): void {
-  if (!map) {
-    util.logWarning('cannot callOnLoadedSubscribers because map is not set')
-    return
-  }
-  for (const subscriber of onLoadedSubscribers) {
-    subscriber(map)
-  }
-}
-
-function callOnUnloadSubscribers(): void {
-  for (const subscriber of onUnloadSubscribers) {
-    subscriber()
-  }
 }
 
 export class Map {

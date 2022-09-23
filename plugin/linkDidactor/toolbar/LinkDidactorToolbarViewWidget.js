@@ -17,7 +17,7 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
     }
     async render() {
         if (!this.shouldBeRendered) {
-            linkDidactorSettings.linkTagSubscribers.subscribe(() => this.render());
+            linkDidactorSettings.linkTags.subscribe(() => this.render());
         }
         this.shouldBeRendered = true;
         await RenderManager_1.renderManager.setContentTo(this.getId(), this.formHtml());

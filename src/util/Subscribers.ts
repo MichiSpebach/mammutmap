@@ -6,7 +6,7 @@ export class Subscribers<T> {
         this.subscribers.push(subscriber)
     }
 
-    public call(data: T) {
+    public callSubscribers(data: T) {
         for (const subscriber of this.subscribers) {
             subscriber(data)
         }

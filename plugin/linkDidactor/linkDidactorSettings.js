@@ -1,19 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLinkTags = exports.getComputedModeForLinkTag = exports.linkTagSubscribers = void 0;
+exports.getLinkTags = exports.getComputedModeForLinkTag = exports.linkTags = void 0;
 const pluginFacade = require("../../dist/pluginFacade");
 const pluginFacade_1 = require("../../dist/pluginFacade");
 const util_1 = require("../../dist/util");
 const DidactedLinkTag_1 = require("./DidactedLinkTag");
-exports.linkTagSubscribers = new pluginFacade_1.Subscribers();
-(0, pluginFacade_1.subscribeMap)(onMapLoaded, onMapUnloaded);
-function onMapLoaded(map) {
-    map.getProjectSettings().linkTagSubscribers.subscribe(() => exports.linkTagSubscribers.call(getLinkTags()));
-    exports.linkTagSubscribers.call(getLinkTags());
-}
-function onMapUnloaded() {
-    exports.linkTagSubscribers.call(getLinkTags());
-}
+exports.linkTags = new pluginFacade_1.Subscribers();
+pluginFacade_1.onMapLoaded.subscribe((map) => {
+    map.getProjectSettings().linkTags.subscribe(() => exports.linkTags.callSubscribers(getLinkTags()));
+    exports.linkTags.callSubscribers(getLinkTags());
+});
+pluginFacade_1.onMapUnload.subscribe(() => exports.linkTags.callSubscribers(getLinkTags()));
 function getComputedModeForLinkTag(tagName) {
     const tag = findLinkTagByName(tagName);
     if (!tag) {

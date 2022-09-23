@@ -1,7 +1,7 @@
 import { fileSystem } from './fileSystemAdapter'
 import { LinkTagData } from './mapData/LinkTagData'
 import { MapSettingsData } from './mapData/MapSettingsData'
-import { Subscribers } from './Subscribers'
+import { Subscribers } from './util/Subscribers'
 import { util } from './util'
 
 export class ProjectSettings { // TODO: rename to MapSettings?
@@ -15,7 +15,7 @@ export class ProjectSettings { // TODO: rename to MapSettings?
   private absoluteSrcRootPath: string
   private absoluteMapRootPath: string
 
-  public readonly linkTagSubscribers: Subscribers<LinkTagData[]> = new Subscribers()
+  public readonly linkTags: Subscribers<LinkTagData[]> = new Subscribers()
 
   private data: MapSettingsData
 
@@ -79,13 +79,13 @@ export class ProjectSettings { // TODO: rename to MapSettings?
 
   public async countUpLinkTagAndSave(tagName: string): Promise<void> {
     this.data.countUpLinkTag(tagName)
-    this.linkTagSubscribers.call(this.getLinkTags())
+    this.linkTags.callSubscribers(this.getLinkTags())
     await this.saveToFileSystem()
   }
 
   public async countDownLinkTagAndSave(tagName: string): Promise<void> {
     this.data.countDownLinkTag(tagName)
-    this.linkTagSubscribers.call(this.getLinkTags())
+    this.linkTags.callSubscribers(this.getLinkTags())
     await this.saveToFileSystem()
   }
 

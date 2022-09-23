@@ -2,7 +2,7 @@ import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
 import { RootFolderBox } from './box/RootFolderBox'
-import { Map, map, subscribe as subscribeMap } from './Map'
+import { Map, map, onMapLoaded, onMapUnload } from './Map'
 import { util } from './util'
 import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
@@ -12,10 +12,10 @@ import { Link } from './box/Link'
 import { applicationMenu } from './applicationMenu/applicationMenu'
 import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import * as contextMenu from './contextMenu/contextMenu'
-import { Subscribers } from './Subscribers'
+import { Subscribers } from './util/Subscribers'
 
 export { Box, FileBox, RootFolderBox }
-export { Map, subscribeMap, applicationMenu, contextMenu, MenuItemFile, Subscribers }
+export { Map, onMapLoaded, onMapUnload, applicationMenu, contextMenu, MenuItemFile, Subscribers }
 
 let boxWatchers: BoxWatcher[] = []
 
