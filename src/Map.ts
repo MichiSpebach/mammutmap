@@ -10,11 +10,17 @@ import { RootFolderBox } from './box/RootFolderBox'
 import { ProjectSettings } from './ProjectSettings'
 import { ClientPosition } from './box/Transform'
 import * as indexHtmlIds from './indexHtmlIds'
+import { fileSystem } from './fileSystemAdapter'
 
 export let map: Map|undefined
 
 const onLoadedSubscribers: ((map: Map) => void)[] = []
 const onUnloadSubscribers: (() => void)[] = []
+
+export function subscribe(onLoaded: (map: Map) => void, onUnload: () => void): void {
+  onLoadedSubscribers.push(onLoaded)
+  onUnloadSubscribers.push(onUnload)
+}
 
 export function setMap(object: Map): void {
   if (map) {
@@ -22,6 +28,53 @@ export function setMap(object: Map): void {
   }
   map = object
   callOnLoadedSubscribers()
+}
+
+export async function searchAndLoadMapCloseTo(folderPath: string): Promise<void> {
+  const filePathsToLookForProjectSettings: string[] = generatePreferredProjectSettingsFilePaths(folderPath)
+    .concat(generateAlternativeProjectSettingsFilePaths(folderPath))
+
+  for (const projectSettingsFilePath of filePathsToLookForProjectSettings) {
+    if (await fileSystem.doesDirentExistAndIsFile(projectSettingsFilePath)) {
+      util.logInfo('found existing ProjectSettings at '+projectSettingsFilePath)
+      try {
+        await loadAndSetMap(await ProjectSettings.loadFromFileSystem(projectSettingsFilePath))
+        return
+      } catch (error) {
+        util.logWarning('Failed to open ProjectSettings at '+projectSettingsFilePath+'. '+error)
+      }
+    }
+  }
+
+  util.logInfo('opening new project at '+folderPath)
+  await loadAndSetMap(ProjectSettings.newWithDefaultData(util.joinPaths([folderPath, '/map/', ProjectSettings.preferredFileName])))
+}
+
+function generatePreferredProjectSettingsFilePaths(openedFolderPath: string): string[] {
+  return generateFolderPathsToLookForProjectSettings(openedFolderPath).map((folderPath: string) => {
+    return util.joinPaths([folderPath, ProjectSettings.preferredFileName])
+  })
+}
+
+function generateAlternativeProjectSettingsFilePaths(openedFolderPath: string): string[] {
+  let projectSettingsFilePaths: string[] = []
+  for (const folderPath of generateFolderPathsToLookForProjectSettings(openedFolderPath)) {
+    projectSettingsFilePaths = projectSettingsFilePaths.concat(
+      ProjectSettings.alternativeFileNames.map((fileName: string) => {
+        return util.joinPaths([folderPath, fileName])
+      })
+    )
+  }
+  return projectSettingsFilePaths
+}
+
+function generateFolderPathsToLookForProjectSettings(openedFolderPath: string): string[] {
+  return [
+    util.joinPaths([openedFolderPath, '/']),
+    util.joinPaths([openedFolderPath, '/map/']),
+    util.joinPaths([openedFolderPath, '/../']),
+    util.joinPaths([openedFolderPath, '/../map/'])
+  ]
 }
 
 export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<void> {
@@ -42,11 +95,6 @@ export async function unloadAndUnsetMap(): Promise<void> {
   checkMapUnloaded()
   clearManagers()
   map = undefined
-}
-
-export function subscribe(onLoaded: (map: Map) => void, onUnload: () => void): void {
-  onLoadedSubscribers.push(onLoaded)
-  onUnloadSubscribers.push(onUnload)
 }
 
 function checkMapUnloaded(): void {

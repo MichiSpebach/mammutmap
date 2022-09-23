@@ -15,6 +15,7 @@ import { ProjectSettings } from '../../src/ProjectSettings'
 import { fileSystem } from '../../src/fileSystemAdapter'
 import { util } from '../../src/util'
 import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
+import { MapSettingsData } from '../../src/mapData/MapSettingsData'
 
 test('render', async () => {
   const scenario = setupSimpleScenario()
@@ -74,7 +75,7 @@ function setupSimpleScenario(): {
   //const managingBox: MockProxy<FolderBox> = mock<FolderBox>() // TODO: fix jest-mock-extended
   //const fromBox: MockProxy<Box> = mock<Box>()
   //const toBox: MockProxy<Box> = (() => mock<Box>())()
-  const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, 'src', 'map')
+  const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, new MapSettingsData('src', 'map'))
   const managingBox: FolderBox = new RootFolderBox(projectSettings, 'map', BoxMapData.buildNewWithId('managingBox', 0, 0, 100, 100), false)
   const fromBox: Box = new FolderBox('FromBox', managingBox, BoxMapData.buildNewWithId('fromBox', 5, 5, 10, 10), false)
   const toBox: Box = new FolderBox('ToBox', managingBox, BoxMapData.buildNewWithId('toBox', 85, 5, 10, 10), false)
@@ -105,7 +106,7 @@ function setupSimpleScenario(): {
   util.logInfo = () => {}
 
   return {
-    link: new Link(linkData, managingBox),
+    link: Link.new(linkData, managingBox),
     managingBox: managingBox,
     fromBox: fromBox,
     toBox: toBox,

@@ -1,7 +1,6 @@
 import { MenuItemFile } from './MenuItemFile'
 import { MenuItemFolder } from './MenuItemFolder'
 import { util } from '../util'
-import { fileSystem } from '../fileSystemAdapter'
 import * as map from '../Map'
 import { ProjectSettings } from '../ProjectSettings'
 import { dialog } from 'electron'
@@ -109,55 +108,7 @@ class ApplicationMenu {
       util.logWarning('expected exactly one selected folder but are '+folderPaths.length)
     }
 
-    this.loadMapCloseTo(folderPaths[0])
-  }
-
-  // TODO: move into Map.ts and also use it in commandLine.ts
-  private async loadMapCloseTo(folderPath: string): Promise<void> {
-    const filePathsToLookForProjectSettings: string[] = this.generatePreferredProjectSettingsFilePaths(folderPath)
-      .concat(this.generateAlternativeProjectSettingsFilePaths(folderPath))
-
-    for (const projectSettingsFilePath of filePathsToLookForProjectSettings) {
-      if (await fileSystem.doesDirentExistAndIsFile(projectSettingsFilePath)) {
-        util.logInfo('found existing ProjectSettings at '+projectSettingsFilePath)
-        try {
-          await map.loadAndSetMap(await ProjectSettings.loadFromFileSystem(projectSettingsFilePath))
-          return
-        } catch (error) {
-          util.logWarning('Failed to open ProjectSettings at '+projectSettingsFilePath+'. '+error)
-        }
-      }
-    }
-
-    util.logInfo('opening new project at '+folderPath)
-    await map.loadAndSetMap(ProjectSettings.newWithDefaultData(util.joinPaths([folderPath, '/map/', ProjectSettings.preferredFileName])))
-  }
-
-  private generatePreferredProjectSettingsFilePaths(openedFolderPath: string): string[] {
-    return this.generateFolderPathsToLookForProjectSettings(openedFolderPath).map((folderPath: string) => {
-      return util.joinPaths([folderPath, ProjectSettings.preferredFileName])
-    })
-  }
-
-  private generateAlternativeProjectSettingsFilePaths(openedFolderPath: string): string[] {
-    let projectSettingsFilePaths: string[] = []
-    for (const folderPath of this.generateFolderPathsToLookForProjectSettings(openedFolderPath)) {
-      projectSettingsFilePaths = projectSettingsFilePaths.concat(
-        ProjectSettings.alternativeFileNames.map((fileName: string) => {
-          return util.joinPaths([folderPath, fileName])
-        })
-      )
-    }
-    return projectSettingsFilePaths
-  }
-
-  private generateFolderPathsToLookForProjectSettings(openedFolderPath: string): string[] {
-    return [
-      util.joinPaths([openedFolderPath, '/']),
-      util.joinPaths([openedFolderPath, '/map/']),
-      util.joinPaths([openedFolderPath, '/../']),
-      util.joinPaths([openedFolderPath, '/../map/'])
-    ]
+    map.searchAndLoadMapCloseTo(folderPaths[0])
   }
 
   private async openProjectFile(): Promise<void> {
