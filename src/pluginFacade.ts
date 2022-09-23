@@ -2,7 +2,7 @@ import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
 import { RootFolderBox } from './box/RootFolderBox'
-import { Map, map } from './Map'
+import { Map, map, subscribe as subscribeMap } from './Map'
 import { util } from './util'
 import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
@@ -12,23 +12,37 @@ import { Link } from './box/Link'
 import { applicationMenu } from './applicationMenu/applicationMenu'
 import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import * as contextMenu from './contextMenu/contextMenu'
+import { Subscribers } from './Subscribers'
 
 export { Box, FileBox, RootFolderBox }
-export { Map, applicationMenu, contextMenu, MenuItemFile }
+export { Map, subscribeMap, applicationMenu, contextMenu, MenuItemFile, Subscribers }
 
 let boxWatchers: BoxWatcher[] = []
+
+export class Message{
+  public constructor(
+    public message: string
+  ) {}
+}
 
 export function getFileBoxIterator(): FileBoxDepthTreeIterator {
   return new FileBoxDepthTreeIterator(getRootFolder())
 }
 
 export function getRootFolder(): RootFolderBox|never {
-  return getMap().getRootFolder()
+  return getMapOrError().getRootFolder()
 }
 
-export function getMap(): Map|never {
+export function getMapOrError(): Map|never {
   if (!map) {
     util.logError('a folder has to be openend first to execute this plugin')
+  }
+  return map
+}
+
+export function getMap(): Map|Message {
+  if (!map) {
+    return new Message('No folder/project/map opened.')
   }
   return map
 }

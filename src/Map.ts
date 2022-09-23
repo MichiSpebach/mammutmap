@@ -13,8 +13,15 @@ import * as indexHtmlIds from './indexHtmlIds'
 
 export let map: Map|undefined
 
+const onLoadedSubscribers: ((map: Map) => void)[] = []
+const onUnloadSubscribers: (() => void)[] = []
+
 export function setMap(object: Map): void {
+  if (map) {
+    callOnUnloadSubscribers()
+  }
   map = object
+  callOnLoadedSubscribers()
 }
 
 export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<void> {
@@ -22,6 +29,7 @@ export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<v
     await unloadAndUnsetMap()
   }
   map = await Map.new('content', projectSettings)
+  callOnLoadedSubscribers()
 }
 
 export async function unloadAndUnsetMap(): Promise<void> {
@@ -29,10 +37,16 @@ export async function unloadAndUnsetMap(): Promise<void> {
     util.logWarning('cannot unload map because no map is loaded')
     return
   }
+  callOnUnloadSubscribers()
   await map.destruct()
   checkMapUnloaded()
   clearManagers()
   map = undefined
+}
+
+export function subscribe(onLoaded: (map: Map) => void, onUnload: () => void): void {
+  onLoadedSubscribers.push(onLoaded)
+  onUnloadSubscribers.push(onUnload)
 }
 
 function checkMapUnloaded(): void {
@@ -49,6 +63,22 @@ function clearManagers(): void {
   ScaleManager.clear()
   HoverManager.clear()
   renderManager.clear()
+}
+
+function callOnLoadedSubscribers(): void {
+  if (!map) {
+    util.logWarning('cannot callOnLoadedSubscribers because map is not set')
+    return
+  }
+  for (const subscriber of onLoadedSubscribers) {
+    subscriber(map)
+  }
+}
+
+function callOnUnloadSubscribers(): void {
+  for (const subscriber of onUnloadSubscribers) {
+    subscriber()
+  }
 }
 
 export class Map {

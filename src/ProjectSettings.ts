@@ -1,6 +1,7 @@
 import { fileSystem } from './fileSystemAdapter'
 import { JsonObject } from './JsonObject'
 import { LinkTagData } from './mapData/LinkTagData'
+import { Subscribers } from './Subscribers'
 import { util } from './util'
 
 export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings?
@@ -13,6 +14,8 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
   private projectSettingsFilePath: string
   private absoluteSrcRootPath: string
   private absoluteMapRootPath: string
+
+  public readonly linkTagSubscribers: Subscribers<LinkTagData[]> = new Subscribers()
 
   private srcRootPath: string
   private mapRootPath: string
@@ -66,9 +69,10 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
   private copyWithoutVolatileFields(): ProjectSettings {
     let thisWithoutVolatileFields: any = {...this}
 
-    thisWithoutVolatileFields[this.projectSettingsFilePath] = undefined // [this.<field>] keeps typesafety
-    thisWithoutVolatileFields[this.absoluteSrcRootPath] = undefined
-    thisWithoutVolatileFields[this.absoluteMapRootPath] = undefined
+    thisWithoutVolatileFields.projectSettingsFilePath = undefined // TODO: extract ProjectSettingsData class for fields that are saved
+    thisWithoutVolatileFields.absoluteSrcRootPath = undefined
+    thisWithoutVolatileFields.absoluteMapRootPath = undefined
+    thisWithoutVolatileFields.linkTagSubscribers = undefined
 
     return thisWithoutVolatileFields
   }
@@ -119,6 +123,7 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
       tag.count += 1
     }
 
+    this.linkTagSubscribers.call(this.getLinkTags())
     await this.saveToFileSystem()
   }
 
@@ -136,6 +141,7 @@ export class ProjectSettings extends JsonObject { // TODO: rename to MapSettings
       tag.count -= 1
     }
 
+    this.linkTagSubscribers.call(this.getLinkTags())
     await this.saveToFileSystem()
   }
 
