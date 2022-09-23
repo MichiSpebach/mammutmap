@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getLinkTags = exports.getComputedModeForLinkTag = exports.linkTags = void 0;
+exports.saveToFileSystem = exports.getLinkTags = exports.getComputedModeForLinkTag = exports.linkTags = void 0;
 const pluginFacade = require("../../dist/pluginFacade");
 const pluginFacade_1 = require("../../dist/pluginFacade");
 const util_1 = require("../../dist/util");
@@ -39,3 +39,11 @@ function getLinkTags() {
     return mapOrMessage.getProjectSettings().getLinkTags().map(tagData => new DidactedLinkTag_1.DidactedLinkTag(tagData));
 }
 exports.getLinkTags = getLinkTags;
+async function saveToFileSystem() {
+    const mapOrMessage = pluginFacade.getMap();
+    if (mapOrMessage instanceof pluginFacade_1.Message) {
+        return util_1.util.logWarning('Failed to saveToFileSystem, reason: ' + mapOrMessage.message);
+    }
+    await mapOrMessage.getProjectSettings().saveToFileSystem();
+}
+exports.saveToFileSystem = saveToFileSystem;

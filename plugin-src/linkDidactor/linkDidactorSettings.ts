@@ -41,3 +41,11 @@ export function getLinkTags(): DidactedLinkTag[]|Message {
     }
     return mapOrMessage.getProjectSettings().getLinkTags().map(tagData => new DidactedLinkTag(tagData))
 }
+
+export async function saveToFileSystem(): Promise<void> {
+    const mapOrMessage: Map|Message = pluginFacade.getMap()
+    if (mapOrMessage instanceof Message) {
+        return util.logWarning('Failed to saveToFileSystem, reason: '+mapOrMessage.message)
+    }
+    await mapOrMessage.getProjectSettings().saveToFileSystem()
+}

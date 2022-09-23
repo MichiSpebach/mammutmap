@@ -8,21 +8,27 @@ export class MapSettingsData extends JsonObject {
     public linkTags: LinkTagData[] // TODO: move into data of boxes for tree structure?
 
     public static ofRawObject(object: any): MapSettingsData {
-        const linkTags: LinkTagData[]|undefined = object.linkTags?.map((rawTag: any) => LinkTagData.ofRawObject(rawTag))
-        return new MapSettingsData(object.srcRootPath, object.mapRootPath, linkTags) // raw object would have no methods // TODO: but maybe use setPrototype instead
+        const mapDataSettings: MapSettingsData = Object.setPrototypeOf(object, MapSettingsData.prototype)
+        mapDataSettings.linkTags = object.linkTags?.map((rawTag: any) => LinkTagData.ofRawObject(rawTag))
+        mapDataSettings.validate()
+        return mapDataSettings
     }
 
     public constructor(srcRootPath: string, mapRootPath: string, linkTags: LinkTagData[] = []) {
-        if (!srcRootPath || !mapRootPath) { // can happen when called with type any
-          let errorMessage = 'ProjectSettings need to have a srcRootPath and a mapRootPath'
-          errorMessage += ', but specified srcRootPath is '+srcRootPath+' and mapRootPath is '+mapRootPath+'.'
-          throw new Error(errorMessage)
-        }
-    
         super()
         this.srcRootPath = srcRootPath
         this.mapRootPath = mapRootPath
         this.linkTags = linkTags
+
+        this.validate()
+    }
+
+    private validate(): void {
+        if (!this.srcRootPath || !this.mapRootPath) { // can happen when called with type any
+            let message = 'ProjectSettings need to have a srcRootPath and a mapRootPath'
+            message += ', but specified srcRootPath is '+this.srcRootPath+' and mapRootPath is '+this.mapRootPath+'.'
+            util.logWarning(message)
+        }
     }
 
     public getLinkTagNamesWithDefaults(): string[] {

@@ -11,8 +11,9 @@ export class LinkTagData extends TagData {
     ]
 
     public static ofRawObject(object: any): TagData {
+        const linkTagData: LinkTagData = Object.setPrototypeOf(object, LinkTagData.prototype)
         // TODO: implement validate like in BoxMapData to warn when loaded data is corrupted
-        return new LinkTagData(object.name, object.count) // raw object would have no methods // TODO: but maybe use setPrototype instead
+        return linkTagData
     }
 
 }
