@@ -109,8 +109,11 @@ class ApplicationMenu {
       util.logWarning('expected exactly one selected folder but are '+folderPaths.length)
     }
 
-    const folderPath: string = folderPaths[0]
+    this.loadMapCloseTo(folderPaths[0])
+  }
 
+  // TODO: move into Map.ts and also use it in commandLine.ts
+  private async loadMapCloseTo(folderPath: string): Promise<void> {
     const filePathsToLookForProjectSettings: string[] = this.generatePreferredProjectSettingsFilePaths(folderPath)
       .concat(this.generateAlternativeProjectSettingsFilePaths(folderPath))
 
@@ -127,7 +130,7 @@ class ApplicationMenu {
     }
 
     util.logInfo('opening new project at '+folderPath)
-    map.loadAndSetMap(new ProjectSettings(util.joinPaths([folderPath, '/map/', ProjectSettings.preferredFileName]), '../', './'))
+    await map.loadAndSetMap(ProjectSettings.newWithDefaultData(util.joinPaths([folderPath, '/map/', ProjectSettings.preferredFileName])))
   }
 
   private generatePreferredProjectSettingsFilePaths(openedFolderPath: string): string[] {

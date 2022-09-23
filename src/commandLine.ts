@@ -19,7 +19,7 @@ async function processCommand(command: string): Promise<void> {
     case 'open':
       const folderPath: string = parameter
       util.logInfo('opening '+folderPath)
-      await map.loadAndSetMap(new ProjectSettings(util.joinPaths([folderPath, '/map/', ProjectSettings.preferredFileName]), '../', './'))
+      await map.loadAndSetMap(ProjectSettings.newWithDefaultData(util.joinPaths([folderPath, '/map/', ProjectSettings.preferredFileName])))
       util.logInfo('opening finished')
       return
     case 'close':
