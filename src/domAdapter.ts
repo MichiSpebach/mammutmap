@@ -1,4 +1,5 @@
 import { util } from './util'
+import { RenderElement } from './util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from './ClientRect'
 
@@ -6,6 +7,7 @@ export type MouseEventType = 'click'|'contextmenu'|'mousedown'|'mouseup'|'mousem
 export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'
 export type WheelEventType = 'wheel'
 export type InputEventType = 'change'
+type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType
 
 export type MouseEventResultAdvanced = {
   clientX: number,
@@ -30,6 +32,7 @@ export class DocumentObjectModelAdapter {
   private renderWindow: BrowserWindow
   private webContents: WebContents
   private ipcChannels: string[] = []
+  private eventChannelIdDictionary: Map<string, {event: EventType, callback: () => void}[]> = new Map()
 
   public constructor(windowToRenderIn: BrowserWindow) {
     this.renderWindow = windowToRenderIn
@@ -66,18 +69,6 @@ export class DocumentObjectModelAdapter {
     return new ClientRect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
   }
 
-  public appendChildTo(parentId: string, childId: string): Promise<void> {
-    // not executeJsOnElement because of "UnhandledPromiseRejectionWarning: Unhandled promise rejection."
-    return this.executeJavaScriptInFunction('document.getElementById("' + parentId + '").appendChild(document.getElementById("' + childId + '"))')
-  }
-
-  public addContentTo(id: string, content: string): Promise<void> {
-    let js = 'const temp = document.createElement("template");'
-    js += 'temp.innerHTML = \''+content+'\';'
-    js += 'document.getElementById("'+id+'").append(temp.content);'
-    return this.executeJavaScriptSuppressingErrors(js)
-  }
-
   public batch(batch: {elementId: string, method: BatchMethod, value: string}[]): Promise<void> {
     const commands: {elementId: string, jsToExecute: string}[] = batch.map(command => {
       switch (command.method) {
@@ -95,8 +86,64 @@ export class DocumentObjectModelAdapter {
     return this.executeJsOnElementsSuppressingErrors(commands)
   }
 
+  public appendChildTo(parentId: string, childId: string): Promise<void> {
+    return this.executeJavaScript(`document.getElementById("${parentId}").append(document.getElementById("${childId}"))`)
+  }
+
+  public addContentTo(id: string, content: string): Promise<void> {
+    let js = 'const temp = document.createElement("template");'
+    js += 'temp.innerHTML = \''+content+'\';'
+    js += 'document.getElementById("'+id+'").append(temp.content);'
+    return this.executeJavaScriptSuppressingErrors(js)
+  }
+
+  // TODO: add to renderManager
+  public addElementTo(id: string, element: RenderElement): Promise<void> {
+    let js: string = this.createHtmlElementJavaScriptOf(element)
+    js += `document.getElementById("${id}").append(element);`
+    return this.executeJavaScript(js)
+  }
+
+  // TODO: add to renderManager
+  public setElementTo(id: string, element: RenderElement): Promise<void> {
+    let js: string = this.createHtmlElementJavaScriptOf(element)
+    js += `document.getElementById("${id}").innerHTML="";`
+    js += `document.getElementById("${id}").append(element);` // TODO: is there no set(element) method?
+    return this.executeJavaScript(js)
+  }
+
+  private createHtmlElementJavaScriptOf(element: RenderElement): string {
+    // TODO: find way to pass object directly to renderer thread and merge attributes into domElement
+    let js = `const element = document.createElement("${element.type}");`
+
+    // TODO: work in progress: parse element.children and add them
+
+    for (const attribute in element.attributes) {
+      if (attribute === 'onclick') { // TODO: handle all events
+        let ipcChannelName = 'click_'
+        if (!element.attributes.id) {
+          util.logWarning('Element has onclick set but no id.')
+          ipcChannelName += util.generateId()
+        } else {
+          ipcChannelName += element.attributes.id
+        }
+        js += `element.${attribute}=${this.createMouseEventRendererFunction(ipcChannelName)};`
+        this.addMouseEventChannelListener(ipcChannelName, element.attributes[attribute])
+      } else {
+        js += `element.${attribute}="${element.attributes[attribute]}";`
+      }
+    }
+
+    return js
+  }
+
   public setContentTo(id: string, content: string): Promise<void> {
     return this.executeJsOnElementSuppressingErrors(id, "innerHTML = '"+content+"'")
+  }
+
+  // TODO: add to renderManager
+  public clear(id: string): Promise<void> {
+    return this.executeJsOnElementSuppressingErrors(id, "innerHTML=''")
   }
 
   public remove(id: string): Promise<void> {
@@ -215,7 +262,7 @@ export class DocumentObjectModelAdapter {
     await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
 
     this.addIpcChannelListener(
-      ipcChannelName, 
+      ipcChannelName,
       (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any) => callback({clientX, clientY, ctrlPressed, cursor})
     )
   }
@@ -225,17 +272,26 @@ export class DocumentObjectModelAdapter {
     eventType: MouseEventType,
     callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void> {
-    let ipcChannelName = eventType+'_'+id
+    const ipcChannelName = eventType+'_'+id
+    const rendererFunction: string = this.createMouseEventRendererFunction(ipcChannelName)
+    await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
+    this.addMouseEventChannelListener(ipcChannelName, callback)
+  }
 
+  private createMouseEventRendererFunction(ipcChannelName: string): string {
     let rendererFunction: string = '(event) => {'
     rendererFunction += 'let ipc = require("electron").ipcRenderer;'
     //rendererFunction += 'console.log(event);'
     rendererFunction += 'event.stopPropagation();'
     rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey);'
     rendererFunction += '}'
+    return rendererFunction
+  }
 
-    await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
-
+  private addMouseEventChannelListener(
+    ipcChannelName: string,
+    callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
+  ): void {
     this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed))
   }
 
