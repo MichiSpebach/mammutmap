@@ -16,7 +16,7 @@ export type MouseEventResultAdvanced = {
   cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'
 }
 
-export type BatchMethod = 'setElementTo'|'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
+export type BatchMethod = 'appendChildTo'|'addContentTo'|'addElementTo'|'setElementTo'|'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
 
 export let dom: DocumentObjectModelAdapter
 
@@ -72,8 +72,20 @@ export class DocumentObjectModelAdapter {
   public batch(batch: {elementId: string, method: BatchMethod, value: string|RenderElement}[]): Promise<void> {
     const jsCommands: string[] = batch.map(command => {
       switch (command.method) {
+        case 'appendChildTo':
+          return this.createAppendChildJavaScript(command.elementId, command.value as string)
+
+        case 'addContentTo':
+          const addContentJs: string = this.createAddContentJavaScript(command.elementId, command.value as string)
+          return this.wrapJavaScriptInFunction(addContentJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'temp' has already been declared"
+
+        case 'addElementTo':
+          const addElementJs: string = this.createAddElementJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElement)
+          return this.wrapJavaScriptInFunction(addElementJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'element' has already been declared"
+
         case 'setElementTo':
-          return this.createSetElementJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElement)
+          let setElementJs: string = this.createSetElementJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElement)
+          return this.wrapJavaScriptInFunction(setElementJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'element' has already been declared"
 
         case 'innerHTML':
         case 'style':
@@ -84,6 +96,10 @@ export class DocumentObjectModelAdapter {
 
         case 'removeClassFrom':
           return `document.getElementById('${command.elementId}').classList.remove('${command.value}');`
+
+        default:
+          util.logWarning(`Method of batchCommand '${command.method}' not known.`)
+          return ''
       }
     })
 
@@ -91,20 +107,32 @@ export class DocumentObjectModelAdapter {
   }
 
   public appendChildTo(parentId: string, childId: string): Promise<void> {
-    return this.executeJavaScript(`document.getElementById("${parentId}").append(document.getElementById("${childId}"))`)
+    return this.executeJavaScript(this.createAppendChildJavaScript(parentId, childId))
+  }
+
+  private createAppendChildJavaScript(parentId: string, childId: string): string {
+    return `document.getElementById("${parentId}").append(document.getElementById("${childId}"));`
   }
 
   public addContentTo(id: string, content: string): Promise<void> {
+    return this.executeJavaScriptSuppressingErrors(this.createAddContentJavaScript(id, content))
+  }
+
+  private createAddContentJavaScript(id: string, content: string): string {
     let js = 'const temp = document.createElement("template");'
     js += 'temp.innerHTML = \''+content+'\';'
     js += 'document.getElementById("'+id+'").append(temp.content);'
-    return this.executeJavaScriptSuppressingErrors(js)
+    return js
   }
 
   public addElementTo(id: string, element: RenderElement): Promise<void> {
-    let js: string = this.createHtmlElementJavaScriptOf(element)
+    return this.executeJavaScript(this.createAddElementJavaScriptAndAddIpcChannelListeners(id, element))
+  }
+
+  private createAddElementJavaScriptAndAddIpcChannelListeners(id: string, element: RenderElement): string {
+    let js: string = this.createHtmlElementJavaScriptAndAddIpcChannelListeners(element)
     js += `document.getElementById("${id}").append(element);`
-    return this.executeJavaScript(js)
+    return js
   }
 
   public setElementTo(id: string, element: RenderElement): Promise<void> {
@@ -112,13 +140,13 @@ export class DocumentObjectModelAdapter {
   }
 
   private createSetElementJavaScriptAndAddIpcChannelListeners(id: string, element: RenderElement): string {
-    let js: string = this.createHtmlElementJavaScriptOf(element)
+    let js: string = this.createHtmlElementJavaScriptAndAddIpcChannelListeners(element)
     js += `document.getElementById("${id}").innerHTML="";`
     js += `document.getElementById("${id}").append(element);` // TODO: is there no set(element) method?
     return js
   }
 
-  private createHtmlElementJavaScriptOf(element: RenderElement): string {
+  private createHtmlElementJavaScriptAndAddIpcChannelListeners(element: RenderElement): string {
     // TODO: find way to pass object directly to renderer thread and merge attributes into domElement
     let js = `const element = document.createElement("${element.type}");`
 
@@ -147,8 +175,7 @@ export class DocumentObjectModelAdapter {
     return this.executeJsOnElementSuppressingErrors(id, "innerHTML = '"+content+"'")
   }
 
-  // TODO: add to renderManager
-  public clear(id: string): Promise<void> {
+  public clearContentOf(id: string): Promise<void> {
     return this.executeJsOnElementSuppressingErrors(id, "innerHTML=''")
   }
 
@@ -366,12 +393,12 @@ export class DocumentObjectModelAdapter {
   }
 
   private executeJavaScriptInFunction(jsToExecute: string): Promise<any> {
-    // () => {..} because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
-    let rendererCode = '(() => {'
-    rendererCode += jsToExecute
-    rendererCode += '}).call()'
+    // wrap in function because otherwise "UnhandledPromiseRejectionWarning: Error: An object could not be cloned."
+    return this.executeJavaScript(this.wrapJavaScriptInFunction(jsToExecute))
+  }
 
-    return this.executeJavaScript(rendererCode)
+  private wrapJavaScriptInFunction(javaScript: string): string {
+    return `(() => {${javaScript}}).call();`
   }
 
   public async executeJavaScript(jsToExecute: string): Promise<any> { // public only for unit tests

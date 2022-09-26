@@ -43,6 +43,7 @@ export class RenderManager {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'appendChildTo'+childId,
+      batchParameters: {elementId: parentId, method: 'appendChildTo', value: childId},
       command: () => dom.appendChildTo(parentId, childId)
     }))
   }
@@ -50,6 +51,8 @@ export class RenderManager {
   public addContentTo(id: string, content: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
+      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      batchParameters: {elementId: id, method: 'addContentTo', value: content},
       command: () => dom.addContentTo(id, content)
     }))
   }
@@ -57,6 +60,8 @@ export class RenderManager {
   public addElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
+      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      batchParameters: {elementId: id, method: 'addElementTo', value: element},
       command: () => dom.addElementTo(id, element)
     }))
   }
@@ -64,7 +69,7 @@ export class RenderManager {
   public setElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      squashableWith: 'setElementTo'+id,
+      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'setElementTo', value: element},
       command: () => dom.setElementTo(id, element)
     }))
@@ -73,9 +78,18 @@ export class RenderManager {
   public setContentTo(id: string, content: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      squashableWith: 'setContentTo'+id,
+      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'innerHTML', value: content},
       command: () => dom.setContentTo(id, content)
+    }))
+  }
+
+  public clearContentOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      batchParameters: {elementId: id, method: 'innerHTML', value: ''},
+      command: () => dom.clearContentOf(id)
     }))
   }
 
