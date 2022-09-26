@@ -1,5 +1,6 @@
 import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced } from './domAdapter'
 import { ClientRect } from './ClientRect'
+import { RenderElement } from './util/RenderElement'
 
 export { MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced }
 
@@ -50,6 +51,22 @@ export class RenderManager {
     return this.runOrSchedule(new Command({
       priority: priority,
       command: () => dom.addContentTo(id, content)
+    }))
+  }
+
+  public addElemntTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addElementTo(id, element)
+    }))
+  }
+
+  public setElemntTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'setElementTo'+id,
+      batchParameters: {elementId: id, method: 'setElementTo', value: element},
+      command: () => dom.setElementTo(id, element)
     }))
   }
 
@@ -283,7 +300,7 @@ export class RenderManager {
     }
 
     const maxBatchSize: number = 100
-    const batch: {elementId: string, method: BatchMethod, value: string}[] = [command.batchParameters]
+    const batch: {elementId: string, method: BatchMethod, value: string|RenderElement}[] = [command.batchParameters]
 
     for (let i: number = this.commands.indexOf(command)+1; i < this.commands.length && batch.length < maxBatchSize; i++) {
       const upcommingCommand: Command = this.commands[i]
@@ -317,14 +334,14 @@ export class Command { // only export for unit tests
   public priority: RenderPriority
   public squashableWith: string|undefined
   public updatableWith: string|undefined
-  public batchParameters: {elementId: string, method: BatchMethod, value: string}|undefined
+  public batchParameters: {elementId: string, method: BatchMethod, value: string|RenderElement}|undefined
   public readonly promise: SchedulablePromise<Promise<any>>
 
   public constructor(options: {
     priority: RenderPriority,
     squashableWith?: string,
     updatableWith?: string,
-    batchParameters?: {elementId: string, method: BatchMethod, value: string},
+    batchParameters?: {elementId: string, method: BatchMethod, value: string|RenderElement},
     command: () => Promise<any>
   }) {
     this.priority = options.priority

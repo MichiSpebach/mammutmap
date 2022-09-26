@@ -16,7 +16,7 @@ export type MouseEventResultAdvanced = {
   cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'
 }
 
-export type BatchMethod = 'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
+export type BatchMethod = 'setElementTo'|'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
 
 export let dom: DocumentObjectModelAdapter
 
@@ -69,18 +69,21 @@ export class DocumentObjectModelAdapter {
     return new ClientRect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
   }
 
-  public batch(batch: {elementId: string, method: BatchMethod, value: string}[]): Promise<void> {
+  public batch(batch: {elementId: string, method: BatchMethod, value: string|RenderElement}[]): Promise<void> {
     const commands: {elementId: string, jsToExecute: string}[] = batch.map(command => {
       switch (command.method) {
+        case 'setElementTo':
+          return {elementId: command.elementId, jsToExecute: this.createSetElementJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElement)}
+
         case 'innerHTML':
         case 'style':
-          return {elementId: command.elementId, jsToExecute: command.method+"='"+command.value+"'"}
+          return {elementId: command.elementId, jsToExecute: `document.getElementById('${command.elementId}').${command.method}='${command.value}'`}
 
         case 'addClassTo':
-          return {elementId: command.elementId, jsToExecute: "classList.add('"+command.value+"')"}
+          return {elementId: command.elementId, jsToExecute: `document.getElementById('${command.elementId}').classList.add('${command.value}')`}
 
         case 'removeClassFrom':
-          return {elementId: command.elementId, jsToExecute: "classList.remove('"+command.value+"')"}
+          return {elementId: command.elementId, jsToExecute: `document.getElementById('${command.elementId}').classList.remove('${command.value}')`}
       }
     })
     return this.executeJsOnElementsSuppressingErrors(commands)
@@ -97,19 +100,21 @@ export class DocumentObjectModelAdapter {
     return this.executeJavaScriptSuppressingErrors(js)
   }
 
-  // TODO: add to renderManager
   public addElementTo(id: string, element: RenderElement): Promise<void> {
     let js: string = this.createHtmlElementJavaScriptOf(element)
     js += `document.getElementById("${id}").append(element);`
     return this.executeJavaScript(js)
   }
 
-  // TODO: add to renderManager
   public setElementTo(id: string, element: RenderElement): Promise<void> {
+    return this.executeJavaScript(this.createSetElementJavaScriptAndAddIpcChannelListeners(id, element))
+  }
+
+  private createSetElementJavaScriptAndAddIpcChannelListeners(id: string, element: RenderElement): string {
     let js: string = this.createHtmlElementJavaScriptOf(element)
     js += `document.getElementById("${id}").innerHTML="";`
     js += `document.getElementById("${id}").append(element);` // TODO: is there no set(element) method?
-    return this.executeJavaScript(js)
+    return js
   }
 
   private createHtmlElementJavaScriptOf(element: RenderElement): string {
