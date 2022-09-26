@@ -70,23 +70,24 @@ export class DocumentObjectModelAdapter {
   }
 
   public batch(batch: {elementId: string, method: BatchMethod, value: string|RenderElement}[]): Promise<void> {
-    const commands: {elementId: string, jsToExecute: string}[] = batch.map(command => {
+    const jsCommands: string[] = batch.map(command => {
       switch (command.method) {
         case 'setElementTo':
-          return {elementId: command.elementId, jsToExecute: this.createSetElementJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElement)}
+          return this.createSetElementJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElement)
 
         case 'innerHTML':
         case 'style':
-          return {elementId: command.elementId, jsToExecute: `document.getElementById('${command.elementId}').${command.method}='${command.value}'`}
+          return `document.getElementById('${command.elementId}').${command.method}='${command.value}';`
 
         case 'addClassTo':
-          return {elementId: command.elementId, jsToExecute: `document.getElementById('${command.elementId}').classList.add('${command.value}')`}
+          return `document.getElementById('${command.elementId}').classList.add('${command.value}');`
 
         case 'removeClassFrom':
-          return {elementId: command.elementId, jsToExecute: `document.getElementById('${command.elementId}').classList.remove('${command.value}')`}
+          return `document.getElementById('${command.elementId}').classList.remove('${command.value}');`
       }
     })
-    return this.executeJsOnElementsSuppressingErrors(commands)
+
+    return this.executeJavaScript(jsCommands.join(''))
   }
 
   public appendChildTo(parentId: string, childId: string): Promise<void> {
@@ -345,14 +346,6 @@ export class DocumentObjectModelAdapter {
 
   public getIpcChannelsCount(): number {
     return this.ipcChannels.length
-  }
-
-  private executeJsOnElementsSuppressingErrors(commands: {elementId: string, jsToExecute: string}[]): Promise<void> {
-    let jsBatch: string = ''
-    commands.forEach(command => {
-      jsBatch += "document.getElementById('"+command.elementId+"')."+command.jsToExecute+";"
-    })
-    return this.executeJavaScriptSuppressingErrors(jsBatch)
   }
 
   private executeJsOnElementSuppressingErrors(elementId: string, jsToExecute: string): Promise<void> {

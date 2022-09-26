@@ -54,14 +54,14 @@ export class RenderManager {
     }))
   }
 
-  public addElemntTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+  public addElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
       command: () => dom.addElementTo(id, element)
     }))
   }
 
-  public setElemntTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+  public setElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'setElementTo'+id,
