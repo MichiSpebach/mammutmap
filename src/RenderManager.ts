@@ -66,6 +66,8 @@ export class RenderManager {
     }))
   }
 
+  // TODO: implement setElementsTo(id: string, elements: string|RenderElement|(string|RenderElement)[])
+
   public setElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,

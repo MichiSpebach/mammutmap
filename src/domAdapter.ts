@@ -147,10 +147,12 @@ export class DocumentObjectModelAdapter {
   }
 
   private createHtmlElementJavaScriptAndAddIpcChannelListeners(element: RenderElement): string {
-    // TODO: find way to pass object directly to renderer thread and merge attributes into domElement
-    let js = `const element = document.createElement("${element.type}");`
+    return this.createHtmlSubElementJavaScriptAndAddIpcChannelListeners(element, 'element')
+  }
 
-    // TODO: work in progress: parse element.children and add them
+  private createHtmlSubElementJavaScriptAndAddIpcChannelListeners(element: RenderElement, elementJsName: string): string {
+    // TODO: find way to pass object directly to renderer thread and merge attributes into domElement
+    let js = `const ${elementJsName} = document.createElement("${element.type}");`
 
     for (const attribute in element.attributes) {
       if (attribute === 'onclick') { // TODO: handle all events
@@ -161,11 +163,22 @@ export class DocumentObjectModelAdapter {
         } else {
           ipcChannelName += element.attributes.id
         }
-        js += `element.${attribute}=${this.createMouseEventRendererFunction(ipcChannelName)};`
+        js += `${elementJsName}.${attribute}=${this.createMouseEventRendererFunction(ipcChannelName)};`
         this.addMouseEventChannelListener(ipcChannelName, element.attributes[attribute])
       } else {
-        js += `element.${attribute}="${element.attributes[attribute]}";`
+        js += `${elementJsName}.${attribute}="${element.attributes[attribute]}";`
       }
+    }
+
+    for (let i = 0; i < element.children.length; i++) {
+      const child: string|RenderElement = element.children[i]
+      const childJsName: string = `${elementJsName}i${i}`
+      if ((child as any).type) { // TODO: improve deciding if string or RenderElement
+        js += this.createHtmlSubElementJavaScriptAndAddIpcChannelListeners(child as RenderElement, childJsName)
+      } else {
+        js += `const ${childJsName} = document.createTextNode("${child}");` // TODO: escape '"'
+      }
+      js += `${elementJsName}.append(${childJsName});`
     }
 
     return js

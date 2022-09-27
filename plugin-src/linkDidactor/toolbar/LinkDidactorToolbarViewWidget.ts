@@ -4,6 +4,7 @@ import { DidactedLinkTag, LinkTagMode, linkTagModes } from '../DidactedLinkTag'
 import * as linkDidactorSettings from '../linkDidactorSettings'
 import { Message } from '../../../dist/pluginFacade'
 import { util } from '../../../dist/util'
+import { RenderElement, createElement } from '../../../dist/util/RenderElement'
 
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
 export class LinkDidactorToolbarViewWidget extends Widget {
@@ -31,39 +32,38 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         }
         this.shouldBeRendered = true
         
-        await renderManager.setContentTo(this.getId(), this.formHtml())
-        await this.addEventListeners()
+        await renderManager.setElementTo(this.getId(), this.form())
     }
 
-    public formHtml(): string {
+    public form(): RenderElement { // TODO: return list of RenderElement
         const tagsOrMessage: DidactedLinkTag[]|Message = linkDidactorSettings.getLinkTags()
         if (tagsOrMessage instanceof Message) {
             this.renderedLinkTags = []
-            return tagsOrMessage.message
+            return createElement('div', {id: this.getId()+'TagSelections'}, [tagsOrMessage.message]) // TODO: return simple string
         }
         this.renderedLinkTags = tagsOrMessage
-        return tagsOrMessage.map(tag => this.formHtmlLineFor(tag)).join('')
+        const tagElements: RenderElement[] = tagsOrMessage.map(tag => this.formLineFor(tag))
+        return createElement('div', {id: this.getId()+'TagSelections'}, tagElements)
     }
 
-    private formHtmlLineFor(tag: DidactedLinkTag): string {
-        return `<div>${tag.getName()}(${tag.getCount()}): ${this.formHtmlDropDown(tag)}</div>`
+    private formLineFor(tag: DidactedLinkTag): RenderElement {
+        const label: string = `${tag.getName()}(${tag.getCount()}): `
+        const dropDown: RenderElement = this.formDropDown(tag)
+
+        return createElement('div', {}, [label, dropDown])
     }
 
-    private formHtmlDropDown(tag: DidactedLinkTag): string {
-        let options: string = ''
-        for (let mode of linkTagModes) {
+    private formDropDown(tag: DidactedLinkTag): RenderElement {
+        const options: RenderElement[] = linkTagModes.map(mode => {
             const selected: string = mode === tag.getMode() ? 'selected' : ''
-            options += `<option value="${mode}" ${selected}>${mode}</option>`
-        }
-        return `<select id="${this.getTagModeDropModeId(tag)}">${options}</select>`
-    }
-
-    private async addEventListeners(): Promise<void> {
-        await Promise.all(this.renderedLinkTags.map(tag => this.addEventListenerForTag(tag)))
-    }
-
-    private async addEventListenerForTag(tag: DidactedLinkTag): Promise<void> {
-        await renderManager.addChangeListenerTo(this.getTagModeDropModeId(tag), 'value', (value: string) => this.setLinkTagMode(tag, value))
+            return createElement('option', {value: mode, selected: mode === tag.getMode()}, [mode])
+        })
+        
+        return createElement('select', {
+            id: this.getTagModeDropModeId(tag),
+            onchange: (value: string) => this.setLinkTagMode(tag, value),
+            innerHTML: options
+        }, options)
     }
 
     private async setLinkTagMode(tag: DidactedLinkTag, mode: string): Promise<void> {
