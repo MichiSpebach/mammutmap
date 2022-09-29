@@ -27,7 +27,11 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
             linkDidactorSettings.linkTags.subscribe(() => this.render());
         }
         this.shouldBeRendered = true;
+        await this.clearEventListeners();
         await RenderManager_1.renderManager.setElementTo(this.getId(), this.form());
+    }
+    async clearEventListeners() {
+        await Promise.all(this.renderedLinkTags.map(tag => RenderManager_1.renderManager.removeEventListenerFrom(this.getTagModeDropModeId(tag), 'change')));
     }
     form() {
         const tagsOrMessage = linkDidactorSettings.getLinkTags();
@@ -46,13 +50,11 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
     }
     formDropDown(tag) {
         const options = DidactedLinkTag_1.linkTagModes.map(mode => {
-            const selected = mode === tag.getMode() ? 'selected' : '';
             return (0, RenderElement_1.createElement)('option', { value: mode, selected: mode === tag.getMode() }, [mode]);
         });
         return (0, RenderElement_1.createElement)('select', {
             id: this.getTagModeDropModeId(tag),
-            onchange: (value) => this.setLinkTagMode(tag, value),
-            innerHTML: options
+            onchangeValue: (value) => this.setLinkTagMode(tag, value)
         }, options);
     }
     async setLinkTagMode(tag, mode) {
