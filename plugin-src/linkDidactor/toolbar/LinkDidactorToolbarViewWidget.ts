@@ -31,8 +31,15 @@ export class LinkDidactorToolbarViewWidget extends Widget {
             linkDidactorSettings.linkTags.subscribe(() => this.render())
         }
         this.shouldBeRendered = true
-        
+
+        await this.clearEventListeners()
         await renderManager.setElementTo(this.getId(), this.form())
+    }
+
+    private async clearEventListeners(): Promise<void> {
+        await Promise.all(this.renderedLinkTags.map(tag => 
+            renderManager.removeEventListenerFrom(this.getTagModeDropModeId(tag), 'change')
+        ))
     }
 
     public form(): RenderElement { // TODO: return list of RenderElement
@@ -55,14 +62,12 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
     private formDropDown(tag: DidactedLinkTag): RenderElement {
         const options: RenderElement[] = linkTagModes.map(mode => {
-            const selected: string = mode === tag.getMode() ? 'selected' : ''
             return createElement('option', {value: mode, selected: mode === tag.getMode()}, [mode])
         })
         
         return createElement('select', {
             id: this.getTagModeDropModeId(tag),
-            onchange: (value: string) => this.setLinkTagMode(tag, value),
-            innerHTML: options
+            onchangeValue: (value: string) => this.setLinkTagMode(tag, value)
         }, options)
     }
 

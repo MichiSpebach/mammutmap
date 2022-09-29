@@ -1,5 +1,5 @@
 import { util } from './util'
-import { RenderElement } from './util/RenderElement'
+import { ElementAttributes, RenderElement } from './util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from './ClientRect'
 
@@ -154,19 +154,14 @@ export class DocumentObjectModelAdapter {
     // TODO: find way to pass object directly to renderer thread and merge attributes into domElement
     let js = `const ${elementJsName} = document.createElement("${element.type}");`
 
+    element = this.interceptEventHandlersWithJsAndAddIpcChannelListeners(element)
+
     for (const attribute in element.attributes) {
-      if (attribute === 'onclick') { // TODO: handle all events
-        let ipcChannelName = 'click_'
-        if (!element.attributes.id) {
-          util.logWarning('Element has onclick set but no id.')
-          ipcChannelName += util.generateId()
-        } else {
-          ipcChannelName += element.attributes.id
-        }
-        js += `${elementJsName}.${attribute}=${this.createMouseEventRendererFunction(ipcChannelName)};`
-        this.addMouseEventChannelListener(ipcChannelName, element.attributes[attribute])
+      const attributeValue = element.attributes[attribute as keyof ElementAttributes]
+      if (typeof attributeValue === 'string' && !attribute.startsWith('on')) { // event handlers where parsed to js string in intercept method above
+        js += `${elementJsName}.${attribute}="${attributeValue}";`
       } else {
-        js += `${elementJsName}.${attribute}="${element.attributes[attribute]}";`
+        js += `${elementJsName}.${attribute}=${attributeValue};`
       }
     }
 
@@ -182,6 +177,54 @@ export class DocumentObjectModelAdapter {
     }
 
     return js
+  }
+
+  private interceptEventHandlersWithJsAndAddIpcChannelListeners(element: RenderElement): RenderElement {
+    for (const attribute in element.attributes) {
+      if (!attribute.startsWith('on')) {
+        continue
+      }
+      let ipcChannelName: string
+      if (!element.attributes.id) {
+        util.logWarning(`Element seems to have '${attribute}' event handler but no id.`)
+        ipcChannelName = util.generateId()
+      } else {
+        ipcChannelName = element.attributes.id
+      }
+
+      switch (attribute) { // TODO: handle all events
+        case 'onclick':
+          ipcChannelName = 'click_'+ipcChannelName
+          this.addMouseEventChannelListener(ipcChannelName, element.attributes[attribute]!)
+          element.attributes.onclick = this.createMouseEventRendererFunction(ipcChannelName) as any
+          continue
+
+        case 'onchangeValue':
+          ipcChannelName = 'change_'+ipcChannelName
+          this.addChangeEventChannelListener(ipcChannelName, element.attributes[attribute]!)
+          if ((element.attributes as any).onchange) {
+            util.logWarning(`There are multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
+          }
+          (element.attributes as any).onchange = this.createChangeEventRendererFunction(ipcChannelName, 'value')
+          element.attributes.onchangeValue = undefined
+          continue
+
+          case 'onchangeChecked':
+            ipcChannelName = 'change_'+ipcChannelName
+            this.addChangeEventChannelListener(ipcChannelName, element.attributes[attribute]!)
+            if ((element.attributes as any).onchange) {
+              util.logWarning(`There are multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
+            }
+            (element.attributes as any).onchange = this.createChangeEventRendererFunction(ipcChannelName, 'checked')
+            element.attributes.onchangeChecked = undefined
+            continue
+
+        default:
+          util.logWarning(`'${attribute}' event handlers are not yet implemented.`)
+      }
+    }
+
+    return element
   }
 
   public setContentTo(id: string, content: string): Promise<void> {
@@ -264,16 +307,9 @@ export class DocumentObjectModelAdapter {
     callback: (value: RETURN_TYPE) => void
   ): Promise<void> {
     let ipcChannelName = 'change_'+id
-
-    let rendererFunction: string = '(event) => {'
-    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
-    //rendererFunction += 'console.log(event);'
-    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.target.'+returnField+');'
-    rendererFunction += '}'
-
+    const rendererFunction: string = this.createChangeEventRendererFunction(ipcChannelName, returnField)
     await this.executeJavaScriptInFunction("document.getElementById('"+id+"').onchange = "+rendererFunction)
-
-    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
+    this.addChangeEventChannelListener(ipcChannelName, callback)
   }
 
   public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
@@ -324,6 +360,15 @@ export class DocumentObjectModelAdapter {
     this.addMouseEventChannelListener(ipcChannelName, callback)
   }
 
+  private createChangeEventRendererFunction(ipcChannelName: string, returnField: 'value'|'checked'): string {
+    let rendererFunction: string = '(event) => {'
+    rendererFunction += 'let ipc = require("electron").ipcRenderer;'
+    //rendererFunction += 'console.log(event);'
+    rendererFunction += 'ipc.send("'+ipcChannelName+'", event.target.'+returnField+');'
+    rendererFunction += '}'
+    return rendererFunction
+  }
+
   private createMouseEventRendererFunction(ipcChannelName: string): string {
     let rendererFunction: string = '(event) => {'
     rendererFunction += 'let ipc = require("electron").ipcRenderer;'
@@ -332,6 +377,13 @@ export class DocumentObjectModelAdapter {
     rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey);'
     rendererFunction += '}'
     return rendererFunction
+  }
+
+  private addChangeEventChannelListener<RETURN_TYPE>(
+    ipcChannelName: string,
+    callback: (value: RETURN_TYPE) => void
+  ): void {
+    this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
   }
 
   private addMouseEventChannelListener(
