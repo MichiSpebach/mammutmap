@@ -13,6 +13,10 @@ export function createRenderElementRaw(type: string, attributes: any, children: 
   return {type: type as ElementType, attributes, children}
 }
 
+export function concatRenderElements(elementsList: RenderElements[]): RenderElements {
+  return elementsList.flat()
+}
+
 export type RenderElements = string | RenderElement | (string|RenderElement)[]
 
 export type RenderElement = {

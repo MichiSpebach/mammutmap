@@ -2,7 +2,8 @@ import { renderManager } from '../../../dist/RenderManager'
 import { Widget } from '../../../dist/Widget'
 import { DidactedLinkTag, LinkTagMode, linkTagModes } from '../DidactedLinkTag'
 import * as linkDidactorSettings from '../linkDidactorSettings'
-import { Message } from '../../../dist/pluginFacade'
+import * as pluginFacade from '../../../dist/pluginFacade'
+import { Map, Message } from '../../../dist/pluginFacade'
 import { util } from '../../../dist/util'
 import { RenderElement, RenderElements, createElement } from '../../../dist/util/RenderElement'
 
@@ -43,17 +44,37 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     public form(): RenderElements {
+        return [
+            this.formHeader(),
+            this.formBody()
+        ].flat()
+    }
+
+    private formHeader(): string {
+        const mapOrMessage: Map|Message = pluginFacade.getMap()
+        if (mapOrMessage instanceof Message) {
+            return mapOrMessage.message
+        }
+        return `Used linkTags in ${mapOrMessage.getRootFolder().getName()}:`
+    }
+
+    private formBody(): RenderElements {
         const tagsOrMessage: DidactedLinkTag[]|Message = linkDidactorSettings.getLinkTags()
         if (tagsOrMessage instanceof Message) {
             this.renderedLinkTags = []
             return tagsOrMessage.message
         }
+
         this.renderedLinkTags = tagsOrMessage
-        const tagElements: RenderElement[] = tagsOrMessage.map(tag => this.formLineFor(tag))
+        if (tagsOrMessage.length === 0) {
+            return 'There are no linkTags used in this project yet, right click on links to tag them.'
+        }
+
+        const tagElements: RenderElement[] = tagsOrMessage.map(tag => this.formLine(tag))
         return tagElements
     }
 
-    private formLineFor(tag: DidactedLinkTag): RenderElement {
+    private formLine(tag: DidactedLinkTag): RenderElement {
         const label: string = `${tag.getName()}(${tag.getCount()}): `
         const dropDown: RenderElement = this.formDropDown(tag)
 
@@ -61,14 +82,14 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     private formDropDown(tag: DidactedLinkTag): RenderElement {
-        const options: RenderElement[] = linkTagModes.map(mode => {
-            return createElement('option', {value: mode, selected: mode === tag.getMode()}, [mode])
-        })
-        
         return createElement('select', {
             id: this.getTagModeDropModeId(tag),
             onchangeValue: (value: string) => this.setLinkTagMode(tag, value)
-        }, options)
+        }, this.formDropDownOptions(tag))
+    }
+
+    private formDropDownOptions(tag: DidactedLinkTag): RenderElement[] {
+        return linkTagModes.map(mode => createElement('option', {value: mode, selected: mode === tag.getMode()}, [mode]))
     }
 
     private async setLinkTagMode(tag: DidactedLinkTag, mode: string): Promise<void> {

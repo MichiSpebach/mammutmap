@@ -5,6 +5,7 @@ const RenderManager_1 = require("../../../dist/RenderManager");
 const Widget_1 = require("../../../dist/Widget");
 const DidactedLinkTag_1 = require("../DidactedLinkTag");
 const linkDidactorSettings = require("../linkDidactorSettings");
+const pluginFacade = require("../../../dist/pluginFacade");
 const pluginFacade_1 = require("../../../dist/pluginFacade");
 const util_1 = require("../../../dist/util");
 const RenderElement_1 = require("../../../dist/util/RenderElement");
@@ -34,28 +35,44 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         await Promise.all(this.renderedLinkTags.map(tag => RenderManager_1.renderManager.removeEventListenerFrom(this.getTagModeDropModeId(tag), 'change')));
     }
     form() {
+        return [
+            this.formHeader(),
+            this.formBody()
+        ].flat();
+    }
+    formHeader() {
+        const mapOrMessage = pluginFacade.getMap();
+        if (mapOrMessage instanceof pluginFacade_1.Message) {
+            return mapOrMessage.message;
+        }
+        return `Used linkTags in ${mapOrMessage.getRootFolder().getName()}:`;
+    }
+    formBody() {
         const tagsOrMessage = linkDidactorSettings.getLinkTags();
         if (tagsOrMessage instanceof pluginFacade_1.Message) {
             this.renderedLinkTags = [];
             return tagsOrMessage.message;
         }
         this.renderedLinkTags = tagsOrMessage;
-        const tagElements = tagsOrMessage.map(tag => this.formLineFor(tag));
+        if (tagsOrMessage.length === 0) {
+            return 'There are no linkTags used in this project yet, right click on links to tag them.';
+        }
+        const tagElements = tagsOrMessage.map(tag => this.formLine(tag));
         return tagElements;
     }
-    formLineFor(tag) {
+    formLine(tag) {
         const label = `${tag.getName()}(${tag.getCount()}): `;
         const dropDown = this.formDropDown(tag);
         return (0, RenderElement_1.createElement)('div', {}, [label, dropDown]);
     }
     formDropDown(tag) {
-        const options = DidactedLinkTag_1.linkTagModes.map(mode => {
-            return (0, RenderElement_1.createElement)('option', { value: mode, selected: mode === tag.getMode() }, [mode]);
-        });
         return (0, RenderElement_1.createElement)('select', {
             id: this.getTagModeDropModeId(tag),
             onchangeValue: (value) => this.setLinkTagMode(tag, value)
-        }, options);
+        }, this.formDropDownOptions(tag));
+    }
+    formDropDownOptions(tag) {
+        return DidactedLinkTag_1.linkTagModes.map(mode => (0, RenderElement_1.createElement)('option', { value: mode, selected: mode === tag.getMode() }, [mode]));
     }
     async setLinkTagMode(tag, mode) {
         if (!DidactedLinkTag_1.linkTagModes.includes(mode)) {
