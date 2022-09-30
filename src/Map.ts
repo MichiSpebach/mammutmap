@@ -83,7 +83,7 @@ export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<v
   if (map) {
     await unloadAndUnsetMap()
   }
-  map = await Map.new('content', projectSettings)
+  map = await Map.new(indexHtmlIds.contentId, projectSettings)
   onMapLoaded.callSubscribers(map)
 }
 
@@ -94,25 +94,32 @@ export async function unloadAndUnsetMap(): Promise<void> {
   }
   onMapUnload.callSubscribers()
   await map.destruct()
-  checkMapUnloaded()
-  clearManagers()
+  ensureMapUnloaded()
   map = undefined
 }
 
-function checkMapUnloaded(): void {
-  if (boxManager.getNumberOfBoxes() != 0) {
-    util.logWarning('expected all boxes to be unloaded at this state, but there are '+boxManager.getNumberOfBoxes()+' boxes.')
+function ensureMapUnloaded(): void {
+  if (boxManager.getNumberOfBoxes() !== 0) {
+    util.logWarning('Expected all boxes to be unloaded at this state, but there are '+boxManager.getNumberOfBoxes()+' boxes.')
   }
-  if (dom.getIpcChannelsCount() != 0) {
-    util.logWarning('expected that no ipcChannels exist at this state, but there are '+dom.getIpcChannelsCount()+' ipcChannels')
+  if (renderManager.getPendingCommandsCount() !== 0) {
+    util.logWarning('Expected no pending render commands at this state, but there are '+renderManager.getPendingCommandsCount()+' render commands.')
   }
-}
-
-function clearManagers(): void {
-  DragManager.clear()
-  ScaleManager.clear()
-  HoverManager.clear()
-  renderManager.clear()
+  if (dom.getIpcChannelsCount() !== 0) {
+    util.logInfo('There are '+dom.getIpcChannelsCount()+' ipcChannels at this state.')
+  }
+  if (DragManager.isDraggingInProgress()) {
+    util.logWarning('Expected dragging not to be in progress at this state.')
+    DragManager.clear()
+  }
+  if (ScaleManager.isScalingInProgress()) {
+    util.logWarning('Expected scaling not to be in progress at this state.')
+    ScaleManager.clear()
+  }
+  if (HoverManager.isHoveringInProgress()) {
+    util.logWarning('Expected hovering not to be in progress at this state.')
+    HoverManager.clear()
+  }
 }
 
 export class Map {
@@ -149,6 +156,7 @@ export class Map {
   }
 
   public async destruct(): Promise<void> {
+    await this.rootFolder.unrenderIfPossible(true)
     await this.rootFolder.destruct()
     await Promise.all([
       renderManager.removeEventListenerFrom('map', 'wheel'),

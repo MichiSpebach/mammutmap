@@ -1,4 +1,4 @@
-
+// TODO: create folder/module rendering and move RenderElement.ts, renderManager.ts, domAdapter.ts into there
 export {
   createRenderElement as ce,
   createRenderElement as cre,

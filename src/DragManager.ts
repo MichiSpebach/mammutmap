@@ -58,7 +58,7 @@ export class DragManager {
     }
   }
 
-  public static clear(): void {
+  public static clear(): void { // TODO: this method should not be needed, remove when sure
     this.state = null
     util.setHint(util.hintToDeactivateSnapToGrid, false)
   }

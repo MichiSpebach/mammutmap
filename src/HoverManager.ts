@@ -10,7 +10,11 @@ export class HoverManager {
     onHoverOut: () => void
   } | null = null
 
-  public static clear(): void {
+  public static isHoveringInProgress(): boolean {
+    return !!this.state
+  }
+
+  public static clear(): void { // TODO: this method should not be needed, remove when sure
     this.state = null
   }
 

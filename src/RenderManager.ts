@@ -11,8 +11,8 @@ export class RenderManager {
     return !!dom
   }
 
-  public clear(): void {
-    this.commands = []
+  public getPendingCommandsCount(): number {
+    return this.commands.length
   }
 
   public openDevTools(): void {
