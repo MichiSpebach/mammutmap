@@ -5,9 +5,9 @@ import { DidactedLinkTag, LinkTagMode } from './DidactedLinkTag'
 
 export const linkTags: Subscribers<DidactedLinkTag[]|Message> = new Subscribers()
 
-onMapLoaded.subscribe((map: Map) => {
+onMapLoaded.subscribe(async (map: Map) => {
     map.getProjectSettings().linkTags.subscribe(() => linkTags.callSubscribers(getLinkTags()))
-    linkTags.callSubscribers(getLinkTags())
+    await linkTags.callSubscribers(getLinkTags())
 })
 
 onMapUnload.subscribe(() => linkTags.callSubscribers(getLinkTags()))

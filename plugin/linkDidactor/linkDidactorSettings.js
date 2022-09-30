@@ -6,9 +6,9 @@ const pluginFacade_1 = require("../../dist/pluginFacade");
 const util_1 = require("../../dist/util");
 const DidactedLinkTag_1 = require("./DidactedLinkTag");
 exports.linkTags = new pluginFacade_1.Subscribers();
-pluginFacade_1.onMapLoaded.subscribe((map) => {
+pluginFacade_1.onMapLoaded.subscribe(async (map) => {
     map.getProjectSettings().linkTags.subscribe(() => exports.linkTags.callSubscribers(getLinkTags()));
-    exports.linkTags.callSubscribers(getLinkTags());
+    await exports.linkTags.callSubscribers(getLinkTags());
 });
 pluginFacade_1.onMapUnload.subscribe(() => exports.linkTags.callSubscribers(getLinkTags()));
 function getComputedModeForLinkTag(tagName) {
