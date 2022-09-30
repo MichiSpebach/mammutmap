@@ -1,5 +1,5 @@
 import { util } from './util'
-import { ElementAttributes, RenderElement } from './util/RenderElement'
+import { ElementAttributes, RenderElement, RenderElements } from './util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from './ClientRect'
 
@@ -16,7 +16,7 @@ export type MouseEventResultAdvanced = {
   cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'
 }
 
-export type BatchMethod = 'appendChildTo'|'addContentTo'|'addElementTo'|'setElementTo'|'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
+export type BatchMethod = 'appendChildTo'|'addContentTo'|'addElementsTo'|'addElementTo'|'setElementsTo'|'setElementTo'|'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
 
 export let dom: DocumentObjectModelAdapter
 
@@ -69,7 +69,7 @@ export class DocumentObjectModelAdapter {
     return new ClientRect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
   }
 
-  public batch(batch: {elementId: string, method: BatchMethod, value: string|RenderElement}[]): Promise<void> {
+  public batch(batch: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements}[]): Promise<void> {
     const jsCommands: string[] = batch.map(command => {
       switch (command.method) {
         case 'appendChildTo':
@@ -79,9 +79,17 @@ export class DocumentObjectModelAdapter {
           const addContentJs: string = this.createAddContentJavaScript(command.elementId, command.value as string)
           return this.wrapJavaScriptInFunction(addContentJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'temp' has already been declared"
 
+        case 'addElementsTo':
+          const addElementsJs: string = this.createAddElementsJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElements)
+          return this.wrapJavaScriptInFunction(addElementsJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'element' has already been declared"
+        
         case 'addElementTo':
           const addElementJs: string = this.createAddElementJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElement)
           return this.wrapJavaScriptInFunction(addElementJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'element' has already been declared"
+
+        case 'setElementsTo':
+          let setElementsJs: string = this.createSetElementsJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElements)
+          return this.wrapJavaScriptInFunction(setElementsJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'element' has already been declared"
 
         case 'setElementTo':
           let setElementJs: string = this.createSetElementJavaScriptAndAddIpcChannelListeners(command.elementId, command.value as RenderElement)
@@ -125,32 +133,57 @@ export class DocumentObjectModelAdapter {
     return js
   }
 
+  public addElementsTo(id: string, element: RenderElements): Promise<void> {
+    return this.executeJavaScript(this.createAddElementsJavaScriptAndAddIpcChannelListeners(id, element))
+  }
+
   public addElementTo(id: string, element: RenderElement): Promise<void> {
     return this.executeJavaScript(this.createAddElementJavaScriptAndAddIpcChannelListeners(id, element))
   }
 
-  private createAddElementJavaScriptAndAddIpcChannelListeners(id: string, element: RenderElement): string {
-    let js: string = this.createHtmlElementJavaScriptAndAddIpcChannelListeners(element)
-    js += `document.getElementById("${id}").append(element);`
-    return js
+  public setElementsTo(id: string, elements: RenderElements): Promise<void> {
+    return this.executeJavaScript(this.createSetElementsJavaScriptAndAddIpcChannelListeners(id, elements))
   }
 
   public setElementTo(id: string, element: RenderElement): Promise<void> {
     return this.executeJavaScript(this.createSetElementJavaScriptAndAddIpcChannelListeners(id, element))
   }
 
-  private createSetElementJavaScriptAndAddIpcChannelListeners(id: string, element: RenderElement): string {
+  private createAddElementsJavaScriptAndAddIpcChannelListeners(id: string, elements: RenderElements): string {
+    if (!Array.isArray(elements)) {
+      return this.createAddElementJavaScriptAndAddIpcChannelListeners(id, elements)
+    }
+
+    let js: string = elements.map((element, index) => this.createHtmlElementJavaScriptAndAddIpcChannelListeners(element, 'element'+index)).join('')
+    const elementJsNames: string[] = elements.map((_, index) => 'element'+index)
+    js += `document.getElementById("${id}").append(${elementJsNames.join(',')});`
+    return js
+  }
+
+  private createAddElementJavaScriptAndAddIpcChannelListeners(id: string, element: string|RenderElement): string {
+    let js: string = this.createHtmlElementJavaScriptAndAddIpcChannelListeners(element)
+    js += `document.getElementById("${id}").append(element);`
+    return js
+  }
+
+  private createSetElementsJavaScriptAndAddIpcChannelListeners(id: string, elements: RenderElements): string {
+    let js: string = `document.getElementById("${id}").innerHTML="";` // TODO: is there no set(element) method?
+    js += this.createAddElementsJavaScriptAndAddIpcChannelListeners(id, elements)
+    return js
+  }
+
+  private createSetElementJavaScriptAndAddIpcChannelListeners(id: string, element: string|RenderElement): string {
     let js: string = this.createHtmlElementJavaScriptAndAddIpcChannelListeners(element)
     js += `document.getElementById("${id}").innerHTML="";`
     js += `document.getElementById("${id}").append(element);` // TODO: is there no set(element) method?
     return js
   }
 
-  private createHtmlElementJavaScriptAndAddIpcChannelListeners(element: RenderElement): string {
-    return this.createHtmlSubElementJavaScriptAndAddIpcChannelListeners(element, 'element')
-  }
+  private createHtmlElementJavaScriptAndAddIpcChannelListeners(element: string|RenderElement, elementJsName: string = 'element'): string {
+    if (typeof element === 'string') {
+      return `const ${elementJsName} = document.createTextNode("${element}");` // TODO: escape '"'
+    }
 
-  private createHtmlSubElementJavaScriptAndAddIpcChannelListeners(element: RenderElement, elementJsName: string): string {
     // TODO: find way to pass object directly to renderer thread and merge attributes into domElement
     let js = `const ${elementJsName} = document.createElement("${element.type}");`
 
@@ -168,11 +201,7 @@ export class DocumentObjectModelAdapter {
     for (let i = 0; i < element.children.length; i++) {
       const child: string|RenderElement = element.children[i]
       const childJsName: string = `${elementJsName}i${i}`
-      if ((child as any).type) { // TODO: improve deciding if string or RenderElement
-        js += this.createHtmlSubElementJavaScriptAndAddIpcChannelListeners(child as RenderElement, childJsName)
-      } else {
-        js += `const ${childJsName} = document.createTextNode("${child}");` // TODO: escape '"'
-      }
+      js += this.createHtmlElementJavaScriptAndAddIpcChannelListeners(child, childJsName)
       js += `${elementJsName}.append(${childJsName});`
     }
 

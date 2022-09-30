@@ -1,6 +1,6 @@
 import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced } from './domAdapter'
 import { ClientRect } from './ClientRect'
-import { RenderElement } from './util/RenderElement'
+import { RenderElement, RenderElements } from './util/RenderElement'
 
 export { MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced }
 
@@ -57,6 +57,15 @@ export class RenderManager {
     }))
   }
 
+  public addElementsTo(id: string, elements: RenderElements, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      batchParameters: {elementId: id, method: 'addElementsTo', value: elements},
+      command: () => dom.addElementsTo(id, elements)
+    }))
+  }
+
   public addElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
@@ -66,7 +75,14 @@ export class RenderManager {
     }))
   }
 
-  // TODO: implement setElementsTo(id: string, elements: string|RenderElement|(string|RenderElement)[])
+  public setElementsTo(id: string, elements: RenderElements, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      batchParameters: {elementId: id, method: 'setElementsTo', value: elements},
+      command: () => dom.setElementsTo(id, elements)
+    }))
+  }
 
   public setElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
@@ -316,7 +332,7 @@ export class RenderManager {
     }
 
     const maxBatchSize: number = 100
-    const batch: {elementId: string, method: BatchMethod, value: string|RenderElement}[] = [command.batchParameters]
+    const batch: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements}[] = [command.batchParameters]
 
     for (let i: number = this.commands.indexOf(command)+1; i < this.commands.length && batch.length < maxBatchSize; i++) {
       const upcommingCommand: Command = this.commands[i]
@@ -350,14 +366,14 @@ export class Command { // only export for unit tests
   public priority: RenderPriority
   public squashableWith: string|undefined
   public updatableWith: string|undefined
-  public batchParameters: {elementId: string, method: BatchMethod, value: string|RenderElement}|undefined
+  public batchParameters: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements} | undefined
   public readonly promise: SchedulablePromise<Promise<any>>
 
   public constructor(options: {
     priority: RenderPriority,
     squashableWith?: string,
     updatableWith?: string,
-    batchParameters?: {elementId: string, method: BatchMethod, value: string|RenderElement},
+    batchParameters?: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements},
     command: () => Promise<any>
   }) {
     this.priority = options.priority

@@ -1,17 +1,19 @@
 
-export function ce(type: ElementType, attributes: ElementAttributes, children: (string|RenderElement)[]): RenderElement {
-  return createElement(type, attributes, children)
+export {
+  createRenderElement as ce,
+  createRenderElement as cre,
+  createRenderElement as createElement
 }
 
-export function createElement(type: ElementType, attributes: ElementAttributes, children: (string|RenderElement)[]): RenderElement {
+export function createRenderElement(type: ElementType, attributes: ElementAttributes, children: (string|RenderElement)[]): RenderElement {
   return {type, attributes, children}
 }
 
-export function createElementRaw(type: string, attributes: any, children: any): RenderElement {
+export function createRenderElementRaw(type: string, attributes: any, children: any): RenderElement {
   return {type: type as ElementType, attributes, children}
 }
 
-export type RenderElementLike = string | RenderElement | (string|RenderElement)[] // TODO: rename to RenderElements
+export type RenderElements = string | RenderElement | (string|RenderElement)[]
 
 export type RenderElement = {
   type: ElementType,

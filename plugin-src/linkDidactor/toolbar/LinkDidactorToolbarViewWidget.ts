@@ -4,7 +4,7 @@ import { DidactedLinkTag, LinkTagMode, linkTagModes } from '../DidactedLinkTag'
 import * as linkDidactorSettings from '../linkDidactorSettings'
 import { Message } from '../../../dist/pluginFacade'
 import { util } from '../../../dist/util'
-import { RenderElement, createElement } from '../../../dist/util/RenderElement'
+import { RenderElement, RenderElements, createElement } from '../../../dist/util/RenderElement'
 
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
 export class LinkDidactorToolbarViewWidget extends Widget {
@@ -33,7 +33,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         this.shouldBeRendered = true
 
         await this.clearEventListeners()
-        await renderManager.setElementTo(this.getId(), this.form())
+        await renderManager.setElementsTo(this.getId(), this.form())
     }
 
     private async clearEventListeners(): Promise<void> {
@@ -42,15 +42,15 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         ))
     }
 
-    public form(): RenderElement { // TODO: return list of RenderElement
+    public form(): RenderElements {
         const tagsOrMessage: DidactedLinkTag[]|Message = linkDidactorSettings.getLinkTags()
         if (tagsOrMessage instanceof Message) {
             this.renderedLinkTags = []
-            return createElement('div', {id: this.getId()+'TagSelections'}, [tagsOrMessage.message]) // TODO: return simple string
+            return tagsOrMessage.message
         }
         this.renderedLinkTags = tagsOrMessage
         const tagElements: RenderElement[] = tagsOrMessage.map(tag => this.formLineFor(tag))
-        return createElement('div', {id: this.getId()+'TagSelections'}, tagElements)
+        return tagElements
     }
 
     private formLineFor(tag: DidactedLinkTag): RenderElement {

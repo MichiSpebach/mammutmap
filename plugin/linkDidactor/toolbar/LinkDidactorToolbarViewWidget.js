@@ -28,7 +28,7 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         }
         this.shouldBeRendered = true;
         await this.clearEventListeners();
-        await RenderManager_1.renderManager.setElementTo(this.getId(), this.form());
+        await RenderManager_1.renderManager.setElementsTo(this.getId(), this.form());
     }
     async clearEventListeners() {
         await Promise.all(this.renderedLinkTags.map(tag => RenderManager_1.renderManager.removeEventListenerFrom(this.getTagModeDropModeId(tag), 'change')));
@@ -37,11 +37,11 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         const tagsOrMessage = linkDidactorSettings.getLinkTags();
         if (tagsOrMessage instanceof pluginFacade_1.Message) {
             this.renderedLinkTags = [];
-            return (0, RenderElement_1.createElement)('div', { id: this.getId() + 'TagSelections' }, [tagsOrMessage.message]); // TODO: return simple string
+            return tagsOrMessage.message;
         }
         this.renderedLinkTags = tagsOrMessage;
         const tagElements = tagsOrMessage.map(tag => this.formLineFor(tag));
-        return (0, RenderElement_1.createElement)('div', { id: this.getId() + 'TagSelections' }, tagElements);
+        return tagElements;
     }
     formLineFor(tag) {
         const label = `${tag.getName()}(${tag.getCount()}): `;
