@@ -44,18 +44,22 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     public form(): RenderElements {
-        return [
-            this.formHeader(),
-            this.formBody()
-        ].flat()
-    }
-
-    private formHeader(): string {
         const mapOrMessage: Map|Message = pluginFacade.getMap()
         if (mapOrMessage instanceof Message) {
             return mapOrMessage.message
         }
-        return `Used linkTags in ${mapOrMessage.getRootFolder().getName()}:`
+        
+        return [
+            this.formHeader(mapOrMessage.getRootFolder().getName()),
+            this.formBody()
+        ].flat()
+    }
+
+    private formHeader(projectName: string): RenderElement {
+        if (projectName.length > 20) {
+            projectName = '...'+projectName.substring(projectName.length-17)
+        }
+        return createElement('div', {}, [`Used linkTags in ${projectName}:`])
     }
 
     private formBody(): RenderElements {

@@ -35,17 +35,20 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         await Promise.all(this.renderedLinkTags.map(tag => RenderManager_1.renderManager.removeEventListenerFrom(this.getTagModeDropModeId(tag), 'change')));
     }
     form() {
-        return [
-            this.formHeader(),
-            this.formBody()
-        ].flat();
-    }
-    formHeader() {
         const mapOrMessage = pluginFacade.getMap();
         if (mapOrMessage instanceof pluginFacade_1.Message) {
             return mapOrMessage.message;
         }
-        return `Used linkTags in ${mapOrMessage.getRootFolder().getName()}:`;
+        return [
+            this.formHeader(mapOrMessage.getRootFolder().getName()),
+            this.formBody()
+        ].flat();
+    }
+    formHeader(projectName) {
+        if (projectName.length > 20) {
+            projectName = '...' + projectName.substring(projectName.length - 17);
+        }
+        return (0, RenderElement_1.createElement)('div', {}, [`Used linkTags in ${projectName}:`]);
     }
     formBody() {
         const tagsOrMessage = linkDidactorSettings.getLinkTags();

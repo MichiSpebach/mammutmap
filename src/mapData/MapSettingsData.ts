@@ -9,7 +9,7 @@ export class MapSettingsData extends JsonObject {
 
     public static ofRawObject(object: any): MapSettingsData {
         const mapDataSettings: MapSettingsData = Object.setPrototypeOf(object, MapSettingsData.prototype)
-        mapDataSettings.linkTags = object.linkTags?.map((rawTag: any) => LinkTagData.ofRawObject(rawTag))
+        mapDataSettings.linkTags = object.linkTags? object.linkTags.map((rawTag: any) => LinkTagData.ofRawObject(rawTag)) : []
         mapDataSettings.validate()
         return mapDataSettings
     }
@@ -25,9 +25,12 @@ export class MapSettingsData extends JsonObject {
 
     private validate(): void {
         if (!this.srcRootPath || !this.mapRootPath) { // can happen when called with type any
-            let message = 'ProjectSettings need to have a srcRootPath and a mapRootPath'
+            let message = 'MapSettingsData need to have a srcRootPath and a mapRootPath'
             message += ', but specified srcRootPath is '+this.srcRootPath+' and mapRootPath is '+this.mapRootPath+'.'
             util.logWarning(message)
+        }
+        if (!this.linkTags) {
+            util.logWarning('MapSettingsData::linkTags are undefined or null.')
         }
     }
 
