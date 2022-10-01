@@ -2,10 +2,10 @@
 	"srcRootPath": "../src",
 	"mapRootPath": "./",
 	"id": "2cnbfh46bf8",
-	"x": 52.000000000000014,
-	"y": 43.99999999999999,
-	"width": 40,
-	"height": 36,
+	"x": 52,
+	"y": 36,
+	"width": 44,
+	"height": 40,
 	"links": [
 		{
 			"id": "56uund4cto",
@@ -248,29 +248,6 @@
 						"boxName": "ClientRect.ts",
 						"x": 50,
 						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "ah1s73g3f1g",
-			"from": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "/home/michael/programming/ts-visualize-files/src",
-						"x": 4.999449076284571,
-						"y": -4.999449076284571
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "ffddla14d38",
-						"boxName": "index.ts",
-						"x": 35.0013222460553,
-						"y": 0
 					}
 				]
 			}
@@ -1193,52 +1170,6 @@
 						"boxName": "box",
 						"x": 0,
 						"y": 69.9982229944518
-					}
-				]
-			}
-		},
-		{
-			"id": "uuvi3g2bitg",
-			"from": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "/home/michael/programming/ts-visualize-files/src",
-						"x": -9.999798544145692,
-						"y": 29.999731392194256
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "18tbjkfri3o",
-						"boxName": "pluginFacade.ts",
-						"x": 0,
-						"y": 0
-					}
-				]
-			}
-		},
-		{
-			"id": "7natorsupng",
-			"from": {
-				"path": [
-					{
-						"boxId": "ua13104dlao",
-						"boxName": "pluginLoader.ts",
-						"x": 0,
-						"y": 49.98939554612937
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "/home/michael/programming/ts-visualize-files/src",
-						"x": -9.99936370577755,
-						"y": 25
 					}
 				]
 			}

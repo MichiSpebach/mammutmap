@@ -1,0 +1,100 @@
+{
+	"srcRootPath": "../",
+	"mapRootPath": "./",
+	"linkTags": [],
+	"id": "76koudrno8g",
+	"x": 5,
+	"y": 5,
+	"width": 90,
+	"height": 90,
+	"links": [
+		{
+			"id": "7natorsupng",
+			"from": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "src",
+						"x": 20,
+						"y": 27.5
+					},
+					{
+						"boxId": "ua13104dlao",
+						"boxName": "pluginLoader.ts",
+						"x": 0,
+						"y": 49.98939554612937
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5ug3rcnfhgo",
+						"boxName": "plugin",
+						"x": 100,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "uuvi3g2bitg",
+			"from": {
+				"path": [
+					{
+						"boxId": "9qijbsd85t8",
+						"boxName": "plugin-src",
+						"x": 100,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "src",
+						"x": 7.5,
+						"y": 82.5
+					},
+					{
+						"boxId": "18tbjkfri3o",
+						"boxName": "pluginFacade.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ah1s73g3f1g",
+			"from": {
+				"path": [
+					{
+						"boxId": "76koudrno8g",
+						"boxName": "/home/michael/programming/ts-visualize-files/",
+						"x": 44,
+						"y": 36
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "src",
+						"x": 17.5,
+						"y": 10
+					},
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		}
+	],
+	"nodes": []
+}
