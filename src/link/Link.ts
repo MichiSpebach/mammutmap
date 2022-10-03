@@ -37,7 +37,7 @@ export class Link implements Hoverable {
   protected constructor(data: BoxMapLinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget) {
     this.data = data
     this.managingBox = managingBox
-    this.line = new LinkLine(this.data.id+'line', this)
+    this.line = LinkLine.new(this.data.id+'line', this)
     this.from = new LinkEnd(this.data.id+'from', this.data.from, this, 'square', from)
     this.to = new LinkEnd(this.data.id+'to', this.data.to, this, 'arrow', to)
   }
@@ -71,7 +71,7 @@ export class Link implements Hoverable {
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
 
-    const lineInnerHtml: string = await this.line.formHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
+    const lineInnerHtml: string = await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
 
     const proms: Promise<any>[] = []
     proms.push(this.updateStyle(priority)) // called before setContentTo(..) to avoid rendering for short time if hidden

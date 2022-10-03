@@ -4,12 +4,22 @@ import { Link } from './Link'
 import { util } from '../util'
 import { renderManager } from '../RenderManager'
 
+export function override(implementation: typeof LinkLineImplementation): void {
+    LinkLineImplementation = implementation
+}
+
+export let LinkLineImplementation: typeof LinkLine /*= LinkLine*/ // assigned after declaration at end of file
+
 export class LinkLine {
     private readonly id: string
     private readonly referenceLink: Link
     private rendered: boolean = false
 
-    public constructor(id: string, referenceLink: Link) {
+    public static new(id: string, referenceLink: Link): LinkLine {
+        return new LinkLineImplementation(id, referenceLink)
+    }
+
+    protected constructor(id: string, referenceLink: Link) {
         this.id = id
         this.referenceLink = referenceLink
     }
@@ -26,7 +36,7 @@ export class LinkLine {
         return this.id+'Target'
     }
 
-    public async formHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean): Promise<string> {
+    public async formInnerHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean): Promise<string> {
         // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
         // TODO: move coordinates to svg element, svg element only as big as needed?
         let lineHtml: string = this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
@@ -78,3 +88,5 @@ export class LinkLine {
         }
     }
 }
+
+LinkLineImplementation = LinkLine
