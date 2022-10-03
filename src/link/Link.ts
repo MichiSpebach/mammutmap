@@ -10,6 +10,7 @@ import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { ClientPosition, LocalPosition } from '../box/Transform'
 import { NodeWidget } from '../node/NodeWidget'
+import { LinkLine } from './LinkLine'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -21,6 +22,7 @@ export let LinkImplementation: typeof Link /*= Link*/ // assigned after declarat
 export class Link implements Hoverable {
   private readonly data: BoxMapLinkData
   private managingBox: Box
+  public readonly line: LinkLine
   public readonly from: LinkEnd
   public readonly to: LinkEnd
   private rendered: boolean = false
@@ -35,6 +37,7 @@ export class Link implements Hoverable {
   protected constructor(data: BoxMapLinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget) {
     this.data = data
     this.managingBox = managingBox
+    this.line = new LinkLine(this.data.id+'line', this)
     this.from = new LinkEnd(this.data.id+'from', this.data.from, this, 'square', from)
     this.to = new LinkEnd(this.data.id+'to', this.data.to, this, 'arrow', to)
   }
@@ -68,7 +71,7 @@ export class Link implements Hoverable {
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
 
-    const lineHtml: string = await this.formLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
+    const lineHtml: string = await this.line.formHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
     const proms: Promise<any>[] = []
 
     proms.push(this.updateStyle(priority)) // called before setContentTo(..) to avoid misplacement for short time
@@ -76,13 +79,13 @@ export class Link implements Hoverable {
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
-      const svgHtml: string = '<svg id="'+this.getId()+'svg">'+lineHtml+'</svg>'
+      const svgHtml: string = '<svg id="'+this.line.getId()+'">'+lineHtml+'</svg>'
       await renderManager.setContentTo(this.getId(), svgHtml+fromHtml+toHtml, priority)
-      proms.push(renderManager.setStyleTo(this.getId()+'svg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;', priority))
+      proms.push(renderManager.setStyleTo(this.line.getId(), 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;', priority))
       proms.push(this.addEventListeners())
       this.rendered = true
     } else {
-      proms.push(renderManager.setContentTo(this.getId()+'svg', lineHtml, priority))
+      proms.push(renderManager.setContentTo(this.line.getId(), lineHtml, priority))
     }
 
     // TODO: too many awaits, optimize
@@ -155,39 +158,6 @@ export class Link implements Hoverable {
     }
   }
 
-  private async formLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean): Promise<string> {
-    // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
-    // TODO: move coordinates to svg element, svg element only as big as needed?
-    let lineHtml: string = this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
-    if ((draggingInProgress || hoveringOver) /*&& (this.from.isFloatToBorder() || this.to.isFloatToBorder())*/) { // TODO: activate floatToBorder option
-      lineHtml = await this.formTargetLineHtml(draggingInProgress) + lineHtml
-    }
-    return lineHtml
-  }
-
-  private formMainLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean): string {
-    const positionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
-    return `<line id="${this.getId()}Line" ${positionHtml} ${this.formLineClassHtml()} ${this.formLineStyleHtml(draggingInProgress)}/>`
-  }
-
-  private async formTargetLineHtml(draggingInProgress: boolean): Promise<string> {
-    const fromTargetInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getTargetPositionInManagingBoxCoords()
-    const toTargetInManagingBoxCoords: LocalPosition = await this.to.getTargetPositionInManagingBoxCoords()
-    const fromTargetInManagingBoxCoords: LocalPosition = await fromTargetInManagingBoxCoordsPromise
-    const positionHtml: string = 'x1="'+fromTargetInManagingBoxCoords.percentX+'%" y1="'+fromTargetInManagingBoxCoords.percentY+'%" x2="'+toTargetInManagingBoxCoords.percentX+'%" y2="'+toTargetInManagingBoxCoords.percentY+'%"'
-    return `<line id="${this.getId()}TargetLine" ${positionHtml} ${this.formLineClassHtml()} ${this.formLineStyleHtml(draggingInProgress)} stroke-dasharray="5"/>`
-  }
-
-  private formLineClassHtml(): string {
-    const highlightClass: string = this.highlight ? ' '+this.getHighlightClass() : ''
-    return `class="${style.getHighlightTransitionClass()}${highlightClass}"`
-  }
-
-  private formLineStyleHtml(draggingInProgress: boolean): string {
-    const pointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
-    return 'style="stroke:'+this.getColor()+';stroke-width:2px;'+pointerEventsStyle+'"'
-  }
-
   public getColor(): string {
     return style.getLinkColor()
   }
@@ -228,6 +198,10 @@ export class Link implements Hoverable {
     await Promise.all(proms)
   }
 
+  public isHighlight(): boolean {
+    return this.highlight
+  }
+
   public async setHighlight(highlight: boolean): Promise<void> {
     this.highlight = highlight
 
@@ -236,20 +210,12 @@ export class Link implements Hoverable {
       return // TODO: trigger rerender when renderInProgress
     }
 
-    const highlightClass: string = this.getHighlightClass()
-    const proms: Promise<any>[] = []
-    if (highlight) {
-      proms.push(renderManager.addClassTo(this.getId()+'svg', highlightClass))
-      proms.push(renderManager.addClassTo(this.getId()+'Line', highlightClass))
-    } else {
-      proms.push(renderManager.removeClassFrom(this.getId()+'svg', highlightClass))
-      proms.push(renderManager.removeClassFrom(this.getId()+'Line', highlightClass))
-    }
-    proms.push(this.updateStyle())
-    proms.push(this.to.setHighlight(highlight))
-    proms.push(this.from.setHighlight(highlight))
-
-    await Promise.all(proms)
+    await Promise.all([
+      this.updateStyle(),
+      this.line.setHighlight(highlight),
+      this.to.setHighlight(highlight),
+      this.from.setHighlight(highlight)
+    ])
   }
 
   public getHighlightClass(): string {
