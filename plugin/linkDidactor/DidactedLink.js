@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidactedLink = void 0;
-const Link_1 = require("../../dist/box/Link");
+const pluginFacade_1 = require("../../dist/pluginFacade");
 const colors = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal'];
-class DidactedLink extends Link_1.LinkImplementation {
+class DidactedLink extends pluginFacade_1.LinkImplementation {
     static getSuperClass() {
         return Object.getPrototypeOf(DidactedLink.prototype).constructor;
     }

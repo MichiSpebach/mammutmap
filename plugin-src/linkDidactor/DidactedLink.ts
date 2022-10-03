@@ -1,7 +1,6 @@
-import { LinkImplementation } from '../../dist/box/Link'
 import { WayPointData } from '../../dist/box/WayPointData'
 import { NodeWidget } from '../../dist/node/NodeWidget'
-import { Box } from '../../dist/pluginFacade'
+import { Box, LinkImplementation } from '../../dist/pluginFacade'
 
 const colors: string[] = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal']
 

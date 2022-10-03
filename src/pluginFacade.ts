@@ -8,14 +8,17 @@ import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
 import { LinkEndData } from './box/LinkEndData'
 import * as boxFinder from './pluginUtil/boxFinder'
-import { Link } from './box/Link'
+import { Link, LinkImplementation, override as overrideLink } from './link/Link'
 import { applicationMenu } from './applicationMenu/applicationMenu'
 import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import * as contextMenu from './contextMenu/contextMenu'
 import { Subscribers } from './util/Subscribers'
+import { renderManager } from './RenderManager'
 
-export { Box, FileBox, RootFolderBox }
+export { renderManager }
 export { Map, onMapLoaded, onMapUnload, applicationMenu, contextMenu, MenuItemFile, Subscribers }
+export { Box, FileBox, RootFolderBox }
+export { Link, LinkImplementation, overrideLink }
 
 let boxWatchers: BoxWatcher[] = []
 

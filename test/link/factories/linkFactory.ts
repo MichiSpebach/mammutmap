@@ -1,5 +1,5 @@
 import { Box } from '../../../src/box/Box'
-import { Link } from '../../../src/box/Link'
+import { Link } from '../../../src/link/Link'
 
 export function of(id: string, managingBox: Box): Link {
     // TODO: implement this a little bit more deeply to be usable for more cases

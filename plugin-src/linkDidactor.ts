@@ -1,5 +1,4 @@
-import { override as overrideLink } from '../dist/box/Link'
-import { applicationMenu, MenuItemFile } from '../dist/pluginFacade'
+import { applicationMenu, MenuItemFile, overrideLink } from '../dist/pluginFacade'
 import { util } from '../dist/util'
 import { DidactedLink } from './linkDidactor/DidactedLink'
 import { sidebarWidget } from '../dist/toolbars/sidebarWidget'

@@ -1,5 +1,5 @@
 import { util } from '../util'
-import { WayPointData } from './WayPointData'
+import { WayPointData } from '../box/WayPointData'
 
 export function calculatePathOfUnchangedLinkEndOfChangedLink(oldPath: WayPointData[], shallowRenderedPath: WayPointData[]): WayPointData[] {
     if (shallowRenderedPath.length === 0) {

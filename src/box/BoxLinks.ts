@@ -1,7 +1,7 @@
 import { util } from '../util'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { Box } from './Box'
-import { Link } from './Link'
+import { Link } from '../link/Link'
 import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
 import { LinkEndData } from './LinkEndData'

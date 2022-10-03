@@ -1,6 +1,6 @@
 import { Box } from '../../../src/box/Box'
-import { Link } from '../../../src/box/Link'
-import { LinkEnd } from '../../../src/box/LinkEnd'
+import { Link } from '../../../src/link/Link'
+import { LinkEnd } from '../../../src/link/LinkEnd'
 import { LinkEndData } from '../../../src/box/LinkEndData'
 import * as linkFactory from './linkFactory'
 

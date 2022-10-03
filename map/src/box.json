@@ -3,7 +3,7 @@
 	"x": 20,
 	"y": 53.88473985561364,
 	"width": 48.96485707262559,
-	"height": 39.539643864421485,
+	"height": 26.11526014438636,
 	"links": [
 		{
 			"id": "65jivuv451o",
@@ -282,29 +282,6 @@
 			}
 		},
 		{
-			"id": "j1q645qcv7",
-			"from": {
-				"path": [
-					{
-						"boxId": "iu4msv07ut8",
-						"boxName": "Box.ts",
-						"x": 20.58997581433644,
-						"y": 99.72672262346282
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "93jcctiarsg",
-						"boxName": "Link.ts",
-						"x": 49.99897091814683,
-						"y": 0
-					}
-				]
-			}
-		},
-		{
 			"id": "btvk87v9t38",
 			"from": {
 				"path": [
@@ -512,75 +489,6 @@
 			}
 		},
 		{
-			"id": "ngukshmtaao",
-			"from": {
-				"path": [
-					{
-						"boxId": "93jcctiarsg",
-						"boxName": "Link.ts",
-						"x": 99.88152961149041,
-						"y": 44.798113763631
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "153ri2jccq8",
-						"boxName": "LinkEnd.ts",
-						"x": -0.078064012490242,
-						"y": 43.90865098904831
-					}
-				]
-			}
-		},
-		{
-			"id": "500q1kkp0t",
-			"from": {
-				"path": [
-					{
-						"boxId": "153ri2jccq8",
-						"boxName": "LinkEnd.ts",
-						"x": 0.026021337496747333,
-						"y": 54.23210798879362
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "93jcctiarsg",
-						"boxName": "Link.ts",
-						"x": 99.88152961149041,
-						"y": 55.30714496231738
-					}
-				]
-			}
-		},
-		{
-			"id": "c50qbs1f9eg",
-			"from": {
-				"path": [
-					{
-						"boxId": "153ri2jccq8",
-						"boxName": "LinkEnd.ts",
-						"x": 50,
-						"y": 0
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "iu4msv07ut8",
-						"boxName": "Box.ts",
-						"x": 55.84556600142944,
-						"y": 98.82520593653331
-					}
-				]
-			}
-		},
-		{
 			"id": "1pr9h9lalog",
 			"from": {
 				"path": [
@@ -599,98 +507,6 @@
 						"boxName": "BoxManager.ts",
 						"x": 60.0009331404843,
 						"y": 0
-					}
-				]
-			}
-		},
-		{
-			"id": "30t4s34rej8",
-			"from": {
-				"path": [
-					{
-						"boxId": "93jcctiarsg",
-						"boxName": "Link.ts",
-						"x": 9.998517273760687,
-						"y": 0
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "asn5cru6lo8",
-						"boxName": "BoxManager.ts",
-						"x": 50,
-						"y": 100.0208344184593
-					}
-				]
-			}
-		},
-		{
-			"id": "ssikl0k2s28",
-			"from": {
-				"path": [
-					{
-						"boxId": "m9s8jr4p2ko",
-						"boxName": "BoxLinks.ts",
-						"x": 36.71441826781632,
-						"y": 99.87550976604422
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "93jcctiarsg",
-						"boxName": "Link.ts",
-						"x": 81.94199277625397,
-						"y": 0.3004807692307693
-					}
-				]
-			}
-		},
-		{
-			"id": "j2gvp4p2vmo",
-			"from": {
-				"path": [
-					{
-						"boxId": "93jcctiarsg",
-						"boxName": "Link.ts",
-						"x": 84.99986421530022,
-						"y": 0
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "m9s8jr4p2ko",
-						"boxName": "BoxLinks.ts",
-						"x": 41.78378256048159,
-						"y": 99.32603562996351
-					}
-				]
-			}
-		},
-		{
-			"id": "nvgkb06bj3g",
-			"from": {
-				"path": [
-					{
-						"boxId": "93jcctiarsg",
-						"boxName": "Link.ts",
-						"x": 44.99817297692329,
-						"y": 0
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "iu4msv07ut8",
-						"boxName": "Box.ts",
-						"x": 17.59579738918074,
-						"y": 99.72453014617675
 					}
 				]
 			}
@@ -923,31 +739,6 @@
 						"y": 0
 					}
 				]
-			}
-		},
-		{
-			"id": "egmcpd6pufo",
-			"from": {
-				"path": [
-					{
-						"boxId": "93jcctiarsg",
-						"boxName": "Link.ts",
-						"x": 50,
-						"y": 50
-					}
-				],
-				"floatToBorder": true
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "biintj5qnmg",
-						"boxName": "linkUtil.ts",
-						"x": 50,
-						"y": 50
-					}
-				],
-				"floatToBorder": true
 			}
 		},
 		{

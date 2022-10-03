@@ -1,6 +1,6 @@
 import { WayPointData } from "../box/WayPointData";
 import { util } from "../util";
-import { Link } from "../box/Link";
+import { Link } from "./Link";
 import { Box } from "../box/Box";
 
 export class BorderingLinks {

@@ -1,7 +1,7 @@
 import { Box } from '../../src/box/Box'
 import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
 import { FolderBox } from '../../src/box/FolderBox'
-import { LinkEnd } from '../../src/box/LinkEnd'
+import { LinkEnd } from '../../src/link/LinkEnd'
 import { LinkEndData } from '../../src/box/LinkEndData'
 import { RootFolderBox } from '../../src/box/RootFolderBox'
 import { WayPointData } from '../../src/box/WayPointData'
@@ -10,7 +10,7 @@ import { RenderManager, init as initRenderManager } from '../../src/RenderManage
 import { NodeData} from '../../src/mapData/NodeData'
 import { NodeWidget } from '../../src/node/NodeWidget'
 import { util } from '../../src/util'
-import * as boxFactory from './factories/boxFactory'
+import * as boxFactory from '../box/factories/boxFactory'
 import * as linkEndFactory from './factories/linkEndFactory'
 import { BoxMapLinkData } from '../../src/box/BoxMapLinkData'
 

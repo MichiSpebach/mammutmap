@@ -1,4 +1,4 @@
-import * as linkUtil from '../../src/box/linkUtil'
+import * as linkUtil from '../../src/link/linkUtil'
 import { WayPointData } from '../../src/box/WayPointData'
 import { util } from '../../src/util'
 
