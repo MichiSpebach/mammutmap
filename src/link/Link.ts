@@ -71,21 +71,21 @@ export class Link implements Hoverable {
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
 
-    const lineHtml: string = await this.line.formHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
-    const proms: Promise<any>[] = []
+    const lineInnerHtml: string = await this.line.formHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
 
-    proms.push(this.updateStyle(priority)) // called before setContentTo(..) to avoid misplacement for short time
+    const proms: Promise<any>[] = []
+    proms.push(this.updateStyle(priority)) // called before setContentTo(..) to avoid rendering for short time if hidden
 
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
-      const svgHtml: string = '<svg id="'+this.line.getId()+'">'+lineHtml+'</svg>'
-      await renderManager.setContentTo(this.getId(), svgHtml+fromHtml+toHtml, priority)
-      proms.push(renderManager.setStyleTo(this.line.getId(), 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;', priority))
+      const lineStyle: string = 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'
+      const lineHtml: string = `<svg id="${this.line.getId()}" style="${lineStyle}">${lineInnerHtml}</svg>`
+      await renderManager.setContentTo(this.getId(), lineHtml+fromHtml+toHtml, priority)
       proms.push(this.addEventListeners())
       this.rendered = true
     } else {
-      proms.push(renderManager.setContentTo(this.line.getId(), lineHtml, priority))
+      proms.push(renderManager.setContentTo(this.line.getId(), lineInnerHtml, priority))
     }
 
     // TODO: too many awaits, optimize
