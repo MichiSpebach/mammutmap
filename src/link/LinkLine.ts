@@ -12,7 +12,7 @@ export let LinkLineImplementation: typeof LinkLine /*= LinkLine*/ // assigned af
 
 export class LinkLine {
     private readonly id: string
-    private readonly referenceLink: Link
+    protected readonly referenceLink: Link
     private rendered: boolean = false
 
     public static new(id: string, referenceLink: Link): LinkLine {

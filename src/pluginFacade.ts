@@ -2,7 +2,7 @@ import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
 import { RootFolderBox } from './box/RootFolderBox'
-import { Map, map, onMapLoaded, onMapUnload } from './Map'
+import { Map, map, onMapLoaded, onMapRendered, onMapUnload } from './Map'
 import { util } from './util'
 import { WayPointData } from './box/WayPointData'
 import { BoxWatcher } from './box/BoxWatcher'
@@ -14,11 +14,15 @@ import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import * as contextMenu from './contextMenu/contextMenu'
 import { Subscribers } from './util/Subscribers'
 import { renderManager } from './RenderManager'
+import { LinkLine, override as overrideLinkLine } from './link/LinkLine'
+import { ProjectSettings } from './ProjectSettings'
 
-export { renderManager }
-export { Map, onMapLoaded, onMapUnload, applicationMenu, contextMenu, MenuItemFile, Subscribers }
+export { applicationMenu, contextMenu, MenuItemFile }
+export { renderManager, Subscribers }
+export { Map, onMapLoaded, onMapRendered, onMapUnload }
+export { ProjectSettings }
 export { Box, FileBox, RootFolderBox }
-export { Link, LinkImplementation, overrideLink }
+export { Link, LinkImplementation, overrideLink, LinkLine, overrideLinkLine }
 
 let boxWatchers: BoxWatcher[] = []
 

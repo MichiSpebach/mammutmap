@@ -182,7 +182,7 @@ export class Link implements Hoverable {
       return
     }
     const proms: Promise<any>[] = []
-    proms.push(this.setHighlight(true))
+    proms.push(this.setHighlight(true)) // TODO: isn't that included in render?
     proms.push(this.render(RenderPriority.RESPONSIVE, false, true))
     await Promise.all(proms)
   }
@@ -193,7 +193,7 @@ export class Link implements Hoverable {
       return
     }
     const proms: Promise<any>[] = []
-    proms.push(this.setHighlight(false))
+    proms.push(this.setHighlight(false)) // TODO: isn't that included in render?
     proms.push(this.render(RenderPriority.RESPONSIVE, false, false))
     await Promise.all(proms)
   }
@@ -202,7 +202,7 @@ export class Link implements Hoverable {
     return this.highlight
   }
 
-  public async setHighlight(highlight: boolean): Promise<void> {
+  public async setHighlight(highlight: boolean): Promise<void> { // TODO: make private, use always render for simplicity nearly no speedboost but complexity
     this.highlight = highlight
 
     if (!this.rendered) {

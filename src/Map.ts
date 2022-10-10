@@ -14,6 +14,7 @@ import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './pluginFacade'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
+export const onMapRendered: Subscribers<Map> = new Subscribers()
 export const onMapUnload: Subscribers<void> = new Subscribers()
 
 export let map: Map|undefined
@@ -29,6 +30,7 @@ export function setMap(object: Map): void {
     util.logWarning('cannot call onLoadedSubscribers because map is not set')
   } else {
     onMapLoaded.callSubscribers(map)
+    onMapRendered.callSubscribers(map)
   }
 }
 
@@ -83,8 +85,14 @@ export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<v
   if (map) {
     await unloadAndUnsetMap()
   }
-  map = await Map.new(indexHtmlIds.contentId, projectSettings)
-  onMapLoaded.callSubscribers(map)
+
+  const loadingMap: {loaded: Promise<Map>, rendered: Promise<void>} = Map.new(indexHtmlIds.contentId, projectSettings)
+
+  map = await loadingMap.loaded
+  await onMapLoaded.callSubscribers(map) // TODO: add maximum await time in case of defective plugins
+
+  await loadingMap.rendered
+  await onMapRendered.callSubscribers(map) // TODO: add maximum await time in case of defective plugins
 }
 
 export async function unloadAndUnsetMap(): Promise<void> {
@@ -126,6 +134,7 @@ export class Map {
 
   private static readonly hintToPreventMoving: string = 'Press CTRL to prevent moving'
 
+  private readonly id: string
   private projectSettings: ProjectSettings
   private rootFolder: RootFolderBox
   private scalePercent: number = 100
@@ -134,25 +143,37 @@ export class Map {
   private readonly mapRatioAdjusterSizePx: number = 600
   private latestMousePositionWhenMoving: ClientPosition|undefined
 
-  public static async new(idToRenderIn: string, projectSettings: ProjectSettings): Promise<Map> {
-    const map = new Map(idToRenderIn, projectSettings, await RootFolderBox.new(projectSettings, 'mapMover'))
-    await Promise.all([
-      map.rootFolder.render(),
-      renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => map.zoom(-delta, clientX, clientY)),
-      renderManager.addEventListenerAdvancedTo('map', 'mousedown', (result: MouseEventResultAdvanced) => map.movestart(result)),
-    ])
-    return map
+  public static new(idToRenderIn: string, projectSettings: ProjectSettings): {loaded: Promise<Map>, rendered: Promise<void>} {
+    const loaded: Promise<Map> = Map.loadNew(idToRenderIn, projectSettings)
+    const rendered: Promise<void> = loaded.then(map => map.render())
+    return {loaded, rendered}
+  }
+
+  private static async loadNew(idToRenderIn: string, projectSettings: ProjectSettings): Promise<Map> { 
+    return new Map(idToRenderIn, projectSettings, await RootFolderBox.new(projectSettings, 'mapMover'))
   }
 
   private constructor(idToRenderIn: string, projectSettings: ProjectSettings, root: RootFolderBox) {
+    this.id = idToRenderIn
     this.projectSettings = projectSettings
     this.rootFolder = root
+  }
 
-    renderManager.setContentTo(idToRenderIn, '<div id="map" style="overflow:hidden; width:100%; height:100%;"></div>')
-    renderManager.setContentTo('map', '<div id="mapRatioAdjuster" style="width:'+this.mapRatioAdjusterSizePx+'px; height:'+this.mapRatioAdjusterSizePx+'px;"></div>')
-    renderManager.setContentTo('mapRatioAdjuster', '<div id="mapMover"></div>')
-    renderManager.setContentTo('mapMover', '<div id="'+root.getId()+'" style="width:100%; height:100%;"></div>')
-    this.updateStyle()
+  private async render(): Promise<void> {
+    const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
+    const mapMoverHtml = `<div id="mapMover">${rootFolderHtml}</div>`
+    const mapRatioAdjusterStyle = `width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
+    const mapRatioAdjusterHtml = `<div id="mapRatioAdjuster" style="${mapRatioAdjusterStyle}">${mapMoverHtml}</div>`
+    const mapHtml = `<div id="map" style="overflow:hidden; width:100%; height:100%;">${mapRatioAdjusterHtml}</div>`
+
+    await renderManager.setContentTo(this.id, mapHtml)
+
+    await Promise.all([
+      this.updateStyle(),
+      this.rootFolder.render(),
+      renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
+      renderManager.addEventListenerAdvancedTo('map', 'mousedown', (result: MouseEventResultAdvanced) => this.movestart(result)),
+    ])
   }
 
   public async destruct(): Promise<void> {
