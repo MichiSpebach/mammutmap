@@ -41,7 +41,7 @@ export class LinkLine {
         // TODO: move coordinates to svg element, svg element only as big as needed?
         let lineHtml: string = this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
         if ((draggingInProgress || hoveringOver) /*&& (this.from.isFloatToBorder() || this.to.isFloatToBorder())*/) { // TODO: activate floatToBorder option
-        lineHtml = await this.formTargetLineHtml(draggingInProgress) + lineHtml
+            lineHtml = await this.formTargetLineHtml(draggingInProgress) + lineHtml
         }
         return lineHtml
     }
@@ -67,25 +67,6 @@ export class LinkLine {
     private formLineStyleHtml(draggingInProgress: boolean): string {
         const pointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
         return 'style="stroke:'+this.referenceLink.getColor()+';stroke-width:2px;'+pointerEventsStyle+'"'
-    }
-
-    public async setHighlight(highlight: boolean): Promise<void> {
-        if (!this.rendered) {
-          //util.logWarning('setHighlight(..) called although LinkLine '+this.getId()+' is not rendered yet.') // TODO: outcomment or remove
-        }
-    
-        const highlightClass: string = this.referenceLink.getHighlightClass()
-        if (highlight) {
-            await Promise.all([
-                renderManager.addClassTo(this.getId(), highlightClass),
-                renderManager.addClassTo(this.getMainLineId(), highlightClass)
-            ])
-        } else {
-            await Promise.all([
-                renderManager.removeClassFrom(this.getId(), highlightClass),
-                renderManager.removeClassFrom(this.getMainLineId(), highlightClass)
-            ])
-        }
     }
 }
 

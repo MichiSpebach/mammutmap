@@ -27,6 +27,8 @@ export class Link implements Hoverable {
   public readonly to: LinkEnd
   private rendered: boolean = false
   private highlight: boolean = false
+  private draggingInProgress: boolean = false
+  private hoveringOver: boolean = false
   private currentStyle: string|null = null
   private styleTimer: NodeJS.Timeout|null = null
 
@@ -66,12 +68,31 @@ export class Link implements Hoverable {
     return this.to
   }
 
-  public async render(priority: RenderPriority = RenderPriority.NORMAL, draggingInProgress: boolean = false, hoveringOver: boolean = false): Promise<void> {
+  public async renderWithOptions(options: {
+    priority?: RenderPriority
+    highlight?: boolean
+    draggingInProgress?: boolean
+    hoveringOver?: boolean
+  }): Promise<void> {
+    if (options.highlight !== undefined) {
+      this.highlight = options.highlight
+    }
+    if (options.draggingInProgress !== undefined) {
+      this.draggingInProgress = options.draggingInProgress
+    }
+    if (options.hoveringOver !== undefined) {
+      this.hoveringOver = options.hoveringOver
+    }
+
+    return this.render(options.priority)
+  }
+
+  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
 
-    const lineInnerHtml: string = await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
+    const lineInnerHtml: string = await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver)
 
     const proms: Promise<any>[] = []
     proms.push(this.updateStyle(priority)) // called before setContentTo(..) to avoid rendering for short time if hidden
@@ -179,50 +200,37 @@ export class Link implements Hoverable {
   private async handleHoverOver(): Promise<void> {
     if (!this.rendered) {
       util.logWarning('handleHoverHover() called on link with id '+this.getId()+' altough link is not rendered.')
-      return
+      this.highlight = true
+      this.hoveringOver = true
+      return // don't call render, maybe widget should be unrendered
     }
-    const proms: Promise<any>[] = []
-    proms.push(this.setHighlight(true)) // TODO: isn't that included in render?
-    proms.push(this.render(RenderPriority.RESPONSIVE, false, true))
-    await Promise.all(proms)
+    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: true, hoveringOver: true})
   }
 
   private async handleHoverOut(): Promise<void> {
     if (!this.rendered) {
       util.logWarning('handleHoverOut() called on link with id '+this.getId()+' altough link is not rendered.')
-      return
+      this.highlight = false
+      this.hoveringOver = false
+      return // don't call render, maybe widget should be unrendered
     }
-    const proms: Promise<any>[] = []
-    proms.push(this.setHighlight(false)) // TODO: isn't that included in render?
-    proms.push(this.render(RenderPriority.RESPONSIVE, false, false))
-    await Promise.all(proms)
+    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: false, hoveringOver: false})
   }
 
   public isHighlight(): boolean {
     return this.highlight
   }
 
-  public async setHighlight(highlight: boolean): Promise<void> { // TODO: make private, use always render for simplicity nearly no speedboost but complexity
-    this.highlight = highlight
-
-    if (!this.rendered) {
-      util.logWarning('setHighlight(..) called although Link is not rendered yet.')
-      return // TODO: trigger rerender when renderInProgress
-    }
-
-    await Promise.all([
-      this.updateStyle(),
-      this.line.setHighlight(highlight),
-      this.to.setHighlight(highlight),
-      this.from.setHighlight(highlight)
-    ])
-  }
-
   public getHighlightClass(): string {
     return style.getHighlightLinkClass()
   }
 
-  public async reorderAndSave(): Promise<void> {
+  public async reorderAndSave(renderOptions?: {
+    priority?: RenderPriority
+    highlight?: boolean
+    draggingInProgress?: boolean
+    hoveringOver?: boolean
+  }): Promise<void> {
     const commonAncestor: Box = Box.findCommonAncestor(this.from.getRenderedTargetBox(), this.to.getRenderedTargetBox()).commonAncestor
     const oldManagingBox: Box = this.managingBox
     this.managingBox = commonAncestor
@@ -233,12 +241,19 @@ export class Link implements Hoverable {
     await Promise.all(proms)
 
     proms = []
+
     if(oldManagingBox !== this.managingBox) {
       proms.push(BoxLinks.changeManagingBoxOfLinkAndSave(oldManagingBox, this.managingBox, this))
     } else {
       proms.push(this.managingBox.saveMapData())
     }
-    proms.push(this.render())
+
+    if (renderOptions) {
+      proms.push(this.renderWithOptions(renderOptions))
+    } else {
+      proms.push(this.render())
+    }
+
     await Promise.all(proms)
   }
 

@@ -76,16 +76,16 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public async dragStart(clientX: number, clientY: number): Promise<void> {
     this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: this.getDropTargetAtDragStart(), snapToGrid: false} // TODO add dropTarget and snapToGrid to dragstart(..)
-    return this.referenceLink.render(RenderPriority.RESPONSIVE, true)
+    return this.referenceLink.renderWithOptions({priority: RenderPriority.RESPONSIVE, draggingInProgress: true})
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: Box|NodeWidget, snapToGrid: boolean): Promise<void> {
     this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: dropTarget, snapToGrid: snapToGrid}
-    return this.referenceLink.render(RenderPriority.RESPONSIVE, true)
+    return this.referenceLink.render(RenderPriority.RESPONSIVE)
   }
 
   public async dragCancel(): Promise<void> {
-    await this.referenceLink.render()
+    await this.referenceLink.renderWithOptions({priority: RenderPriority.RESPONSIVE, draggingInProgress: false})
     this.dragState = null
   }
 
@@ -96,7 +96,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       this.dragState.dropTarget = dropTarget
     }
     this.renderedTarget = dropTarget
-    await this.referenceLink.reorderAndSave()
+    await this.referenceLink.reorderAndSave({priority: RenderPriority.RESPONSIVE, draggingInProgress: false})
     this.dragState = null
   }
 
@@ -199,10 +199,14 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   // TODO: remove parameter positionInManagingBoxCoords
+  // TODO: now more frequent called, add renderPriority
   public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
     this.updateBoxesRegisteredAtAndBorderingBox() // important because zooming could have happened
 
-    await this.renderShape(positionInManagingBoxCoords, angleInRadians)
+    await Promise.all([ // TODO: await at end of method
+      this.renderShape(positionInManagingBoxCoords, angleInRadians),
+      this.setHighlight()
+    ])
 
     if (!this.rendered) {
       DragManager.addDraggable(this)
@@ -245,13 +249,9 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     await renderManager.setStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle)
   }
 
-  public async setHighlight(highlight: boolean): Promise<void> {
-    if (!this.rendered) {
-      util.logWarning('setHighlight(..) called although LinkEnd '+this.getId()+' is not rendered yet.')
-    }
-
+  private async setHighlight(): Promise<void> {
     const highlightClass: string = this.referenceLink.getHighlightClass()
-    if (highlight) {
+    if (this.referenceLink.isHighlight()) {
       await renderManager.addClassTo(this.getId(), highlightClass)
     } else {
       await renderManager.removeClassFrom(this.getId(), highlightClass)
