@@ -12,17 +12,24 @@ onMapLoaded.subscribe(async (map: Map) => {
 
 onMapUnload.subscribe(() => linkTags.callSubscribers(getLinkTags()))
 
-export function getComputedModeForLinkTag(tagName: string): LinkTagMode {
-    const tag: DidactedLinkTag|undefined = findLinkTagByName(tagName)
-    if (!tag) {
-        util.logWarning('cannot getComputedModeForLinkTag because no LinkTag with name '+tagName+' found, returning visible as default')
+export function getComputedModeForLinkTags(tagNames: string[]): LinkTagMode {
+    let mostImportantTag: DidactedLinkTag|undefined = undefined
+    let maxIndex: number = -1
+    
+    const linkTags: DidactedLinkTag[] = getLinkTagsOrWarn()
+    for (const tagName of tagNames) {
+        const index = linkTags.findIndex(tag => tag.getName() === tagName)
+        if (index > maxIndex) {
+            mostImportantTag = linkTags[index]
+            maxIndex = index
+        }
+    }
+    
+    if (!mostImportantTag) {
+        util.logWarning('Cannot getComputedModeForLinkTags because no LinkTag with name in ['+tagNames+'] found, returning visible as default.')
         return 'visible'
     }
-    return tag.getMode()
-}
-
-function findLinkTagByName(tagName: string): DidactedLinkTag|undefined {
-    return getLinkTagsOrWarn().find(tag => tag.getName() === tagName)
+    return mostImportantTag.getMode()
 }
 
 function getLinkTagsOrWarn(): DidactedLinkTag[] {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveToFileSystem = exports.getLinkTags = exports.getComputedModeForLinkTag = exports.linkTags = void 0;
+exports.saveToFileSystem = exports.getLinkTags = exports.getComputedModeForLinkTags = exports.linkTags = void 0;
 const pluginFacade = require("../../dist/pluginFacade");
 const pluginFacade_1 = require("../../dist/pluginFacade");
 const util_1 = require("../../dist/util");
@@ -11,18 +11,24 @@ pluginFacade_1.onMapLoaded.subscribe(async (map) => {
     await exports.linkTags.callSubscribers(getLinkTags());
 });
 pluginFacade_1.onMapUnload.subscribe(() => exports.linkTags.callSubscribers(getLinkTags()));
-function getComputedModeForLinkTag(tagName) {
-    const tag = findLinkTagByName(tagName);
-    if (!tag) {
-        util_1.util.logWarning('cannot getComputedModeForLinkTag because no LinkTag with name ' + tagName + ' found, returning visible as default');
+function getComputedModeForLinkTags(tagNames) {
+    let mostImportantTag = undefined;
+    let maxIndex = -1;
+    const linkTags = getLinkTagsOrWarn();
+    for (const tagName of tagNames) {
+        const index = linkTags.findIndex(tag => tag.getName() === tagName);
+        if (index > maxIndex) {
+            mostImportantTag = linkTags[index];
+            maxIndex = index;
+        }
+    }
+    if (!mostImportantTag) {
+        util_1.util.logWarning('Cannot getComputedModeForLinkTags because no LinkTag with name in [' + tagNames + '] found, returning visible as default.');
         return 'visible';
     }
-    return tag.getMode();
+    return mostImportantTag.getMode();
 }
-exports.getComputedModeForLinkTag = getComputedModeForLinkTag;
-function findLinkTagByName(tagName) {
-    return getLinkTagsOrWarn().find(tag => tag.getName() === tagName);
-}
+exports.getComputedModeForLinkTags = getComputedModeForLinkTags;
 function getLinkTagsOrWarn() {
     const tagsOrMessage = getLinkTags();
     if (tagsOrMessage instanceof pluginFacade_1.Message) {
