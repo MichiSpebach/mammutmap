@@ -4,6 +4,7 @@ import { Map, map as mapWidget } from './Map'
 import { ToolbarWidget } from './toolbars/ToolbarWidget'
 import { renderManager } from './RenderManager'
 import { settingsOnStartup } from './Settings'
+import { util } from './util'
 
 // TODO: rename to indexWidget|bodyWidget|appWidget|window(Widget)?
 
@@ -45,6 +46,10 @@ class MainWidget extends Widget {
         pros.push(this.adjustWidgets())
 
         await Promise.all(pros)
+    }
+
+    public async unrender(): Promise<void> {
+        util.logWarning('expected MainWidget::unrender not to be called') // TODO: add default implementation in super class?
     }
 
     private async adjustWidgets(): Promise<void> {

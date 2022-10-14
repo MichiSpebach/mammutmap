@@ -10,7 +10,7 @@ import { RenderElement, RenderElements, createElement } from '../../../dist/util
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
 export class LinkDidactorToolbarViewWidget extends Widget {
 
-    private shouldBeRendered: boolean = false
+    private renderedOrInProgress: boolean = false
     private renderedLinkTags: DidactedLinkTag[] = []
 
     public constructor(
@@ -23,27 +23,40 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         return this.id
     }
 
-    private getTagModeDropModeId(tag: DidactedLinkTag): string {
+    private getTagModeDropDownId(tag: DidactedLinkTag): string {
         return this.getId()+tag.getName()
     }
 
     public async render(): Promise<void> {
-        if (!this.shouldBeRendered) {
+        if (!this.renderedOrInProgress) {
             linkDidactorSettings.linkTags.subscribe(() => this.render())
+            this.renderedOrInProgress = true
         }
-        this.shouldBeRendered = true
 
         await this.clearEventListeners()
-        await renderManager.setElementsTo(this.getId(), this.form())
+        await renderManager.setElementsTo(this.getId(), this.formInner())
+    }
+
+    public async unrender(): Promise<void> {
+        if (!this.renderedOrInProgress) {
+            return
+        }
+        this.renderedOrInProgress = false
+
+        await Promise.all([
+            this.clearEventListeners(),
+            renderManager.clearContentOf(this.getId()),
+            this.renderedLinkTags = []
+        ])
     }
 
     private async clearEventListeners(): Promise<void> {
         await Promise.all(this.renderedLinkTags.map(tag => 
-            renderManager.removeEventListenerFrom(this.getTagModeDropModeId(tag), 'change')
+            renderManager.removeEventListenerFrom(this.getTagModeDropDownId(tag), 'change')
         ))
     }
 
-    public form(): RenderElements {
+    public formInner(): RenderElements {
         const mapOrMessage: Map|Message = pluginFacade.getMap()
         if (mapOrMessage instanceof Message) {
             return mapOrMessage.message
@@ -87,7 +100,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
     private formDropDown(tag: DidactedLinkTag): RenderElement {
         return createElement('select', {
-            id: this.getTagModeDropModeId(tag),
+            id: this.getTagModeDropDownId(tag),
             onchangeValue: (value: string) => this.setLinkTagMode(tag, value)
         }, this.formDropDownOptions(tag))
     }

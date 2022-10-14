@@ -14,27 +14,38 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
     constructor(id) {
         super();
         this.id = id;
-        this.shouldBeRendered = false;
+        this.renderedOrInProgress = false;
         this.renderedLinkTags = [];
     }
     getId() {
         return this.id;
     }
-    getTagModeDropModeId(tag) {
+    getTagModeDropDownId(tag) {
         return this.getId() + tag.getName();
     }
     async render() {
-        if (!this.shouldBeRendered) {
+        if (!this.renderedOrInProgress) {
             linkDidactorSettings.linkTags.subscribe(() => this.render());
+            this.renderedOrInProgress = true;
         }
-        this.shouldBeRendered = true;
         await this.clearEventListeners();
-        await RenderManager_1.renderManager.setElementsTo(this.getId(), this.form());
+        await RenderManager_1.renderManager.setElementsTo(this.getId(), this.formInner());
+    }
+    async unrender() {
+        if (!this.renderedOrInProgress) {
+            return;
+        }
+        this.renderedOrInProgress = false;
+        await Promise.all([
+            this.clearEventListeners(),
+            RenderManager_1.renderManager.clearContentOf(this.getId()),
+            this.renderedLinkTags = []
+        ]);
     }
     async clearEventListeners() {
-        await Promise.all(this.renderedLinkTags.map(tag => RenderManager_1.renderManager.removeEventListenerFrom(this.getTagModeDropModeId(tag), 'change')));
+        await Promise.all(this.renderedLinkTags.map(tag => RenderManager_1.renderManager.removeEventListenerFrom(this.getTagModeDropDownId(tag), 'change')));
     }
-    form() {
+    formInner() {
         const mapOrMessage = pluginFacade.getMap();
         if (mapOrMessage instanceof pluginFacade_1.Message) {
             return mapOrMessage.message;
@@ -70,7 +81,7 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
     }
     formDropDown(tag) {
         return (0, RenderElement_1.createElement)('select', {
-            id: this.getTagModeDropModeId(tag),
+            id: this.getTagModeDropDownId(tag),
             onchangeValue: (value) => this.setLinkTagMode(tag, value)
         }, this.formDropDownOptions(tag));
     }

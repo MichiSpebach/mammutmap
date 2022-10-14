@@ -52,7 +52,7 @@ export class ToolbarWidget extends Widget {
     this.shouldBeRendered = false
     
     if (this.selectedView) {
-      //await this.selectedView.getWidget().unrender() // TODO: implement unrender for ToolbarView
+      await this.selectedView.getWidget().unrender()
     }
     await renderManager.setContentTo(this.getId(), '')
   }

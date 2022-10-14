@@ -4,4 +4,5 @@
 export abstract class Widget {
     public abstract getId(): string
     public abstract render(): Promise<void> // TODO for some gui components render needs arguments
+    public abstract unrender(): Promise<void>  // TODO: add default implementation?
 }
