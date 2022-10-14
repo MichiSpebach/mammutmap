@@ -1,7 +1,6 @@
-import { applicationMenu, MenuItemFile, overrideLink, overrideLinkLine } from '../dist/pluginFacade'
+import { applicationMenu, mainWidget, MenuItemFile, overrideLink, overrideLinkLine } from '../dist/pluginFacade'
 import { util } from '../dist/util'
 import { DidactedLink } from './linkDidactor/DidactedLink'
-import { sidebarWidget } from '../dist/toolbars/sidebarWidget'
 import { LinkDidactorToolbarView } from './linkDidactor/toolbar/LinkDidactorToolbarView'
 import { DidactedLinkLine } from './linkDidactor/DidactedLinkLine'
 
@@ -28,4 +27,4 @@ async function activate(): Promise<void> {
 
 activate()
 
-sidebarWidget.addView(new LinkDidactorToolbarView('LinkDidactor'))
+mainWidget.sidebar.addView(new LinkDidactorToolbarView('LinkDidactor'))

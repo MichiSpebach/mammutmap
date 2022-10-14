@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const pluginFacade_1 = require("../dist/pluginFacade");
 const util_1 = require("../dist/util");
 const DidactedLink_1 = require("./linkDidactor/DidactedLink");
-const sidebarWidget_1 = require("../dist/toolbars/sidebarWidget");
 const LinkDidactorToolbarView_1 = require("./linkDidactor/toolbar/LinkDidactorToolbarView");
 const DidactedLinkLine_1 = require("./linkDidactor/DidactedLinkLine");
 const deactivateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'deactivate', click: deactivate });
@@ -25,4 +24,4 @@ async function activate() {
     util_1.util.logInfo('activated linkDidactor plugin');
 }
 activate();
-sidebarWidget_1.sidebarWidget.addView(new LinkDidactorToolbarView_1.LinkDidactorToolbarView('LinkDidactor'));
+pluginFacade_1.mainWidget.sidebar.addView(new LinkDidactorToolbarView_1.LinkDidactorToolbarView('LinkDidactor'));

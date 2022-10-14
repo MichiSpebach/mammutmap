@@ -16,9 +16,11 @@ import { Subscribers } from './util/Subscribers'
 import { renderManager } from './RenderManager'
 import { LinkLine, override as overrideLinkLine } from './link/LinkLine'
 import { ProjectSettings } from './ProjectSettings'
+import { mainWidget } from './mainWidget'
 
 export { applicationMenu, contextMenu, MenuItemFile }
 export { renderManager, Subscribers }
+export { mainWidget }
 export { Map, onMapLoaded, onMapRendered, onMapUnload }
 export { ProjectSettings }
 export { Box, FileBox, RootFolderBox }
