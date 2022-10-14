@@ -1,6 +1,7 @@
 import { exec, ChildProcess } from 'child_process'
 import { renderManager } from './RenderManager'
 import { style } from './styleAdapter'
+import * as indexHtmlIds from './indexHtmlIds'
 
 export { ChildProcess }
 
@@ -67,7 +68,7 @@ class Util {
     if (active) {
       if (!this.hint) {
         this.hint = hint
-        await renderManager.addContentTo('body', `<div id="${this.hintId}" class="${style.getHintClass()}">${hint}</div>`)
+        await renderManager.addContentTo(indexHtmlIds.bodyId, `<div id="${this.hintId}" class="${style.getHintClass()}">${hint}</div>`)
       } else if (this.hint !== hint) {
         this.hint = hint
         await renderManager.setContentTo(this.hintId, hint)
