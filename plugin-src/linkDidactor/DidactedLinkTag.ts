@@ -1,7 +1,7 @@
 import { LinkTagData } from '../../dist/mapData/LinkTagData'
 import { util } from '../../dist/util'
 
-export const linkTagModes = ['notDisplayed', 'visibleEnds', 'visible'] as const // "as const" makes LinkTagMode a typesafe union of literals
+export const linkTagModes = ['notRendered', 'visibleEnds', 'visible'] as const // "as const" makes LinkTagMode a typesafe union of literals
 export type LinkTagMode = typeof linkTagModes[number]
 
 export class DidactedLinkTag  {

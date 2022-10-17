@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidactedLinkTag = exports.linkTagModes = void 0;
 const util_1 = require("../../dist/util");
-exports.linkTagModes = ['notDisplayed', 'visibleEnds', 'visible']; // "as const" makes LinkTagMode a typesafe union of literals
+exports.linkTagModes = ['notRendered', 'visibleEnds', 'visible']; // "as const" makes LinkTagMode a typesafe union of literals
 class DidactedLinkTag {
     constructor(data) {
         this.data = data;

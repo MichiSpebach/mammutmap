@@ -2,10 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidactedLink = void 0;
 const pluginFacade_1 = require("../../dist/pluginFacade");
+const linkDidactorSettings = require("./linkDidactorSettings");
 const colors = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal'];
 class DidactedLink extends pluginFacade_1.LinkImplementation {
     static getSuperClass() {
         return Object.getPrototypeOf(DidactedLink.prototype).constructor;
+    }
+    render(priority) {
+        if (linkDidactorSettings.getComputedModeForLinkTags(this.getTags()) === 'notRendered') {
+            return super.unrender();
+        }
+        return super.render(priority);
     }
     getColor() {
         let toBoxId;
