@@ -143,7 +143,7 @@ export class Link implements Hoverable {
     const firstCall: boolean = !this.currentStyle
     const hideTransitionDurationInMs = 1000
     let startDisplayNoneTimer: boolean = false
-    if (this.includesTag('hidden')) {
+    if (this.includesTag('hidden')) { // TODO: simplify and move hidden logic into LinkDidactor plugin
       if (this.highlight) {
         style = 'opacity:0.5;'
       } else if (firstCall) {

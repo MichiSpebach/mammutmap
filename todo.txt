@@ -1,7 +1,11 @@
 
+plugin for center/fitView via contextMenu for boxes and links that zooms to fit selected object in screen
+
 watch/unwatch box or links via contextMenu/boxHeader/sidebar (prevents unrendering)
 
-toolbars, sidebar
+bottom toolbar
+
+'Toolbars Everywhere' plugin that makes toolbars addable to boxes
 
 add option to contextMenu of boxes: tag[
   'hidden|unimportant'(e.g. files that start with '.'),
