@@ -23,9 +23,6 @@ export class DidactedLinkLine extends LinkLineImplementation {
         }
 
         const tagNames: string[]|undefined = this.referenceLink.getData().tags
-        if (!tagNames || tagNames.length === 0) {
-            return true
-        }
 
         const mode: LinkTagMode = linkDidactorSettings.getComputedModeForLinkTags(tagNames)
         switch (mode) {

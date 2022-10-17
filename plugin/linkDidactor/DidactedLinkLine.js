@@ -19,9 +19,6 @@ class DidactedLinkLine extends LinkLine_1.LinkLineImplementation {
             return true;
         }
         const tagNames = this.referenceLink.getData().tags;
-        if (!tagNames || tagNames.length === 0) {
-            return true;
-        }
         const mode = linkDidactorSettings.getComputedModeForLinkTags(tagNames);
         switch (mode) {
             case 'visible':

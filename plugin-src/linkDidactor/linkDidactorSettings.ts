@@ -12,7 +12,13 @@ onMapLoaded.subscribe(async (map: Map) => {
 
 onMapUnload.subscribe(() => linkTags.callSubscribers(getLinkTags()))
 
-export function getComputedModeForLinkTags(tagNames: string[]): LinkTagMode {
+let defaultLinkMode: LinkTagMode = 'visibleEnds'
+
+export function getComputedModeForLinkTags(tagNames: string[]|undefined): LinkTagMode {
+    if (!tagNames || tagNames.length === 0) {
+        return defaultLinkMode
+    }
+
     let mostImportantTag: DidactedLinkTag|undefined = undefined
     let maxIndex: number = -1
     
@@ -41,12 +47,23 @@ function getLinkTagsOrWarn(): DidactedLinkTag[] {
     return tagsOrMessage
 }
 
+// TODO rename to getDefaultLinkAppereance(): {mode: LinkTagMode, color: string}?
+export function getDefaultLinkMode(): LinkTagMode {
+    return defaultLinkMode
+}
+
 export function getLinkTags(): DidactedLinkTag[]|Message {
     const mapOrMessage: Map|Message = pluginFacade.getMap()
     if (mapOrMessage instanceof Message) {
         return mapOrMessage
     }
     return mapOrMessage.getProjectSettings().getLinkTags().map(tagData => new DidactedLinkTag(tagData))
+}
+
+export function setDefaultLinkModeAndSaveToFileSystem(mode: LinkTagMode): Promise<void> {
+    defaultLinkMode = mode
+    // TODO implement
+    return Promise.resolve()
 }
 
 export async function saveToFileSystem(): Promise<void> {

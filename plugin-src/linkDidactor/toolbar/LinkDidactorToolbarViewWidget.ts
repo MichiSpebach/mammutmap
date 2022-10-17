@@ -23,6 +23,10 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         return this.id
     }
 
+    private getDefaultModeDropDownId(): string {
+        return this.getId()+'-default'
+    }
+
     private getTagModeDropDownId(tag: DidactedLinkTag): string {
         return this.getId()+tag.getName()
     }
@@ -87,31 +91,54 @@ export class LinkDidactorToolbarViewWidget extends Widget {
             return 'There are no linkTags used in this project yet, right click on links to tag them.'
         }
 
-        const tagElements: RenderElement[] = tagsOrMessage.map(tag => this.formLine(tag))
-        return tagElements
+        const defaultRow: RenderElement = this.formDefaultLine()
+        const tagRows: RenderElement[] = tagsOrMessage.map(tag => this.formTagLine(tag))
+
+        return [defaultRow, ...tagRows]
     }
 
-    private formLine(tag: DidactedLinkTag): RenderElement {
-        const label: string = `${tag.getName()}(${tag.getCount()}): `
-        const dropDown: RenderElement = this.formDropDown(tag)
+    private formDefaultLine(): RenderElement {
+        const label: string = 'default: '
+        const dropDown: RenderElement = this.formDefaultModeDropDown()
 
         return createElement('div', {}, [label, dropDown])
     }
 
-    private formDropDown(tag: DidactedLinkTag): RenderElement {
+    private formTagLine(tag: DidactedLinkTag): RenderElement {
+        const label: string = `${tag.getName()}(${tag.getCount()}): `
+        const dropDown: RenderElement = this.formTagModeDropDown(tag)
+
+        return createElement('div', {}, [label, dropDown])
+    }
+
+    private formDefaultModeDropDown(): RenderElement {
+        return createElement('select', {
+            id: this.getDefaultModeDropDownId(),
+            onchangeValue: (value: string) => this.setDefaultLinkMode(value)
+        }, this.formDropDownOptions(linkDidactorSettings.getDefaultLinkMode()))
+    }
+
+    private formTagModeDropDown(tag: DidactedLinkTag): RenderElement {
         return createElement('select', {
             id: this.getTagModeDropDownId(tag),
             onchangeValue: (value: string) => this.setLinkTagMode(tag, value)
-        }, this.formDropDownOptions(tag))
+        }, this.formDropDownOptions(tag.getMode()))
     }
 
-    private formDropDownOptions(tag: DidactedLinkTag): RenderElement[] {
-        return linkTagModes.map(mode => createElement('option', {value: mode, selected: mode === tag.getMode()}, [mode]))
+    private formDropDownOptions(tagMode: LinkTagMode): RenderElement[] {
+        return linkTagModes.map(mode => createElement('option', {value: mode, selected: mode === tagMode}, [mode]))
+    }
+
+    private async setDefaultLinkMode(mode: string): Promise<void> {
+        if (!linkTagModes.includes(mode as any)) {
+            util.logWarning(`default LinkTagMode '${mode}' is not known.`)
+        }
+        await linkDidactorSettings.setDefaultLinkModeAndSaveToFileSystem(mode as LinkTagMode)
     }
 
     private async setLinkTagMode(tag: DidactedLinkTag, mode: string): Promise<void> {
         if (!linkTagModes.includes(mode as any)) {
-            util.logWarning(`LinkTagMode ${mode} is not known.`)
+            util.logWarning(`LinkTagMode '${mode}' is not known.`)
         }
         tag.setMode(mode as LinkTagMode)
         await linkDidactorSettings.saveToFileSystem()

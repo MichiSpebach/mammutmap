@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveToFileSystem = exports.getLinkTags = exports.getComputedModeForLinkTags = exports.linkTags = void 0;
+exports.saveToFileSystem = exports.setDefaultLinkModeAndSaveToFileSystem = exports.getLinkTags = exports.getDefaultLinkMode = exports.getComputedModeForLinkTags = exports.linkTags = void 0;
 const pluginFacade = require("../../dist/pluginFacade");
 const pluginFacade_1 = require("../../dist/pluginFacade");
 const util_1 = require("../../dist/util");
@@ -11,7 +11,11 @@ pluginFacade_1.onMapLoaded.subscribe(async (map) => {
     await exports.linkTags.callSubscribers(getLinkTags());
 });
 pluginFacade_1.onMapUnload.subscribe(() => exports.linkTags.callSubscribers(getLinkTags()));
+let defaultLinkMode = 'visibleEnds';
 function getComputedModeForLinkTags(tagNames) {
+    if (!tagNames || tagNames.length === 0) {
+        return defaultLinkMode;
+    }
     let mostImportantTag = undefined;
     let maxIndex = -1;
     const linkTags = getLinkTagsOrWarn();
@@ -37,6 +41,11 @@ function getLinkTagsOrWarn() {
     }
     return tagsOrMessage;
 }
+// TODO rename to getDefaultLinkAppereance(): {mode: LinkTagMode, color: string}?
+function getDefaultLinkMode() {
+    return defaultLinkMode;
+}
+exports.getDefaultLinkMode = getDefaultLinkMode;
 function getLinkTags() {
     const mapOrMessage = pluginFacade.getMap();
     if (mapOrMessage instanceof pluginFacade_1.Message) {
@@ -45,6 +54,12 @@ function getLinkTags() {
     return mapOrMessage.getProjectSettings().getLinkTags().map(tagData => new DidactedLinkTag_1.DidactedLinkTag(tagData));
 }
 exports.getLinkTags = getLinkTags;
+function setDefaultLinkModeAndSaveToFileSystem(mode) {
+    defaultLinkMode = mode;
+    // TODO implement
+    return Promise.resolve();
+}
+exports.setDefaultLinkModeAndSaveToFileSystem = setDefaultLinkModeAndSaveToFileSystem;
 async function saveToFileSystem() {
     const mapOrMessage = pluginFacade.getMap();
     if (mapOrMessage instanceof pluginFacade_1.Message) {
