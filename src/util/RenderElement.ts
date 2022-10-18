@@ -25,7 +25,7 @@ export type RenderElement = {
   children: (string|RenderElement)[]
 }
 
-export type ElementType = 'div'|'span'|'button'|'select'|'option'
+export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'button'|'select'|'option'
 
 export type ElementAttributes = {
   id?: string,

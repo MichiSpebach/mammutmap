@@ -71,22 +71,31 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
             return tagsOrMessage.message;
         }
         this.renderedLinkTags = tagsOrMessage;
-        if (tagsOrMessage.length === 0) {
-            return 'There are no linkTags used in this project yet, right click on links to tag them.';
+        const defaultRow = this.formDefaultRow();
+        const tagRows = tagsOrMessage.map(tag => this.formTagRow(tag));
+        const table = (0, RenderElement_1.createElement)('table', {}, [defaultRow, ...tagRows]);
+        if (tagRows.length === 0) {
+            return [table, 'There are no linkTags used in this project yet, right click on links to tag them.'];
         }
-        const defaultRow = this.formDefaultLine();
-        const tagRows = tagsOrMessage.map(tag => this.formTagLine(tag));
-        return [defaultRow, ...tagRows];
+        else {
+            return table;
+        }
     }
-    formDefaultLine() {
+    formDefaultRow() {
         const label = 'default: ';
         const dropDown = this.formDefaultModeDropDown();
-        return (0, RenderElement_1.createElement)('div', {}, [label, dropDown]);
+        return (0, RenderElement_1.ce)('tr', {}, [
+            (0, RenderElement_1.ce)('td', {}, [label]),
+            (0, RenderElement_1.ce)('td', {}, [dropDown])
+        ]);
     }
-    formTagLine(tag) {
+    formTagRow(tag) {
         const label = `${tag.getName()}(${tag.getCount()}): `;
         const dropDown = this.formTagModeDropDown(tag);
-        return (0, RenderElement_1.createElement)('div', {}, [label, dropDown]);
+        return (0, RenderElement_1.ce)('tr', {}, [
+            (0, RenderElement_1.ce)('td', {}, [label]),
+            (0, RenderElement_1.ce)('td', {}, [dropDown])
+        ]);
     }
     formDefaultModeDropDown() {
         return (0, RenderElement_1.createElement)('select', {

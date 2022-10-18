@@ -5,7 +5,7 @@ import * as linkDidactorSettings from '../linkDidactorSettings'
 import * as pluginFacade from '../../../dist/pluginFacade'
 import { Map, Message } from '../../../dist/pluginFacade'
 import { util } from '../../../dist/util'
-import { RenderElement, RenderElements, createElement } from '../../../dist/util/RenderElement'
+import { RenderElement, RenderElements, createElement, ce } from '../../../dist/util/RenderElement'
 
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
 export class LinkDidactorToolbarViewWidget extends Widget {
@@ -87,28 +87,36 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         }
 
         this.renderedLinkTags = tagsOrMessage
-        if (tagsOrMessage.length === 0) {
-            return 'There are no linkTags used in this project yet, right click on links to tag them.'
+        
+        const defaultRow: RenderElement = this.formDefaultRow()
+        const tagRows: RenderElement[] = tagsOrMessage.map(tag => this.formTagRow(tag))
+        const table: RenderElement = createElement('table', {}, [defaultRow, ...tagRows])
+        
+        if (tagRows.length === 0) {
+            return [table, 'There are no linkTags used in this project yet, right click on links to tag them.']
+        } else {
+            return table
         }
-
-        const defaultRow: RenderElement = this.formDefaultLine()
-        const tagRows: RenderElement[] = tagsOrMessage.map(tag => this.formTagLine(tag))
-
-        return [defaultRow, ...tagRows]
     }
 
-    private formDefaultLine(): RenderElement {
+    private formDefaultRow(): RenderElement {
         const label: string = 'default: '
         const dropDown: RenderElement = this.formDefaultModeDropDown()
 
-        return createElement('div', {}, [label, dropDown])
+        return ce('tr', {}, [
+            ce('td', {}, [label]), 
+            ce('td', {}, [dropDown])
+        ])
     }
 
-    private formTagLine(tag: DidactedLinkTag): RenderElement {
+    private formTagRow(tag: DidactedLinkTag): RenderElement {
         const label: string = `${tag.getName()}(${tag.getCount()}): `
         const dropDown: RenderElement = this.formTagModeDropDown(tag)
 
-        return createElement('div', {}, [label, dropDown])
+        return ce('tr', {}, [
+            ce('td', {}, [label]), 
+            ce('td', {}, [dropDown])
+        ])
     }
 
     private formDefaultModeDropDown(): RenderElement {
