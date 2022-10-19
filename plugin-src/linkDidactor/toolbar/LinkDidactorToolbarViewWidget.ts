@@ -155,7 +155,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     private async rerenderLinks(): Promise<void> {
-        await Promise.all(pluginFacade.getRootFolder().getInnerLinksRecursive().map(links => links.render({forceRerender: true})))
+        await Promise.all(pluginFacade.getRootFolder().getInnerLinksRecursive().map(boxLinks => boxLinks.render({forceRerender: true})))
     }
 
 }

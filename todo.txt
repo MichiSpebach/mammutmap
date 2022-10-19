@@ -1,4 +1,7 @@
 
+plugin that pulls boxes into view when hovering on link
+togglePull/keepInsideView option on contextMenu/BoxHeader of Box that holds Box inside view
+
 plugin for center/fitView via contextMenu for boxes and links that zooms to fit selected object in screen
 
 watch/unwatch box or links via contextMenu/boxHeader/sidebar (prevents unrendering)

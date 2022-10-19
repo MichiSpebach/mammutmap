@@ -158,7 +158,9 @@ export class FolderBox extends Box {
   }
 
   public getInnerLinksRecursive(): BoxLinks[] {
-    return [this.links, ...this.getBoxes().map(box => box.links)]
+    const innerLinks: BoxLinks[] = this.getBoxes().map(box => box.getInnerLinksRecursive()).flat()
+    innerLinks.unshift(this.links)
+    return innerLinks
   }
 
 }
