@@ -6,6 +6,7 @@ import { BoxMapData } from './BoxMapData'
 import { FolderBox } from './FolderBox'
 import { FileBoxHeader } from './FileBoxHeader'
 import { FileBoxBody } from './FileBoxBody'
+import { BoxLinks } from './BoxLinks'
 
 export class FileBox extends Box {
   private readonly body: FileBoxBody
@@ -75,6 +76,10 @@ export class FileBox extends Box {
 
   public isBodyRendered(): boolean {
     return this.body.isRendered()
+  }
+
+  public getInnerLinksRecursive(): BoxLinks[] {
+    return [this.links]
   }
 
 }

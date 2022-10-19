@@ -7,6 +7,7 @@ import { BoxMapData } from './BoxMapData'
 import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
 import { BoxWatcher } from './BoxWatcher'
+import { BoxLinks } from './BoxLinks'
 
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
@@ -154,6 +155,10 @@ export class FolderBox extends Box {
 
   public rearrangeBoxesWithoutMapData(grabbedBox: Box): Promise<void> {
     return this.body.rearrangeBoxesWithoutMapData(grabbedBox)
+  }
+
+  public getInnerLinksRecursive(): BoxLinks[] {
+    return [this.links, ...this.getBoxes().map(box => box.links)]
   }
 
 }

@@ -142,6 +142,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
             util.logWarning(`default LinkTagMode '${mode}' is not known.`)
         }
         await linkDidactorSettings.setDefaultLinkModeAndSaveToFileSystem(mode as LinkTagMode)
+        await this.rerenderLinks()
     }
 
     private async setLinkTagMode(tag: DidactedLinkTag, mode: string): Promise<void> {
@@ -150,6 +151,11 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         }
         tag.setMode(mode as LinkTagMode)
         await linkDidactorSettings.saveToFileSystem()
+        await this.rerenderLinks()
+    }
+
+    private async rerenderLinks(): Promise<void> {
+        await Promise.all(pluginFacade.getRootFolder().getInnerLinksRecursive().map(links => links.render({forceRerender: true})))
     }
 
 }

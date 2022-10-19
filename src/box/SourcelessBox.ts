@@ -6,6 +6,7 @@ import { BoxHeader } from './BoxHeader'
 import { SourcelessBoxHeader } from './SourcelessBoxHeader'
 import { FolderBox } from './FolderBox'
 import { BoxMapData } from './BoxMapData'
+import { BoxLinks } from './BoxLinks'
 
 export class SourcelessBox extends Box {
   private content: string
@@ -71,6 +72,10 @@ export class SourcelessBox extends Box {
 
   protected isBodyRendered(): boolean {
     return this.bodyRendered
+  }
+
+  public getInnerLinksRecursive(): BoxLinks[] {
+    return [this.links]
   }
 
 }

@@ -6,13 +6,15 @@ import { BoxMapLinkData } from './BoxMapLinkData'
 import { WayPointData } from './WayPointData'
 import { LinkEndData } from './LinkEndData'
 import { NodeWidget } from '../node/NodeWidget'
+import { Widget } from '../Widget'
 
-export class BoxLinks {
+export class BoxLinks extends Widget {
     private readonly referenceBox: Box
     private links: Link[] = []
-    private rendered: boolean = false
+    private renderedOrInProgress: boolean = false
 
     public constructor(referenceBox: Box) {
+      super()
       this.referenceBox = referenceBox
     }
 
@@ -80,8 +82,8 @@ export class BoxLinks {
       await this.referenceBox.saveMapData()
     }
 
-    public async render(): Promise<void> {
-      if (this.rendered) {
+    public async render(options?: {forceRerender?: boolean}): Promise<void> {
+      if (this.renderedOrInProgress && !options?.forceRerender) {
         // links that are connected to NodeWidgets need to be rerendered
         // because size of NodeWidgets is not percental // TODO: use smart css attributes to handle this
         this.links.filter(link => {
@@ -90,20 +92,21 @@ export class BoxLinks {
         }).forEach(link => link.render())
         return
       }
+      this.renderedOrInProgress = true
+
+      const placeholderPros: Promise<void>[] = []
 
       for (const linkData of this.referenceBox.getMapLinkData()) {
         if (this.links.find(link => link.getId() === linkData.id)) {
           continue
         }
-        this.links.push(Link.new(linkData, this.referenceBox))
+        const link: Link = Link.new(linkData, this.referenceBox)
+        this.links.push(link)
+        placeholderPros.push(this.addPlaceholderFor(link))
       }
 
-      await Promise.all(this.links.map(async (link: Link) => {
-        await this.addPlaceholderFor(link)
-        await link.render()
-      }))
-
-      this.rendered = true
+      await Promise.all(placeholderPros)
+      await Promise.all(this.links.map((link: Link) => link.render()))
     }
 
     private async addPlaceholderFor(link: Link): Promise<void> {
@@ -115,17 +118,16 @@ export class BoxLinks {
     }
 
     public async unrender(): Promise<void> {
-      if (!this.rendered) {
+      if (!this.renderedOrInProgress) { // TODO: reschedule if renderInProgress
         return
       }
+      this.renderedOrInProgress = false
 
       await Promise.all(this.links.map(async (link: Link) => {
         await link.unrender()
         await this.removePlaceholderFor(link)
       }))
       this.links = []
-
-      this.rendered = false
     }
 
     public getLinkWithEndBoxes(from: Box, to: Box): Link|undefined {

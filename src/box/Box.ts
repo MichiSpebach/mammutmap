@@ -419,6 +419,8 @@ export abstract class Box implements DropTarget, Hoverable {
 
   protected abstract isBodyRendered(): boolean
 
+  public abstract getInnerLinksRecursive(): BoxLinks[]
+
   /*private renderBody(): void {
     util.addContentTo(this.getId(), this.formBody())
   }

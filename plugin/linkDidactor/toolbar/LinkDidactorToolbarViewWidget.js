@@ -117,6 +117,7 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
             util_1.util.logWarning(`default LinkTagMode '${mode}' is not known.`);
         }
         await linkDidactorSettings.setDefaultLinkModeAndSaveToFileSystem(mode);
+        await this.rerenderLinks();
     }
     async setLinkTagMode(tag, mode) {
         if (!DidactedLinkTag_1.linkTagModes.includes(mode)) {
@@ -124,6 +125,10 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         }
         tag.setMode(mode);
         await linkDidactorSettings.saveToFileSystem();
+        await this.rerenderLinks();
+    }
+    async rerenderLinks() {
+        await Promise.all(pluginFacade.getRootFolder().getInnerLinksRecursive().map(links => links.render({ forceRerender: true })));
     }
 }
 exports.LinkDidactorToolbarViewWidget = LinkDidactorToolbarViewWidget;
