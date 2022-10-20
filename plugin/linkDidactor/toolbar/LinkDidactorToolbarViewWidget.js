@@ -128,7 +128,8 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         await this.rerenderLinks();
     }
     async rerenderLinks() {
-        await Promise.all(pluginFacade.getRootFolder().getInnerLinksRecursive().map(links => links.render({ forceRerender: true })));
+        const links = pluginFacade.getRootFolder().getInnerLinksRecursive().map(boxLinks => boxLinks.getLinks()).flat();
+        await Promise.all(links.map(link => link.render()));
     }
 }
 exports.LinkDidactorToolbarViewWidget = LinkDidactorToolbarViewWidget;

@@ -82,8 +82,8 @@ export class BoxLinks extends Widget {
       await this.referenceBox.saveMapData()
     }
 
-    public async render(options?: {forceRerender?: boolean}): Promise<void> {
-      if (this.renderedOrInProgress && !options?.forceRerender) {
+    public async render(): Promise<void> {
+      if (this.renderedOrInProgress) {
         // links that are connected to NodeWidgets need to be rerendered
         // because size of NodeWidgets is not percental // TODO: use smart css attributes to handle this
         this.links.filter(link => {
@@ -138,6 +138,10 @@ export class BoxLinks extends Widget {
         const linkToBoxId: string = linkToWayPoints[linkToWayPoints.length-1].boxId
         return linkFromBoxId === from.getId() && linkToBoxId === to.getId()
       })
+    }
+
+    public getLinks(): Link[] {
+      return this.links
     }
 
 }

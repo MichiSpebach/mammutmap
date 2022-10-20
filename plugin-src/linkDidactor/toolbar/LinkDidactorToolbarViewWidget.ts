@@ -3,7 +3,7 @@ import { Widget } from '../../../dist/Widget'
 import { DidactedLinkTag, LinkTagMode, linkTagModes } from '../DidactedLinkTag'
 import * as linkDidactorSettings from '../linkDidactorSettings'
 import * as pluginFacade from '../../../dist/pluginFacade'
-import { Map, Message } from '../../../dist/pluginFacade'
+import { Map, Message, Link } from '../../../dist/pluginFacade'
 import { util } from '../../../dist/util'
 import { RenderElement, RenderElements, createElement, ce } from '../../../dist/util/RenderElement'
 
@@ -155,7 +155,8 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     private async rerenderLinks(): Promise<void> {
-        await Promise.all(pluginFacade.getRootFolder().getInnerLinksRecursive().map(boxLinks => boxLinks.render({forceRerender: true})))
+        const links: Link[] = pluginFacade.getRootFolder().getInnerLinksRecursive().map(boxLinks => boxLinks.getLinks()).flat()
+        await Promise.all(links.map(link => link.render()))
     }
 
 }
