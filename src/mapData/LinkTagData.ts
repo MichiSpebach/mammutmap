@@ -24,7 +24,7 @@ export class LinkTagData extends TagData {
         }
 
         linkTagData.validate()
-        
+
         return linkTagData
     }
 
@@ -36,6 +36,8 @@ export class LinkTagData extends TagData {
         } else {
             this.appearance = new LinkAppearanceData()
         }
+
+        this.validate()
     }
 
     private validate(): void {

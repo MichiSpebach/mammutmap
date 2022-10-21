@@ -13,11 +13,9 @@ onMapLoaded.subscribe(async (map: Map) => {
 
 onMapUnload.subscribe(() => linkTags.callSubscribers(getLinkTags()))
 
-let defaultLinkAppearance: LinkAppearanceData = new LinkAppearanceData('visibleEnds')
-
 export function getComputedModeForLinkTags(tagNames: string[]|undefined): LinkAppearanceMode {
     if (!tagNames || tagNames.length === 0) {
-        return defaultLinkAppearance.getMode()
+        return getDefaultLinkAppereance().getMode()
     }
 
     let mostImportantTag: LinkTagData|undefined = undefined
@@ -49,7 +47,7 @@ function getLinkTagsOrWarn(): LinkTagData[] {
 }
 
 export function getDefaultLinkAppereance(): LinkAppearanceData {
-    return defaultLinkAppearance
+    return pluginFacade.getMapOrError().getProjectSettings().getDefaultLinkAppearance()
 }
 
 export function getLinkTags(): LinkTagData[]|Message {
@@ -58,12 +56,6 @@ export function getLinkTags(): LinkTagData[]|Message {
         return mapOrMessage
     }
     return mapOrMessage.getProjectSettings().getLinkTags()
-}
-
-export function setDefaultLinkModeAndSaveToFileSystem(mode: LinkAppearanceMode): Promise<void> {
-    defaultLinkAppearance.setMode(mode)
-    // TODO implement
-    return Promise.resolve()
 }
 
 export async function saveToFileSystem(): Promise<void> {

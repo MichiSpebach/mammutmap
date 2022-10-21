@@ -142,7 +142,8 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         if (!linkAppearanceModes.includes(mode as any)) {
             util.logWarning(`default LinkTagMode '${mode}' is not known.`)
         }
-        await linkDidactorSettings.setDefaultLinkModeAndSaveToFileSystem(mode as LinkAppearanceMode)
+        linkDidactorSettings.getDefaultLinkAppereance().setMode(mode as LinkAppearanceMode)
+        await linkDidactorSettings.saveToFileSystem()
         await this.rerenderLinks()
     }
 

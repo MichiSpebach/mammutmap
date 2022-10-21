@@ -3,6 +3,7 @@ import { LinkTagData } from './mapData/LinkTagData'
 import { MapSettingsData } from './mapData/MapSettingsData'
 import { Subscribers } from './util/Subscribers'
 import { util } from './util'
+import { LinkAppearanceData } from './mapData/LinkAppearanceData'
 
 export class ProjectSettings { // TODO: rename to MapSettings?
 
@@ -87,6 +88,10 @@ export class ProjectSettings { // TODO: rename to MapSettings?
     this.data.countDownLinkTag(tagName)
     this.linkTags.callSubscribers(this.getLinkTags())
     await this.saveToFileSystem()
+  }
+
+  public getDefaultLinkAppearance(): LinkAppearanceData {
+    return this.data.defaultLinkAppearance
   }
 
 }
