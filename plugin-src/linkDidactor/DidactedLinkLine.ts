@@ -33,7 +33,7 @@ export class DidactedLinkLine extends LinkLineImplementation {
                 return false
 
             default:
-                util.logWarning(`Unexpected LinkTagMode ${mode}`) // should also never be called if link is 'notDisplayed' at all
+                util.logWarning(`Unexpected LinkTagMode ${mode}`) // should also never be called if link is 'notRendered' at all
                 return true
         }
     }

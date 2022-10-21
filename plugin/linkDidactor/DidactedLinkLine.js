@@ -26,7 +26,7 @@ class DidactedLinkLine extends LinkLine_1.LinkLineImplementation {
             case 'visibleEnds':
                 return false;
             default:
-                util_1.util.logWarning(`Unexpected LinkTagMode ${mode}`); // should also never be called if link is 'notDisplayed' at all
+                util_1.util.logWarning(`Unexpected LinkTagMode ${mode}`); // should also never be called if link is 'notRendered' at all
                 return true;
         }
     }

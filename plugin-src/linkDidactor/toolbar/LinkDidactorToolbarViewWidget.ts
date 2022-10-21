@@ -12,7 +12,7 @@ import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/mapData/L
 export class LinkDidactorToolbarViewWidget extends Widget {
 
     private renderedOrInProgress: boolean = false
-    private renderedLinkTags: LinkTagData[] = []
+    private elementIdsWithChangeEventListeners: string[] = []
 
     public constructor(
         private readonly id: string
@@ -51,14 +51,14 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         await Promise.all([
             this.clearEventListeners(),
             renderManager.clearContentOf(this.getId()),
-            this.renderedLinkTags = []
         ])
     }
 
     private async clearEventListeners(): Promise<void> {
-        await Promise.all(this.renderedLinkTags.map(tag => 
-            renderManager.removeEventListenerFrom(this.getTagModeDropDownId(tag), 'change')
+        await Promise.all(this.elementIdsWithChangeEventListeners.map(elementId => 
+            renderManager.removeEventListenerFrom(elementId, 'change')
         ))
+        this.elementIdsWithChangeEventListeners = []
     }
 
     public formInner(): RenderElements {
@@ -83,11 +83,8 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     private formBody(): RenderElements {
         const tagsOrMessage: LinkTagData[]|Message = linkDidactorSettings.getLinkTags()
         if (tagsOrMessage instanceof Message) {
-            this.renderedLinkTags = []
             return tagsOrMessage.message
         }
-
-        this.renderedLinkTags = tagsOrMessage
         
         const defaultRow: RenderElement = this.formDefaultRow()
         const tagRows: RenderElement[] = tagsOrMessage.map(tag => this.formTagRow(tag))
@@ -121,15 +118,21 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     private formDefaultModeDropDown(): RenderElement {
+        const elementId: string = this.getDefaultModeDropDownId()
+        this.elementIdsWithChangeEventListeners.push(elementId)
+
         return createElement('select', {
-            id: this.getDefaultModeDropDownId(),
+            id: elementId,
             onchangeValue: (value: string) => this.setDefaultLinkMode(value)
         }, this.formDropDownOptions(linkDidactorSettings.getDefaultLinkAppereance().getMode()))
     }
 
     private formTagModeDropDown(tag: LinkTagData): RenderElement {
+        const elementId: string = this.getTagModeDropDownId(tag)
+        this.elementIdsWithChangeEventListeners.push(elementId)
+
         return createElement('select', {
-            id: this.getTagModeDropDownId(tag),
+            id: elementId,
             onchangeValue: (value: string) => this.setLinkTagMode(tag, value)
         }, this.formDropDownOptions(tag.appearance.getMode()))
     }
