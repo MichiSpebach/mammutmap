@@ -2,7 +2,7 @@ import { util } from '../util'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { Box } from './Box'
 import { Link } from '../link/Link'
-import { BoxMapLinkData } from './BoxMapLinkData'
+import { LinkData } from '../mapData/LinkData'
 import { WayPointData } from './WayPointData'
 import { LinkEndData } from './LinkEndData'
 import { NodeWidget } from '../node/NodeWidget'
@@ -51,7 +51,7 @@ export class BoxLinks extends Widget {
       to: {mapData: LinkEndData, linkable?: Box|NodeWidget}, 
       reorderAndSave: boolean
     ): Promise<Link> {
-      const linkData = new BoxMapLinkData(util.generateId(), from.mapData, to.mapData)
+      const linkData = new LinkData(util.generateId(), from.mapData, to.mapData)
       this.referenceBox.getMapLinkData().push(linkData)
 
       const link: Link = Link.new(linkData, this.referenceBox, from.linkable, to.linkable)

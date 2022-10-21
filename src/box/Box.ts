@@ -10,7 +10,7 @@ import { FolderBox } from './FolderBox'
 import { BoxHeader } from './BoxHeader'
 import { scaleTool } from './ScaleTool'
 import { BoxLinks } from './BoxLinks'
-import { BoxMapLinkData } from './BoxMapLinkData'
+import { LinkData } from '../mapData/LinkData'
 import { DropTarget } from '../DropTarget'
 import { DragManager } from '../DragManager'
 import { Hoverable } from '../Hoverable'
@@ -323,7 +323,7 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.mapData.nodes
   }
 
-  public getMapLinkData(): BoxMapLinkData[] {
+  public getMapLinkData(): LinkData[] {
     return this.mapData.links
   }
 

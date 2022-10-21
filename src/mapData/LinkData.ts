@@ -1,12 +1,12 @@
-import { LinkEndData } from './LinkEndData'
+import { LinkEndData } from '../box/LinkEndData'
 
-export class BoxMapLinkData {
+export class LinkData {
   public readonly id: string
   public from: LinkEndData
   public to: LinkEndData
   public tags: string[]|undefined
 
-  public static buildFromRawObject(object: any): BoxMapLinkData {
+  public static buildFromRawObject(object: any): LinkData {
     let from: LinkEndData
     let to: LinkEndData
 
@@ -24,7 +24,7 @@ export class BoxMapLinkData {
       to = LinkEndData.buildFromRawObject(new LinkEndData(object.toWayPoints)) // raw object would have no methods
     }
 
-    return new BoxMapLinkData(object.id, from, to, object.tags)
+    return new LinkData(object.id, from, to, object.tags)
   }
 
   public constructor(id: string, from: LinkEndData, to: LinkEndData, tags?: string[]) {

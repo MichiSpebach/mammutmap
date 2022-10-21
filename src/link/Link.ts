@@ -4,7 +4,7 @@ import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu/contextMenu'
 import { Box } from '../box/Box'
 import { BoxLinks } from '../box/BoxLinks'
-import { BoxMapLinkData } from '../box/BoxMapLinkData'
+import { LinkData } from '../mapData/LinkData'
 import { LinkEnd } from './LinkEnd'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
@@ -20,7 +20,7 @@ export let LinkImplementation: typeof Link /*= Link*/ // assigned after declarat
 
 // important: always extend from LinkImplementation (important for plugins)
 export class Link implements Hoverable {
-  private readonly data: BoxMapLinkData
+  private readonly data: LinkData
   private managingBox: Box
   public readonly line: LinkLine
   public readonly from: LinkEnd
@@ -32,11 +32,11 @@ export class Link implements Hoverable {
   private currentStyle: string|null = null
   private styleTimer: NodeJS.Timeout|null = null
 
-  public static new(data: BoxMapLinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget): Link {
+  public static new(data: LinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget): Link {
     return new LinkImplementation(data, managingBox, from, to)
   }
 
-  protected constructor(data: BoxMapLinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget) {
+  protected constructor(data: LinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget) {
     this.data = data
     this.managingBox = managingBox
     this.line = LinkLine.new(this.data.id+'line', this)
@@ -48,7 +48,7 @@ export class Link implements Hoverable {
     return this.data.id
   }
 
-  public getData(): BoxMapLinkData {
+  public getData(): LinkData {
     return this.data
   }
 

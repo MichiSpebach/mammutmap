@@ -1,7 +1,7 @@
 import { LocalRect } from '../LocalRect'
 import { JsonObject } from '../JsonObject'
 import { util } from '../util'
-import { BoxMapLinkData } from './BoxMapLinkData'
+import { LinkData } from '../mapData/LinkData'
 import { LocalPosition } from './Transform'
 import { NodeData } from '../mapData/NodeData'
 
@@ -11,7 +11,7 @@ export class BoxMapData extends JsonObject {
   public y: number
   public width: number
   public height: number
-  public readonly links: BoxMapLinkData[]
+  public readonly links: LinkData[]
   public readonly nodes: NodeData[]
 
   public static buildNewFromRect(rect: LocalRect): BoxMapData {
@@ -34,12 +34,12 @@ export class BoxMapData extends JsonObject {
       id = util.generateId()
     }
 
-    let links: BoxMapLinkData[]
-    let rawLinks: BoxMapLinkData[]|undefined = parsedData.links
+    let links: LinkData[]
+    let rawLinks: LinkData[]|undefined = parsedData.links
     if (!rawLinks) {
       links = []
     } else {
-      links = rawLinks.map(BoxMapLinkData.buildFromRawObject) // raw object would have no methods
+      links = rawLinks.map(LinkData.buildFromRawObject) // raw object would have no methods
     }
 
     let nodes: NodeData[]
@@ -53,7 +53,7 @@ export class BoxMapData extends JsonObject {
     return new BoxMapData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height, links, nodes)
   }
 
-  public constructor(id: string, x: number, y: number, width: number, height: number, links: BoxMapLinkData[], nodes: NodeData[]) {
+  public constructor(id: string, x: number, y: number, width: number, height: number, links: LinkData[], nodes: NodeData[]) {
     super()
     this.id = id
     this.x = x
