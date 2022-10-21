@@ -52,29 +52,6 @@
 			}
 		},
 		{
-			"id": "9fgac3urmj",
-			"from": {
-				"path": [
-					{
-						"boxId": "flo206thmv",
-						"boxName": "BoxMapLinkData.ts",
-						"x": 49.99700167905973,
-						"y": 100.00627116518248
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "8arb7pnkv8",
-						"boxName": "LinkEndData.ts",
-						"x": 49.998500794578874,
-						"y": 0
-					}
-				]
-			}
-		},
-		{
 			"id": "giag3kom29g",
 			"from": {
 				"path": [
@@ -144,29 +121,6 @@
 			}
 		},
 		{
-			"id": "rjhihd48edg",
-			"from": {
-				"path": [
-					{
-						"boxId": "93kjm246u28",
-						"boxName": "BoxMapData.ts",
-						"x": 49.99929504983997,
-						"y": 100.00294889563858
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "flo206thmv",
-						"boxName": "BoxMapLinkData.ts",
-						"x": 49.99929504983997,
-						"y": 0
-					}
-				]
-			}
-		},
-		{
 			"id": "1hj9nar106",
 			"from": {
 				"path": [
@@ -185,29 +139,6 @@
 						"boxName": "Box.ts",
 						"x": 50,
 						"y": 0
-					}
-				]
-			}
-		},
-		{
-			"id": "ad9fl1gc64o",
-			"from": {
-				"path": [
-					{
-						"boxId": "3lnmuaqr88",
-						"boxName": "box",
-						"x": 83.99994150065446,
-						"y": 7.999901365167725
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "93kjm246u28",
-						"boxName": "BoxMapData.ts",
-						"x": 0,
-						"y": 49.980881978078
 					}
 				]
 			}
@@ -714,29 +645,6 @@
 						"boxName": "Grid.ts",
 						"x": -0.0010832475762335481,
 						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "22n38u2pbb8",
-			"from": {
-				"path": [
-					{
-						"boxId": "8arb7pnkv8",
-						"boxName": "LinkEndData.ts",
-						"x": 50,
-						"y": 100
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "qm6p7cuvvl",
-						"boxName": "WayPointData.ts",
-						"x": 50,
-						"y": 0
 					}
 				]
 			}

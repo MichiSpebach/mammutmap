@@ -492,7 +492,10 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"isA"
+			]
 		},
 		{
 			"id": "44u7ufsllu",
@@ -1423,35 +1426,6 @@
 			}
 		},
 		{
-			"id": "eeu7otbh35g",
-			"from": {
-				"path": [
-					{
-						"boxId": "3lnmuaqr88",
-						"boxName": "box",
-						"x": 90.00012035287462,
-						"y": 4.999878244776701
-					},
-					{
-						"boxId": "93kjm246u28",
-						"boxName": "BoxMapData.ts",
-						"x": 50,
-						"y": 0
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "81j924kmav",
-						"boxName": "JsonObject.ts",
-						"x": 50.00120345632657,
-						"y": 100.00240702852328
-					}
-				]
-			}
-		},
-		{
 			"id": "na8q4es2blg",
 			"from": {
 				"path": [
@@ -1845,7 +1819,10 @@
 					}
 				],
 				"floatToBorder": true
-			}
+			},
+			"tags": [
+				"isA"
+			]
 		},
 		{
 			"id": "flhj0s2bvo",
@@ -2105,7 +2082,10 @@
 					}
 				],
 				"floatToBorder": true
-			}
+			},
+			"tags": [
+				"isA"
+			]
 		},
 		{
 			"id": "qtp1lmi34r",
@@ -3435,6 +3415,290 @@
 				],
 				"floatToBorder": true
 			}
+		},
+		{
+			"id": "fl86e8m2178",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 50,
+						"y": 18
+					},
+					{
+						"boxId": "nb95jvo9cr",
+						"boxName": "BoxData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "j6acd5oeiog",
+						"boxName": "LocalRect.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "17426ssn85o",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 50,
+						"y": 18
+					},
+					{
+						"boxId": "nb95jvo9cr",
+						"boxName": "BoxData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "81j924kmav",
+						"boxName": "JsonObject.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "gjqtjo6r9vo",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 50,
+						"y": 18
+					},
+					{
+						"boxId": "nb95jvo9cr",
+						"boxName": "BoxData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "2b8sujcvhug",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 34,
+						"y": 17.6
+					},
+					{
+						"boxId": "nb95jvo9cr",
+						"boxName": "BoxData.ts",
+						"x": 50,
+						"y": 48
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 68,
+						"y": 70
+					},
+					{
+						"boxId": "v8ooobkjdto",
+						"boxName": "Transform.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"should be refactored"
+			]
+		},
+		{
+			"id": "goepa4sido8",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 88,
+						"y": 0
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 50,
+						"y": 100
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "58ssl42l4f",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 50,
+						"y": 50
+					},
+					{
+						"boxId": "ab2okpks6lg",
+						"boxName": "MapSettingsData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "4cbv580lmog",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 50,
+						"y": 50
+					},
+					{
+						"boxId": "ab2okpks6lg",
+						"boxName": "MapSettingsData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "81j924kmav",
+						"boxName": "JsonObject.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "2l7kd96m7mg",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 22,
+						"y": 86
+					},
+					{
+						"boxId": "lrte38iq4qo",
+						"boxName": "WayPointData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 68,
+						"y": 70
+					},
+					{
+						"boxId": "v8ooobkjdto",
+						"boxName": "Transform.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"should be refactored"
+			]
+		},
+		{
+			"id": "3j2t23hbllg",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnat5erptr8",
+						"boxName": "mapData",
+						"x": 82,
+						"y": 86
+					},
+					{
+						"boxId": "1dv97bvsb4o",
+						"boxName": "TagData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "81j924kmav",
+						"boxName": "JsonObject.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
 		}
 	],
 	"nodes": []

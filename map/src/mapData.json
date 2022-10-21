@@ -4,5 +4,163 @@
 	"y": 44.65809903142227,
 	"width": 4,
 	"height": 4.068371597014022,
-	"links": []
+	"links": [
+		{
+			"id": "63lomutcdqg",
+			"from": {
+				"path": [
+					{
+						"boxId": "nb95jvo9cr",
+						"boxName": "BoxData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "nc999q32ito",
+						"boxName": "LinkData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "unvhfbsagk",
+			"from": {
+				"path": [
+					{
+						"boxId": "nb95jvo9cr",
+						"boxName": "BoxData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3ekdien7kcg",
+						"boxName": "NodeData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "pkf32cg6qeo",
+			"from": {
+				"path": [
+					{
+						"boxId": "nc999q32ito",
+						"boxName": "LinkData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "pr1t820r1v8",
+						"boxName": "LinkEndData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "8ot7mifimd8",
+			"from": {
+				"path": [
+					{
+						"boxId": "pr1t820r1v8",
+						"boxName": "LinkEndData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "lrte38iq4qo",
+						"boxName": "WayPointData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "vubi7rbi7q",
+			"from": {
+				"path": [
+					{
+						"boxId": "ab2okpks6lg",
+						"boxName": "MapSettingsData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "o68jm3oi8c",
+						"boxName": "LinkTagData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "v8tgdruja3g",
+			"from": {
+				"path": [
+					{
+						"boxId": "o68jm3oi8c",
+						"boxName": "LinkTagData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "1dv97bvsb4o",
+						"boxName": "TagData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		}
+	],
+	"nodes": []
 }

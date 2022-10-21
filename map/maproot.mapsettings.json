@@ -1,7 +1,25 @@
 {
 	"srcRootPath": "../",
 	"mapRootPath": "./",
-	"linkTags": [],
+	"linkTags": [
+		{
+			"name": "hidden",
+			"count": 1,
+			"mode": "visibleEnds"
+		},
+		{
+			"name": "has",
+			"count": 6
+		},
+		{
+			"name": "isA",
+			"count": 6
+		},
+		{
+			"name": "should be refactored",
+			"count": 2
+		}
+	],
 	"id": "76koudrno8g",
 	"x": 5,
 	"y": 5,
