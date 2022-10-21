@@ -1,11 +1,11 @@
 import { LocalRect } from '../LocalRect'
 import { JsonObject } from '../JsonObject'
 import { util } from '../util'
-import { LinkData } from '../mapData/LinkData'
-import { LocalPosition } from './Transform'
-import { NodeData } from '../mapData/NodeData'
+import { LinkData } from './LinkData'
+import { LocalPosition } from '../box/Transform'
+import { NodeData } from './NodeData'
 
-export class BoxMapData extends JsonObject {
+export class BoxData extends JsonObject {
   public readonly id: string
   public x: number
   public y: number
@@ -14,20 +14,20 @@ export class BoxMapData extends JsonObject {
   public readonly links: LinkData[]
   public readonly nodes: NodeData[]
 
-  public static buildNewFromRect(rect: LocalRect): BoxMapData {
+  public static buildNewFromRect(rect: LocalRect): BoxData {
     return this.buildNew(rect.x, rect.y, rect.width, rect.height)
   }
 
-  public static buildNew(x: number, y: number, width: number, height: number): BoxMapData {
+  public static buildNew(x: number, y: number, width: number, height: number): BoxData {
     return this.buildNewWithId(util.generateId(), x, y, width, height)
   }
 
-  public static buildNewWithId(id: string, x: number, y: number, width: number, height: number): BoxMapData {
-    return new BoxMapData(id, x, y, width, height, [], [])
+  public static buildNewWithId(id: string, x: number, y: number, width: number, height: number): BoxData {
+    return new BoxData(id, x, y, width, height, [], [])
   }
 
-  public static buildFromJson(json: string ): BoxMapData /*| SyntaxError*/ {
-    const parsedData: BoxMapData = JSON.parse(json) // parsed object has no functions
+  public static buildFromJson(json: string ): BoxData /*| SyntaxError*/ {
+    const parsedData: BoxData = JSON.parse(json) // parsed object has no functions
 
     let id: string = parsedData.id // TODO: delete this later
     if (id == null) {
@@ -50,7 +50,7 @@ export class BoxMapData extends JsonObject {
       nodes = rawNodes.map(NodeData.buildFromRawObject) // raw object would have no methods
     }
 
-    return new BoxMapData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height, links, nodes)
+    return new BoxData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height, links, nodes)
   }
 
   public constructor(id: string, x: number, y: number, width: number, height: number, links: LinkData[], nodes: NodeData[]) {

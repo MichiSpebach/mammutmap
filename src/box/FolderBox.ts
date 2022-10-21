@@ -3,7 +3,7 @@ import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu/contextMenu'
 import { Box } from './Box'
-import { BoxMapData } from './BoxMapData'
+import { BoxData } from '../mapData/BoxData'
 import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
 import { BoxWatcher } from './BoxWatcher'
@@ -12,7 +12,7 @@ import { BoxLinks } from './BoxLinks'
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
 
-  public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
+  public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean) {
     super(name, parent, mapData, mapDataFileExists)
     this.body = new FolderBoxBody(this)
   }
@@ -137,11 +137,11 @@ export class FolderBox extends Box {
     return this.body.containsBox(box)
   }
 
-  public async addNewFileAndSave(name: string, mapData: BoxMapData): Promise<void> {
+  public async addNewFileAndSave(name: string, mapData: BoxData): Promise<void> {
     await this.body.addNewFileAndSave(name, mapData)
   }
 
-  public async addNewFolderAndSave(name: string, mapData: BoxMapData): Promise<void> {
+  public async addNewFolderAndSave(name: string, mapData: BoxData): Promise<void> {
     await this.body.addNewFolderAndSave(name, mapData)
   }
 

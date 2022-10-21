@@ -5,14 +5,14 @@ import { Box } from './Box'
 import { BoxHeader } from './BoxHeader'
 import { SourcelessBoxHeader } from './SourcelessBoxHeader'
 import { FolderBox } from './FolderBox'
-import { BoxMapData } from './BoxMapData'
+import { BoxData } from '../mapData/BoxData'
 import { BoxLinks } from './BoxLinks'
 
 export class SourcelessBox extends Box {
   private content: string
   private bodyRendered: boolean = false
 
-  public constructor(name: string, parent: FolderBox, mapData: BoxMapData, mapDataFileExists: boolean, content: string) {
+  public constructor(name: string, parent: FolderBox, mapData: BoxData, mapDataFileExists: boolean, content: string) {
     super(name, parent, mapData, mapDataFileExists)
     this.content = content
   }

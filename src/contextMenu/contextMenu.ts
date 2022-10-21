@@ -7,7 +7,7 @@ import { Link } from '../link/Link'
 import { DragManager } from '../DragManager'
 import { LinkEndData } from '../mapData/LinkEndData'
 import { ClientPosition, LocalPosition } from '../box/Transform'
-import { BoxMapData } from '../box/BoxMapData'
+import { BoxData } from '../mapData/BoxData'
 import { TextInputPopup } from '../TextInputPopup'
 import { SourcelessBox } from '../box/SourcelessBox'
 import { NodeData } from '../mapData/NodeData'
@@ -176,7 +176,7 @@ function buildRenameBoxItem(box: Box): MenuItemFile {
 
 function buildAddNewFileItem(box: FolderBox, clientX: number, clientY: number): MenuItemFile {
   return new MenuItemFile({label: 'new file', click: async () => {
-    const mapData: BoxMapData = await buildMapDataForNewBox(box, clientX, clientY)
+    const mapData: BoxData = await buildMapDataForNewBox(box, clientX, clientY)
     await box.addNewFileAndSave(mapData.id, mapData)
     //ScaleManager.startWithClickToDropMode(newBox) // TODO: implement
   }})
@@ -184,15 +184,15 @@ function buildAddNewFileItem(box: FolderBox, clientX: number, clientY: number): 
 
 function buildAddNewFolderItem(box: FolderBox, clientX: number, clientY: number): MenuItemFile {
   return new MenuItemFile({label: 'new folder', click: async () => {
-    const mapData: BoxMapData = await buildMapDataForNewBox(box, clientX, clientY)
+    const mapData: BoxData = await buildMapDataForNewBox(box, clientX, clientY)
     await box.addNewFolderAndSave(mapData.id, mapData)
     //ScaleManager.startWithClickToDropMode(newBox) // TODO: implement
   }})
 }
 
-async function buildMapDataForNewBox(parentBox: FolderBox, clientX: number, clientY: number): Promise<BoxMapData> {
+async function buildMapDataForNewBox(parentBox: FolderBox, clientX: number, clientY: number): Promise<BoxData> {
   const position: LocalPosition = await parentBox.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-  return BoxMapData.buildNew(position.percentX, position.percentY, 16, 8)
+  return BoxData.buildNew(position.percentX, position.percentY, 16, 8)
 }
 
 function buildDetailsItem(title: string, object: any): MenuItemFile {

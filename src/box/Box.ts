@@ -3,7 +3,7 @@ import { fileSystem } from '../fileSystemAdapter'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
-import { BoxMapData } from './BoxMapData'
+import { BoxData } from '../mapData/BoxData'
 import { LocalRect } from '../LocalRect'
 import { ClientRect } from '../ClientRect'
 import { FolderBox } from './FolderBox'
@@ -26,7 +26,7 @@ import { ProjectSettings } from '../ProjectSettings'
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
   private parent: FolderBox|null
-  private mapData: BoxMapData
+  private mapData: BoxData
   private mapDataFileExists: boolean
   public readonly transform: Transform
   private readonly header: BoxHeader
@@ -38,7 +38,7 @@ export abstract class Box implements DropTarget, Hoverable {
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
 
-  public constructor(name: string, parent: FolderBox|null, mapData: BoxMapData, mapDataFileExists: boolean) {
+  public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean) {
     this.name = name
     this.parent = parent
     this.mapData = mapData
@@ -328,7 +328,7 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async restoreMapData(): Promise<void> {
-    const restoredMapData: BoxMapData|null = await fileSystem.loadFromJsonFile(this.getMapDataFilePath(), BoxMapData.buildFromJson)
+    const restoredMapData: BoxData|null = await fileSystem.loadFromJsonFile(this.getMapDataFilePath(), BoxData.buildFromJson)
     if (restoredMapData === null) {
       util.logWarning('failed to restoreMapData of '+this.getSrcPath()+' because mapDataFile does not exist')
       return

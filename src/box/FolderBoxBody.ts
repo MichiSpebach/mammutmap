@@ -6,7 +6,7 @@ import { BoxBody } from './BoxBody'
 import { Box } from './Box'
 import { FileBox } from './FileBox'
 import { FolderBox } from './FolderBox'
-import { BoxMapData } from './BoxMapData'
+import { BoxData } from '../mapData/BoxData'
 import { SourcelessBox } from './SourcelessBox'
 import { BoxMapDataLoader } from './BoxMapDataLoader'
 import { ClientPosition } from './Transform'
@@ -113,7 +113,7 @@ export class FolderBoxBody extends BoxBody {
     this.boxes.push(...await Promise.all(this.createBoxesWithoutMapData(sourcesWithoutMapData)))
   }
 
-  private createBoxesWithMapData(boxDatas: {source: Dirent, mapData: BoxMapData}[]): Promise<Box>[] {
+  private createBoxesWithMapData(boxDatas: {source: Dirent, mapData: BoxData}[]): Promise<Box>[] {
     const boxPromises: Promise<Box>[] = []
 
     for (const boxData of boxDatas) {
@@ -123,7 +123,7 @@ export class FolderBoxBody extends BoxBody {
     return boxPromises
   }
 
-  private createBoxesWithoutSourceData(boxDatas: {boxName: string, mapData: BoxMapData}[]): Promise<Box>[] {
+  private createBoxesWithoutSourceData(boxDatas: {boxName: string, mapData: BoxData}[]): Promise<Box>[] {
     const boxPromises: Promise<Box>[] = []
 
     for (const boxData of boxDatas) {
@@ -146,7 +146,7 @@ export class FolderBoxBody extends BoxBody {
     }
 
     for (let i: number = 0; i < sources.length && i < emptySpaces.length; i++) {
-      const mapData: BoxMapData = BoxMapData.buildNewFromRect(emptySpaces[i])
+      const mapData: BoxData = BoxData.buildNewFromRect(emptySpaces[i])
       boxPromises.push(this.createBoxAndRenderPlaceholder(sources[i].name, sources[i], mapData, false))
     }
 
@@ -178,7 +178,7 @@ export class FolderBoxBody extends BoxBody {
     }
   }
 
-  private async createBoxAndRenderPlaceholder(name: string, dirEntry: Dirent|undefined, mapData: BoxMapData, mapDataFileExists: boolean): Promise<Box> {
+  private async createBoxAndRenderPlaceholder(name: string, dirEntry: Dirent|undefined, mapData: BoxData, mapDataFileExists: boolean): Promise<Box> {
     let box: Box
 
     if (!dirEntry) {
@@ -238,12 +238,12 @@ export class FolderBoxBody extends BoxBody {
     return this.boxes
   }
 
-  public async addNewFileAndSave(name: string, mapData: BoxMapData): Promise<void> {
+  public async addNewFileAndSave(name: string, mapData: BoxData): Promise<void> {
     const newBox: FileBox = new FileBox(name, this.referenceFolderBox, mapData, false)
     await this.addNewBoxAndSave(newBox, (path: string) => fileSystem.writeFile(path, ""))
   }
 
-  public async addNewFolderAndSave(name: string, mapData: BoxMapData): Promise<void> {
+  public async addNewFolderAndSave(name: string, mapData: BoxData): Promise<void> {
     const newBox: FolderBox = new FolderBox(name, this.referenceFolderBox, mapData, false)
     await this.addNewBoxAndSave(newBox, fileSystem.makeFolder)
   }

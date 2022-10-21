@@ -2,7 +2,7 @@ import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu/contextMenu'
 import { Box } from './Box'
-import { BoxMapData } from './BoxMapData'
+import { BoxData } from '../mapData/BoxData'
 import { FolderBox } from './FolderBox'
 import { FileBoxHeader } from './FileBoxHeader'
 import { FileBoxBody } from './FileBoxBody'
@@ -11,7 +11,7 @@ import { BoxLinks } from './BoxLinks'
 export class FileBox extends Box {
   private readonly body: FileBoxBody
 
-  public constructor(name: string, parent: FolderBox, mapData: BoxMapData, mapDataFileExists: boolean) {
+  public constructor(name: string, parent: FolderBox, mapData: BoxData, mapDataFileExists: boolean) {
     super(name, parent, mapData, mapDataFileExists)
     this.body = new FileBoxBody(this)
   }

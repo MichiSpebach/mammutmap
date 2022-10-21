@@ -1,7 +1,7 @@
 import { Dirent } from 'original-fs'
 import { util } from '../util'
 import { fileSystem } from '../fileSystemAdapter'
-import { BoxMapData } from './BoxMapData'
+import { BoxData } from '../mapData/BoxData'
 import { FolderBox } from './FolderBox'
 import { FolderBoxBody } from './FolderBoxBody'
 import { boxManager } from './BoxManager'
@@ -56,24 +56,24 @@ export class BoxMapDataLoader {
   public async loadMapDatasOfSourcesWithMapData(
     sourcesWithMapData: {source: Dirent, map: Dirent}[]
   ): Promise<{
-    sourcesWithLoadedMapData: {source: Dirent, mapData: BoxMapData}[],
+    sourcesWithLoadedMapData: {source: Dirent, mapData: BoxData}[],
     sourcesWithLoadingFailedMapData: Dirent[]
   }> {
-    const sourcesWithLoadingMapData: {source: Dirent, mapFilePath: string, mapData: Promise<BoxMapData|null>}[] = []
+    const sourcesWithLoadingMapData: {source: Dirent, mapFilePath: string, mapData: Promise<BoxData|null>}[] = []
 
     for (const sourceWithMap of sourcesWithMapData) {
       if (!this.referenceBoxBody.containsBoxByName(sourceWithMap.source.name)) {
         const mapFilePath: string = util.concatPaths(this.referenceBox.getMapPath(), sourceWithMap.map.name)
-        const mapData: Promise<BoxMapData|null> = fileSystem.loadFromJsonFile(mapFilePath, BoxMapData.buildFromJson)
+        const mapData: Promise<BoxData|null> = fileSystem.loadFromJsonFile(mapFilePath, BoxData.buildFromJson)
         sourcesWithLoadingMapData.push({source: sourceWithMap.source, mapFilePath, mapData})
       }
     }
 
-    const sourcesWithLoadedMapData: {source: Dirent, mapData: BoxMapData}[] = []
+    const sourcesWithLoadedMapData: {source: Dirent, mapData: BoxData}[] = []
     const sourcesWithLoadingFailedMapData: Dirent[] = []
 
     for (const sourceWithLoadingMapData of sourcesWithLoadingMapData) {
-      const mapData: BoxMapData|null = await sourceWithLoadingMapData.mapData
+      const mapData: BoxData|null = await sourceWithLoadingMapData.mapData
       if (!mapData) {
         util.logWarning('failed to load mapData in '+sourceWithLoadingMapData.mapFilePath)
         sourcesWithLoadingFailedMapData.push(sourceWithLoadingMapData.source)
@@ -100,8 +100,8 @@ export class BoxMapDataLoader {
     return sourceDirents
   }
 
-  public async loadMapDatasWithoutSources(mapDirents: Dirent[]): Promise<{boxName: string, mapData: BoxMapData}[]> {
-    const mapDatasLoading: {boxName: string, mapFilePath: string, mapData: Promise<BoxMapData|null>}[] = []
+  public async loadMapDatasWithoutSources(mapDirents: Dirent[]): Promise<{boxName: string, mapData: BoxData}[]> {
+    const mapDatasLoading: {boxName: string, mapFilePath: string, mapData: Promise<BoxData|null>}[] = []
 
     for (const mapDirent of mapDirents) {
       if (!mapDirent.name.endsWith('.json')) {
@@ -110,15 +110,15 @@ export class BoxMapDataLoader {
       const boxName: string = mapDirent.name.substring(0, mapDirent.name.length-5)
       if (!this.referenceBoxBody.containsBoxByName(boxName)) {
         const mapFilePath: string = util.concatPaths(this.referenceBox.getMapPath(), mapDirent.name)
-        const mapData: Promise<BoxMapData|null> = fileSystem.loadFromJsonFile(mapFilePath, BoxMapData.buildFromJson)
+        const mapData: Promise<BoxData|null> = fileSystem.loadFromJsonFile(mapFilePath, BoxData.buildFromJson)
         mapDatasLoading.push({boxName, mapFilePath, mapData})
       }
     }
 
-    const mapDatasLoaded: {boxName: string, mapData: BoxMapData}[] = []
+    const mapDatasLoaded: {boxName: string, mapData: BoxData}[] = []
 
     for (const mapDataLoading of mapDatasLoading) {
-      const mapData: BoxMapData|null = await mapDataLoading.mapData
+      const mapData: BoxData|null = await mapDataLoading.mapData
       if (!mapData) {
         util.logWarning('failed to load mapData in '+mapDataLoading.mapFilePath)
         continue
