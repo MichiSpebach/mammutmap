@@ -1,4 +1,4 @@
-import { WayPointData } from "../box/WayPointData";
+import { WayPointData } from "../mapData/WayPointData";
 import { util } from "../util";
 import { Link } from "./Link";
 import { Box } from "../box/Box";

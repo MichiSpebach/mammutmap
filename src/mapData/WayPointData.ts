@@ -1,4 +1,4 @@
-import { LocalPosition } from "./Transform"
+import { LocalPosition } from "../box/Transform"
 
 export class WayPointData {
   public boxId: string
