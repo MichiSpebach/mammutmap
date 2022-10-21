@@ -4,7 +4,7 @@ import { Box } from './Box'
 import { Link } from '../link/Link'
 import { LinkData } from '../mapData/LinkData'
 import { WayPointData } from './WayPointData'
-import { LinkEndData } from './LinkEndData'
+import { LinkEndData } from '../mapData/LinkEndData'
 import { NodeWidget } from '../node/NodeWidget'
 import { Widget } from '../Widget'
 

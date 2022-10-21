@@ -1,4 +1,4 @@
-import { WayPointData } from './WayPointData'
+import { WayPointData } from '../box/WayPointData'
 
 export class LinkEndData {
   public path: WayPointData[]

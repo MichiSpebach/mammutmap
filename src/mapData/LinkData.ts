@@ -1,4 +1,4 @@
-import { LinkEndData } from '../box/LinkEndData'
+import { LinkEndData } from './LinkEndData'
 
 export class LinkData {
   public readonly id: string
