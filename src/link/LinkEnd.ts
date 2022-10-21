@@ -219,7 +219,10 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       return
     }
 
+     // TODO: in some cases link should also be tracked by borderingBoxes when unrendered,
+     // TODO: introduce load/unload mechanism and do deregister there
     this.boxesRegisteredAt.forEach(box => box.borderingLinks.deregister(this.referenceLink))
+    this.boxesRegisteredAt = []
     DragManager.removeDraggable(this)
     await renderManager.setStyleTo(this.getId(), '')
 

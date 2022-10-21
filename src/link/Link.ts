@@ -135,6 +135,7 @@ export class Link implements Hoverable {
 
     this.rendered = false
     await Promise.all(proms)
+    await renderManager.clearContentOf(this.getId())
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
