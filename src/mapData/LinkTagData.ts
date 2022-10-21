@@ -16,10 +16,15 @@ export class LinkTagData extends TagData {
 
     public static ofRawObject(object: any): TagData {
         const linkTagData: LinkTagData = Object.setPrototypeOf(object, LinkTagData.prototype)
-        if (!linkTagData.appearance) {
+
+        if (linkTagData.appearance) {
+            ((linkTagData.appearance as any) as LinkAppearanceData) = LinkAppearanceData.ofRawObject(linkTagData.appearance)
+        } else {
             ((linkTagData.appearance as any) as LinkAppearanceData) = new LinkAppearanceData()
         }
+
         linkTagData.validate()
+        
         return linkTagData
     }
 

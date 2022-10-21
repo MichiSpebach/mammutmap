@@ -7,6 +7,12 @@ export type LinkAppearanceMode = typeof linkAppearanceModes[number]
 
 export class LinkAppearanceData extends JsonObject {
 
+    public static ofRawObject(object: any): LinkAppearanceData {
+        const data: LinkAppearanceData = Object.setPrototypeOf(object, LinkAppearanceData.prototype)
+        data.validate()
+        return data
+    }
+
     public constructor(
         private mode?: LinkAppearanceMode,
         private color?: string

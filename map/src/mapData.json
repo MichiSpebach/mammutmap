@@ -158,6 +158,32 @@
 				]
 			},
 			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "siqerqiiumo",
+			"from": {
+				"path": [
+					{
+						"boxId": "o68jm3oi8c",
+						"boxName": "LinkTagData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2fmp3fu4r9",
+						"boxName": "LinkAppearanceData.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
 				"has"
 			]
 		}
