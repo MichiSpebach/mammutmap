@@ -1,4 +1,5 @@
 {
 	"zoomSpeed": 3,
-	"boxMinSizeToRender": 200
+	"boxMinSizeToRender": 200,
+	"sidebar": true
 }
