@@ -3,12 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LinkDidactorToolbarViewWidget = void 0;
 const RenderManager_1 = require("../../../dist/RenderManager");
 const Widget_1 = require("../../../dist/Widget");
-const DidactedLinkTag_1 = require("../DidactedLinkTag");
 const linkDidactorSettings = require("../linkDidactorSettings");
 const pluginFacade = require("../../../dist/pluginFacade");
 const pluginFacade_1 = require("../../../dist/pluginFacade");
 const util_1 = require("../../../dist/util");
 const RenderElement_1 = require("../../../dist/util/RenderElement");
+const LinkAppearanceData_1 = require("../../../dist/mapData/LinkAppearanceData");
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
 class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
     constructor(id) {
@@ -24,7 +24,7 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         return this.getId() + '-default';
     }
     getTagModeDropDownId(tag) {
-        return this.getId() + tag.getName();
+        return this.getId() + tag.name;
     }
     async render() {
         if (!this.renderedOrInProgress) {
@@ -90,7 +90,7 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         ]);
     }
     formTagRow(tag) {
-        const label = `${tag.getName()}(${tag.getCount()}): `;
+        const label = `${tag.name}(${tag.count}): `;
         const dropDown = this.formTagModeDropDown(tag);
         return (0, RenderElement_1.ce)('tr', {}, [
             (0, RenderElement_1.ce)('td', {}, [label]),
@@ -101,29 +101,29 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         return (0, RenderElement_1.createElement)('select', {
             id: this.getDefaultModeDropDownId(),
             onchangeValue: (value) => this.setDefaultLinkMode(value)
-        }, this.formDropDownOptions(linkDidactorSettings.getDefaultLinkMode()));
+        }, this.formDropDownOptions(linkDidactorSettings.getDefaultLinkAppereance().getMode()));
     }
     formTagModeDropDown(tag) {
         return (0, RenderElement_1.createElement)('select', {
             id: this.getTagModeDropDownId(tag),
             onchangeValue: (value) => this.setLinkTagMode(tag, value)
-        }, this.formDropDownOptions(tag.getMode()));
+        }, this.formDropDownOptions(tag.appearance.getMode()));
     }
     formDropDownOptions(tagMode) {
-        return DidactedLinkTag_1.linkTagModes.map(mode => (0, RenderElement_1.createElement)('option', { value: mode, selected: mode === tagMode }, [mode]));
+        return LinkAppearanceData_1.linkAppearanceModes.map(mode => (0, RenderElement_1.createElement)('option', { value: mode, selected: mode === tagMode }, [mode]));
     }
     async setDefaultLinkMode(mode) {
-        if (!DidactedLinkTag_1.linkTagModes.includes(mode)) {
+        if (!LinkAppearanceData_1.linkAppearanceModes.includes(mode)) {
             util_1.util.logWarning(`default LinkTagMode '${mode}' is not known.`);
         }
         await linkDidactorSettings.setDefaultLinkModeAndSaveToFileSystem(mode);
         await this.rerenderLinks();
     }
     async setLinkTagMode(tag, mode) {
-        if (!DidactedLinkTag_1.linkTagModes.includes(mode)) {
+        if (!LinkAppearanceData_1.linkAppearanceModes.includes(mode)) {
             util_1.util.logWarning(`LinkTagMode '${mode}' is not known.`);
         }
-        tag.setMode(mode);
+        tag.appearance.setMode(mode);
         await linkDidactorSettings.saveToFileSystem();
         await this.rerenderLinks();
     }

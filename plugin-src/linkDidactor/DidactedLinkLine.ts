@@ -1,7 +1,7 @@
 import { LocalPosition } from '../../dist/box/Transform'
 import { LinkLineImplementation } from '../../dist/link/LinkLine'
+import { LinkAppearanceMode } from '../../dist/mapData/LinkAppearanceData'
 import { util } from '../../dist/util'
-import { LinkTagMode } from './DidactedLinkTag'
 import * as linkDidactorSettings from './linkDidactorSettings'
 
 export class DidactedLinkLine extends LinkLineImplementation {
@@ -24,7 +24,7 @@ export class DidactedLinkLine extends LinkLineImplementation {
 
         const tagNames: string[]|undefined = this.referenceLink.getData().tags
 
-        const mode: LinkTagMode = linkDidactorSettings.getComputedModeForLinkTags(tagNames)
+        const mode: LinkAppearanceMode = linkDidactorSettings.getComputedModeForLinkTags(tagNames)
         switch (mode) {
             case 'visible':
                 return true

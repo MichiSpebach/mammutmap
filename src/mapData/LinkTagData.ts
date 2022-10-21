@@ -1,6 +1,10 @@
+import { util } from '../util'
+import { LinkAppearanceData } from './LinkAppearanceData'
 import { TagData } from './TagData'
 
 export class LinkTagData extends TagData {
+
+    public readonly appearance: LinkAppearanceData
     
     public static readonly defaultTagNames: string[] = [
         'hidden',
@@ -12,8 +16,33 @@ export class LinkTagData extends TagData {
 
     public static ofRawObject(object: any): TagData {
         const linkTagData: LinkTagData = Object.setPrototypeOf(object, LinkTagData.prototype)
-        // TODO: implement validate like in BoxMapData to warn when loaded data is corrupted
+        if (!linkTagData.appearance) {
+            ((linkTagData.appearance as any) as LinkAppearanceData) = new LinkAppearanceData()
+        }
+        linkTagData.validate()
         return linkTagData
+    }
+
+    public constructor(name: string, count: number, appearance?: LinkAppearanceData) {
+        super(name, count)
+
+        if (appearance) {
+            this.appearance = appearance
+        } else {
+            this.appearance = new LinkAppearanceData()
+        }
+    }
+
+    private validate(): void {
+        if (!this.name) {
+            util.logWarning('LinkTagData::name is undefined or null.')
+        }
+        if (!this.count) {
+            util.logWarning('LinkTagData::count is undefined or null.')
+        }
+        if (!this.appearance) {
+            util.logWarning('LinkTagData::appearance is undefined or null.')
+        }
     }
 
 }

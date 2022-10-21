@@ -1,26 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.saveToFileSystem = exports.setDefaultLinkModeAndSaveToFileSystem = exports.getLinkTags = exports.getDefaultLinkMode = exports.getComputedModeForLinkTags = exports.linkTags = void 0;
+exports.saveToFileSystem = exports.setDefaultLinkModeAndSaveToFileSystem = exports.getLinkTags = exports.getDefaultLinkAppereance = exports.getComputedModeForLinkTags = exports.linkTags = void 0;
 const pluginFacade = require("../../dist/pluginFacade");
 const pluginFacade_1 = require("../../dist/pluginFacade");
 const util_1 = require("../../dist/util");
-const DidactedLinkTag_1 = require("./DidactedLinkTag");
+const LinkAppearanceData_1 = require("../../dist/mapData/LinkAppearanceData");
 exports.linkTags = new pluginFacade_1.Subscribers();
 pluginFacade_1.onMapLoaded.subscribe(async (map) => {
     map.getProjectSettings().linkTags.subscribe(() => exports.linkTags.callSubscribers(getLinkTags()));
     await exports.linkTags.callSubscribers(getLinkTags());
 });
 pluginFacade_1.onMapUnload.subscribe(() => exports.linkTags.callSubscribers(getLinkTags()));
-let defaultLinkMode = 'visibleEnds';
+let defaultLinkAppearance = new LinkAppearanceData_1.LinkAppearanceData('visibleEnds');
 function getComputedModeForLinkTags(tagNames) {
     if (!tagNames || tagNames.length === 0) {
-        return defaultLinkMode;
+        return defaultLinkAppearance.getMode();
     }
     let mostImportantTag = undefined;
     let maxIndex = -1;
     const linkTags = getLinkTagsOrWarn();
     for (const tagName of tagNames) {
-        const index = linkTags.findIndex(tag => tag.getName() === tagName);
+        const index = linkTags.findIndex(tag => tag.name === tagName);
         if (index > maxIndex) {
             mostImportantTag = linkTags[index];
             maxIndex = index;
@@ -30,7 +30,7 @@ function getComputedModeForLinkTags(tagNames) {
         util_1.util.logWarning('Cannot getComputedModeForLinkTags because no LinkTag with name in [' + tagNames + '] found, returning visible as default.');
         return 'visible';
     }
-    return mostImportantTag.getMode();
+    return mostImportantTag.appearance.getMode();
 }
 exports.getComputedModeForLinkTags = getComputedModeForLinkTags;
 function getLinkTagsOrWarn() {
@@ -41,21 +41,20 @@ function getLinkTagsOrWarn() {
     }
     return tagsOrMessage;
 }
-// TODO rename to getDefaultLinkAppereance(): {mode: LinkTagMode, color: string}?
-function getDefaultLinkMode() {
-    return defaultLinkMode;
+function getDefaultLinkAppereance() {
+    return defaultLinkAppearance;
 }
-exports.getDefaultLinkMode = getDefaultLinkMode;
+exports.getDefaultLinkAppereance = getDefaultLinkAppereance;
 function getLinkTags() {
     const mapOrMessage = pluginFacade.getMap();
     if (mapOrMessage instanceof pluginFacade_1.Message) {
         return mapOrMessage;
     }
-    return mapOrMessage.getProjectSettings().getLinkTags().map(tagData => new DidactedLinkTag_1.DidactedLinkTag(tagData));
+    return mapOrMessage.getProjectSettings().getLinkTags();
 }
 exports.getLinkTags = getLinkTags;
 function setDefaultLinkModeAndSaveToFileSystem(mode) {
-    defaultLinkMode = mode;
+    defaultLinkAppearance.setMode(mode);
     // TODO implement
     return Promise.resolve();
 }

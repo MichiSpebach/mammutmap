@@ -1,17 +1,18 @@
 import { renderManager } from '../../../dist/RenderManager'
 import { Widget } from '../../../dist/Widget'
-import { DidactedLinkTag, LinkTagMode, linkTagModes } from '../DidactedLinkTag'
 import * as linkDidactorSettings from '../linkDidactorSettings'
 import * as pluginFacade from '../../../dist/pluginFacade'
 import { Map, Message, Link } from '../../../dist/pluginFacade'
 import { util } from '../../../dist/util'
 import { RenderElement, RenderElements, createElement, ce } from '../../../dist/util/RenderElement'
+import { LinkTagData } from '../../../dist/mapData/LinkTagData'
+import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/mapData/LinkAppearanceData'
 
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
 export class LinkDidactorToolbarViewWidget extends Widget {
 
     private renderedOrInProgress: boolean = false
-    private renderedLinkTags: DidactedLinkTag[] = []
+    private renderedLinkTags: LinkTagData[] = []
 
     public constructor(
         private readonly id: string
@@ -27,8 +28,8 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         return this.getId()+'-default'
     }
 
-    private getTagModeDropDownId(tag: DidactedLinkTag): string {
-        return this.getId()+tag.getName()
+    private getTagModeDropDownId(tag: LinkTagData): string {
+        return this.getId()+tag.name
     }
 
     public async render(): Promise<void> {
@@ -80,7 +81,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     private formBody(): RenderElements {
-        const tagsOrMessage: DidactedLinkTag[]|Message = linkDidactorSettings.getLinkTags()
+        const tagsOrMessage: LinkTagData[]|Message = linkDidactorSettings.getLinkTags()
         if (tagsOrMessage instanceof Message) {
             this.renderedLinkTags = []
             return tagsOrMessage.message
@@ -109,8 +110,8 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         ])
     }
 
-    private formTagRow(tag: DidactedLinkTag): RenderElement {
-        const label: string = `${tag.getName()}(${tag.getCount()}): `
+    private formTagRow(tag: LinkTagData): RenderElement {
+        const label: string = `${tag.name}(${tag.count}): `
         const dropDown: RenderElement = this.formTagModeDropDown(tag)
 
         return ce('tr', {}, [
@@ -123,33 +124,33 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         return createElement('select', {
             id: this.getDefaultModeDropDownId(),
             onchangeValue: (value: string) => this.setDefaultLinkMode(value)
-        }, this.formDropDownOptions(linkDidactorSettings.getDefaultLinkMode()))
+        }, this.formDropDownOptions(linkDidactorSettings.getDefaultLinkAppereance().getMode()))
     }
 
-    private formTagModeDropDown(tag: DidactedLinkTag): RenderElement {
+    private formTagModeDropDown(tag: LinkTagData): RenderElement {
         return createElement('select', {
             id: this.getTagModeDropDownId(tag),
             onchangeValue: (value: string) => this.setLinkTagMode(tag, value)
-        }, this.formDropDownOptions(tag.getMode()))
+        }, this.formDropDownOptions(tag.appearance.getMode()))
     }
 
-    private formDropDownOptions(tagMode: LinkTagMode): RenderElement[] {
-        return linkTagModes.map(mode => createElement('option', {value: mode, selected: mode === tagMode}, [mode]))
+    private formDropDownOptions(tagMode: LinkAppearanceMode): RenderElement[] {
+        return linkAppearanceModes.map(mode => createElement('option', {value: mode, selected: mode === tagMode}, [mode]))
     }
 
     private async setDefaultLinkMode(mode: string): Promise<void> {
-        if (!linkTagModes.includes(mode as any)) {
+        if (!linkAppearanceModes.includes(mode as any)) {
             util.logWarning(`default LinkTagMode '${mode}' is not known.`)
         }
-        await linkDidactorSettings.setDefaultLinkModeAndSaveToFileSystem(mode as LinkTagMode)
+        await linkDidactorSettings.setDefaultLinkModeAndSaveToFileSystem(mode as LinkAppearanceMode)
         await this.rerenderLinks()
     }
 
-    private async setLinkTagMode(tag: DidactedLinkTag, mode: string): Promise<void> {
-        if (!linkTagModes.includes(mode as any)) {
+    private async setLinkTagMode(tag: LinkTagData, mode: string): Promise<void> {
+        if (!linkAppearanceModes.includes(mode as any)) {
             util.logWarning(`LinkTagMode '${mode}' is not known.`)
         }
-        tag.setMode(mode as LinkTagMode)
+        tag.appearance.setMode(mode as LinkAppearanceMode)
         await linkDidactorSettings.saveToFileSystem()
         await this.rerenderLinks()
     }
