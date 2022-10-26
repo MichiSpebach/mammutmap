@@ -4,8 +4,6 @@ import { Box, LinkImplementation } from '../../dist/pluginFacade'
 import { RenderPriority } from '../../dist/RenderManager'
 import * as linkDidactorSettings from './linkDidactorSettings'
 
-const colors: string[] = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal']
-
 export class DidactedLink extends LinkImplementation {
 
     public static getSuperClass(): typeof LinkImplementation {
@@ -21,6 +19,16 @@ export class DidactedLink extends LinkImplementation {
     }
 
     public getColor(): string {
+        const color: string = linkDidactorSettings.getComputedColorForLinkTags(this.getTags())
+
+        if (color === linkDidactorSettings.boxIdHashColorName) {
+            return this.getColorByToBoxIdHash()
+        }
+
+        return color
+    }
+
+    private getColorByToBoxIdHash() : string {
         let toBoxId: string
         const dropTargetIfRenderInProgress: Box|NodeWidget|null = this.getTo().getDropTargetIfRenderInProgress()
         if (dropTargetIfRenderInProgress) {
@@ -31,7 +39,7 @@ export class DidactedLink extends LinkImplementation {
         }
         
         const hash: number = toBoxId.charCodeAt(0) + toBoxId.charCodeAt(toBoxId.length/2) + toBoxId.charCodeAt(toBoxId.length-1)
-        return colors[hash % colors.length]
+        return linkDidactorSettings.linkColors[hash % linkDidactorSettings.linkColors.length]
     }
 
 }

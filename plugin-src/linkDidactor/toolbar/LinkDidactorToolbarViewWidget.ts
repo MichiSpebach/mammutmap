@@ -25,11 +25,19 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     private getDefaultModeDropDownId(): string {
-        return this.getId()+'-default'
+        return this.getId()+'-mode-default'
     }
 
     private getTagModeDropDownId(tag: LinkTagData): string {
-        return this.getId()+tag.name
+        return `${this.getId()}-mode-${tag.name}`
+    }
+
+    private getDefaultColorDropDownId(): string {
+        return this.getId()+'-color-default'
+    }
+
+    private getTagColorDropDownId(tag: LinkTagData): string {
+        return `${this.getId()}-color-${tag.name}`
     }
 
     public async render(): Promise<void> {
@@ -99,21 +107,25 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
     private formDefaultRow(): RenderElement {
         const label: string = 'default: '
-        const dropDown: RenderElement = this.formDefaultModeDropDown()
+        const modeDropDown: RenderElement = this.formDefaultModeDropDown()
+        const colorDropDown: RenderElement = this.formDefaultColorDropDown()
 
         return ce('tr', {}, [
             ce('td', {}, [label]), 
-            ce('td', {}, [dropDown])
+            ce('td', {}, [modeDropDown]),
+            ce('td', {}, [colorDropDown])
         ])
     }
 
     private formTagRow(tag: LinkTagData): RenderElement {
         const label: string = `${tag.name}(${tag.count}): `
-        const dropDown: RenderElement = this.formTagModeDropDown(tag)
+        const modeDropDown: RenderElement = this.formTagModeDropDown(tag)
+        const colorDropDown: RenderElement = this.formTagColorDropDown(tag)
 
         return ce('tr', {}, [
             ce('td', {}, [label]), 
-            ce('td', {}, [dropDown])
+            ce('td', {}, [modeDropDown]),
+            ce('td', {}, [colorDropDown])
         ])
     }
 
@@ -124,7 +136,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         return createElement('select', {
             id: elementId,
             onchangeValue: (value: string) => this.setDefaultLinkMode(value)
-        }, this.formDropDownOptions(linkDidactorSettings.getDefaultLinkAppereance().getMode()))
+        }, this.formDefaultModeDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceMode()))
     }
 
     private formTagModeDropDown(tag: LinkTagData): RenderElement {
@@ -133,28 +145,86 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
         return createElement('select', {
             id: elementId,
-            onchangeValue: (value: string) => this.setLinkTagMode(tag, value)
-        }, this.formDropDownOptions(tag.appearance.getMode()))
+            onchangeValue: (value: string) => this.setLinkTagMode(tag, value !== 'undefined' ? value : undefined)
+        }, this.formTagModeDropDownOptions(tag.appearance.mode))
     }
 
-    private formDropDownOptions(tagMode: LinkAppearanceMode): RenderElement[] {
-        return linkAppearanceModes.map(mode => createElement('option', {value: mode, selected: mode === tagMode}, [mode]))
+    private formDefaultColorDropDown(): RenderElement {
+        const elementId: string = this.getDefaultColorDropDownId()
+        this.elementIdsWithChangeEventListeners.push(elementId)
+
+        return createElement('select', {
+            id: elementId,
+            onchangeValue: (value: string) => this.setDefaultLinkColor(value)
+        }, this.formDefaultColorDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceColor()))
     }
 
-    private async setDefaultLinkMode(mode: string): Promise<void> {
-        if (!linkAppearanceModes.includes(mode as any)) {
+    private formTagColorDropDown(tag: LinkTagData): RenderElement {
+        const elementId: string = this.getTagColorDropDownId(tag)
+        this.elementIdsWithChangeEventListeners.push(elementId)
+
+        return createElement('select', {
+            id: elementId,
+            onchangeValue: (value: string) => this.setLinkTagColor(tag, value !== 'undefined' ? value : undefined)
+        }, this.formTagColorDropDownOptions(tag.appearance.color))
+    }
+
+    private formDefaultModeDropDownOptions(selectedMode: LinkAppearanceMode): RenderElement[] {
+        const elements: RenderElement[] = this.formModeDropDownOptions(selectedMode)
+        // TODO: implement 'auto' option, links are visible as long as there are currently only rendered/loaded a certain amount
+        // elements.push(createElement('option', {value: 'auto', selected: undefined === selectedMode}, ['auto']))
+        return elements
+    }
+
+    private formTagModeDropDownOptions(selectedMode: LinkAppearanceMode|undefined): RenderElement[] {
+        const elements: RenderElement[] = this.formModeDropDownOptions(selectedMode)
+        elements.push(createElement('option', {value: undefined, selected: undefined === selectedMode}, ['unset']))
+        return elements
+    }
+
+    private formModeDropDownOptions(selectedMode: LinkAppearanceMode|undefined): RenderElement[] {
+        return linkAppearanceModes.map(mode => createElement('option', {value: mode, selected: mode === selectedMode}, [mode]))
+    }
+
+    private formDefaultColorDropDownOptions(selectedColor: string): RenderElement[] {
+        const elements: RenderElement[] = this.formColorDropDownOptions(selectedColor)
+        return elements
+    }
+
+    private formTagColorDropDownOptions(selectedColor: string|undefined): RenderElement[] {
+        const elements: RenderElement[] = this.formColorDropDownOptions(selectedColor)
+        elements.push(createElement('option', {value: undefined, selected: undefined === selectedColor}, ['unset']))
+        return elements
+    }
+
+    private formColorDropDownOptions(selectedColor: string|undefined): RenderElement[] {
+        return linkDidactorSettings.linkColorOptions.map(color => createElement('option', {value: color, selected: color === selectedColor}, [color]))
+    }
+
+    private async setDefaultLinkMode(mode: string|undefined): Promise<void> {
+        if (mode && !linkAppearanceModes.includes(mode as any)) {
             util.logWarning(`default LinkTagMode '${mode}' is not known.`)
         }
-        linkDidactorSettings.getDefaultLinkAppereance().setMode(mode as LinkAppearanceMode)
+        await linkDidactorSettings.setDefaultLinkAppereanceModeAndSave(mode as LinkAppearanceMode)
+        await this.rerenderLinks()
+    }
+
+    private async setLinkTagMode(tag: LinkTagData, mode: string|undefined): Promise<void> {
+        if (mode && !linkAppearanceModes.includes(mode as any)) {
+            util.logWarning(`LinkTagMode '${mode}' is not known.`)
+        }
+        tag.appearance.mode = (mode as LinkAppearanceMode)
         await linkDidactorSettings.saveToFileSystem()
         await this.rerenderLinks()
     }
 
-    private async setLinkTagMode(tag: LinkTagData, mode: string): Promise<void> {
-        if (!linkAppearanceModes.includes(mode as any)) {
-            util.logWarning(`LinkTagMode '${mode}' is not known.`)
-        }
-        tag.appearance.setMode(mode as LinkAppearanceMode)
+    private async setDefaultLinkColor(color: string|undefined): Promise<void> {
+        await linkDidactorSettings.setDefaultLinkAppereanceColorAndSave(color)
+        await this.rerenderLinks()
+    }
+
+    private async setLinkTagColor(tag: LinkTagData, color: string|undefined): Promise<void> {
+        tag.appearance.color = color
         await linkDidactorSettings.saveToFileSystem()
         await this.rerenderLinks()
     }

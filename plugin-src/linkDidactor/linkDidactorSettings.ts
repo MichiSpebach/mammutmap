@@ -3,6 +3,11 @@ import { Message, Map, onMapLoaded, onMapUnload, Subscribers } from '../../dist/
 import { util } from '../../dist/util'
 import { LinkAppearanceData, LinkAppearanceMode } from '../../dist/mapData/LinkAppearanceData'
 import { LinkTagData } from '../../dist/mapData/LinkTagData'
+import { style } from '../../dist/styleAdapter'
+
+export const linkColors: string[] = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal', style.getLinkColor()]
+export const boxIdHashColorName = 'boxId hash'
+export const linkColorOptions: string[] = [...linkColors, boxIdHashColorName]
 
 export const linkTags: Subscribers<LinkTagData[]|Message> = new Subscribers()
 
@@ -14,27 +19,39 @@ onMapLoaded.subscribe(async (map: Map) => {
 onMapUnload.subscribe(() => linkTags.callSubscribers(getLinkTags()))
 
 export function getComputedModeForLinkTags(tagNames: string[]|undefined): LinkAppearanceMode {
-    if (!tagNames || tagNames.length === 0) {
-        return getDefaultLinkAppereance().getMode()
-    }
+    let mostImportantMode: LinkAppearanceMode = getDefaultLinkAppereanceMode()
 
-    let mostImportantTag: LinkTagData|undefined = undefined
-    let maxIndex: number = -1
+    if (!tagNames || tagNames.length === 0) {
+        return mostImportantMode
+    }
     
-    const linkTags: LinkTagData[] = getLinkTagsOrWarn()
-    for (const tagName of tagNames) {
-        const index = linkTags.findIndex(tag => tag.name === tagName)
-        if (index > maxIndex) {
-            mostImportantTag = linkTags[index]
-            maxIndex = index
+    for (const linkTag of getLinkTagsSortedByIndex(tagNames)) {
+        if (linkTag.appearance.mode) {
+            mostImportantMode = linkTag.appearance.mode
         }
     }
     
-    if (!mostImportantTag) {
-        util.logWarning('Cannot getComputedModeForLinkTags because no LinkTag with name in ['+tagNames+'] found, returning visible as default.')
-        return 'visible'
+    return mostImportantMode
+}
+
+export function getComputedColorForLinkTags(tagNames: string[]|undefined): string {
+    let mostImportantColor: string = getDefaultLinkAppereanceColor()
+
+    if (!tagNames || tagNames.length === 0) {
+        return mostImportantColor
     }
-    return mostImportantTag.appearance.getMode()
+    
+    for (const linkTag of getLinkTagsSortedByIndex(tagNames)) {
+        if (linkTag.appearance.color) {
+            mostImportantColor = linkTag.appearance.color
+        }
+    }
+    
+    return mostImportantColor
+}
+
+function getLinkTagsSortedByIndex(tagNames: string[]): LinkTagData[] {
+    return getLinkTagsOrWarn().filter(tag => tagNames.includes(tag.name))
 }
 
 function getLinkTagsOrWarn(): LinkTagData[] {
@@ -46,8 +63,26 @@ function getLinkTagsOrWarn(): LinkTagData[] {
     return tagsOrMessage
 }
 
-export function getDefaultLinkAppereance(): LinkAppearanceData {
+export function getDefaultLinkAppereanceMode(): LinkAppearanceMode {
+    return getDefaultLinkAppereance().mode ?? 'visible'
+}
+
+export function getDefaultLinkAppereanceColor(): string {
+    return getDefaultLinkAppereance().color ?? style.getLinkColor()
+}
+
+function getDefaultLinkAppereance(): LinkAppearanceData {
     return pluginFacade.getMapOrError().getProjectSettings().getDefaultLinkAppearance()
+}
+
+export async function setDefaultLinkAppereanceModeAndSave(mode: LinkAppearanceMode|undefined): Promise<void> {
+    getDefaultLinkAppereance().mode = mode
+    await saveToFileSystem()
+}
+
+export async function setDefaultLinkAppereanceColorAndSave(color: string|undefined): Promise<void> {
+    getDefaultLinkAppereance().color = color
+    await saveToFileSystem()
 }
 
 export function getLinkTags(): LinkTagData[]|Message {

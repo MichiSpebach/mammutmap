@@ -21,10 +21,16 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         return this.id;
     }
     getDefaultModeDropDownId() {
-        return this.getId() + '-default';
+        return this.getId() + '-mode-default';
     }
     getTagModeDropDownId(tag) {
-        return this.getId() + tag.name;
+        return `${this.getId()}-mode-${tag.name}`;
+    }
+    getDefaultColorDropDownId() {
+        return this.getId() + '-color-default';
+    }
+    getTagColorDropDownId(tag) {
+        return `${this.getId()}-color-${tag.name}`;
     }
     async render() {
         if (!this.renderedOrInProgress) {
@@ -81,18 +87,22 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
     }
     formDefaultRow() {
         const label = 'default: ';
-        const dropDown = this.formDefaultModeDropDown();
+        const modeDropDown = this.formDefaultModeDropDown();
+        const colorDropDown = this.formDefaultColorDropDown();
         return (0, RenderElement_1.ce)('tr', {}, [
             (0, RenderElement_1.ce)('td', {}, [label]),
-            (0, RenderElement_1.ce)('td', {}, [dropDown])
+            (0, RenderElement_1.ce)('td', {}, [modeDropDown]),
+            (0, RenderElement_1.ce)('td', {}, [colorDropDown])
         ]);
     }
     formTagRow(tag) {
         const label = `${tag.name}(${tag.count}): `;
-        const dropDown = this.formTagModeDropDown(tag);
+        const modeDropDown = this.formTagModeDropDown(tag);
+        const colorDropDown = this.formTagColorDropDown(tag);
         return (0, RenderElement_1.ce)('tr', {}, [
             (0, RenderElement_1.ce)('td', {}, [label]),
-            (0, RenderElement_1.ce)('td', {}, [dropDown])
+            (0, RenderElement_1.ce)('td', {}, [modeDropDown]),
+            (0, RenderElement_1.ce)('td', {}, [colorDropDown])
         ]);
     }
     formDefaultModeDropDown() {
@@ -101,32 +111,79 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         return (0, RenderElement_1.createElement)('select', {
             id: elementId,
             onchangeValue: (value) => this.setDefaultLinkMode(value)
-        }, this.formDropDownOptions(linkDidactorSettings.getDefaultLinkAppereance().getMode()));
+        }, this.formDefaultModeDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceMode()));
     }
     formTagModeDropDown(tag) {
         const elementId = this.getTagModeDropDownId(tag);
         this.elementIdsWithChangeEventListeners.push(elementId);
         return (0, RenderElement_1.createElement)('select', {
             id: elementId,
-            onchangeValue: (value) => this.setLinkTagMode(tag, value)
-        }, this.formDropDownOptions(tag.appearance.getMode()));
+            onchangeValue: (value) => this.setLinkTagMode(tag, value !== 'undefined' ? value : undefined)
+        }, this.formTagModeDropDownOptions(tag.appearance.mode));
     }
-    formDropDownOptions(tagMode) {
-        return LinkAppearanceData_1.linkAppearanceModes.map(mode => (0, RenderElement_1.createElement)('option', { value: mode, selected: mode === tagMode }, [mode]));
+    formDefaultColorDropDown() {
+        const elementId = this.getDefaultColorDropDownId();
+        this.elementIdsWithChangeEventListeners.push(elementId);
+        return (0, RenderElement_1.createElement)('select', {
+            id: elementId,
+            onchangeValue: (value) => this.setDefaultLinkColor(value)
+        }, this.formDefaultColorDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceColor()));
+    }
+    formTagColorDropDown(tag) {
+        const elementId = this.getTagColorDropDownId(tag);
+        this.elementIdsWithChangeEventListeners.push(elementId);
+        return (0, RenderElement_1.createElement)('select', {
+            id: elementId,
+            onchangeValue: (value) => this.setLinkTagColor(tag, value !== 'undefined' ? value : undefined)
+        }, this.formTagColorDropDownOptions(tag.appearance.color));
+    }
+    formDefaultModeDropDownOptions(selectedMode) {
+        const elements = this.formModeDropDownOptions(selectedMode);
+        // TODO: implement 'auto' option, links are visible as long as there are currently only rendered/loaded a certain amount
+        // elements.push(createElement('option', {value: 'auto', selected: undefined === selectedMode}, ['auto']))
+        return elements;
+    }
+    formTagModeDropDownOptions(selectedMode) {
+        const elements = this.formModeDropDownOptions(selectedMode);
+        elements.push((0, RenderElement_1.createElement)('option', { value: undefined, selected: undefined === selectedMode }, ['unset']));
+        return elements;
+    }
+    formModeDropDownOptions(selectedMode) {
+        return LinkAppearanceData_1.linkAppearanceModes.map(mode => (0, RenderElement_1.createElement)('option', { value: mode, selected: mode === selectedMode }, [mode]));
+    }
+    formDefaultColorDropDownOptions(selectedColor) {
+        const elements = this.formColorDropDownOptions(selectedColor);
+        return elements;
+    }
+    formTagColorDropDownOptions(selectedColor) {
+        const elements = this.formColorDropDownOptions(selectedColor);
+        elements.push((0, RenderElement_1.createElement)('option', { value: undefined, selected: undefined === selectedColor }, ['unset']));
+        return elements;
+    }
+    formColorDropDownOptions(selectedColor) {
+        return linkDidactorSettings.linkColorOptions.map(color => (0, RenderElement_1.createElement)('option', { value: color, selected: color === selectedColor }, [color]));
     }
     async setDefaultLinkMode(mode) {
-        if (!LinkAppearanceData_1.linkAppearanceModes.includes(mode)) {
+        if (mode && !LinkAppearanceData_1.linkAppearanceModes.includes(mode)) {
             util_1.util.logWarning(`default LinkTagMode '${mode}' is not known.`);
         }
-        linkDidactorSettings.getDefaultLinkAppereance().setMode(mode);
-        await linkDidactorSettings.saveToFileSystem();
+        await linkDidactorSettings.setDefaultLinkAppereanceModeAndSave(mode);
         await this.rerenderLinks();
     }
     async setLinkTagMode(tag, mode) {
-        if (!LinkAppearanceData_1.linkAppearanceModes.includes(mode)) {
+        if (mode && !LinkAppearanceData_1.linkAppearanceModes.includes(mode)) {
             util_1.util.logWarning(`LinkTagMode '${mode}' is not known.`);
         }
-        tag.appearance.setMode(mode);
+        tag.appearance.mode = mode;
+        await linkDidactorSettings.saveToFileSystem();
+        await this.rerenderLinks();
+    }
+    async setDefaultLinkColor(color) {
+        await linkDidactorSettings.setDefaultLinkAppereanceColorAndSave(color);
+        await this.rerenderLinks();
+    }
+    async setLinkTagColor(tag, color) {
+        tag.appearance.color = color;
         await linkDidactorSettings.saveToFileSystem();
         await this.rerenderLinks();
     }
