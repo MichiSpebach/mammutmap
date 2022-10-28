@@ -26,31 +26,28 @@ export class BoxData extends JsonObject {
     return new BoxData(id, x, y, width, height, [], [])
   }
 
-  public static buildFromJson(json: string ): BoxData /*| SyntaxError*/ {
-    const parsedData: BoxData = JSON.parse(json) // parsed object has no functions
+  public static buildFromJson(json: string ): BoxData /*| SyntaxError*/ { // TODO: remove this method and use ofRawObject?
+    return this.ofRawObject(JSON.parse(json)) // parsed object has no functions
+  }
 
-    let id: string = parsedData.id // TODO: delete this later
-    if (id == null) {
-      id = util.generateId()
-    }
+  public static ofRawObject(object: any): BoxData {
+    const boxData: BoxData = Object.setPrototypeOf(object, BoxData.prototype)
 
-    let links: LinkData[]
-    let rawLinks: LinkData[]|undefined = parsedData.links
-    if (!rawLinks) {
-      links = []
+    if (!boxData.links) {
+      ((boxData.links as any) as LinkData[]) = []
     } else {
-      links = rawLinks.map(LinkData.buildFromRawObject) // raw object would have no methods
+      ((boxData.links as any) as LinkData[]) = boxData.links.map(LinkData.buildFromRawObject) // raw object would have no methods
     }
 
-    let nodes: NodeData[]
-    let rawNodes: NodeData[]|undefined = parsedData.nodes
-    if (!rawNodes) {
-      nodes = []
+    if (!boxData.nodes) {
+      ((boxData.nodes as any) as NodeData[]) = []
     } else {
-      nodes = rawNodes.map(NodeData.buildFromRawObject) // raw object would have no methods
+      ((boxData.nodes as any) as NodeData[]) = boxData.nodes.map(NodeData.buildFromRawObject) // raw object would have no methods
     }
 
-    return new BoxData(id, parsedData.x, parsedData.y, parsedData.width, parsedData.height, links, nodes)
+    boxData.validate()
+
+    return boxData
   }
 
   public constructor(id: string, x: number, y: number, width: number, height: number, links: LinkData[], nodes: NodeData[]) {
@@ -66,7 +63,7 @@ export class BoxData extends JsonObject {
     this.validate()
   }
 
-  public validate(): void {
+  protected validate(): void {
     this.warnIf(this.id == null, 'id is null')
     this.warnIf(this.id == undefined, 'id is undefined')
     this.warnIf(this.id == '', 'id is empty')

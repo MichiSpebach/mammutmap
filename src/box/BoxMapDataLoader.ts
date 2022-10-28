@@ -64,7 +64,7 @@ export class BoxMapDataLoader {
     for (const sourceWithMap of sourcesWithMapData) {
       if (!this.referenceBoxBody.containsBoxByName(sourceWithMap.source.name)) {
         const mapFilePath: string = util.concatPaths(this.referenceBox.getMapPath(), sourceWithMap.map.name)
-        const mapData: Promise<BoxData|null> = fileSystem.loadFromJsonFile(mapFilePath, BoxData.buildFromJson)
+        const mapData: Promise<BoxData|null> = fileSystem.loadFromJsonFile(mapFilePath, (json: string) => BoxData.buildFromJson(json))
         sourcesWithLoadingMapData.push({source: sourceWithMap.source, mapFilePath, mapData})
       }
     }
@@ -110,7 +110,7 @@ export class BoxMapDataLoader {
       const boxName: string = mapDirent.name.substring(0, mapDirent.name.length-5)
       if (!this.referenceBoxBody.containsBoxByName(boxName)) {
         const mapFilePath: string = util.concatPaths(this.referenceBox.getMapPath(), mapDirent.name)
-        const mapData: Promise<BoxData|null> = fileSystem.loadFromJsonFile(mapFilePath, BoxData.buildFromJson)
+        const mapData: Promise<BoxData|null> = fileSystem.loadFromJsonFile(mapFilePath, (json: string) => BoxData.buildFromJson(json))
         mapDatasLoading.push({boxName, mapFilePath, mapData})
       }
     }

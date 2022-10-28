@@ -328,7 +328,7 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async restoreMapData(): Promise<void> {
-    const restoredMapData: BoxData|null = await fileSystem.loadFromJsonFile(this.getMapDataFilePath(), BoxData.buildFromJson)
+    const restoredMapData: BoxData|null = await fileSystem.loadFromJsonFile(this.getMapDataFilePath(), (json: string) => BoxData.buildFromJson(json))
     if (restoredMapData === null) {
       util.logWarning('failed to restoreMapData of '+this.getSrcPath()+' because mapDataFile does not exist')
       return

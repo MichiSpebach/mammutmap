@@ -1,6 +1,4 @@
-import { fileSystem } from '../fileSystemAdapter'
 import { FolderBox } from './FolderBox'
-import { BoxData } from '../mapData/BoxData'
 import { ProjectSettings } from '../ProjectSettings'
 import { ClientRect } from '../ClientRect'
 import { renderManager, RenderPriority } from '../RenderManager'
@@ -10,18 +8,8 @@ export class RootFolderBox extends FolderBox {
   private readonly idRenderedInto: string
   private cachedClientRect: ClientRect|null = null
 
-  public static async new(projectSettings: ProjectSettings, idRenderedInto: string): Promise<RootFolderBox> {
-    let mapData: BoxData|null = await fileSystem.loadFromJsonFile(projectSettings.getProjectSettingsFilePath(), BoxData.buildFromJson)
-    const mapDataFileExists: boolean = (mapData !== null)
-    if (mapData === null) {
-      mapData = BoxData.buildNew(5, 5, 90, 90)
-    }
-
-    return new RootFolderBox(projectSettings, idRenderedInto, mapData, mapDataFileExists)
-  }
-
-  public constructor(projectSettings: ProjectSettings, idRenderedInto: string, mapData: BoxData, mapDataFileExists: boolean) {
-    super(projectSettings.getAbsoluteSrcRootPath(), null, mapData, mapDataFileExists)
+  public constructor(projectSettings: ProjectSettings, idRenderedInto: string, mapDataFileExists: boolean) {
+    super(projectSettings.getAbsoluteSrcRootPath(), null, projectSettings.data, mapDataFileExists)
     this.projectSettings = projectSettings
     this.idRenderedInto = idRenderedInto
   }

@@ -1,38 +1,50 @@
 import { util } from '../util'
-import { JsonObject } from './../JsonObject'
+import { BoxData } from './BoxData'
 import { LinkAppearanceData } from './LinkAppearanceData'
+import { LinkData } from './LinkData'
 import { LinkTagData } from './LinkTagData'
+import { NodeData } from './NodeData'
 
-export class MapSettingsData extends JsonObject {
+export class MapSettingsData extends BoxData {
     public srcRootPath: string
     public mapRootPath: string
     public linkTags: LinkTagData[] // TODO: move into data of boxes for tree structure?
     public readonly defaultLinkAppearance: LinkAppearanceData
 
     public static ofRawObject(object: any): MapSettingsData {
-        const mapDataSettings: MapSettingsData = Object.setPrototypeOf(object, MapSettingsData.prototype)
+        const boxData: BoxData = BoxData.ofRawObject(object)
+        const mapSettingsData: MapSettingsData = Object.setPrototypeOf(boxData, MapSettingsData.prototype)
 
-        mapDataSettings.linkTags = object.linkTags? object.linkTags.map((rawTag: any) => LinkTagData.ofRawObject(rawTag)) : []
+        mapSettingsData.linkTags = object.linkTags? object.linkTags.map((rawTag: any) => LinkTagData.ofRawObject(rawTag)) : []
 
-        if (mapDataSettings.defaultLinkAppearance) {
-            ((mapDataSettings.defaultLinkAppearance as any) as LinkAppearanceData) = LinkAppearanceData.ofRawObject(mapDataSettings.defaultLinkAppearance)
+        if (mapSettingsData.defaultLinkAppearance) {
+            ((mapSettingsData.defaultLinkAppearance as any) as LinkAppearanceData) = LinkAppearanceData.ofRawObject(mapSettingsData.defaultLinkAppearance)
         } else {
-            ((mapDataSettings.defaultLinkAppearance as any) as LinkAppearanceData) = new LinkAppearanceData()
+            ((mapSettingsData.defaultLinkAppearance as any) as LinkAppearanceData) = new LinkAppearanceData()
         }
 
-        mapDataSettings.validate()
+        mapSettingsData.validate()
         
-        return mapDataSettings
+        return mapSettingsData
     }
 
-    public constructor(srcRootPath: string, mapRootPath: string, linkTags: LinkTagData[] = [], defaultLinkAppearance?: LinkAppearanceData) {
-        super()
-        this.srcRootPath = srcRootPath
-        this.mapRootPath = mapRootPath
-        this.linkTags = linkTags
+    public constructor(options: {
+        id: string,
+        x: number, y: number, width: number, height: number,
+        links: LinkData[],
+        nodes: NodeData[],
+        srcRootPath: string,
+        mapRootPath: string,
+        linkTags: LinkTagData[],
+        defaultLinkAppearance?: LinkAppearanceData
+    }) {
+        super(options.id, options.x, options.y, options.width, options.height, options.links, options.nodes)
+        this.srcRootPath = options.srcRootPath
+        this.mapRootPath = options.mapRootPath
+        this.linkTags = options.linkTags
         
-        if (defaultLinkAppearance) {
-            this.defaultLinkAppearance = defaultLinkAppearance
+        if (options.defaultLinkAppearance) {
+            this.defaultLinkAppearance = options.defaultLinkAppearance
         } else {
             this.defaultLinkAppearance = new LinkAppearanceData()
         }
@@ -40,15 +52,19 @@ export class MapSettingsData extends JsonObject {
         this.validate()
     }
 
-    private validate(): void {
+    protected validate(): void {
+        super.validate()
+
         if (!this.srcRootPath || !this.mapRootPath) { // can happen when called with type any
             let message = 'MapSettingsData need to have a srcRootPath and a mapRootPath'
             message += ', but specified srcRootPath is '+this.srcRootPath+' and mapRootPath is '+this.mapRootPath+'.'
             util.logWarning(message)
         }
+
         if (!this.linkTags) {
             util.logWarning('MapSettingsData::linkTags are undefined or null.')
         }
+        
         if (!this.defaultLinkAppearance) {
             util.logWarning('MapSettingsData::defaultLinkAppearance is undefined or null.')
         }

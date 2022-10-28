@@ -86,9 +86,9 @@ export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<v
     await unloadAndUnsetMap()
   }
 
-  const loadingMap: {loaded: Promise<Map>, rendered: Promise<void>} = Map.new(indexHtmlIds.contentId, projectSettings)
+  const loadingMap: {loaded: Map, rendered: Promise<void>} = Map.new(indexHtmlIds.contentId, projectSettings)
 
-  map = await loadingMap.loaded
+  map = loadingMap.loaded
   await onMapLoaded.callSubscribers(map) // TODO: add maximum await time in case of defective plugins
 
   await loadingMap.rendered
@@ -143,14 +143,10 @@ export class Map {
   private readonly mapRatioAdjusterSizePx: number = 600
   private latestMousePositionWhenMoving: ClientPosition|undefined
 
-  public static new(idToRenderIn: string, projectSettings: ProjectSettings): {loaded: Promise<Map>, rendered: Promise<void>} {
-    const loaded: Promise<Map> = Map.loadNew(idToRenderIn, projectSettings)
-    const rendered: Promise<void> = loaded.then(map => map.render())
-    return {loaded, rendered}
-  }
-
-  private static async loadNew(idToRenderIn: string, projectSettings: ProjectSettings): Promise<Map> { 
-    return new Map(idToRenderIn, projectSettings, await RootFolderBox.new(projectSettings, 'mapMover'))
+  public static new(idToRenderIn: string, projectSettings: ProjectSettings): {loaded: Map, rendered: Promise<void>} {
+    const rootFolderBox: RootFolderBox = new RootFolderBox(projectSettings, 'mapMover', projectSettings.isDataFileExisting())
+    const map: Map = new Map(idToRenderIn, projectSettings, rootFolderBox)
+    return {loaded: map, rendered: map.render()}
   }
 
   private constructor(idToRenderIn: string, projectSettings: ProjectSettings, root: RootFolderBox) {
