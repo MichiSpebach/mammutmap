@@ -86,12 +86,10 @@ export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<v
     await unloadAndUnsetMap()
   }
 
-  const loadingMap: {loaded: Map, rendered: Promise<void>} = Map.new(indexHtmlIds.contentId, projectSettings)
-
-  map = loadingMap.loaded
+  map = new Map(indexHtmlIds.contentId, projectSettings)
   await onMapLoaded.callSubscribers(map) // TODO: add maximum await time in case of defective plugins
 
-  await loadingMap.rendered
+  await map.render()
   await onMapRendered.callSubscribers(map) // TODO: add maximum await time in case of defective plugins
 }
 
@@ -143,19 +141,13 @@ export class Map {
   private readonly mapRatioAdjusterSizePx: number = 600
   private latestMousePositionWhenMoving: ClientPosition|undefined
 
-  public static new(idToRenderIn: string, projectSettings: ProjectSettings): {loaded: Map, rendered: Promise<void>} {
-    const rootFolderBox: RootFolderBox = new RootFolderBox(projectSettings, 'mapMover', projectSettings.isDataFileExisting())
-    const map: Map = new Map(idToRenderIn, projectSettings, rootFolderBox)
-    return {loaded: map, rendered: map.render()}
-  }
-
-  private constructor(idToRenderIn: string, projectSettings: ProjectSettings, root: RootFolderBox) {
+  public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
     this.projectSettings = projectSettings
-    this.rootFolder = root
+    this.rootFolder = new RootFolderBox(projectSettings, 'mapMover', projectSettings.isDataFileExisting())
   }
 
-  private async render(): Promise<void> {
+  public async render(): Promise<void> {
     const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
     const mapMoverHtml = `<div id="mapMover">${rootFolderHtml}</div>`
     const mapRatioAdjusterStyle = `width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
