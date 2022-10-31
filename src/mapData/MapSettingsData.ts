@@ -23,7 +23,7 @@ export class MapSettingsData extends BoxData {
             ((mapSettingsData.defaultLinkAppearance as any) as LinkAppearanceData) = new LinkAppearanceData()
         }
 
-        mapSettingsData.validate()
+        mapSettingsData.validateMapSettingsData()
         
         return mapSettingsData
     }
@@ -49,10 +49,10 @@ export class MapSettingsData extends BoxData {
             this.defaultLinkAppearance = new LinkAppearanceData()
         }
 
-        this.validate()
+        this.validateMapSettingsData()
     }
 
-    protected validate(): void {
+    private validateMapSettingsData(): void { // super.validate() is not overriden because it is also called in constructor of super class
         super.validate()
 
         if (!this.srcRootPath || !this.mapRootPath) { // can happen when called with type any
