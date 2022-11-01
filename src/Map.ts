@@ -21,7 +21,7 @@ export let map: Map|undefined
 
 export function setMap(object: Map): void {
   if (map) {
-    onMapUnload.callSubscribers()
+    onMapUnload.callSubscribers() // TODO: call 'await unloadAndUnsetMap()' instead
   }
 
   map = object
@@ -87,10 +87,10 @@ export async function loadAndSetMap(projectSettings: ProjectSettings): Promise<v
   }
 
   map = new Map(indexHtmlIds.contentId, projectSettings)
-  await onMapLoaded.callSubscribers(map) // TODO: add maximum await time in case of defective plugins
+  await onMapLoaded.callSubscribers(map) // TODO: add maximum await time or dialog to force continue in case of defective plugins
 
   await map.render()
-  await onMapRendered.callSubscribers(map) // TODO: add maximum await time in case of defective plugins
+  await onMapRendered.callSubscribers(map) // TODO: add maximum await time or dialog to force continue in case of defective plugins
 }
 
 export async function unloadAndUnsetMap(): Promise<void> {
@@ -98,7 +98,7 @@ export async function unloadAndUnsetMap(): Promise<void> {
     util.logWarning('cannot unload map because no map is loaded')
     return
   }
-  onMapUnload.callSubscribers()
+  await onMapUnload.callSubscribers() // TODO: add maximum await time or dialog to force continue in case of defective plugins
   await map.destruct()
   ensureMapUnloaded()
   map = undefined
