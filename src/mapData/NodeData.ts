@@ -12,8 +12,9 @@ export class NodeData extends JsonObject {
     }
 
     public static buildFromRawObject(object: any): NodeData {
-        // TODO: implement validate like in BoxMapData to warn when loaded data is corrupted
-        return new NodeData(object.id, object.x, object.y) // raw object would have no methods
+        const nodeData: NodeData = Object.setPrototypeOf(object, NodeData.prototype) // raw object would have no methods
+        nodeData.validate()
+        return nodeData
     }
 
     public constructor(id: string, x: number, y: number) {
@@ -21,6 +22,26 @@ export class NodeData extends JsonObject {
         this.id = id
         this.x = x
         this.y = y
+
+        this.validate()
+    }
+
+    private validate(): void {
+        if (!this.id || this.id.length === 0) {
+            util.logWarning('NodeData::id is undefined or null or has length 0.')
+        }
+
+        if (!this.x) {
+            util.logWarning('NodeData::x is undefined or null.')
+        } else if (this.x < 0 || this.x > 100) {
+            util.logWarning(`expected NodeData::x to be between 0 and 100 but it is ${this.x}.`)
+        }
+
+        if (!this.y) {
+            util.logWarning('NodeData::y is undefined or null.')
+        } else if (this.y < 0 || this.y > 100) {
+            util.logWarning(`expected NodeData::y to be between 0 and 100 but it is ${this.y}.`)
+        }
     }
 
     public getPosition(): LocalPosition {

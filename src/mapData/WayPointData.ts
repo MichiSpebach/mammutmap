@@ -1,3 +1,4 @@
+import { util } from '../util'
 import { LocalPosition } from "../box/Transform"
 
 export class WayPointData {
@@ -11,7 +12,9 @@ export class WayPointData {
   }
 
   public static buildFromRawObject(object: any): WayPointData {
-    return new WayPointData(object.boxId, object.boxName, object.x, object.y) // raw object would have no methods
+    const wayPointData: WayPointData = Object.setPrototypeOf(object, WayPointData.prototype) // raw object would have no methods
+    wayPointData.validate()
+    return wayPointData
   }
 
   private constructor(boxId: string, boxName: string, x: number, y: number) {
@@ -19,6 +22,30 @@ export class WayPointData {
     this.boxName = boxName
     this.x = x
     this.y = y
+
+    this.validate()
+  }
+
+  private validate(): void {
+    if (!this.boxId || this.boxId.length === 0) {
+      util.logWarning('WayPointData::boxId is undefined or null or has length 0.')
+    }
+
+    if (!this.boxName || this.boxName.length === 0) {
+      util.logWarning('WayPointData::boxName is undefined or null or has length 0.')
+    }
+
+    if (!this.x) {
+      util.logWarning('WayPointData::x is undefined or null.')
+    } else if (this.x < 0 || this.x > 100) {
+      util.logWarning(`expected WayPointData::x to be between 0 and 100 but it is ${this.x}.`)
+    }
+
+    if (!this.y) {
+      util.logWarning('WayPointData::y is undefined or null.')
+    } else if (this.y < 0 || this.y > 100) {
+      util.logWarning(`expected WayPointData::y to be between 0 and 100 but it is ${this.y}.`)
+    }
   }
 
   public getPosition(): LocalPosition {

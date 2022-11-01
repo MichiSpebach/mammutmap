@@ -26,7 +26,7 @@ export class BoxData extends JsonObject {
     return new BoxData(id, x, y, width, height, [], [])
   }
 
-  public static buildFromJson(json: string ): BoxData /*| SyntaxError*/ { // TODO: remove this method and use ofRawObject?
+  public static buildFromJson(json: string ): BoxData /*| SyntaxError*/ { // TODO: remove this method and use ofRawObject directly?
     return this.ofRawObject(JSON.parse(json)) // parsed object has no functions
   }
 
@@ -34,15 +34,15 @@ export class BoxData extends JsonObject {
     const boxData: BoxData = Object.setPrototypeOf(object, BoxData.prototype)
 
     if (!boxData.links) {
-      ((boxData.links as any) as LinkData[]) = []
+      Object.assign(boxData.links, [])
     } else {
-      ((boxData.links as any) as LinkData[]) = boxData.links.map(LinkData.buildFromRawObject) // raw object would have no methods
+      Object.assign(boxData.links, boxData.links.map(LinkData.buildFromRawObject)) // raw object would have no methods
     }
 
     if (!boxData.nodes) {
-      ((boxData.nodes as any) as NodeData[]) = []
+      Object.assign(boxData.nodes, [])
     } else {
-      ((boxData.nodes as any) as NodeData[]) = boxData.nodes.map(NodeData.buildFromRawObject) // raw object would have no methods
+      Object.assign(boxData.nodes, boxData.nodes.map(NodeData.buildFromRawObject)) // raw object would have no methods
     }
 
     boxData.validate()

@@ -18,9 +18,9 @@ export class MapSettingsData extends BoxData {
         mapSettingsData.linkTags = object.linkTags? object.linkTags.map((rawTag: any) => LinkTagData.ofRawObject(rawTag)) : []
 
         if (mapSettingsData.defaultLinkAppearance) {
-            ((mapSettingsData.defaultLinkAppearance as any) as LinkAppearanceData) = LinkAppearanceData.ofRawObject(mapSettingsData.defaultLinkAppearance)
+            Object.assign(mapSettingsData.defaultLinkAppearance, LinkAppearanceData.ofRawObject(mapSettingsData.defaultLinkAppearance))
         } else {
-            ((mapSettingsData.defaultLinkAppearance as any) as LinkAppearanceData) = new LinkAppearanceData()
+            Object.assign(mapSettingsData.defaultLinkAppearance, new LinkAppearanceData())
         }
 
         mapSettingsData.validateMapSettingsData()
