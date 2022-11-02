@@ -18,9 +18,9 @@ export class LinkTagData extends TagData {
         const linkTagData: LinkTagData = Object.setPrototypeOf(object, LinkTagData.prototype)
 
         if (linkTagData.appearance) {
-            Object.assign(linkTagData.appearance, LinkAppearanceData.ofRawObject(linkTagData.appearance)) // raw object would have no methods
+            (linkTagData.appearance as LinkAppearanceData) = LinkAppearanceData.ofRawObject(linkTagData.appearance) // raw object would have no methods
         } else {
-            Object.assign(linkTagData.appearance, new LinkAppearanceData())
+            (linkTagData.appearance as LinkAppearanceData) = new LinkAppearanceData()
         }
 
         linkTagData.validate()

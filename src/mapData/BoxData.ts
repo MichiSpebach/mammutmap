@@ -34,15 +34,15 @@ export class BoxData extends JsonObject {
     const boxData: BoxData = Object.setPrototypeOf(object, BoxData.prototype)
 
     if (!boxData.links) {
-      Object.assign(boxData.links, [])
+      (boxData.links as LinkData[]) = []
     } else {
-      Object.assign(boxData.links, boxData.links.map(LinkData.buildFromRawObject)) // raw object would have no methods
+      (boxData.links as LinkData[]) = boxData.links.map(LinkData.buildFromRawObject) // raw object would have no methods
     }
 
     if (!boxData.nodes) {
-      Object.assign(boxData.nodes, [])
+      (boxData.nodes as NodeData[]) = []
     } else {
-      Object.assign(boxData.nodes, boxData.nodes.map(NodeData.buildFromRawObject)) // raw object would have no methods
+      (boxData.nodes as NodeData[]) = boxData.nodes.map(NodeData.buildFromRawObject) // raw object would have no methods
     }
 
     boxData.validate()

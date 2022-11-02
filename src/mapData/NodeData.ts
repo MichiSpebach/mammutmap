@@ -31,16 +31,18 @@ export class NodeData extends JsonObject {
             util.logWarning('NodeData::id is undefined or null or has length 0.')
         }
 
-        if (!this.x) {
+        if (this.x === undefined || this.x === null) {
             util.logWarning('NodeData::x is undefined or null.')
         } else if (this.x < 0 || this.x > 100) {
-            util.logWarning(`expected NodeData::x to be between 0 and 100 but it is ${this.x}.`)
+            // TODO: sometimes there is a difference of epsilon, reactivate as soon as values are rounded before save
+            //util.logWarning(`expected NodeData::x to be between 0 and 100 but it is ${this.x}.`)
         }
 
-        if (!this.y) {
+        if (this.y === undefined || this.y === null) {
             util.logWarning('NodeData::y is undefined or null.')
         } else if (this.y < 0 || this.y > 100) {
-            util.logWarning(`expected NodeData::y to be between 0 and 100 but it is ${this.y}.`)
+            // TODO: sometimes there is a difference of epsilon, reactivate as soon as values are rounded before save
+            //util.logWarning(`expected NodeData::y to be between 0 and 100 but it is ${this.y}.`)
         }
     }
 
