@@ -1,5 +1,5 @@
 import { util } from './util'
-import { ElementAttributes, RenderElement, RenderElements } from './util/RenderElement'
+import { ElementAttributes, RenderElement, RenderElements, Style } from './util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from './ClientRect'
 
@@ -191,7 +191,16 @@ export class DocumentObjectModelAdapter {
 
     for (const attribute in element.attributes) {
       const attributeValue = element.attributes[attribute as keyof ElementAttributes]
-      if (typeof attributeValue === 'string' && !attribute.startsWith('on')) { // event handlers where parsed to js string in intercept method above
+      if (attribute === 'style') {
+        for (const styleAttribute in (attributeValue as Style)) {
+          const styleAttributeValue = (attributeValue as any)[styleAttribute]
+          if (typeof styleAttributeValue === 'string') {
+            js += `${elementJsName}.style.${styleAttribute}="${styleAttributeValue}";`
+          } else {
+            js += `${elementJsName}.style.${styleAttribute}=${styleAttributeValue};`
+          }
+        }
+      } else if (typeof attributeValue === 'string' && !attribute.startsWith('on')) { // event handlers where parsed to js string in intercept method above
         js += `${elementJsName}.${attribute}="${attributeValue}";`
       } else {
         js += `${elementJsName}.${attribute}=${attributeValue};`

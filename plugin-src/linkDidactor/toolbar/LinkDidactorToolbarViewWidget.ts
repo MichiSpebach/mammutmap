@@ -4,7 +4,7 @@ import * as linkDidactorSettings from '../linkDidactorSettings'
 import * as pluginFacade from '../../../dist/pluginFacade'
 import { Map, Message, Link } from '../../../dist/pluginFacade'
 import { util } from '../../../dist/util'
-import { RenderElement, RenderElements, createElement, ce } from '../../../dist/util/RenderElement'
+import { RenderElement, RenderElements, createElement, ce, ElementAttributes } from '../../../dist/util/RenderElement'
 import { LinkTagData } from '../../../dist/mapData/LinkTagData'
 import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/mapData/LinkAppearanceData'
 
@@ -56,10 +56,8 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         }
         this.renderedOrInProgress = false
 
-        await Promise.all([
-            this.clearEventListeners(),
-            renderManager.clearContentOf(this.getId()),
-        ])
+        await this.clearEventListeners()
+        await renderManager.clearContentOf(this.getId())
     }
 
     private async clearEventListeners(): Promise<void> {
@@ -111,7 +109,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         const colorDropDown: RenderElement = this.formDefaultColorDropDown()
 
         return ce('tr', {}, [
-            ce('td', {}, [label]), 
+            ce('td', this.getLabelAttributes(linkDidactorSettings.getDefaultLinkAppereanceColor()), [label]), 
             ce('td', {}, [modeDropDown]),
             ce('td', {}, [colorDropDown])
         ])
@@ -123,10 +121,17 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         const colorDropDown: RenderElement = this.formTagColorDropDown(tag)
 
         return ce('tr', {}, [
-            ce('td', {}, [label]), 
+            ce('td', this.getLabelAttributes(tag.appearance.color), [label]), 
             ce('td', {}, [modeDropDown]),
             ce('td', {}, [colorDropDown])
         ])
+    }
+
+    private getLabelAttributes(color: string|undefined): ElementAttributes {
+        if (!color || color === linkDidactorSettings.boxIdHashColorName) {
+            return {}
+        }
+        return {style: {color}}
     }
 
     private formDefaultModeDropDown(): RenderElement {
@@ -220,13 +225,19 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
     private async setDefaultLinkColor(color: string|undefined): Promise<void> {
         await linkDidactorSettings.setDefaultLinkAppereanceColorAndSave(color)
-        await this.rerenderLinks()
+        await Promise.all([
+            this.rerenderLinks(),
+            this.render()
+        ])
     }
 
     private async setLinkTagColor(tag: LinkTagData, color: string|undefined): Promise<void> {
         tag.appearance.color = color
         await linkDidactorSettings.saveToFileSystem()
-        await this.rerenderLinks()
+        await Promise.all([
+            this.rerenderLinks(),
+            this.render()
+        ])
     }
 
     private async rerenderLinks(): Promise<void> {

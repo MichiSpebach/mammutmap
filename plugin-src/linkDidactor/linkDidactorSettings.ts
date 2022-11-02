@@ -5,7 +5,7 @@ import { LinkAppearanceData, LinkAppearanceMode } from '../../dist/mapData/LinkA
 import { LinkTagData } from '../../dist/mapData/LinkTagData'
 import { style } from '../../dist/styleAdapter'
 
-export const linkColors: string[] = ['green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal', style.getLinkColor()]
+export const linkColors: string[] = ['red', 'green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal', style.getLinkColor()]
 export const boxIdHashColorName = 'boxId hash'
 export const linkColorOptions: string[] = [...linkColors, boxIdHashColorName]
 

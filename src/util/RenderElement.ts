@@ -29,12 +29,17 @@ export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'button'|'select'|'opti
 
 export type ElementAttributes = {
   id?: string,
+  style?: Style,
   selected?: boolean,
   innerHTML?: string,
   onclick?: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
   value?: string,
   onchangeValue?: (value: string) => void,
   onchangeChecked?: (checked: boolean) => void
+}
+
+export type Style = {
+  color?: string
 }
 
 export class RenderElementClass implements RenderElement {

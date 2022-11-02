@@ -45,10 +45,8 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
             return;
         }
         this.renderedOrInProgress = false;
-        await Promise.all([
-            this.clearEventListeners(),
-            RenderManager_1.renderManager.clearContentOf(this.getId()),
-        ]);
+        await this.clearEventListeners();
+        await RenderManager_1.renderManager.clearContentOf(this.getId());
     }
     async clearEventListeners() {
         await Promise.all(this.elementIdsWithChangeEventListeners.map(elementId => RenderManager_1.renderManager.removeEventListenerFrom(elementId, 'change')));
@@ -90,7 +88,7 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         const modeDropDown = this.formDefaultModeDropDown();
         const colorDropDown = this.formDefaultColorDropDown();
         return (0, RenderElement_1.ce)('tr', {}, [
-            (0, RenderElement_1.ce)('td', {}, [label]),
+            (0, RenderElement_1.ce)('td', this.getLabelAttributes(linkDidactorSettings.getDefaultLinkAppereanceColor()), [label]),
             (0, RenderElement_1.ce)('td', {}, [modeDropDown]),
             (0, RenderElement_1.ce)('td', {}, [colorDropDown])
         ]);
@@ -100,10 +98,16 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
         const modeDropDown = this.formTagModeDropDown(tag);
         const colorDropDown = this.formTagColorDropDown(tag);
         return (0, RenderElement_1.ce)('tr', {}, [
-            (0, RenderElement_1.ce)('td', {}, [label]),
+            (0, RenderElement_1.ce)('td', this.getLabelAttributes(tag.appearance.color), [label]),
             (0, RenderElement_1.ce)('td', {}, [modeDropDown]),
             (0, RenderElement_1.ce)('td', {}, [colorDropDown])
         ]);
+    }
+    getLabelAttributes(color) {
+        if (!color || color === linkDidactorSettings.boxIdHashColorName) {
+            return {};
+        }
+        return { style: { color } };
     }
     formDefaultModeDropDown() {
         const elementId = this.getDefaultModeDropDownId();
@@ -180,12 +184,18 @@ class LinkDidactorToolbarViewWidget extends Widget_1.Widget {
     }
     async setDefaultLinkColor(color) {
         await linkDidactorSettings.setDefaultLinkAppereanceColorAndSave(color);
-        await this.rerenderLinks();
+        await Promise.all([
+            this.rerenderLinks(),
+            this.render()
+        ]);
     }
     async setLinkTagColor(tag, color) {
         tag.appearance.color = color;
         await linkDidactorSettings.saveToFileSystem();
-        await this.rerenderLinks();
+        await Promise.all([
+            this.rerenderLinks(),
+            this.render()
+        ]);
     }
     async rerenderLinks() {
         const links = pluginFacade.getRootFolder().getInnerLinksRecursive().map(boxLinks => boxLinks.getLinks()).flat();
