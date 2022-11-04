@@ -1,9 +1,7 @@
-import { style } from '../styleAdapter'
 import { JsonObject } from '../JsonObject'
 import { util } from '../util'
 
-// TODO: add 'hidden' to linkAppearanceModes
-export const linkAppearanceModes = ['notRendered', 'visibleEnds', 'visible'] as const // "as const" makes LinkAppearanceMode a typesafe union of literals
+export const linkAppearanceModes = ['notRendered', 'hidden', 'visibleEnds', 'visible'] as const // "as const" makes LinkAppearanceMode a typesafe union of literals
 export type LinkAppearanceMode = typeof linkAppearanceModes[number]
 
 export class LinkAppearanceData extends JsonObject {

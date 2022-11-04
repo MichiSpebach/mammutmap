@@ -30,7 +30,10 @@ export class DidactedLinkLine extends LinkLineImplementation {
                 return true
 
             case 'visibleEnds':
-                return false
+                return false // TODO: implement smooth disappearing like for 'hidden' as well
+
+            case 'hidden':
+                return true // sometimes visible because of smooth disappearing
 
             default:
                 util.logWarning(`Unexpected LinkTagMode ${mode}`) // should also never be called if link is 'notRendered' at all

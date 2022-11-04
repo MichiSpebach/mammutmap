@@ -29,8 +29,6 @@ export class Link implements Hoverable {
   private highlight: boolean = false
   private draggingInProgress: boolean = false
   private hoveringOver: boolean = false
-  private currentStyle: string|null = null
-  private styleTimer: NodeJS.Timeout|null = null
 
   public static new(data: LinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget): Link {
     return new LinkImplementation(data, managingBox, from, to)
@@ -95,7 +93,6 @@ export class Link implements Hoverable {
     const lineInnerHtml: string = await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver)
 
     const proms: Promise<any>[] = []
-    proms.push(this.updateStyle(priority)) // called before setContentTo(..) to avoid rendering for short time if hidden
 
     if (!this.rendered) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
@@ -131,53 +128,10 @@ export class Link implements Hoverable {
     proms.push(this.removeEventListeners())
     proms.push(this.from.unrender())
     proms.push(this.to.unrender())
-    this.clearStyleTimer()
 
     this.rendered = false
     await Promise.all(proms)
     await renderManager.clearContentOf(this.getId())
-  }
-
-  private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    let style: string = '';
-
-    const firstCall: boolean = !this.currentStyle
-    const hideTransitionDurationInMs = 1000
-    let startDisplayNoneTimer: boolean = false
-    if (this.includesTag('hidden')) { // TODO: simplify and move hidden logic into LinkDidactor plugin
-      if (this.highlight) {
-        style = 'opacity:0.5;'
-      } else if (firstCall) {
-        style = 'display:none;'
-      } else {
-        startDisplayNoneTimer = true
-        style = 'transition-duration:'+hideTransitionDurationInMs+'ms;opacity:0;'
-      }
-    }
-
-    if (this.currentStyle === style) {
-      return
-    }
-    this.currentStyle = style
-
-    this.clearStyleTimer()
-    if (startDisplayNoneTimer) {
-      this.styleTimer = setTimeout(() => {
-        renderManager.setStyleTo(this.getId(), 'display:none;', priority)
-        this.styleTimer = null
-      }, hideTransitionDurationInMs)
-    }
-
-    if (!firstCall || style !== '') {
-      await renderManager.setStyleTo(this.getId(), style, priority)
-    }
-  }
-
-  private clearStyleTimer() {
-    if (this.styleTimer) {
-      clearTimeout(this.styleTimer)
-      this.styleTimer = null
-    }
   }
 
   public getColor(): string {

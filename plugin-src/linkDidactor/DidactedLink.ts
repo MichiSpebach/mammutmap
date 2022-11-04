@@ -1,21 +1,36 @@
 import { WayPointData } from '../../dist/box/WayPointData'
+import { LinkAppearanceMode } from '../../dist/mapData/LinkAppearanceData'
 import { NodeWidget } from '../../dist/node/NodeWidget'
 import { Box, LinkImplementation } from '../../dist/pluginFacade'
-import { RenderPriority } from '../../dist/RenderManager'
+import { renderManager, RenderPriority } from '../../dist/RenderManager'
 import * as linkDidactorSettings from './linkDidactorSettings'
 
 export class DidactedLink extends LinkImplementation {
+    private currentStyle: string|null = null
+    private styleTimer: NodeJS.Timeout|null = null
 
     public static getSuperClass(): typeof LinkImplementation {
         return Object.getPrototypeOf(DidactedLink.prototype).constructor
     }
 
-    public render(priority?: RenderPriority): Promise<void> {
-        if (linkDidactorSettings.getComputedModeForLinkTags(this.getTags()) === 'notRendered') {
+    public async render(priority?: RenderPriority): Promise<void> {
+        if (this.getMode() === 'notRendered') {
             return super.unrender()
         }
 
-        return super.render(priority)
+        await Promise.all([
+            this.updateStyle(priority), // called before super.render() to avoid rendering for short time if hidden
+            super.render(priority)
+        ])
+    }
+
+    public async unrender(): Promise<void> {
+        this.clearStyleTimer()
+        await super.unrender()
+    }
+
+    public getMode(): LinkAppearanceMode {
+        return linkDidactorSettings.getComputedModeForLinkTags(this.getTags())
     }
 
     public getColor(): string {
@@ -40,6 +55,48 @@ export class DidactedLink extends LinkImplementation {
         
         const hash: number = toBoxId.charCodeAt(0) + toBoxId.charCodeAt(toBoxId.length/2) + toBoxId.charCodeAt(toBoxId.length-1)
         return linkDidactorSettings.linkColors[hash % linkDidactorSettings.linkColors.length]
+    }
+
+    private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+        let style: string = '';
+    
+        const firstCall: boolean = !this.currentStyle
+        const hideTransitionDurationInMs = 1000
+        let startDisplayNoneTimer: boolean = false
+        if (this.getMode() === 'hidden') {
+          if (this.isHighlight()) {
+            style = 'opacity:0.5;'
+          } else if (firstCall) {
+            style = 'display:none;'
+          } else {
+            startDisplayNoneTimer = true
+            style = 'transition-duration:'+hideTransitionDurationInMs+'ms;opacity:0;'
+          }
+        }
+    
+        if (this.currentStyle === style) {
+          return
+        }
+        this.currentStyle = style
+    
+        this.clearStyleTimer()
+        if (startDisplayNoneTimer) {
+          this.styleTimer = setTimeout(() => {
+            renderManager.setStyleTo(this.getId(), 'display:none;', priority)
+            this.styleTimer = null
+          }, hideTransitionDurationInMs)
+        }
+    
+        if (!firstCall || style !== '') {
+          await renderManager.setStyleTo(this.getId(), style, priority)
+        }
+    }
+
+    private clearStyleTimer() {
+        if (this.styleTimer) {
+            clearTimeout(this.styleTimer)
+            this.styleTimer = null
+        }
     }
 
 }
