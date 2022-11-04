@@ -2,9 +2,9 @@ import { Box } from '../../src/box/Box'
 import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
 import { FolderBox } from '../../src/box/FolderBox'
 import { LinkEnd } from '../../src/link/LinkEnd'
-import { LinkEndData } from '../../src/box/LinkEndData'
+import { LinkEndData } from '../../src/mapData/LinkEndData'
 import { RootFolderBox } from '../../src/box/RootFolderBox'
-import { WayPointData } from '../../src/box/WayPointData'
+import { WayPointData } from '../../src/mapData/WayPointData'
 import { DocumentObjectModelAdapter, init as initDocumentObjectModelAdapter } from '../../src/domAdapter'
 import { RenderManager, init as initRenderManager } from '../../src/RenderManager'
 import { NodeData} from '../../src/mapData/NodeData'
@@ -12,7 +12,7 @@ import { NodeWidget } from '../../src/node/NodeWidget'
 import { util } from '../../src/util'
 import * as boxFactory from '../box/factories/boxFactory'
 import * as linkEndFactory from './factories/linkEndFactory'
-import { BoxMapLinkData } from '../../src/box/BoxMapLinkData'
+import { LinkData } from '../../src/mapData/LinkData'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 
@@ -356,7 +356,7 @@ async function setupRenderedScenarioWithDepthAndNode(): Promise<{
     node: NodeWidget
 }> {
     const scene = setupRenderedScenarioWithDepth()
-    const boxMapLinkData = new BoxMapLinkData('linkId', scene.linkEndData, scene.linkEndData)
+    const boxMapLinkData = new LinkData('linkId', scene.linkEndData, scene.linkEndData)
     scene.linkEnd.getReferenceLink().getData = () => boxMapLinkData
     await scene.innerBox.nodes.add(new NodeData('nodeId', 75, 25))
     return { ...scene, node: scene.innerBox.nodes.getNodeById('nodeId')! }

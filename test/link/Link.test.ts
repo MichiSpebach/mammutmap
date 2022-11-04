@@ -1,6 +1,6 @@
 import { MockProxy, mock } from 'jest-mock-extended'
-import { BoxMapLinkData } from '../../src/box/BoxMapLinkData'
-import { WayPointData } from '../../src/box/WayPointData'
+import { LinkData } from '../../src/mapData/LinkData'
+import { WayPointData } from '../../src/mapData/WayPointData'
 import { Box } from '../../src/box/Box'
 import { FolderBox } from '../../src/box/FolderBox'
 import { Link } from '../../src/link/Link'
@@ -8,8 +8,8 @@ import { ClientRect } from '../../src/ClientRect'
 import { DocumentObjectModelAdapter, init as initDomAdapter } from '../../src/domAdapter'
 import { RenderManager, init as initRenderManager } from '../../src/RenderManager'
 import { Transform } from '../../src/box/Transform'
-import { LinkEndData } from '../../src/box/LinkEndData'
-import { BoxMapData } from '../../src/box/BoxMapData'
+import { LinkEndData } from '../../src/mapData/LinkEndData'
+import { BoxData } from '../../src/mapData/BoxData'
 import { RootFolderBox } from '../../src/box/RootFolderBox'
 import { ProjectSettings } from '../../src/ProjectSettings'
 import { fileSystem } from '../../src/fileSystemAdapter'
@@ -49,7 +49,7 @@ test('reorderAndSave', async () => {
 
   await scenario.link.reorderAndSave()
 
-  const linkData: BoxMapLinkData = scenario.link.getData()
+  const linkData: LinkData = scenario.link.getData()
   expect(linkData.from.path).toHaveLength(1)
   expect(linkData.from.path[0].boxId).toEqual('fromBox')
   expect(linkData.from.path[0].x).toEqual(50)
@@ -70,15 +70,24 @@ function setupSimpleScenario(): {
 } {
   const fromWayPoints: WayPointData[] = [WayPointData.buildNew('fromBox', 'FromBox', 50, 50)]
   const toWayPoints: WayPointData[] = [WayPointData.buildNew('toBox', 'ToBox', 50, 50)]
-  const linkData: BoxMapLinkData = new BoxMapLinkData('link', new LinkEndData(fromWayPoints), new LinkEndData(toWayPoints))
+  const linkData: LinkData = new LinkData('link', new LinkEndData(fromWayPoints), new LinkEndData(toWayPoints))
 
   //const managingBox: MockProxy<FolderBox> = mock<FolderBox>() // TODO: fix jest-mock-extended
   //const fromBox: MockProxy<Box> = mock<Box>()
   //const toBox: MockProxy<Box> = (() => mock<Box>())()
-  const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, new MapSettingsData('src', 'map'))
-  const managingBox: FolderBox = new RootFolderBox(projectSettings, 'map', BoxMapData.buildNewWithId('managingBox', 0, 0, 100, 100), false)
-  const fromBox: Box = new FolderBox('FromBox', managingBox, BoxMapData.buildNewWithId('fromBox', 5, 5, 10, 10), false)
-  const toBox: Box = new FolderBox('ToBox', managingBox, BoxMapData.buildNewWithId('toBox', 85, 5, 10, 10), false)
+  const mapSettingsData: MapSettingsData = new MapSettingsData({
+    id: 'managingBox',
+    x: 0, y: 0, width: 100, height: 100,
+    links: [],
+    nodes: [],
+    srcRootPath: 'src',
+    mapRootPath: 'map',
+    linkTags: []
+  })
+  const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, mapSettingsData, false)
+  const managingBox: FolderBox = new RootFolderBox(projectSettings, 'map')
+  const fromBox: Box = new FolderBox('FromBox', managingBox, BoxData.buildNewWithId('fromBox', 5, 5, 10, 10), false)
+  const toBox: Box = new FolderBox('ToBox', managingBox, BoxData.buildNewWithId('toBox', 85, 5, 10, 10), false)
 
   Object.defineProperty(managingBox, 'transform', {value: new Transform(managingBox)})
   managingBox.getClientRect = () => Promise.resolve(new ClientRect(0, 0, 100, 100))

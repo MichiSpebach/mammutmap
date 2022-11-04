@@ -1,6 +1,6 @@
 import { mock } from 'jest-mock-extended'
 import { ClientPosition, LocalPosition, Transform } from '../../src/box/Transform'
-import { BoxMapData } from '../../src/box/BoxMapData'
+import { BoxData } from '../../src/mapData/BoxData'
 import { FolderBox } from '../../src/box/FolderBox'
 import { ClientRect } from '../../src/ClientRect'
 
@@ -24,9 +24,9 @@ test('getNearestGridPositionOf rounds to multiple of 4', () => {
 })
 
 function setupScenario(): {transform: Transform, otherTransform: Transform} {
-  const box: FolderBox = new FolderBox('src/box', null, mock<BoxMapData>(), false)
+  const box: FolderBox = new FolderBox('src/box', null, mock<BoxData>(), false)
   box.getClientRect = () => Promise.resolve(new ClientRect(500, 300, 400, 200))
-  const otherBox: FolderBox = new FolderBox('src/box/other', null, mock<BoxMapData>(), false)
+  const otherBox: FolderBox = new FolderBox('src/box/other', null, mock<BoxData>(), false)
   otherBox.getClientRect = () => Promise.resolve(new ClientRect(550, 350, 200, 100))
 
   return {transform: box.transform, otherTransform: otherBox.transform}

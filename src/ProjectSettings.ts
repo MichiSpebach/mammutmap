@@ -45,7 +45,7 @@ export class ProjectSettings { // TODO: rename to MapSettings?
     return new ProjectSettings(filePath, data, false)
   }
 
-  private constructor(projectSettingsFilePath: string, data: MapSettingsData, mapDataFileExists: boolean) {
+  public constructor(projectSettingsFilePath: string, data: MapSettingsData, mapDataFileExists: boolean) {
     this.projectSettingsFilePath = projectSettingsFilePath
 
     const projectSettingsFolderPath: string = util.removeLastElementFromPath(projectSettingsFilePath)

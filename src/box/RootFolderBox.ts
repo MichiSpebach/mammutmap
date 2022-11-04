@@ -8,8 +8,8 @@ export class RootFolderBox extends FolderBox {
   private readonly idRenderedInto: string
   private cachedClientRect: ClientRect|null = null
 
-  public constructor(projectSettings: ProjectSettings, idRenderedInto: string, mapDataFileExists: boolean) {
-    super(projectSettings.getAbsoluteSrcRootPath(), null, projectSettings.data, mapDataFileExists)
+  public constructor(projectSettings: ProjectSettings, idRenderedInto: string) {
+    super(projectSettings.getAbsoluteSrcRootPath(), null, projectSettings.data, projectSettings.isDataFileExisting())
     this.projectSettings = projectSettings
     this.idRenderedInto = idRenderedInto
   }

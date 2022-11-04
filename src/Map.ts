@@ -144,7 +144,7 @@ export class Map {
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
     this.projectSettings = projectSettings
-    this.rootFolder = new RootFolderBox(projectSettings, 'mapMover', projectSettings.isDataFileExisting())
+    this.rootFolder = new RootFolderBox(projectSettings, 'mapMover')
   }
 
   public async render(): Promise<void> {
