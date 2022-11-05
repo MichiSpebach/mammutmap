@@ -1,5 +1,5 @@
 import { mock } from 'jest-mock-extended'
-import { BoxMapData } from '../../src/box/BoxMapData'
+import { BoxData } from '../../src/mapData/BoxData'
 import { FolderBox } from '../../src/box/FolderBox'
 import { FileBox } from '../../src/box/FileBox'
 import { BoxWatcher } from '../../src/box/BoxWatcher'
@@ -61,9 +61,9 @@ function setupScenarioForGetBoxBySourcePathAndRenderIfNecessary(): {
   innerBox: FolderBox,
   fileBox: FileBox
 } {
-  const box: FolderBox = new FolderBox('src/box', null, mock<BoxMapData>(), false)
-  const innerBox: FolderBox = new FolderBox('innerBox', box, mock<BoxMapData>(), false)
-  const fileBox: FileBox = new FileBox('fileBox', innerBox, mock<BoxMapData>(), false)
+  const box: FolderBox = new FolderBox('src/box', null, mock<BoxData>(), false)
+  const innerBox: FolderBox = new FolderBox('innerBox', box, mock<BoxData>(), false)
+  const fileBox: FileBox = new FileBox('fileBox', innerBox, mock<BoxData>(), false)
 
   box.getSrcPath = () => 'src/box'
   box.getBoxes = () => [innerBox]

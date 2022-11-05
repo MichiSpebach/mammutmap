@@ -1,4 +1,4 @@
-import { mainWidget } from './mainWidget'
+import * as indexHtmlIds from './indexHtmlIds'
 import { renderManager } from './RenderManager'
 import { style } from './styleAdapter'
 import { Widget } from './Widget'
@@ -25,7 +25,7 @@ export abstract class PopupWidget extends Widget {
         html += this.formContentHtml()
         html += '</div>'
 
-        await renderManager.addContentTo(mainWidget.getId(), html)
+        await renderManager.addContentTo(indexHtmlIds.bodyId, html)
 
         await renderManager.addEventListenerTo(this.id+'Close', 'click', async () => {
             if (this.onClose) {

@@ -1,7 +1,7 @@
 import { Box } from '../../../src/box/Box'
 import { Link } from '../../../src/link/Link'
 import { LinkEnd } from '../../../src/link/LinkEnd'
-import { LinkEndData } from '../../../src/box/LinkEndData'
+import { LinkEndData } from '../../../src/mapData/LinkEndData'
 import * as linkFactory from './linkFactory'
 
 export function renderedOf(linkEndData: LinkEndData, managingBox: Box, boxesRegisteredAt: Box[]): LinkEnd {
