@@ -22,9 +22,7 @@ test('render', async () => {
 
   await scenario.link.render()
 
-  //expect(scenario.renderMan.setContentTo).toHaveBeenCalledWith('link', any())) // TODO: make something like this work
-  expect(scenario.renderMan.setContentTo).toHaveBeenCalledWith('link', '<svg id="linksvg"><line id="linkLine" x1="15%" y1="10%" x2="85%" y2="10%" class="highlightTransition" style="stroke:#2060c0;stroke-width:2px;pointer-events:auto;"/></svg><div id="linkfrom" draggable="true" class="highlightTransition"></div><div id="linkto" draggable="true" class="highlightTransition"></div>', 1)
-  expect(scenario.renderMan.setStyleTo).toHaveBeenCalledWith('linksvg', 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;', 1)
+  expect(scenario.renderMan.setContentTo).toHaveBeenCalledWith('link', expect.anything(), 1)
   //expect(scenario.fromBox.registerBorderingLink).toHaveBeenCalledWith(scenario.link) // TODO: fix jest-mock-extended
   //expect(scenario.toBox.registerBorderingLink).toHaveBeenCalledWith(scenario.link)
   expect(scenario.renderMan.setStyleTo).toHaveBeenCalledWith('linkfrom', 'position:absolute;left:15%;top:10%;width:10px;height:10px;background-color:#2060c0;transform:translate(-5px,-5px);')
