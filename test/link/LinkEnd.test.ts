@@ -13,6 +13,7 @@ import { util } from '../../src/util'
 import * as boxFactory from '../box/factories/boxFactory'
 import * as linkEndFactory from './factories/linkEndFactory'
 import { LinkData } from '../../src/mapData/LinkData'
+import { ClientRect } from '../../src/ClientRect'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 
@@ -131,7 +132,7 @@ test('reorderMapDataPathWithoutRender deep, change only position, while dragging
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
-test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag nodeWidget into parentBox; then drag nodeWidget back', async () => {
+    test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag nodeWidget into parentBox; then drag nodeWidget back', async () => {
     const scene = await setupRenderedScenarioWithDepthAndNode()
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -140,13 +141,19 @@ test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag node
     ])
     scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
 
-    // drag linkEnd into nodeWidget
-    await scene.linkEnd.drag(627.2+345.6*0.8, 313.6+172.8*0.2, scene.node, false)
+    expect(await scene.outerBox.getClientRect()).toEqual({x: 512, y: 256, width: 576, height: 288})
+    expect(await scene.innerBox.getClientRect()).toEqual({x: 627.2, y: 313.6, width: expect.closeTo(345.6), height: expect.closeTo(172.8)})
+    const nodeClientRect: ClientRect = await scene.node.getClientShape()
+    expect(nodeClientRect).toEqual({x: expect.closeTo(627.2+345.6*0.75 - 14/2), y: 313.6+172.8*0.25 - 14/2, width: 14, height: 14})
+    expect(scene.node.getRenderPosition()).toEqual({percentX: 75, percentY: 25})
+
+    // drag linkEnd to nodeWidget
+    await scene.linkEnd.drag(nodeClientRect.x + 14/2, nodeClientRect.y + 14/2, scene.node, false)
     await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
 
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
-        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 80, y: 20},
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 75, y: 25},
         {boxId: 'nodeId', boxName: 'nodenodeId', x: 50, y: 50}
     ])
     expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
@@ -155,11 +162,9 @@ test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag node
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
 
     // drag nodeWidget into parentBox
-    ;(scene.node as any).managingBox = scene.outerBox
-    // TODO: remove from innerBox
-    ;(scene.outerBox.nodes as any).nodeWidgets.push(scene.node)
-
-    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+    scene.linkEnd.getReferenceLink().reorderAndSave = async () => await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+    await scene.node.drag(512, 256, scene.outerBox, false)
+    await scene.node.dragEnd(scene.outerBox)
 
     expect(scene.linkEndData.path).toEqual([
         {boxId: 'nodeId', boxName: 'nodenodeId', x: 50, y: 50}
@@ -170,15 +175,13 @@ test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag node
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
 
     // drag nodeWidget back
-    ;(scene.node as any).managingBox = scene.innerBox
-    // TODO: remove from outerBox
-    ;(scene.innerBox.nodes as any).nodeWidgets.push(scene.node)
-
-    await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+    scene.linkEnd.getReferenceLink().reorderAndSave = async () => await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
+    await scene.node.drag(nodeClientRect.x + 14/2, nodeClientRect.y + 14/2, scene.innerBox, false)
+    await scene.node.dragEnd(scene.innerBox)
 
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
-        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 80, y: 20},
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 75, y: 25},
         {boxId: 'nodeId', boxName: 'nodenodeId', x: 50, y: 50}
     ])
     expect(scene.outerBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(false)
