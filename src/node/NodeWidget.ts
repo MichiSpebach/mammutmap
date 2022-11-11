@@ -28,7 +28,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         super()
         this.mapData = mapData
         this.managingBox = managingBox
-        this.borderingLinks = new BorderingLinks(this)
+        this.borderingLinks = new BorderingLinks(this, this.getParentBorderingLinks().getLinksThatIncludeWayPointFor(this)) // TODO: handle second parameter in BorderingLinks
     }
 
     public getId(): string {
@@ -41,6 +41,10 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
 
     public getMapData(): NodeData {
         return this.mapData
+    }
+
+    public getParentBorderingLinks(): BorderingLinks {
+        return this.managingBox.borderingLinks
     }
 
     public getManagingBox(): Box {
@@ -98,7 +102,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         proms.push(renderManager.setStyleTo(this.getId(), positionStyle+sizeStyle+borderStyle+colorStyle, priority))
 
         if (!this.rendered) {
-            proms.push(this.getManagingBox().borderingLinks.renderLinksThatIncludeWayPointFor(this.getId()))
+            proms.push(this.borderingLinks.renderAll())
             DragManager.addDropTarget(this)
             proms.push(DragManager.addDraggable(this, priority))
             proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, clientX, clientY)))
@@ -115,7 +119,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         }
         this.unrenderInProgress = true
         const proms: Promise<any>[] = []
-        proms.push(this.getManagingBox().borderingLinks.renderLinksThatIncludeWayPointFor(this.getId()))
+        proms.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
         DragManager.removeDropTarget(this)
         proms.push(DragManager.removeDraggable(this, priority))
         proms.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))

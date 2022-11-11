@@ -47,7 +47,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.header = this.createHeader()
     this.nodes = new BoxNodesWidget(this)
     this.links = new BoxLinks(this)
-    this.borderingLinks = new BorderingLinks(this)
+    this.borderingLinks = new BorderingLinks(this, this.getParentBorderingLinks().getLinksThatIncludeWayPointFor(this))
 
     boxManager.addBox(this)
   }
@@ -58,7 +58,6 @@ export abstract class Box implements DropTarget, Hoverable {
       await this.unrenderIfPossible(true)
     }
     boxManager.removeBox(this)
-    await this.renderBorderingLinks() // otherwise borderingLinks would not float back to border of parent
   }
 
   protected abstract createHeader(): BoxHeader // TODO: make this somehow a constructor argument for subclasses
@@ -99,6 +98,13 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.getParent().getProjectSettings()
   }
 
+  public getParentBorderingLinks(): BorderingLinks {
+    if (!this.parent) {
+      return new BorderingLinks(this, []) // TODO: override/implement this in RootFolderBox, don't give in 'this' (maybe implement BorderingLinks.buildEmpty())
+    }
+    return this.parent.borderingLinks
+  }
+
   public getParent(): FolderBox|never {
     if (this.parent == null) {
       util.logError('Box.getParent() cannot be called on root.')
@@ -107,7 +113,7 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public isRoot(): boolean {
-    return false
+    return false // TODO: replace with !this.parent?
   }
 
   public abstract isFolder(): boolean
@@ -231,7 +237,7 @@ export abstract class Box implements DropTarget, Hoverable {
       await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+bodyHtml+headerHtml+borderHtml+scaleToolPlaceholderHtml+nodesHtml+linksHtml)
 
       await this.header.render()
-      await this.renderBorderingLinks()
+      await this.borderingLinks.renderAll()
     }
 
     await this.renderBody()
@@ -277,18 +283,12 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.links.unrender())
     proms.push(this.nodes.unrender())
     proms.push(this.unrenderAdditional())
+    proms.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
     await Promise.all(proms)
 
     this.unrenderInProgress = false
     this.rendered = false
     return {rendered: false}
-  }
-
-  private async renderBorderingLinks(): Promise<void> {
-    if (this.isRoot()) {
-      return
-    }
-    await this.getParent().borderingLinks.renderLinksThatIncludeWayPointFor(this.getId())
   }
 
   private onHoverOver(): void {

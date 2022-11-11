@@ -201,14 +201,13 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   // TODO: remove parameter positionInManagingBoxCoords
   // TODO: now more frequent called, add renderPriority
   public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
-    this.updateBoxesRegisteredAtAndBorderingBox() // important because zooming could have happened
-
     await Promise.all([ // TODO: await at end of method
       this.renderShape(positionInManagingBoxCoords, angleInRadians),
       this.setHighlight()
     ])
 
     if (!this.rendered) {
+      this.updateBoxesRegisteredAtAndBorderingBox()
       DragManager.addDraggable(this)
       this.rendered = true
     }

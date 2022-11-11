@@ -180,7 +180,7 @@ export class Link implements Hoverable {
     return style.getHighlightLinkClass()
   }
 
-  public async reorderAndSave(renderOptions?: {
+  public async reorderAndSave(renderOptions?: { // TODO: rename to reorderAndSaveAndRender()?
     priority?: RenderPriority
     highlight?: boolean
     draggingInProgress?: boolean

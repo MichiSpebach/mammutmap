@@ -6,10 +6,11 @@ import { NodeWidget } from "../node/NodeWidget"
 
 export class BorderingLinks {
   private readonly referenceBoxOrNode: Box|NodeWidget
-  protected readonly links: Link[] = []
+  protected readonly links: Link[]
 
-  public constructor(referenceBoxOrNode: Box|NodeWidget) {
+  public constructor(referenceBoxOrNode: Box|NodeWidget, links: Link[]) {
     this.referenceBoxOrNode = referenceBoxOrNode
+    this.links = links
   }
 
   public async reorderAndSaveAll(): Promise<void> {
@@ -24,17 +25,10 @@ export class BorderingLinks {
     await Promise.all(this.links.map(link => link.renderWithOptions({highlight})))
   }
 
-  public async renderLinksThatIncludeWayPointFor(boxOrNodeId: string): Promise<void> {
-    const linksToUpdate: Link[] = this.filterFor(boxOrNodeId)
-    await Promise.all(linksToUpdate.map(async (link: Link) => {
-      await link.render()
-    }))
-  }
-
-  private filterFor(boxId: string): Link[] {
+  public getLinksThatIncludeWayPointFor(boxOrNode: Box|NodeWidget): Link[] {
     return this.links.filter((link: Link) => {
-        return link.getData().from.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
-            || link.getData().to.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxId)
+        return link.getData().from.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxOrNode.getId())
+            || link.getData().to.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxOrNode.getId())
       }
     )
   }
