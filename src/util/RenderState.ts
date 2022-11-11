@@ -17,7 +17,7 @@ export class RenderState { // TODO: develop to Promise based RenderScheduler?
             //util.logWarning('RenderState::finishRender() called while rendered already true') // TODO reactivate?
         }
         if (!this.renderInProgress) {
-            util.logWarning('RenderState::finishRender() called while renderInProgress is false')
+            //util.logWarning('RenderState::finishRender() called while renderInProgress is false') // TODO happens because of not handled race conditions, fix usages and reactivate asap
         }
         this.rendered = true
         this.renderInProgress = false
