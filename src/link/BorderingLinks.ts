@@ -1,14 +1,15 @@
-import { WayPointData } from "../mapData/WayPointData";
-import { util } from "../util";
-import { Link } from "./Link";
-import { Box } from "../box/Box";
+import { WayPointData } from "../mapData/WayPointData"
+import { util } from "../util"
+import { Link } from "./Link"
+import { Box } from "../box/Box"
+import { NodeWidget } from "../node/NodeWidget"
 
 export class BorderingLinks {
-  private readonly referenceBox: Box
+  private readonly referenceBoxOrNode: Box|NodeWidget
   protected readonly links: Link[] = []
 
-  public constructor(referenceBox: Box) {
-    this.referenceBox = referenceBox
+  public constructor(referenceBoxOrNode: Box|NodeWidget) {
+    this.referenceBoxOrNode = referenceBoxOrNode
   }
 
   public async reorderAndSaveAll(): Promise<void> {
@@ -41,21 +42,21 @@ export class BorderingLinks {
   public register(link: Link): void {
     if (this.includes(link)) {
       let message = `Trying to register borderingLink with id ${link.getId()}`
-      message += ` to box with name ${this.referenceBox.getName()} that is already registered at this box.`
+      message += ` to box with name ${this.referenceBoxOrNode.getName()} that is already registered at this box.`
       util.logWarning(message)
       return
     }
     this.links.push(link)
-    if (!this.referenceBox.isMapDataFileExisting()) {
+    if (!this.referenceBoxOrNode.isMapDataFileExisting()) {
       // otherwise managingBox of link would save linkPath with not persisted boxId
-      this.referenceBox.saveMapData()
+      this.referenceBoxOrNode.saveMapData()
     }
   }
 
   public deregister(link: Link): void {
     if (!this.includes(link)) {
       let message = `Trying to deregister borderingLink with id ${link.getId()}`
-      message += ` from box with name ${this.referenceBox.getName()} that is not registered at this box.`
+      message += ` from box with name ${this.referenceBoxOrNode.getName()} that is not registered at this box.`
       util.logWarning(message)
       return
     }
@@ -67,7 +68,7 @@ export class BorderingLinks {
   }
 
   public getOutgoingLinks(): Link[] {
-    return this.links.filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBox))
+    return this.links.filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
   }
 
 }

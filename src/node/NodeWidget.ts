@@ -15,7 +15,7 @@ import * as contextMenu from '../contextMenu/contextMenu'
 
 export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     private readonly mapData: NodeData
-    private managingBox: Box
+    private managingBox: Box // TODO: rename to parent?
     public readonly borderingLinks: BorderingLinks
     private rendered: boolean = false
     private renderInProgress: boolean = false
@@ -28,11 +28,15 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         super()
         this.mapData = mapData
         this.managingBox = managingBox
-        this.borderingLinks = new BorderingLinks(managingBox)
+        this.borderingLinks = new BorderingLinks(this)
     }
 
     public getId(): string {
         return this.mapData.id
+    }
+
+    public getName(): string {
+        return this.mapData.id // TODO: add name field to NodeData
     }
 
     public getMapData(): NodeData {
@@ -64,6 +68,14 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
 
     public getSavePosition(): LocalPosition {
         return this.mapData.getPosition()
+    }
+
+    public isMapDataFileExisting(): boolean {
+        return this.getManagingBox().isMapDataFileExisting()
+    }
+
+    public saveMapData(): Promise<void> {
+        return this.getManagingBox().saveMapData()
     }
 
     private async setDragStateAndRender(
@@ -169,7 +181,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
             const oldManagingBox: Box = this.managingBox
             this.managingBox = dropTarget
             await BoxNodesWidget.changeManagingBoxOfNodeAndSave(oldManagingBox, dropTarget, this)
-            proms.push(this.borderingLinks.reorderAndSaveAll())
+            proms.push(this.borderingLinks.reorderAndSaveAll()) // TODO: this should be included in changeManagingBoxOfNodeAndSave()
         }
 
         proms.push(this.setDragStateAndRender(null, RenderPriority.RESPONSIVE))

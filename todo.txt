@@ -1,4 +1,6 @@
 
+TitleCompressor|TextCompressor|TitleEllipsis plugin: compresses long names like 'SomeWidget.ts' to 'So…Wi…ts' (uses one ellipsis char instead of three dots)
+
 plugin that pulls boxes into view when hovering on link
 togglePull/keepInsideView option on contextMenu/BoxHeader of Box that holds Box inside view
 
@@ -48,7 +50,7 @@ when link is created over contextMenu and click in contextMenu is outside of lin
 
 done, but check if working correctly: fix borderingLinks, links are not always updated correctly when dragged
 
-introduce interface Linkable, Box and NodeWidget implement it and have a list of borderingLinks
+introduce interface Linkable|NodeLike or superclass (Abstract)Node, Box and NodeWidget implement it and have a list of borderingLinks
 
 when a linkHead is dragged over another linkHead and a box the dropTarget is the linkHeads baseBox but it should be the box (somehow set pointer-events: none; for all linkHeads while dragging)
 
