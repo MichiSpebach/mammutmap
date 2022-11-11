@@ -30,10 +30,11 @@ export abstract class Box implements DropTarget, Hoverable {
   private mapDataFileExists: boolean
   public readonly transform: Transform
   private readonly header: BoxHeader
-  public readonly nodes: BoxNodesWidget
+  public readonly nodes: BoxNodesWidget // TODO: introduce (Abstract)NodesWidget|SubNodesWidget|ChildNodesWidget that contains all sorts of childNodes (Boxes and LinkNodes)?
   public readonly links: BoxLinks // TODO: rename to managedLinks?
   public readonly borderingLinks: BorderingLinks
   private rendered: boolean = false
+  private renderInProgress: boolean = false // TODO: introduce RenderState or RenderScheduler class
   private unrenderInProgress: boolean = false
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
@@ -124,6 +125,16 @@ export abstract class Box implements DropTarget, Hoverable {
 
   protected isRendered(): boolean {
     return this.rendered
+  }
+
+  public shouldBeRendered(): boolean { // TODO: rename to isRenderedOrInProgress()|isAboutToRender()|isBeingRendered()?
+    if (this.renderInProgress) {
+        return true
+    } else if (this.unrenderInProgress) {
+        return false
+    } else {
+        return this.rendered
+    }
   }
 
   public async setParentAndFlawlesslyResizeAndSave(newParent: FolderBox): Promise<void> {
@@ -222,6 +233,9 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async render(): Promise<void> {
+    // TODO: there can be race conditions, handle if renderInProgress is already true
+    this.renderInProgress = true
+
     if (!this.isRendered()) {
       this.renderStyle()
 
@@ -256,6 +270,7 @@ export abstract class Box implements DropTarget, Hoverable {
 
     await this.renderAdditional()
     this.rendered = true
+    this.renderInProgress = false
   }
 
   public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
