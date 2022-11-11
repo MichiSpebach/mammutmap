@@ -13,13 +13,14 @@ import { NodeWidget } from '../node/NodeWidget'
 import { Shape } from '../shape/Shape'
 import { FolderBox } from '../box/FolderBox'
 import * as linkUtil from './linkUtil'
+import { RenderState } from '../util/RenderState'
 
 export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly id: string
   private readonly data: LinkEndData
   private readonly referenceLink: Link
   private shape: 'square'|'arrow'
-  private rendered: boolean = false
+  private renderState: RenderState = new RenderState()
   private boxesRegisteredAt: (Box|NodeWidget)[] = []
   private renderedTarget: Box|NodeWidget|undefined
   private dragState: {
@@ -201,22 +202,26 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   // TODO: remove parameter positionInManagingBoxCoords
   // TODO: now more frequent called, add renderPriority
   public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
+    this.renderState.startRender()
+
     await Promise.all([ // TODO: await at end of method
       this.renderShape(positionInManagingBoxCoords, angleInRadians),
       this.setHighlight()
     ])
 
-    if (!this.rendered) {
+    if (!this.renderState.isRendered()) {
       this.updateBoxesRegisteredAtAndBorderingBox()
       DragManager.addDraggable(this)
-      this.rendered = true
     }
+
+    this.renderState.finishRender()
   }
 
   public async unrender(): Promise<void> {
-    if (!this.rendered) {
+    if (!this.renderState.isRendered()) {
       return
     }
+    this.renderState.startUnrender()
 
      // TODO: in some cases link should also be tracked by borderingBoxes when unrendered,
      // TODO: introduce load/unload mechanism and do deregister there
@@ -225,7 +230,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     DragManager.removeDraggable(this)
     await renderManager.setStyleTo(this.getId(), '')
 
-    this.rendered = false
+    this.renderState.finishUnrender()
   }
 
   private async renderShape(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {

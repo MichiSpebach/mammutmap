@@ -34,7 +34,7 @@ export abstract class Box implements DropTarget, Hoverable {
   public readonly links: BoxLinks // TODO: rename to managedLinks?
   public readonly borderingLinks: BorderingLinks
   private rendered: boolean = false
-  private renderInProgress: boolean = false // TODO: introduce RenderState or RenderScheduler class
+  private renderInProgress: boolean = false // TODO: use RenderState instead
   private unrenderInProgress: boolean = false
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
@@ -127,7 +127,7 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.rendered
   }
 
-  public shouldBeRendered(): boolean { // TODO: rename to isRenderedOrInProgress()|isAboutToRender()|isBeingRendered()?
+  public shouldBeRendered(): boolean { // TODO: remove and use RenderState instead
     if (this.renderInProgress) {
         return true
     } else if (this.unrenderInProgress) {
