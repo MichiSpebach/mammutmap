@@ -298,7 +298,11 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.links.unrender())
     proms.push(this.nodes.unrender())
     proms.push(this.unrenderAdditional())
-    proms.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
+    if (!this.parent) { // TODO: find better solution, maybe unrender body of parent after links of parent
+      proms.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
+    } else {
+      proms.push(this.borderingLinks.renderAllNotManagedBy(this.parent)) // the ones that are managed by the parent are unrendered when the body of the parent is unrendered
+    }
     await Promise.all(proms)
 
     this.unrenderInProgress = false

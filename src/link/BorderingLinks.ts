@@ -11,6 +11,16 @@ export class BorderingLinks {
   public constructor(referenceBoxOrNode: Box|NodeWidget, links: Link[]) {
     this.referenceBoxOrNode = referenceBoxOrNode
     this.links = links
+    this.links.forEach(link => this.warnIfLinkIsManagedByReferenceBox(link))
+  }
+
+  private warnIfLinkIsManagedByReferenceBox(link: Link): void {
+    if (this.referenceBoxOrNode === link.getManagingBox()) {
+      let message = `Adding link with id ${link.getId()} to BorderingLinks`
+      message += ` of box with name ${this.referenceBoxOrNode.getName()} that is managed by this box.`
+      message += ` Only bordering/adjacent links should be added here.`
+      util.logWarning(message)
+    }
   }
 
   public async reorderAndSaveAll(): Promise<void> {
@@ -19,6 +29,10 @@ export class BorderingLinks {
 
   public async renderAll(): Promise<void> {
     await Promise.all(this.links.map(link => link.render()))
+  }
+
+  public async renderAllNotManagedBy(box: Box): Promise<void> {
+    await Promise.all(this.links.filter(link => link.getManagingBox() !== box).map(link => link.render()))
   }
 
   public async setHighlightAll(highlight: boolean): Promise<void> {
@@ -40,6 +54,8 @@ export class BorderingLinks {
       util.logWarning(message)
       return
     }
+    this.warnIfLinkIsManagedByReferenceBox(link)
+    
     this.links.push(link)
     if (!this.referenceBoxOrNode.isMapDataFileExisting()) {
       // otherwise managingBox of link would save linkPath with not persisted boxId
