@@ -30,7 +30,9 @@ export abstract class Box implements DropTarget, Hoverable {
   private mapDataFileExists: boolean
   public readonly transform: Transform
   private readonly header: BoxHeader
+  // TODO: move nodes into BoxBody
   public readonly nodes: BoxNodesWidget // TODO: introduce (Abstract)NodesWidget|SubNodesWidget|ChildNodesWidget that contains all sorts of childNodes (Boxes and LinkNodes)?
+  // TODO: move links into BoxBody?
   public readonly links: BoxLinks // TODO: rename to managedLinks?
   public readonly borderingLinks: BorderingLinks
   private rendered: boolean = false
@@ -311,6 +313,7 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   private onHoverOver(): void {
+    // TODO: move scaleTool.isScalingInProgress() into HoverManager
     if (scaleTool.isScalingInProgress() || this.unrenderInProgress) {
       return
     }
@@ -319,7 +322,8 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   private onHoverOut(): void {
-    if (scaleTool.isScalingInProgress()) {
+    // TODO: move scaleTool.isScalingInProgress() into HoverManager
+    if (scaleTool.isScalingInProgress() || this.unrenderInProgress) {
       return
     }
     scaleTool.unrenderFrom(this)
