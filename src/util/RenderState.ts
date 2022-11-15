@@ -1,18 +1,18 @@
 import { util } from '../util'
 
-export class RenderState { // TODO: develop to Promise based RenderScheduler?
+export class RenderState { // TODO: develop to Promise based RenderScheduler that has method scheduleOrSkip
     private rendered: boolean = false
     private renderInProgress: boolean = false
     private unrenderInProgress: boolean = false
 
-    public startRender(): void {
+    public renderStarted(): void {
         if (this.unrenderInProgress) {
             util.logWarning('RenderState::startRender() called while unrenderInProgress')
         }
         this.renderInProgress = true
     }
 
-    public finishRender(): void {
+    public renderFinished(): void {
         if (this.rendered) {
             //util.logWarning('RenderState::finishRender() called while rendered already true') // TODO reactivate?
         }
@@ -23,14 +23,14 @@ export class RenderState { // TODO: develop to Promise based RenderScheduler?
         this.renderInProgress = false
     }
 
-    public startUnrender(): void {
+    public unrenderStarted(): void {
         if (this.renderInProgress) {
             util.logWarning('RenderState::startUnrender() called while renderInProgress')
         }
         this.unrenderInProgress = true
     }
 
-    public finishUnrender(): void {
+    public unrenderFinished(): void {
         if (this.rendered) {
             //util.logWarning('RenderState::finishUnrender() called while rendered already false') // TODO reactivate?
         }
@@ -45,7 +45,19 @@ export class RenderState { // TODO: develop to Promise based RenderScheduler?
         return this.rendered
     }
 
-    public shouldBeRendered(): boolean { // TODO: rename to isRenderedOrInProgress()|isAboutToRender()|isBeingRendered()?
+    public isUnrendered(): boolean {
+        return !this.rendered
+    }
+
+    public isRenderInProgress(): boolean {
+        return this.renderInProgress
+    }
+
+    public isUnrenderInProgress(): boolean {
+        return this.unrenderInProgress
+    }
+
+    public isBeingRendered(): boolean { // TODO: rename to isRenderedOrInProgress()?
         if (this.renderInProgress) {
             return true
         } else if (this.unrenderInProgress) {
@@ -53,6 +65,10 @@ export class RenderState { // TODO: develop to Promise based RenderScheduler?
         } else {
             return this.rendered
         }
+    }
+
+    public isBeingUnrendered(): boolean {
+        return !this.isBeingRendered()
     }
 
 }

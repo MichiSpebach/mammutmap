@@ -202,7 +202,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   // TODO: remove parameter positionInManagingBoxCoords
   // TODO: now more frequent called, add renderPriority
   public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
-    this.renderState.startRender()
+    this.renderState.renderStarted()
 
     await Promise.all([ // TODO: await at end of method
       this.renderShape(positionInManagingBoxCoords, angleInRadians),
@@ -214,14 +214,14 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       DragManager.addDraggable(this)
     }
 
-    this.renderState.finishRender()
+    this.renderState.renderFinished()
   }
 
   public async unrender(): Promise<void> {
     if (!this.renderState.isRendered()) {
       return
     }
-    this.renderState.startUnrender()
+    this.renderState.unrenderStarted()
 
      // TODO: in some cases link should also be tracked by borderingBoxes when unrendered,
      // TODO: introduce load/unload mechanism and do deregister there
@@ -230,7 +230,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     DragManager.removeDraggable(this)
     await renderManager.setStyleTo(this.getId(), '')
 
-    this.renderState.finishUnrender()
+    this.renderState.unrenderFinished()
   }
 
   private async renderShape(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {

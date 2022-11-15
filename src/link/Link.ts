@@ -11,6 +11,7 @@ import { HoverManager } from '../HoverManager'
 import { ClientPosition, LocalPosition } from '../box/Transform'
 import { NodeWidget } from '../node/NodeWidget'
 import { LinkLine } from './LinkLine'
+import { RenderState } from '../util/RenderState'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -25,7 +26,7 @@ export class Link implements Hoverable {
   public readonly line: LinkLine
   public readonly from: LinkEnd
   public readonly to: LinkEnd
-  private rendered: boolean = false
+  private renderState: RenderState = new RenderState()
   private highlight: boolean = false
   private draggingInProgress: boolean = false
   private hoveringOver: boolean = false
@@ -86,6 +87,8 @@ export class Link implements Hoverable {
   }
 
   public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    this.renderState.renderStarted()
+
     const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
@@ -94,14 +97,13 @@ export class Link implements Hoverable {
 
     const proms: Promise<any>[] = []
 
-    if (!this.rendered) {
+    if (!this.renderState.isRendered()) {
       const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
       const lineStyle: string = 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'
       const lineHtml: string = `<svg id="${this.line.getId()}" style="${lineStyle}">${lineInnerHtml}</svg>`
       await renderManager.setContentTo(this.getId(), lineHtml+fromHtml+toHtml, priority)
       proms.push(this.addEventListeners())
-      this.rendered = true
     } else {
       proms.push(renderManager.setContentTo(this.line.getId(), lineInnerHtml, priority))
     }
@@ -116,12 +118,14 @@ export class Link implements Hoverable {
     proms.push(this.to.render(toInManagingBoxCoords, angleInRadians))
 
     await Promise.all(proms)
+    this.renderState.renderFinished()
   }
 
   public async unrender(): Promise<void> {
-    if(!this.rendered) {
-      return
+    if(this.renderState.isBeingUnrendered()) {
+      return // TODO: await current render process if in progress
     }
+    this.renderState.unrenderStarted()
 
     const proms: Promise<any>[] = []
 
@@ -129,9 +133,9 @@ export class Link implements Hoverable {
     proms.push(this.from.unrender())
     proms.push(this.to.unrender())
 
-    this.rendered = false
     await Promise.all(proms)
     await renderManager.clearContentOf(this.getId())
+    this.renderState.unrenderFinished()
   }
 
   public getColor(): string {
@@ -153,21 +157,20 @@ export class Link implements Hoverable {
   }
 
   private async handleHoverOver(): Promise<void> {
-    if (!this.rendered) {
+    if (this.renderState.isBeingUnrendered()) {
       util.logWarning('handleHoverHover() called on link with id '+this.getId()+' altough link is not rendered.')
       this.highlight = true
       this.hoveringOver = true
-      return // don't call render, maybe widget should be unrendered
+      return
     }
     await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: true, hoveringOver: true})
   }
 
   private async handleHoverOut(): Promise<void> {
-    if (!this.rendered) {
-      util.logWarning('handleHoverOut() called on link with id '+this.getId()+' altough link is not rendered.')
+    if (this.renderState.isBeingUnrendered()) {
       this.highlight = false
       this.hoveringOver = false
-      return // don't call render, maybe widget should be unrendered
+      return
     }
     await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: false, hoveringOver: false})
   }
