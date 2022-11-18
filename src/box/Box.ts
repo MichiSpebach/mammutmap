@@ -257,13 +257,6 @@ export abstract class Box implements DropTarget, Hoverable {
     }
 
     await this.renderBody()
-    if (this.isBodyRendered()) {
-      await this.nodes.render()
-      await this.links.render()
-    } else {
-      await this.links.unrender()
-      await this.nodes.unrender()
-    }
 
     if (!this.isRendered()) {
       DragManager.addDropTarget(this)
@@ -297,10 +290,8 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.detachGrid())
     proms.push(this.header.unrender())
     proms.push(scaleTool.unrenderFrom(this))
-    proms.push(this.links.unrender())
-    proms.push(this.nodes.unrender())
     proms.push(this.unrenderAdditional())
-    if (!this.parent) { // TODO: find better solution, maybe unrender body of parent after links of parent
+    if (!this.parent) { // TODO: find better solution than this condition, maybe unrender childs of body after links (of body)
       proms.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
     } else {
       proms.push(this.borderingLinks.renderAllNotManagedBy(this.parent)) // the ones that are managed by the parent are unrendered when the body of the parent is unrendered

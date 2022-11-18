@@ -393,10 +393,9 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
     if (renderedPath.length === 0) {
       const managingBox: Box = this.getManagingBox()
-      let message = 'Corrupted mapData detected: '
-      message += `Link with id ${this.referenceLink.getId()} in ${managingBox.getSrcPath()} has path with no rendered boxes, `
-      message += 'this only happens when mapData is corrupted. '
-      message += 'Defaulting LinkEnd to center of managingBox.'
+      let message = `Link with id ${this.referenceLink.getId()} in ${managingBox.getSrcPath()} has path with no rendered boxes.`
+      message += ' This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn\'t.'
+      message += ' Defaulting LinkEnd to center of managingBox.'
       util.logWarning(message)
       renderedPath.push({linkable: managingBox, wayPoint: WayPointData.buildNew(managingBox.getId(), managingBox.getName(), 50, 50)})
     }

@@ -30,23 +30,25 @@ export class FolderBoxBody extends BoxBody {
     await this.renderBoxes()
   }
 
-  protected async executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
+  protected async executeUnrenderIfPossible(force?: boolean): Promise<{anyChildStillRendered: boolean}> {
     if (!this.isRendered()) {
-      return {rendered: false}
+      return {anyChildStillRendered: false}
     }
 
-    let rendered: boolean = false
+    let anyChildStillRendered: boolean = false
     await Promise.all(this.boxes.map(async (box: Box): Promise<void> => {
       if ((await box.unrenderIfPossible(force)).rendered) {
-        rendered = true
+        anyChildStillRendered = true
       }
     }))
-    if (!rendered) {
+
+    if (!anyChildStillRendered) {
       await this.unrenderTooManyFilesNotice()
       await this.unrenderBoxPlaceholders()
       await this.destructBoxes()
     }
-    return {rendered: rendered}
+
+    return {anyChildStillRendered}
   }
 
   private async renderTooManyFilesNotice(count: number): Promise<void> {

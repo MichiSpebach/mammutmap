@@ -48,6 +48,8 @@ export abstract class BoxBody {
 
     await this.unrenderZoomInToRenderHint()
     await this.executeRender()
+    await this.referenceBox.nodes.render()
+    await this.referenceBox.links.render()
 
     this.rendered = true
     this.renderInProgress = false
@@ -62,9 +64,15 @@ export abstract class BoxBody {
     }
     this.renderInProgress = true // TODO: make atomic with if statement
 
-    this.rendered = (await this.executeUnrenderIfPossible(force)).rendered
+    const anyChildStillRendered: boolean = (await this.executeUnrenderIfPossible(force)).anyChildStillRendered
+    if (!anyChildStillRendered) { // TODO: remove condition and unrender as much as possible?
+      await this.referenceBox.links.unrender() // TODO: move above executeUnrenderIfPossible, but then also unrenders links that are connected to childs that are not unrendered?
+      await this.referenceBox.nodes.unrender()
+      await this.renderZoomInToRenderHint()
+    }
 
     this.renderInProgress = false
+    this.rendered = anyChildStillRendered
 
     await this.rerenderIfNecessary()
     return {rendered: this.rendered}
@@ -91,7 +99,7 @@ export abstract class BoxBody {
 
   protected abstract executeRender(): Promise<void>
 
-  protected abstract executeUnrenderIfPossible(force?: boolean): Promise<{rendered: boolean}>
+  protected abstract executeUnrenderIfPossible(force?: boolean): Promise<{anyChildStillRendered: boolean}>
 
   private async renderZoomInToRenderHint(): Promise<void> {
     if (this.zoomInToRenderHintRendered) {

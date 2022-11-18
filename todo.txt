@@ -1,4 +1,6 @@
 
+show count of ongoing awaits (while dev-mode is enabled in settings)
+
 TitleCompressor|TextCompressor|TitleEllipsis plugin: compresses long names like 'SomeWidget.ts' to 'So…Wi…ts' (uses one ellipsis char instead of three dots)
 
 plugin that pulls boxes into view when hovering on link

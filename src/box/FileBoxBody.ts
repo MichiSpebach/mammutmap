@@ -40,12 +40,12 @@ export class FileBoxBody extends BoxBody {
     await renderManager.setContentTo(this.getId(), content)
   }
 
-  protected async executeUnrenderIfPossible(): Promise<{rendered: boolean}> {
+  protected async executeUnrenderIfPossible(): Promise<{anyChildStillRendered: boolean}> {
     if (!this.isRendered()) {
-      return {rendered: false}
+      return {anyChildStillRendered: false}
     }
     await renderManager.remove(this.getContentId())
-    return {rendered: false}
+    return {anyChildStillRendered: false}
   }
 
   private async formHtmlContentForImage(): Promise<string|never> {
