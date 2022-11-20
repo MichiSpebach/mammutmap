@@ -41,7 +41,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     const proms: Promise<any>[] = []
 
     let html: string = '<div draggable="true" class="'+style.getBoxHeaderInnerClass()+'">'
-    html += this.referenceBox.getName()
+    html += this.formTitleHtml()
     html += '</div>'
     proms.push(renderManager.setContentTo(this.getId(), html))
 
@@ -52,6 +52,10 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     }
 
     await Promise.all(proms)
+  }
+
+  public formTitleHtml(): string {
+    return this.referenceBox.getName()
   }
 
   public async unrender(): Promise<void> {
