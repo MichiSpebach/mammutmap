@@ -31,11 +31,11 @@ export class BorderingLinks {
     await Promise.all(this.links.map(link => link.render()))
   }
 
-  public async renderAllNotManagedBy(box: Box): Promise<void> {
-    await Promise.all(this.links.filter(link => link.getManagingBox() !== box).map(link => link.render()))
+  public async renderAllNotManagedBy(box: Box): Promise<void> { // TODO: rename to renderAllThatShouldBe()
+    await Promise.all(this.links.filter(link => link.getManagingBox().isBodyBeingRendered()).map(link => link.render()))
   }
 
-  public async setHighlightAll(highlight: boolean): Promise<void> {
+  public async setHighlightAll(highlight: boolean): Promise<void> { // TODO: produces warnings, also implement setHighlightAllThatShouldBeRendered()
     await Promise.all(this.links.map(link => link.renderWithOptions({highlight})))
   }
 

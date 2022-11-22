@@ -431,7 +431,9 @@ export abstract class Box implements DropTarget, Hoverable {
 
   protected abstract unrenderBodyIfPossible(force?: boolean): Promise<{rendered: boolean}>
 
-  protected abstract isBodyRendered(): boolean
+  public abstract isBodyRendered(): boolean
+
+  public abstract isBodyBeingRendered(): boolean
 
   public abstract getInnerLinksRecursive(): BoxLinks[]
 

@@ -217,7 +217,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     this.renderState.renderFinished()
   }
 
-  public async unrender(): Promise<void> {
+  public async unrender(): Promise<void> { // TODO: use RenderScheduler to avoid race condition
     if (!this.renderState.isRendered()) {
       return
     }

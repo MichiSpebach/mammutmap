@@ -22,6 +22,10 @@ export abstract class BoxBody {
     return this.rendered
   }
 
+  public isBeingRendered(): boolean {
+    return this.rendered || this.renderInProgress
+  }
+
   public getId(): string {
     return this.referenceBox.getId()+'Body'
   }

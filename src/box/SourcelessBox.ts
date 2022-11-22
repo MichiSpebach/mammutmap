@@ -70,8 +70,12 @@ export class SourcelessBox extends Box {
     return {rendered: false}
   }
 
-  protected isBodyRendered(): boolean {
+  public isBodyRendered(): boolean {
     return this.bodyRendered
+  }
+
+  public isBodyBeingRendered(): boolean {
+    return this.bodyRendered // TODO: this is not always correct, add generic ${public readonly body: BoxBody} to Box and remove implementation in subclasses of Box
   }
 
   public getInnerLinksRecursive(): BoxLinks[] {

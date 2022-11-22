@@ -47,6 +47,11 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         return this.managingBox.borderingLinks
     }
 
+    public getParent(): Box {
+        return this.managingBox
+    }
+
+    /**@deprecated use getParent() instead*/
     public getManagingBox(): Box {
         return this.managingBox
     }

@@ -71,6 +71,10 @@ export class FolderBox extends Box {
     return this.body.isRendered()
   }
 
+  public isBodyBeingRendered(): boolean {
+    return this.body.isBeingRendered()
+  }
+
   // TODO: only used by plugins, move into pluginUtil/boxFinder?
   public async getBoxBySourcePathAndRenderIfNecessary(
     path: string, 

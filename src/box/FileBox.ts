@@ -78,6 +78,10 @@ export class FileBox extends Box {
     return this.body.isRendered()
   }
 
+  public isBodyBeingRendered(): boolean {
+    return this.body.isBeingRendered()
+  }
+
   public getInnerLinksRecursive(): BoxLinks[] {
     return [this.links]
   }
