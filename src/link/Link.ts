@@ -12,6 +12,7 @@ import { ClientPosition, LocalPosition } from '../box/Transform'
 import { NodeWidget } from '../node/NodeWidget'
 import { LinkLine } from './LinkLine'
 import { RenderState } from '../util/RenderState'
+import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -27,6 +28,7 @@ export class Link implements Hoverable {
   public readonly from: LinkEnd
   public readonly to: LinkEnd
   private renderState: RenderState = new RenderState()
+  private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private highlight: boolean = false
   private draggingInProgress: boolean = false
   private hoveringOver: boolean = false
@@ -86,11 +88,12 @@ export class Link implements Hoverable {
     return this.render(options.priority)
   }
 
-  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { await this.renderState.scheduleRender(async () => {
+  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { await this.renderScheduler.schedule(async () => {
     if (!this.getManagingBox().isBodyBeingRendered()) {
       util.logWarning(`Link::render(..) called for Link with id ${this.getId()} unless its managingBox with name ${this.getManagingBox().getName()} is being unrendered.`)
       return
     }
+    this.renderState.renderStarted()
 
     const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
@@ -121,12 +124,14 @@ export class Link implements Hoverable {
     proms.push(this.to.render(toInManagingBoxCoords, angleInRadians))
 
     await Promise.all(proms)
+    this.renderState.renderFinished()
   })}
 
-  public async unrender(): Promise<void> { await this.renderState.scheduleUnrender( async () => {
+  public async unrender(): Promise<void> { await this.renderScheduler.schedule( async () => {
     if (this.renderState.isUnrendered()) {
       return
     }
+    this.renderState.unrenderStarted()
 
     await Promise.all([
       this.removeEventListeners(),
@@ -135,6 +140,7 @@ export class Link implements Hoverable {
     ])
 
     await renderManager.clearContentOf(this.getId())
+    this.renderState.unrenderFinished()
   })}
 
   public getColor(): string {

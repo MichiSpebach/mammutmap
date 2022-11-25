@@ -7,12 +7,13 @@ import { WayPointData } from '../mapData/WayPointData'
 import { LinkEndData } from '../mapData/LinkEndData'
 import { NodeWidget } from '../node/NodeWidget'
 import { Widget } from '../Widget'
-import { RenderState } from '../util/RenderState'
+import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 
 export class BoxLinks extends Widget {
     private readonly referenceBox: Box
     private links: Link[] = []
-    private renderScheduler: RenderState = new RenderState()
+    private rendered: boolean = false
+    private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
 
     public constructor(referenceBox: Box) {
       super()
@@ -83,8 +84,8 @@ export class BoxLinks extends Widget {
       await this.referenceBox.saveMapData()
     }
 
-    public async render(): Promise<void> { await this.renderScheduler.scheduleRender(async () => {
-      if (this.renderScheduler.isRendered()) {
+    public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
+      if (this.rendered) {
         // links that are connected to NodeWidgets need to be rerendered
         // because size of NodeWidgets is not percental // TODO: use smart css attributes to handle this
         this.links.filter(link => {
@@ -107,6 +108,7 @@ export class BoxLinks extends Widget {
 
       await Promise.all(placeholderPros)
       await Promise.all(this.links.map((link: Link) => link.render()))
+      this.rendered = true
     })}
 
     private async addPlaceholderFor(link: Link): Promise<void> {
@@ -117,8 +119,8 @@ export class BoxLinks extends Widget {
       await renderManager.remove(link.getId())
     }
 
-    public async unrender(): Promise<void> { await this.renderScheduler.scheduleUnrender(async () => {
-      if (this.renderScheduler.isUnrendered()) {
+    public async unrender(): Promise<void> { await this.renderScheduler.schedule(async () => {
+      if (!this.rendered) {
         return
       }
 
@@ -127,6 +129,7 @@ export class BoxLinks extends Widget {
         await this.removePlaceholderFor(link)
       }))
       this.links = []
+      this.rendered = false
     })}
 
     public getLinkWithEndBoxes(from: Box, to: Box): Link|undefined {

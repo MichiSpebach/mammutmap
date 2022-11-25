@@ -4,10 +4,12 @@ import { ClientRect } from '../ClientRect'
 import { Box } from './Box'
 import { style } from '../styleAdapter'
 import { RenderState } from '../util/RenderState'
+import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 
 export abstract class BoxBody {
   private readonly referenceBox: Box
-  private renderScheduler: RenderState = new RenderState()
+  private renderState: RenderState = new RenderState()
+  private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private zoomInToRenderHintRendered: boolean = false
 
   public constructor(referenceBox: Box) {
@@ -15,18 +17,18 @@ export abstract class BoxBody {
   }
 
   public isRendered(): boolean {
-    return this.renderScheduler.isRendered()
+    return this.renderState.isRendered()
   }
 
   public isBeingRendered(): boolean {
-    return this.renderScheduler.isBeingRendered()
+    return this.renderState.isBeingRendered()
   }
 
   public getId(): string {
     return this.referenceBox.getId()+'Body'
   }
 
-  public async render(): Promise<void> { await this.renderScheduler.scheduleOrSkip(async () => {
+  public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
     if (! await this.shouldBeRendered()) {
       if (this.isRendered() && await this.shouldBeUnrendered()) {
         await this.runUnrenderIfPossible()
@@ -39,7 +41,7 @@ export abstract class BoxBody {
       // no return here, stays rendered, render needs to be propagated
     }
 
-    this.renderScheduler.renderStarted()
+    this.renderState.renderStarted()
 
     await this.unrenderZoomInToRenderHint(),
     await Promise.all([
@@ -48,25 +50,25 @@ export abstract class BoxBody {
     ])
     await this.referenceBox.links.render()
 
-    this.renderScheduler.renderFinished()
+    this.renderState.renderFinished()
   })}
 
   public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
-    await this.renderScheduler.scheduleOrSkip(async () => this.runUnrenderIfPossible(force))
-    return {rendered: this.renderScheduler.isRendered()}
+    await this.renderScheduler.schedule(() => this.runUnrenderIfPossible(force))
+    return {rendered: this.renderState.isRendered()}
   }
 
   private async runUnrenderIfPossible(force?: boolean): Promise<void> {
-    this.renderScheduler.unrenderStarted()
+    this.renderState.unrenderStarted()
     
     const anyChildStillRendered: boolean = (await this.executeUnrenderIfPossible(force)).anyChildStillRendered
     if (!anyChildStillRendered) { // TODO: remove condition and unrender as much as possible?
       await this.referenceBox.links.unrender() // TODO: move above executeUnrenderIfPossible, but then also unrenders links that are connected to childs that are not unrendered?
       await this.referenceBox.nodes.unrender()
       await this.renderZoomInToRenderHint()
-      this.renderScheduler.unrenderFinished()
+      this.renderState.unrenderFinished()
     } else {
-      this.renderScheduler.unrenderFinishedStillRendered()
+      this.renderState.unrenderFinishedStillRendered()
     }
   }
 

@@ -23,6 +23,7 @@ import { NodeData } from '../mapData/NodeData'
 import { BorderingLinks } from '../link/BorderingLinks'
 import { ProjectSettings } from '../ProjectSettings'
 import { RenderState } from '../util/RenderState'
+import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -36,7 +37,8 @@ export abstract class Box implements DropTarget, Hoverable {
   // TODO: move links into BoxBody?
   public readonly links: BoxLinks // TODO: rename to managedLinks?
   public readonly borderingLinks: BorderingLinks
-  private renderScheduler: RenderState = new RenderState()
+  private renderState: RenderState = new RenderState()
+  private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
 
@@ -125,11 +127,11 @@ export abstract class Box implements DropTarget, Hoverable {
   public abstract isSourceless(): boolean
 
   public isRendered(): boolean {
-    return this.renderScheduler.isRendered()
+    return this.renderState.isRendered()
   }
 
   public isBeingRendered(): boolean {
-    return this.renderScheduler.isBeingRendered()
+    return this.renderState.isBeingRendered()
   }
 
   public async setParentAndFlawlesslyResizeAndSave(newParent: FolderBox): Promise<void> {
@@ -227,8 +229,10 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.watchers.length !== 0
   }
 
-  public async render(): Promise<void> { await this.renderScheduler.scheduleRender(async () => {
-    if (!this.isRendered()) {
+  public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
+    this.renderState.renderStarted()
+
+    if (!this.renderState.isRendered()) {
       this.renderStyle()
 
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
@@ -248,27 +252,29 @@ export abstract class Box implements DropTarget, Hoverable {
 
     await this.renderBody()
 
-    if (!this.isRendered()) {
+    if (!this.renderState.isRendered()) {
       DragManager.addDropTarget(this)
       HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut())
     }
 
     await this.renderAdditional()
+
+    this.renderState.renderFinished()
   })}
 
-  public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> { await this.renderScheduler.scheduleOrSkip(async () => {
-    if (!this.renderScheduler.isRendered()) {
+  public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> { await this.renderScheduler.schedule(async () => {
+    if (!this.renderState.isRendered()) {
       return
     }
-    this.renderScheduler.unrenderStarted()
+    this.renderState.unrenderStarted()
     
     if ((await this.unrenderBodyIfPossible(force)).rendered) {
-      this.renderScheduler.unrenderFinishedStillRendered()
+      this.renderState.unrenderFinishedStillRendered()
       return
     }
     if (this.hasWatchers()) {
       if (!force) {
-        this.renderScheduler.unrenderFinishedStillRendered()
+        this.renderState.unrenderFinishedStillRendered()
         return
       }
       util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
@@ -285,11 +291,11 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.borderingLinks.renderAllThatShouldBe()) // otherwise borderingLinks would not float back to border of parent
     await Promise.all(proms)
 
-    this.renderScheduler.unrenderFinished()
+    this.renderState.unrenderFinished()
     return
     })
 
-    return {rendered: this.renderScheduler.isRendered()}
+    return {rendered: this.renderState.isRendered()}
   }
 
   private async onHoverOver(): Promise<void> {
@@ -365,7 +371,7 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async attachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    if (this.renderScheduler.isUnrenderInProgress()) {
+    if (this.renderState.isUnrenderInProgress()) {
       util.logWarning('prevented attaching grid to box that gets unrendered') // TODO: only to check that this gets triggered, remove
       return
     }
