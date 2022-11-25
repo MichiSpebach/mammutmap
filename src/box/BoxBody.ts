@@ -2,16 +2,12 @@ import { renderManager } from '../RenderManager'
 import { settings } from '../Settings'
 import { ClientRect } from '../ClientRect'
 import { Box } from './Box'
-import { util } from '../util'
 import { style } from '../styleAdapter'
+import { RenderState } from '../util/RenderState'
 
 export abstract class BoxBody {
   private readonly referenceBox: Box
-  private rendered: boolean = false
-  private renderInProgress: boolean = false
-  private rerenderAfterRenderFinished: boolean = false
-  private unrenderAfterRenderFinished: boolean = false
-  private unrenderAfterRenderFinishedForce?: boolean
+  private renderScheduler: RenderState = new RenderState()
   private zoomInToRenderHintRendered: boolean = false
 
   public constructor(referenceBox: Box) {
@@ -19,86 +15,58 @@ export abstract class BoxBody {
   }
 
   public isRendered(): boolean {
-    return this.rendered
+    return this.renderScheduler.isRendered()
   }
 
   public isBeingRendered(): boolean {
-    return this.rendered || this.renderInProgress
+    return this.renderScheduler.isBeingRendered()
   }
 
   public getId(): string {
     return this.referenceBox.getId()+'Body'
   }
 
-  public async render(): Promise<void> { // TODO: make sure only one thread is in this method (semaphore)
-    if (this.renderInProgress) {
-      this.scheduleRerender(true)
-      return // TODO: should return promise that resolves when current render operation and scheduled rerender operation are finished
+  public async render(): Promise<void> {
+    if (this.renderScheduler.isRenderInProgress()) {
+      await this.renderScheduler.ongoingProcess // TODO: is this really needed, find better solution, remove?
     }
-    this.renderInProgress = true // TODO: make atomic with if statement
 
     if (! await this.shouldBeRendered()) {
-      this.renderInProgress = false
       if (this.isRendered() && await this.shouldBeUnrendered()) {
-        await this.unrenderIfPossible()
+        await this.unrenderIfPossible() // TODO: introduce runUnrenderIfPossible and wrap whole method with renderSchedule
         return
       }
       if (!this.isRendered()) {
-        await this.renderZoomInToRenderHint()
+        await this.renderZoomInToRenderHint() // TODO: this should also be done with renderScheduler
         return
       }
       // no return here, stays rendered, render needs to be propagated
     }
 
-    await this.unrenderZoomInToRenderHint()
-    await this.executeRender()
-    await this.referenceBox.nodes.render()
-    await this.referenceBox.links.render()
-
-    this.rendered = true
-    this.renderInProgress = false
-
-    await this.rerenderIfNecessary()
+    await this.renderScheduler.scheduleRender(async () => {
+      await Promise.all([
+        this.unrenderZoomInToRenderHint(),
+        this.executeRender(),
+        this.referenceBox.nodes.render()
+      ])
+      await this.referenceBox.links.render()
+    })
   }
 
-  public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
-    if (this.renderInProgress) {
-      this.scheduleRerender(false, force)
-      return {rendered: this.rendered} // TODO: should return promise that resolves when current render operation and scheduled rerender operation are finished
-    }
-    this.renderInProgress = true // TODO: make atomic with if statement
-
+  public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> { await this.renderScheduler.scheduleOrSkip(async () => {
+    this.renderScheduler.unrenderStarted()
     const anyChildStillRendered: boolean = (await this.executeUnrenderIfPossible(force)).anyChildStillRendered
     if (!anyChildStillRendered) { // TODO: remove condition and unrender as much as possible?
       await this.referenceBox.links.unrender() // TODO: move above executeUnrenderIfPossible, but then also unrenders links that are connected to childs that are not unrendered?
       await this.referenceBox.nodes.unrender()
       await this.renderZoomInToRenderHint()
+      this.renderScheduler.unrenderFinished()
+    } else {
+      this.renderScheduler.unrenderFinishedStillRendered()
     }
-
-    this.renderInProgress = false
-    this.rendered = anyChildStillRendered
-
-    await this.rerenderIfNecessary()
-    return {rendered: this.rendered}
-  }
-
-  private scheduleRerender(render: boolean, forceIfUnrender?: boolean): void {
-    this.rerenderAfterRenderFinished = render
-    this.unrenderAfterRenderFinished = !render
-    this.unrenderAfterRenderFinishedForce = forceIfUnrender
-  }
-
-  private async rerenderIfNecessary(): Promise<void> {
-    if (this.rerenderAfterRenderFinished && this.unrenderAfterRenderFinished) {
-      util.logWarning('rerenderAfterRenderFinished and unrenderAfterRenderFinished are both true, this should not happen')
-    }
-    if (this.rerenderAfterRenderFinished) {
-      this.rerenderAfterRenderFinished = false
-      await this.render()
-    } else if (this.unrenderAfterRenderFinished) {
-      this.unrenderAfterRenderFinished = false
-      await this.unrenderIfPossible(this.unrenderAfterRenderFinishedForce)
-    }
+    })
+    
+    return {rendered: this.renderScheduler.isRendered()}
   }
 
   protected abstract executeRender(): Promise<void>

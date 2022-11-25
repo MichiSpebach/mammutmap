@@ -31,12 +31,20 @@ export class BorderingLinks {
     await Promise.all(this.links.map(link => link.render()))
   }
 
-  public async renderAllNotManagedBy(box: Box): Promise<void> { // TODO: rename to renderAllThatShouldBe()
-    await Promise.all(this.links.filter(link => link.getManagingBox().isBodyBeingRendered()).map(link => link.render()))
+  public async renderAllThatShouldBe(): Promise<void> {
+    await Promise.all(this.getLinksThatShouldBeRendered().map(link => link.render()))
   }
 
-  public async setHighlightAll(highlight: boolean): Promise<void> { // TODO: produces warnings, also implement setHighlightAllThatShouldBeRendered()
+  public async setHighlightAll(highlight: boolean): Promise<void> {
     await Promise.all(this.links.map(link => link.renderWithOptions({highlight})))
+  }
+
+  public async setHighlightAllThatShouldBeRendered(highlight: boolean): Promise<void> {
+    await Promise.all(this.getLinksThatShouldBeRendered().map(link => link.renderWithOptions({highlight})))
+  }
+
+  public getLinksThatShouldBeRendered(): Link[] {
+    return this.links.filter(link => link.getManagingBox().isBodyBeingRendered())
   }
 
   public getLinksThatIncludeWayPointFor(boxOrNode: Box|NodeWidget): Link[] {

@@ -4,6 +4,43 @@ export class RenderState { // TODO: develop to Promise based RenderScheduler tha
     private rendered: boolean = false
     private renderInProgress: boolean = false
     private unrenderInProgress: boolean = false
+    public ongoingProcess: Promise<void>|null = null
+    private scheduledProcess: (() => Promise<void>)|null = null
+
+    public async scheduleRender(process: () => Promise<void>): Promise<void> {
+        await this.scheduleOrSkip(async () => {
+            this.renderStarted()
+            await process()
+            this.renderFinished()
+        })
+    }
+
+    public async scheduleUnrender(process: () => Promise<void>): Promise<void> {
+        await this.scheduleOrSkip(async () => {
+            this.unrenderStarted()
+            await process()
+            this.unrenderFinished()
+        })
+    }
+
+    public async scheduleOrSkip(process: () => Promise<void>): Promise<void> {
+        if (!this.ongoingProcess) {
+            this.ongoingProcess = process()
+            await this.ongoingProcess
+            this.ongoingProcess = null
+        } else {
+            this.scheduledProcess = process
+            await this.ongoingProcess
+            if (!this.ongoingProcess) {
+                this.ongoingProcess = this.scheduledProcess()
+                this.scheduledProcess = null
+                await this.ongoingProcess
+                this.ongoingProcess = null
+            } else {
+                await this.ongoingProcess
+            }
+        }
+    }
 
     public renderStarted(): void {
         if (this.unrenderInProgress) {
@@ -31,14 +68,24 @@ export class RenderState { // TODO: develop to Promise based RenderScheduler tha
     }
 
     public unrenderFinished(): void {
+        this.validateUnrenderFinished()
+        this.rendered = false
+        this.unrenderInProgress = false
+    }
+
+    public unrenderFinishedStillRendered(): void {
+        this.validateUnrenderFinished()
+        this.rendered = true
+        this.unrenderInProgress = false
+    }
+
+    private validateUnrenderFinished(): void {
         if (this.rendered) {
             //util.logWarning('RenderState::finishUnrender() called while rendered already false') // TODO reactivate?
         }
         if (!this.unrenderInProgress) {
             util.logWarning('RenderState::finishUnrender() called while unrenderInProgress is false')
         }
-        this.rendered = false
-        this.unrenderInProgress = false
     }
 
     public isRendered(): boolean {

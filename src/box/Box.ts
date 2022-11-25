@@ -22,6 +22,7 @@ import { BoxNodesWidget } from './BoxNodesWidget'
 import { NodeData } from '../mapData/NodeData'
 import { BorderingLinks } from '../link/BorderingLinks'
 import { ProjectSettings } from '../ProjectSettings'
+import { RenderState } from '../util/RenderState'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -35,9 +36,7 @@ export abstract class Box implements DropTarget, Hoverable {
   // TODO: move links into BoxBody?
   public readonly links: BoxLinks // TODO: rename to managedLinks?
   public readonly borderingLinks: BorderingLinks
-  private rendered: boolean = false
-  private renderInProgress: boolean = false // TODO: use RenderState instead
-  private unrenderInProgress: boolean = false
+  private renderScheduler: RenderState = new RenderState()
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
 
@@ -125,18 +124,12 @@ export abstract class Box implements DropTarget, Hoverable {
 
   public abstract isSourceless(): boolean
 
-  protected isRendered(): boolean {
-    return this.rendered
+  public isRendered(): boolean {
+    return this.renderScheduler.isRendered()
   }
 
-  public shouldBeRendered(): boolean { // TODO: remove and use RenderState instead
-    if (this.renderInProgress) {
-        return true
-    } else if (this.unrenderInProgress) {
-        return false
-    } else {
-        return this.rendered
-    }
+  public isBeingRendered(): boolean {
+    return this.renderScheduler.isBeingRendered()
   }
 
   public async setParentAndFlawlesslyResizeAndSave(newParent: FolderBox): Promise<void> {
@@ -234,10 +227,7 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.watchers.length !== 0
   }
 
-  public async render(): Promise<void> {
-    // TODO: there can be race conditions, handle if renderInProgress is already true
-    this.renderInProgress = true
-
+  public async render(): Promise<void> { await this.renderScheduler.scheduleRender(async () => {
     if (!this.isRendered()) {
       this.renderStyle()
 
@@ -264,24 +254,25 @@ export abstract class Box implements DropTarget, Hoverable {
     }
 
     await this.renderAdditional()
-    this.rendered = true
-    this.renderInProgress = false
-  }
+  })}
 
-  public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> {
-    if (!this.isRendered()) {
-      return {rendered: false}
+  public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> { await this.renderScheduler.scheduleOrSkip(async () => {
+    if (!this.renderScheduler.isRendered()) {
+      return
     }
+    this.renderScheduler.unrenderStarted()
+    
     if ((await this.unrenderBodyIfPossible(force)).rendered) {
-      return {rendered: true}
+      this.renderScheduler.unrenderFinishedStillRendered()
+      return
     }
     if (this.hasWatchers()) {
       if (!force) {
-        return {rendered: true}
+        this.renderScheduler.unrenderFinishedStillRendered()
+        return
       }
       util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
     }
-    this.unrenderInProgress = true
 
     DragManager.removeDropTarget(this)
     HoverManager.removeHoverable(this)
@@ -291,34 +282,38 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.header.unrender())
     proms.push(scaleTool.unrenderFrom(this))
     proms.push(this.unrenderAdditional())
-    if (!this.parent) { // TODO: find better solution than this condition, maybe unrender childs of body after links (of body)
-      proms.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
-    } else {
-      proms.push(this.borderingLinks.renderAllNotManagedBy(this.parent)) // the ones that are managed by the parent are unrendered when the body of the parent is unrendered
-    }
+    proms.push(this.borderingLinks.renderAllThatShouldBe()) // otherwise borderingLinks would not float back to border of parent
     await Promise.all(proms)
 
-    this.unrenderInProgress = false
-    this.rendered = false
-    return {rendered: false}
+    this.renderScheduler.unrenderFinished()
+    return
+    })
+
+    return {rendered: this.renderScheduler.isRendered()}
   }
 
-  private onHoverOver(): void {
+  private async onHoverOver(): Promise<void> {
     // TODO: move scaleTool.isScalingInProgress() into HoverManager
-    if (scaleTool.isScalingInProgress() || this.unrenderInProgress) {
+    if (scaleTool.isScalingInProgress()) {
       return
     }
-    scaleTool.renderInto(this)
-    this.borderingLinks.setHighlightAll(true)
+
+    await Promise.all([
+      scaleTool.renderInto(this),
+      this.borderingLinks.setHighlightAllThatShouldBeRendered(true)
+    ])
   }
 
-  private onHoverOut(): void {
+  private async onHoverOut(): Promise<void> {
     // TODO: move scaleTool.isScalingInProgress() into HoverManager
-    if (scaleTool.isScalingInProgress() || this.unrenderInProgress) {
+    if (scaleTool.isScalingInProgress()) {
       return
     }
-    scaleTool.unrenderFrom(this)
-    this.borderingLinks.setHighlightAll(false)
+
+    await Promise.all([
+      scaleTool.unrenderFrom(this),
+      this.borderingLinks.setHighlightAllThatShouldBeRendered(false)
+    ])
   }
 
   public isMapDataFileExisting(): boolean {
@@ -370,7 +365,7 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async attachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    if (this.unrenderInProgress) {
+    if (this.renderScheduler.isUnrenderInProgress()) {
       util.logWarning('prevented attaching grid to box that gets unrendered') // TODO: only to check that this gets triggered, remove
       return
     }

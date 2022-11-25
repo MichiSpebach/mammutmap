@@ -17,7 +17,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
     private readonly mapData: NodeData
     private managingBox: Box // TODO: rename to parent?
     public readonly borderingLinks: BorderingLinks
-    private rendered: boolean = false
+    private rendered: boolean = false // TODO: use RenderState
     private renderInProgress: boolean = false
     private unrenderInProgress: boolean = false
     private dragState: {
@@ -56,7 +56,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         return this.managingBox
     }
 
-    public shouldBeRendered(): boolean {
+    public isBeingRendered(): boolean {
         if (this.renderInProgress) {
             return true
         } else if (this.unrenderInProgress) {

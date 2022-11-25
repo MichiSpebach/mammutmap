@@ -378,7 +378,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
         linkable = parentBox.nodes.getNodeById(wayPoint.boxId)
       }
 
-      if (!linkable || !linkable.shouldBeRendered()) {
+      if (!linkable || !linkable.isBeingRendered()) {
         break
       }
 

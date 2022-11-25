@@ -86,8 +86,11 @@ export class Link implements Hoverable {
     return this.render(options.priority)
   }
 
-  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    this.renderState.renderStarted()
+  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { await this.renderState.scheduleRender(async () => {
+    if (!this.getManagingBox().isBodyBeingRendered()) {
+      util.logWarning(`Link::render(..) called for Link with id ${this.getId()} unless its managingBox with name ${this.getManagingBox().getName()} is being unrendered.`)
+      return
+    }
 
     const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
@@ -118,25 +121,21 @@ export class Link implements Hoverable {
     proms.push(this.to.render(toInManagingBoxCoords, angleInRadians))
 
     await Promise.all(proms)
-    this.renderState.renderFinished()
-  }
+  })}
 
-  public async unrender(): Promise<void> {
-    if(this.renderState.isBeingUnrendered()) {
-      return // TODO: await current render process if in progress
+  public async unrender(): Promise<void> { await this.renderState.scheduleUnrender( async () => {
+    if (this.renderState.isUnrendered()) {
+      return
     }
-    this.renderState.unrenderStarted()
 
-    const proms: Promise<any>[] = []
+    await Promise.all([
+      this.removeEventListeners(),
+      this.from.unrender(),
+      this.to.unrender()
+    ])
 
-    proms.push(this.removeEventListeners())
-    proms.push(this.from.unrender())
-    proms.push(this.to.unrender())
-
-    await Promise.all(proms)
     await renderManager.clearContentOf(this.getId())
-    this.renderState.unrenderFinished()
-  }
+  })}
 
   public getColor(): string {
     return style.getLinkColor()
