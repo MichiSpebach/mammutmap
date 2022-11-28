@@ -17,6 +17,7 @@ import { renderManager } from './RenderManager'
 import { LinkLine, override as overrideLinkLine } from './link/LinkLine'
 import { ProjectSettings } from './ProjectSettings'
 import { mainWidget } from './mainWidget'
+import { BoxHeader } from './box/BoxHeader'
 
 export { applicationMenu, contextMenu, MenuItemFile }
 export { renderManager, Subscribers }
@@ -24,6 +25,7 @@ export { mainWidget }
 export { Map, onMapLoaded, onMapRendered, onMapUnload }
 export { ProjectSettings }
 export { Box, FileBox, RootFolderBox }
+export { BoxHeader }
 export { Link, LinkImplementation, overrideLink, LinkLine, overrideLinkLine }
 
 let boxWatchers: BoxWatcher[] = []
@@ -168,7 +170,7 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   }
 
   const toBox: Box = await toReport.boxWatcher.get()
-  
+
   const {link, linkAlreadyExisted} = await addLinkBetweenBoxes(fromBox, toBox)
 
   if (!options?.registerBoxWatchersInsteadOfUnwatch) {
@@ -205,7 +207,7 @@ async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
 }
 
 export async function findBoxBySourcePath(
-  path: string, 
+  path: string,
   baseOfPath: FolderBox,
   options?: {
     onlyReturnWarnings?: boolean
