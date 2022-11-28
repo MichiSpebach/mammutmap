@@ -45,8 +45,8 @@ class TelescopeBoxHeader extends pluginFacade_1.BoxHeader {
     }
     formTitleHtmlSplitInMiddle() {
         const parts = this.splitInMiddle(this.referenceBox.getName());
-        let html = `<span style="text-overflow:ellipsis;overflow:hidden;">${parts.left}</span>`;
-        html += `<span style="max-width:50%;white-space:nowrap;direction:rtl;overflow:hidden;">${parts.right}</span>`;
+        let html = `<span style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">${parts.left}</span>`;
+        html += `<span style="white-space:nowrap;direction:rtl;overflow:hidden;">${parts.right}</span>`;
         return `<div style="display:flex;">${html}</div>`;
     }
     formTitleHtmlSplitBetweenWords() {
