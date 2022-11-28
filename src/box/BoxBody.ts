@@ -30,11 +30,11 @@ export abstract class BoxBody {
 
   public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
     if (! await this.shouldBeRendered()) {
-      if (this.isRendered() && await this.shouldBeUnrendered()) {
+      if (this.renderState.isRendered() && await this.shouldBeUnrendered()) {
         await this.runUnrenderIfPossible()
         return
       }
-      if (!this.isRendered()) {
+      if (this.renderState.isUnrendered()) {
         await this.renderZoomInToRenderHint()
         return
       }
@@ -59,6 +59,9 @@ export abstract class BoxBody {
   }
 
   private async runUnrenderIfPossible(force?: boolean): Promise<void> {
+    if (this.renderState.isUnrendered()) {
+      return
+    }
     this.renderState.setUnrenderStarted()
     
     const anyChildStillRendered: boolean = (await this.executeUnrenderIfPossible(force)).anyChildStillRendered
@@ -68,7 +71,7 @@ export abstract class BoxBody {
       await this.renderZoomInToRenderHint()
       this.renderState.setUnrenderFinished()
     } else {
-      this.renderState.unrenderFinishedStillRendered()
+      this.renderState.setUnrenderFinishedStillRendered()
     }
   }
 

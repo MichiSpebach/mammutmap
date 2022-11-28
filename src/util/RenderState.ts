@@ -40,15 +40,15 @@ export class RenderState {
         this.unrenderInProgress = false
     }
 
-    public unrenderFinishedStillRendered(): void {
+    public setUnrenderFinishedStillRendered(): void {
         this.validateUnrenderFinished()
         this.rendered = true
         this.unrenderInProgress = false
     }
 
     private validateUnrenderFinished(): void {
-        if (this.rendered) {
-            //util.logWarning('RenderState::setUnrenderFinished() called while rendered already false')
+        if (!this.rendered) {
+            util.logWarning('RenderState::setUnrenderFinished() called while rendered already false')
         }
         if (!this.unrenderInProgress) {
             util.logWarning('RenderState::setUnrenderFinished() called while unrenderInProgress is false')

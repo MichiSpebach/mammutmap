@@ -269,12 +269,12 @@ export abstract class Box implements DropTarget, Hoverable {
     this.renderState.setUnrenderStarted()
     
     if ((await this.unrenderBodyIfPossible(force)).rendered) {
-      this.renderState.unrenderFinishedStillRendered()
+      this.renderState.setUnrenderFinishedStillRendered()
       return
     }
     if (this.hasWatchers()) {
       if (!force) {
-        this.renderState.unrenderFinishedStillRendered()
+        this.renderState.setUnrenderFinishedStillRendered()
         return
       }
       util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
