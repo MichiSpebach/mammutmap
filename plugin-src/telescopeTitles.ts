@@ -23,14 +23,26 @@ async function activate(): Promise<void> {
 class TelescopeBoxHeader extends BoxHeader {
 
   private static formTitleHtmlBackup: () => string
+  private static formTitleHtmlSplitInMiddleBackup: () => string
+  private static formTitleHtmlSplitBetweenWordsBackup: () => string
+  private static splitInMiddleBackup: (text: string) => {left: string, right: string}
+  private static splitBetweenWordsBackup: (text: string) => string[]
 
   public static activateAndPlugin(): void {
       this.formTitleHtmlBackup = BoxHeader.prototype.formTitleHtml
       BoxHeader.prototype.formTitleHtml = TelescopeBoxHeader.prototype.formTitleHtml
+      ;(BoxHeader.prototype as any).splitInMiddle = TelescopeBoxHeader.prototype.splitInMiddle
+      ;(BoxHeader.prototype as any).formTitleHtmlSplitInMiddle = TelescopeBoxHeader.prototype.formTitleHtmlSplitInMiddle
+      ;(BoxHeader.prototype as any).formTitleHtmlSplitBetweenWords = TelescopeBoxHeader.prototype.formTitleHtmlSplitBetweenWords
+      ;(BoxHeader.prototype as any).splitBetweenWords = TelescopeBoxHeader.prototype.splitBetweenWords
   }
 
   public static deactivateAndPlugout(): void {
       BoxHeader.prototype.formTitleHtml = TelescopeBoxHeader.formTitleHtmlBackup
+      ;(BoxHeader.prototype as any).splitInMiddle = TelescopeBoxHeader.splitInMiddleBackup
+      ;(BoxHeader.prototype as any).formTitleHtmlSplitInMiddle = TelescopeBoxHeader.formTitleHtmlSplitInMiddleBackup
+      ;(BoxHeader.prototype as any).formTitleHtmlSplitBetweenWords = TelescopeBoxHeader.formTitleHtmlSplitBetweenWordsBackup
+      ;(BoxHeader.prototype as any).splitBetweenWords = TelescopeBoxHeader.splitBetweenWordsBackup
   }
 
   /*public constructor(referenceBox: Box) {
@@ -42,23 +54,46 @@ class TelescopeBoxHeader extends BoxHeader {
   }
 
   public formTitleHtml(): string {
-    let title: string = this.referenceBox.getName()
+    return this.formTitleHtmlSplitInMiddle()
+  }
+
+  private formTitleHtmlSplitInMiddle(): string {
+    const parts: {left: string, right: string} = this.splitInMiddle(this.referenceBox.getName())
+    let html: string = `<span style="text-overflow:ellipsis;overflow:hidden;">${parts.left}</span>`
+    html += `<span style="max-width:50%;white-space:nowrap;direction:rtl;overflow:hidden;">${parts.right}</span>`
+    return `<div style="display:flex;">${html}</div>`
+  }
+
+  public formTitleHtmlSplitBetweenWords(): string {
+    const parts: string[] = this.splitBetweenWords(this.referenceBox.getName())
+    const html: string = parts.map(part => `<span style="text-overflow:ellipsis;overflow:hidden;">${part}</span>`).join('')
+    return `<div style="display:flex;">${html}</div>`
+  }
+
+  private splitInMiddle(text: string): {left: string, right: string} {
+    const splitIndex: number = text.length/2
+    return {
+      left: text.substring(0, splitIndex), 
+      right: text.substring(splitIndex)
+    }
+  }
+
+  private splitBetweenWords(text: string): string[] {
     let parts: string[] = []
     while (true) {
-      let index: number = title.substring(1).search(/[A-Z._/\\]/)+1
+      let index: number = text.substring(1).search(/[A-Z._\-/\\\s]/)+1
       if (index > 0) {
-        if (!title.charAt(index).match(/[A-Z]/)) {
+        if (!text.charAt(index).match(/[A-Z]/)) {
           index++
         }
-        parts.push(title.substring(0, index))
-        title = title.substring(index)
+        parts.push(text.substring(0, index))
+        text = text.substring(index)
       } else {
-        parts.push(title)
+        parts.push(text)
         break
       }
     }
-    const html: string = parts.map(part => `<span style="text-overflow:ellipsis;overflow:hidden;">${part}</span>`).join('')
-    return `<div style="display:flex;">${html}</div>`
+    return parts
   }
 }
 
