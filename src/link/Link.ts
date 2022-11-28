@@ -93,7 +93,7 @@ export class Link implements Hoverable {
       util.logWarning(`Link::render(..) called for Link with id ${this.getId()} unless its managingBox with name ${this.getManagingBox().getName()} is being unrendered.`)
       return
     }
-    this.renderState.renderStarted()
+    this.renderState.setRenderStarted()
 
     const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
@@ -124,14 +124,14 @@ export class Link implements Hoverable {
     proms.push(this.to.render(toInManagingBoxCoords, angleInRadians))
 
     await Promise.all(proms)
-    this.renderState.renderFinished()
+    this.renderState.setRenderFinished()
   })}
 
   public async unrender(): Promise<void> { await this.renderScheduler.schedule( async () => {
     if (this.renderState.isUnrendered()) {
       return
     }
-    this.renderState.unrenderStarted()
+    this.renderState.setUnrenderStarted()
 
     await Promise.all([
       this.removeEventListeners(),
@@ -140,7 +140,7 @@ export class Link implements Hoverable {
     ])
 
     await renderManager.clearContentOf(this.getId())
-    this.renderState.unrenderFinished()
+    this.renderState.setUnrenderFinished()
   })}
 
   public getColor(): string {

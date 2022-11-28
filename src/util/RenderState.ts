@@ -6,32 +6,35 @@ export class RenderState {
     private renderInProgress: boolean = false
     private unrenderInProgress: boolean = false
 
-    public renderStarted(): void {
+    public setRenderStarted(): void {
+        if (this.renderInProgress) {
+            util.logWarning('RenderState::setRenderStarted() called while renderInProgress')
+        }
         if (this.unrenderInProgress) {
-            util.logWarning('RenderState::startRender() called while unrenderInProgress')
+            util.logWarning('RenderState::setRenderStarted() called while unrenderInProgress')
         }
         this.renderInProgress = true
     }
 
-    public renderFinished(): void {
-        if (this.rendered) {
-            //util.logWarning('RenderState::finishRender() called while rendered already true') // TODO reactivate?
-        }
+    public setRenderFinished(): void {
         if (!this.renderInProgress) {
-            //util.logWarning('RenderState::finishRender() called while renderInProgress is false') // TODO happens because of not handled race conditions, fix usages and reactivate asap
+            util.logWarning('RenderState::setRenderFinished() called while renderInProgress is false')
         }
         this.rendered = true
         this.renderInProgress = false
     }
 
-    public unrenderStarted(): void {
+    public setUnrenderStarted(): void {
         if (this.renderInProgress) {
-            util.logWarning('RenderState::startUnrender() called while renderInProgress')
+            util.logWarning('RenderState::setUnrenderStarted() called while renderInProgress')
+        }
+        if (this.unrenderInProgress) {
+            util.logWarning('RenderState::setUnrenderStarted() called while unrenderInProgress')
         }
         this.unrenderInProgress = true
     }
 
-    public unrenderFinished(): void {
+    public setUnrenderFinished(): void {
         this.validateUnrenderFinished()
         this.rendered = false
         this.unrenderInProgress = false
@@ -45,10 +48,10 @@ export class RenderState {
 
     private validateUnrenderFinished(): void {
         if (this.rendered) {
-            //util.logWarning('RenderState::finishUnrender() called while rendered already false') // TODO reactivate?
+            //util.logWarning('RenderState::setUnrenderFinished() called while rendered already false')
         }
         if (!this.unrenderInProgress) {
-            util.logWarning('RenderState::finishUnrender() called while unrenderInProgress is false')
+            util.logWarning('RenderState::setUnrenderFinished() called while unrenderInProgress is false')
         }
     }
 

@@ -230,7 +230,7 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
-    this.renderState.renderStarted()
+    this.renderState.setRenderStarted()
 
     if (!this.renderState.isRendered()) {
       this.renderStyle()
@@ -259,14 +259,14 @@ export abstract class Box implements DropTarget, Hoverable {
 
     await this.renderAdditional()
 
-    this.renderState.renderFinished()
+    this.renderState.setRenderFinished()
   })}
 
   public async unrenderIfPossible(force?: boolean): Promise<{rendered: boolean}> { await this.renderScheduler.schedule(async () => {
     if (!this.renderState.isRendered()) {
       return
     }
-    this.renderState.unrenderStarted()
+    this.renderState.setUnrenderStarted()
     
     if ((await this.unrenderBodyIfPossible(force)).rendered) {
       this.renderState.unrenderFinishedStillRendered()
@@ -291,7 +291,7 @@ export abstract class Box implements DropTarget, Hoverable {
     proms.push(this.borderingLinks.renderAllThatShouldBe()) // otherwise borderingLinks would not float back to border of parent
     await Promise.all(proms)
 
-    this.renderState.unrenderFinished()
+    this.renderState.setUnrenderFinished()
     return
     })
 
