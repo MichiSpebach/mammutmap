@@ -2,7 +2,6 @@ import { MockProxy, mock } from 'jest-mock-extended'
 import { LinkData } from '../../src/mapData/LinkData'
 import { WayPointData } from '../../src/mapData/WayPointData'
 import { Box } from '../../src/box/Box'
-import { FolderBox } from '../../src/box/FolderBox'
 import { Link } from '../../src/link/Link'
 import { ClientRect } from '../../src/ClientRect'
 import { DocumentObjectModelAdapter, init as initDomAdapter } from '../../src/domAdapter'
@@ -10,12 +9,13 @@ import { RenderManager, init as initRenderManager } from '../../src/RenderManage
 import { Transform } from '../../src/box/Transform'
 import { LinkEndData } from '../../src/mapData/LinkEndData'
 import { BoxData } from '../../src/mapData/BoxData'
-import { RootFolderBox } from '../../src/box/RootFolderBox'
 import { ProjectSettings } from '../../src/ProjectSettings'
 import { fileSystem } from '../../src/fileSystemAdapter'
 import { util } from '../../src/util'
 import { BoxManager, init as initBoxManager } from '../../src/box/BoxManager'
 import { MapSettingsData } from '../../src/mapData/MapSettingsData'
+import * as boxFactory from '../box/factories/boxFactory'
+import { RootFolderBox } from '../../src/pluginFacade'
 
 test('render', async () => {
   const scenario = setupSimpleScenario()
@@ -70,9 +70,6 @@ function setupSimpleScenario(): {
   const toWayPoints: WayPointData[] = [WayPointData.buildNew('toBox', 'ToBox', 50, 50)]
   const linkData: LinkData = new LinkData('link', new LinkEndData(fromWayPoints), new LinkEndData(toWayPoints))
 
-  //const managingBox: MockProxy<FolderBox> = mock<FolderBox>() // TODO: fix jest-mock-extended
-  //const fromBox: MockProxy<Box> = mock<Box>()
-  //const toBox: MockProxy<Box> = (() => mock<Box>())()
   const mapSettingsData: MapSettingsData = new MapSettingsData({
     id: 'managingBox',
     x: 0, y: 0, width: 100, height: 100,
@@ -83,9 +80,9 @@ function setupSimpleScenario(): {
     linkTags: []
   })
   const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, mapSettingsData, false)
-  const managingBox: FolderBox = new RootFolderBox(projectSettings, 'map')
-  const fromBox: Box = new FolderBox('FromBox', managingBox, BoxData.buildNewWithId('fromBox', 5, 5, 10, 10), false)
-  const toBox: Box = new FolderBox('ToBox', managingBox, BoxData.buildNewWithId('toBox', 85, 5, 10, 10), false)
+  const managingBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: projectSettings, rendered: true})
+  const fromBox: Box = boxFactory.folderOf({idOrData: BoxData.buildNewWithId('fromBox', 5, 5, 10, 10), name: 'FromBox', parent: managingBox, rendered: true})
+  const toBox: Box = boxFactory.folderOf({idOrData: BoxData.buildNewWithId('toBox', 85, 5, 10, 10), name: 'ToBox', parent: managingBox, rendered: true})
 
   Object.defineProperty(managingBox, 'transform', {value: new Transform(managingBox)})
   managingBox.getClientRect = () => Promise.resolve(new ClientRect(0, 0, 100, 100))
@@ -98,6 +95,7 @@ function setupSimpleScenario(): {
     }
     return undefined
   }
+  managingBox.isBodyBeingRendered = () => true
 
   const domAdapter: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
   initDomAdapter(domAdapter)

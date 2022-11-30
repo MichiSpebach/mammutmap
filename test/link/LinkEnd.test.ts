@@ -57,14 +57,14 @@ test('reorderMapDataPathWithoutRender misplaced managingBox', async () => {
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path[0]).toEqual({boxId: 'managingBoxId', boxName: 'managingBoxName', x: 75, y: 50})
     const actualManagingBox: Box = scene.linkEnd.getManagingBox()
-    const misplacedManagingBox: Box = boxFactory.rootFolderOf('misplacedManagingBoxId')
+    const misplacedManagingBox: Box = boxFactory.rootFolderOf({idOrProjectSettings:'misplacedManagingBoxId', rendered: true})
     scene.linkEnd.getManagingBox = () => misplacedManagingBox
 
     await scene.linkEnd.reorderMapDataPathWithoutRender(actualManagingBox)
 
     expect(logWarning).toBeCalledWith('newManagingBox should already be set to referenceLink when calling reorderMapDataPathWithoutRender(..), this will likely lead to further problems')
     expect(logWarning).toBeCalledWith('did not find managingBox while reorderMapDataPathWithoutRender(..) of LinkEnd with id linkEndId, this could happen when reorderMapDataPathWithoutRender(..) is called before the new managingBox is set')
-    expect(logWarning).toBeCalledWith('Corrupted mapData detected: Link with id linkId in fakeProjectSettingsFilePath/fakeSrcRootPath has path with no rendered boxes, this only happens when mapData is corrupted. Defaulting LinkEnd to center of managingBox.')
+    expect(logWarning).toBeCalledWith('Link with id linkId in fakeProjectSettingsFilePath/fakeSrcRootPath has path with no rendered boxes. This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn\'t. Defaulting LinkEnd to center of managingBox.')
     expect(logWarning).toBeCalledTimes(3)
 })
 
@@ -132,7 +132,7 @@ test('reorderMapDataPathWithoutRender deep, change only position, while dragging
     expect(scene.deepBox.borderingLinks.includes(scene.linkEnd.getReferenceLink())).toBe(true)
 })
 
-    test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag nodeWidget into parentBox; then drag nodeWidget back', async () => {
+test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag nodeWidget into parentBox; then drag nodeWidget back', async () => {
     const scene = await setupRenderedScenarioWithDepthAndNode()
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -303,7 +303,11 @@ test('reorderMapDataPathWithoutRender deep, move managingBox outside', async () 
         {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
-    scene.linkEnd.getManagingBox = () => scene.rootBox
+    expect(scene.linkEnd.getReferenceLink().getManagingBox()).toBe(scene.outerBox)
+    expect(scene.linkEnd.getManagingBox()).toBe(scene.outerBox)
+
+    scene.linkEnd.getReferenceLink().getManagingBox = () => scene.rootBox
+    expect(scene.linkEnd.getManagingBox()).toBe(scene.rootBox)
 
     await scene.linkEnd.reorderMapDataPathWithoutRender(scene.rootBox)
 
@@ -342,9 +346,9 @@ function setupRenderedScenarioWithDepthZero(): {linkEnd: LinkEnd, linkEndData: L
     const wayPoint = WayPointData.buildNew('managingBoxId', 'managingBoxName', 75, 50)
     const linkEndData = new LinkEndData([wayPoint])
 
-    const managingBox: RootFolderBox = boxFactory.rootFolderOf('managingBoxId')
+    const managingBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: 'managingBoxId', rendered: true})
 
-    const linkEnd = linkEndFactory.renderedOf(linkEndData, managingBox, [managingBox])
+    const linkEnd = linkEndFactory.renderedOf(linkEndData, managingBox, [])
 
     return {linkEnd, linkEndData}
 }
@@ -377,10 +381,10 @@ function setupRenderedScenarioWithDepth(): {
     const deepWayPoint = WayPointData.buildNew('deepBoxId', 'deepBoxName', 50, 50)
     const linkEndData = new LinkEndData([innerWayPoint, deepWayPoint])
 
-    const rootBox: RootFolderBox = boxFactory.rootFolderOf('rootBoxId')
-    const outerBox: FolderBox = boxFactory.folderOf('outerBoxId', rootBox)
-    const innerBox: FolderBox = boxFactory.folderOf('innerBoxId', outerBox)
-    const deepBox: FolderBox = boxFactory.folderOf('deepBoxId', innerBox)
+    const rootBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: 'rootBoxId', rendered: true})
+    const outerBox: FolderBox = boxFactory.folderOf({idOrData: 'outerBoxId', parent: rootBox, rendered: true})
+    const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, rendered: true})
+    const deepBox: FolderBox = boxFactory.folderOf({idOrData: 'deepBoxId', parent: innerBox, rendered: true})
     rootBox.addBox(outerBox)
     outerBox.addBox(innerBox)
     innerBox.addBox(deepBox)
@@ -402,9 +406,9 @@ function setupShallowRenderedScenarioWithDepth(): {
     const deepWayPoint = WayPointData.buildNew('deepBoxId', 'deepBoxName', 50, 50)
     const linkEndData = new LinkEndData([innerWayPoint, deepWayPoint])
 
-    const rootBox: RootFolderBox = boxFactory.rootFolderOf('rootBoxId')
-    const outerBox: FolderBox = boxFactory.folderOf('outerBoxId', rootBox)
-    const innerBox: FolderBox = boxFactory.folderOf('innerBoxId', outerBox)
+    const rootBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: 'rootBoxId'})
+    const outerBox: FolderBox = boxFactory.folderOf({idOrData: 'outerBoxId', parent: rootBox, rendered: true})
+    const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, rendered: true})
     rootBox.addBox(outerBox)
     outerBox.addBox(innerBox)
     const renderedBoxesInPath: Box[] = [innerBox]

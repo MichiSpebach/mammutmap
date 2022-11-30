@@ -16,8 +16,8 @@ export class BorderingLinks {
 
   private warnIfLinkIsManagedByReferenceBox(link: Link): void {
     if (this.referenceBoxOrNode === link.getManagingBox()) {
-      let message = `Adding link with id ${link.getId()} to BorderingLinks`
-      message += ` of box with name ${this.referenceBoxOrNode.getName()} that is managed by this box.`
+      let message = `Adding link with id '${link.getId()}' to BorderingLinks`
+      message += ` of box with name '${this.referenceBoxOrNode.getName()}' that is managed by this box.`
       message += ` Only bordering/adjacent links should be added here.`
       util.logWarning(message)
     }
