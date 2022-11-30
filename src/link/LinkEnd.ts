@@ -14,6 +14,7 @@ import { Shape } from '../shape/Shape'
 import { FolderBox } from '../box/FolderBox'
 import * as linkUtil from './linkUtil'
 import { RenderState } from '../util/RenderState'
+import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 
 export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly id: string
@@ -21,6 +22,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly referenceLink: Link
   private shape: 'square'|'arrow'
   private renderState: RenderState = new RenderState()
+  private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private boxesRegisteredAt: (Box|NodeWidget)[] = []
   private renderedTarget: Box|NodeWidget|undefined
   private dragState: {
@@ -201,7 +203,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   // TODO: remove parameter positionInManagingBoxCoords
   // TODO: now more frequent called, add renderPriority
-  public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
+  public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> { await this.renderScheduler.schedule(async () => {
     this.renderState.setRenderStarted()
 
     await Promise.all([ // TODO: await at end of method
@@ -215,9 +217,9 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     }
 
     this.renderState.setRenderFinished()
-  }
+  })}
 
-  public async unrender(): Promise<void> { // TODO: use RenderScheduler to avoid race condition
+  public async unrender(): Promise<void> { await this.renderScheduler.schedule(async () => {
     if (!this.renderState.isRendered()) {
       return
     }
@@ -231,7 +233,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     await renderManager.setStyleTo(this.getId(), '')
 
     this.renderState.setUnrenderFinished()
-  }
+  })}
 
   private async renderShape(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
     const positionStyle = 'position:absolute;left:'+positionInManagingBoxCoords.percentX+'%;top:'+positionInManagingBoxCoords.percentY+'%;'
