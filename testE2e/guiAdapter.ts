@@ -1,6 +1,5 @@
-import puppeteer = require('puppeteer-core')
 import { spawn } from 'child_process'
-import { Browser, Page } from 'puppeteer-core'
+import * as puppeteer from 'puppeteer-core'
 import { util } from '../src/util'
 
 const electronDebugPort: number = 9291
@@ -9,7 +8,7 @@ const viewportWidth: number = 1600
 const viewportHight: number = 800
 const defaultScreenshotClip = {x:0, y: 0, width: 800, height: 800}
 
-let page: Page|undefined
+let page: puppeteer.Page|undefined
 let boxIteratorLastFilePath: string|null = null
 
 export async function startApp(): Promise<void> {
@@ -185,12 +184,12 @@ async function waitUntilLogMatches(condition:(log: string) => boolean, timelimit
     if (Date.now() > timecap) {
       throw new Error(`log does not match condition in time of ${timelimitInMs}ms`)
     }
-    await util.wait(50)
+    await util.wait(50) // TODO: improve, start with short wait time and increase it incrementally
   }
 }
 
 async function getLastLog(): Promise<string> {
-  const logs: puppeteer.ElementHandle<Element>[] = await (await getLog()).$x('div')
+  const logs: puppeteer.ElementHandle<HTMLDivElement>[] = await (await getLog()).$$('div')
   if (logs.length === 0) {
     return ''
   }
@@ -200,7 +199,7 @@ async function getLastLog(): Promise<string> {
 async function getLog(): Promise<puppeteer.ElementHandle<Element>> {
   const logElement: puppeteer.ElementHandle<Element>|null = await findElement('log')
   if (!logElement) {
-    throw new Error('failed to get log')
+    throw new Error('Failed to get log.')
   }
   return logElement
 }
@@ -210,24 +209,28 @@ async function findElement(id: string): Promise<puppeteer.ElementHandle<Element>
 }
 
 async function getContentOf(element: puppeteer.ElementHandle<Element>): Promise<string> {
-  return (await element.getProperty('innerText'))._remoteObject.value
+  const remoteObject: puppeteer.Protocol.Runtime.RemoteObject = (await element.getProperty('innerText')).remoteObject()
+  if (remoteObject.value === undefined || remoteObject.value === null) {
+    throw new Error('Failed to getContentOf(element) because remoteObject does not have a value.')
+  }
+  return remoteObject.value
 }
 
-async function getPage(): Promise<Page> {
+async function getPage(): Promise<puppeteer.Page> {
   if (!page) {
     page = await connectToAppAndFindCorrectPage()
   }
   return page
 }
 
-async function connectToAppAndFindCorrectPage(): Promise<Page> {
-  let browser: Browser = await connectToApp()
+async function connectToAppAndFindCorrectPage(): Promise<puppeteer.Page> {
+  let browser: puppeteer.Browser = await connectToApp()
   return findCorrectPage(browser)
 }
 
-async function connectToApp(): Promise<Browser> {
+async function connectToApp(): Promise<puppeteer.Browser> {
   const timecap = Date.now() + timeoutForPuppeteerToConnectToElectronInMs
-  let browser: Browser|undefined
+  let browser: puppeteer.Browser|undefined
   while (!browser) {
     try {
       browser = await puppeteer.connect({
@@ -248,8 +251,8 @@ async function connectToApp(): Promise<Browser> {
   return browser
 }
 
-async function findCorrectPage(browser: Browser): Promise<Page> {
-  const pages: Page[] = await browser.pages()
+async function findCorrectPage(browser: puppeteer.Browser): Promise<puppeteer.Page> {
+  const pages: puppeteer.Page[] = await browser.pages()
   for (page of pages) {
     if (await isCorrectPage(page)) {
       return page
@@ -258,6 +261,6 @@ async function findCorrectPage(browser: Browser): Promise<Page> {
   throw new Error('browser does not contain correct page, might happen when electronDebugPort is not free')
 }
 
-async function isCorrectPage(page: Page): Promise<boolean> {
+async function isCorrectPage(page: puppeteer.Page): Promise<boolean> {
   return await page.title() !== ''
 }
