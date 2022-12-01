@@ -3,7 +3,6 @@ import { renderManager, RenderPriority } from './RenderManager'
 import * as map from './Map'
 import { util } from './util'
 import * as commandLinePluginFacade from './commandLinePluginFacade'
-import { ProjectSettings } from './ProjectSettings'
 import * as htmlCursor from './htmlCursor'
 import { setCompatibilityTheme } from './styleAdapter'
 
@@ -19,7 +18,7 @@ async function processCommand(command: string): Promise<void> {
     case 'open':
       const folderPath: string = parameter
       util.logInfo('opening '+folderPath)
-      await map.searchAndLoadMapCloseTo(util.joinPaths([folderPath, '/map/', ProjectSettings.preferredFileName]))
+      await map.searchAndLoadMapCloseTo(folderPath)
       util.logInfo('opening finished')
       return
     case 'close':

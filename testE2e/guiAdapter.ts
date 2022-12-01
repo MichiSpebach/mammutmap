@@ -61,6 +61,7 @@ export async function zoomWithoutWaitingInBetween(deltas: number[]): Promise<voi
 
 async function zoomWithoutWaitingUntilFinished(delta: number): Promise<void> {
   await (await getPage()).focus('#map') // otherwise sometimes wheel does not work immediately
+  delta *= 0.8 // TODO: somehow the value the app receives is larger, fix this
   await (await getPage()).mouse.wheel({deltaY: -delta})
 }
 
