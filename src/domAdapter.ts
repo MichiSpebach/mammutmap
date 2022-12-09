@@ -442,6 +442,9 @@ export class DocumentObjectModelAdapter {
     rendererFunction += 'let ipc = require("electron").ipcRenderer;'
     //rendererFunction += 'console.log(event);'
     rendererFunction += 'event.stopPropagation();'
+    if (eventType === 'dragstart') {
+      rendererFunction += 'event.dataTransfer.setDragImage(new Image(), 0, 0);'
+    }
     rendererFunction += 'if (event.clientX != 0 || event.clientY != 0) {'
     rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey);'
     rendererFunction += '}'
