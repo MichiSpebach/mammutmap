@@ -326,10 +326,10 @@
 			"from": {
 				"path": [
 					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "/home/michael/programming/ts-visualize-files/src",
-						"x": 89.99987271793871,
-						"y": 74.99968179484678
+						"boxId": "dub9um70n18",
+						"boxName": "DragManager.ts",
+						"x": 84,
+						"y": 56
 					}
 				]
 			},
@@ -3727,6 +3727,81 @@
 						"y": 50
 					}
 				]
+			}
+		},
+		{
+			"id": "f646ng2tda8",
+			"from": {
+				"path": [
+					{
+						"boxId": "hmdangdf9s",
+						"boxName": "mouseDownDragManager.ts",
+						"x": 100,
+						"y": 0
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 96,
+						"y": 52
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "89di06n9j2o",
+			"from": {
+				"path": [
+					{
+						"boxId": "hmdangdf9s",
+						"boxName": "mouseDownDragManager.ts",
+						"x": 100,
+						"y": 0
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 100,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "s2j44k2tas",
+			"from": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 43.245,
+						"y": 49.246
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "hmdangdf9s",
+						"boxName": "mouseDownDragManager.ts",
+						"x": 50,
+						"y": 56
+					}
+				],
+				"floatToBorder": true
 			}
 		}
 	],

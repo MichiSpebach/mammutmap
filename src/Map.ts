@@ -12,6 +12,7 @@ import { ClientPosition } from './box/Transform'
 import * as indexHtmlIds from './indexHtmlIds'
 import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './pluginFacade'
+import { mouseDownDragManager } from './MouseDownDragManager'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -160,16 +161,21 @@ export class Map {
       this.updateStyle(),
       this.rootFolder.render(),
       renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
-      renderManager.addEventListenerAdvancedTo('map', 'mousedown', (result: MouseEventResultAdvanced) => this.movestart(result)),
+      mouseDownDragManager.addDraggable(
+        this.id,
+        (result: MouseEventResultAdvanced) => this.movestart(result),
+        (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY, ctrlPressed),
+        (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend()
+      )
     ])
   }
 
   public async destruct(): Promise<void> {
     await this.rootFolder.unrenderIfPossible(true)
-    await this.rootFolder.destruct()
     await Promise.all([
+      this.rootFolder.destruct(),
       renderManager.removeEventListenerFrom('map', 'wheel'),
-      renderManager.removeEventListenerFrom('map', 'mousedown')
+      mouseDownDragManager.removeDraggable(this.id)
     ])
     await renderManager.remove('map')
   }
@@ -205,11 +211,6 @@ export class Map {
     }
 
     this.latestMousePositionWhenMoving = new ClientPosition(eventResult.clientX, eventResult.clientY)
-    await Promise.all([
-      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY, ctrlPressed), RenderPriority.RESPONSIVE),
-      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE),
-      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseleave', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE)
-    ])
     util.setHint(Map.hintToPreventMoving, true)
   }
 
@@ -243,11 +244,6 @@ export class Map {
       util.logWarning('moveend should be called after move')
     }
 
-    await Promise.all([
-      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousemove', RenderPriority.RESPONSIVE),
-      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseup', RenderPriority.RESPONSIVE),
-      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseleave', RenderPriority.RESPONSIVE)
-    ])
     this.latestMousePositionWhenMoving = undefined
     util.setHint(Map.hintToPreventMoving, false)
   }
