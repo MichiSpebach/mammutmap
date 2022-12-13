@@ -68,6 +68,7 @@ export class DragManager {
 
     await Promise.all([
       renderManager.addClassTo(draggableId, this.draggableStyleClass, priority),
+      renderManager.addEventListenerTo(draggableId, 'mousedown', () => {/* only to catch mousedown, because mouseDownDragManager would be disturbed by it */}),
       renderManager.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
         this.onDragStart(elementToDrag, clientX, clientY, false)
       }, priority),
@@ -87,6 +88,7 @@ export class DragManager {
 
     await Promise.all([
       renderManager.removeClassFrom(draggableId, this.draggableStyleClass, priority),
+      renderManager.removeEventListenerFrom(draggableId, 'mousedown', priority),
       renderManager.removeEventListenerFrom(draggableId, 'dragstart', priority),
       renderManager.removeEventListenerFrom(draggableId, 'drag', priority),
       renderManager.removeEventListenerFrom(draggableId, 'dragend', priority)

@@ -162,7 +162,7 @@ export class Map {
       this.rootFolder.render(),
       renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
       mouseDownDragManager.addDraggable(
-        this.id,
+        'map',
         (result: MouseEventResultAdvanced) => this.movestart(result),
         (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY, ctrlPressed),
         (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend()
@@ -175,7 +175,7 @@ export class Map {
     await Promise.all([
       this.rootFolder.destruct(),
       renderManager.removeEventListenerFrom('map', 'wheel'),
-      mouseDownDragManager.removeDraggable(this.id)
+      mouseDownDragManager.removeDraggable('map')
     ])
     await renderManager.remove('map')
   }
