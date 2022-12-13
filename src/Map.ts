@@ -140,7 +140,7 @@ export class Map {
   private marginTopPercent: number = 0
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
-  private latestMousePositionWhenMoving: ClientPosition|undefined
+  private moveState: {latestMousePosition: ClientPosition, prevented: boolean} | null = null
 
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
@@ -203,29 +203,33 @@ export class Map {
   }
 
   private async movestart(eventResult: MouseEventResultAdvanced): Promise<void> {
-    if (eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed) {
-      return
-    }
-    if (this.latestMousePositionWhenMoving) {
+    if (this.moveState) {
       util.logWarning('movestart should be called before move')
     }
 
-    this.latestMousePositionWhenMoving = new ClientPosition(eventResult.clientX, eventResult.clientY)
-    util.setHint(Map.hintToPreventMoving, true)
+    this.moveState = {
+      latestMousePosition: new ClientPosition(eventResult.clientX, eventResult.clientY), 
+      prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed
+    }
+    this.updateHintToPreventMoving()
   }
 
   private async move(clientX: number, clientY: number, ctrlPressed: boolean): Promise<void> {
-    if (ctrlPressed) {
-      await this.moveend()
-      return
-    }
-    if (!this.latestMousePositionWhenMoving) {
+    if (!this.moveState) {
       util.logWarning('move should be called between movestart and moveend')
       return
     }
+    if (this.moveState.prevented) {
+      return
+    }
+    if (ctrlPressed) {
+      this.moveState.prevented = true
+      this.updateHintToPreventMoving()
+      return
+    }
 
-    const marginTopOffsetPx: number = clientY - this.latestMousePositionWhenMoving.y
-    const marginLeftOffsetPx: number = clientX - this.latestMousePositionWhenMoving.x
+    const marginTopOffsetPx: number = clientY - this.moveState.latestMousePosition.y
+    const marginLeftOffsetPx: number = clientX - this.moveState.latestMousePosition.x
 
     const marginTopOffsetPercent: number = marginTopOffsetPx / (this.mapRatioAdjusterSizePx/100)
     const marginLeftOffsetPercent: number = marginLeftOffsetPx / (this.mapRatioAdjusterSizePx/100)
@@ -233,19 +237,24 @@ export class Map {
     this.marginTopPercent += marginTopOffsetPercent
     this.marginLeftPercent += marginLeftOffsetPercent
 
-    this.latestMousePositionWhenMoving = new ClientPosition(clientX, clientY)
+    this.moveState.latestMousePosition = new ClientPosition(clientX, clientY)
 
     await this.updateStyle(RenderPriority.RESPONSIVE)
     await this.rootFolder.render()
   }
 
   private async moveend(): Promise<void> {
-    if (!this.latestMousePositionWhenMoving) {
+    if (!this.moveState) {
       util.logWarning('moveend should be called after move')
     }
 
-    this.latestMousePositionWhenMoving = undefined
-    util.setHint(Map.hintToPreventMoving, false)
+    this.moveState = null
+    this.updateHintToPreventMoving()
+  }
+
+  private updateHintToPreventMoving(): void {
+    const visible: boolean = !!this.moveState && !this.moveState.prevented
+    util.setHint(Map.hintToPreventMoving, visible)
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
