@@ -82,6 +82,10 @@ pre {
   border-radius: 3px;
 }
 
+.disableUserSelect {
+  user-select: none;
+}
+
 .nsResize {
   cursor:ns-resize;
 }

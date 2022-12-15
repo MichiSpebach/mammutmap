@@ -83,29 +83,35 @@ class Util {
   }
 
   // TODO: move to mouseEventBlockerScreenOverlay.ts file
+  // TODO: could simply pointer-events: none work?
   private mouseEventBlockerScreenOverlayState: 'notInitialized'|'active'|'inactive' = 'notInitialized'
   public async setMouseEventBlockerScreenOverlay(active: boolean, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const mouseEventBlockerScreenOverlayId: string = 'mouseEventBlockerScreenOverlay'
+    const pros: Promise<void>[] = []
 
     if (active) {
+      pros.push(renderManager.addClassTo(indexHtmlIds.bodyId, style.getClass('disableUserSelect'))) // needed because sometimes selection is faster than overlay
       if (this.mouseEventBlockerScreenOverlayState === 'notInitialized') {
         const mapOverlayMoveLock: RenderElement = {
           type: 'div', 
           attributes: {id: mouseEventBlockerScreenOverlayId, style: {position: "fixed", top: "0px", width: "100%", height: "100%"}}, 
           children: []
         }
-        renderManager.addElementTo(indexHtmlIds.bodyId, mapOverlayMoveLock, priority)
+        pros.push(renderManager.addElementTo(indexHtmlIds.bodyId, mapOverlayMoveLock, priority))
       } else {
-        renderManager.appendChildTo(indexHtmlIds.bodyId, mouseEventBlockerScreenOverlayId, priority)
+        pros.push(renderManager.appendChildTo(indexHtmlIds.bodyId, mouseEventBlockerScreenOverlayId, priority))
       }
       this.mouseEventBlockerScreenOverlayState = 'active'
 
     } else {
       if (this.mouseEventBlockerScreenOverlayState === 'active') {
-        renderManager.appendChildTo(indexHtmlIds.unplacedElementsId, mouseEventBlockerScreenOverlayId, priority)
+        pros.push(renderManager.removeClassFrom(indexHtmlIds.bodyId, style.getClass('disableUserSelect')))
+        pros.push(renderManager.appendChildTo(indexHtmlIds.unplacedElementsId, mouseEventBlockerScreenOverlayId, priority))
         this.mouseEventBlockerScreenOverlayState = 'inactive'
       }
     }
+
+    await Promise.all(pros)
   }
 
   public stringify(object: any): string {
