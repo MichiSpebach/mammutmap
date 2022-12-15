@@ -1,7 +1,8 @@
 import { exec, ChildProcess } from 'child_process'
-import { renderManager } from './RenderManager'
+import { renderManager, RenderPriority } from './RenderManager'
 import { style } from './styleAdapter'
 import * as indexHtmlIds from './indexHtmlIds'
+import { RenderElement } from './util/RenderElement'
 
 export { ChildProcess }
 
@@ -77,6 +78,32 @@ class Util {
       if (this.hint === hint) {
         this.hint = null
         await renderManager.remove(this.hintId)
+      }
+    }
+  }
+
+  // TODO: move to mouseEventBlockerScreenOverlay.ts file
+  private mouseEventBlockerScreenOverlayState: 'notInitialized'|'active'|'inactive' = 'notInitialized'
+  public async setMouseEventBlockerScreenOverlay(active: boolean, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    const mouseEventBlockerScreenOverlayId: string = 'mouseEventBlockerScreenOverlay'
+
+    if (active) {
+      if (this.mouseEventBlockerScreenOverlayState === 'notInitialized') {
+        const mapOverlayMoveLock: RenderElement = {
+          type: 'div', 
+          attributes: {id: mouseEventBlockerScreenOverlayId, style: {position: "fixed", top: "0px", width: "100%", height: "100%"}}, 
+          children: []
+        }
+        renderManager.addElementTo(indexHtmlIds.bodyId, mapOverlayMoveLock, priority)
+      } else {
+        renderManager.appendChildTo(indexHtmlIds.bodyId, mouseEventBlockerScreenOverlayId, priority)
+      }
+      this.mouseEventBlockerScreenOverlayState = 'active'
+
+    } else {
+      if (this.mouseEventBlockerScreenOverlayState === 'active') {
+        renderManager.appendChildTo(indexHtmlIds.unplacedElementsId, mouseEventBlockerScreenOverlayId, priority)
+        this.mouseEventBlockerScreenOverlayState = 'inactive'
       }
     }
   }

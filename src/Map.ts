@@ -211,7 +211,7 @@ export class Map {
       latestMousePosition: new ClientPosition(eventResult.clientX, eventResult.clientY), 
       prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed
     }
-    this.updateHintToPreventMoving()
+    this.updateMouseEventBlockerAndHintToPreventMoving()
   }
 
   private async move(clientX: number, clientY: number, ctrlPressed: boolean): Promise<void> {
@@ -224,7 +224,7 @@ export class Map {
     }
     if (ctrlPressed) {
       this.moveState.prevented = true
-      this.updateHintToPreventMoving()
+      this.updateMouseEventBlockerAndHintToPreventMoving()
       return
     }
 
@@ -249,11 +249,12 @@ export class Map {
     }
 
     this.moveState = null
-    this.updateHintToPreventMoving()
+    this.updateMouseEventBlockerAndHintToPreventMoving()
   }
 
-  private updateHintToPreventMoving(): void {
+  private updateMouseEventBlockerAndHintToPreventMoving(): void {
     const visible: boolean = !!this.moveState && !this.moveState.prevented
+    util.setMouseEventBlockerScreenOverlay(visible, RenderPriority.RESPONSIVE)
     util.setHint(Map.hintToPreventMoving, visible)
   }
 

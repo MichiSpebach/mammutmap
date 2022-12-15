@@ -39,6 +39,10 @@ export type ElementAttributes = {
 }
 
 export type Style = {
+  position?: string,
+  top?: string,
+  width?: string,
+  height?: string
   color?: string
 }
 
