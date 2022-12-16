@@ -5,19 +5,30 @@
 		{
 			"name": "hidden",
 			"count": 1,
-			"mode": "visibleEnds"
+			"mode": "visibleEnds",
+			"appearance": {}
 		},
 		{
 			"name": "has",
-			"count": 6
+			"count": 7,
+			"appearance": {
+				"mode": "visible"
+			}
 		},
 		{
 			"name": "isA",
-			"count": 6
+			"count": 7,
+			"appearance": {
+				"mode": "visible"
+			}
 		},
 		{
 			"name": "should be refactored",
-			"count": 2
+			"count": 2,
+			"appearance": {
+				"mode": "visibleEnds",
+				"color": "red"
+			}
 		}
 	],
 	"id": "76koudrno8g",
@@ -114,5 +125,8 @@
 			}
 		}
 	],
-	"nodes": []
+	"nodes": [],
+	"defaultLinkAppearance": {
+		"mode": "visibleEnds"
+	}
 }
