@@ -12,6 +12,7 @@ import { ClientPosition } from './box/Transform'
 import * as indexHtmlIds from './indexHtmlIds'
 import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './pluginFacade'
+import { mouseDownDragManager } from './MouseDownDragManager'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -139,7 +140,7 @@ export class Map {
   private marginTopPercent: number = 0
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
-  private latestMousePositionWhenMoving: ClientPosition|undefined
+  private moveState: {latestMousePosition: ClientPosition, prevented: boolean} | null = null
 
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
@@ -160,16 +161,21 @@ export class Map {
       this.updateStyle(),
       this.rootFolder.render(),
       renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
-      renderManager.addEventListenerAdvancedTo('map', 'mousedown', (result: MouseEventResultAdvanced) => this.movestart(result)),
+      mouseDownDragManager.addDraggable(
+        'map',
+        (result: MouseEventResultAdvanced) => this.movestart(result),
+        (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY, ctrlPressed),
+        (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend()
+      )
     ])
   }
 
   public async destruct(): Promise<void> {
     await this.rootFolder.unrenderIfPossible(true)
-    await this.rootFolder.destruct()
     await Promise.all([
+      this.rootFolder.destruct(),
       renderManager.removeEventListenerFrom('map', 'wheel'),
-      renderManager.removeEventListenerFrom('map', 'mousedown')
+      mouseDownDragManager.removeDraggable('map')
     ])
     await renderManager.remove('map')
   }
@@ -197,34 +203,33 @@ export class Map {
   }
 
   private async movestart(eventResult: MouseEventResultAdvanced): Promise<void> {
-    if (eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed) {
-      return
-    }
-    if (this.latestMousePositionWhenMoving) {
+    if (this.moveState) {
       util.logWarning('movestart should be called before move')
     }
 
-    this.latestMousePositionWhenMoving = new ClientPosition(eventResult.clientX, eventResult.clientY)
-    await Promise.all([
-      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY, ctrlPressed), RenderPriority.RESPONSIVE),
-      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE),
-      renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseleave', (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend(), RenderPriority.RESPONSIVE)
-    ])
-    util.setHint(Map.hintToPreventMoving, true)
+    this.moveState = {
+      latestMousePosition: new ClientPosition(eventResult.clientX, eventResult.clientY), 
+      prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed
+    }
+    this.updateMouseEventBlockerAndHintToPreventMoving()
   }
 
   private async move(clientX: number, clientY: number, ctrlPressed: boolean): Promise<void> {
-    if (ctrlPressed) {
-      await this.moveend()
-      return
-    }
-    if (!this.latestMousePositionWhenMoving) {
+    if (!this.moveState) {
       util.logWarning('move should be called between movestart and moveend')
       return
     }
+    if (this.moveState.prevented) {
+      return
+    }
+    if (ctrlPressed) {
+      this.moveState.prevented = true
+      this.updateMouseEventBlockerAndHintToPreventMoving()
+      return
+    }
 
-    const marginTopOffsetPx: number = clientY - this.latestMousePositionWhenMoving.y
-    const marginLeftOffsetPx: number = clientX - this.latestMousePositionWhenMoving.x
+    const marginTopOffsetPx: number = clientY - this.moveState.latestMousePosition.y
+    const marginLeftOffsetPx: number = clientX - this.moveState.latestMousePosition.x
 
     const marginTopOffsetPercent: number = marginTopOffsetPx / (this.mapRatioAdjusterSizePx/100)
     const marginLeftOffsetPercent: number = marginLeftOffsetPx / (this.mapRatioAdjusterSizePx/100)
@@ -232,24 +237,25 @@ export class Map {
     this.marginTopPercent += marginTopOffsetPercent
     this.marginLeftPercent += marginLeftOffsetPercent
 
-    this.latestMousePositionWhenMoving = new ClientPosition(clientX, clientY)
+    this.moveState.latestMousePosition = new ClientPosition(clientX, clientY)
 
     await this.updateStyle(RenderPriority.RESPONSIVE)
     await this.rootFolder.render()
   }
 
   private async moveend(): Promise<void> {
-    if (!this.latestMousePositionWhenMoving) {
+    if (!this.moveState) {
       util.logWarning('moveend should be called after move')
     }
 
-    await Promise.all([
-      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousemove', RenderPriority.RESPONSIVE),
-      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseup', RenderPriority.RESPONSIVE),
-      renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseleave', RenderPriority.RESPONSIVE)
-    ])
-    this.latestMousePositionWhenMoving = undefined
-    util.setHint(Map.hintToPreventMoving, false)
+    this.moveState = null
+    this.updateMouseEventBlockerAndHintToPreventMoving()
+  }
+
+  private updateMouseEventBlockerAndHintToPreventMoving(): void {
+    const visible: boolean = !!this.moveState && !this.moveState.prevented
+    util.setMouseEventBlockerScreenOverlay(visible, RenderPriority.RESPONSIVE)
+    util.setHint(Map.hintToPreventMoving, visible)
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
