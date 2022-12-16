@@ -221,7 +221,7 @@ export class Map {
     }
 
     if (!this.moveState.movingStarted) {
-      this.moveState.movingStarted = true
+      this.moveState.movingStarted = true // TODO: use treshold to block other mouse events only if moved some distance?
       this.updateMouseEventBlockerAndHintToPreventMoving()
     }
 
