@@ -37,7 +37,8 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         onDrag: (clientX: number, clientY: number, ctrlPressed: boolean) => Promise<void>
     ): void {
         if (this.mouseDown) {
-            util.logWarning('MouseDownDragManager: there seem to be multiple elements that catch mousedown event at the same time.')
+            util.logWarning('MouseDownDragManager: there seem to be multiple elements that catch mousedown event at the same time or multiple mouse buttons are pressed.')
+            return
         }
         this.mouseDown = true
 
