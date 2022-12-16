@@ -2,7 +2,7 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { renderManager } from './RenderManager'
 
 interface Style {
-  getClass(name: 'disableUserSelect'): string
+  getClass(name: 'disableUserSelect'|'draggingInProgress'): string
 
   getApplicationMenuClass(suffix: ''|'Item'|'ItemDisabled'|'ItemFile'|'ItemFolder'|'ItemFolderContainer'): string
 
@@ -37,7 +37,7 @@ interface Style {
 
 class DarkTheme implements Style {
 
-  getClass(name: 'disableUserSelect'): string {
+  getClass(name: 'disableUserSelect'|'draggingInProgress'): string {
     return name
   }
 

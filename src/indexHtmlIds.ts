@@ -1,4 +1,4 @@
-
+export const htmlId: string = 'html'
 export const headId: string = 'head'
 export const bodyId: string = 'body'
 export const contentId: string = 'content'

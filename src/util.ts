@@ -83,7 +83,6 @@ class Util {
   }
 
   // TODO: move to mouseEventBlockerScreenOverlay.ts file
-  // TODO: could simply pointer-events: none work?
   private mouseEventBlockerScreenOverlayState: 'notInitialized'|'active'|'inactive' = 'notInitialized'
   public async setMouseEventBlockerScreenOverlay(active: boolean, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const mouseEventBlockerScreenOverlayId: string = 'mouseEventBlockerScreenOverlay'

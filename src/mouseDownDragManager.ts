@@ -18,12 +18,7 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
             renderManager.addEventListenerAdvancedTo(elementId, 'mousedown', (eventResult: MouseEventResultAdvanced) => {
                 this.dragStart(eventResult, onDragStart, onDrag)
             }),
-            renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-                // TODO: replace indexHtmlIds.bodyId with 'window' and only initialize once
-                this.dragEnd(clientX, clientY, ctrlPressed, onDragEnd)
-            }),
-            renderManager.addEventListenerTo(indexHtmlIds.bodyId, 'mouseleave', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-                // TODO: remove when indexHtmlIds.bodyId is replaced with 'window'
+            renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => {
                 this.dragEnd(clientX, clientY, ctrlPressed, onDragEnd)
             })
         ])
@@ -32,8 +27,7 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
     public async removeDraggable(elementId: string): Promise<void> {
         await Promise.all([
             renderManager.removeEventListenerFrom(elementId, 'mousedown'),
-            renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseup'), // TODO: replace indexHtmlIds.bodyId with 'window' and only initialize once
-            renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseleave') // TODO: remove when indexHtmlIds.bodyId is replaced with 'window'
+            renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mouseup')
         ])
     }
 
@@ -47,11 +41,9 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         }
         this.mouseDown = true
 
-        renderManager.addEventListenerTo(
-            indexHtmlIds.bodyId, 'mousemove', // TODO: replace indexHtmlIds.bodyId with 'window'
-            (clientX: number, clientY: number, ctrlPressed: boolean) => {this.drag(clientX, clientY, ctrlPressed, onDrag)}, 
-            RenderPriority.RESPONSIVE
-        )
+        renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
+            this.drag(clientX, clientY, ctrlPressed, onDrag)
+        }, RenderPriority.RESPONSIVE)
         onDragStart(eventResult)
     }
 
@@ -75,7 +67,7 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         }
         this.mouseDown = false
 
-        renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousemove', RenderPriority.RESPONSIVE) // TODO: replace indexHtmlIds.bodyId with 'window'
+        renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mousemove', RenderPriority.RESPONSIVE)
         onDragEnd(clientX, clientY, ctrlPressed)
     }
 }
