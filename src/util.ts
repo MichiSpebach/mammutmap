@@ -3,6 +3,7 @@ import { renderManager, RenderPriority } from './RenderManager'
 import { style } from './styleAdapter'
 import * as indexHtmlIds from './indexHtmlIds'
 import { RenderElement } from './util/RenderElement'
+import * as stacktraceUtil from './util/stacktraceUtil'
 
 export { ChildProcess }
 
@@ -260,6 +261,26 @@ class Util {
 
   public generateId(): string {
     return Math.random().toString(32).substring(2)
+  }
+
+  public getCallerDirPath(skipThroughFilePath?: string): string {
+    if (!skipThroughFilePath) {
+      skipThroughFilePath = stacktraceUtil.getCallerFilePath(__filename)
+    }
+
+    return stacktraceUtil.getCallerDirPath(skipThroughFilePath)
+  }
+
+  public getCallerFilePath(skipThroughFilePath?: string): string {
+    if (!skipThroughFilePath) {
+      skipThroughFilePath = stacktraceUtil.getCallerFilePath(__filename)
+    }
+
+    return stacktraceUtil.getCallerFilePath(skipThroughFilePath)
+  }
+
+  public getCallStackPaths(): string[] {
+    return stacktraceUtil.getCallStackPaths()
   }
 
 }

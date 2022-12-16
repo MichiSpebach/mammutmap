@@ -3803,6 +3803,68 @@
 				],
 				"floatToBorder": true
 			}
+		},
+		{
+			"id": "muh37oo0kuo",
+			"from": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 73.617,
+						"y": 10.155
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 49.949,
+						"y": 49.988
+					},
+					{
+						"boxId": "7gt9suh8r7g",
+						"boxName": "stacktraceUtil.ts",
+						"x": 49.744,
+						"y": 49.94
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "m1qsdfoimg",
+			"from": {
+				"path": [
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 53.583,
+						"y": 51.491
+					},
+					{
+						"boxId": "7gt9suh8r7g",
+						"boxName": "stacktraceUtil.ts",
+						"x": 67.915,
+						"y": 57.454
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 73.855,
+						"y": 48.974
+					}
+				],
+				"floatToBorder": true
+			}
 		}
 	],
 	"nodes": []
