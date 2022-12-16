@@ -183,7 +183,10 @@ async function waitUntilLogMatches(condition:(log: string) => boolean, timelimit
       return
     }
     if (Date.now() > timecap) {
-      throw new Error(`log does not match condition in time of ${timelimitInMs}ms`)
+      let message = `Log does not match condition in time of ${timelimitInMs}ms.`
+      message += `\nCondition is: "${condition}".`
+      message += `\nLog is: "${log}".`
+      throw new Error(message)
     }
     await util.wait(50) // TODO: improve, start with short wait time and increase it incrementally
   }

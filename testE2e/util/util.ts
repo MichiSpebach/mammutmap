@@ -1,14 +1,14 @@
 import { toMatchImageSnapshot, MatchImageSnapshotOptions } from 'jest-image-snapshot'
 import { promises as fsPromises } from 'fs'
+import { util } from '../../src/util'
 
 expect.extend({ toMatchImageSnapshot })
 
 // TODO: implement CustomMatcher 'toImagify' for jest instead
 
-// TODO: make dirname optional
 export async function expectImageToMatchSnapshot(options: {
     image: string|Buffer
-    snapshotDirname: string
+    snapshotDirname?: string
     snapshotIdentifier?: string
 }): Promise<void> {
     expect(options.image).toMatchImageSnapshot({
@@ -17,10 +17,9 @@ export async function expectImageToMatchSnapshot(options: {
     })
 }
 
-// TODO: make dirname optional
 export async function expectImageNotToMatchSnapshot(options: {
     image: Buffer
-    snapshotDirname: string
+    snapshotDirname?: string
     snapshotIdentifier: string
 }): Promise<void> {
     try {
@@ -36,7 +35,11 @@ export async function expectImageNotToMatchSnapshot(options: {
     fail('expected image not to match snapshot')
 }
 
-export function getSnapshotOptions(dirname: string): MatchImageSnapshotOptions { // TODO: make dirname optional
+export function getSnapshotOptions(dirname?: string): MatchImageSnapshotOptions {
+    if (!dirname) {
+        dirname = util.getCallerDirPath()
+    }
+
     return {
         customSnapshotsDir: dirname,
         customDiffDir: dirname,
