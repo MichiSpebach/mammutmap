@@ -140,7 +140,7 @@ export class Map {
   private marginTopPercent: number = 0
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
-  private moveState: {latestMousePosition: ClientPosition, prevented: boolean} | null = null
+  private moveState: {latestMousePosition: ClientPosition, prevented: boolean, movingStarted: boolean} | null = null
 
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
@@ -209,9 +209,9 @@ export class Map {
 
     this.moveState = {
       latestMousePosition: new ClientPosition(eventResult.clientX, eventResult.clientY), 
-      prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed
+      prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed,
+      movingStarted: false
     }
-    this.updateMouseEventBlockerAndHintToPreventMoving()
   }
 
   private async move(clientX: number, clientY: number, ctrlPressed: boolean): Promise<void> {
@@ -219,6 +219,12 @@ export class Map {
       util.logWarning('move should be called between movestart and moveend')
       return
     }
+
+    if (!this.moveState.movingStarted) {
+      this.moveState.movingStarted = true // TODO: use treshold to block other mouse events only if moved some distance?
+      this.updateMouseEventBlockerAndHintToPreventMoving()
+    }
+
     if (this.moveState.prevented) {
       return
     }
