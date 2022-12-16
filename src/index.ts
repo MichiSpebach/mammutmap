@@ -34,7 +34,11 @@ const createWindow = async () => {
     await applicationMenu.initAndRender()
   }
 
-  await pluginLoader.loadPlugins()
+  if (getStartupArgumentBoolean('skip-plugins')) {
+    util.logInfo('skip loading of plugins because --skip-plugins=true')
+  } else {
+    await pluginLoader.loadPlugins()
+  }
 
   if (process.platform === 'darwin') {
     let message: string = 'macOS detected, initializing applicationMenu after plugins have loaded'
@@ -69,3 +73,15 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+function getStartupArgumentBoolean(argName: 'skip-plugins'): boolean {
+  const value = app.commandLine.getSwitchValue(argName)
+  if (value === 'true') {
+    return true
+  }
+  if (!value || value === 'false') {
+    return false
+  }
+  util.logWarning(`Expected argument "${argName}" to be "true" or "false" but is "${value}", defaulting to false.`)
+  return false
+}
