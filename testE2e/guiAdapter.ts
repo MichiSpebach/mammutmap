@@ -12,7 +12,7 @@ let page: puppeteer.Page|undefined
 let boxIteratorLastFilePath: string|null = null
 
 export async function startApp(): Promise<void> {
-  spawn('electron', ['.', `--remote-debugging-port=${electronDebugPort}`], {
+  spawn('electron', ['.', `--remote-debugging-port=${electronDebugPort} --skip-plugins=true`], {
     shell: true
   })
   await connectToAppAndFindCorrectPage()
