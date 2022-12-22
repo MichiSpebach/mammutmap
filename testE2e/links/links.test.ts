@@ -1,12 +1,5 @@
 import * as gui from '../guiAdapter'
-import { toMatchImageSnapshot, MatchImageSnapshotOptions } from 'jest-image-snapshot'
-
-expect.extend({ toMatchImageSnapshot })
-const snapshotOptions: MatchImageSnapshotOptions = {
-  customSnapshotsDir: __dirname,
-  customDiffDir: __dirname,
-  customDiffConfig: {threshold: 0.15}
-}
+import * as e2eUtil from '../util/util'
 
 beforeEach(async () => {
   await gui.resetWindow()
@@ -18,19 +11,19 @@ afterAll(async () => {
 })
 
 test('highlighting of bordering links of hovered box', async () => {
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.moveMouseTo(400, 200)
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.zoom(500)
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.moveMouseTo(400, 400)
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.moveMouseTo(400, 450)
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 }, 10000)
 
 test('highlighting when spamming changing mouse position', async () => {
@@ -49,9 +42,6 @@ test('highlighting when spamming changing mouse position', async () => {
     for (;y > 100; y -= 50) {
       await gui.moveMouseTo(x, y)
     }
-    expect(await gui.takeScreenshot()).toMatchImageSnapshot({
-      ...snapshotOptions,
-      ...{customSnapshotIdentifier: 'highlighting-when-spamming-changing-mouse-position'}
-    })
+    e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'highlighting-when-spamming-changing-mouse-position'})
   }
 }, 15000)
