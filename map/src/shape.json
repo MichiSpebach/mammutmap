@@ -1,0 +1,160 @@
+{
+	"id": "nsm4nes02ig",
+	"x": 68,
+	"y": 36.00000000000001,
+	"width": 4,
+	"height": 4,
+	"links": [
+		{
+			"id": "58hmeptruo8",
+			"from": {
+				"path": [
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rof59v11638",
+						"boxName": "Position.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "qq77i9qi0hg",
+			"from": {
+				"path": [
+					{
+						"boxId": "6e0alhgnc3",
+						"boxName": "LocalPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rof59v11638",
+						"boxName": "Position.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "qa9ual4iv9o",
+			"from": {
+				"path": [
+					{
+						"boxId": "c35bh7edg08",
+						"boxName": "ClientCircle.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "uts4fni96tg",
+			"from": {
+				"path": [
+					{
+						"boxId": "c35bh7edg08",
+						"boxName": "ClientCircle.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p1p2nd6qd7",
+						"boxName": "Circle.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "qpfknn9pbr",
+			"from": {
+				"path": [
+					{
+						"boxId": "p1p2nd6qd7",
+						"boxName": "Circle.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rof59v11638",
+						"boxName": "Position.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "l0fq8fuf1",
+			"from": {
+				"path": [
+					{
+						"boxId": "p1p2nd6qd7",
+						"boxName": "Circle.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "022mb20vbv",
+						"boxName": "Shape.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		}
+	],
+	"nodes": []
+}

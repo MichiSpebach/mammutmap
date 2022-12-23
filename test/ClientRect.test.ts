@@ -1,4 +1,4 @@
-import { ClientPosition } from '../src/box/Transform'
+import { ClientPosition } from '../src/shape/ClientPosition'
 import { ClientRect } from '../src/ClientRect'
 
 test('calculateIntersectionsWithLine', () => {

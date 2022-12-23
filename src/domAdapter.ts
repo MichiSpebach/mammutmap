@@ -2,6 +2,7 @@ import { util } from './util'
 import { ElementAttributes, RenderElement, RenderElements, Style } from './util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from './ClientRect'
+import { ClientPosition } from './shape/ClientPosition'
 
 export type MouseEventType = 'click'|'contextmenu'|'mousedown'|'mouseup'|'mousemove'|'mouseover'|'mouseout'|'mouseenter'|'mouseleave'
 export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'
@@ -10,8 +11,7 @@ export type InputEventType = 'change'
 type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType
 
 export type MouseEventResultAdvanced = {
-  clientX: number,
-  clientY: number,
+  position: ClientPosition,
   ctrlPressed: boolean,
   cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'
 }
@@ -383,7 +383,9 @@ export class DocumentObjectModelAdapter {
 
     this.addIpcChannelListener(
       ipcChannelName,
-      (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any) => callback({clientX, clientY, ctrlPressed, cursor})
+      (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any) => callback({
+        position: new ClientPosition(clientX, clientY), ctrlPressed, cursor
+      })
     )
   }
 

@@ -1,5 +1,5 @@
 import { util } from '../util'
-import { LocalPosition } from "../box/Transform"
+import { LocalPosition } from "../shape/LocalPosition"
 
 export class WayPointData {
   public boxId: string

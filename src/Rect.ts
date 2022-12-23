@@ -1,4 +1,4 @@
-import { Position } from './box/Transform'
+import { Position } from './shape/Position'
 import { Shape } from './shape/Shape'
 
 // TODO: move into shape

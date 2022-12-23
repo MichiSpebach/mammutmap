@@ -1,4 +1,4 @@
-import { LocalPosition } from './box/Transform'
+import { LocalPosition } from './shape/LocalPosition'
 import { Rect } from './Rect'
 
 // TODO: move into shape

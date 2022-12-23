@@ -9,7 +9,7 @@ import { FolderBox } from './FolderBox'
 import { BoxData } from '../mapData/BoxData'
 import { SourcelessBox } from './SourcelessBox'
 import { BoxMapDataLoader } from './BoxMapDataLoader'
-import { ClientPosition } from './Transform'
+import { ClientPosition } from '../shape/ClientPosition'
 import { EmptySpaceFinder } from './EmptySpaceFinder'
 import { LocalRect } from '../LocalRect'
 

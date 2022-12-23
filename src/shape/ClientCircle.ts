@@ -1,4 +1,4 @@
-import { ClientPosition } from '../box/Transform'
+import { ClientPosition } from './ClientPosition'
 import { Circle } from './Circle'
 
 export class ClientCircle extends Circle<ClientPosition> {

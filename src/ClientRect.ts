@@ -1,4 +1,4 @@
-import { ClientPosition } from './box/Transform'
+import { ClientPosition } from './shape/ClientPosition'
 import { Rect } from './Rect'
 
 // TODO: move into shape

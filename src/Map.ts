@@ -8,7 +8,7 @@ import { HoverManager } from './HoverManager'
 import { boxManager } from './box/BoxManager'
 import { RootFolderBox } from './box/RootFolderBox'
 import { ProjectSettings } from './ProjectSettings'
-import { ClientPosition } from './box/Transform'
+import { ClientPosition } from './shape/ClientPosition'
 import * as indexHtmlIds from './indexHtmlIds'
 import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './pluginFacade'
@@ -164,8 +164,8 @@ export class Map {
       mouseDownDragManager.addDraggable(
         'map',
         (result: MouseEventResultAdvanced) => this.movestart(result),
-        (clientX: number, clientY: number, ctrlPressed: boolean) => this.move(clientX, clientY, ctrlPressed),
-        (clientX: number, clientY: number, ctrlPressed: boolean) => this.moveend()
+        (position: ClientPosition, ctrlPressed: boolean) => this.move(position, ctrlPressed),
+        (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
       )
     ])
   }
@@ -208,13 +208,13 @@ export class Map {
     }
 
     this.moveState = {
-      latestMousePosition: new ClientPosition(eventResult.clientX, eventResult.clientY), 
+      latestMousePosition: eventResult.position, 
       prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed,
       movingStarted: false
     }
   }
 
-  private async move(clientX: number, clientY: number, ctrlPressed: boolean): Promise<void> {
+  private async move(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
     if (!this.moveState) {
       util.logWarning('move should be called between movestart and moveend')
       return
@@ -234,8 +234,8 @@ export class Map {
       return
     }
 
-    const marginTopOffsetPx: number = clientY - this.moveState.latestMousePosition.y
-    const marginLeftOffsetPx: number = clientX - this.moveState.latestMousePosition.x
+    const marginTopOffsetPx: number = position.y - this.moveState.latestMousePosition.y
+    const marginLeftOffsetPx: number = position.x - this.moveState.latestMousePosition.x
 
     const marginTopOffsetPercent: number = marginTopOffsetPx / (this.mapRatioAdjusterSizePx/100)
     const marginLeftOffsetPercent: number = marginLeftOffsetPx / (this.mapRatioAdjusterSizePx/100)
@@ -243,7 +243,7 @@ export class Map {
     this.marginTopPercent += marginTopOffsetPercent
     this.marginLeftPercent += marginLeftOffsetPercent
 
-    this.moveState.latestMousePosition = new ClientPosition(clientX, clientY)
+    this.moveState.latestMousePosition = position
 
     await this.updateStyle(RenderPriority.RESPONSIVE)
     await this.rootFolder.render()
