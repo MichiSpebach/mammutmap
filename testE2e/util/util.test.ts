@@ -1,6 +1,11 @@
 import * as e2eUtil from './util'
 import { promises as fsPromises } from 'fs'
 
+test('meme', async () => {
+    const meme = await fsPromises.readFile('./testE2e/util/meme.png')
+    e2eUtil.expectImageToMatchSnapshot({image: meme, snapshotIdentifier: 'meme'})
+})
+
 test('default snapshotOptions', async () => {
     const snapshotIdentifier: string = 'util-test-ts-default-snapshot-options'
     const testFilePathPrefix: string = `./testE2e/util/${snapshotIdentifier}-snap-`
