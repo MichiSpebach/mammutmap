@@ -60,17 +60,20 @@ function extractPathFromStacktraceLine(stacktraceLine: string, stacktraceLineInd
 
     let path: string = stacktraceLine.substring(pathStartIndex, pathEndIndex)
 
-    const columnInfoStartIndex: number = path.lastIndexOf((':'))
-    if (columnInfoStartIndex < 0) {
-        util.logWarning(`Did not find column information in line with index ${stacktraceLineIndex} of stacktrace. Line is "${stacktraceLine}".`)
+    path = removePositionInfoFromStacktraceLine(path, 'column', stacktraceLineIndex)
+    path = removePositionInfoFromStacktraceLine(path, 'row', stacktraceLineIndex)
+
+    return path
+}
+
+function removePositionInfoFromStacktraceLine(stacktraceLine: string, positionType: 'column'|'row', stacktraceLineIndex: number) {
+    const positionInfoStartIndex: number = stacktraceLine.lastIndexOf((':'))
+    if (positionInfoStartIndex < 0) {
+        if (stacktraceLine !== '<anonymous>') {
+            util.logWarning(`Did not find ${positionType} information in line with index ${stacktraceLineIndex} of stacktrace. Line is "${stacktraceLine}".`)
+        }
+        return stacktraceLine
     }
 
-    path = path.substring(0, columnInfoStartIndex)
-
-    const rowInfoStartIndex: number = path.lastIndexOf((':'))
-    if (rowInfoStartIndex < 0) {
-        util.logWarning(`Did not find row information in line with index ${stacktraceLineIndex} of stacktrace. Line is "${stacktraceLine}".`)
-    }
-
-    return path.substring(0, rowInfoStartIndex)
+    return stacktraceLine.substring(0, positionInfoStartIndex)
 }
