@@ -1,8 +1,5 @@
 import * as gui from '../guiAdapter'
-import { toMatchImageSnapshot, MatchImageSnapshotOptions } from 'jest-image-snapshot'
-
-expect.extend({ toMatchImageSnapshot })
-const snapshotOptions: MatchImageSnapshotOptions = {customSnapshotsDir: __dirname, customDiffDir: __dirname}
+import * as e2eUtil from '../util/util'
 
 afterAll(async () => {
   await gui.resetWindow()
@@ -14,17 +11,17 @@ test('iterate over boxes', async () => {
   await gui.startBoxIterator()
 
   await gui.getNextSourcePathOfBoxIterator()
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/c/a/a')
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/d/a/a/a')
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   expect(await gui.getNextSourcePathOfBoxIterator()).toBeUndefined()
   await gui.clearWatchedBoxes()
-  expect(await gui.takeScreenshot()).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 })
 
 async function iterateOverBoxesUntilFile(filePath: string): Promise<void> {
