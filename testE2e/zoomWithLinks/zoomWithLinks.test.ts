@@ -1,8 +1,5 @@
 import * as gui from '../guiAdapter'
-import { toMatchImageSnapshot, MatchImageSnapshotOptions } from 'jest-image-snapshot'
-
-expect.extend({ toMatchImageSnapshot })
-const snapshotOptions: MatchImageSnapshotOptions = {customSnapshotsDir: __dirname, customDiffDir: __dirname}
+import * as e2eUtil from '../util/util'
 
 test('spamming zoom in and out while hover over link', async () => {
   await gui.resetWindow()
@@ -13,16 +10,11 @@ test('spamming zoom in and out while hover over link', async () => {
   for (let round = 0; round < 10; round++) {
     await gui.zoom(2000)
     await clearTerminalAndZoom(2000)
-    expect(await gui.takeScreenshot()).toMatchImageSnapshot({
-      ...snapshotOptions,
-      ...{customSnapshotIdentifier: 'spamming-zoom-in-and-out-1'}
-    })
+    e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'spamming-zoom-in-and-out-1'})
+
     await gui.zoom(-400)
     await clearTerminalAndZoom(-400)
-    expect(await gui.takeScreenshot()).toMatchImageSnapshot({
-      ...snapshotOptions,
-      ...{customSnapshotIdentifier: 'spamming-zoom-in-and-out-2'}
-    })
+    e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'spamming-zoom-in-and-out-2'})
   }
 }, 100000)
 

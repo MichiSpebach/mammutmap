@@ -1,8 +1,5 @@
 import * as gui from '../guiAdapter'
-import { toMatchImageSnapshot, MatchImageSnapshotOptions } from 'jest-image-snapshot'
-
-expect.extend({ toMatchImageSnapshot })
-const snapshotOptions: MatchImageSnapshotOptions = {customSnapshotsDir: __dirname, customDiffDir: __dirname}
+import * as e2eUtil from '../util/util'
 
 afterAll(async () => {
   await gui.resetWindow()
@@ -13,8 +10,7 @@ test('zoom into deep folder', async () => {
   await gui.openFolder('testE2e/zoom/scenario')
   await gui.moveMouseTo(300, 300)
   await gui.zoom(5000)
-  const image = await gui.takeScreenshot()
-  expect(image).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 })
 
 test('zoom in and out', async () => {
@@ -23,20 +19,16 @@ test('zoom in and out', async () => {
   await gui.moveMouseTo(300, 300)
   await gui.zoom(1500)
   await gui.zoom(2500)
-  const image1 = await gui.takeScreenshot()
-  expect(image1).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.zoom(-250)
-  const image2 = await gui.takeScreenshot()
-  expect(image2).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.zoom(500)
-  const image3 = await gui.takeScreenshot()
-  expect(image3).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.zoom(-485)
-  const image4 = await gui.takeScreenshot()
-  expect(image4).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 })
 
 test('zoom in and out without waiting', async () => {
@@ -46,6 +38,5 @@ test('zoom in and out without waiting', async () => {
   await gui.zoomWithoutWaitingInBetween([1500, 2500, -250, 500, -485])
   await gui.clearTerminal()
   await gui.moveMouseTo(300, 300)
-  const image = await gui.takeScreenshot()
-  expect(image).toMatchImageSnapshot(snapshotOptions)
+  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 })
