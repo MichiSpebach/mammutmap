@@ -100,7 +100,7 @@ export class Transform {
 
 }
 
-// TODO: move positions to own classes
+// TODO: move positions to own classes, move into shape
 export abstract class Position<POSITION extends Position<POSITION>> {
 
   public abstract getX(): number

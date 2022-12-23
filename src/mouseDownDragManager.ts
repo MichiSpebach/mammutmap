@@ -6,17 +6,17 @@ import { ClientPosition } from './box/Transform'
 export let mouseDownDragManager: MouseDownDragManager // = new MouseDownDragManager() // initialized at end of file
 
 class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
-    
+
     private dragState: {
         latest: {mousePosition: ClientPosition, ctrlPressed: boolean},
-        onDragEnd: (clientX: number, clientY: number, ctrlPressed: boolean) => Promise<void>
+        onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     } | null = null
 
     public async addDraggable(
         elementId: string,
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,
-        onDrag: (clientX: number, clientY: number, ctrlPressed: boolean) => Promise<void>,
-        onDragEnd: (clientX: number, clientY: number, ctrlPressed: boolean) => Promise<void>
+        onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
+        onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     ): Promise<void> {
         await Promise.all([
             renderManager.addEventListenerAdvancedTo(elementId, 'mousedown', (eventResult: MouseEventResultAdvanced) => {
@@ -42,31 +42,31 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
     private dragStart(
         eventResult: MouseEventResultAdvanced,
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,
-        onDrag: (clientX: number, clientY: number, ctrlPressed: boolean) => Promise<void>,
-        onDragEnd: (clientX: number, clientY: number, ctrlPressed: boolean) => Promise<void>
+        onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
+        onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     ): void {
         if (this.dragState) {
             util.logWarning('MouseDownDragManager: there seem to be multiple elements that catch mousedown event at the same time or multiple mouse buttons are pressed.')
             return
         }
-        this.dragState = {latest: {mousePosition: new ClientPosition(eventResult.clientX, eventResult.clientY), ctrlPressed: eventResult.ctrlPressed}, onDragEnd}
+        this.dragState = {latest: {mousePosition: eventResult.position, ctrlPressed: eventResult.ctrlPressed}, onDragEnd}
 
         renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-            this.drag(clientX, clientY, ctrlPressed, onDrag)
+            this.drag(new ClientPosition(clientX, clientY), ctrlPressed, onDrag)
         }, RenderPriority.RESPONSIVE)
         onDragStart(eventResult)
     }
 
     private drag(
-        clientX: number, clientY: number, ctrlPressed: boolean, 
-        onDrag: (clientX: number, clientY: number, ctrlPressed: boolean) => Promise<void>
+        position: ClientPosition, ctrlPressed: boolean, 
+        onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     ): void {
         if (!this.dragState) {
             return // this happens when mouseup was already fired but mousemove listener is not yet removed
         }
-        this.dragState.latest = {mousePosition: new ClientPosition(clientX, clientY), ctrlPressed}
+        this.dragState.latest = {mousePosition: position, ctrlPressed}
 
-        onDrag(clientX, clientY, ctrlPressed)
+        onDrag(position, ctrlPressed)
     }
 
     private async dragEnd(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
@@ -76,7 +76,7 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         
         await Promise.all([
             renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mousemove', RenderPriority.RESPONSIVE),
-            this.dragState.onDragEnd(position.x, position.y, ctrlPressed),
+            this.dragState.onDragEnd(position, ctrlPressed),
             this.dragState = null
         ])
     }
