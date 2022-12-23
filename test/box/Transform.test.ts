@@ -1,5 +1,7 @@
 import { mock } from 'jest-mock-extended'
-import { ClientPosition, LocalPosition, Transform } from '../../src/box/Transform'
+import { Transform } from '../../src/box/Transform'
+import { ClientPosition } from '../../src/shape/ClientPosition'
+import { LocalPosition } from '../../src/shape/LocalPosition'
 import { BoxData } from '../../src/mapData/BoxData'
 import { FolderBox } from '../../src/box/FolderBox'
 import { ClientRect } from '../../src/ClientRect'

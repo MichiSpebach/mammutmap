@@ -1,7 +1,7 @@
 import { MouseEventResultAdvanced, renderManager, RenderPriority } from './RenderManager'
 import * as indexHtmlIds from './indexHtmlIds'
 import { util } from './util'
-import { ClientPosition } from './box/Transform'
+import { ClientPosition } from './shape/ClientPosition'
 
 export let mouseDownDragManager: MouseDownDragManager // = new MouseDownDragManager() // initialized at end of file
 

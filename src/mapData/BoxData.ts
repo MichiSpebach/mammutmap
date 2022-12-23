@@ -2,7 +2,7 @@ import { LocalRect } from '../LocalRect'
 import { JsonObject } from '../JsonObject'
 import { util } from '../util'
 import { LinkData } from './LinkData'
-import { LocalPosition } from '../box/Transform'
+import { LocalPosition } from '../shape/LocalPosition'
 import { NodeData } from './NodeData'
 
 export class BoxData extends JsonObject {

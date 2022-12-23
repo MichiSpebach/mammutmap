@@ -1,4 +1,4 @@
-import { Position } from '../box/Transform'
+import { Position } from './Position'
 import { Shape } from './Shape'
 
 export abstract class Circle<POSITION extends Position<POSITION>> extends Shape<POSITION> {

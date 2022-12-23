@@ -2,7 +2,7 @@ import { util } from './util'
 import { ElementAttributes, RenderElement, RenderElements, Style } from './util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from './ClientRect'
-import { ClientPosition } from './box/Transform'
+import { ClientPosition } from './shape/ClientPosition'
 
 export type MouseEventType = 'click'|'contextmenu'|'mousedown'|'mouseup'|'mousemove'|'mouseover'|'mouseout'|'mouseenter'|'mouseleave'
 export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'

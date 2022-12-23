@@ -17,9 +17,10 @@
 		},
 		{
 			"name": "isA",
-			"count": 7,
+			"count": 11,
 			"appearance": {
-				"mode": "visible"
+				"mode": "visible",
+				"color": "aqua"
 			}
 		},
 		{

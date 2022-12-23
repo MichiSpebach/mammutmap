@@ -1,6 +1,6 @@
 import { util } from '../util'
 import { JsonObject } from '../JsonObject'
-import { LocalPosition } from '../box/Transform'
+import { LocalPosition } from '../shape/LocalPosition'
 
 export class NodeData extends JsonObject {
     public readonly id: string

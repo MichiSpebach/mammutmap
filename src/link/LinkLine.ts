@@ -1,5 +1,5 @@
 import { style } from '../styleAdapter'
-import { LocalPosition } from '../box/Transform'
+import { LocalPosition } from '../shape/LocalPosition'
 import { Link } from './Link'
 import { util } from '../util'
 import { renderManager } from '../RenderManager'

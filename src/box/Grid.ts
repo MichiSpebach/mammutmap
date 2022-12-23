@@ -1,6 +1,6 @@
 import { renderManager, RenderPriority } from '../RenderManager'
 import * as indexHtmlIds from '../indexHtmlIds'
-import { LocalPosition } from './Transform'
+import { LocalPosition } from '../shape/LocalPosition'
 
 export class Grid {
 
