@@ -12,7 +12,7 @@ import { ClientPosition } from './shape/ClientPosition'
 import * as indexHtmlIds from './indexHtmlIds'
 import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './pluginFacade'
-import { mouseDownDragManager } from './MouseDownDragManager'
+import { mouseDownDragManager } from './mouseDownDragManager'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -208,7 +208,7 @@ export class Map {
     }
 
     this.moveState = {
-      latestMousePosition: eventResult.position, 
+      latestMousePosition: eventResult.position,
       prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed,
       movingStarted: false
     }
