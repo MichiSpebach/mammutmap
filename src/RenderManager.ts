@@ -254,7 +254,8 @@ export class RenderManager {
   public addCommand(command: Command): void { // only public for unit tests
     let i = 0
     for(; i < this.commands.length; i++) {
-      if(command.priority > this.commands[i].priority) {
+      const queuedCommand: Command = this.commands[i]
+      if(command.priority > queuedCommand.priority && !queuedCommand.promise.isStarted()) {
         break
       }
     }
@@ -338,6 +339,10 @@ export class RenderManager {
       const upcommingCommand: Command = this.commands[i]
 
       if (upcommingCommand.batchParameters) {
+        if (upcommingCommand.promise.isStarted()) {
+          console.trace('Trying to batch upcomming command that is already started into another, this would lead to double execution and is skipped.')
+          continue
+        }
         batch.push(upcommingCommand.batchParameters)
         upcommingCommand.squashableWith = undefined
         upcommingCommand.updatableWith = undefined
