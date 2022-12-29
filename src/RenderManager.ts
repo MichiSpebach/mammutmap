@@ -1,6 +1,7 @@
 import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced } from './domAdapter'
 import { ClientRect } from './ClientRect'
 import { RenderElement, RenderElements } from './util/RenderElement'
+import { ClientPosition } from './shape/ClientPosition'
 
 export { MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced }
 
@@ -17,6 +18,11 @@ export class RenderManager {
 
   public openDevTools(): void {
     dom.openDevTools()
+  }
+
+  public getCursorClientPosition(): ClientPosition {
+    const position: {x: number, y: number} = dom.getCursorClientPosition()
+    return new ClientPosition(position.x, position.y)
   }
 
   public getClientSize(): {width: number, height: number} {
@@ -237,14 +243,15 @@ export class RenderManager {
 
     this.addCommand(command)
 
-    // TODO: improve implementation, squishy behavior when higher prioritized command is added
-    const indexToWaitFor: number = this.commands.indexOf(command)-1
-    if (indexToWaitFor >= 0) {
-      await this.commands[indexToWaitFor].promise.get()
+    const commandCanBeStarted: Promise<any>|{minPriority?: RenderPriority} = this.blockUntilCommandCanBeStarted(command)
+    if (commandCanBeStarted instanceof Promise) {
+      await commandCanBeStarted
+    } else {
+      var minPriority: RenderPriority|undefined = commandCanBeStarted.minPriority
     }
 
-    this.batchUpcommingCommandsInto(command)
     if (!command.promise.isStarted()) { // if command was batched into another command, promise is already started
+      this.batchUpcommingCommandsInto(command, minPriority)
       command.promise.run()
     }
     command.promise.get().then(() => this.commands.splice(this.commands.indexOf(command), 1)) // TODO: check that no race conditions occur, improve
@@ -260,6 +267,21 @@ export class RenderManager {
       }
     }
     this.commands.splice(i, 0, command)
+  }
+
+  private blockUntilCommandCanBeStarted(command: Command): Promise<any>|{minPriority?: RenderPriority} {
+    const maxStartedCommandsCount = 3
+    const indexToWaitFor: number = this.commands.indexOf(command)-1
+    if (indexToWaitFor >= 0) {
+      if (command.priority >= RenderPriority.RESPONSIVE) {
+        const startedCommandsCount: number = this.commands.filter(command => command.promise.isStarted()).length
+        if (startedCommandsCount <= maxStartedCommandsCount) {
+          return {minPriority: RenderPriority.RESPONSIVE}
+        }
+      }
+      return this.commands[indexToWaitFor].promise.get()
+    }
+    return {}
   }
 
   // TODO: remove and simply use tryToUpdateQueuedCommands(..)
@@ -327,7 +349,7 @@ export class RenderManager {
     }
   }
 
-  private batchUpcommingCommandsInto(command: Command): void {
+  private batchUpcommingCommandsInto(command: Command, minPriority?: RenderPriority): void {
     if (!command.batchParameters) {
       return
     }
@@ -339,7 +361,7 @@ export class RenderManager {
       const upcommingCommand: Command = this.commands[i]
 
       if (upcommingCommand.batchParameters) {
-        if (upcommingCommand.promise.isStarted()) {
+        if (upcommingCommand.promise.isStarted() || (minPriority && command.priority < minPriority)) {
           console.trace('Trying to batch upcomming command that is already started into another, this would lead to double execution and is skipped.')
           continue
         }

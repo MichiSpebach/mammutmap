@@ -61,6 +61,7 @@ test('runOrSchedule two commands', async () => {
 
   expect(await command1Result).toBe(1)
   expect(await command2Result).toBe(2)
+  expect(counter).toBe(2)
   expect(renderManager.getCommands().length).toBe(0)
 })
 
@@ -83,10 +84,45 @@ test('runOrSchedule three commands, third overtakes second', async () => {
   const command1Result: Promise<number> = renderManager.runOrSchedule(command1)
   const command2Result: Promise<number> = renderManager.runOrSchedule(command2)
   const command3Result: Promise<number> = renderManager.runOrSchedule(command3)
+  expect(command1.promise.isStarted()).toBe(true)
+  expect(command2.promise.isStarted()).toBe(false)
 
   expect(await command1Result).toBe(1)
   expect(await command2Result).toBe(3)
   expect(await command3Result).toBe(2)
+  expect(counter).toBe(3)
+  expect(renderManager.getCommands().length).toBe(0)
+})
+
+test('runOrSchedule, higher prioritized command is started although lower prioritized is still going on', async () => {
+  const renderManager = new RenderManager()
+  let command1Counter: number = 0
+  let command2Counter: number = 0
+
+  const command1Promise: SchedulablePromise<number> = new SchedulablePromise(() => {
+    command1Counter++
+    return command1Counter
+  })
+
+  const command1 = buildCommand({priority: RenderPriority.NORMAL, command: () => {
+    return command1Promise.get()
+  }})
+  const command2 = buildCommand({priority: RenderPriority.RESPONSIVE, command: () => {
+    command2Counter++
+    return Promise.resolve(command2Counter)
+  }})
+
+  const command1Result: Promise<number> = renderManager.runOrSchedule(command1)
+  const command2Result: Promise<number> = renderManager.runOrSchedule(command2)
+  expect(command1.promise.isStarted()).toBe(true)
+  expect(command1Counter).toBe(0)
+  expect(command2.promise.isStarted()).toBe(true)
+  command1Promise.run()
+
+  expect(await command1Result).toBe(1)
+  expect(await command2Result).toBe(1)
+  expect(command1Counter).toBe(1)
+  expect(command2Counter).toBe(1)
   expect(renderManager.getCommands().length).toBe(0)
 })
 
@@ -278,6 +314,21 @@ test('addCommand increasing priority', () => {
   expect(renderManager.getCommands()).toHaveLength(2)
   expect(renderManager.getCommands()[0]).toEqual(command2)
   expect(renderManager.getCommands()[1]).toEqual(command1)
+})
+
+test('addCommand increasing priority, does not overtake already started command', () => {
+  const renderManager = new RenderManager()
+  const command1 = buildCommand({priority: RenderPriority.NORMAL})
+  const command2 = buildCommand({priority: RenderPriority.RESPONSIVE})
+
+  renderManager.addCommand(command1)
+  command1.promise.run()
+  expect(command1.promise.isStarted()).toBe(true)
+  renderManager.addCommand(command2)
+
+  expect(renderManager.getCommands()).toHaveLength(2)
+  expect(renderManager.getCommands()[0]).toEqual(command1)
+  expect(renderManager.getCommands()[1]).toEqual(command2)
 })
 
 test('addCommand increasing and same priority', () => {
