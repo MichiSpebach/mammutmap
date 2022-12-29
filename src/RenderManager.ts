@@ -275,7 +275,7 @@ export class RenderManager {
     if (indexToWaitFor >= 0) {
       if (command.priority >= RenderPriority.RESPONSIVE) {
         const startedCommandsCount: number = this.commands.filter(command => command.promise.isStarted()).length
-        if (startedCommandsCount <= maxStartedCommandsCount) {
+        if (startedCommandsCount < maxStartedCommandsCount) {
           return {minPriority: RenderPriority.RESPONSIVE}
         }
       }
@@ -355,22 +355,34 @@ export class RenderManager {
     }
 
     const maxBatchSize: number = 100
-    const batch: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements}[] = [command.batchParameters]
+    const batch: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements}[] = []
+    let originalCommandAdded: boolean = false
 
-    for (let i: number = this.commands.indexOf(command)+1; i < this.commands.length && batch.length < maxBatchSize; i++) {
+    for (let i: number = 0; i < this.commands.length && batch.length < maxBatchSize; i++) {
       const upcommingCommand: Command = this.commands[i]
 
       if (upcommingCommand.batchParameters) {
         if (upcommingCommand.promise.isStarted() || (minPriority && command.priority < minPriority)) {
-          console.trace('Trying to batch upcomming command that is already started into another, this would lead to double execution and is skipped.')
           continue
         }
         batch.push(upcommingCommand.batchParameters)
         upcommingCommand.squashableWith = undefined
         upcommingCommand.updatableWith = undefined
+        if (upcommingCommand === command) {
+          originalCommandAdded = true
+          continue
+        }
         upcommingCommand.batchParameters = undefined
-        upcommingCommand.promise.setCommand(() => Promise.resolve())
+        upcommingCommand.promise.setCommand(() => {
+          // TODO: check why this happens, fix it or remove comment
+          //console.trace('Tried to call command that was batched into another, this should never happen.')
+          return Promise.resolve()
+        })
       }
+    }
+
+    if (!originalCommandAdded) { // prevents original command from being squeezed out if there are a lot of higher prioritized commands
+      batch.push(command.batchParameters)
     }
 
     if (batch.length > 1) {
