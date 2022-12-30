@@ -10,11 +10,11 @@ test('spamming zoom in and out while hover over link', async () => {
   for (let round = 0; round < 10; round++) {
     await gui.zoom(2000)
     await clearTerminalAndZoom(2000)
-    e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'spamming-zoom-in-and-out-1'})
+    await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'spamming-zoom-in-and-out-1'})
 
     await gui.zoom(-400)
     await clearTerminalAndZoom(-400)
-    e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'spamming-zoom-in-and-out-2'})
+    await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'spamming-zoom-in-and-out-2'})
   }
 }, 100000)
 

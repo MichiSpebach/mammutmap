@@ -11,17 +11,17 @@ test('iterate over boxes', async () => {
   await gui.startBoxIterator()
 
   await gui.getNextSourcePathOfBoxIterator()
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/c/a/a')
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await iterateOverBoxesUntilFile('testE2e/pluginFacade/scenario/d/a/a/a')
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   expect(await gui.getNextSourcePathOfBoxIterator()).toBeUndefined()
   await gui.clearWatchedBoxes()
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 })
 
 async function iterateOverBoxesUntilFile(filePath: string): Promise<void> {

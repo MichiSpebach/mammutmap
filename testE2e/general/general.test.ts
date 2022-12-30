@@ -13,7 +13,6 @@ test('title of app', async () => {
 
 test('snapshot empty window', async () => {
   await gui.resetWindow()
-  await util.wait(50) // TODO: otherwise htmlCursor has somehow a shadow => some pixel differ from snapshot and test fails, fix this
   const image = await gui.takeScreenshot()
-  e2eUtil.expectImageToMatchSnapshot({image})
+  await e2eUtil.expectImageToMatchSnapshot({image})
 })

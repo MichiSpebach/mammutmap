@@ -9,5 +9,5 @@ test('file with special characters', async () => {
   await gui.resetWindow()
   await gui.openFolder('testE2e/renderFiles/scenario')
   
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 })

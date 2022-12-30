@@ -11,19 +11,19 @@ afterAll(async () => {
 })
 
 test('highlighting of bordering links of hovered box', async () => {
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.moveMouseTo(400, 200)
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.zoom(500)
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.moveMouseTo(400, 400)
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 
   await gui.moveMouseTo(400, 450)
-  e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot()})
 }, 10000)
 
 test('highlighting when spamming changing mouse position', async () => {
@@ -42,6 +42,6 @@ test('highlighting when spamming changing mouse position', async () => {
     for (;y > 100; y -= 50) {
       await gui.moveMouseTo(x, y)
     }
-    e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'highlighting-when-spamming-changing-mouse-position'})
+    await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'highlighting-when-spamming-changing-mouse-position'})
   }
 }, 15000)
