@@ -254,7 +254,7 @@ export abstract class Box implements DropTarget, Hoverable {
 
     if (!this.renderState.isRendered()) {
       DragManager.addDropTarget(this)
-      HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut())
+      HoverManager.addHoverable(this, await this.getClientShape(), () => this.onHoverOver(), () => this.onHoverOut())
     }
 
     await this.renderAdditional()

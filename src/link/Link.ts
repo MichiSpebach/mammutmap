@@ -14,6 +14,7 @@ import { NodeWidget } from '../node/NodeWidget'
 import { LinkLine } from './LinkLine'
 import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
+import { ClientRect } from '../ClientRect'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -151,7 +152,7 @@ export class Link implements Hoverable {
   private async addEventListeners(): Promise<void> {
     const proms: Promise<any>[] = []
     proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, clientX, clientY)))
-    proms.push(HoverManager.addHoverable(this, () => this.handleHoverOver(),() => this.handleHoverOut()))
+    proms.push(HoverManager.addHoverable(this, await this.getClientShape(), () => this.handleHoverOver(),() => this.handleHoverOut()))
     await Promise.all(proms)
   }
 
@@ -219,6 +220,12 @@ export class Link implements Hoverable {
     }
 
     await Promise.all(proms)
+  }
+
+  public async getClientShape(): Promise<ClientRect> { // TODO: only stub, implement something like RotatedRect
+    const {from, to} = await this.getLineInClientCoords()
+    const centerPosition: ClientPosition = new ClientPosition((from.x+to.x)/2, (from.y+to.y)/2)
+    return new ClientRect(centerPosition.x-1, centerPosition.y-1, 2, 2)
   }
 
   public async getLineInClientCoords(): Promise<{from: ClientPosition, to: ClientPosition}> {
