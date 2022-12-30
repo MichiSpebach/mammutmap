@@ -104,7 +104,9 @@ export class ScaleTool {
   public async scale(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
     const boxRenderedInto: Box = this.getBoxRenderedIntoOrFail()
     await boxRenderedInto.updateMeasuresAndBorderingLinks(measuresInPercentIfChanged, RenderPriority.RESPONSIVE)
-    await boxRenderedInto.getParent().rearrangeBoxesWithoutMapData(boxRenderedInto)
+    if (!boxRenderedInto.isRoot()) {
+      await boxRenderedInto.getParent().rearrangeBoxesWithoutMapData(boxRenderedInto)
+    }
   }
 
   public async scaleEnd(): Promise<void> {
