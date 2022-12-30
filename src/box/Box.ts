@@ -302,7 +302,7 @@ export abstract class Box implements DropTarget, Hoverable {
 
   private async onHoverOver(): Promise<void> {
     // TODO: move scaleTool.isScalingInProgress() into HoverManager
-    if (scaleTool.isScalingInProgress()) {
+    if (scaleTool.isScalingInProgress() || this.renderState.isBeingUnrendered()) {
       return
     }
 
