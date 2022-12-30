@@ -231,6 +231,7 @@ export abstract class Box implements DropTarget, Hoverable {
 
   public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
     this.renderState.setRenderStarted()
+    const pros: Promise<void>[] = []
 
     if (!this.renderState.isRendered()) {
       this.renderStyle()
@@ -246,19 +247,20 @@ export abstract class Box implements DropTarget, Hoverable {
       const linksHtml = `<div id="${this.links.getId()}"></div>`
       await renderManager.setContentTo(this.getId(), backgroundHtml+gridPlaceHolderHtml+bodyHtml+headerHtml+borderHtml+scaleToolPlaceholderHtml+nodesHtml+linksHtml)
 
-      await this.header.render()
-      await this.borderingLinks.renderAll()
+      pros.push(this.header.render())
+      pros.push(this.borderingLinks.renderAll())
     }
 
-    await this.renderBody()
+    pros.push(this.renderBody())
 
     if (!this.renderState.isRendered()) {
       DragManager.addDropTarget(this)
-      HoverManager.addHoverable(this, await this.getClientShape(), () => this.onHoverOver(), () => this.onHoverOut())
+      pros.push(HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut()))
     }
 
-    await this.renderAdditional()
+    pros.push(this.renderAdditional())
 
+    await Promise.all(pros)
     this.renderState.setRenderFinished()
   })}
 

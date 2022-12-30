@@ -56,6 +56,10 @@ export class DocumentObjectModelAdapter {
     return {x: cursorScreenPosition.x - contentBounds.x, y: cursorScreenPosition.y - contentBounds.y}
   }
 
+  public async isElementHovered(id: string): Promise<boolean> {
+    return this.executeJsOnElement(id, 'matches(":hover")')
+  }
+
   public async getClientRectOf(id: string): Promise<ClientRect> {
     // implemented workaround because following line doesn't work, because 'Error: An object could not be cloned.'
     //return await executeJsOnElement(id, "getBoundingClientRect()").catch(reason => util.logError(reason))

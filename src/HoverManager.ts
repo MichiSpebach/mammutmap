@@ -2,7 +2,6 @@ import { renderManager } from './RenderManager'
 import { Hoverable } from './Hoverable'
 import { DragManager } from './DragManager'
 import { ScaleManager } from './ScaleManager'
-import { ClientRect } from './ClientRect'
 
 export class HoverManager {
 
@@ -19,22 +18,15 @@ export class HoverManager {
     this.state = null
   }
 
-  public static async addHoverable(
-    hoverable: Hoverable,
-    currentCollisionShape: ClientRect,
-    onHoverOver: () => void,
-    onHoverOut: () => void
-  ): Promise<void> {
-    const pros: Promise<void>[] = []
-
-    if (currentCollisionShape.isPositionInside(renderManager.getCursorClientPosition())) {
-      pros.push(this.onMouseOver(hoverable, onHoverOver, onHoverOut))
-    }
-    pros.push(renderManager.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
+  public static async addHoverable(hoverable: Hoverable, onHoverOver: () => void, onHoverOut: () => void): Promise<void> {
+    await renderManager.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
       this.onMouseOver(hoverable, onHoverOver, onHoverOut)
-    }))
+    })
     
-    await Promise.all(pros)
+    const elementHovered: boolean = await renderManager.isElementHovered(hoverable.getId())
+    if (elementHovered) {
+      await this.onMouseOver(hoverable, onHoverOver, onHoverOut)
+    }
   }
 
   private static async onMouseOver(hoverable: Hoverable, onHoverOver: () => void, onHoverOut: () => void): Promise<void> {

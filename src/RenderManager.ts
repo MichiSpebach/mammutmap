@@ -20,13 +20,17 @@ export class RenderManager {
     dom.openDevTools()
   }
 
+  public getClientSize(): {width: number, height: number} {
+    return dom.getClientSize()
+  }
+
   public getCursorClientPosition(): ClientPosition {
     const position: {x: number, y: number} = dom.getCursorClientPosition()
     return new ClientPosition(position.x, position.y)
   }
 
-  public getClientSize(): {width: number, height: number} {
-    return dom.getClientSize()
+  public isElementHovered(id: string): Promise<boolean> {
+    return dom.isElementHovered(id)
   }
 
   public getClientRectOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<ClientRect> {
