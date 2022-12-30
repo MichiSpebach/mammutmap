@@ -41,14 +41,21 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   public async render(): Promise<void> {
     const proms: Promise<any>[] = []
 
-    let html: string = '<div draggable="true" class="'+style.getBoxHeaderInnerClass()+'">'
+    let draggableHtml: string = 'draggable="true"'
+    if (this.referenceBox.isRoot()) {
+      draggableHtml = ''
+    }
+
+    let html: string = `<div ${draggableHtml} class="${style.getBoxHeaderInnerClass()}">`
     html += this.formTitleHtml()
     html += '</div>'
     proms.push(renderManager.setContentTo(this.getId(), html))
 
     if (!this.rendered) {
       proms.push(renderManager.addClassTo(this.getId(), style.getBoxHeaderClass()))
-      proms.push(DragManager.addDraggable(this))
+      if (draggableHtml) {
+        proms.push(DragManager.addDraggable(this))
+      }
       this.rendered = true
     }
 
@@ -63,7 +70,9 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     if (!this.rendered) {
       return
     }
-    await DragManager.removeDraggable(this)
+    if (!this.referenceBox.isRoot()) {
+      await DragManager.removeDraggable(this)
+    }
     this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
   }
 
