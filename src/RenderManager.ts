@@ -251,6 +251,7 @@ export class RenderManager {
     }
 
     if (!command.promise.isStarted()) { // if command was batched into another command, promise is already started
+      // TODO: is always true with current implementation becuase command was modified by command it was batched into to directly resolve, change implementation or remove condition
       this.batchUpcommingCommandsInto(command, minPriority)
       command.promise.run()
     }
@@ -368,16 +369,12 @@ export class RenderManager {
         batch.push(upcommingCommand.batchParameters)
         upcommingCommand.squashableWith = undefined
         upcommingCommand.updatableWith = undefined
-        if (upcommingCommand === command) {
-          originalCommandAdded = true
-          continue
-        }
         upcommingCommand.batchParameters = undefined
-        upcommingCommand.promise.setCommand(() => {
-          // TODO: check why this happens, fix it or remove comment
-          //console.trace('Tried to call command that was batched into another, this should never happen.')
-          return Promise.resolve()
-        })
+        if (upcommingCommand !== command) {
+          upcommingCommand.promise.setCommand(() => Promise.resolve())
+        } else {
+          originalCommandAdded = true
+        }
       }
     }
 

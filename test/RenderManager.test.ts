@@ -288,9 +288,9 @@ test('runOrSchedule with batchUpcommingCommandsInto one', async () => {
   initDomAdapter(dom)
   const renderManager = new RenderManager()
 
-  const command1 = buildCommand({priority: RenderPriority.NORMAL, batchValue: 'command1', command: () => Promise.resolve()})
-  const command2 = buildCommand({priority: RenderPriority.NORMAL, batchValue: 'command2', command: () => Promise.resolve()})
-  const command3 = buildCommand({priority: RenderPriority.NORMAL, batchValue: 'command3', command: () => Promise.resolve()})
+  const command1 = buildCommand({priority: RenderPriority.NORMAL, batchValue: 'command1', command: () => Promise.resolve('command1')})
+  const command2 = buildCommand({priority: RenderPriority.NORMAL, batchValue: 'command2', command: () => Promise.resolve('command2')})
+  const command3 = buildCommand({priority: RenderPriority.NORMAL, batchValue: 'command3', command: () => Promise.resolve('command3')})
 
   const command1Result: Promise<number> = renderManager.runOrSchedule(command1) // runs directly, does not wait for other commands to batch
   const command2Result: Promise<number> = renderManager.runOrSchedule(command2)
@@ -301,21 +301,9 @@ test('runOrSchedule with batchUpcommingCommandsInto one', async () => {
 
   await Promise.all([command1Result, command2Result, command3Result])
 
-  expect(command1.promise.getCommand().toString()).toBe('() => Promise.resolve()')
+  expect(command1.promise.getCommand().toString()).toBe("() => Promise.resolve('command1')")
   expect(command2.promise.getCommand().toString()).toBe('() => domAdapter_1.dom.batch(batch)')
-  expect(command3.promise.getCommand().toString()).toBe(`() => {
-                    // TODO: check why this happens, fix it or remove comment
-                    //console.trace('Tried to call command that was batched into another, this should never happen.')
-                    return Promise.resolve();
-                }`)
-  
-  const batchCalls: [batch: {elementId: string, method: BatchMethod, value: RenderElements}[]][] = dom.batch.mock.calls
-  expect(batchCalls.length).toBe(1)
-  const batchCall: {elementId: string, method: BatchMethod, value: RenderElements}[] = batchCalls[0][0]
-  expect(batchCall.length).toBe(2)
-  expect(batchCall[0].value).toBe('command2')
-  expect(batchCall[1].value).toBe('command3')
-
+  expect(command3.promise.getCommand().toString()).toBe('() => Promise.resolve()') // not resolve('command3') because it was set to directly resolve by command2
   expect(dom.batch).toBeCalledTimes(1)
   expect(dom.batch).toBeCalledWith([
     {elementId: expect.any(String), method: expect.any(String), value: 'command2'},
@@ -347,13 +335,6 @@ test('runOrSchedule with batchUpcommingCommandsInto one, higher prioritized comm
   expect(highPrioCommand.promise.isStarted()).toBe(false)
 
   await Promise.all([normalPrioCommandResult, highPrioCommandResult])
-  
-  const batchCalls: [batch: {elementId: string, method: BatchMethod, value: RenderElements}[]][] = dom.batch.mock.calls
-  expect(batchCalls.length).toBe(1)
-  const batchCall: {elementId: string, method: BatchMethod, value: RenderElements}[] = batchCalls[0][0]
-  expect(batchCall.length).toBe(2)
-  expect(batchCall[0].value).toBe('highPrioCommand')
-  expect(batchCall[1].value).toBe('normalPrioCommand')
 
   expect(dom.batch).toBeCalledTimes(1)
   expect(dom.batch).toBeCalledWith([
