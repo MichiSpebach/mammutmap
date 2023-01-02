@@ -40,7 +40,10 @@ export type ElementAttributes = {
 
 export type Style = {
   position?: string,
+  left?: string,
+  right?: string,
   top?: string,
+  bottom?: string,
   width?: string,
   height?: string
   color?: string

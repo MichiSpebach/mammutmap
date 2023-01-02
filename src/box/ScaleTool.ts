@@ -70,7 +70,7 @@ export class ScaleTool {
   }
 
   private formLine(id: string, sizeAndPositionStyle: string, sizeAndPositionStyleLine: string): string {
-    return '<div id="'+id+'" draggable="true" style="position:absolute;'+sizeAndPositionStyle+'">'
+    return '<div id="'+id+'" style="position:absolute;'+sizeAndPositionStyle+'">'
           +'<div id="'+id+'Line" class="'+style.getHighlightClass()+'" style="position:absolute;'+sizeAndPositionStyleLine+'"></div>'
           +'</div>'
   }

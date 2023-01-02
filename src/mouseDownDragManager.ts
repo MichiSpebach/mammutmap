@@ -7,6 +7,8 @@ export let mouseDownDragManager: MouseDownDragManager // = new MouseDownDragMana
 
 class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
 
+    private initialized: boolean = false
+
     private dragState: {
         latest: {mousePosition: ClientPosition, ctrlPressed: boolean},
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
@@ -18,20 +20,26 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     ): Promise<void> {
-        await Promise.all([
-            renderManager.addEventListenerAdvancedTo(elementId, 'mousedown', (eventResult: MouseEventResultAdvanced) => {
-                this.dragStart(eventResult, onDragStart, onDrag, onDragEnd)
-            }),
-            renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => {
+        const pros: Promise<void>[] = []
+
+        pros.push(renderManager.addEventListenerAdvancedTo(elementId, 'mousedown', (eventResult: MouseEventResultAdvanced) => {
+            this.dragStart(eventResult, onDragStart, onDrag, onDragEnd)
+        }))
+
+        if (!this.initialized) {
+            pros.push(renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => {
                 this.dragEnd(new ClientPosition(clientX, clientY), ctrlPressed)
-            })
-        ])
+            }))
+            this.initialized = true
+        }
+
+        await Promise.all(pros)
     }
 
     public async removeDraggable(elementId: string): Promise<void> {
         const pros: Promise<void>[] = [
             renderManager.removeEventListenerFrom(elementId, 'mousedown'),
-            renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mouseup')
+            //renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mouseup') // TODO: remove or implement counter or do initializing in constructor and destructor
         ]
         if (this.dragState) {
             pros.push(this.dragEnd(this.dragState.latest.mousePosition, this.dragState.latest.ctrlPressed))

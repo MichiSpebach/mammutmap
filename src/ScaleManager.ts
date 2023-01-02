@@ -1,8 +1,10 @@
 import { util } from './util'
 import { style } from './styleAdapter'
-import { renderManager } from './RenderManager'
+import { MouseEventResultAdvanced, renderManager } from './RenderManager'
 import { ScaleTool } from './box/ScaleTool'
 import { ClientRect } from './ClientRect'
+import { mouseDownDragManager } from './mouseDownDragManager'
+import { ClientPosition } from './shape/ClientPosition'
 
 export class ScaleManager {
   private static state: {
@@ -52,7 +54,20 @@ export class ScaleManager {
   }
 
   private static addListenersForSide(scalable: ScaleTool, id: string, drag: (clientX: number, clientY:number, snapToGrid: boolean) => void): void {
-    renderManager.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
+    function onDragStart(eventResult: MouseEventResultAdvanced): Promise<void> {
+      return ScaleManager.dragstart(scalable, eventResult.position.x, eventResult.position.y)
+    }
+    function onDrag(position: ClientPosition, ctrlPressed: boolean) {
+      drag(position.x, position.y, !ctrlPressed)
+        util.setHint(util.hintToDeactivateSnapToGrid, !ctrlPressed)
+        return Promise.resolve()
+    }
+    function onDragEnd(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
+      ScaleManager.dragEnd()
+      return Promise.resolve()
+    }
+    mouseDownDragManager.addDraggable(id, onDragStart, onDrag, onDragEnd)
+    /*renderManager.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
       this.dragstart(scalable, clientX, clientY)
     })
 
@@ -63,7 +78,7 @@ export class ScaleManager {
 
     renderManager.addDragListenerTo(id, 'dragend', (clientX: number, clientY:number): void => {
       this.dragEnd()
-    })
+    })*/
   }
 
   private static removeListenersForSide(id: string): void {
