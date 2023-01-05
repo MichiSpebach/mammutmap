@@ -53,33 +53,20 @@ export class ScaleManager {
     this.removeListenersForSide(scalable.getLeftId())
   }
 
-  private static addListenersForSide(scalable: ScaleTool, id: string, drag: (clientX: number, clientY:number, snapToGrid: boolean) => void): void {
+  private static addListenersForSide(scalable: ScaleTool, id: string, drag: (clientX: number, clientY:number, snapToGrid: boolean) => Promise<void>): void {
     function onDragStart(eventResult: MouseEventResultAdvanced): Promise<void> {
-      ScaleManager.dragstart(scalable, eventResult.position.x, eventResult.position.y)
-      return Promise.resolve()
+      return ScaleManager.dragstart(scalable, eventResult.position.x, eventResult.position.y)
     }
-    function onDrag(position: ClientPosition, ctrlPressed: boolean) {
-      drag(position.x, position.y, !ctrlPressed)
-      util.setHint(util.hintToDeactivateSnapToGrid, !ctrlPressed)
-      return Promise.resolve()
+    async function onDrag(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
+      await Promise.all([
+        drag(position.x, position.y, !ctrlPressed),
+        util.setHint(util.hintToDeactivateSnapToGrid, !ctrlPressed)
+      ])
     }
     function onDragEnd(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
-      ScaleManager.dragEnd()
-      return Promise.resolve()
+      return ScaleManager.dragEnd()
     }
     mouseDownDragManager.addDraggable(id, onDragStart, onDrag, onDragEnd)
-    /*renderManager.addDragListenerTo(id, 'dragstart', (clientX: number, clientY:number): void => {
-      this.dragstart(scalable, clientX, clientY)
-    })
-
-    renderManager.addDragListenerTo(id, 'drag', (clientX: number, clientY:number, ctrlPressed: boolean): void => {
-      drag(clientX, clientY, !ctrlPressed)
-      util.setHint(util.hintToDeactivateSnapToGrid, !ctrlPressed)
-    })
-
-    renderManager.addDragListenerTo(id, 'dragend', (clientX: number, clientY:number): void => {
-      this.dragEnd()
-    })*/
   }
 
   private static removeListenersForSide(id: string): void {
@@ -88,25 +75,26 @@ export class ScaleManager {
     renderManager.removeEventListenerFrom(id, 'dragend')
   }
 
-  private static dragstart(scalable: ScaleTool, clientX: number, clientY: number): void {
-    util.setMouseEventBlockerScreenOverlay(true, RenderPriority.RESPONSIVE)
-    let parentClientRect: Promise<ClientRect> = scalable.getParentClientRect()
-    let clientRect: Promise<ClientRect> = scalable.getClientRect()
-    scalable.scaleStart()
-
+  private static async dragstart(scalable: ScaleTool, clientX: number, clientY: number): Promise<void> {
     this.state = {
       scaling: scalable,
-      startParentClientRect: parentClientRect,
-      startClientRect: clientRect,
+      startParentClientRect: scalable.getParentClientRect(),
+      startClientRect: scalable.getClientRect(),
       startClientX: clientX,
       startClientY: clientY
     }
+    await Promise.all([
+      util.setMouseEventBlockerScreenOverlay(true, RenderPriority.RESPONSIVE),
+      scalable.scaleStart()
+    ])
   }
 
-  private static dragRightBottom(clientX: number, clientY: number, snapToGrid: boolean): void {
+  private static async dragRightBottom(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {
     // TODO: triggers render two times, implement with one render
-    this.dragEastBorder(clientX, clientY, snapToGrid)
-    this.dragSouthBorder(clientX, clientY, snapToGrid)
+    await Promise.all([
+      this.dragEastBorder(clientX, clientY, snapToGrid),
+      this.dragSouthBorder(clientX, clientY, snapToGrid)
+    ])
   }
 
   private static async dragEastBorder(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {
@@ -197,15 +185,19 @@ export class ScaleManager {
     this.state.scaling.scale({x: newXInPercent, width: newWidthInPercent})
   }
 
-  private static dragEnd(): void {
-    util.setMouseEventBlockerScreenOverlay(false, RenderPriority.RESPONSIVE)
+  private static async dragEnd(): Promise<void> {
+    const pros: Promise<void>[] = []
+
+    pros.push(util.setMouseEventBlockerScreenOverlay(false, RenderPriority.RESPONSIVE))
     if (this.state == null) {
       util.logWarning("ScaleManager: failed to save resize operation, state is null although resizing was in progress")
       return
     }
-    this.state.scaling.scaleEnd()
+    pros.push(this.state.scaling.scaleEnd())
+    pros.push(util.setHint(util.hintToDeactivateSnapToGrid, false))
     this.state = null
-    util.setHint(util.hintToDeactivateSnapToGrid, false)
+
+    await Promise.all(pros)
   }
 
 }
