@@ -2007,10 +2007,10 @@
   "resolved" "https://registry.npmjs.org/detect-node/-/detect-node-2.1.0.tgz"
   "version" "2.1.0"
 
-"devtools-protocol@0.0.1019158":
-  "integrity" "sha512-wvq+KscQ7/6spEV7czhnZc9RM/woz1AY+/Vpd8/h2HFMwJSdTliu7f/yr1A6vDdJfKICZsShqsYpEQbdhg8AFQ=="
-  "resolved" "https://registry.npmjs.org/devtools-protocol/-/devtools-protocol-0.0.1019158.tgz"
-  "version" "0.0.1019158"
+"devtools-protocol@0.0.1068969":
+  "integrity" "sha512-ATFTrPbY1dKYhPPvpjtwWKSK2mIwGmRwX54UASn9THEuIZCe2n9k3vVuMmt6jWeL+e5QaaguEv/pMyR+JQB7VQ=="
+  "resolved" "https://registry.npmjs.org/devtools-protocol/-/devtools-protocol-0.0.1068969.tgz"
+  "version" "0.0.1068969"
 
 "diff-sequences@^28.1.1":
   "integrity" "sha512-FU0iFaH/E23a+a718l8Qa/19bF9p06kgE0KipMOMadwa3SjnaElKzPaUC0vnibs6/B/9ni97s61mcejk8W1fQw=="
@@ -4536,7 +4536,7 @@
   dependencies:
     "pngjs" "^6.0.0"
 
-"pkg-dir@^4.2.0", "pkg-dir@4.2.0":
+"pkg-dir@^4.2.0":
   "integrity" "sha512-HRDzbaKjC+AOWVXxAU/x54COGeIv9eb+6CkDSQoNTt4XyWoIJvuPsXizxu/Fr23EiekbtZwmh1IcIG/l/a10GQ=="
   "resolved" "https://registry.npmjs.org/pkg-dir/-/pkg-dir-4.2.0.tgz"
   "version" "4.2.0"
@@ -4594,7 +4594,7 @@
     "ansi-styles" "^5.0.0"
     "react-is" "^18.0.0"
 
-"progress@^2.0.3", "progress@2.0.3":
+"progress@^2.0.3":
   "integrity" "sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA=="
   "resolved" "https://registry.npmjs.org/progress/-/progress-2.0.3.tgz"
   "version" "2.0.3"
@@ -4638,23 +4638,21 @@
   "resolved" "https://registry.npmjs.org/punycode/-/punycode-2.1.1.tgz"
   "version" "2.1.1"
 
-"puppeteer-core@^16.1.0":
-  "integrity" "sha512-Eu9FCqdWU2PU/RY53sa+JTsbFiQg5fJyaHX5DP0WZ4+lVLVdMfR9dwPimRkSl9NEcArm7lZMpiDlVCYelE90ZA=="
-  "resolved" "https://registry.npmjs.org/puppeteer-core/-/puppeteer-core-16.1.0.tgz"
-  "version" "16.1.0"
+"puppeteer-core@^19.4.1":
+  "integrity" "sha512-JHIuqtqrUAx4jGOTxXu4ilapV2jabxtVMA/e4wwFUMvtSsqK4nVBSI+Z1SKDoz7gRy/JUIc8WzmfocCa6SIZ1w=="
+  "resolved" "https://registry.npmjs.org/puppeteer-core/-/puppeteer-core-19.4.1.tgz"
+  "version" "19.4.1"
   dependencies:
     "cross-fetch" "3.1.5"
     "debug" "4.3.4"
-    "devtools-protocol" "0.0.1019158"
+    "devtools-protocol" "0.0.1068969"
     "extract-zip" "2.0.1"
     "https-proxy-agent" "5.0.1"
-    "pkg-dir" "4.2.0"
-    "progress" "2.0.3"
     "proxy-from-env" "1.1.0"
     "rimraf" "3.0.2"
     "tar-fs" "2.1.1"
     "unbzip2-stream" "1.4.3"
-    "ws" "8.8.1"
+    "ws" "8.11.0"
 
 "queue-microtask@^1.2.2":
   "integrity" "sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A=="
@@ -5682,10 +5680,10 @@
     "imurmurhash" "^0.1.4"
     "signal-exit" "^3.0.7"
 
-"ws@8.8.1":
-  "integrity" "sha512-bGy2JzvzkPowEJV++hF07hAD6niYSr0JzBNo/J29WsB57A2r7Wlc1UFcTR9IzrPvuNVO4B8LGqF8qcpsVOhJCA=="
-  "resolved" "https://registry.npmjs.org/ws/-/ws-8.8.1.tgz"
-  "version" "8.8.1"
+"ws@8.11.0":
+  "integrity" "sha512-HPG3wQd9sNQoT9xHyNCXoDUa+Xw/VevmY9FoHyQ+g+rrMn4j6FB4np7Z0OhdTgjx6MgQLK7jwSy1YecU1+4Asg=="
+  "resolved" "https://registry.npmjs.org/ws/-/ws-8.11.0.tgz"
+  "version" "8.11.0"
 
 "xmlbuilder@^15.1.1":
   "integrity" "sha512-yMqGBqtXyeN1e3TGYvgNgDVZ3j84W4cwkOXQswghol6APgZWaff9lnbvN7MHYJOiXsvGPXtjTYJEiC9J2wv9Eg=="

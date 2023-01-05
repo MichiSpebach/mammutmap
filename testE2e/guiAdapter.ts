@@ -10,6 +10,7 @@ const defaultScreenshotClip = {x:0, y: 0, width: 800, height: 800}
 
 let page: puppeteer.Page|undefined
 let boxIteratorLastFilePath: string|null = null
+let latestMousePosition: {x: number, y: number}|undefined = undefined
 
 export async function startApp(): Promise<void> {
   spawn('electron', ['.', `--remote-debugging-port=${electronDebugPort} --skip-plugins=true`], {
@@ -30,8 +31,22 @@ export async function getTitle(): Promise<string> {
   return (await getPage()).title()
 }
 
-export async function moveMouseTo(x: number, y: number): Promise<void> {
-  await (await getPage()).mouse.move(x, y)
+export async function moveMouseTo(x: number, y: number, options?: {steps?: number}): Promise<void> {
+  latestMousePosition = {x, y}
+  await (await getPage()).mouse.move(x, y, options)
+}
+
+export async function click(x: number, y: number): Promise<void> {
+  latestMousePosition = {x, y}
+  await (await getPage()).mouse.click(x, y)
+}
+
+export async function mouseDown(): Promise<void> {
+  await (await getPage()).mouse.down()
+}
+
+export async function mouseUp(): Promise<void> {
+  await (await getPage()).mouse.up()
 }
 
 export async function takeScreenshot(
@@ -139,6 +154,9 @@ async function type(id: string, text: string): Promise<void> {
 
 async function removeFocus(): Promise<void> {
   await (await getPage()).mouse.click(0, 0)
+  if (latestMousePosition) {
+    await moveMouseTo(latestMousePosition.x, latestMousePosition.y)
+  }
 }
 
 async function waitUntilLastLogEndsWith(ending: string, timelimitInMs: number): Promise<string> {

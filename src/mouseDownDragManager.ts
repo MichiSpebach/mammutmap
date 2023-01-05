@@ -22,7 +22,7 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
     ): Promise<void> {
         const pros: Promise<void>[] = []
 
-        pros.push(renderManager.addEventListenerAdvancedTo(elementId, 'mousedown', (eventResult: MouseEventResultAdvanced) => {
+        pros.push(renderManager.addEventListenerAdvancedTo(elementId, 'mousedown', {stopPropagation: true}, (eventResult: MouseEventResultAdvanced) => {
             this.dragStart(eventResult, onDragStart, onDrag, onDragEnd)
         }))
 

@@ -1,6 +1,6 @@
 import { util } from './util'
 import { style } from './styleAdapter'
-import { MouseEventResultAdvanced, renderManager } from './RenderManager'
+import { MouseEventResultAdvanced, renderManager, RenderPriority } from './RenderManager'
 import { ScaleTool } from './box/ScaleTool'
 import { ClientRect } from './ClientRect'
 import { mouseDownDragManager } from './mouseDownDragManager'
@@ -55,12 +55,13 @@ export class ScaleManager {
 
   private static addListenersForSide(scalable: ScaleTool, id: string, drag: (clientX: number, clientY:number, snapToGrid: boolean) => void): void {
     function onDragStart(eventResult: MouseEventResultAdvanced): Promise<void> {
-      return ScaleManager.dragstart(scalable, eventResult.position.x, eventResult.position.y)
+      ScaleManager.dragstart(scalable, eventResult.position.x, eventResult.position.y)
+      return Promise.resolve()
     }
     function onDrag(position: ClientPosition, ctrlPressed: boolean) {
       drag(position.x, position.y, !ctrlPressed)
-        util.setHint(util.hintToDeactivateSnapToGrid, !ctrlPressed)
-        return Promise.resolve()
+      util.setHint(util.hintToDeactivateSnapToGrid, !ctrlPressed)
+      return Promise.resolve()
     }
     function onDragEnd(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
       ScaleManager.dragEnd()
@@ -87,7 +88,8 @@ export class ScaleManager {
     renderManager.removeEventListenerFrom(id, 'dragend')
   }
 
-  private static async dragstart(scalable: ScaleTool, clientX: number, clientY: number): Promise<void> {
+  private static dragstart(scalable: ScaleTool, clientX: number, clientY: number): void {
+    util.setMouseEventBlockerScreenOverlay(true, RenderPriority.RESPONSIVE)
     let parentClientRect: Promise<ClientRect> = scalable.getParentClientRect()
     let clientRect: Promise<ClientRect> = scalable.getClientRect()
     scalable.scaleStart()
@@ -196,6 +198,7 @@ export class ScaleManager {
   }
 
   private static dragEnd(): void {
+    util.setMouseEventBlockerScreenOverlay(false, RenderPriority.RESPONSIVE)
     if (this.state == null) {
       util.logWarning("ScaleManager: failed to save resize operation, state is null although resizing was in progress")
       return

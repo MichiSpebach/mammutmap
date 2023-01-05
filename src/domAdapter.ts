@@ -371,6 +371,7 @@ export class DocumentObjectModelAdapter {
   public async addEventListenerAdvancedTo(
     id: string,
     eventType: MouseEventType,
+    {stopPropagation = true}: {stopPropagation?: boolean},
     callback: (result: MouseEventResultAdvanced) => void
   ): Promise<void> {
     let ipcChannelName = eventType+'_'+id
@@ -378,7 +379,9 @@ export class DocumentObjectModelAdapter {
     let rendererFunction: string = '(event) => {'
     rendererFunction += 'let ipc = require("electron").ipcRenderer;'
     //rendererFunction += 'console.log(event);'
-    rendererFunction += 'event.stopPropagation();'
+    if (stopPropagation) {
+      rendererFunction += 'event.stopPropagation();'
+    }
     rendererFunction += 'let cursor = window.getComputedStyle(event.target)["cursor"];'
     rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey, cursor);'
     rendererFunction += '}'
