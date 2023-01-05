@@ -1,8 +1,6 @@
 
 show count of ongoing awaits (while dev-mode is enabled in settings)
 
-TitleCompressor|TextCompressor|TitleEllipsis plugin: compresses long names like 'SomeWidget.ts' to 'So…Wi…ts' (uses one ellipsis char instead of three dots)
-
 plugin that pulls boxes into view when hovering on link
 togglePull/keepInsideView option on contextMenu/BoxHeader of Box that holds Box inside view
 
@@ -22,7 +20,7 @@ add option to contextMenu of boxes: tag[
 
 show start and end of hidden links to see the direction in which they are going
 
-plugin that that hides or downsizes unimportant files and folders
+'Magnifier' plugin that magnifies (currently) important boxes and hides or downsizes unimportant files and folders
 
 make it possible to partially set mapData, when links are added position and size should not be set
 option to unmpat boxes over contextMenu->unmap/unplace (sets position and size of mapData to undefined)

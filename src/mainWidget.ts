@@ -5,6 +5,8 @@ import { ToolbarWidget } from './toolbars/ToolbarWidget'
 import { renderManager } from './RenderManager'
 import { settingsOnStartup } from './Settings'
 import { util } from './util'
+import { createElement } from './util/RenderElement'
+import { ClientPosition } from './shape/ClientPosition'
 
 // TODO: rename to indexWidget|bodyWidget|appWidget|window(Widget)?
 
@@ -14,6 +16,7 @@ class MainWidget extends Widget {
     private map: Map|undefined
     //private terminal: TerminalWidget // TODO implement, or bottomBar?
     public readonly sidebar: ToolbarWidget
+    private devStatsInterval: NodeJS.Timer|undefined
 
     private renderedOrInProgress: boolean = false
 
@@ -34,6 +37,8 @@ class MainWidget extends Widget {
         if (!this.renderedOrInProgress) {
             this.renderedOrInProgress = true
             settings.subscribeBoolean('sidebar', async (active: boolean) => this.render())
+            settings.subscribeBoolean('developerMode', (newValue: boolean) => this.updateDevStats())
+            this.updateDevStats()
             await renderManager.addContentTo(indexHtmlIds.bodyId, `<div id="${this.sidebar.getId()}"></div>`)
         }
         
@@ -75,6 +80,33 @@ class MainWidget extends Widget {
 
     private getTerminalStyle(widthInPercent: number): string {
         return `width:${widthInPercent}%;height:15%;overflow-x:auto;`
+    }
+
+    private async updateDevStats(): Promise<void> {
+        const devStatsId: string = this.getId()+'devStats'
+
+        if (!(await settingsOnStartup).getBoolean('developerMode')) {
+            if (this.devStatsInterval) {
+                clearInterval(this.devStatsInterval)
+                this.devStatsInterval = undefined
+                await renderManager.remove(devStatsId)
+            }
+            return
+        }
+
+        if (!this.devStatsInterval) {
+            this.devStatsInterval = setInterval(() => this.updateDevStats(), 200)
+            await renderManager.addElementTo(this.getId(), createElement('div', {
+                id: devStatsId, 
+                style: {position: 'absolute', top: '30px', left: '10px'}
+            }, []))
+        }
+
+        const cursorPosition: ClientPosition = renderManager.getCursorClientPosition()
+        await renderManager.setElementsTo(devStatsId, [
+            createElement('div', {}, [`clientX = ${cursorPosition.x}`]),
+            createElement('div', {}, [`clientY = ${cursorPosition.y}`])
+        ])
     }
 
 }

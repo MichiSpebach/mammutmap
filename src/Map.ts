@@ -13,6 +13,7 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './pluginFacade'
 import { mouseDownDragManager } from './mouseDownDragManager'
+import { createElement, RenderElement } from './util/RenderElement'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -141,6 +142,7 @@ export class Map {
   private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
   private moveState: {latestMousePosition: ClientPosition, prevented: boolean, movingStarted: boolean} | null = null
+  private devStats: RenderElement|undefined
 
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
@@ -191,7 +193,7 @@ export class Map {
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {
     let clientYPercent: number = 100 * clientY / this.mapRatioAdjusterSizePx
     let clientXPercent: number = 100 * clientX / this.mapRatioAdjusterSizePx
-    let scaleChange: number = this.scalePercent * (delta/1500) * settings.getZoomSpeed()
+    let scaleChange: number = this.scalePercent * (delta/1500) * settings.getZoomSpeed() // TODO: improve
 
     this.marginTopPercent -= scaleChange * (clientYPercent - this.marginTopPercent) / this.scalePercent
     this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent
@@ -271,6 +273,28 @@ export class Map {
 
     await renderManager.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle, priority)
     this.rootFolder.clearCachedClientRect()
+
+    if (settings.getBoolean('developerMode')) {
+      this.updateDevStats()
+    }
+  }
+
+  private async updateDevStats(): Promise<void> {
+    const devStatsId: string = this.id+'devStats'
+
+    if (!this.devStats) {
+      this.devStats = createElement('div', {
+        id: devStatsId, 
+        style: {position: 'absolute', top: '75px', left: '10px'}
+      }, [])
+      await renderManager.addElementTo(this.id, this.devStats)
+    }
+
+    await renderManager.setElementsTo(devStatsId, [
+      createElement('div', {}, [`zoom = ${this.scalePercent}%`]),
+      createElement('div', {}, [`top = ${this.marginTopPercent}%`]),
+      createElement('div', {}, [`left = ${this.marginLeftPercent}%`])
+    ])
   }
 
 }
