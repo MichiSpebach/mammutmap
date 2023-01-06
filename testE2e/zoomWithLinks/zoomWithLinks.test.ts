@@ -12,8 +12,8 @@ test('spamming zoom in and out while hover over link', async () => {
     await clearTerminalAndZoom(2000)
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'spamming-zoom-in-and-out-1'})
 
-    await gui.zoom(-400)
-    await clearTerminalAndZoom(-400)
+    await gui.zoom(-2000)
+    await clearTerminalAndZoom(-2000)
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'spamming-zoom-in-and-out-2'})
   }
 }, 100000)

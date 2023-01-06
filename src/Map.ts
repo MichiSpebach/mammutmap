@@ -191,13 +191,19 @@ export class Map {
   }
 
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {
-    let clientYPercent: number = 100 * clientY / this.mapRatioAdjusterSizePx
-    let clientXPercent: number = 100 * clientX / this.mapRatioAdjusterSizePx
-    let scaleChange: number = this.scalePercent * (delta/1500) * settings.getZoomSpeed() // TODO: improve
+    const deltaNormalized: number = delta*settings.getZoomSpeed() / 1500
+    const scaleFactor: number = delta > 0
+      ? 1+deltaNormalized
+      : 1 / (1-deltaNormalized)
+
+    const scalePercentNew: number = this.scalePercent * scaleFactor
+    const scaleChange: number = scalePercentNew - this.scalePercent
+    const clientYPercent: number = 100 * clientY / this.mapRatioAdjusterSizePx
+    const clientXPercent: number = 100 * clientX / this.mapRatioAdjusterSizePx
 
     this.marginTopPercent -= scaleChange * (clientYPercent - this.marginTopPercent) / this.scalePercent
     this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent
-    this.scalePercent += scaleChange
+    this.scalePercent = scalePercentNew
 
     await this.updateStyle(RenderPriority.RESPONSIVE)
     await this.rootFolder.render()

@@ -18,6 +18,7 @@ add option to contextMenu of boxes: tag[
   'important|expanding'? (sizes up to all available space)
 ]
 
+'linkDidactor': show all links when there are currently only a few rendered
 show start and end of hidden links to see the direction in which they are going
 
 'Magnifier' plugin that magnifies (currently) important boxes and hides or downsizes unimportant files and folders

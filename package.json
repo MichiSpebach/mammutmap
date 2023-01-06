@@ -1,7 +1,7 @@
 {
   "name": "mammutmap",
   "productName": "mammutmap",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "TODO",
   "main": "dist/index.js",
   "scripts": {
