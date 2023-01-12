@@ -196,14 +196,12 @@ export class Map {
       ? 1+deltaNormalized
       : 1 / (1-deltaNormalized)
 
-    const scalePercentNew: number = this.scalePercent * scaleFactor
-    const scaleChange: number = scalePercentNew - this.scalePercent
     const clientYPercent: number = 100 * clientY / this.mapRatioAdjusterSizePx
     const clientXPercent: number = 100 * clientX / this.mapRatioAdjusterSizePx
 
-    this.marginTopPercent -= scaleChange * (clientYPercent - this.marginTopPercent) / this.scalePercent
-    this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent
-    this.scalePercent = scalePercentNew
+    this.marginTopPercent -= (scaleFactor-1) * (clientYPercent - this.marginTopPercent)
+    this.marginLeftPercent -= (scaleFactor-1) * (clientXPercent - this.marginLeftPercent)
+    this.scalePercent *= scaleFactor
 
     await this.updateStyle(RenderPriority.RESPONSIVE)
     await this.rootFolder.render()
