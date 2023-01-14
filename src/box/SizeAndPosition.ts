@@ -1,6 +1,7 @@
 import { LocalPosition } from '../shape/LocalPosition'
 import { LocalRect } from '../LocalRect'
 import { Box } from './Box'
+import { RenderPriority } from '../RenderManager'
 
 export class SizeAndPosition {
     private readonly referenceNode: Box // TODO: simply rename to parent?
@@ -62,7 +63,8 @@ export class SizeAndPosition {
         this.detached.zoomX *= factor
         this.detached.zoomY *= factor
 
-        await this.referenceNode.renderWithUpdateStyle()
+        await this.referenceNode.renderStyle(RenderPriority.RESPONSIVE)
+        await this.referenceNode.render()
     }
 
     public async shift(x: number, y: number): Promise<void> {
@@ -78,6 +80,7 @@ export class SizeAndPosition {
         this.detached.shiftX += x
         this.detached.shiftY += y
 
-        await this.referenceNode.renderWithUpdateStyle()
+        await this.referenceNode.renderStyle(RenderPriority.RESPONSIVE)
+        await this.referenceNode.render()
     }
 }

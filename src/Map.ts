@@ -145,20 +145,18 @@ export class Map {
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
     this.projectSettings = projectSettings
-    this.rootFolder = new RootFolderBox(projectSettings, 'mapMover')
+    this.rootFolder = new RootFolderBox(projectSettings, 'mapRatioAdjuster')
   }
 
   public async render(): Promise<void> {
     const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
-    const mapMoverHtml = `<div id="mapMover">${rootFolderHtml}</div>` // TODO: can be removed
-    const mapRatioAdjusterStyle = `width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
-    const mapRatioAdjusterHtml = `<div id="mapRatioAdjuster" style="${mapRatioAdjusterStyle}">${mapMoverHtml}</div>`
+    const mapRatioAdjusterStyle = `position:relative;width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
+    const mapRatioAdjusterHtml = `<div id="mapRatioAdjuster" style="${mapRatioAdjusterStyle}">${rootFolderHtml}</div>`
     const mapHtml = `<div id="map" style="overflow:hidden; width:100%; height:100%;">${mapRatioAdjusterHtml}</div>`
 
     await renderManager.setContentTo(this.id, mapHtml)
 
     await Promise.all([
-      this.updateStyle(),
       this.rootFolder.render(),
       renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
       mouseDownDragManager.addDraggable(
@@ -201,7 +199,7 @@ export class Map {
 
     await this.rootFolder.site.zoom(scaleFactor, this.rootFolder.transform.fromParentPosition(cursorLocalPosition))
     util.logDebug(`zooming ${delta} finished at x=${clientX} and y=${clientY}`)
-    
+
     if (settings.getBoolean('developerMode')) {
       this.updateDevStats()
     }
@@ -267,11 +265,6 @@ export class Map {
     const visible: boolean = !!this.moveState && !this.moveState.prevented
     util.setMouseEventBlockerScreenOverlay(visible, RenderPriority.RESPONSIVE)
     util.setHint(Map.hintToPreventMoving, visible)
-  }
-
-  private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    await renderManager.setStyleTo('mapMover', 'position:relative;width:100%;height:100%;', priority)
-    this.rootFolder.clearCachedClientRect() // TODO: remove clear as soon as sure
   }
 
   private async updateDevStats(): Promise<void> {

@@ -239,11 +239,6 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.watchers.length !== 0
   }
 
-  public async renderWithUpdateStyle(): Promise<void> { // TODO: add option 'enforceUpdateStyleResponsive: boolean' to render() instead? or simply make renderStyle(..) public
-    await this.renderStyle(RenderPriority.RESPONSIVE)
-    await this.render()
-  }
-
   public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
     this.renderState.setRenderStarted()
     const pros: Promise<void>[] = []
@@ -400,7 +395,7 @@ export abstract class Box implements DropTarget, Hoverable {
     await grid.unrenderFrom(this.getGridPlaceHolderId(), priority)
   }
 
-  protected async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+  public async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const rect: LocalRect = this.getLocalRect()
 
     const basicStyle: string = 'display:inline-block;position:absolute;overflow:visible;'

@@ -41,7 +41,7 @@ export class RootFolderBox extends FolderBox {
     await super.saveMapData()
   }
 
-  protected async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+  public async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     await super.renderStyle(priority)
     this.clearCachedClientRect()
   }

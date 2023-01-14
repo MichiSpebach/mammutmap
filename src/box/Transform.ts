@@ -33,6 +33,16 @@ export class Transform {
         return new LocalPosition(percentX, percentY)
     }
 
+    /** same result as box.getParent().clientToLocalPosition(..) but this also works with rootBox where getParent() does not work */
+    // TODO: not needed atm/anymore, remove?
+    public async clientToParentLocalPosition(position: ClientPosition): Promise<LocalPosition> {
+        const parentClientRect: ClientRect = await this.referenceBox.getParentClientRect()
+        return new LocalPosition(
+            (position.x - parentClientRect.x) / parentClientRect.width * 100,
+            (position.y - parentClientRect.y) / parentClientRect.height * 100
+        )
+    }
+
     public async localToClientPosition(localPosition: LocalPosition): Promise<ClientPosition> {
         return (await this.localToClientPositions([localPosition]))[0]
     }
