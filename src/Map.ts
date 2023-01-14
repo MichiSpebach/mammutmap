@@ -14,6 +14,7 @@ import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './pluginFacade'
 import { mouseDownDragManager } from './mouseDownDragManager'
 import { createElement, RenderElement } from './util/RenderElement'
+import { LocalPosition } from './shape/LocalPosition'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -137,9 +138,6 @@ export class Map {
   private readonly id: string
   private projectSettings: ProjectSettings
   private rootFolder: RootFolderBox
-  private scalePercent: number = 100
-  private marginTopPercent: number = 0
-  private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
   private moveState: {latestMousePosition: ClientPosition, prevented: boolean, movingStarted: boolean} | null = null
   private devStats: RenderElement|undefined
@@ -152,7 +150,7 @@ export class Map {
 
   public async render(): Promise<void> {
     const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
-    const mapMoverHtml = `<div id="mapMover">${rootFolderHtml}</div>`
+    const mapMoverHtml = `<div id="mapMover">${rootFolderHtml}</div>` // TODO: can be removed
     const mapRatioAdjusterStyle = `width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
     const mapRatioAdjusterHtml = `<div id="mapRatioAdjuster" style="${mapRatioAdjusterStyle}">${mapMoverHtml}</div>`
     const mapHtml = `<div id="map" style="overflow:hidden; width:100%; height:100%;">${mapRatioAdjusterHtml}</div>`
@@ -196,16 +194,17 @@ export class Map {
       ? 1+deltaNormalized
       : 1 / (1-deltaNormalized)
 
-    const clientYPercent: number = 100 * clientY / this.mapRatioAdjusterSizePx
-    const clientXPercent: number = 100 * clientX / this.mapRatioAdjusterSizePx
+    const cursorLocalPosition: LocalPosition = new LocalPosition(
+      100 * clientX / this.mapRatioAdjusterSizePx,
+      100 * clientY / this.mapRatioAdjusterSizePx
+    )
 
-    this.marginTopPercent -= (scaleFactor-1) * (clientYPercent - this.marginTopPercent)
-    this.marginLeftPercent -= (scaleFactor-1) * (clientXPercent - this.marginLeftPercent)
-    this.scalePercent *= scaleFactor
-
-    await this.updateStyle(RenderPriority.RESPONSIVE)
-    await this.rootFolder.render()
+    await this.rootFolder.site.zoom(scaleFactor, this.rootFolder.transform.fromParentPosition(cursorLocalPosition))
     util.logDebug(`zooming ${delta} finished at x=${clientX} and y=${clientY}`)
+    
+    if (settings.getBoolean('developerMode')) {
+      this.updateDevStats()
+    }
   }
 
   private async movestart(eventResult: MouseEventResultAdvanced): Promise<void> {
@@ -246,13 +245,13 @@ export class Map {
     const marginTopOffsetPercent: number = marginTopOffsetPx / (this.mapRatioAdjusterSizePx/100)
     const marginLeftOffsetPercent: number = marginLeftOffsetPx / (this.mapRatioAdjusterSizePx/100)
 
-    this.marginTopPercent += marginTopOffsetPercent
-    this.marginLeftPercent += marginLeftOffsetPercent
-
     this.moveState.latestMousePosition = position
 
-    await this.updateStyle(RenderPriority.RESPONSIVE)
-    await this.rootFolder.render()
+    await this.rootFolder.site.shift(marginLeftOffsetPercent, marginTopOffsetPercent)
+
+    if (settings.getBoolean('developerMode')) {
+      this.updateDevStats()
+    }
   }
 
   private async moveend(): Promise<void> {
@@ -271,16 +270,8 @@ export class Map {
   }
 
   private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    let basicStyle: string = 'position:relative;'
-    let offsetStyle: string = 'top:' + this.marginTopPercent + '%;left:' + this.marginLeftPercent + '%;'
-    let scaleStyle: string = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;'
-
-    await renderManager.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle, priority)
-    this.rootFolder.clearCachedClientRect()
-
-    if (settings.getBoolean('developerMode')) {
-      this.updateDevStats()
-    }
+    await renderManager.setStyleTo('mapMover', 'position:relative;width:100%;height:100%;', priority)
+    this.rootFolder.clearCachedClientRect() // TODO: remove clear as soon as sure
   }
 
   private async updateDevStats(): Promise<void> {
@@ -294,10 +285,12 @@ export class Map {
       await renderManager.addElementTo(this.id, this.devStats)
     }
 
+    const stats = this.rootFolder.site.getDetached()
     await renderManager.setElementsTo(devStatsId, [
-      createElement('div', {}, [`zoom = ${this.scalePercent}%`]),
-      createElement('div', {}, [`top = ${this.marginTopPercent}%`]),
-      createElement('div', {}, [`left = ${this.marginLeftPercent}%`])
+      createElement('div', {}, [`shiftX = ${stats?.shiftX}%`]),
+      createElement('div', {}, [`shiftY = ${stats?.shiftY}%`]),
+      createElement('div', {}, [`zoomX = *${stats?.zoomX}`]),
+      createElement('div', {}, [`zoomY = *${stats?.zoomY}`])
     ])
   }
 

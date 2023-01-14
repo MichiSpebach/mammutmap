@@ -9,6 +9,7 @@ import { ClientPosition } from '../shape/ClientPosition'
 import { LocalPosition } from '../shape/LocalPosition'
 import { style } from '../styleAdapter'
 import { settings } from '../Settings'
+import { util } from '../util'
 
 export abstract  class BoxHeader implements Draggable<FolderBox> {
   public readonly referenceBox: Box
@@ -77,6 +78,10 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async dragStart(clientX: number, clientY: number): Promise<void> {
+    if (this.referenceBox.site.isDetached()) {
+      util.logWarning(`BoxHeader::dragStart(..) called on detached box "${this.referenceBox.getName()}".`)
+    }
+
     let clientRect: ClientRect = await this.referenceBox.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
 

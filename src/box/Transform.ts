@@ -46,6 +46,14 @@ export class Transform {
         })
     }
 
+    public fromParentPosition(positionInParentCoords: LocalPosition): LocalPosition {
+        const rect: LocalRect = this.referenceBox.getLocalRect()
+        return new LocalPosition(
+            (positionInParentCoords.percentX-rect.x) * (100/rect.width),
+            (positionInParentCoords.percentY-rect.y) * (100/rect.height)
+        )
+    }
+
     public toParentPosition(position: LocalPosition): LocalPosition {
         const rect: LocalRect = this.referenceBox.getLocalRect()
         return new LocalPosition(
@@ -76,7 +84,7 @@ export class Transform {
     }
 
     // remove? not really practical
-    public async getNearestGridPositionIfNearbyOrIdentidy(position: ClientPosition): Promise<LocalPosition> {
+    public async getNearestGridPositionIfNearbyOrIdentity(position: ClientPosition): Promise<LocalPosition> {
         const localPosition: LocalPosition = await this.clientToLocalPosition(position)
         const localPositionSnappedToGrid: LocalPosition = this.getNearestGridPositionOf(localPosition)
         const clientPositionSnappedToGrid: ClientPosition = await this.localToClientPosition(localPositionSnappedToGrid)

@@ -138,7 +138,7 @@ export class FolderBoxBody extends BoxBody {
   private createBoxesWithoutMapData(sources: Dirent[]): Promise<Box>[] {
     const boxPromises: Promise<Box>[] = []
 
-    const emptySpaceFinder = new EmptySpaceFinder(this.boxes.map(box => box.getLocalRect()))
+    const emptySpaceFinder = new EmptySpaceFinder(this.boxes.map(box => box.getLocalRectToSave()))
     const emptySpaces: LocalRect[] = emptySpaceFinder.findEmptySpaces(sources.length)
     if (emptySpaces.length !== sources.length) {
       let message = `Can not load all boxes in ${this.referenceFolderBox.getSrcPath()}`
@@ -159,7 +159,7 @@ export class FolderBoxBody extends BoxBody {
     const boxesWithMapData: Box[] = this.boxes.filter(box => box.isMapDataFileExisting() || box === grabbedBox)
     const boxesWithoutMapData: Box[] = this.boxes.filter(box => !box.isMapDataFileExisting() && box !== grabbedBox)
 
-    const occupiedSpaces: LocalRect[] = boxesWithMapData.map(box => box.getLocalRect())
+    const occupiedSpaces: LocalRect[] = boxesWithMapData.map(box => box.getLocalRectToSave())
     if (!boxesWithMapData.includes(grabbedBox)) {
        // in case grabbedBox is dragged from another parent
       occupiedSpaces.push(await this.referenceFolderBox.transform.clientToLocalRect(await grabbedBox.getClientRect()))
@@ -198,7 +198,7 @@ export class FolderBoxBody extends BoxBody {
   }
 
   private async renderBoxPlaceholderFor(box: Box): Promise<void> {
-    const rect: LocalRect = box.getLocalRect()
+    const rect: LocalRect = box.getLocalRectToSave()
     let style = `position:absolute;`
     style += `left:${rect.x}%;top:${rect.y}%;width:${rect.width}%;height:${rect.height}%;`
     style += 'overflow:hidden;'
@@ -276,6 +276,9 @@ export class FolderBoxBody extends BoxBody {
 
   // TODO: is this method needed?
   public async getBoxesAt(clientX: number, clientY: number): Promise<Box[]> {
+    if (this.referenceFolderBox.site.isDetached()) {
+      util.logWarning(`FolderBoxBody::getBoxesAt(..) called on detached box "${this.referenceFolderBox.getName()}" but option to specify whether savedPosition or renderedPosition is not implemented.`)
+    }
     let boxesAtPostion:Box[] = []
 
     for (var i: number = 0; i < this.boxes.length; i++) {

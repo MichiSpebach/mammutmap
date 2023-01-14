@@ -24,6 +24,7 @@ import { BorderingLinks } from '../link/BorderingLinks'
 import { ProjectSettings } from '../ProjectSettings'
 import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
+import { SizeAndPosition } from './SizeAndPosition'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -31,6 +32,7 @@ export abstract class Box implements DropTarget, Hoverable {
   private mapData: BoxData
   private mapDataFileExists: boolean
   public readonly transform: Transform
+  public readonly site: SizeAndPosition
   private readonly header: BoxHeader
   // TODO: move nodes into BoxBody
   public readonly nodes: BoxNodesWidget // TODO: introduce (Abstract)NodesWidget|SubNodesWidget|ChildNodesWidget that contains all sorts of childNodes (Boxes and LinkNodes)?
@@ -48,6 +50,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.mapData = mapData
     this.mapDataFileExists = mapDataFileExists
     this.transform = new Transform(this)
+    this.site = new SizeAndPosition(this)
     this.header = this.createHeader()
     this.nodes = new BoxNodesWidget(this)
     this.links = new BoxLinks(this)
@@ -135,6 +138,9 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async setParentAndFlawlesslyResizeAndSave(newParent: FolderBox): Promise<void> {
+    if (this.site.isDetached()) {
+      util.logWarning(`Box::setParentAndFlawlesslyResizeAndSave(..) called on detached box "${this.getName()}".`)
+    }
     if (this.parent == null) {
       util.logError('Box.setParent() cannot be called on root.')
     }
@@ -190,18 +196,22 @@ export abstract class Box implements DropTarget, Hoverable {
     }
   }
 
-  public async getParentClientRect(): Promise<ClientRect> {
+  public async getParentClientRect(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'?
     return this.getParent().getClientRect()
   }
 
-  public async getClientShape(): Promise<ClientRect> {
+  public async getClientShape(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'?
     return this.getClientRect()
   }
-  public async getClientRect(): Promise<ClientRect> {
-    return this.getParent().transform.localToClientRect(this.mapData.getRect())
+  public async getClientRect(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'? // TODO: delegate into site?
+    return this.getParent().transform.localToClientRect(this.getLocalRect())
   }
 
-  public getLocalRect(): LocalRect {
+  public getLocalRect(): LocalRect { // TODO: rename to getLocalRectToRender|getRenderLocalRect?
+    return this.site.getLocalRectToRender()
+  }
+
+  public getLocalRectToSave(): LocalRect {
     return this.mapData.getRect()
   }
 
@@ -229,6 +239,11 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.watchers.length !== 0
   }
 
+  public async renderWithUpdateStyle(): Promise<void> { // TODO: add option 'enforceUpdateStyleResponsive: boolean' to render() instead? or simply make renderStyle(..) public
+    await this.renderStyle(RenderPriority.RESPONSIVE)
+    await this.render()
+  }
+
   public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
     this.renderState.setRenderStarted()
     const pros: Promise<void>[] = []
@@ -237,6 +252,7 @@ export abstract class Box implements DropTarget, Hoverable {
       this.renderStyle()
 
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
+      // TODO: introduce <div id="content"> that contains everything but border and scaleToolPlaceholder? would make sense for detaching mechanism to leave borderFrame at savedPosition
       const backgroundHtml = `<div style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
       const gridPlaceHolderHtml = `<div id="${this.getGridPlaceHolderId()}" style="${styleAbsoluteAndStretched}"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}" style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};"></div>`
@@ -385,9 +401,11 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   protected async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    const rect: LocalRect = this.getLocalRect()
+
     const basicStyle: string = 'display:inline-block;position:absolute;overflow:visible;'
-    const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
-    const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
+    const scaleStyle: string = 'width:'+rect.width+'%;height:'+rect.height+'%;'
+    const positionStyle: string = 'left:'+rect.x+'%;top:'+rect.y+'%;'
 
     await renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle, priority)
   }
@@ -404,6 +422,10 @@ export abstract class Box implements DropTarget, Hoverable {
     measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
+    if (this.site.isDetached()) {
+      util.logWarning(`Box::updateMeasures(..) called on detached box "${this.getName()}".`)
+    }
+
     if (measuresInPercentIfChanged.x != null) {
       this.mapData.x = measuresInPercentIfChanged.x
     }
