@@ -15,6 +15,7 @@ import { Subscribers } from './pluginFacade'
 import { mouseDownDragManager } from './mouseDownDragManager'
 import { createElement, RenderElement } from './util/RenderElement'
 import { LocalPosition } from './shape/LocalPosition'
+import { ClientRect } from './ClientRect'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -197,7 +198,7 @@ export class Map {
       100 * clientY / this.mapRatioAdjusterSizePx
     )
 
-    await this.rootFolder.site.zoom(scaleFactor, this.rootFolder.transform.fromParentPosition(cursorLocalPosition))
+    await this.rootFolder.site.zoomInParentCoords(scaleFactor, cursorLocalPosition)
     util.logDebug(`zooming ${delta} finished at x=${clientX} and y=${clientY}`)
 
     if (settings.getBoolean('developerMode')) {
@@ -278,12 +279,16 @@ export class Map {
       await renderManager.addElementTo(this.id, this.devStats)
     }
 
-    const stats = this.rootFolder.site.getDetached()
+    const stats = this.rootFolder.site.getDetachmentsInRenderedPath()
+    const renderedSitesInPath = this.rootFolder.site.getRenderedPath()
+    const renderedClientRectsInPath: ClientRect[] = await Promise.all(renderedSitesInPath.map(site => site.referenceNode.getClientRect()))
     await renderManager.setElementsTo(devStatsId, [
-      createElement('div', {}, [`shiftX = ${stats?.shiftX}%`]),
-      createElement('div', {}, [`shiftY = ${stats?.shiftY}%`]),
-      createElement('div', {}, [`zoomX = *${stats?.zoomX}`]),
-      createElement('div', {}, [`zoomY = *${stats?.zoomY}`])
+      createElement('div', {}, [`shiftX = ${stats.map(detachment => detachment.shiftX)}%`]),
+      createElement('div', {}, [`shiftY = ${stats.map(detachment => detachment.shiftY)}%`]),
+      createElement('div', {}, [`zoomX = *${stats.map(detachment => detachment.zoomX).join('*')}`]),
+      createElement('div', {}, [`zoomY = *${stats.map(detachment => detachment.zoomY).join('*')}`]),
+      createElement('div', {}, [`clientXs = ${renderedClientRectsInPath.map(rect => Math.round(rect.x)).join(', ')}`]),
+      createElement('div', {}, [`clientWidths = ${renderedClientRectsInPath.map(rect => Math.round(rect.width)).join(', ')}`])
     ])
   }
 

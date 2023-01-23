@@ -45,7 +45,8 @@ test('zoom out far often', async () => {
   await gui.resetWindow()
   await gui.openFolder('testE2e/zoom/scenario')
   await clearTerminalAndZoom(2000)
-  for (let i = 0; i < 5; i++) {
+
+  for (let i = 0; i < 10; i++) {
     await clearTerminalAndZoom(-10000)
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'zoom-out-far-often-1'})
     await clearTerminalAndZoom(10000)
@@ -53,9 +54,24 @@ test('zoom out far often', async () => {
   }
 }, 10000)
 
-test('zoom in extremely deep', async () => {
-  // TODO
-})
+test('zoom in to ultimate depth and out again', async () => {
+  await gui.resetWindow()
+  await gui.openFolder('testE2e/zoom/extremeDeepScenario')
+  await gui.moveMouseTo(300, 300)
+
+  for (let i = 1; i <= 6; i++) {
+    await gui.zoom(4000)
+    await gui.clearTerminal()
+    await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'zoom-in-to-ultimate-depth-and-out-again-'+i})
+  }
+  for (let i = 5; i >= 0; i--) {
+    await gui.zoom(-4000)
+    await gui.zoom(-500) // otherwise not ensured that inner box is unrendered,
+    await gui.zoom(500) // size when box should unrender is specified smaller than when it should render (improves ux)
+    await gui.clearTerminal()
+    await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'zoom-in-to-ultimate-depth-and-out-again-'+i})
+  }
+}, 10000)
 
 async function clearTerminalAndZoom(zoomDelta: number): Promise<void> {
   await gui.clearTerminal()

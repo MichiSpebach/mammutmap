@@ -23,3 +23,7 @@ test('scale box by dragging right side', async () => {
     await gui.clearTerminal()
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-narrow'})
 })
+
+test('scale rootBox', async () => {
+    // TODO
+})
