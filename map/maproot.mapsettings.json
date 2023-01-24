@@ -10,14 +10,15 @@
 		},
 		{
 			"name": "has",
-			"count": 7,
+			"count": 20,
 			"appearance": {
-				"mode": "visible"
+				"mode": "visible",
+				"color": "lime"
 			}
 		},
 		{
 			"name": "isA",
-			"count": 11,
+			"count": 20,
 			"appearance": {
 				"mode": "visible",
 				"color": "aqua"
