@@ -23,6 +23,10 @@ export class BoxNodesWidget extends Widget {
       return this.nodeWidgets.find(node => node.getId() === id)
     }
 
+    public getNodes(): NodeWidget[] {
+      return this.nodeWidgets
+    }
+
     public async render(): Promise<void> {
       if (this.rendered) {
         return

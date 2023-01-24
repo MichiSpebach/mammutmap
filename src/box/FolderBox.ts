@@ -8,6 +8,7 @@ import { FolderBoxHeader } from './FolderBoxHeader'
 import { FolderBoxBody } from './FolderBoxBody'
 import { BoxWatcher } from './BoxWatcher'
 import { BoxLinks } from './BoxLinks'
+import { NodeWidget } from '../node/NodeWidget'
 
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
@@ -31,6 +32,10 @@ export class FolderBox extends Box {
 
   public isSourceless(): boolean {
     return false
+  }
+
+  public getChilds(): (Box|NodeWidget)[] { // TODO: change return type to AbstractNodeWidget as soon as available
+    return [...super.getChilds(), ...this.getBoxes()]
   }
 
   protected getBodyOverflowStyle(): 'auto'|'hidden'|'visible' {

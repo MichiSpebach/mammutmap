@@ -2,7 +2,6 @@ import { LocalPosition } from '../shape/LocalPosition'
 import { LocalRect } from '../LocalRect'
 import { Box } from './Box'
 import { RenderPriority } from '../RenderManager'
-import { FolderBox } from './FolderBox'
 import { util } from '../util'
 import { ClientRect } from '../ClientRect'
 
@@ -188,17 +187,25 @@ export class SizeAndPosition {
     }
 
     private findChildSiteToDelegateZoom(options?: {warningOff?: boolean}): SizeAndPosition|undefined {
-        if (!(this.referenceNode instanceof FolderBox)) {
+        const renderedChildBoxes: Box[] = []
+        for (const child of this.referenceNode.getChilds()) {
+            if (child instanceof Box && child.isBodyBeingRendered()) {
+                renderedChildBoxes.push(child)
+            }
+        }
+
+        if (renderedChildBoxes.length < 1) {
             if (!options?.warningOff) {
                 util.logWarning('SizeAndPosition::findChildSiteToDelegateZoom(..) Deeper zoom not implemented.')
             }
             return undefined
         }
 
-        const renderedChilds: Box[] = this.referenceNode.getBoxes().filter(box => box.isBodyBeingRendered())
-        if (renderedChilds.length !== 1 && !options?.warningOff) {
-            util.logWarning(`SizeAndPosition::findChildSiteToDelegateZoom(..) Expected exactly 1 child with rendered body, but are ${renderedChilds.length} (${renderedChilds.map(box => box.getName())}).`)
+        if (renderedChildBoxes.length !== 1 && !options?.warningOff) {
+            let message: string = `SizeAndPosition::findChildSiteToDelegateZoom(..) Expected exactly 1 child with rendered body`
+            message += `, but are ${renderedChildBoxes.length} (${renderedChildBoxes.map(box => box.getName())}).`
+            util.logWarning(message)
         }
-        return renderedChilds[0]?.site
+        return renderedChildBoxes[0]?.site
     }
 }

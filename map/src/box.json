@@ -1172,29 +1172,6 @@
 			]
 		},
 		{
-			"id": "a85mtn76ub8",
-			"from": {
-				"path": [
-					{
-						"boxId": "6or8q07u6u",
-						"boxName": "SizeAndPosition.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "8hst7ghum5o",
-						"boxName": "FolderBox.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "47jki68qrd",
 			"from": {
 				"path": [

@@ -25,6 +25,7 @@ import { ProjectSettings } from '../ProjectSettings'
 import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { SizeAndPosition } from './SizeAndPosition'
+import { NodeWidget } from '../node/NodeWidget'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -128,6 +129,10 @@ export abstract class Box implements DropTarget, Hoverable {
   public abstract isFile(): boolean
 
   public abstract isSourceless(): boolean
+
+  public getChilds(): (Box|NodeWidget)[] { // TODO: change return type to AbstractNodeWidget as soon as available
+    return this.nodes.getNodes()
+  }
 
   public isRendered(): boolean {
     return this.renderState.isRendered()
