@@ -9,6 +9,7 @@ export class SizeAndPosition {
     public static readonly delegateZoomToChildInPixels: number = 1000*1000 // TODO: can still be increased by magnitude when implementation is improved, worth it?
 
     public readonly referenceNode: Box // TODO: simply rename to parent?
+    public readonly referenceNodeMapSiteData: {x: number, y: number, width: number, height: number}
     private detached: {
         shiftX: number
         shiftY: number
@@ -16,8 +17,9 @@ export class SizeAndPosition {
         zoomY: number
     } | undefined
 
-    public constructor(referenceNode: Box) {
+    public constructor(referenceNode: Box, referenceNodeMapSiteData: {x: number, y: number, width: number, height: number}) {
         this.referenceNode = referenceNode
+        this.referenceNodeMapSiteData = referenceNodeMapSiteData
     }
 
     public isDetached(): boolean {
@@ -67,6 +69,59 @@ export class SizeAndPosition {
         return this.referenceNode.getLocalRectToSave()
     }
 
+    public async updateMeasures(
+        measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
+        priority: RenderPriority = RenderPriority.NORMAL
+    ): Promise<void> {
+        if (this.detached) {
+            if (!this.referenceNode.isRoot()) {
+                util.logWarning(`SizeAndPosition::updateMeasures(..) not implemented on detached box "${this.referenceNode.getName()}".`)
+                return
+            }
+            measuresInPercentIfChanged = this.transformDetachedMeasuresToMeasuresToSave(measuresInPercentIfChanged)
+        }
+    
+        if (measuresInPercentIfChanged.x != null) {
+            this.referenceNodeMapSiteData.x = measuresInPercentIfChanged.x
+        }
+        if (measuresInPercentIfChanged.y != null) {
+            this.referenceNodeMapSiteData.y = measuresInPercentIfChanged.y
+        }
+        if (measuresInPercentIfChanged.width != null) {
+            this.referenceNodeMapSiteData.width = measuresInPercentIfChanged.width
+        }
+        if (measuresInPercentIfChanged.height != null) {
+            this.referenceNodeMapSiteData.height = measuresInPercentIfChanged.height
+        }
+    
+        await this.referenceNode.renderStyle(priority)
+        // TODO: call this.referenceNode.render(RenderPriority.LOW) with very low priority and
+        // TODO: return '{renderStyle: Promise<void>, rerenderChilds: Promise<void>}> to prevent rerenderChilds from blocking rerenderBorderingLinks in Box
+    }
+
+    private transformDetachedMeasuresToMeasuresToSave(
+        measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}
+    ): {x?: number, y?: number, width?: number, height?: number} {
+        if (!this.detached) {
+            util.logWarning(`expected SizeAndPosition::transformDetachedMeasuresToMeasuresToSave(..) to be called on detached box "${this.referenceNode.getName()}".`)
+            return measuresInPercentIfChanged
+        }
+
+        if (measuresInPercentIfChanged.x) {
+            measuresInPercentIfChanged.x -= this.detached.shiftX
+        }
+        if (measuresInPercentIfChanged.y) {
+            measuresInPercentIfChanged.y -= this.detached.shiftY
+        }
+        if (measuresInPercentIfChanged.width) {
+            measuresInPercentIfChanged.width /= this.detached.zoomX
+        }
+        if (measuresInPercentIfChanged.height) {
+            measuresInPercentIfChanged.height /= this.detached.zoomY
+        }
+        return measuresInPercentIfChanged
+    }
+
     public async shift(x: number, y: number): Promise<void> {
         if (!this.detached) {
             this.detached = {
@@ -98,13 +153,14 @@ export class SizeAndPosition {
             }
         }
 
-        const childSiteToDelegateZoom: SizeAndPosition|undefined = this.findDetachedChildSite()
+        const childSiteToDelegateZoom: SizeAndPosition|undefined = this.findDetachedChildSite() // TODO: cache?, small lags appear while zooming on heavy load, this could be why, did not recognize them before
         if (childSiteToDelegateZoom) {
             return this.delegateZoomToChild(factor, positionInParentCoords, childSiteToDelegateZoom)
         }
 
         if (factor > 1) {
             const pixelRect: ClientRect = await this.referenceNode.getClientRect() // TODO: do this after zooming, init detachment in child for next zoom?
+            // TODO: small lags appear while zooming on heavy load, this could be why, did not recognize them before
             // TODO: or check with new detached values in case of very big zoom factor?
             const maxPixels: number = SizeAndPosition.delegateZoomToChildInPixels
             if (pixelRect.x < -maxPixels || pixelRect.y < -maxPixels || pixelRect.width > maxPixels || pixelRect.height > maxPixels) {

@@ -51,7 +51,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.mapData = mapData
     this.mapDataFileExists = mapDataFileExists
     this.transform = new Transform(this)
-    this.site = new SizeAndPosition(this)
+    this.site = new SizeAndPosition(this, this.mapData)
     this.header = this.createHeader()
     this.nodes = new BoxNodesWidget(this)
     this.links = new BoxLinks(this)
@@ -170,7 +170,7 @@ export abstract class Box implements DropTarget, Hoverable {
     const newY: number = distanceBetweenParentsY + this.mapData.y * scaleY
     const newWidth: number = this.mapData.width * scaleX
     const newHeight: number = this.mapData.height * scaleY
-    await this.updateMeasures({x: newX, y: newY, width: newWidth, height: newHeight})
+    await this.site.updateMeasures({x: newX, y: newY, width: newWidth, height: newHeight})
 
     await this.renameAndMoveOnFileSystem(oldSrcPath, newSrcPath, oldMapDataFilePath, newMapDataFilePath)
     await this.saveMapData()
@@ -414,32 +414,8 @@ export abstract class Box implements DropTarget, Hoverable {
     measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
-    await this.updateMeasures(measuresInPercentIfChanged, priority)
+    await this.site.updateMeasures(measuresInPercentIfChanged, priority)
     await this.borderingLinks.renderAll()
-  }
-
-  private async updateMeasures(
-    measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
-    priority: RenderPriority = RenderPriority.NORMAL
-  ): Promise<void> {
-    if (this.site.isDetached()) {
-      util.logWarning(`Box::updateMeasures(..) called on detached box "${this.getName()}".`)
-    }
-
-    if (measuresInPercentIfChanged.x != null) {
-      this.mapData.x = measuresInPercentIfChanged.x
-    }
-    if (measuresInPercentIfChanged.y != null) {
-      this.mapData.y = measuresInPercentIfChanged.y
-    }
-    if (measuresInPercentIfChanged.width != null) {
-      this.mapData.width = measuresInPercentIfChanged.width
-    }
-    if (measuresInPercentIfChanged.height != null) {
-      this.mapData.height = measuresInPercentIfChanged.height
-    }
-
-    await this.renderStyle(priority)
   }
 
   protected abstract getBodyOverflowStyle(): 'auto'|'hidden'|'visible'

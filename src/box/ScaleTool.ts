@@ -76,9 +76,6 @@ export class ScaleTool {
   }
 
   public async getClientRect(): Promise<ClientRect> {
-    if (this.boxRenderedInto?.site.isDetached()) {
-      util.logWarning(`ScaleTool::getClientRect() called on detached box ${this.boxRenderedInto.getName()}, most likely detached box is being scaled.`)
-    }
     return this.getBoxRenderedIntoOrFail().getClientRect()
   }
 
