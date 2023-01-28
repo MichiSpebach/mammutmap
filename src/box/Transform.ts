@@ -33,6 +33,16 @@ export class Transform {
         return new LocalPosition(percentX, percentY)
     }
 
+    /** same result as box.getParent().clientToLocalPosition(..) but this also works with rootBox where getParent() does not work */
+    // TODO: not needed atm/anymore, remove?
+    public async clientToParentLocalPosition(position: ClientPosition): Promise<LocalPosition> {
+        const parentClientRect: ClientRect = await this.referenceBox.getParentClientRect()
+        return new LocalPosition(
+            (position.x - parentClientRect.x) / parentClientRect.width * 100,
+            (position.y - parentClientRect.y) / parentClientRect.height * 100
+        )
+    }
+
     public async localToClientPosition(localPosition: LocalPosition): Promise<ClientPosition> {
         return (await this.localToClientPositions([localPosition]))[0]
     }
@@ -44,6 +54,14 @@ export class Transform {
             const clientY: number = clientRect.y + (localPosition.percentY / 100) * clientRect.height
             return new ClientPosition(clientX, clientY)
         })
+    }
+
+    public fromParentPosition(positionInParentCoords: LocalPosition): LocalPosition {
+        const rect: LocalRect = this.referenceBox.getLocalRect()
+        return new LocalPosition(
+            (positionInParentCoords.percentX-rect.x) * (100/rect.width),
+            (positionInParentCoords.percentY-rect.y) * (100/rect.height)
+        )
     }
 
     public toParentPosition(position: LocalPosition): LocalPosition {
@@ -76,7 +94,7 @@ export class Transform {
     }
 
     // remove? not really practical
-    public async getNearestGridPositionIfNearbyOrIdentidy(position: ClientPosition): Promise<LocalPosition> {
+    public async getNearestGridPositionIfNearbyOrIdentity(position: ClientPosition): Promise<LocalPosition> {
         const localPosition: LocalPosition = await this.clientToLocalPosition(position)
         const localPositionSnappedToGrid: LocalPosition = this.getNearestGridPositionOf(localPosition)
         const clientPositionSnappedToGrid: ClientPosition = await this.localToClientPosition(localPositionSnappedToGrid)

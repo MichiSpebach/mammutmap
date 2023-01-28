@@ -9,6 +9,7 @@ import { ClientPosition } from '../shape/ClientPosition'
 import { LocalPosition } from '../shape/LocalPosition'
 import { style } from '../styleAdapter'
 import { settings } from '../Settings'
+import { util } from '../util'
 
 export abstract  class BoxHeader implements Draggable<FolderBox> {
   public readonly referenceBox: Box
@@ -77,6 +78,10 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async dragStart(clientX: number, clientY: number): Promise<void> {
+    if (this.referenceBox.site.isDetached()) {
+      util.logWarning(`BoxHeader::dragStart(..) called on detached box "${this.referenceBox.getName()}".`)
+    }
+
     let clientRect: ClientRect = await this.referenceBox.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
 
@@ -84,28 +89,21 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
+    if (this.referenceBox.isRoot()) {
+      util.logWarning('BoxHeader::drag(..) called on rootBox, cannot drag root, also this should never happen.')
+      return
+    }
     const clientPosition = new ClientPosition(clientX-this.dragOffset.x, clientY-this.dragOffset.y)
 
     let positionInParentBoxCoords: LocalPosition
     if (!snapToGrid) {
-      positionInParentBoxCoords = await this.clientToParentLocalPosition(clientPosition)
-    } else if (this.referenceBox.isRoot()) {
-      positionInParentBoxCoords = this.referenceBox.transform.getNearestGridPositionOf(await this.clientToParentLocalPosition(clientPosition))
+      positionInParentBoxCoords = await this.referenceBox.getParent().transform.clientToLocalPosition(clientPosition)
     } else {
       positionInParentBoxCoords = await this.referenceBox.getParent().transform.getNearestGridPositionOfOtherTransform(clientPosition, dropTarget.transform)
     }
 
     await this.referenceBox.updateMeasuresAndBorderingLinks({x: positionInParentBoxCoords.percentX, y: positionInParentBoxCoords.percentY}, RenderPriority.RESPONSIVE)
     await dropTarget.rearrangeBoxesWithoutMapData(this.referenceBox)
-  }
-
-  // TODO: move into Transform?
-  private async clientToParentLocalPosition(position: ClientPosition): Promise<LocalPosition> {
-    const parentClientRect: ClientRect = await this.referenceBox.getParentClientRect()
-    return new LocalPosition(
-      (position.x - parentClientRect.x) / parentClientRect.width * 100,
-      (position.y - parentClientRect.y) / parentClientRect.height * 100
-    )
   }
 
   public async dragCancel(): Promise<void> {

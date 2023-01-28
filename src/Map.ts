@@ -14,6 +14,8 @@ import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './pluginFacade'
 import { mouseDownDragManager } from './mouseDownDragManager'
 import { createElement, RenderElement } from './util/RenderElement'
+import { LocalPosition } from './shape/LocalPosition'
+import { ClientRect } from './ClientRect'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -137,9 +139,6 @@ export class Map {
   private readonly id: string
   private projectSettings: ProjectSettings
   private rootFolder: RootFolderBox
-  private scalePercent: number = 100
-  private marginTopPercent: number = 0
-  private marginLeftPercent: number = 0
   private readonly mapRatioAdjusterSizePx: number = 600
   private moveState: {latestMousePosition: ClientPosition, prevented: boolean, movingStarted: boolean} | null = null
   private devStats: RenderElement|undefined
@@ -147,20 +146,18 @@ export class Map {
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
     this.projectSettings = projectSettings
-    this.rootFolder = new RootFolderBox(projectSettings, 'mapMover')
+    this.rootFolder = new RootFolderBox(projectSettings, 'mapRatioAdjuster')
   }
 
   public async render(): Promise<void> {
     const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
-    const mapMoverHtml = `<div id="mapMover">${rootFolderHtml}</div>`
-    const mapRatioAdjusterStyle = `width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
-    const mapRatioAdjusterHtml = `<div id="mapRatioAdjuster" style="${mapRatioAdjusterStyle}">${mapMoverHtml}</div>`
+    const mapRatioAdjusterStyle = `position:relative;width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
+    const mapRatioAdjusterHtml = `<div id="mapRatioAdjuster" style="${mapRatioAdjusterStyle}">${rootFolderHtml}</div>`
     const mapHtml = `<div id="map" style="overflow:hidden; width:100%; height:100%;">${mapRatioAdjusterHtml}</div>`
 
     await renderManager.setContentTo(this.id, mapHtml)
 
     await Promise.all([
-      this.updateStyle(),
       this.rootFolder.render(),
       renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
       mouseDownDragManager.addDraggable(
@@ -196,18 +193,17 @@ export class Map {
       ? 1+deltaNormalized
       : 1 / (1-deltaNormalized)
 
-    const scalePercentNew: number = this.scalePercent * scaleFactor
-    const scaleChange: number = scalePercentNew - this.scalePercent
-    const clientYPercent: number = 100 * clientY / this.mapRatioAdjusterSizePx
-    const clientXPercent: number = 100 * clientX / this.mapRatioAdjusterSizePx
+    const cursorLocalPosition: LocalPosition = new LocalPosition(
+      100 * clientX / this.mapRatioAdjusterSizePx,
+      100 * clientY / this.mapRatioAdjusterSizePx
+    )
 
-    this.marginTopPercent -= scaleChange * (clientYPercent - this.marginTopPercent) / this.scalePercent
-    this.marginLeftPercent -= scaleChange * (clientXPercent - this.marginLeftPercent) / this.scalePercent
-    this.scalePercent = scalePercentNew
-
-    await this.updateStyle(RenderPriority.RESPONSIVE)
-    await this.rootFolder.render()
+    await this.rootFolder.site.zoomInParentCoords(scaleFactor, cursorLocalPosition)
     util.logDebug(`zooming ${delta} finished at x=${clientX} and y=${clientY}`)
+
+    if (settings.getBoolean('developerMode')) {
+      this.updateDevStats()
+    }
   }
 
   private async movestart(eventResult: MouseEventResultAdvanced): Promise<void> {
@@ -248,13 +244,13 @@ export class Map {
     const marginTopOffsetPercent: number = marginTopOffsetPx / (this.mapRatioAdjusterSizePx/100)
     const marginLeftOffsetPercent: number = marginLeftOffsetPx / (this.mapRatioAdjusterSizePx/100)
 
-    this.marginTopPercent += marginTopOffsetPercent
-    this.marginLeftPercent += marginLeftOffsetPercent
-
     this.moveState.latestMousePosition = position
 
-    await this.updateStyle(RenderPriority.RESPONSIVE)
-    await this.rootFolder.render()
+    await this.rootFolder.site.shift(marginLeftOffsetPercent, marginTopOffsetPercent)
+
+    if (settings.getBoolean('developerMode')) {
+      this.updateDevStats()
+    }
   }
 
   private async moveend(): Promise<void> {
@@ -272,19 +268,6 @@ export class Map {
     util.setHint(Map.hintToPreventMoving, visible)
   }
 
-  private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    let basicStyle: string = 'position:relative;'
-    let offsetStyle: string = 'top:' + this.marginTopPercent + '%;left:' + this.marginLeftPercent + '%;'
-    let scaleStyle: string = 'width:' + this.scalePercent + '%;height:' + this.scalePercent + '%;'
-
-    await renderManager.setStyleTo('mapMover', basicStyle + offsetStyle + scaleStyle, priority)
-    this.rootFolder.clearCachedClientRect()
-
-    if (settings.getBoolean('developerMode')) {
-      this.updateDevStats()
-    }
-  }
-
   private async updateDevStats(): Promise<void> {
     const devStatsId: string = this.id+'devStats'
 
@@ -296,10 +279,16 @@ export class Map {
       await renderManager.addElementTo(this.id, this.devStats)
     }
 
+    const stats = this.rootFolder.site.getDetachmentsInRenderedPath()
+    const renderedSitesInPath = this.rootFolder.site.getRenderedPath()
+    const renderedClientRectsInPath: ClientRect[] = await Promise.all(renderedSitesInPath.map(site => site.referenceNode.getClientRect()))
     await renderManager.setElementsTo(devStatsId, [
-      createElement('div', {}, [`zoom = ${this.scalePercent}%`]),
-      createElement('div', {}, [`top = ${this.marginTopPercent}%`]),
-      createElement('div', {}, [`left = ${this.marginLeftPercent}%`])
+      createElement('div', {}, [`shiftX = ${stats.map(detachment => detachment.shiftX)}%`]),
+      createElement('div', {}, [`shiftY = ${stats.map(detachment => detachment.shiftY)}%`]),
+      createElement('div', {}, [`zoomX = *${stats.map(detachment => detachment.zoomX).join('*')}`]),
+      createElement('div', {}, [`zoomY = *${stats.map(detachment => detachment.zoomY).join('*')}`]),
+      createElement('div', {}, [`clientXs = ${renderedClientRectsInPath.map(rect => Math.round(rect.x)).join(', ')}`]),
+      createElement('div', {}, [`clientWidths = ${renderedClientRectsInPath.map(rect => Math.round(rect.width)).join(', ')}`])
     ])
   }
 

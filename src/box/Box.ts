@@ -24,6 +24,8 @@ import { BorderingLinks } from '../link/BorderingLinks'
 import { ProjectSettings } from '../ProjectSettings'
 import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
+import { SizeAndPosition } from './SizeAndPosition'
+import { NodeWidget } from '../node/NodeWidget'
 
 export abstract class Box implements DropTarget, Hoverable {
   private name: string
@@ -31,6 +33,7 @@ export abstract class Box implements DropTarget, Hoverable {
   private mapData: BoxData
   private mapDataFileExists: boolean
   public readonly transform: Transform
+  public readonly site: SizeAndPosition
   private readonly header: BoxHeader
   // TODO: move nodes into BoxBody
   public readonly nodes: BoxNodesWidget // TODO: introduce (Abstract)NodesWidget|SubNodesWidget|ChildNodesWidget that contains all sorts of childNodes (Boxes and LinkNodes)?
@@ -48,6 +51,7 @@ export abstract class Box implements DropTarget, Hoverable {
     this.mapData = mapData
     this.mapDataFileExists = mapDataFileExists
     this.transform = new Transform(this)
+    this.site = new SizeAndPosition(this, this.mapData)
     this.header = this.createHeader()
     this.nodes = new BoxNodesWidget(this)
     this.links = new BoxLinks(this)
@@ -126,6 +130,10 @@ export abstract class Box implements DropTarget, Hoverable {
 
   public abstract isSourceless(): boolean
 
+  public getChilds(): (Box|NodeWidget)[] { // TODO: change return type to AbstractNodeWidget as soon as available
+    return this.nodes.getNodes()
+  }
+
   public isRendered(): boolean {
     return this.renderState.isRendered()
   }
@@ -135,6 +143,9 @@ export abstract class Box implements DropTarget, Hoverable {
   }
 
   public async setParentAndFlawlesslyResizeAndSave(newParent: FolderBox): Promise<void> {
+    if (this.site.isDetached()) {
+      util.logWarning(`Box::setParentAndFlawlesslyResizeAndSave(..) called on detached box "${this.getName()}".`)
+    }
     if (this.parent == null) {
       util.logError('Box.setParent() cannot be called on root.')
     }
@@ -159,7 +170,7 @@ export abstract class Box implements DropTarget, Hoverable {
     const newY: number = distanceBetweenParentsY + this.mapData.y * scaleY
     const newWidth: number = this.mapData.width * scaleX
     const newHeight: number = this.mapData.height * scaleY
-    await this.updateMeasures({x: newX, y: newY, width: newWidth, height: newHeight})
+    await this.site.updateMeasures({x: newX, y: newY, width: newWidth, height: newHeight})
 
     await this.renameAndMoveOnFileSystem(oldSrcPath, newSrcPath, oldMapDataFilePath, newMapDataFilePath)
     await this.saveMapData()
@@ -190,18 +201,22 @@ export abstract class Box implements DropTarget, Hoverable {
     }
   }
 
-  public async getParentClientRect(): Promise<ClientRect> {
+  public async getParentClientRect(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'?
     return this.getParent().getClientRect()
   }
 
-  public async getClientShape(): Promise<ClientRect> {
+  public async getClientShape(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'?
     return this.getClientRect()
   }
-  public async getClientRect(): Promise<ClientRect> {
-    return this.getParent().transform.localToClientRect(this.mapData.getRect())
+  public async getClientRect(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'? // TODO: delegate into site?
+    return this.getParent().transform.localToClientRect(this.getLocalRect())
   }
 
-  public getLocalRect(): LocalRect {
+  public getLocalRect(): LocalRect { // TODO: rename to getLocalRectToRender|getRenderLocalRect?
+    return this.site.getLocalRectToRender()
+  }
+
+  public getLocalRectToSave(): LocalRect {
     return this.mapData.getRect()
   }
 
@@ -237,6 +252,7 @@ export abstract class Box implements DropTarget, Hoverable {
       this.renderStyle()
 
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
+      // TODO: introduce <div id="content"> that contains everything but border and scaleToolPlaceholder? would make sense for detaching mechanism to leave borderFrame at savedPosition
       const backgroundHtml = `<div style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
       const gridPlaceHolderHtml = `<div id="${this.getGridPlaceHolderId()}" style="${styleAbsoluteAndStretched}"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}" style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};"></div>`
@@ -384,10 +400,12 @@ export abstract class Box implements DropTarget, Hoverable {
     await grid.unrenderFrom(this.getGridPlaceHolderId(), priority)
   }
 
-  protected async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+  public async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    const rect: LocalRect = this.getLocalRect()
+
     const basicStyle: string = 'display:inline-block;position:absolute;overflow:visible;'
-    const scaleStyle: string = 'width:' + this.mapData.width + '%;height:' + this.mapData.height + '%;'
-    const positionStyle: string = 'left:' + this.mapData.x + '%;top:' + this.mapData.y + '%;'
+    const scaleStyle: string = 'width:'+rect.width+'%;height:'+rect.height+'%;'
+    const positionStyle: string = 'left:'+rect.x+'%;top:'+rect.y+'%;'
 
     await renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle, priority)
   }
@@ -396,28 +414,8 @@ export abstract class Box implements DropTarget, Hoverable {
     measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
-    await this.updateMeasures(measuresInPercentIfChanged, priority)
+    await this.site.updateMeasures(measuresInPercentIfChanged, priority)
     await this.borderingLinks.renderAll()
-  }
-
-  private async updateMeasures(
-    measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
-    priority: RenderPriority = RenderPriority.NORMAL
-  ): Promise<void> {
-    if (measuresInPercentIfChanged.x != null) {
-      this.mapData.x = measuresInPercentIfChanged.x
-    }
-    if (measuresInPercentIfChanged.y != null) {
-      this.mapData.y = measuresInPercentIfChanged.y
-    }
-    if (measuresInPercentIfChanged.width != null) {
-      this.mapData.width = measuresInPercentIfChanged.width
-    }
-    if (measuresInPercentIfChanged.height != null) {
-      this.mapData.height = measuresInPercentIfChanged.height
-    }
-
-    await this.renderStyle(priority)
   }
 
   protected abstract getBodyOverflowStyle(): 'auto'|'hidden'|'visible'
