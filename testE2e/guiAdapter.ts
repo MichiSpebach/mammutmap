@@ -246,31 +246,48 @@ async function getPage(): Promise<puppeteer.Page> {
 }
 
 async function connectToAppAndFindCorrectPage(): Promise<puppeteer.Page> {
-  let browser: puppeteer.Browser = await connectToApp()
+  let browser: puppeteer.Browser = await connectToAppWithRetries()
   return findCorrectPage(browser)
 }
 
-async function connectToApp(): Promise<puppeteer.Browser> {
-  const timecap = Date.now() + timeoutForPuppeteerToConnectToElectronInMs
+async function connectToAppWithRetries(): Promise<puppeteer.Browser> {
+  const startTime: number = Date.now()
+  const timecap: number = startTime+timeoutForPuppeteerToConnectToElectronInMs
   let browser: puppeteer.Browser|undefined
-  while (!browser) {
+  const errors: unknown[] = []
+
+  for (let tryIndex: number = 0; !browser; tryIndex++) {
+    const tryBrowserUrl: string = tryIndex%2 === 0
+      ? `http://127.0.0.1:${electronDebugPort}`
+      : `http://localhost:${electronDebugPort}` // does not work in some environments because of IPv6 issues
+    
     try {
-      browser = await puppeteer.connect({
-        browserURL: `http://localhost:${electronDebugPort}`,
-        defaultViewport: {
-          width: viewportWidth,
-          height: viewportHight
-        }
-      })
-    } catch (error) {
-      if (Date.now() > timecap) {
-        throw error
+      browser = await connectToAppOrFail(tryBrowserUrl)
+      if (tryIndex > 0) { // otherwise log is called for each test suite, TODO: improve test setup that connection/pageObject is cached
+        console.log(`Connecting to app succeeded with browserURL ${tryBrowserUrl}.`)
       }
-      console.log(`wait ${timecap-Date.now()}ms until connection to app succeeds`)
-      await util.wait(100)
+    } catch (error: unknown) {
+      errors.push(error)
+      if (Date.now() > timecap) {
+        console.log(`None of the ${tryIndex+1} tries within ${Date.now()-startTime}ms to connect to app worked, see errors for details.`)
+        throw errors
+      }
+      console.log(`Waiting ${timecap-Date.now()}ms until connection to app succeeds...`)
+      await util.wait(100) // TODO: increase wait time logarithmically?
     }
   }
+
   return browser
+}
+
+async function connectToAppOrFail(browserURL: string): Promise<puppeteer.Browser> | never {
+  return puppeteer.connect({
+    browserURL: browserURL,
+    defaultViewport: {
+      width: viewportWidth,
+      height: viewportHight
+    }
+  })
 }
 
 async function findCorrectPage(browser: puppeteer.Browser): Promise<puppeteer.Page> {
