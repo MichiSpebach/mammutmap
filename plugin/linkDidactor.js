@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const pluginFacade_1 = require("../dist/pluginFacade");
-const util_1 = require("../dist/util");
+const pluginFacade_2 = require("../dist/pluginFacade");
 const DidactedLink_1 = require("./linkDidactor/DidactedLink");
 const LinkDidactorToolbarView_1 = require("./linkDidactor/toolbar/LinkDidactorToolbarView");
 const DidactedLinkLine_1 = require("./linkDidactor/DidactedLinkLine");
@@ -14,14 +14,14 @@ async function deactivate() {
     (0, pluginFacade_1.overrideLinkLine)(DidactedLinkLine_1.DidactedLinkLine.getSuperClass());
     await pluginFacade_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, false);
     await pluginFacade_1.applicationMenu.setMenuItemEnabled(activateMenuItem, true);
-    util_1.util.logInfo('deactivated linkDidactor plugin');
+    pluginFacade_2.coreUtil.logInfo('deactivated linkDidactor plugin');
 }
 async function activate() {
     (0, pluginFacade_1.overrideLink)(DidactedLink_1.DidactedLink);
     (0, pluginFacade_1.overrideLinkLine)(DidactedLinkLine_1.DidactedLinkLine);
     await pluginFacade_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, true);
     await pluginFacade_1.applicationMenu.setMenuItemEnabled(activateMenuItem, false);
-    util_1.util.logInfo('activated linkDidactor plugin');
+    pluginFacade_2.coreUtil.logInfo('activated linkDidactor plugin');
 }
 activate();
 pluginFacade_1.mainWidget.sidebar.addView(new LinkDidactorToolbarView_1.LinkDidactorToolbarView('LinkDidactor'));

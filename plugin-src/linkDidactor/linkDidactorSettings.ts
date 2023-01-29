@@ -1,9 +1,9 @@
 import * as pluginFacade from '../../dist/pluginFacade'
 import { Message, Map, onMapLoaded, onMapUnload, Subscribers } from '../../dist/pluginFacade'
-import { util } from '../../dist/util'
-import { LinkAppearanceData, LinkAppearanceMode } from '../../dist/mapData/LinkAppearanceData'
-import { LinkTagData } from '../../dist/mapData/LinkTagData'
-import { style } from '../../dist/styleAdapter'
+import { coreUtil } from '../../dist/pluginFacade'
+import { LinkAppearanceData, LinkAppearanceMode } from '../../dist/pluginFacade'
+import { LinkTagData } from '../../dist/pluginFacade'
+import { style } from '../../dist/pluginFacade'
 
 export const linkColors: string[] = ['red', 'green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal', style.getLinkColor()]
 export const boxIdHashColorName = 'boxId hash'
@@ -57,7 +57,7 @@ function getLinkTagsSortedByIndex(tagNames: string[]): LinkTagData[] {
 function getLinkTagsOrWarn(): LinkTagData[] {
     const tagsOrMessage: LinkTagData[]|Message = getLinkTags()
     if (tagsOrMessage instanceof Message) {
-        util.logWarning('Failed to getLinkTagsOrWarn(), returning empty list. Reason: '+tagsOrMessage.message)
+        coreUtil.logWarning('Failed to getLinkTagsOrWarn(), returning empty list. Reason: '+tagsOrMessage.message)
         return []
     }
     return tagsOrMessage
@@ -96,7 +96,7 @@ export function getLinkTags(): LinkTagData[]|Message {
 export async function saveToFileSystem(): Promise<void> {
     const mapOrMessage: Map|Message = pluginFacade.getMap()
     if (mapOrMessage instanceof Message) {
-        return util.logWarning('Failed to saveToFileSystem, reason: '+mapOrMessage.message)
+        return coreUtil.logWarning('Failed to saveToFileSystem, reason: '+mapOrMessage.message)
     }
     await mapOrMessage.getProjectSettings().saveToFileSystem()
 }

@@ -1,5 +1,4 @@
 import * as gui from '../guiAdapter'
-import { util } from '../../src/util'
 import *  as e2eUtil from '../util/util'
 
 afterAll(async () => {

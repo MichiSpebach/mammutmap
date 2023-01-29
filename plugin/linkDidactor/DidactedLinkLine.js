@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidactedLinkLine = void 0;
-const LinkLine_1 = require("../../dist/link/LinkLine");
-const util_1 = require("../../dist/util");
+const pluginFacade_1 = require("../../dist/pluginFacade");
+const pluginFacade_2 = require("../../dist/pluginFacade");
 const linkDidactorSettings = require("./linkDidactorSettings");
-class DidactedLinkLine extends LinkLine_1.LinkLineImplementation {
+class DidactedLinkLine extends pluginFacade_1.LinkLineImplementation {
     static getSuperClass() {
         return Object.getPrototypeOf(DidactedLinkLine.prototype).constructor;
     }
@@ -28,7 +28,7 @@ class DidactedLinkLine extends LinkLine_1.LinkLineImplementation {
             case 'hidden':
                 return true; // sometimes visible because of smooth disappearing
             default:
-                util_1.util.logWarning(`Unexpected LinkTagMode ${mode}`); // should also never be called if link is 'notRendered' at all
+                pluginFacade_2.coreUtil.logWarning(`Unexpected LinkTagMode ${mode}`); // should also never be called if link is 'notRendered' at all
                 return true;
         }
     }

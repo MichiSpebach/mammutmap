@@ -1,4 +1,4 @@
-import { util } from '../../dist/util'
+import { coreUtil } from '../../dist/pluginFacade'
 
 export class Cycle {
     public readonly involvedModulesChain: string[]
@@ -10,7 +10,7 @@ export class Cycle {
         if (moduleNames.length > 1) {
             moduleNames.push(moduleNames[0])
         } else {
-            util.logWarning(`Expected cycle "${cycleString}" to have at least two elements.`)
+            coreUtil.logWarning(`Expected cycle "${cycleString}" to have at least two elements.`)
         }
         return new Cycle(moduleNames)
     }

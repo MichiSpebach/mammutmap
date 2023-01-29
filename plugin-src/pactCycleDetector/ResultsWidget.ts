@@ -1,6 +1,6 @@
-import { renderManager } from "../../dist/RenderManager"
-import { util } from "../../dist/util"
-import { Widget } from "../../dist/Widget"
+import { renderManager } from "../../dist/pluginFacade"
+import { coreUtil } from "../../dist/pluginFacade"
+import { Widget } from "../../dist/pluginFacade"
 import { Cycle } from "./Cycle"
 import * as linkAdder from "./linkAdder"
 
@@ -44,7 +44,7 @@ export class ResultsWidget extends Widget {
         let cyclesHtml: string = '<details>'
         cyclesHtml += '<summary>cycles</summary>'
         for (const cycle of cycles) {
-            cyclesHtml += util.escapeForHtml(cycle.involvedModulesChain.toString())+'<br>'
+            cyclesHtml += coreUtil.escapeForHtml(cycle.involvedModulesChain.toString())+'<br>'
         }
         cyclesHtml += '</details>'
         await renderManager.addContentTo(this.getId(), cyclesHtml)

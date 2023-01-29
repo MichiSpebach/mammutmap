@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const pluginFacade = require("../dist/pluginFacade");
 const pluginFacade_1 = require("../dist/pluginFacade");
-const util_1 = require("../dist/util");
+const pluginFacade_2 = require("../dist/pluginFacade");
 const pathFinder = require("./neuralNetLinkGenerator/pathFinder");
 const typeFinder = require("./neuralNetLinkGenerator/typeFinder");
 pluginFacade_1.contextMenu.addFileBoxMenuItem((box) => {
@@ -20,7 +20,7 @@ async function generateOutgoingLinksForBox(box) {
         foundLinksCount += report.link ? 1 : 0;
         foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0;
     }));
-    util_1.util.logInfo(`Found ${foundLinksCount} links for '${box.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`);
+    pluginFacade_2.coreUtil.logInfo(`Found ${foundLinksCount} links for '${box.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`);
 }
 function getSiblingFileNamesWithoutEndings(box) {
     return getSiblings(box).map((sibling) => sibling.getName().split('.')[0]);

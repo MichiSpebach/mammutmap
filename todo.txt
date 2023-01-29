@@ -1,4 +1,6 @@
 
+FIX: prevent "Failed to readdir because: Error: ENOENT: no such file or directory" from hanging up whole application, happens when folder is removed from outside
+
 show count of ongoing awaits (while dev-mode is enabled in settings)
 
 plugin that pulls boxes into view when hovering on link

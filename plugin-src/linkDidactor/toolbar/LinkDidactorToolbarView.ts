@@ -1,6 +1,6 @@
-import { util } from '../../../dist/util'
-import { ToolbarView } from '../../../dist/toolbars/ToolbarView'
-import { Widget } from '../../../dist/Widget'
+import { coreUtil } from '../../../dist/pluginFacade'
+import { ToolbarView } from '../../../dist/pluginFacade'
+import { Widget } from '../../../dist/pluginFacade'
 import { LinkDidactorToolbarViewWidget } from './LinkDidactorToolbarViewWidget'
 
 export class LinkDidactorToolbarView implements ToolbarView {
@@ -10,7 +10,7 @@ export class LinkDidactorToolbarView implements ToolbarView {
     public constructor(
         private readonly name: string
     ) {
-        this.widget = new LinkDidactorToolbarViewWidget(name+util.generateId())
+        this.widget = new LinkDidactorToolbarViewWidget(name+coreUtil.generateId())
     }
 
     public getName(): string {

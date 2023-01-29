@@ -1,32 +1,57 @@
-import { Box } from './box/Box'
-import { FileBox } from './box/FileBox'
-import { FolderBox } from './box/FolderBox'
-import { RootFolderBox } from './box/RootFolderBox'
-import { Map, map, onMapLoaded, onMapRendered, onMapUnload } from './Map'
-import { util } from './util'
-import { WayPointData } from './mapData/WayPointData'
-import { BoxWatcher } from './box/BoxWatcher'
-import { LinkEndData } from './mapData/LinkEndData'
-import * as boxFinder from './pluginUtil/boxFinder'
-import { Link, LinkImplementation, override as overrideLink } from './link/Link'
-import { applicationMenu } from './applicationMenu/applicationMenu'
-import { MenuItemFile } from './applicationMenu/MenuItemFile'
-import * as contextMenu from './contextMenu/contextMenu'
-import { Subscribers } from './util/Subscribers'
-import { renderManager } from './RenderManager'
-import { LinkLine, override as overrideLinkLine } from './link/LinkLine'
-import { ProjectSettings } from './ProjectSettings'
-import { mainWidget } from './mainWidget'
-import { BoxHeader } from './box/BoxHeader'
+import { Box } from './core/box/Box'
+import { FileBox } from './core/box/FileBox'
+import { FolderBox } from './core/box/FolderBox'
+import { RootFolderBox } from './core/box/RootFolderBox'
+import { Map, map, onMapLoaded, onMapRendered, onMapUnload } from './core/Map'
+import { ChildProcess, util } from './core/util'
+import { WayPointData } from './core/mapData/WayPointData'
+import { BoxWatcher } from './core/box/BoxWatcher'
+import { LinkEndData } from './core/mapData/LinkEndData'
+import * as boxFinder from './core/pluginUtil/boxFinder'
+import { Link, LinkImplementation, override as overrideLink } from './core/link/Link'
+import { applicationMenu } from './core/applicationMenu/applicationMenu'
+import { MenuItemFile } from './core/applicationMenu/MenuItemFile'
+import * as contextMenu from './core/contextMenu/contextMenu'
+import { Subscribers } from './core/util/Subscribers'
+import { renderManager, RenderPriority } from './core/RenderManager'
+import { LinkLine, LinkLineImplementation, override as overrideLinkLine } from './core/link/LinkLine'
+import { ProjectSettings } from './core/ProjectSettings'
+import { mainWidget } from './core/mainWidget'
+import { BoxHeader } from './core/box/BoxHeader'
+import { Transform } from './core/box/Transform'
+import { LocalPosition } from './core/shape/LocalPosition'
+import { LinkAppearanceData, LinkAppearanceMode, linkAppearanceModes } from './core/mapData/LinkAppearanceData'
+import { style } from './core/styleAdapter'
+import { BorderingLinks } from './core/link/BorderingLinks'
+import { NodeWidget } from './core/node/NodeWidget'
+import { LinkTagData } from './core/mapData/LinkTagData'
+import { ToolbarView } from './core/toolbars/ToolbarView'
+import { Widget } from './core/Widget'
+import { ce, createElement, ElementAttributes, RenderElement, RenderElements } from './core/util/RenderElement'
+import { PopupWidget } from './core/PopupWidget'
 
+export { util as coreUtil, ChildProcess }
 export { applicationMenu, contextMenu, MenuItemFile }
-export { renderManager, Subscribers }
+export { renderManager, RenderPriority, Subscribers }
+export { RenderElement, RenderElements, createElement, ce, ElementAttributes }
+export { style }
+export { Widget }
+export { PopupWidget}
 export { mainWidget }
+export { ToolbarView }
 export { Map, onMapLoaded, onMapRendered, onMapUnload }
 export { ProjectSettings }
+export { LinkAppearanceData, LinkAppearanceMode, linkAppearanceModes }
+export { LinkTagData }
+export { WayPointData }
+export { Transform, LocalPosition }
+export { BoxWatcher }
 export { Box, FileBox, RootFolderBox }
 export { BoxHeader }
-export { Link, LinkImplementation, overrideLink, LinkLine, overrideLinkLine }
+export { BorderingLinks }
+export { Link, LinkImplementation, overrideLink }
+export { LinkLine, LinkLineImplementation, overrideLinkLine }
+export { NodeWidget }
 
 let boxWatchers: BoxWatcher[] = []
 

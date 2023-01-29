@@ -1,6 +1,6 @@
 import * as pluginFacade from '../dist/pluginFacade'
 import { contextMenu, MenuItemFile, Box, FileBox } from '../dist/pluginFacade'
-import { util } from '../dist/util'
+import { coreUtil } from '../dist/pluginFacade'
 import * as pathFinder from './neuralNetLinkGenerator/pathFinder'
 import * as typeFinder from './neuralNetLinkGenerator/typeFinder'
 
@@ -24,7 +24,7 @@ async function generateOutgoingLinksForBox(box: FileBox): Promise<void> {
         foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0
     }))
 
-    util.logInfo(`Found ${foundLinksCount} links for '${box.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`)
+    coreUtil.logInfo(`Found ${foundLinksCount} links for '${box.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`)
 }
 
 function getSiblingFileNamesWithoutEndings(box: Box): string[] {

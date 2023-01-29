@@ -1,8 +1,8 @@
-import { WayPointData } from '../../dist/box/WayPointData'
-import { LinkAppearanceMode } from '../../dist/mapData/LinkAppearanceData'
-import { NodeWidget } from '../../dist/node/NodeWidget'
+import { WayPointData } from '../../dist/pluginFacade'
+import { LinkAppearanceMode } from '../../dist/pluginFacade'
+import { NodeWidget } from '../../dist/pluginFacade'
 import { Box, LinkImplementation } from '../../dist/pluginFacade'
-import { renderManager, RenderPriority } from '../../dist/RenderManager'
+import { renderManager, RenderPriority } from '../../dist/pluginFacade'
 import * as linkDidactorSettings from './linkDidactorSettings'
 
 export class DidactedLink extends LinkImplementation {

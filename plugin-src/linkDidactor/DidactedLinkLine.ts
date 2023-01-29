@@ -1,7 +1,7 @@
-import { LocalPosition } from '../../dist/box/Transform'
-import { LinkLineImplementation } from '../../dist/link/LinkLine'
-import { LinkAppearanceMode } from '../../dist/mapData/LinkAppearanceData'
-import { util } from '../../dist/util'
+import { LocalPosition } from '../../dist/pluginFacade'
+import { LinkLineImplementation } from '../../dist/pluginFacade'
+import { LinkAppearanceMode } from '../../dist/pluginFacade'
+import { coreUtil } from '../../dist/pluginFacade'
 import * as linkDidactorSettings from './linkDidactorSettings'
 
 export class DidactedLinkLine extends LinkLineImplementation {
@@ -36,7 +36,7 @@ export class DidactedLinkLine extends LinkLineImplementation {
                 return true // sometimes visible because of smooth disappearing
 
             default:
-                util.logWarning(`Unexpected LinkTagMode ${mode}`) // should also never be called if link is 'notRendered' at all
+                coreUtil.logWarning(`Unexpected LinkTagMode ${mode}`) // should also never be called if link is 'notRendered' at all
                 return true
         }
     }

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const pluginFacade_1 = require("../dist/pluginFacade");
-const util_1 = require("../dist/util");
+const pluginFacade_2 = require("../dist/pluginFacade");
 const deactivateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'deactivate', click: deactivate });
 const activateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'activate', click: activate });
 pluginFacade_1.applicationMenu.addMenuItemTo('telescopeTitles.js', deactivateMenuItem);
@@ -10,16 +10,21 @@ async function deactivate() {
     TelescopeBoxHeader.deactivateAndPlugout();
     await pluginFacade_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, false);
     await pluginFacade_1.applicationMenu.setMenuItemEnabled(activateMenuItem, true);
-    util_1.util.logInfo('deactivated telescopeTitles plugin');
+    pluginFacade_2.coreUtil.logInfo('deactivated telescopeTitles plugin');
 }
 async function activate() {
     TelescopeBoxHeader.activateAndPlugin();
     await pluginFacade_1.applicationMenu.setMenuItemEnabled(deactivateMenuItem, true);
     await pluginFacade_1.applicationMenu.setMenuItemEnabled(activateMenuItem, false);
-    util_1.util.logInfo('activated telescopeTitles plugin');
+    pluginFacade_2.coreUtil.logInfo('activated telescopeTitles plugin');
 }
 class TelescopeBoxHeader extends pluginFacade_1.BoxHeader {
     static activateAndPlugin() {
+        //const swap = BoxHeader.prototype
+        //console.log(TelescopeBoxHeader.getSuperClass())
+        //Object.setPrototypeOf(TelescopeBoxHeader.getSuperClass().prototype, null)
+        //Object.setPrototypeOf(BoxHeader.prototype, TelescopeBoxHeader.prototype)
+        //Object.setPrototypeOf(TelescopeBoxHeader.getSuperClass(), swap)
         this.formTitleHtmlBackup = pluginFacade_1.BoxHeader.prototype.formTitleHtml;
         pluginFacade_1.BoxHeader.prototype.formTitleHtml = TelescopeBoxHeader.prototype.formTitleHtml;
         pluginFacade_1.BoxHeader.prototype.splitInMiddle = TelescopeBoxHeader.prototype.splitInMiddle;

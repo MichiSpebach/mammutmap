@@ -1,6 +1,6 @@
 import { spawn } from 'child_process'
 import * as puppeteer from 'puppeteer-core'
-import { util } from '../src/util'
+import { util } from '../src/core/util'
 
 const electronDebugPort: number = 9291
 const timeoutForPuppeteerToConnectToElectronInMs: number = 15000

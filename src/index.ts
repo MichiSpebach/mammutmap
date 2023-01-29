@@ -1,11 +1,11 @@
 import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
-import * as domAdapter from './domAdapter'
-import * as commandLine from './commandLine'
-import { applicationMenu } from './applicationMenu/applicationMenu'
-import * as pluginLoader from './pluginLoader'
-import { util } from './util'
-import { mainWidget } from './mainWidget'
+import * as domAdapter from './core/domAdapter'
+import * as commandLine from './core/commandLine'
+import { applicationMenu } from './core/applicationMenu/applicationMenu'
+import * as pluginLoader from './core/pluginLoader'
+import { util } from './core/util'
+import { mainWidget } from './core/mainWidget'
 
 var mainWindow: BrowserWindow
 
@@ -24,7 +24,7 @@ const createWindow = async () => {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../src/index.html'))
+  mainWindow.loadFile(path.join(__dirname, '../src/core/index.html'))
 
   domAdapter.initFromBrowserWindow(mainWindow)
   mainWidget.render()

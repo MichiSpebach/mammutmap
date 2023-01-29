@@ -1,8 +1,8 @@
 import { applicationMenu, MenuItemFile } from '../dist/pluginFacade'
-import { util } from '../dist/util'
-import { dom } from '../dist/domAdapter'
-import { style } from '../dist/styleAdapter'
-import { BorderingLinks } from '../dist/link/BorderingLinks'
+import { coreUtil } from '../dist/pluginFacade'
+import { dom } from '../dist/core/domAdapter'
+import { style } from '../dist/pluginFacade'
+import { BorderingLinks } from '../dist/pluginFacade'
 
 const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate, enabled: false})
 const activateMenuItem: MenuItemFile = new MenuItemFile({label: 'activate', click: activate})
@@ -18,7 +18,7 @@ async function deactivate(): Promise<void> {
     await ensureDeactivation()
     await applicationMenu.setMenuItemEnabled(deactivateMenuItem, false)
     await applicationMenu.setMenuItemEnabled(activateMenuItem, true)
-    util.logInfo('deactivated fancyHighlighting plugin')
+    coreUtil.logInfo('deactivated fancyHighlighting plugin')
 }
 
 async function activate(): Promise<void> {
@@ -26,7 +26,7 @@ async function activate(): Promise<void> {
     await ensureActivation()
     await applicationMenu.setMenuItemEnabled(deactivateMenuItem, true)
     await applicationMenu.setMenuItemEnabled(activateMenuItem, false)
-    util.logInfo('activated fancyHighlighting plugin')
+    coreUtil.logInfo('activated fancyHighlighting plugin')
 }
 
 async function ensureDeactivation(): Promise<void> {

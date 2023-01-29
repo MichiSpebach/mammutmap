@@ -1,6 +1,6 @@
 import { toMatchImageSnapshot, MatchImageSnapshotOptions } from 'jest-image-snapshot'
 import { promises as fsPromises } from 'fs'
-import { util } from '../../src/util'
+import { util } from '../../src/core/util'
 import * as imageManipulator from './imageManipulatorAdapter'
 
 expect.extend({ toMatchImageSnapshot })
