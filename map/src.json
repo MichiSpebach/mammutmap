@@ -47,7 +47,7 @@
 						"boxId": "ffddla14d38",
 						"boxName": "index.ts",
 						"x": 100,
-						"y": 9.99790741472715
+						"y": 36
 					}
 				]
 			},
@@ -225,6 +225,311 @@
 			},
 			"tags": [
 				"important"
+			]
+		},
+		{
+			"id": "cccp5i2f8qg",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 86,
+						"y": 46
+					},
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "tu5breqb2e",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 40,
+						"y": 16
+					},
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "mgft8s8pfbg",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "9crc7egp018",
+						"boxName": "ElectronIpcDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ilogj7j2crg",
+			"from": {
+				"path": [
+					{
+						"boxId": "9crc7egp018",
+						"boxName": "ElectronIpcDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 89.44,
+						"y": 36.72
+					},
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 18,
+						"y": 18
+					},
+					{
+						"boxId": "i20ugc3f1e8",
+						"boxName": "RenderElement.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "er26v0pros",
+			"from": {
+				"path": [
+					{
+						"boxId": "9crc7egp018",
+						"boxName": "ElectronIpcDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 78,
+						"y": 52
+					},
+					{
+						"boxId": "1a5e3kn3reo",
+						"boxName": "ClientRect.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "86agkanj4fo",
+			"from": {
+				"path": [
+					{
+						"boxId": "9crc7egp018",
+						"boxName": "ElectronIpcDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 70.48,
+						"y": 39.44
+					},
+					{
+						"boxId": "nsm4nes02ig",
+						"boxName": "shape",
+						"x": 62,
+						"y": 86
+					},
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "gap2iqu6lro",
+			"from": {
+				"path": [
+					{
+						"boxId": "9crc7egp018",
+						"boxName": "ElectronIpcDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 84.999,
+						"y": 7.5
+					},
+					{
+						"boxId": "5da77t8c1t8",
+						"boxName": "domAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "dem0v5hdpi",
+			"from": {
+				"path": [
+					{
+						"boxId": "9crc7egp018",
+						"boxName": "ElectronIpcDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 86,
+						"y": 46
+					},
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "djbg6j3g3qg",
+			"from": {
+				"path": [
+					{
+						"boxId": "9crc7egp018",
+						"boxName": "ElectronIpcDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 92,
+						"y": 38
+					},
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"falsePositive"
+			]
+		},
+		{
+			"id": "bofv6g0g24",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 92,
+						"y": 38
+					},
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"falsePositive"
 			]
 		}
 	],

@@ -1,5 +1,5 @@
-import { util } from '../../src/core/util'
-import { DocumentObjectModelAdapter } from '../../src/core/domAdapter'
+import { util } from '../src/core/util'
+import { ElectronIpcDomAdapter } from '../src/ElectronIpcDomAdapter'
 
 test('executeJavaScript', async () => {
   const scenario = setupScenario()
@@ -50,7 +50,7 @@ function mockUtil(): {warningCalls: string[]} {
   return {warningCalls: warningCalls}
 }
 
-function setupScenario(): {dom: DocumentObjectModelAdapter} {
+function setupScenario(): {dom: ElectronIpcDomAdapter} {
   const webContentsMock: any = Object
   webContentsMock.executeJavaScript = (rendererCode: string): Promise<any> => {
     return eval(rendererCode)
@@ -59,5 +59,5 @@ function setupScenario(): {dom: DocumentObjectModelAdapter} {
   const windowMock: any = Object
   windowMock.webContents = webContentsMock
 
-  return {dom: new DocumentObjectModelAdapter(windowMock)}
+  return {dom: new ElectronIpcDomAdapter(windowMock)}
 }

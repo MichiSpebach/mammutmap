@@ -6,6 +6,7 @@ import { applicationMenu } from './core/applicationMenu/applicationMenu'
 import * as pluginLoader from './core/pluginLoader'
 import { util } from './core/util'
 import { mainWidget } from './core/mainWidget'
+import { ElectronIpcDomAdapter } from './ElectronIpcDomAdapter'
 
 var mainWindow: BrowserWindow
 
@@ -26,7 +27,7 @@ const createWindow = async () => {
 
   mainWindow.loadFile(path.join(__dirname, '../src/core/index.html'))
 
-  domAdapter.initFromBrowserWindow(mainWindow)
+  domAdapter.init(new ElectronIpcDomAdapter(mainWindow))
   mainWidget.render()
   commandLine.init()
 

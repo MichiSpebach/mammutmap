@@ -18,7 +18,7 @@
 		},
 		{
 			"name": "isA",
-			"count": 20,
+			"count": 21,
 			"appearance": {
 				"mode": "visible",
 				"color": "aqua"
@@ -38,6 +38,13 @@
 			"appearance": {
 				"mode": "visible",
 				"color": "yellow"
+			}
+		},
+		{
+			"name": "falsePositive",
+			"count": 2,
+			"appearance": {
+				"mode": "notRendered"
 			}
 		}
 	],

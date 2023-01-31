@@ -1,4 +1,6 @@
 
+'linkDidactor': make borderingLinks with mode 'renderedEnds' while box is hovered to floatToBorder normally and only drawToTarget if boxHeader or boxBorder is hovered
+
 FIX: prevent "Failed to readdir because: Error: ENOENT: no such file or directory" from hanging up whole application, happens when folder is removed from outside
 
 show count of ongoing awaits (while dev-mode is enabled in settings)
@@ -20,7 +22,7 @@ add option to contextMenu of boxes: tag[
   'important|expanding'? (sizes up to all available space)
 ]
 
-'linkDidactor': show all links when there are currently only a few rendered
+'linkDidactor': show all links when there are currently only a few rendered, introduce mode 'auto' or 'visibleIfFew'
 show start and end of hidden links to see the direction in which they are going
 
 'Magnifier' plugin that magnifies (currently) important boxes and hides or downsizes unimportant files and folders
