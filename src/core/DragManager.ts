@@ -1,5 +1,4 @@
 import { util } from './util'
-import { dom } from './domAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { Draggable } from './Draggable'
 import { DropTarget } from './DropTarget'
@@ -156,7 +155,7 @@ export class DragManager {
   }
 
   public static startDragWithClickToDropMode(elementToDrag: Draggable<DropTarget>) {
-    const cursorClientPosition: {x: number, y: number} = dom.getCursorClientPosition();
+    const cursorClientPosition: {x: number, y: number} = renderManager.getCursorClientPosition();
     this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, true)
 
     renderManager.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {

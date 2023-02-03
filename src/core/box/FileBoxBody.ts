@@ -1,10 +1,9 @@
 import { util } from '../util'
-import { fileSystem } from '../fileSystemAdapter'
+import { fileSystem, Stats } from '../fileSystemAdapter'
 import { renderManager } from '../RenderManager'
 import { BoxBody } from './BoxBody'
 import { FileBox } from './FileBox'
 import { style } from '../styleAdapter'
-import { Stats } from 'original-fs'
 
 export class FileBoxBody extends BoxBody {
   private readonly referenceFileBox: FileBox

@@ -1,5 +1,11 @@
 import { fileSystem } from '../../src/core/fileSystemAdapter'
+import * as fileSystemAdapter from '../../src/core/fileSystemAdapter'
+import { NodeJsFileSystemAdapter } from '../../src/NodeJsFileSystemAdapter'
 import { JsonObject } from '../../src/core/JsonObject'
+
+beforeAll(() => {
+  fileSystemAdapter.init(new NodeJsFileSystemAdapter())
+})
 
 test('doesDirentExist', async () => {
   expect(await fileSystem.doesDirentExist('src')).toBe(true)

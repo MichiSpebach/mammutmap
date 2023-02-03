@@ -1,6 +1,5 @@
-import { Dirent } from 'original-fs'
 import { util } from '../util'
-import { fileSystem } from '../fileSystemAdapter'
+import { fileSystem, Dirent } from '../fileSystemAdapter'
 import { BoxData } from '../mapData/BoxData'
 import { FolderBox } from './FolderBox'
 import { FolderBoxBody } from './FolderBoxBody'

@@ -1,7 +1,6 @@
 import { util } from '../util'
-import { fileSystem } from '../fileSystemAdapter'
+import { fileSystem, Dirent } from '../fileSystemAdapter'
 import { renderManager } from '../RenderManager'
-import { Dirent } from 'original-fs'
 import { BoxBody } from './BoxBody'
 import { Box } from './Box'
 import { FileBox } from './FileBox'

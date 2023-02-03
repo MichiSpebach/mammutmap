@@ -1,6 +1,6 @@
 import { mock, MockProxy } from 'jest-mock-extended'
 import { Dirent } from 'fs'
-import { FileSystem, init as initFileSystem } from '../../../src/core/fileSystemAdapter'
+import { FileSystemAdapter, init as initFileSystem } from '../../../src/core/fileSystemAdapter'
 import { BoxMapDataLoader } from '../../../src/core/box/BoxMapDataLoader'
 import { FolderBox } from '../../../src/core/box/FolderBox'
 import { FolderBoxBody } from '../../../src/core/box/FolderBoxBody'
@@ -99,7 +99,7 @@ test('loadMapDatasOfSourcesWithMapData', async () => {
   const boxDataDirent1: BoxData = buildBoxData('dirent1')
   const boxDataDirent2: BoxData = buildBoxData('dirent2')
 
-  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  const fileSystem: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent1.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent1))
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent2.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent2))
   initFileSystem(fileSystem)
@@ -131,7 +131,7 @@ test('loadMapDatasOfSourcesWithMapData referenceBox contains already a box', asy
   const mapDirent2: MockProxy<Dirent> = buildDirentMock('dirent2.json')
   const boxDataDirent2: BoxData = buildBoxData('dirent2')
 
-  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  const fileSystem: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent2.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent2))
   initFileSystem(fileSystem)
 
@@ -162,7 +162,7 @@ test('loadMapDatasOfSourcesWithMapData loading of a mapData fails', async () => 
   const mapDirent2: MockProxy<Dirent> = buildDirentMock('dirent2.json')
   const boxDataDirent1: BoxData = buildBoxData('dirent1')
 
-  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  const fileSystem: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent1.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent1))
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent2.json', expect.anything()).mockReturnValue(Promise.resolve(null))
   initFileSystem(fileSystem)
@@ -270,7 +270,7 @@ test('loadMapDatasWithoutSources', async () => {
   const boxDataDirent1: BoxData = buildBoxData('dirent1')
   const boxDataDirent2: BoxData = buildBoxData('dirent2')
 
-  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  const fileSystem: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent1.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent1))
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent2.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent2))
   initFileSystem(fileSystem)
@@ -295,7 +295,7 @@ test('loadMapDatasWithoutSources suffix of a file name is invalid', async () => 
   const mapDirent2: MockProxy<Dirent> = buildDirentMock('dirent2.json')
   const boxDataDirent2: BoxData = buildBoxData('dirent2')
 
-  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  const fileSystem: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent1.invalid', expect.anything()).mockReturnValue(Promise.resolve(null))
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent2.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent2))
   initFileSystem(fileSystem)
@@ -322,7 +322,7 @@ test('loadMapDatasWithoutSources referenceBox contains already a box', async () 
   const mapDirent2: MockProxy<Dirent> = buildDirentMock('dirent2.json')
   const boxDataDirent2: BoxData = buildBoxData('dirent2')
 
-  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  const fileSystem: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent2.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent2))
   initFileSystem(fileSystem)
 
@@ -346,7 +346,7 @@ test('loadMapDatasWithoutSources boxId is already used by another box', async ()
   const boxDataDirent1: BoxData = buildBoxData('dirent1')
   const boxDataDirent2: BoxData = buildBoxData('dirent2')
 
-  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  const fileSystem: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent1.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent1))
   fileSystem.loadFromJsonFile.calledWith('mapPath/dirent2.json', expect.anything()).mockReturnValue(Promise.resolve(boxDataDirent2))
   initFileSystem(fileSystem)
@@ -375,7 +375,7 @@ test('loadMapDatasWithoutSources boxId is already used by another box', async ()
 function setupScenarioForLoadDirents(sourceDirents: Dirent[], mapDirents: Dirent[]): {
   loader: BoxMapDataLoader
 } {
-  const fileSystem: MockProxy<FileSystem> = mock<FileSystem>()
+  const fileSystem: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystem.readdir.calledWith('sourcePath').mockReturnValue(Promise.resolve(sourceDirents))
   fileSystem.readdir.calledWith('mapPath').mockReturnValue(Promise.resolve(mapDirents))
   fileSystem.doesDirentExist.calledWith('mapPath').mockReturnValue(Promise.resolve(true))

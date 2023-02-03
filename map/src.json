@@ -24,14 +24,14 @@
 					{
 						"boxId": "2cnbfh46bf8",
 						"boxName": "core",
-						"x": 25,
-						"y": 25
+						"x": 8,
+						"y": 42
 					},
 					{
 						"boxId": "ua13104dlao",
 						"boxName": "pluginLoader.ts",
-						"x": 50.00189991260402,
-						"y": -0.00001484137537993921
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -107,8 +107,8 @@
 					{
 						"boxId": "ffddla14d38",
 						"boxName": "index.ts",
-						"x": 44.99902966247183,
-						"y": 100.00186601977981
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -142,8 +142,8 @@
 					{
 						"boxId": "ffddla14d38",
 						"boxName": "index.ts",
-						"x": 19.999677138152585,
-						"y": 100
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -152,14 +152,14 @@
 					{
 						"boxId": "2cnbfh46bf8",
 						"boxName": "core",
-						"x": 10,
-						"y": 20
+						"x": 8,
+						"y": 54
 					},
 					{
 						"boxId": "5194u9gf71g",
 						"boxName": "commandLine.ts",
 						"x": 50,
-						"y": 0
+						"y": 50
 					}
 				]
 			}
@@ -172,13 +172,13 @@
 						"boxId": "2cnbfh46bf8",
 						"boxName": "core",
 						"x": 2.5,
-						"y": 35
+						"y": 38.5
 					},
 					{
 						"boxId": "8k5lfaulrs8",
 						"boxName": "commandLinePluginFacade.ts",
 						"x": 50,
-						"y": 100.0043148084225
+						"y": 50
 					}
 				]
 			},
@@ -187,8 +187,8 @@
 					{
 						"boxId": "18tbjkfri3o",
 						"boxName": "pluginFacade.ts",
-						"x": 14.999496612924105,
-						"y": 0
+						"x": 50,
+						"y": 50
 					}
 				]
 			}
@@ -283,7 +283,10 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"important"
+			]
 		},
 		{
 			"id": "mgft8s8pfbg",
@@ -531,6 +534,217 @@
 			"tags": [
 				"falsePositive"
 			]
+		},
+		{
+			"id": "er3ne38hsg",
+			"from": {
+				"path": [
+					{
+						"boxId": "oo3fcuic17",
+						"boxName": "NodeJsFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 86,
+						"y": 30
+					},
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "sl34mraae88",
+			"from": {
+				"path": [
+					{
+						"boxId": "oo3fcuic17",
+						"boxName": "NodeJsFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 86,
+						"y": 46
+					},
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "haqbhh96kf8",
+			"from": {
+				"path": [
+					{
+						"boxId": "oo3fcuic17",
+						"boxName": "NodeJsFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 92,
+						"y": 38
+					},
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"falsePositive"
+			]
+		},
+		{
+			"id": "6lmjc4bc15g",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 86,
+						"y": 30
+					},
+					{
+						"boxId": "3ht1ieidr2o",
+						"boxName": "fileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "aoivtonnmig",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 100,
+						"y": 44
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "oo3fcuic17",
+						"boxName": "NodeJsFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "v7fpt26vofo",
+			"from": {
+				"path": [
+					{
+						"boxId": "18tbjkfri3o",
+						"boxName": "pluginFacade.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 8,
+						"y": 92.16
+					},
+					{
+						"boxId": "pkff9sbn5hg",
+						"boxName": "pluginUtil",
+						"x": 50,
+						"y": 52
+					},
+					{
+						"boxId": "909gvpvhjuo",
+						"boxName": "boxFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "ftvln3sopk8",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 16,
+						"y": 42
+					},
+					{
+						"boxId": "7b4gp3csto8",
+						"boxName": "Settings.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
 		}
 	],
 	"nodes": []

@@ -8,7 +8,7 @@ import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
 import { ElectronApplicationMenu } from './ElectronApplicationMenu'
 import { HtmlApplicationMenu } from './HtmlApplicationMenu'
-import { settingsOnStartup } from '../Settings'
+import { settings } from '../Settings'
 import { MenuItem } from './MenuItem'
 
 class ApplicationMenu {
@@ -42,7 +42,6 @@ class ApplicationMenu {
     const pros: Promise<void>[] = []
 
     pros.push(this.electronApplicationMenu.initAndRender())
-    const settings = await settingsOnStartup
     pros.push(this.setHtmlApplicationMenuActive(settings.getBoolean('htmlApplicationMenu')));
     settings.subscribeBoolean('htmlApplicationMenu', (active) => this.setHtmlApplicationMenuActive(active))
 

@@ -3,7 +3,7 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { Map, map as mapWidget } from './Map'
 import { ToolbarWidget } from './toolbars/ToolbarWidget'
 import { renderManager } from './RenderManager'
-import { settingsOnStartup } from './Settings'
+import { settings } from './Settings'
 import { util } from './util'
 import { createElement } from './util/RenderElement'
 import { ClientPosition } from './shape/ClientPosition'
@@ -32,7 +32,6 @@ class MainWidget extends Widget {
 
     public async render(): Promise<void> {
         const pros: Promise<void>[] = []
-        const settings = await settingsOnStartup
         
         if (!this.renderedOrInProgress) {
             this.renderedOrInProgress = true
@@ -58,7 +57,6 @@ class MainWidget extends Widget {
     }
 
     private async adjustWidgets(): Promise<void> {
-        const settings = await settingsOnStartup
         if (settings.getBoolean('sidebar')) {
             await Promise.all([
                 renderManager.setStyleTo(this.sidebar.getId(), 'position:absolute;top:0;right:0;height:100%;width:20%;background-color:#303438;'),
@@ -85,7 +83,7 @@ class MainWidget extends Widget {
     private async updateDevStats(): Promise<void> {
         const devStatsId: string = this.getId()+'devStats'
 
-        if (!(await settingsOnStartup).getBoolean('developerMode')) {
+        if (!settings.getBoolean('developerMode')) {
             if (this.devStatsInterval) {
                 clearInterval(this.devStatsInterval)
                 this.devStatsInterval = undefined

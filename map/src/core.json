@@ -1,9 +1,9 @@
 {
 	"id": "2cnbfh46bf8",
-	"x": 40,
-	"y": 23.999999999999996,
-	"width": 42.307692307692314,
-	"height": 52.63157894736843,
+	"x": 36.00000000000001,
+	"y": 32,
+	"width": 43.99999999999999,
+	"height": 52,
 	"links": [
 		{
 			"id": "56uund4cto",
@@ -94,17 +94,20 @@
 					{
 						"boxId": "3lnmuaqr88",
 						"boxName": "box",
-						"x": 5.258281435066672,
-						"y": 10.06293106572129
+						"x": 15.4,
+						"y": 10.2
 					},
 					{
 						"boxId": "8i2aqhl305",
 						"boxName": "RootFolderBox.ts",
-						"x": 1.2942356368498973,
-						"y": 50.63413455731368
+						"x": 52,
+						"y": 52
 					}
 				]
-			}
+			},
+			"tags": [
+				"has"
+			]
 		},
 		{
 			"id": "v2b0imnouao",
@@ -778,8 +781,8 @@
 					{
 						"boxId": "6o0ikrr8ru",
 						"boxName": "Map.ts",
-						"x": 80.29054109197747,
-						"y": 0.23199801650550775
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -788,8 +791,8 @@
 					{
 						"boxId": "7b4gp3csto8",
 						"boxName": "Settings.ts",
-						"x": 0.7670747897920047,
-						"y": 98.61079846930572
+						"x": 50,
+						"y": 50
 					}
 				]
 			}
@@ -995,8 +998,8 @@
 					{
 						"boxId": "ua13104dlao",
 						"boxName": "pluginLoader.ts",
-						"x": 25,
-						"y": 100
+						"x": 52,
+						"y": 50
 					}
 				]
 			},
@@ -1050,8 +1053,8 @@
 					{
 						"boxId": "5194u9gf71g",
 						"boxName": "commandLine.ts",
-						"x": 12,
-						"y": 52
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -1060,8 +1063,8 @@
 					{
 						"boxId": "6o0ikrr8ru",
 						"boxName": "Map.ts",
-						"x": 12,
-						"y": 56
+						"x": 50,
+						"y": 50
 					}
 				]
 			}
@@ -1081,10 +1084,10 @@
 			"to": {
 				"path": [
 					{
-						"boxId": "5da77t8c1t8",
-						"boxName": "domAdapter.ts",
-						"x": 0.9677632885417355,
-						"y": 98.8799745809834
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
 					}
 				]
 			}
@@ -1096,8 +1099,8 @@
 					{
 						"boxId": "5194u9gf71g",
 						"boxName": "commandLine.ts",
-						"x": 7.1712984427414295,
-						"y": 99.79241052893796
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -1106,8 +1109,8 @@
 					{
 						"boxId": "8k5lfaulrs8",
 						"boxName": "commandLinePluginFacade.ts",
-						"x": 48.267732983199544,
-						"y": 0.022318107424490405
+						"x": 50,
+						"y": 50
 					}
 				]
 			}
@@ -1324,8 +1327,8 @@
 					{
 						"boxId": "6o0ikrr8ru",
 						"boxName": "Map.ts",
-						"x": 100,
-						"y": 0
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -1334,11 +1337,14 @@
 					{
 						"boxId": "jnk7eechpkg",
 						"boxName": "ProjectSettings.ts",
-						"x": 0,
-						"y": 100
+						"x": 50,
+						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"has"
+			]
 		},
 		{
 			"id": "i0lsbt4miqo",
@@ -1359,29 +1365,6 @@
 						"boxName": "ProjectSettings.ts",
 						"x": 44.99960065264767,
 						"y": 100
-					}
-				]
-			}
-		},
-		{
-			"id": "tmgdcbj0s48",
-			"from": {
-				"path": [
-					{
-						"boxId": "cr2q48p1plg",
-						"boxName": "indexHtmlIds.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "perbgpafqk8",
-						"boxName": "index.html",
-						"x": 50,
-						"y": 50
 					}
 				]
 			}
@@ -2099,7 +2082,10 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"isA"
+			]
 		},
 		{
 			"id": "909kkslmdh",
@@ -2145,7 +2131,10 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"isA"
+			]
 		},
 		{
 			"id": "ve979bmlofg",
@@ -3139,7 +3128,10 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"has"
+			]
 		},
 		{
 			"id": "j2gvp4p2vmo",
@@ -3878,6 +3870,153 @@
 			"tags": [
 				"important"
 			]
+		},
+		{
+			"id": "nh6fk8uuqt",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "vhvlusivido",
+						"boxName": "toolbars",
+						"x": 74,
+						"y": 26
+					},
+					{
+						"boxId": "hucoli0hl28",
+						"boxName": "ToolbarWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "ha6fvcnn7sg",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 45.705,
+						"y": 48.319
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "7rvucmo6eio",
+			"from": {
+				"path": [
+					{
+						"boxId": "vhvlusivido",
+						"boxName": "toolbars",
+						"x": 26.099,
+						"y": 25.728
+					},
+					{
+						"boxId": "hucoli0hl28",
+						"boxName": "ToolbarWidget.ts",
+						"x": 50.355,
+						"y": 49.029
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "v12f3i9e6eg",
+						"boxName": "Widget.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "4qra4qiiad8",
+			"from": {
+				"path": [
+					{
+						"boxId": "vhvlusivido",
+						"boxName": "toolbars",
+						"x": 25.467,
+						"y": 75.548
+					},
+					{
+						"boxId": "mre23nmcmm8",
+						"boxName": "ToolbarView.ts",
+						"x": 48.095,
+						"y": 55.529
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "v12f3i9e6eg",
+						"boxName": "Widget.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "tmgdcbj0s48",
+			"from": {
+				"path": [
+					{
+						"boxId": "perbgpafqk8",
+						"boxName": "index.html",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cr2q48p1plg",
+						"boxName": "indexHtmlIds.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
 		}
 	],
 	"nodes": [

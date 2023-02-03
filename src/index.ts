@@ -7,6 +7,9 @@ import * as pluginLoader from './core/pluginLoader'
 import { util } from './core/util'
 import { mainWidget } from './core/mainWidget'
 import { ElectronIpcDomAdapter } from './ElectronIpcDomAdapter'
+import * as fileSystemAdapter from './core/fileSystemAdapter'
+import { NodeJsFileSystemAdapter } from './NodeJsFileSystemAdapter'
+import * as settings from './core/Settings'
 
 var mainWindow: BrowserWindow
 
@@ -28,6 +31,8 @@ const createWindow = async () => {
   mainWindow.loadFile(path.join(__dirname, '../src/core/index.html'))
 
   domAdapter.init(new ElectronIpcDomAdapter(mainWindow))
+  fileSystemAdapter.init(new NodeJsFileSystemAdapter())
+  await settings.init()
   mainWidget.render()
   commandLine.init()
 

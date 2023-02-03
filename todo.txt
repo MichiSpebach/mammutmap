@@ -1,4 +1,6 @@
 
+move sidebar to left by default and make it toggable with ctrl+b?
+
 'linkDidactor': make borderingLinks with mode 'renderedEnds' while box is hovered to floatToBorder normally and only drawToTarget if boxHeader or boxBorder is hovered
 
 FIX: prevent "Failed to readdir because: Error: ENOENT: no such file or directory" from hanging up whole application, happens when folder is removed from outside

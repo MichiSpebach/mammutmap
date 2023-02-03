@@ -1,9 +1,29 @@
-import * as fs from 'fs'
-import { Dirent, promises as fsPromises } from 'fs'
 import { util } from './util'
 import { JsonObject } from './JsonObject'
 
-export class FileSystem {
+export interface Stats {
+  size: number // TODO: rename to sizeInBytes?
+  isFile(): boolean
+}
+
+export interface Dirent {
+  name: string
+  isFile(): boolean
+  isDirectory(): boolean
+}
+
+export let fileSystem: FileSystemAdapter
+
+export function init(object: FileSystemAdapter): void {
+  fileSystem = object
+}
+
+/**
+ * TODO: some methods don't fit here, introduce fileSystemTools|fileSystemJsonTools|fileSystemDataLayer|fileSystemObjectLayer that calls this adapter
+ * and move loadFromJsonFile(..), saveToJsonFile(..), mergeObjectIntoJsonFile(..), readFileAndConvertToHtml(..) there
+ * then change FileSystemAdapter from class to interface
+ */
+export abstract class FileSystemAdapter {
 
   private ongoingOperations: {path: string, promise: Promise<unknown>}[] = []
 
@@ -44,46 +64,6 @@ export class FileSystem {
     }
   }
 
-  public async doesDirentExistAndIsFile(path: string): Promise<boolean> {
-    const direntStats: fs.Stats|null = await this.getDirentStatsIfExists(path)
-    return direntStats !== null && direntStats.isFile()
-  }
-
-  public async doesDirentExist(path: string): Promise<boolean> {
-    const direntStats: fs.Stats|null = await this.getDirentStatsIfExists(path)
-    return direntStats !== null
-  }
-
-  public async getDirentStatsIfExists(path: string): Promise<fs.Stats|null> {
-    try {
-      return await this.getDirentStatsOrThrow(path) // without await, catch would not work
-    } catch(_) {
-      return null
-    }
-  }
-
-  public async getDirentStatsOrThrow(path: string): Promise<fs.Stats|never> {
-    return fsPromises.stat(path)
-  }
-
-  public async readdir(path: string): Promise<Dirent[]> {
-    return fsPromises.readdir(path, {withFileTypes: true}).catch((reason) => {
-      util.logWarning('Failed to readdir because: '+reason)
-    }).then()
-  }
-
-  public async readFileAndConvertToHtml(path: string): Promise<string> {
-    return util.escapeForHtml(await this.readFile(path))
-  }
-
-  public readFile(path: string): Promise<string> {
-    return fsPromises.readFile(path, 'utf-8')
-  }
-
-  public readFileSync(path: string): string {
-    return fs.readFileSync(path, 'utf-8')
-  }
-
   public async mergeObjectIntoJsonFile(path: string, object: JsonObject): Promise<void> {
     await this.scheduleOperation(path, async (): Promise<void> => {
       const originalJson: string = await this.readFile(path)
@@ -92,38 +72,30 @@ export class FileSystem {
     })
   }
 
-  public async writeFile(path: string, data: string): Promise<void> {
-    let directory = ''
-    const fileEntries: string[] = path.split('/')
-    for (let i = 0; i < fileEntries.length - 1; i++) {
-      directory += fileEntries[i] + '/'
-    }
-    await this.makeFolder(directory)
-    return fsPromises.writeFile(path, data)
+  public abstract doesDirentExistAndIsFile(path: string): Promise<boolean>
+
+  public abstract doesDirentExist(path: string): Promise<boolean>
+
+  public abstract getDirentStatsIfExists(path: string): Promise<Stats|null>
+
+  public abstract getDirentStatsOrThrow(path: string): Promise<Stats|never>
+
+  public abstract readdir(path: string): Promise<Dirent[]>
+
+  public async readFileAndConvertToHtml(path: string): Promise<string> {
+    return util.escapeForHtml(await this.readFile(path))
   }
 
-  public async makeFolder(path: string): Promise<void> {
-    await fsPromises.mkdir(path, {recursive: true})
-  }
+  public abstract readFile(path: string): Promise<string>
 
-  public async symlink(existingPath: string, newPath: string, type?: 'dir'|'file'|'junction'): Promise<void> {
-    await fsPromises.symlink(existingPath, newPath, type).catch((reason) => {
-      util.logWarning('Failed to symlink because: '+reason)
-    }).then()
-  }
+  public abstract readFileSync(path: string): string
 
-  public async rename(oldPath: string, newPath: string): Promise<void> {
-    const newFolderPath: string = util.removeLastElementFromPath(newPath)
-    if (!await this.doesDirentExist(newFolderPath)) {
-      await this.makeFolder(newFolderPath)
-    }
-    return fsPromises.rename(oldPath, newPath)
-  }
+  public abstract writeFile(path: string, data: string): Promise<void>
 
-}
+  public abstract makeFolder(path: string): Promise<void>
 
-export let fileSystem: FileSystem = new FileSystem()
+  public abstract symlink(existingPath: string, newPath: string, type?: 'dir'|'file'|'junction'): Promise<void>
 
-export function init(object: FileSystem): void {
-  fileSystem = object
+  public abstract rename(oldPath: string, newPath: string): Promise<void>
+
 }

@@ -4,6 +4,18 @@ import { fileSystem } from './fileSystemAdapter'
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
 export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'htmlApplicationMenu'|'sidebar'
 
+export let settings: Settings
+
+/**
+ * uses fileSystemAdapter and has to be called after fileSystemAdapter.init(..)
+ */
+export async function init(): Promise<void> {
+  if (!fileSystem) {
+    util.logWarning('Settings.init() fileSystem is not defined, most likely fileSystemAdapter.init(..) was not called before.')
+  }
+  settings = await Settings.loadFromFileSystem()
+}
+
 class Settings {
 
   private static readonly settingsFileName: string = 'settings.json'
@@ -108,11 +120,3 @@ class Settings {
   }
 
 }
-
-export let settings: Settings
-
-export const settingsOnStartup: Promise<Settings> = Settings.loadFromFileSystem() // TODO: use async module loading and get rid of this workaround
-
-settingsOnStartup.then((loadedSettings: Settings) => {
-  settings = loadedSettings
-})

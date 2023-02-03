@@ -10,7 +10,7 @@ import { Transform } from '../../../src/core/box/Transform'
 import { LinkEndData } from '../../../src/core/mapData/LinkEndData'
 import { BoxData } from '../../../src/core/mapData/BoxData'
 import { ProjectSettings } from '../../../src/core/ProjectSettings'
-import { fileSystem } from '../../../src/core/fileSystemAdapter'
+import { FileSystemAdapter, init as initFileSystemAdapter } from '../../../src/core/fileSystemAdapter'
 import { util } from '../../../src/core/util'
 import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
 import { MapSettingsData } from '../../../src/core/mapData/MapSettingsData'
@@ -106,7 +106,9 @@ function setupSimpleScenario(): {
   const boxManager: MockProxy<BoxManager> = mock<BoxManager>()
   initBoxManager(boxManager)
 
-  fileSystem.saveToJsonFile = (_filePath, _object) => Promise.resolve()
+  const fileSystemAdapter: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
+  fileSystemAdapter.saveToJsonFile.mockReturnValue(Promise.resolve())
+  initFileSystemAdapter(fileSystemAdapter)
 
   util.logInfo = () => {}
 
