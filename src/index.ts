@@ -11,6 +11,8 @@ import * as fileSystemAdapter from './core/fileSystemAdapter'
 import { NodeJsFileSystemAdapter } from './NodeJsFileSystemAdapter'
 import * as settings from './core/Settings'
 import { ElectronAndHtmlApplicationMenu } from './ElectronAndHtmlApplicationMenu'
+import * as contextMenu from './core/contextMenu'
+import { ElectronContextMenuPopup } from './ElectronContextMenuPopup'
 
 var mainWindow: BrowserWindow
 
@@ -36,6 +38,7 @@ const createWindow = async () => {
   await settings.init()
   mainWidget.render()
   commandLine.init()
+  contextMenu.init(new ElectronContextMenuPopup())
 
   if (process.platform !== 'darwin') {
     await applicationMenu.initAndRender(new ElectronAndHtmlApplicationMenu())

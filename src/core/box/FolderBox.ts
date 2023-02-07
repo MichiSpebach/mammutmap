@@ -1,7 +1,7 @@
 import { util } from '../util'
 import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
-import * as contextMenu from '../contextMenu/contextMenu'
+import * as contextMenu from '../contextMenu'
 import { Box } from './Box'
 import { BoxData } from '../mapData/BoxData'
 import { FolderBoxHeader } from './FolderBoxHeader'

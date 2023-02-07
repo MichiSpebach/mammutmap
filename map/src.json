@@ -46,8 +46,8 @@
 					{
 						"boxId": "ffddla14d38",
 						"boxName": "index.ts",
-						"x": 100,
-						"y": 36
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -75,8 +75,8 @@
 					{
 						"boxId": "ffddla14d38",
 						"boxName": "index.ts",
-						"x": 100,
-						"y": 49.99725802029065
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -664,8 +664,8 @@
 					{
 						"boxId": "ffddla14d38",
 						"boxName": "index.ts",
-						"x": 100,
-						"y": 44
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -935,6 +935,122 @@
 					}
 				],
 				"floatToBorder": true
+			}
+		},
+		{
+			"id": "stvp8tfdsh",
+			"from": {
+				"path": [
+					{
+						"boxId": "meufhoqlfg",
+						"boxName": "ElectronContextMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 5.6,
+						"y": 34.4
+					},
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 20,
+						"y": 60
+					},
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "2p02ebh3nto",
+			"from": {
+				"path": [
+					{
+						"boxId": "meufhoqlfg",
+						"boxName": "ElectronContextMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 8,
+						"y": 42
+					},
+					{
+						"boxId": "of7n0ghe2po",
+						"boxName": "contextMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "8u9st9nmsb",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 8,
+						"y": 42
+					},
+					{
+						"boxId": "of7n0ghe2po",
+						"boxName": "contextMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "19uequidbpg",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "meufhoqlfg",
+						"boxName": "ElectronContextMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
 			}
 		}
 	],

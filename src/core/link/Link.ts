@@ -1,7 +1,7 @@
 import { util } from '../util'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
-import * as contextMenu from '../contextMenu/contextMenu'
+import * as contextMenu from '../contextMenu'
 import { Box } from '../box/Box'
 import { BoxLinks } from '../box/BoxLinks'
 import { LinkData } from '../mapData/LinkData'

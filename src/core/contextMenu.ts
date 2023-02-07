@@ -1,24 +1,33 @@
-import { util } from '../util'
-import { Box } from '../box/Box'
-import { FileBox } from '../box/FileBox'
-import { FolderBox } from '../box/FolderBox'
-import { WayPointData } from '../mapData/WayPointData'
-import { Link } from '../link/Link'
-import { DragManager } from '../DragManager'
-import { LinkEndData } from '../mapData/LinkEndData'
-import { ClientPosition } from '../shape/ClientPosition'
-import { LocalPosition } from '../shape/LocalPosition'
-import { BoxData } from '../mapData/BoxData'
-import { TextInputPopup } from '../TextInputPopup'
-import { SourcelessBox } from '../box/SourcelessBox'
-import { NodeData } from '../mapData/NodeData'
-import { PopupWidget } from '../PopupWidget'
-import { settings } from '../Settings'
-import { NodeWidget } from '../node/NodeWidget'
-import { MenuItem } from '../applicationMenu/MenuItem'
-import { MenuItemFolder } from '../applicationMenu/MenuItemFolder'
-import { MenuItemFile } from '../applicationMenu/MenuItemFile'
-import { ElectronContextMenu } from './ElectronContextMenu'
+import { util } from './util'
+import { Box } from './box/Box'
+import { FileBox } from './box/FileBox'
+import { FolderBox } from './box/FolderBox'
+import { WayPointData } from './mapData/WayPointData'
+import { Link } from './link/Link'
+import { DragManager } from './DragManager'
+import { LinkEndData } from './mapData/LinkEndData'
+import { ClientPosition } from './shape/ClientPosition'
+import { LocalPosition } from './shape/LocalPosition'
+import { BoxData } from './mapData/BoxData'
+import { TextInputPopup } from './TextInputPopup'
+import { SourcelessBox } from './box/SourcelessBox'
+import { NodeData } from './mapData/NodeData'
+import { PopupWidget } from './PopupWidget'
+import { settings } from './Settings'
+import { NodeWidget } from './node/NodeWidget'
+import { MenuItem } from './applicationMenu/MenuItem'
+import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
+import { MenuItemFile } from './applicationMenu/MenuItemFile'
+
+let contextMenuPopup: ContextMenuPopup
+
+export function init(popupImpl: ContextMenuPopup): void {
+  contextMenuPopup = popupImpl
+}
+
+export interface ContextMenuPopup {
+  popup(items: MenuItem[]): void
+}
 
 const fileBoxMenuItemGenerators: ((box: FileBox) => MenuItem|undefined)[] = []
 
@@ -46,7 +55,7 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
     }
   })
 
-  popupMenu(items)
+  contextMenuPopup.popup(items)
 }
 
 export function openForFolderBox(box: FolderBox, clientX: number, clientY: number): void {
@@ -63,7 +72,7 @@ export function openForFolderBox(box: FolderBox, clientX: number, clientY: numbe
     items.push(buildDetailsItem('FolderBoxDetails', box))
   }
 
-  popupMenu(items)
+  contextMenuPopup.popup(items)
 }
 
 export function openForSourcelessBox(box: SourcelessBox, clientX: number, clientY: number): void {
@@ -77,7 +86,7 @@ export function openForSourcelessBox(box: SourcelessBox, clientX: number, client
     items.push(buildDetailsItem('SourcelessBoxDetails', box))
   }
 
-  popupMenu(items)
+  contextMenuPopup.popup(items)
 }
 
 export function openForNode(node: NodeWidget, clientX: number, clientY: number): void {
@@ -87,7 +96,7 @@ export function openForNode(node: NodeWidget, clientX: number, clientY: number):
     items.push(buildDetailsItem('NodeDetails', node))
   }
 
-  popupMenu(items)
+  contextMenuPopup.popup(items)
 }
 
 export function openForLink(link: Link, clientX: number, clientY: number): void {
@@ -100,7 +109,7 @@ export function openForLink(link: Link, clientX: number, clientY: number): void 
     items.push(buildDetailsItem('LinkDetails', link))
   }
 
-  popupMenu(items)
+  contextMenuPopup.popup(items)
 }
 
 function buildOpenFileInEditorItem(box: FileBox): MenuItemFile {
@@ -243,9 +252,4 @@ async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise
 async function addNodeToBox(box: Box, position: ClientPosition): Promise<void> {
   const positionInBox: LocalPosition = await box.transform.clientToLocalPosition(position)
   await box.nodes.add(NodeData.buildNew(positionInBox.percentX, positionInBox.percentY))
-}
-
-function popupMenu(items: MenuItem[]): void {
-  new ElectronContextMenu(items).popup()
-  // TODO: implement HtmlContextMenu for browser mode
 }

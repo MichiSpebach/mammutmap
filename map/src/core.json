@@ -824,122 +824,6 @@
 			]
 		},
 		{
-			"id": "66fugjsccb",
-			"from": {
-				"path": [
-					{
-						"boxId": "3lnmuaqr88",
-						"boxName": "box",
-						"x": 64.99982128176717,
-						"y": 24.999515713483184
-					},
-					{
-						"boxId": "3n81ck4i5sg",
-						"boxName": "FileBox.ts",
-						"x": 75,
-						"y": 0
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "lr0pi422h1o",
-						"boxName": "contextMenu.ts",
-						"x": 89.99974469606066,
-						"y": 100.00510673067102
-					}
-				]
-			}
-		},
-		{
-			"id": "8pktsjd7amo",
-			"from": {
-				"path": [
-					{
-						"boxId": "lr0pi422h1o",
-						"boxName": "contextMenu.ts",
-						"x": 95.00114886772703,
-						"y": 100.00510673067102
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "3lnmuaqr88",
-						"boxName": "box",
-						"x": 65.99962213859344,
-						"y": 24.999515713483184
-					},
-					{
-						"boxId": "3n81ck4i5sg",
-						"boxName": "FileBox.ts",
-						"x": 79.99897875816994,
-						"y": 0
-					}
-				]
-			}
-		},
-		{
-			"id": "ahf98ke2718",
-			"from": {
-				"path": [
-					{
-						"boxId": "lr0pi422h1o",
-						"boxName": "contextMenu.ts",
-						"x": 4.999738998799395,
-						"y": 100
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "3lnmuaqr88",
-						"boxName": "box",
-						"x": 23.7498251248139,
-						"y": 24.999669938238846
-					},
-					{
-						"boxId": "8hst7ghum5o",
-						"boxName": "FolderBox.ts",
-						"x": 74.9993735853469,
-						"y": -0.0026404731727925645
-					}
-				]
-			}
-		},
-		{
-			"id": "sp07k6mp3rg",
-			"from": {
-				"path": [
-					{
-						"boxId": "3lnmuaqr88",
-						"boxName": "box",
-						"x": 24.999952491443707,
-						"y": 25
-					},
-					{
-						"boxId": "8hst7ghum5o",
-						"boxName": "FolderBox.ts",
-						"x": 79.99939189394631,
-						"y": 0
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "lr0pi422h1o",
-						"boxName": "contextMenu.ts",
-						"x": 9.999334897906827,
-						"y": 100
-					}
-				]
-			}
-		},
-		{
 			"id": "u5ne16v474o",
 			"from": {
 				"path": [
@@ -1413,31 +1297,6 @@
 						"y": 100
 					}
 				]
-			}
-		},
-		{
-			"id": "rmiaucbpdv",
-			"from": {
-				"path": [
-					{
-						"boxId": "lr0pi422h1o",
-						"boxName": "contextMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				],
-				"floatToBorder": true
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "0vh7l3j1gv",
-						"boxName": "TextInputPopup.ts",
-						"x": 50,
-						"y": 50.000000000000085
-					}
-				],
-				"floatToBorder": true
 			}
 		},
 		{
@@ -4023,7 +3882,7 @@
 		{
 			"id": "e3t5mpvbmhg",
 			"x": 0,
-			"y": 76
+			"y": 80
 		}
 	]
 }
