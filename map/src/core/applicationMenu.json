@@ -29,58 +29,6 @@
 			}
 		},
 		{
-			"id": "5658agvftg8",
-			"from": {
-				"path": [
-					{
-						"boxId": "8do6ol70k2g",
-						"boxName": "applicationMenu.ts",
-						"x": 48,
-						"y": 48
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"tags": [
-				"has"
-			]
-		},
-		{
-			"id": "r5amcb4o79",
-			"from": {
-				"path": [
-					{
-						"boxId": "8do6ol70k2g",
-						"boxName": "applicationMenu.ts",
-						"x": 44,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "8vq6o31k6o",
-						"boxName": "HtmlApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"tags": [
-				"has"
-			]
-		},
-		{
 			"id": "0rtks9flf28",
 			"from": {
 				"path": [
@@ -464,75 +412,6 @@
 			}
 		},
 		{
-			"id": "ji9a1jjv6e8",
-			"from": {
-				"path": [
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "gdmkf1vt9no",
-						"boxName": "MenuItemFolder.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "ue7m21plk5g",
-			"from": {
-				"path": [
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "6hojqbs8qn8",
-						"boxName": "MenuItem.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "mii1j92q1hg",
-			"from": {
-				"path": [
-					{
-						"boxId": "dm650n82gqg",
-						"boxName": "ElectronApplicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "8do6ol70k2g",
-						"boxName": "applicationMenu.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "bajhr5nkbuo",
 			"from": {
 				"path": [
@@ -807,6 +686,32 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "58i7ff05al8",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
 		}
 	],
 	"nodes": []

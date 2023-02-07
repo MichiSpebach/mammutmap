@@ -3,19 +3,23 @@ import { MenuItemFolder } from './MenuItemFolder'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { renderManager } from '../RenderManager'
 import { HtmlApplicationMenuWidget } from './HtmlApplicationMenuWidget'
+import { AbstractApplicationMenu } from './applicationMenu'
 
-export class HtmlApplicationMenu {
+export class HtmlApplicationMenu extends AbstractApplicationMenu {
 
-    private readonly menuTree: MenuItemFolder
     private readonly widget: HtmlApplicationMenuWidget
 
     private rendered: boolean = false
     private ongoingRender: Promise<void>|undefined = undefined
     private ongoingUnrender: Promise<void>|undefined = undefined
 
-    public constructor(menuTree: MenuItemFolder) {
-        this.menuTree = menuTree
+    public constructor() {
+        super()
         this.widget = new HtmlApplicationMenuWidget('htmlApplicationMenu', this.menuTree)
+    }
+
+    public async initAndRender(): Promise<void> {
+        await this.renderUp()
     }
 
     public async renderUp(): Promise<void> {
@@ -59,13 +63,12 @@ export class HtmlApplicationMenu {
         await renderManager.remove(this.widget.getId())
     }
 
-    public addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItem): void {
+    public async addMenuItemToAfter(parentMenuItem: MenuItemFolder, menuItem: MenuItem): Promise<void> {
         // TODO implement for case that parentMenuItem is opened at the moment
     }
 
-    public setMenuItemEnabled(menuItem: MenuItem, enabled: boolean): Promise<void> {
+    public async setMenuItemEnabledAfter(menuItem: MenuItem, enabled: boolean): Promise<void> {
         // TODO implement for case that parentMenuItem is opened at the moment
-        return Promise.resolve()
     }
 
 }

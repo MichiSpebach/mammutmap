@@ -1,16 +1,11 @@
 import { Menu, MenuItem as ElectronMenuItem } from 'electron'
-import { MenuItem } from './MenuItem'
-import { MenuItemFolder } from './MenuItemFolder'
-import { util } from '../util'
+import { AbstractApplicationMenu } from './core/applicationMenu/applicationMenu'
+import { MenuItem } from './core/applicationMenu/MenuItem'
+import { MenuItemFolder } from './core/applicationMenu/MenuItemFolder'
+import { util } from './core/util'
 
-export class ElectronApplicationMenu {
-
-  private readonly menuTree: MenuItemFolder
+export class ElectronApplicationMenu extends AbstractApplicationMenu {
   private rendered: boolean = false
-
-  public constructor(menuTree: MenuItemFolder) {
-    this.menuTree = menuTree
-  }
 
   public initAndRender(): Promise<void> {
     const menu = Menu.buildFromTemplate(this.menuTree.submenu)
@@ -19,7 +14,7 @@ export class ElectronApplicationMenu {
     return Promise.resolve()
   }
 
-  public addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItem): void {
+  public async addMenuItemToAfter(parentMenuItem: MenuItemFolder, menuItem: MenuItem): Promise<void> {
     if (!this.rendered) {
       return
     }
@@ -34,7 +29,7 @@ export class ElectronApplicationMenu {
     menu.append(new ElectronMenuItem(menuItem))
   }
 
-  public setMenuItemEnabled(menuItem: MenuItem, enabled: boolean): Promise<void> {
+  protected setMenuItemEnabledAfter(menuItem: MenuItem, enabled: boolean): Promise<void> {
     if (!this.rendered) {
       return Promise.resolve()
     }

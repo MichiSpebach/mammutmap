@@ -6,16 +6,24 @@ import { ProjectSettings } from '../ProjectSettings'
 import { dialog } from 'electron'
 import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
-import { ElectronApplicationMenu } from './ElectronApplicationMenu'
-import { HtmlApplicationMenu } from './HtmlApplicationMenu'
-import { settings } from '../Settings'
 import { MenuItem } from './MenuItem'
 
-class ApplicationMenu {
+export let applicationMenu: ApplicationMenu
 
-  private readonly menuTree: MenuItemFolder
-  private readonly electronApplicationMenu: ElectronApplicationMenu
-  private readonly htmlApplicatioinMenu: HtmlApplicationMenu
+export async function initAndRender(object: ApplicationMenu): Promise<void> {
+  applicationMenu = object
+  await object.initAndRender()
+}
+
+export interface ApplicationMenu {
+  initAndRender(): Promise<void>
+  addMenuItemToPlugins(menuItem: MenuItem): Promise<void>
+  addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItem): Promise<void>
+  setMenuItemEnabled(menuItem: MenuItem, enabled: boolean): Promise<void>
+}
+
+export abstract class AbstractApplicationMenu implements ApplicationMenu {
+  protected readonly menuTree: MenuItemFolder
 
   public constructor() {
     const fileMenu: MenuItemFolder = new MenuItemFolder({id: 'File', label: 'File', submenu: [
@@ -34,57 +42,40 @@ class ApplicationMenu {
     ]})
 
     this.menuTree = new MenuItemFolder({id: 'ApplicationMenu', label: 'ApplicationMenu', submenu: [fileMenu, settingsMenu, pluginsMenu]})
-    this.electronApplicationMenu = new ElectronApplicationMenu(this.menuTree)
-    this.htmlApplicatioinMenu = new HtmlApplicationMenu(this.menuTree)
   }
 
-  public async initAndRender(): Promise<void> {
-    const pros: Promise<void>[] = []
+  public abstract initAndRender(): Promise<void>
 
-    pros.push(this.electronApplicationMenu.initAndRender())
-    pros.push(this.setHtmlApplicationMenuActive(settings.getBoolean('htmlApplicationMenu')));
-    settings.subscribeBoolean('htmlApplicationMenu', (active) => this.setHtmlApplicationMenuActive(active))
-
-    await Promise.all(pros)
+  public async addMenuItemToPlugins(menuItem: MenuItem): Promise<void> {
+    await this.addMenuItemTo('Plugins', menuItem)
   }
 
-  private setHtmlApplicationMenuActive(active: boolean): Promise<void> {
-    if (active) {
-      return this.htmlApplicatioinMenu.renderUp()
-    } else {
-      return this.htmlApplicatioinMenu.renderDown()
-    }
-  }
-
-  public addMenuItemToPlugins(menuItem: MenuItem): void {
-    this.addMenuItemTo('Plugins', menuItem)
-  }
-
-  public addMenuItemTo(parentMenuItemId: string, menuItem: MenuItem): void {
-    const parentMenuItem: MenuItem|undefined = this.findMenuItemById(parentMenuItemId)
-    if (!parentMenuItem) {
-        util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItemId}' because it was not found.`)
+  public async addMenuItemTo(parentMenuItem: string|MenuItemFolder, menuItem: MenuItem): Promise<void> {
+    if (typeof parentMenuItem === 'string') {
+      const foundParentMenuItem: MenuItem|undefined = this.findMenuItemById(parentMenuItem)
+      if (!foundParentMenuItem) {
+        util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItem}' because it was not found.`)
         return
-    }
-    if (!(parentMenuItem instanceof MenuItemFolder)) {
-        util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItemId}' because it is not a MenuItemFolder.`)
+      }
+      if (!(foundParentMenuItem instanceof MenuItemFolder)) {
+        util.logWarning(`Cannot add menuItem '${menuItem.label}' to menu with id '${parentMenuItem}' because it is not a MenuItemFolder.`)
         return
+      }
+      parentMenuItem = foundParentMenuItem
     }
 
     parentMenuItem.submenu.push(menuItem)
-
-    this.electronApplicationMenu.addMenuItemTo(parentMenuItem, menuItem)
-    this.htmlApplicatioinMenu.addMenuItemTo(parentMenuItem, menuItem)
+    await this.addMenuItemToAfter(parentMenuItem, menuItem)
   }
 
+  protected abstract addMenuItemToAfter(parentMenuItem: MenuItemFolder, menuItem: MenuItem): Promise<void>
+  
   public async setMenuItemEnabled(menuItem: MenuItem, enabled: boolean): Promise<void> {
     menuItem.enabled = enabled
-
-    await Promise.all([
-      this.electronApplicationMenu.setMenuItemEnabled(menuItem, enabled),
-      this.htmlApplicatioinMenu.setMenuItemEnabled(menuItem, enabled)
-    ])
+    await this.setMenuItemEnabledAfter(menuItem, enabled)
   }
+  
+  protected abstract setMenuItemEnabledAfter(menuItem: MenuItem, enabled: boolean): Promise<void>
 
   private findMenuItemById(menuItemId: string): MenuItem|undefined {
     return this.menuTree.findMenuItemById(menuItemId)
@@ -141,5 +132,3 @@ class ApplicationMenu {
   }
 
 }
-
-export let applicationMenu: ApplicationMenu = new ApplicationMenu()

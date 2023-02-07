@@ -36,7 +36,7 @@ export interface DocumentObjectModelAdapter {
 
    appendChildTo(parentId: string, childId: string): Promise<void>
    addContentTo(id: string, content: string): Promise<void>
-   addElementsTo(id: string, element: RenderElements): Promise<void>
+   addElementsTo(id: string, elements: RenderElements): Promise<void>
    addElementTo(id: string, element: RenderElement): Promise<void>
    setElementsTo(id: string, elements: RenderElements): Promise<void>
    setElementTo(id: string, element: RenderElement): Promise<void>
@@ -85,7 +85,7 @@ export interface DocumentObjectModelAdapter {
     callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void>
 
-   removeEventListenerFrom(id: string, eventType: MouseEventType|DragEventType|WheelEventType|InputEventType): Promise<void>
+   removeEventListenerFrom(id: string, eventType: EventType): Promise<void>
 
    getIpcChannelsCount(): number
 }

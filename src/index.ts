@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
 import * as domAdapter from './core/domAdapter'
 import * as commandLine from './core/commandLine'
-import { applicationMenu } from './core/applicationMenu/applicationMenu'
+import * as applicationMenu from './core/applicationMenu/applicationMenu'
 import * as pluginLoader from './core/pluginLoader'
 import { util } from './core/util'
 import { mainWidget } from './core/mainWidget'
@@ -10,6 +10,7 @@ import { ElectronIpcDomAdapter } from './ElectronIpcDomAdapter'
 import * as fileSystemAdapter from './core/fileSystemAdapter'
 import { NodeJsFileSystemAdapter } from './NodeJsFileSystemAdapter'
 import * as settings from './core/Settings'
+import { ElectronAndHtmlApplicationMenu } from './ElectronAndHtmlApplicationMenu'
 
 var mainWindow: BrowserWindow
 
@@ -37,7 +38,7 @@ const createWindow = async () => {
   commandLine.init()
 
   if (process.platform !== 'darwin') {
-    await applicationMenu.initAndRender()
+    await applicationMenu.initAndRender(new ElectronAndHtmlApplicationMenu())
   }
 
   if (getStartupArgumentBoolean('skip-plugins')) {
@@ -51,7 +52,7 @@ const createWindow = async () => {
     message += ' because dynamically changing menus might not work in macOS.\n'
     message += 'When problems with the applicationMenu occur you can activate htmlApplicationMenu in the settings.'
     util.logInfo(message)
-    await applicationMenu.initAndRender()
+    await applicationMenu.initAndRender(new ElectronAndHtmlApplicationMenu())
   }
 };
 

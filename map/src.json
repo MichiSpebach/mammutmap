@@ -745,6 +745,197 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "5658agvftg8",
+			"from": {
+				"path": [
+					{
+						"boxId": "ftec83a7duo",
+						"boxName": "ElectronAndHtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": []
+		},
+		{
+			"id": "ji9a1jjv6e8",
+			"from": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 6.56,
+						"y": 35.04
+					},
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 32,
+						"y": 76
+					},
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ue7m21plk5g",
+			"from": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 5.6,
+						"y": 34.4
+					},
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 20,
+						"y": 60
+					},
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "mii1j92q1hg",
+			"from": {
+				"path": [
+					{
+						"boxId": "dm650n82gqg",
+						"boxName": "ElectronApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 9.92,
+						"y": 33.36
+					},
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 74,
+						"y": 34
+					},
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": []
+		},
+		{
+			"id": "r5amcb4o79",
+			"from": {
+				"path": [
+					{
+						"boxId": "ftec83a7duo",
+						"boxName": "ElectronAndHtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 8.32,
+						"y": 33.36
+					},
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 54,
+						"y": 34
+					},
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": []
+		},
+		{
+			"id": "mjj7q9nd24o",
+			"from": {
+				"path": [
+					{
+						"boxId": "ffddla14d38",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ftec83a7duo",
+						"boxName": "ElectronAndHtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
 		}
 	],
 	"nodes": []

@@ -77,7 +77,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
             return this.wrapJavaScriptInFunction(setElementJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'element' has already been declared"
   
           case 'innerHTML':
-          case 'style':
+          case 'style': // TODO: style is a readonly property, find better solution
             return `document.getElementById('${command.elementId}').${command.method}='${command.value}';`
   
           case 'addClassTo':
@@ -114,8 +114,8 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return js
     }
   
-    public addElementsTo(id: string, element: RenderElements): Promise<void> {
-      return this.executeJavaScript(this.createAddElementsJavaScriptAndAddIpcChannelListeners(id, element))
+    public addElementsTo(id: string, elements: RenderElements): Promise<void> {
+      return this.executeJavaScript(this.createAddElementsJavaScriptAndAddIpcChannelListeners(id, elements))
     }
   
     public addElementTo(id: string, element: RenderElement): Promise<void> {
@@ -259,7 +259,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     public setStyleTo(id: string, style: string): Promise<void> {
-      return this.executeJsOnElementSuppressingErrors(id, "style = '"+style+"'")
+      return this.executeJsOnElementSuppressingErrors(id, "style = '"+style+"'") // TODO: style is a readonly property, find better solution
     }
   
     public addClassTo(id: string, className: string): Promise<void> {
@@ -441,7 +441,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed))
     }
   
-    public async removeEventListenerFrom(id: string, eventType: MouseEventType|DragEventType|WheelEventType|InputEventType): Promise<void> {
+    public async removeEventListenerFrom(id: string, eventType: EventType): Promise<void> {
       const ipcChannelName = eventType+'_'+id
       await this.executeJsOnElement(id, "on"+eventType+" = null")
       this.removeIpcChannelListener(ipcChannelName)
