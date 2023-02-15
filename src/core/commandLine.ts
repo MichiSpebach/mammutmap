@@ -1,7 +1,7 @@
 import { dom } from './domAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import * as map from './Map'
-import { util } from './util'
+import { util } from './util/util'
 import * as commandLinePluginFacade from './commandLinePluginFacade'
 import * as htmlCursor from './htmlCursor'
 import { setCompatibilityTheme } from './styleAdapter'

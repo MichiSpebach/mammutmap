@@ -1,4 +1,4 @@
-import { util } from './core/util'
+import { util } from './core/util/util'
 import { ElementAttributes, RenderElement, RenderElements, Style } from './core/util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from './core/ClientRect'

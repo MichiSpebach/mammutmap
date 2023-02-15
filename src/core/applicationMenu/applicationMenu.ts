@@ -1,9 +1,9 @@
 import { MenuItemFile } from './MenuItemFile'
 import { MenuItemFolder } from './MenuItemFolder'
-import { util } from '../util'
+import { util } from '../util/util'
 import * as map from '../Map'
 import { ProjectSettings } from '../ProjectSettings'
-import { dialog } from 'electron'
+import { dialog } from 'electron' // TODO: move Electron.OpenDialogReturnValue into NodeJsFileSystemAdapter
 import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
 import { MenuItem } from './MenuItem'
@@ -15,7 +15,7 @@ export async function initAndRender(object: ApplicationMenu): Promise<void> {
   await object.initAndRender()
 }
 
-export interface ApplicationMenu {
+export interface ApplicationMenu { // TODO: rename to interface ApplicationMenuView and AbstractApplicationMenu to ApplicationMenu calling the view which was set by init?
   initAndRender(): Promise<void>
   addMenuItemToPlugins(menuItem: MenuItem): Promise<void>
   addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItem): Promise<void>

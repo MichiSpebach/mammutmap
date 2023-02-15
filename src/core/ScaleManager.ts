@@ -1,4 +1,4 @@
-import { util } from './util'
+import { util } from './util/util'
 import { style } from './styleAdapter'
 import { MouseEventResultAdvanced, renderManager, RenderPriority } from './RenderManager'
 import { ScaleTool } from './box/ScaleTool'

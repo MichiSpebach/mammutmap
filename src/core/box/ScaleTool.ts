@@ -3,7 +3,7 @@ import { style } from '../styleAdapter'
 import { Box } from './Box'
 import { ScaleManager } from '../ScaleManager'
 import * as indexHtmlIds from '../indexHtmlIds'
-import { util } from '../util'
+import { util } from '../util/util'
 import { ClientRect } from '../ClientRect'
 
 export class ScaleTool {

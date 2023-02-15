@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from '../util/util'
 import { fileSystem, Dirent } from '../fileSystemAdapter'
 import { renderManager } from '../RenderManager'
 import { BoxBody } from './BoxBody'

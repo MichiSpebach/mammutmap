@@ -5,7 +5,7 @@ import { MenuItem } from './MenuItem'
 import { MenuItemFile } from './MenuItemFile'
 import { MenuItemWidget } from './MenuItemWidget'
 import * as menuItemWidgetFactory from './menuItemWidgetFactory'
-import { util } from '../util'
+import { util } from '../util/util'
 
 export class MenuItemFolderContainerWidget extends Widget {
 

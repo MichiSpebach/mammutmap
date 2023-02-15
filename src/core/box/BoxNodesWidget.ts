@@ -3,7 +3,7 @@ import { NodeWidget } from '../node/NodeWidget'
 import { Widget } from '../Widget'
 import { NodeData } from '../mapData/NodeData'
 import { Box } from './Box'
-import { util } from '../util'
+import { util } from '../util/util'
 
 export class BoxNodesWidget extends Widget {
     private readonly referenceBox: Box

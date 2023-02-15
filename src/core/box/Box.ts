@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from '../util/util'
 import { fileSystem } from '../fileSystemAdapter'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'

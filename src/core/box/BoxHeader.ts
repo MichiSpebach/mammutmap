@@ -9,7 +9,7 @@ import { ClientPosition } from '../shape/ClientPosition'
 import { LocalPosition } from '../shape/LocalPosition'
 import { style } from '../styleAdapter'
 import { settings } from '../Settings'
-import { util } from '../util'
+import { util } from '../util/util'
 
 export abstract  class BoxHeader implements Draggable<FolderBox> {
   public readonly referenceBox: Box

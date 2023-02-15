@@ -1,4 +1,4 @@
-import { util } from './util'
+import { util } from './util/util'
 import { dom, MouseEventResultAdvanced } from './domAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { settings } from './Settings'

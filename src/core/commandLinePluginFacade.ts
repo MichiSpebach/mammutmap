@@ -1,4 +1,4 @@
-import { util } from './util'
+import { util } from './util/util'
 import * as pluginFacade from '../pluginFacade'
 import {FileBoxDepthTreeIterator} from '../pluginFacade'
 import { BoxWatcher } from './box/BoxWatcher'

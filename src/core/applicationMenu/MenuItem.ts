@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from '../util/util'
 
 export abstract class MenuItem {
     public readonly id: string

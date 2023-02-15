@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from './util'
 
 export class Subscribers<T> {
     private subscribers: ((data: T) => Promise<void>)[] = []

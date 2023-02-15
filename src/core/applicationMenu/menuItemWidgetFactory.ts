@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from '../util/util'
 import { MenuItemFileWidget } from './MenuItemFileWidget'
 import { MenuItemFolderWidget } from './MenuItemFolderWidget'
 import { MenuItemWidget } from './MenuItemWidget'

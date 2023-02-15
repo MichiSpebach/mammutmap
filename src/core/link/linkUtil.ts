@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from '../util/util'
 import { WayPointData } from '../mapData/WayPointData'
 
 export function calculatePathOfUnchangedLinkEndOfChangedLink(oldPath: WayPointData[], shallowRenderedPath: WayPointData[]): WayPointData[] {

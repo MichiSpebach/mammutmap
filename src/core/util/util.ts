@@ -1,9 +1,9 @@
 import { exec, ChildProcess } from 'child_process'
-import { renderManager, RenderPriority } from './RenderManager'
-import { style } from './styleAdapter'
-import * as indexHtmlIds from './indexHtmlIds'
-import { RenderElement } from './util/RenderElement'
-import * as stacktraceUtil from './util/stacktraceUtil'
+import { renderManager, RenderPriority } from '../RenderManager'
+import { style } from '../styleAdapter'
+import * as indexHtmlIds from '../indexHtmlIds'
+import { RenderElement } from './RenderElement'
+import * as stacktraceUtil from './stacktraceUtil'
 
 export { ChildProcess }
 

@@ -1,6 +1,6 @@
 import { PopupWidget } from './PopupWidget'
 import { renderManager } from './RenderManager'
-import { util } from './util'
+import { util } from './util/util'
 
 export class TextInputPopup extends PopupWidget {
     private readonly defaultValue: string

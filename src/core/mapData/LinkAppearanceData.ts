@@ -1,5 +1,5 @@
 import { JsonObject } from '../JsonObject'
-import { util } from '../util'
+import { util } from '../util/util'
 
 export const linkAppearanceModes = ['notRendered', 'hidden', 'visibleEnds', 'visible'] as const // "as const" makes LinkAppearanceMode a typesafe union of literals
 export type LinkAppearanceMode = typeof linkAppearanceModes[number]

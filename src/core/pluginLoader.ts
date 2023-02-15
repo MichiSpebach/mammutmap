@@ -1,5 +1,5 @@
 import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
-import { util } from './util'
+import { util } from './util/util'
 import { fileSystem, Dirent } from './fileSystemAdapter'
 import { applicationMenu } from './applicationMenu/applicationMenu'
 

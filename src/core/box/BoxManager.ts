@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from '../util/util'
 import { Box } from './Box'
 
 export class BoxManager {

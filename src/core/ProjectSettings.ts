@@ -2,7 +2,7 @@ import { fileSystem } from './fileSystemAdapter'
 import { LinkTagData } from './mapData/LinkTagData'
 import { MapSettingsData } from './mapData/MapSettingsData'
 import { Subscribers } from './util/Subscribers'
-import { util } from './util'
+import { util } from './util/util'
 import { LinkAppearanceData } from './mapData/LinkAppearanceData'
 
 export class ProjectSettings { // TODO: rename to MapSettings?

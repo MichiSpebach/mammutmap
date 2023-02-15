@@ -2,7 +2,7 @@ import { LocalPosition } from '../shape/LocalPosition'
 import { LocalRect } from '../LocalRect'
 import { Box } from './Box'
 import { RenderPriority } from '../RenderManager'
-import { util } from '../util'
+import { util } from '../util/util'
 import { ClientRect } from '../ClientRect'
 
 export class SizeAndPosition {

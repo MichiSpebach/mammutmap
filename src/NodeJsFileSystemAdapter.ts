@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import { Dirent, promises as fsPromises } from 'fs'
 import { FileSystemAdapter } from './core/fileSystemAdapter'
-import { util } from './core/util'
+import { util } from './core/util/util'
 
 export class NodeJsFileSystemAdapter extends FileSystemAdapter {
 

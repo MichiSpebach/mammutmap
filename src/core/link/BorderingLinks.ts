@@ -1,5 +1,5 @@
 import { WayPointData } from "../mapData/WayPointData"
-import { util } from "../util"
+import { util } from "../util/util"
 import { Link } from "./Link"
 import { Box } from "../box/Box"
 import { NodeWidget } from "../node/NodeWidget"

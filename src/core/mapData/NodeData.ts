@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from '../util/util'
 import { JsonObject } from '../JsonObject'
 import { LocalPosition } from '../shape/LocalPosition'
 

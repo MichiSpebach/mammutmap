@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from './util'
 
 export function getCallerDirPath(skipThroughFilePath?: string): string {
     return util.removeLastElementFromPath(getCallerFilePath(skipThroughFilePath))

@@ -1,7 +1,7 @@
 import { BoxWatcher } from '../box/BoxWatcher'
 import { RootFolderBox } from '../box/RootFolderBox'
 import { map } from '../Map'
-import { util } from '../util'
+import { util } from '../util/util'
 import { FolderBox } from '../box/FolderBox'
 
 export async function findBox(

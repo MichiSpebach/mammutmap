@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from '../util/util'
 import { BoxData } from './BoxData'
 import { LinkAppearanceData } from './LinkAppearanceData'
 import { LinkData } from './LinkData'

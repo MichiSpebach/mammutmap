@@ -1,6 +1,6 @@
 import { LocalRect } from '../LocalRect'
 import { JsonObject } from '../JsonObject'
-import { util } from '../util'
+import { util } from '../util/util'
 import { LinkData } from './LinkData'
 import { LocalPosition } from '../shape/LocalPosition'
 import { NodeData } from './NodeData'

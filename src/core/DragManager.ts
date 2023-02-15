@@ -1,4 +1,4 @@
-import { util } from './util'
+import { util } from './util/util'
 import { renderManager, RenderPriority } from './RenderManager'
 import { Draggable } from './Draggable'
 import { DropTarget } from './DropTarget'

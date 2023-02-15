@@ -1,4 +1,4 @@
-import { util } from '../util'
+import { util } from './util'
 
 // TODO: introduce interface RenderStateReadonly|RenderStateReader to have public getRenderStateReader(): RenderStateReader in Widgets?
 export class RenderState {
