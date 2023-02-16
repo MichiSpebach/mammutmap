@@ -3,7 +3,7 @@ import { MenuItemFolder } from './MenuItemFolder'
 import { util } from '../util/util'
 import * as map from '../Map'
 import { ProjectSettings } from '../ProjectSettings'
-import { dialog } from 'electron' // TODO: move Electron.OpenDialogReturnValue into NodeJsFileSystemAdapter
+import { fileSystem, OpenDialogReturnValue } from '../fileSystemAdapter'
 import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
 import { MenuItem } from './MenuItem'
@@ -82,7 +82,7 @@ export abstract class AbstractApplicationMenu implements ApplicationMenu {
   }
 
   private async openFolder(): Promise<void> {
-    const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
+    const dialogReturnValue: OpenDialogReturnValue = await fileSystem.showOpenDialog({
       title:'Open a folder',
       properties: ['openDirectory']
     })
@@ -102,7 +102,7 @@ export abstract class AbstractApplicationMenu implements ApplicationMenu {
   }
 
   private async openProjectFile(): Promise<void> {
-    const dialogReturnValue: Electron.OpenDialogReturnValue = await dialog.showOpenDialog({
+    const dialogReturnValue: OpenDialogReturnValue = await fileSystem.showOpenDialog({
       title:'Open a projectFile '+ProjectSettings.preferredFileNameExtension,
       properties: ['openFile'],
       filters: [

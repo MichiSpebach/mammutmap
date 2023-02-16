@@ -12,6 +12,21 @@ export interface Dirent {
   isDirectory(): boolean
 }
 
+export interface FileFilter { // subset of Electron.FileFilter
+  extensions: string[]
+  name: string
+}
+
+export interface OpenDialogOptions { // subset of Electron.OpenDialogOptions
+  title?: string
+  filters?: FileFilter[]
+  properties?: Array<'openFile'|'openDirectory'>
+}
+
+export interface OpenDialogReturnValue { // subset of Electron.OpenDialogReturnValue
+  filePaths: string[]
+}
+
 export let fileSystem: FileSystemAdapter
 
 export function init(object: FileSystemAdapter): void {
@@ -97,5 +112,7 @@ export abstract class FileSystemAdapter {
   public abstract symlink(existingPath: string, newPath: string, type?: 'dir'|'file'|'junction'): Promise<void>
 
   public abstract rename(oldPath: string, newPath: string): Promise<void>
+
+  public abstract showOpenDialog(options: OpenDialogOptions): Promise<OpenDialogReturnValue>
 
 }

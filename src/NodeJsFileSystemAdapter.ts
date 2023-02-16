@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import { Dirent, promises as fsPromises } from 'fs'
-import { FileSystemAdapter } from './core/fileSystemAdapter'
+import { dialog } from 'electron'
+import { FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue } from './core/fileSystemAdapter'
 import { util } from './core/util/util'
 
 export class NodeJsFileSystemAdapter extends FileSystemAdapter {
@@ -63,6 +64,10 @@ export class NodeJsFileSystemAdapter extends FileSystemAdapter {
       await this.makeFolder(newFolderPath)
     }
     return fsPromises.rename(oldPath, newPath)
+  }
+
+  public showOpenDialog(options: OpenDialogOptions): Promise<OpenDialogReturnValue> {
+    return dialog.showOpenDialog(options)
   }
 
 }
