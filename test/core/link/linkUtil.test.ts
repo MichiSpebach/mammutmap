@@ -1,6 +1,6 @@
 import * as linkUtil from '../../../src/core/link/linkUtil'
 import { WayPointData } from '../../../src/core/mapData/WayPointData'
-import { util } from '../../../src/core/util'
+import { util } from '../../../src/core/util/util'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 

@@ -1,4 +1,4 @@
-import { util } from '../../src/core/util'
+import { util } from '../../src/core/util/util'
 
 test('getIndentationDepth', () => {
   expect(util.getIndentationDepth('')).toBe(0)

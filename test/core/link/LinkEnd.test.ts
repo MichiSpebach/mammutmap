@@ -9,7 +9,7 @@ import { DocumentObjectModelAdapter, init as initDocumentObjectModelAdapter } fr
 import { RenderManager, init as initRenderManager } from '../../../src/core/RenderManager'
 import { NodeData} from '../../../src/core/mapData/NodeData'
 import { NodeWidget } from '../../../src/core/node/NodeWidget'
-import { util } from '../../../src/core/util'
+import { util } from '../../../src/core/util/util'
 import * as boxFactory from '../box/factories/boxFactory'
 import * as linkEndFactory from './factories/linkEndFactory'
 import { LinkData } from '../../../src/core/mapData/LinkData'

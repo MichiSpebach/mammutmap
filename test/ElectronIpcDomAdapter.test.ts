@@ -1,4 +1,4 @@
-import { util } from '../src/core/util'
+import { util } from '../src/core/util/util'
 import { ElectronIpcDomAdapter } from '../src/ElectronIpcDomAdapter'
 
 test('executeJavaScript', async () => {

@@ -3,7 +3,7 @@ import { BoxData } from '../../../src/core/mapData/BoxData'
 import { FolderBox } from '../../../src/core/box/FolderBox'
 import { FileBox } from '../../../src/core/box/FileBox'
 import { BoxWatcher } from '../../../src/core/box/BoxWatcher'
-import { util } from '../../../src/core/util'
+import { util } from '../../../src/core/util/util'
 
 test('getBoxBySourcePathAndRenderIfNecessary path with one element', async () => {
   const scenario = setupScenarioForGetBoxBySourcePathAndRenderIfNecessary()

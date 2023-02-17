@@ -5,7 +5,7 @@ import { BoxMapDataLoader } from '../../../src/core/box/BoxMapDataLoader'
 import { FolderBox } from '../../../src/core/box/FolderBox'
 import { FolderBoxBody } from '../../../src/core/box/FolderBoxBody'
 import { BoxData } from '../../../src/core/mapData/BoxData'
-import { util } from '../../../src/core/util'
+import { util } from '../../../src/core/util/util'
 import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
 import { Box } from '../../../src/core/box/Box'
 
