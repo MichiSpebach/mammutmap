@@ -13,6 +13,8 @@ import * as settings from './core/Settings'
 import { ElectronAndHtmlApplicationMenu } from './ElectronAndHtmlApplicationMenu'
 import * as contextMenu from './core/contextMenu'
 import { ElectronContextMenuPopup } from './ElectronContextMenuPopup'
+import * as processingAdapter from './core/processingAdapter'
+import { NodeJsProcessingAdapter } from './NodeJsProcessingAdapter'
 
 var mainWindow: BrowserWindow
 
@@ -33,6 +35,7 @@ const createWindow = async () => {
 
   mainWindow.loadFile(path.join(__dirname, '../src/core/index.html'))
 
+  processingAdapter.init(new NodeJsProcessingAdapter())
   domAdapter.init(new ElectronIpcDomAdapter(mainWindow))
   fileSystemAdapter.init(new NodeJsFileSystemAdapter())
   await settings.init()

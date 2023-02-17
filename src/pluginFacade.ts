@@ -3,7 +3,8 @@ import { FileBox } from './core/box/FileBox'
 import { FolderBox } from './core/box/FolderBox'
 import { RootFolderBox } from './core/box/RootFolderBox'
 import { Map, map, onMapLoaded, onMapRendered, onMapUnload } from './core/Map'
-import { ChildProcess, util } from './core/util/util'
+import { util } from './core/util/util'
+import { ChildProcess, processing } from './core/processingAdapter'
 import { WayPointData } from './core/mapData/WayPointData'
 import { BoxWatcher } from './core/box/BoxWatcher'
 import { LinkEndData } from './core/mapData/LinkEndData'
@@ -30,7 +31,8 @@ import { Widget } from './core/Widget'
 import { ce, createElement, ElementAttributes, RenderElement, RenderElements } from './core/util/RenderElement'
 import { PopupWidget } from './core/PopupWidget'
 
-export { util as coreUtil, ChildProcess }
+export { util as coreUtil }
+export { processing, ChildProcess}
 export { applicationMenu, contextMenu, MenuItemFile }
 export { renderManager, RenderPriority, Subscribers }
 export { RenderElement, RenderElements, createElement, ce, ElementAttributes }

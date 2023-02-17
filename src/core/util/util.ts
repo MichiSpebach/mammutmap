@@ -1,17 +1,15 @@
-import { exec, ChildProcess } from 'child_process'
+import { processing, ChildProcess } from '../processingAdapter'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { RenderElement } from './RenderElement'
 import * as stacktraceUtil from './stacktraceUtil'
 
-export { ChildProcess }
-
 class Util {
   private logDebugActivated: boolean = false
 
   public runShellCommand(command: string): ChildProcess {
-    return exec(command)
+    return processing.runShellCommand(command)
   }
 
   public setLogDebugActivated(activated: boolean): void {
