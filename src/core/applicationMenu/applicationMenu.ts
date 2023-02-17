@@ -18,7 +18,7 @@ export async function initAndRender(object: ApplicationMenu): Promise<void> {
 export interface ApplicationMenu { // TODO: rename to interface ApplicationMenuView and AbstractApplicationMenu to ApplicationMenu calling the view which was set by init?
   initAndRender(): Promise<void>
   addMenuItemToPlugins(menuItem: MenuItem): Promise<void>
-  addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItem): Promise<void>
+  addMenuItemTo(parentMenuItem: string|MenuItemFolder, menuItem: MenuItem): Promise<void>
   setMenuItemEnabled(menuItem: MenuItem, enabled: boolean): Promise<void>
 }
 

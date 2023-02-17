@@ -1,6 +1,7 @@
 import { PopupWidget } from "../../dist/pluginFacade"
 import { renderManager } from "../../dist/pluginFacade"
 import { ChildProcess, coreUtil } from "../../dist/pluginFacade"
+import { ChildProcess as NodeChildProcess } from "child_process"
 import { ResultsWidget } from "./ResultsWidget"
 
 export class WizardWidget extends PopupWidget {
@@ -41,9 +42,9 @@ export class WizardWidget extends PopupWidget {
         this.resultsWidget = undefined
 
         const command: string = await renderManager.getValueOf(this.commandInputId)
-        let process: ChildProcess
+        let process: NodeChildProcess
         try {
-            process = coreUtil.runShellCommand(command)
+            process = coreUtil.runShellCommand(command) as NodeChildProcess
         } catch (e: any) {
             await renderManager.addContentTo(this.outputId, 'Error: '+coreUtil.escapeForHtml(e.toString()))
             return
