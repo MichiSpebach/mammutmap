@@ -1052,6 +1052,38 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "9vr5r6pnmn8",
+			"from": {
+				"path": [
+					{
+						"boxId": "3h3i50irvjg",
+						"boxName": "NodeJsProcessingAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 92,
+						"y": 48
+					},
+					{
+						"boxId": "okqimrfe8no",
+						"boxName": "processingAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
 		}
 	],
 	"nodes": []
