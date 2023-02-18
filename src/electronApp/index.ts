@@ -33,7 +33,7 @@ const createWindow = async () => {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../../src/electronApp/index.html')) // TODO: copy html and css files to dist
+  mainWindow.loadFile(path.join(__dirname, './index.html'))
 
   processingAdapter.init(new NodeJsProcessingAdapter())
   domAdapter.init(new ElectronIpcDomAdapter(mainWindow))
