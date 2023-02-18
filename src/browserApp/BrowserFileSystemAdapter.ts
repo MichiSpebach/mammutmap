@@ -1,5 +1,5 @@
-import { Dirent, FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue, Stats } from './core/fileSystemAdapter'
-import { util } from './core/util/util'
+import { Dirent, FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue, Stats } from '../core/fileSystemAdapter'
+import { util } from '../core/util/util'
 import * as direntsFromHttpServersHtmlDirectoryPageExtractor from './direntsFromHttpServersHtmlDirectoryPageExtractor'
 
 export class BrowserFileSystemAdapter extends FileSystemAdapter {
@@ -53,7 +53,7 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
     }
 
     private adjustHostPath(hostPath: string): string {
-        return '.'+hostPath
+        return '../.'+hostPath // index.html and index.ts are in dist/browserApp/, so need to move up two folders to find e.g. './settings.json' on host server
     }
 
     public readFileSync(path: string): string {

@@ -1,5 +1,5 @@
-import { Dirent } from './core/fileSystemAdapter'
-import { util } from './core/util/util'
+import { Dirent } from '../core/fileSystemAdapter'
+import { util } from '../core/util/util'
 
 export function extract(htmlDirectoryPage: string): Dirent[] {
     const tableContentHtml: string = extractTableContent(htmlDirectoryPage)
