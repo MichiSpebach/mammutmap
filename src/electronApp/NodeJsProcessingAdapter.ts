@@ -1,5 +1,5 @@
 import { exec, ChildProcess } from 'child_process'
-import { ProcessingAdapter } from './core/processingAdapter'
+import { ProcessingAdapter } from '../core/processingAdapter'
 
 export class NodeJsProcessingAdapter implements ProcessingAdapter {
 

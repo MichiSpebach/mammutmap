@@ -1,19 +1,19 @@
 import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
-import * as domAdapter from './core/domAdapter'
-import * as commandLine from './core/commandLine'
-import * as applicationMenu from './core/applicationMenu/applicationMenu'
-import * as pluginLoader from './core/pluginLoader'
-import { util } from './core/util/util'
-import { mainWidget } from './core/mainWidget'
+import * as domAdapter from '../core/domAdapter'
+import * as commandLine from '../core/commandLine'
+import * as applicationMenu from '../core/applicationMenu/applicationMenu'
+import * as pluginLoader from '../core/pluginLoader'
+import { util } from '../core/util/util'
+import { mainWidget } from '../core/mainWidget'
 import { ElectronIpcDomAdapter } from './ElectronIpcDomAdapter'
-import * as fileSystemAdapter from './core/fileSystemAdapter'
+import * as fileSystemAdapter from '../core/fileSystemAdapter'
 import { NodeJsFileSystemAdapter } from './NodeJsFileSystemAdapter'
-import * as settings from './core/Settings'
+import * as settings from '../core/Settings'
 import { ElectronAndHtmlApplicationMenu } from './ElectronAndHtmlApplicationMenu'
-import * as contextMenu from './core/contextMenu'
+import * as contextMenu from '../core/contextMenu'
 import { ElectronContextMenuPopup } from './ElectronContextMenuPopup'
-import * as processingAdapter from './core/processingAdapter'
+import * as processingAdapter from '../core/processingAdapter'
 import { NodeJsProcessingAdapter } from './NodeJsProcessingAdapter'
 
 var mainWindow: BrowserWindow
@@ -33,7 +33,7 @@ const createWindow = async () => {
     }
   });
 
-  mainWindow.loadFile(path.join(__dirname, '../src/core/index.html'))
+  mainWindow.loadFile(path.join(__dirname, '../../src/electronApp/index.html')) // TODO: copy html and css files to dist
 
   processingAdapter.init(new NodeJsProcessingAdapter())
   domAdapter.init(new ElectronIpcDomAdapter(mainWindow))

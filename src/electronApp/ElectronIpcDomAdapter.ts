@@ -1,9 +1,9 @@
-import { util } from './core/util/util'
-import { ElementAttributes, RenderElement, RenderElements, Style } from './core/util/RenderElement'
+import { util } from '../core/util/util'
+import { ElementAttributes, RenderElement, RenderElements, Style } from '../core/util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
-import { ClientRect } from './core/ClientRect'
-import { ClientPosition } from './core/shape/ClientPosition'
-import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, InputEventType, mouseEventAdvancedDefaultOptions, MouseEventResultAdvanced, MouseEventType, WheelEventType } from './core/domAdapter'
+import { ClientRect } from '../core/ClientRect'
+import { ClientPosition } from '../core/shape/ClientPosition'
+import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, InputEventType, mouseEventAdvancedDefaultOptions, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
 
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     private renderWindow: BrowserWindow

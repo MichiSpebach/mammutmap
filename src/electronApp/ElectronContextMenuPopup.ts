@@ -1,6 +1,6 @@
 import { Menu as ElectronMenu } from 'electron'
-import { MenuItem } from './core/applicationMenu/MenuItem'
-import { ContextMenuPopup } from './core/contextMenu'
+import { MenuItem } from '../core/applicationMenu/MenuItem'
+import { ContextMenuPopup } from '../core/contextMenu'
 
 export class ElectronContextMenuPopup implements ContextMenuPopup {
 

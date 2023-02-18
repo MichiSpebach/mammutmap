@@ -1,9 +1,9 @@
 {
   "name": "mammutmap",
   "productName": "mammutmap",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "TODO",
-  "main": "dist/index.js",
+  "main": "dist/electronApp/index.js",
   "scripts": {
     "test": "jest --config ./test/jest.config.js",
     "testE2e": "tsc && jest --config ./testE2e/jest.config.js --runInBand",

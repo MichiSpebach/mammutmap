@@ -1,8 +1,8 @@
 import { Menu, MenuItem as ElectronMenuItem } from 'electron'
-import { AbstractApplicationMenu } from './core/applicationMenu/applicationMenu'
-import { MenuItem } from './core/applicationMenu/MenuItem'
-import { MenuItemFolder } from './core/applicationMenu/MenuItemFolder'
-import { util } from './core/util/util'
+import { AbstractApplicationMenu } from '../core/applicationMenu/applicationMenu'
+import { MenuItem } from '../core/applicationMenu/MenuItem'
+import { MenuItemFolder } from '../core/applicationMenu/MenuItemFolder'
+import { util } from '../core/util/util'
 
 export class ElectronApplicationMenu extends AbstractApplicationMenu {
   private rendered: boolean = false

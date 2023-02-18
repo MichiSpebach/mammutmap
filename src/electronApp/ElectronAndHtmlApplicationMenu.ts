@@ -1,9 +1,9 @@
-import { MenuItemFolder } from './core/applicationMenu/MenuItemFolder'
+import { MenuItemFolder } from '../core/applicationMenu/MenuItemFolder'
 import { ElectronApplicationMenu } from './ElectronApplicationMenu'
-import { HtmlApplicationMenu } from './core/applicationMenu/HtmlApplicationMenu'
-import { settings } from './core/Settings'
-import { MenuItem } from './core/applicationMenu/MenuItem'
-import { ApplicationMenu } from './core/applicationMenu/applicationMenu'
+import { HtmlApplicationMenu } from '../core/applicationMenu/HtmlApplicationMenu'
+import { settings } from '../core/Settings'
+import { MenuItem } from '../core/applicationMenu/MenuItem'
+import { ApplicationMenu } from '../core/applicationMenu/applicationMenu'
 
 export class ElectronAndHtmlApplicationMenu implements ApplicationMenu {
   private readonly electronApplicationMenu: ElectronApplicationMenu
