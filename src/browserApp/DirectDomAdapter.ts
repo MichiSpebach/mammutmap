@@ -2,7 +2,7 @@ import { ClientRect } from '../core/ClientRect';
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
-import { RenderElements, RenderElement } from '../pluginFacade';
+import { RenderElements, RenderElement } from '../core/util/RenderElement';
 
 // TODO: reschedule all methods that return a Promise so that they are queued and priorized on heavy load to prevent lags
 export class DirectDomAdapter implements DocumentObjectModelAdapter {

@@ -1,0 +1,105 @@
+{
+	"id": "sgho0rk14so",
+	"x": 44,
+	"y": 8,
+	"width": 20,
+	"height": 20,
+	"links": [
+		{
+			"id": "r1u7gsv6tl8",
+			"from": {
+				"path": [
+					{
+						"boxId": "3a588t7cd9o",
+						"boxName": "index.html",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "dpd3jokqmm",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"important"
+			]
+		},
+		{
+			"id": "r5btjocb6bg",
+			"from": {
+				"path": [
+					{
+						"boxId": "dpd3jokqmm",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "v2paij4pdmo",
+						"boxName": "DirectDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "slekhi9i22",
+			"from": {
+				"path": [
+					{
+						"boxId": "dpd3jokqmm",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "n0u6e8svi3",
+						"boxName": "BrowserFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "cc1ssmg515g",
+			"from": {
+				"path": [
+					{
+						"boxId": "n0u6e8svi3",
+						"boxName": "BrowserFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "9dko05uerg",
+						"boxName": "direntsFromHttpServersHtmlDirectoryPageExtractor.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		}
+	],
+	"nodes": []
+}

@@ -18,7 +18,7 @@
 		},
 		{
 			"name": "isA",
-			"count": 26,
+			"count": 28,
 			"appearance": {
 				"mode": "visible",
 				"color": "aqua"
@@ -34,7 +34,7 @@
 		},
 		{
 			"name": "important",
-			"count": 11,
+			"count": 13,
 			"appearance": {
 				"mode": "visible",
 				"color": "yellow"
@@ -130,9 +130,9 @@
 				"path": [
 					{
 						"boxId": "76koudrno8g",
-						"boxName": "/home/michael/programming/ts-visualize-files/",
-						"x": 44,
-						"y": 36
+						"boxName": "mammutmap",
+						"x": 48,
+						"y": 32
 					}
 				]
 			},
@@ -141,8 +141,14 @@
 					{
 						"boxId": "irkt9q2cnb",
 						"boxName": "src",
-						"x": 18,
-						"y": 20
+						"x": 7.657,
+						"y": 12.8
+					},
+					{
+						"boxId": "960p1g3mgs",
+						"boxName": "electronApp",
+						"x": 18.286,
+						"y": 24
 					},
 					{
 						"boxId": "ffddla14d38",
@@ -180,6 +186,46 @@
 					{
 						"boxId": "18tbjkfri3o",
 						"boxName": "pluginFacade.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"important"
+			]
+		},
+		{
+			"id": "l6aitn52noo",
+			"from": {
+				"path": [
+					{
+						"boxId": "76koudrno8g",
+						"boxName": "mammutmap",
+						"x": 50,
+						"y": 32
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "irkt9q2cnb",
+						"boxName": "src",
+						"x": 47.6,
+						"y": 12.4
+					},
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 18,
+						"y": 22
+					},
+					{
+						"boxId": "3a588t7cd9o",
+						"boxName": "index.html",
 						"x": 50,
 						"y": 50
 					}

@@ -6,29 +6,6 @@
 	"height": 52,
 	"links": [
 		{
-			"id": "56uund4cto",
-			"from": {
-				"path": [
-					{
-						"boxId": "perbgpafqk8",
-						"boxName": "index.html",
-						"x": 48,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "3lsosl5fvo8",
-						"boxName": "index.css",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "vjlb3hs7fo",
 			"from": {
 				"path": [
@@ -3875,29 +3852,6 @@
 					}
 				],
 				"floatToBorder": true
-			}
-		},
-		{
-			"id": "tmgdcbj0s48",
-			"from": {
-				"path": [
-					{
-						"boxId": "perbgpafqk8",
-						"boxName": "index.html",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "cr2q48p1plg",
-						"boxName": "indexHtmlIds.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
 			}
 		}
 	],
