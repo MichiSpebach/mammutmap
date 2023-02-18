@@ -4,6 +4,9 @@ import * as direntsFromHttpServersHtmlDirectoryPageExtractor from './direntsFrom
 
 export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
+    private directoryHandles: FileSystemDirectoryHandle[] = []
+    private fileHandles: FileSystemFileHandle[] = []
+
     public async doesDirentExistAndIsFile(path: string): Promise<boolean> {
         if (this.isHostPath(path)) {
             const response: Response = await fetch(this.adjustHostPath(path))
@@ -76,8 +79,35 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         util.logWarning('BrowserFileSystemAdapter::rename(..) not implemented yet.')
     }
 
-    public showOpenDialog(options: OpenDialogOptions): Promise<OpenDialogReturnValue> {
-        util.logError('BrowserFileSystemAdapter::showOpenDialog(..) not implemented yet.')
+    public async showOpenDialog(options: OpenDialogOptions): Promise<OpenDialogReturnValue> {
+        if (!options.properties) {
+            util.logWarning(`BrowserFileSystemAdapter::showOpenDialog(..) expected options.properties to be defined, defaulting to 'openDirectory'.`)
+            return this.showDirectoryPicker()
+        }
+        if (options.properties.includes('openDirectory') && options.properties.includes('openFile')) {
+            util.logWarning(`BrowserFileSystemAdapter::showOpenDialog(..) options.properties contains 'openDirectory' and 'openFile', expected either or, defaulting to 'openDirectory'.`)
+            return this.showDirectoryPicker()
+        }
+        if (options.properties.includes('openDirectory')) {
+            return this.showDirectoryPicker()
+        }
+        if (options.properties.includes('openFile')) {
+            return this.showFilePicker()
+        }
+        util.logWarning(`BrowserFileSystemAdapter::showOpenDialog(..) options.properties contains neither 'openDirectory' nor 'openFile', defaulting to 'openDirectory'.`)
+        return this.showDirectoryPicker()
+    }
+    
+    private async showDirectoryPicker(): Promise<OpenDialogReturnValue> {
+        const directoryHandle: FileSystemDirectoryHandle = await (window as any).showDirectoryPicker() // TODO: fix as any
+        this.directoryHandles.unshift(directoryHandle) // unshift to search in newer handles first
+        return {filePaths: [directoryHandle.name]}
+    }
+    
+    private async showFilePicker(): Promise<OpenDialogReturnValue> {
+        const fileHandle: FileSystemFileHandle = await (window as any).showOpenFilePicker() // TODO: fix as any
+        this.fileHandles.unshift(fileHandle) // unshift to search in newer handles first
+        return {filePaths: [fileHandle.name]}
     }
     
 }
