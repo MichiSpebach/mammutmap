@@ -39,7 +39,7 @@ export class ElectronAndHtmlApplicationMenu implements ApplicationMenu {
     ])
   }
 
-  public async addMenuItemTo(parentMenuItem: MenuItemFolder, menuItem: MenuItem): Promise<void> {
+  public async addMenuItemTo(parentMenuItem: string|MenuItemFolder, menuItem: MenuItem): Promise<void> {
     await Promise.all([
       this.electronApplicationMenu.addMenuItemTo(parentMenuItem, menuItem),
       this.htmlApplicatioinMenu.addMenuItemTo(parentMenuItem, menuItem)
