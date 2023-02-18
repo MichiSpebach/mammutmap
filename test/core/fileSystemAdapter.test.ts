@@ -1,6 +1,6 @@
 import { fileSystem } from '../../src/core/fileSystemAdapter'
 import * as fileSystemAdapter from '../../src/core/fileSystemAdapter'
-import { NodeJsFileSystemAdapter } from '../../src/NodeJsFileSystemAdapter'
+import { NodeJsFileSystemAdapter } from '../../src/electronApp/NodeJsFileSystemAdapter'
 import { JsonObject } from '../../src/core/JsonObject'
 
 beforeAll(() => {

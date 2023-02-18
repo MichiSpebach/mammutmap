@@ -1,5 +1,5 @@
 import { util } from '../src/core/util/util'
-import { ElectronIpcDomAdapter } from '../src/ElectronIpcDomAdapter'
+import { ElectronIpcDomAdapter } from '../src/electronApp/ElectronIpcDomAdapter'
 
 test('executeJavaScript', async () => {
   const scenario = setupScenario()
