@@ -52,7 +52,7 @@ export type Style = {
 export class RenderElementClass implements RenderElement {
   public constructor(
     public type: ElementType,
-    public attributes: any,
+    public attributes: any, // TODO: flatten attributes, inline them
     public children: (string | RenderElement)[]
   ) {}
 }

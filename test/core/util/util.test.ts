@@ -1,4 +1,4 @@
-import { util } from '../../src/core/util/util'
+import { util } from '../../../src/core/util/util'
 
 test('getIndentationDepth', () => {
   expect(util.getIndentationDepth('')).toBe(0)
@@ -155,6 +155,25 @@ test('getElementCountOfPath', () => {
   expect(util.getElementCountOfPath('./')).toBe(1)
   expect(util.getElementCountOfPath('./relative/path')).toBe(2)
   expect(util.getElementCountOfPath('../relative/path')).toBe(3)
+})
+
+test('getElementsOfPath', () => {
+  expect(util.getElementsOfPath('oneElement')).toEqual(['oneElement'])
+  expect(util.getElementsOfPath('oneElement.fileEnding')).toEqual(['oneElement.fileEnding'])
+  expect(util.getElementsOfPath('oneElement/')).toEqual(['oneElement'])
+
+  expect(util.getElementsOfPath('two/elements')).toEqual(['two', 'elements'])
+  expect(util.getElementsOfPath('two/elements.fileEnding')).toEqual(['two', 'elements.fileEnding'])
+  expect(util.getElementsOfPath('two/elements/')).toEqual(['two', 'elements'])
+  
+  expect(util.getElementsOfPath('/')).toEqual(['/']) // TODO: not sure about that
+  expect(util.getElementsOfPath('file://absolute/path')).toEqual(['absolute', 'path'])
+  expect(util.getElementsOfPath('/absolute/path')).toEqual(['absolute', 'path'])
+  
+  expect(util.getElementsOfPath('./')).toEqual(['.']) // TODO: not sure about that
+  expect(util.getElementsOfPath('../')).toEqual(['..']) // TODO: not sure about that
+  expect(util.getElementsOfPath('./relative/path')).toEqual(['relative', 'path'])
+  expect(util.getElementsOfPath('../relative/path')).toEqual(['..', 'relative', 'path'])
 })
 
 test('matchFileNames', () => {

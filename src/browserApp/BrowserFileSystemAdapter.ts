@@ -1,4 +1,4 @@
-import { Dirent, FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue, Stats } from '../core/fileSystemAdapter'
+import { Dirent, DirentBasicImpl, FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue, Stats } from '../core/fileSystemAdapter'
 import { util } from '../core/util/util'
 import * as direntsFromHttpServersHtmlDirectoryPageExtractor from './direntsFromHttpServersHtmlDirectoryPageExtractor'
 
@@ -9,20 +9,22 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
     public async doesDirentExistAndIsFile(path: string): Promise<boolean> {
         if (this.isHostPath(path)) {
-            const response: Response = await fetch(this.adjustHostPath(path))
+            const response: Response = await this.fetchFromHostServer(path)
             return response.ok // TODO: this does not check if dirent is a file
         }
-        util.logWarning('BrowserFileSystemAdapter::doesDirentExistAndIsFile(..) not implemented for local fileSystem yet.')
-        return false
+
+        const handle: FileSystemHandle|undefined = await this.findHandleByPath(path)
+        return handle?.kind === 'file'
     }
 
     public async doesDirentExist(path: string): Promise<boolean> {
         if (this.isHostPath(path)) {
-            const response: Response = await fetch(this.adjustHostPath(path))
+            const response: Response = await this.fetchFromHostServer(path)
             return response.ok
         }
-        util.logWarning('BrowserFileSystemAdapter::doesDirentExist(..) not implemented for local fileSystem yet.')
-        return false
+
+        const handle: FileSystemHandle|undefined = await this.findHandleByPath(path)
+        return !!handle
     }
 
     public async getDirentStatsIfExists(path: string): Promise<Stats | null> {
@@ -36,11 +38,25 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
     public async readdir(path: string): Promise<Dirent[]> {
         if (this.isHostPath(path)) {
-            const response: Response = await fetch(this.adjustHostPath(path))
+            const response: Response = await this.fetchFromHostServer(path)
             const htmlDirectoryPage: string = await response.text()
             return direntsFromHttpServersHtmlDirectoryPageExtractor.extract(htmlDirectoryPage) // TODO: in the long run also implement RESTful backend
         }
-        util.logError(`BrowserFileSystemAdapter::readdir(..) not implemented for local fileSystem yet. Tried to read '${path}'.`)
+
+        const handle: FileSystemHandle|undefined = await this.findHandleByPath(path)
+        if (!handle) {
+            util.logWarning(`BrowserFileSystemAdapter::readdir(..) path '${path}' not found, defaulting to empty list.`)
+            return []
+        }
+        if (handle.kind !== 'directory') {
+            util.logWarning(`BrowserFileSystemAdapter::readdir(..) expected path '${path}' to be of kind 'directory' but is '${handle.kind}', defaulting to empty list.`)
+            return []
+        }
+        const dirents: Dirent[] = []
+        for await (const [key, value] of (handle as any).entries()) { // TODO: fix as any
+            dirents.push(new DirentBasicImpl(value.name, value.kind))
+        }
+        return dirents
     }
 
     public async readFile(path: string): Promise<string> {
@@ -48,7 +64,18 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
             const response: Response = await fetch(this.adjustHostPath(path))
             return await response.text()
         }
-        util.logError('BrowserFileSystemAdapter::readFile(..) not implemented for local fileSystem yet.')
+
+        const handle: FileSystemHandle|undefined = await this.findHandleByPath(path)
+        if (!handle) {
+            util.logWarning(`BrowserFileSystemAdapter::readFile(..) path '${path}' not found, defaulting to empty string.`)
+            return ''
+        }
+        if (handle.kind !== 'file' || !(handle instanceof FileSystemFileHandle)) {
+            util.logWarning(`BrowserFileSystemAdapter::readFile(..) expected path '${path}' to be of kind 'file' but is '${handle.kind}', defaulting to empty string.`)
+            return ''
+        }
+        const file: File = await handle.getFile()
+        return file.text()
     }
 
     private isHostPath(path: string): boolean {
@@ -57,6 +84,10 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
     private adjustHostPath(hostPath: string): string {
         return '../.'+hostPath // index.html and index.ts are in dist/browserApp/, so need to move up two folders to find e.g. './settings.json' on host server
+    }
+
+    private fetchFromHostServer(path: string): Promise<Response> {
+        return fetch(this.adjustHostPath(path), {cache: 'no-store'}) // TODO: configure http-server correctly and use cache: 'no-cache'
     }
 
     public readFileSync(path: string): string {
@@ -108,6 +139,53 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         const fileHandle: FileSystemFileHandle = await (window as any).showOpenFilePicker() // TODO: fix as any
         this.fileHandles.unshift(fileHandle) // unshift to search in newer handles first
         return {filePaths: [fileHandle.name]}
+    }
+
+    private async findHandleByPath(path: string): Promise<FileSystemHandle|undefined> {
+        const restElements: string[] = util.getElementsOfPath(path)
+        const firstElement: string|undefined = restElements.shift()
+        if (!firstElement) {
+            util.logWarning('BrowserFileSystemAdapter::findHandleByPath(..) path is empty, defaulting to undefined.')
+            return undefined
+        }
+
+        for (const searchHandle of this.directoryHandles) {
+            if (searchHandle.name !== firstElement) {
+                continue
+            }
+            if (restElements.length === 0) {
+                return searchHandle
+            }
+            const resultHandle: FileSystemHandle|undefined = await this.findHandleByPathInDirectoryRecursive(restElements, searchHandle)
+            if (resultHandle) {
+                return resultHandle
+            }
+        }
+        return undefined
+    }
+
+    private async findHandleByPathInDirectoryRecursive(pathElements: string[], directoryHandle: FileSystemDirectoryHandle): Promise<FileSystemHandle|undefined> {
+        const firstElement: string|undefined = pathElements.shift()
+        if (!firstElement) {
+            util.logWarning('BrowserFileSystemAdapter::findHandleByPathInDirectoryRecursive(..) path is empty, defaulting to undefined.')
+            return undefined
+        }
+        
+        for await (const [key, value] of (directoryHandle as any).entries()) { // TODO: fix as any
+            if (key !== firstElement) {
+                continue
+            }
+            if (pathElements.length === 0) {
+                return value
+            }
+            if (value.kind === 'directory') {
+                return this.findHandleByPathInDirectoryRecursive(pathElements, value)
+            }
+            util.logWarning('BrowserFileSystemAdapter::findHandleByPathInDirectoryRecursive(..) matching handle does not represent a directory but there are remaining pathElements, defaulting to undefined.')
+            return undefined
+        }
+
+        return undefined
     }
     
 }

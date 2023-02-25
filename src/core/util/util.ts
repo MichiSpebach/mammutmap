@@ -221,10 +221,33 @@ class Util {
   }
 
   public getElementCountOfPath(path: string): number {
-    if (path.startsWith('./')) {
-      path = path.substring(2)
+    return this.getElementsOfPath(path).length
+  }
+
+  public getElementsOfPath(path: string): string[] {
+    let preprocessedPath: string = path
+    if (path === '/') {
+      return ['/']
     }
-    return path.split(/[^/][/][^/]/).length
+
+    if (path.startsWith('./') && path !== './') {
+      preprocessedPath = path.substring(2)
+    } else if (path.startsWith('/')) {
+      preprocessedPath = path.substring(1)
+    } else {
+      preprocessedPath = path.replace(/^[\w]+[:][/][/]/, '')
+    }
+
+    if (preprocessedPath.endsWith('/')) {
+      preprocessedPath = preprocessedPath.substring(0, preprocessedPath.length-1)
+    }
+    
+    const elements: string[] = preprocessedPath.split('/')
+    if (elements.includes('')) {
+      this.logWarning(`Util::getElementsOfPath(..) struggling to interpret path '${path}', filtering out empty elements in '[${elements}]'.`)
+      return elements.filter(element => element.length > 0)
+    }
+    return elements
   }
 
   public removeLastElementFromPath(path: string): string {

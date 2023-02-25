@@ -12,6 +12,24 @@ export interface Dirent {
   isDirectory(): boolean
 }
 
+export class DirentBasicImpl implements Dirent {
+  public readonly name: string
+  public readonly kind: 'directory'|'file'
+  
+  public constructor(name: string, kind: 'directory'|'file') {
+    this.name = name
+    this.kind = kind
+  }
+
+  public isFile() {
+    return this.kind === 'file'
+  }
+
+  public isDirectory() {
+    return this.kind === 'directory'
+  }
+}
+
 export interface FileFilter { // subset of Electron.FileFilter
   extensions: string[]
   name: string

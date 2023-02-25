@@ -184,9 +184,71 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         if (typeof element === 'string') {
             return document.createTextNode(element)
         }
+
         const node: HTMLElement = document.createElement(element.type)
-        ;(node.attributes as any) = element.attributes // TODO: cast to any because attributes is a readonly property, find better solution
-        ;(node.children as any) = this.createHtmlElementsFrom(element.children) // TODO: cast to any because children is a readonly property, find better solution
+
+        Object.assign(node, element.attributes)
+        if (element.attributes.style) {
+            Object.assign(node.style, element.attributes.style)
+        }
+        if (element.attributes.onclick) {
+            node.onclick = (event) => element.attributes.onclick!(event.clientX, event.clientY, event.ctrlKey)
+        }
+        if (element.attributes.onchangeValue && element.attributes.onchangeChecked) {
+            util.logWarning(`DirectDomAdapter::createHtmlElementFrom(..) multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
+        }
+        if (element.attributes.onchangeValue) {
+            node.onchange = (event) => {
+                if (!element.attributes.onchangeValue) {
+                    let message: string = `DirectDomAdapter::createHtmlElementFrom(..) failed to precess onchange event on element with id '${element.attributes.id}'`
+                    message += ', element.attributes.onchangeValue is not defined anymore, defaulting to empty string.'
+                    util.logWarning(message)
+                    return ''
+                }
+                if (!event.target) {
+                    let message: string = `DirectDomAdapter::createHtmlElementFrom(..) failed to precess onchange event on element with id '${element.attributes.id}'`
+                    message += ', event.target is undefined, defaulting to empty string.'
+                    util.logWarning(message)
+                    return ''
+                }
+                const value: string|undefined = (event.target as any).value
+                if (!value) {
+                    let message: string = `DirectDomAdapter::createHtmlElementFrom(..) failed to precess onchange event on element with id '${element.attributes.id}'`
+                    message += ', event.target.value is undefined, defaulting to empty string.'
+                    util.logWarning(message)
+                    return ''
+                }
+                element.attributes.onchangeValue(value)
+            }
+        }
+        if (element.attributes.onchangeChecked) {
+            node.onchange = (event) => {
+                if (!element.attributes.onchangeChecked) {
+                    let message: string = `DirectDomAdapter::createHtmlElementFrom(..) failed to precess onchange event on element with id '${element.attributes.id}'`
+                    message += ', element.attributes.onchangeChecked is not defined anymore, defaulting to false.'
+                    util.logWarning(message)
+                    return false
+                }
+                if (!event.target) {
+                    let message: string = `DirectDomAdapter::createHtmlElementFrom(..) failed to precess onchange event on element with id '${element.attributes.id}'`
+                    message += ', event.target is undefined, defaulting to false.'
+                    util.logWarning(message)
+                    return false
+                }
+                const checked: boolean|undefined = (event.target as any).checked
+                if (!checked) {
+                    let message: string = `DirectDomAdapter::createHtmlElementFrom(..) failed to precess onchange event on element with id '${element.attributes.id}'`
+                    message += ', event.target.checked is undefined, defaulting to false.'
+                    util.logWarning(message)
+                    return false
+                }
+                element.attributes.onchangeChecked(checked)
+            }
+        }
+        // TODO: warn if element.attributes.on... event handler is not implemented yet
+
+        node.append(...this.createHtmlElementsFrom(element.children))
+
         return node
     }
 
