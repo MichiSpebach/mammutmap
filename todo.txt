@@ -1,3 +1,4 @@
+click or doubleClick on box zooms to fit box in screen?
 
 move sidebar to left by default and make it toggable with ctrl+b?
 

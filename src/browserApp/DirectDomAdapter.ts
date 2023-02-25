@@ -2,7 +2,7 @@ import { ClientRect } from '../core/ClientRect';
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
-import { RenderElements, RenderElement } from '../core/util/RenderElement';
+import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
 
 // TODO: reschedule all methods that return a Promise so that they are queued and priorized on heavy load to prevent lags
 export class DirectDomAdapter implements DocumentObjectModelAdapter {
@@ -25,16 +25,25 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public getElementOrFail(id: string): HTMLElement|never {
-        const element: HTMLElement|null = document.getElementById(id)
+        const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            // TODO: improve, util.logError(..) can go very wrong when getting elements to log message fails (cycle)
-            util.logError(`DirectDomAdapter::getElementOrFail(id: string) failed to get element with id ${id}.`)
+            // TODO: improve, util.logError(..) and util.logWarning(..) can go very wrong when getting elements to log message fails (cycle)
+            util.logError(`DirectDomAdapter::getElementOrFail(id: string) failed to get element with id '${id}'.`)
         }
         return element
     }
 
+    public getElement(id: string): HTMLElement|null {
+        return document.getElementById(id)
+    }
+
     public async isElementHovered(id: string): Promise<boolean> {
-        return this.getElementOrFail(id).matches(":hover")
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::isElementHovered(..) failed to get element with id '${id}', defaulting to false.`)
+            return false
+        }
+        return element.matches(":hover")
     }
 
     public async getClientRectOf(id: string): Promise<ClientRect> {
@@ -64,16 +73,16 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                     return this.setElementToSync(command.elementId, command.value as RenderElement)
         
                 case 'innerHTML':
-                    return this.getElementOrFail(command.elementId).innerHTML=command.value as string
+                    return this.setContentToSync(command.elementId, command.value as string)
 
                 case 'style':
                     return this.setStyleToSync(command.elementId, command.value as string)
         
                 case 'addClassTo':
-                  return this.getElementOrFail(command.elementId).classList.add(command.value as string)
+                    return this.addClassToSync(command.elementId, command.value as string)
         
                 case 'removeClassFrom':
-                  return this.getElementOrFail(command.elementId).classList.remove(command.value as string)
+                    return this.removeClassFromSync(command.elementId, command.value as string)
         
                 default:
                   util.logWarning(`Method of batchCommand '${command.method}' not known.`)
@@ -87,37 +96,66 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         this.appendChildToSync(parentId, childId)
     }
     public appendChildToSync(parentId: string, childId: string): void {
-        this.getElementOrFail(parentId).appendChild(this.getElementOrFail(childId))
+        const parent: HTMLElement|null = this.getElement(parentId)
+        const child: HTMLElement|null = this.getElement(childId)
+        if (!parent) {
+            util.logWarning(`DirectDomAdapter::appendChildTo(..) failed to get parent element with id '${parentId}'.`)
+            return
+        }
+        if (!child) {
+            util.logWarning(`DirectDomAdapter::appendChildTo(..) failed to get child element with id '${childId}'.`)
+            return
+        }
+        parent.appendChild(child)
     }
 
     public async addContentTo(id: string, content: string): Promise<void> {
         this.addContentToSync(id, content)
     }
     public addContentToSync(id: string, content: string): void {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addContentTo(..) failed to get element with id '${id}'.`)
+            return
+        }
         const temp = document.createElement("template")
         temp.innerHTML = content
-        this.getElementOrFail(id).append(temp.content)
+        element.append(temp.content)
     }
 
     public async addElementsTo(id: string, elements: RenderElements): Promise<void> {
         this.addElementsToSync(id, elements)
     }
     private addElementsToSync(id: string, elements: RenderElements): void {
-        this.getElementOrFail(id).append(...this.createHtmlElementsFrom(elements))
+        const parent: HTMLElement|null = this.getElement(id)
+        if (!parent) {
+            util.logWarning(`DirectDomAdapter::addElementsTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        parent.append(...this.createHtmlElementsFrom(elements))
     }
 
     public async addElementTo(id: string, element: RenderElement): Promise<void> {
         this.addElementToSync(id, element)
     }
     private addElementToSync(id: string, element: RenderElement): void {
-        this.getElementOrFail(id).append(...this.createHtmlElementsFrom(element))
+        const parent: HTMLElement|null = this.getElement(id)
+        if (!parent) {
+            util.logWarning(`DirectDomAdapter::addElementTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        parent.append(...this.createHtmlElementsFrom(element))
     }
 
     public async setElementsTo(id: string, elements: RenderElements): Promise<void> {
         this.setElementsToSync(id, elements)
     }
     public setElementsToSync(id: string, elements: RenderElements): void {
-        const elementToSetInto: HTMLElement = this.getElementOrFail(id)
+        const elementToSetInto: HTMLElement|null = this.getElement(id)
+        if (!elementToSetInto) {
+            util.logWarning(`DirectDomAdapter::setElementsTo(..) failed to get element with id '${id}'.`)
+            return
+        }
         elementToSetInto.innerHTML="" // TODO: is there no set(element) method?
         elementToSetInto.append(...this.createHtmlElementsFrom(elements))
     }
@@ -126,7 +164,11 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         this.setElementToSync(id, element)
     }
     public setElementToSync(id: string, element: RenderElement): void {
-        const elementToSetInto: HTMLElement = this.getElementOrFail(id)
+        const elementToSetInto: HTMLElement|null = this.getElement(id)
+        if (!elementToSetInto) {
+            util.logWarning(`DirectDomAdapter::setElementTo(..) failed to get element with id '${id}'.`)
+            return
+        }
         elementToSetInto.innerHTML="" // TODO: is there no set(element) method?
         elementToSetInto.append(this.createHtmlElementFrom(element))
     }
@@ -149,39 +191,88 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public async setContentTo(id: string, content: string): Promise<void> {
-        this.getElementOrFail(id).innerHTML=content
+        this.setContentToSync(id, content)
+    }
+    public setContentToSync(id: string, content: string): void {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::setContentTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.innerHTML=content
     }
 
     public async clearContentOf(id: string): Promise<void> {
-        this.getElementOrFail(id).innerHTML=''
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::clearContentOf(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.innerHTML=''
     }
 
     public async remove(id: string): Promise<void> {
-        this.getElementOrFail(id).remove()
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::remove(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.remove()
     }
 
     public async setStyleTo(id: string, style: string): Promise<void> {
         this.setStyleToSync(id, style)
     }
     public setStyleToSync(id: string, style: string): void {
-        (this.getElementOrFail(id).style as any)=style // TODO: cast to any because style is a readonly property, find better solution
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::setStyleTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        (element.style as any)=style // TODO: cast to any because style is a readonly property, find better solution
     }
 
     public async addClassTo(id: string, className: string): Promise<void> {
-        this.getElementOrFail(id).classList.add(className)
+        this.addClassToSync(id, className)
+    }
+    public addClassToSync(id: string, className: string): void {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addClassTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.classList.add(className)
     }
 
     public async removeClassFrom(id: string, className: string): Promise<void> {
-        this.getElementOrFail(id).classList.remove(className)
+        this.removeClassFromSync(id, className)
+    }
+    public removeClassFromSync(id: string, className: string): void {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::removeClassFrom(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.classList.remove(className)
     }
 
     public async containsClass(id: string, className: string): Promise<boolean> {
-        return this.getElementOrFail(id).classList.contains(className)
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::containsClass(..) failed to get element with id '${id}', defaulting to false.`)
+            return false
+        }
+        return element.classList.contains(className)
     }
 
     public async getClassesOf(id: string): Promise<string[]> {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::getClassesOf(..) failed to get element with id '${id}', defaulting to empty list.`)
+            return []
+        }
         const classNames: string[] = []
-        this.getElementOrFail(id).classList.forEach(className => classNames.push(className))
+        element.classList.forEach(className => classNames.push(className))
         return classNames
     }
 
@@ -190,20 +281,40 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
     
     public async getValueOf(id: string): Promise<string> {
-        return (this.getElementOrFail(id) as any).value // TODO: cast to any because value does not exist on all types of HTMLElement, find better solution
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::getValueOf(..) failed to get element with id '${id}', defaulting to empty string.`)
+            return ''
+        }
+        return (element as any).value // TODO: cast to any because value does not exist on all types of HTMLElement, find better solution
     }
 
     public async setValueTo(id: string, value: string): Promise<void> {
-        (this.getElementOrFail(id) as any).value = value // TODO: cast to any because value does not exist on all types of HTMLElement, find better solution
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::setValueTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        (element as any).value = value // TODO: cast to any because value does not exist on all types of HTMLElement, find better solution
     }
 
     public async scrollToBottom(id: string): Promise<void> {
-        this.getElementOrFail(id).scrollTop = Number.MAX_SAFE_INTEGER
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::scrollToBottom(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.scrollTop = Number.MAX_SAFE_INTEGER
     }
 
     // TODO: rename to addKeydownListenerTo
     public async addKeypressListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
-        this.getElementOrFail(id).onkeypress = (event) => { // TODO: onkeypress is depcrecated, use onkeydown instead
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addKeypressListenerTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.onkeypress = (event) => { // TODO: onkeypress is depcrecated, use onkeydown instead
             //console.log(event)
             if (event.key === key) {
                 if (!event.target) {
@@ -221,7 +332,12 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public async addChangeListenerTo<RETURN_TYPE>(id: string, returnField: 'value' | 'checked', callback: (value: RETURN_TYPE) => void): Promise<void> {
-        this.getElementOrFail(id).onchange = (event) => {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addChangeListenerTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.onchange = (event) => {
             //console.log(event)
             if (!event.target) {
                 util.logWarning('DirectDomAdapter::addChangeListenerTo(..) event.target is null')
@@ -237,14 +353,24 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
-        this.getElementOrFail(id).onwheel = (event) => {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addWheelListenerTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.onwheel = (event) => {
             //console.log(event)
             callback(event.deltaY, event.clientX, event.clientY)
         }
     }
 
     public async addEventListenerAdvancedTo(id: string, eventType: MouseEventType, options: { stopPropagation?: boolean | undefined; }, callback: (result: MouseEventResultAdvanced) => void): Promise<void> {
-        this.getElementOrFail(id)[this.prefixMouseEventTypeWithOn(eventType)] = (event) => {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element[this.prefixMouseEventTypeWithOn(eventType)] = (event) => {
             //console.log(event)
             if (options.stopPropagation) {
                 event.stopPropagation()
@@ -270,7 +396,12 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public async addEventListenerTo(id: string, eventType: MouseEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void): Promise<void> {
-        this.getElementOrFail(id)[this.prefixMouseEventTypeWithOn(eventType)] = (event) => {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addEventListenerTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element[this.prefixMouseEventTypeWithOn(eventType)] = (event) => {
             //console.log(event)
             event.stopPropagation()
             callback(event.clientX, event.clientY, event.ctrlKey)
@@ -278,7 +409,12 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public async addDragListenerTo(id: string, eventType: DragEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void): Promise<void> {
-        this.getElementOrFail(id)[this.prefixDragEventTypeWithOn(eventType)] = (event) => {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addDragListenerTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element[this.prefixDragEventTypeWithOn(eventType)] = (event) => {
             //console.log(event)
             event.stopPropagation()
             if (eventType === 'dragstart') {
@@ -295,7 +431,12 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public async removeEventListenerFrom(id: string, eventType: EventType): Promise<void> {
-        this.getElementOrFail(id)[this.prefixEventTypeWithOn(eventType)] = null
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::removeEventListenerFrom(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element[this.prefixEventTypeWithOn(eventType)] = null
     }
     
     private prefixMouseEventTypeWithOn(eventType: MouseEventType): 'onclick'|'oncontextmenu'|'onmousedown'|'onmouseup'|'onmousemove'|'onmouseover'|'onmouseout'|'onmouseenter'|'onmouseleave' {
