@@ -1,0 +1,60 @@
+{
+	"id": "72ker0hveuo",
+	"x": 80,
+	"y": 36,
+	"width": 15.999999999999986,
+	"height": 8,
+	"links": [
+		{
+			"id": "muh37oo0kuo",
+			"from": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 48
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "7gt9suh8r7g",
+						"boxName": "stacktraceUtil.ts",
+						"x": 50,
+						"y": 48
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "m1qsdfoimg",
+			"from": {
+				"path": [
+					{
+						"boxId": "7gt9suh8r7g",
+						"boxName": "stacktraceUtil.ts",
+						"x": 50,
+						"y": 52
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 52
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	],
+	"nodes": []
+}

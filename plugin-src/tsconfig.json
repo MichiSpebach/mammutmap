@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "target": "es2021",
-    "module": "commonjs",
+    "module": "es2022", // overriden by buildPluginsForOlderElectron in package.json, TODO: cleanup as soon as electron supports es-modules
     "strict": true,
     "allowJs": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
     "outDir": "../plugin",
     "moduleResolution": "node"
-  }
+  },
+  "exclude": ["**/*.test.ts"]
 }

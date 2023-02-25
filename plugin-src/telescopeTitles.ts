@@ -1,5 +1,5 @@
 import { applicationMenu, MenuItemFile, BoxHeader, Box } from '../dist/pluginFacade'
-import { util } from '../dist/util'
+import { coreUtil } from '../dist/pluginFacade'
 
 const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate})
 const activateMenuItem: MenuItemFile = new MenuItemFile({label: 'activate', click: activate})
@@ -10,14 +10,14 @@ async function deactivate(): Promise<void> {
     TelescopeBoxHeader.deactivateAndPlugout()
     await applicationMenu.setMenuItemEnabled(deactivateMenuItem, false)
     await applicationMenu.setMenuItemEnabled(activateMenuItem, true)
-    util.logInfo('deactivated telescopeTitles plugin')
+    coreUtil.logInfo('deactivated telescopeTitles plugin')
 }
 
 async function activate(): Promise<void> {
     TelescopeBoxHeader.activateAndPlugin()
     await applicationMenu.setMenuItemEnabled(deactivateMenuItem, true)
     await applicationMenu.setMenuItemEnabled(activateMenuItem, false)
-    util.logInfo('activated telescopeTitles plugin')
+    coreUtil.logInfo('activated telescopeTitles plugin')
 }
 
 class TelescopeBoxHeader extends BoxHeader {
@@ -29,6 +29,11 @@ class TelescopeBoxHeader extends BoxHeader {
   private static splitBetweenWordsBackup: (text: string) => string[]
 
   public static activateAndPlugin(): void {
+      //const swap = BoxHeader.prototype
+      //console.log(TelescopeBoxHeader.getSuperClass())
+      //Object.setPrototypeOf(TelescopeBoxHeader.getSuperClass().prototype, null)
+      //Object.setPrototypeOf(BoxHeader.prototype, TelescopeBoxHeader.prototype)
+      //Object.setPrototypeOf(TelescopeBoxHeader.getSuperClass(), swap)
       this.formTitleHtmlBackup = BoxHeader.prototype.formTitleHtml
       BoxHeader.prototype.formTitleHtml = TelescopeBoxHeader.prototype.formTitleHtml
       ;(BoxHeader.prototype as any).splitInMiddle = TelescopeBoxHeader.prototype.splitInMiddle

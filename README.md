@@ -7,6 +7,7 @@ Visualize source code in an UML-like diagram that updates with code changes and 
 `npm install`
 
 ### Start
+(run `npm install` first)\
 `npm start`
 
 ### Execute tests

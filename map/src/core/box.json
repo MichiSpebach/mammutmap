@@ -1,0 +1,1399 @@
+{
+	"id": "3lnmuaqr88",
+	"x": 20,
+	"y": 53.88473985561364,
+	"width": 48.96485707262559,
+	"height": 26.11526014438636,
+	"links": [
+		{
+			"id": "65jivuv451o",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 44.99904420042055,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 90.89442001074694,
+						"y": 99.763644177052
+					}
+				]
+			}
+		},
+		{
+			"id": "opjcldb1v4o",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 99.15772196185992,
+						"y": 75.32249547374774
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ujltrbp3r9",
+						"boxName": "BoxBorder.ts",
+						"x": 1.0074168754940378,
+						"y": 28.877882032857787
+					}
+				]
+			}
+		},
+		{
+			"id": "giag3kom29g",
+			"from": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 95.72618506739362,
+						"y": 96.57186632193813
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 48,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "j1bsg578ft8",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 98.34111114895936,
+						"y": 42.637872568267
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 2.8216503992901507,
+						"y": 79.76859504132231
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "pci0kff1s48",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 41.92434662998624,
+						"y": 99.88521339872692
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "m9s8jr4p2ko",
+						"boxName": "BoxLinks.ts",
+						"x": 45.00275077938749,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "1hj9nar106",
+			"from": {
+				"path": [
+					{
+						"boxId": "3n81ck4i5sg",
+						"boxName": "FileBox.ts",
+						"x": 50,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 52,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "vcs22i0orv8",
+			"from": {
+				"path": [
+					{
+						"boxId": "3n81ck4i5sg",
+						"boxName": "FileBox.ts",
+						"x": 0,
+						"y": 29.99932872390414
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 100.0021233676611,
+						"y": 29.992615962945557
+					}
+				]
+			}
+		},
+		{
+			"id": "alfkrujbgho",
+			"from": {
+				"path": [
+					{
+						"boxId": "3n81ck4i5sg",
+						"boxName": "FileBox.ts",
+						"x": 100.00245839172013,
+						"y": 49.997668454185124
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "n2rcvc1did8",
+						"boxName": "FileBoxHeader.ts",
+						"x": 20,
+						"y": 0
+					}
+				]
+			}
+		},
+		{
+			"id": "oq6hlkek8a",
+			"from": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 100,
+						"y": 39.998852092062215
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "lsppgrrk3so",
+						"boxName": "FolderBoxHeader.ts",
+						"x": 0,
+						"y": 49.995218513914125
+					}
+				]
+			}
+		},
+		{
+			"id": "btvk87v9t38",
+			"from": {
+				"path": [
+					{
+						"boxId": "8i2aqhl305",
+						"boxName": "RootFolderBox.ts",
+						"x": 49.99533995060348,
+						"y": 100.02357100766058
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 50,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "ckg29q74ffg",
+			"from": {
+				"path": [
+					{
+						"boxId": "ujltrbp3r9",
+						"boxName": "BoxBorder.ts",
+						"x": 1.1402815385391614,
+						"y": 17.48229795249224
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 98.96982916873637,
+						"y": 70.52278213639107
+					}
+				]
+			}
+		},
+		{
+			"id": "g6lnv48rgcg",
+			"from": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 4.445430346051464,
+						"y": 91.099173553719
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 98.34111114895936,
+						"y": 47.9683502885359
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "t0gelgml1fg",
+			"from": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 1.5945880647499397,
+						"y": 14.518790100824933
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 100,
+						"y": 49.99770862930205
+					}
+				]
+			}
+		},
+		{
+			"id": "k7l97462cho",
+			"from": {
+				"path": [
+					{
+						"boxId": "n2rcvc1did8",
+						"boxName": "FileBoxHeader.ts",
+						"x": 50,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 50.00168412543366,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "mfo5vt3k0j8",
+			"from": {
+				"path": [
+					{
+						"boxId": "lsppgrrk3so",
+						"boxName": "FolderBoxHeader.ts",
+						"x": 50,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 49.99880907012195,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "ag89smblafg",
+			"from": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 72,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 43.999999999999986,
+						"y": 80
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "pf3n99cui8o",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 49.99912449658554,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "hb324ah31o8",
+			"from": {
+				"path": [
+					{
+						"boxId": "m9s8jr4p2ko",
+						"boxName": "BoxLinks.ts",
+						"x": 50.001833852924996,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 43.86107290233838,
+						"y": 99.88521339872692
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "1pr9h9lalog",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 0,
+						"y": 80
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "asn5cru6lo8",
+						"boxName": "BoxManager.ts",
+						"x": 60.0009331404843,
+						"y": 0
+					}
+				]
+			}
+		},
+		{
+			"id": "2q68jvfpi",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "abdt6a40aoo",
+						"boxName": "BoxBody.ts",
+						"x": 50,
+						"y": 100.0070856656983
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "5bebn6jt888",
+			"from": {
+				"path": [
+					{
+						"boxId": "96nihtd8s1",
+						"boxName": "FileBoxBody.ts",
+						"x": 49.99874627015371,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "abdt6a40aoo",
+						"boxName": "BoxBody.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "gt4k6thirpg",
+			"from": {
+				"path": [
+					{
+						"boxId": "3n81ck4i5sg",
+						"boxName": "FileBox.ts",
+						"x": 14.998302146444336,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "96nihtd8s1",
+						"boxName": "FileBoxBody.ts",
+						"x": 29.99678261180424,
+						"y": 100
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "eljcn0173co",
+			"from": {
+				"path": [
+					{
+						"boxId": "vn8ji2a9l2g",
+						"boxName": "BoxWatcher.ts",
+						"x": 44.99871017670579,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "asn5cru6lo8",
+						"boxName": "BoxManager.ts",
+						"x": 29.99914011780386,
+						"y": 0
+					}
+				]
+			}
+		},
+		{
+			"id": "b9qqgs7kn3o",
+			"from": {
+				"path": [
+					{
+						"boxId": "vn8ji2a9l2g",
+						"boxName": "BoxWatcher.ts",
+						"x": 100,
+						"y": 39.99646361948545
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 0,
+						"y": 35.00077366873715
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "jf876fccnjg",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 96.46397396064506,
+						"y": 99.92654537235846
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "v8ooobkjdto",
+						"boxName": "Transform.ts",
+						"x": 0,
+						"y": 17.406246841200847
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "un3lia2d5n8",
+			"from": {
+				"path": [
+					{
+						"boxId": "v8ooobkjdto",
+						"boxName": "Transform.ts",
+						"x": 0.7873531401857661,
+						"y": 25.169311634489034
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 92.30063618878532,
+						"y": 99.20895016386032
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "bv4b87l2i0o",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 100,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2rhi7ulgmt8",
+						"boxName": "Grid.ts",
+						"x": -0.001254421836975338,
+						"y": 0.0031726894888797234
+					}
+				]
+			}
+		},
+		{
+			"id": "klc6vm77n5o",
+			"from": {
+				"path": [
+					{
+						"boxId": "v8ooobkjdto",
+						"boxName": "Transform.ts",
+						"x": 100,
+						"y": 50.00136982548423
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2rhi7ulgmt8",
+						"boxName": "Grid.ts",
+						"x": -0.0010832475762335481,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "vu6b8h4b01g",
+			"from": {
+				"path": [
+					{
+						"boxId": "2e45vnalnbg",
+						"boxName": "SourcelessBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "iroiejjp3l8",
+			"from": {
+				"path": [
+					{
+						"boxId": "2e45vnalnbg",
+						"boxName": "SourcelessBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cc805vhgr3g",
+						"boxName": "SourcelessBoxHeader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": []
+		},
+		{
+			"id": "l1nuj0h4jgg",
+			"from": {
+				"path": [
+					{
+						"boxId": "cc805vhgr3g",
+						"boxName": "SourcelessBoxHeader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "14cgcroflu",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "4k7urpfglb",
+			"from": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "asn5cru6lo8",
+						"boxName": "BoxManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "0m5kannqlv",
+			"from": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 56.000000000000014
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 55.99999999999999
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "9i5ipm0v51",
+			"from": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "bno2cafe2r",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 44,
+						"y": 84
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8hst7ghum5o",
+						"boxName": "FolderBox.ts",
+						"x": 72,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden",
+				"has"
+			]
+		},
+		{
+			"id": "v7l777n4ino",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ddk085fu74",
+						"boxName": "EmptySpaceFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "prafgl8pk4g",
+			"from": {
+				"path": [
+					{
+						"boxId": "ddk085fu74",
+						"boxName": "EmptySpaceFinder.ts",
+						"x": 49.68169941438982,
+						"y": 59.33303417656215
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2rhi7ulgmt8",
+						"boxName": "Grid.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "firph8ve3t",
+			"from": {
+				"path": [
+					{
+						"boxId": "ddk085fu74",
+						"boxName": "EmptySpaceFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "80f08jcgf58",
+						"boxName": "node80f08jcgf58",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "fp80916o0qo",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "80f08jcgf58",
+						"boxName": "node80f08jcgf58",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "rj3ns38hvt8",
+			"from": {
+				"path": [
+					{
+						"boxId": "rjo0gg3uqi",
+						"boxName": "FolderBoxBody.ts",
+						"x": 53.8786334088756,
+						"y": 35.628191696044794
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jvta9jokfd8",
+						"boxName": "nodejvta9jokfd8",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "04416g7tb0g",
+			"from": {
+				"path": [
+					{
+						"boxId": "pp0gavdio0g",
+						"boxName": "BoxMapDataLoader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jvta9jokfd8",
+						"boxName": "nodejvta9jokfd8",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "8k1ggo7bqkg",
+			"from": {
+				"path": [
+					{
+						"boxId": "96nihtd8s1",
+						"boxName": "FileBoxBody.ts",
+						"x": 100,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jvta9jokfd8",
+						"boxName": "nodejvta9jokfd8",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "pqgjpkifd1o",
+			"from": {
+				"path": [
+					{
+						"boxId": "8i2aqhl305",
+						"boxName": "RootFolderBox.ts",
+						"x": 100,
+						"y": 14.990575451823926
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jvta9jokfd8",
+						"boxName": "nodejvta9jokfd8",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "dp372otc5fo",
+			"from": {
+				"path": [
+					{
+						"boxId": "abdt6a40aoo",
+						"boxName": "BoxBody.ts",
+						"x": 69.99871569844599,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jvta9jokfd8",
+						"boxName": "nodejvta9jokfd8",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "nb2l5ak1gng",
+			"from": {
+				"path": [
+					{
+						"boxId": "6or8q07u6u",
+						"boxName": "SizeAndPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "47jki68qrd",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 52,
+						"y": 48
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6or8q07u6u",
+						"boxName": "SizeAndPosition.ts",
+						"x": 50,
+						"y": 48
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "gqulm2u1f9g",
+			"from": {
+				"path": [
+					{
+						"boxId": "6or8q07u6u",
+						"boxName": "SizeAndPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "k0mmal4nto",
+						"boxName": "nodek0mmal4nto",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "d84k94aa91g",
+			"from": {
+				"path": [
+					{
+						"boxId": "6or8q07u6u",
+						"boxName": "SizeAndPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "sueq3v2tol",
+						"boxName": "nodesueq3v2tol",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "4ag7cs0s84o",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 68,
+						"y": 80
+					},
+					{
+						"boxId": "6or8q07u6u",
+						"boxName": "SizeAndPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cot0nk5on0g",
+						"boxName": "nodecot0nk5on0g",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "h8f371be99o",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 68,
+						"y": 80
+					},
+					{
+						"boxId": "6or8q07u6u",
+						"boxName": "SizeAndPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6lmgcfh61so",
+						"boxName": "node6lmgcfh61so",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "e2jhuc6ilpg",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 68,
+						"y": 80
+					},
+					{
+						"boxId": "6or8q07u6u",
+						"boxName": "SizeAndPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "80f08jcgf58",
+						"boxName": "node80f08jcgf58",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "is356dp8ap",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 0,
+						"y": 36
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "vn8ji2a9l2g",
+						"boxName": "BoxWatcher.ts",
+						"x": 100,
+						"y": 44
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
+		}
+	],
+	"nodes": [
+		{
+			"id": "jvta9jokfd8",
+			"x": 52,
+			"y": 0
+		},
+		{
+			"id": "k0mmal4nto",
+			"x": 100,
+			"y": 0
+		},
+		{
+			"id": "sueq3v2tol",
+			"x": 64,
+			"y": 0
+		},
+		{
+			"id": "cot0nk5on0g",
+			"x": 100,
+			"y": 7.999999999999999
+		},
+		{
+			"id": "80f08jcgf58",
+			"x": 100,
+			"y": 12.000000000000002
+		},
+		{
+			"id": "6lmgcfh61so",
+			"x": 96,
+			"y": 0
+		}
+	]
+}

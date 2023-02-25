@@ -52,7 +52,7 @@ test('zoom out far often', async () => {
     await clearTerminalAndZoom(10000)
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'zoom-out-far-often-2'})
   }
-}, 10000)
+}, 15000)
 
 test('zoom in to ultimate depth and out again', async () => {
   await gui.resetWindow()

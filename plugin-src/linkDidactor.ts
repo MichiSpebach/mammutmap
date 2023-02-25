@@ -1,5 +1,5 @@
 import { applicationMenu, mainWidget, MenuItemFile, overrideLink, overrideLinkLine } from '../dist/pluginFacade'
-import { util } from '../dist/util'
+import { coreUtil } from '../dist/pluginFacade'
 import { DidactedLink } from './linkDidactor/DidactedLink'
 import { LinkDidactorToolbarView } from './linkDidactor/toolbar/LinkDidactorToolbarView'
 import { DidactedLinkLine } from './linkDidactor/DidactedLinkLine'
@@ -14,7 +14,7 @@ async function deactivate(): Promise<void> {
     overrideLinkLine(DidactedLinkLine.getSuperClass())
     await applicationMenu.setMenuItemEnabled(deactivateMenuItem, false)
     await applicationMenu.setMenuItemEnabled(activateMenuItem, true)
-    util.logInfo('deactivated linkDidactor plugin')
+    coreUtil.logInfo('deactivated linkDidactor plugin')
 }
 
 async function activate(): Promise<void> {
@@ -22,7 +22,7 @@ async function activate(): Promise<void> {
     overrideLinkLine(DidactedLinkLine)
     await applicationMenu.setMenuItemEnabled(deactivateMenuItem, true)
     await applicationMenu.setMenuItemEnabled(activateMenuItem, false)
-    util.logInfo('activated linkDidactor plugin')
+    coreUtil.logInfo('activated linkDidactor plugin')
 }
 
 activate()

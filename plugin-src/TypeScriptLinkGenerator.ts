@@ -1,12 +1,12 @@
 import * as ts from 'typescript'
 import { Program, SourceFile } from 'typescript'
 import { applicationMenu, contextMenu, MenuItemFile } from '../dist/pluginFacade'
-import { util } from '../dist/util'
+import { coreUtil } from '../dist/pluginFacade'
 import * as pluginFacade from '../dist/pluginFacade'
 import { FileBox, FileBoxDepthTreeIterator } from '../dist/pluginFacade'
 
 applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItemFile({label: 'Generate links', click: generateLinks}))
-applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItemFile({label: 'Join on GitHub (coming soon)', click: () => util.logInfo('Join on GitHub is coming soon')}))
+applicationMenu.addMenuItemTo('TypeScriptLinkGenerator.js', new MenuItemFile({label: 'Join on GitHub (coming soon)', click: () => coreUtil.logInfo('Join on GitHub is coming soon')}))
 
 contextMenu.addFileBoxMenuItem((box: pluginFacade.FileBox) => {
   if (!box.getName().endsWith('.ts')) {
@@ -19,7 +19,7 @@ contextMenu.addFileBoxMenuItem((box: pluginFacade.FileBox) => {
 })
 
 async function generateLinks(): Promise<void> {
-  util.logInfo('generateLinks')
+  coreUtil.logInfo('generateLinks')
 
   const boxes: FileBoxDepthTreeIterator = pluginFacade.getFileBoxIterator()
   let boxChunk: FileBox[] = [] // calling ts.createProgram(..) with many files is magnitude faster than calling many times with one file
@@ -34,7 +34,7 @@ async function generateLinks(): Promise<void> {
     }
   }
 
-  util.logInfo('generateLinks finished')
+  coreUtil.logInfo('generateLinks finished')
 }
 
 async function generateOutgoingLinksForBoxes(boxes: FileBox[]) {
@@ -48,11 +48,11 @@ async function generateOutgoingLinksForBoxes(boxes: FileBox[]) {
 
 async function generateOutgoingLinksForBox(box: FileBox, program: Program): Promise<void> {
   const filePath: string = box.getSrcPath()
-  util.logInfo('generate outgoing links for file '+filePath)
+  coreUtil.logInfo('generate outgoing links for file '+filePath)
 
   const sourceFile: SourceFile|undefined = program.getSourceFile(filePath)
   if (!sourceFile) {
-    util.logError('failed to get '+ filePath +' as SourceFile')
+    coreUtil.logError('failed to get '+ filePath +' as SourceFile')
   }
 
   const importPaths: string[] = extractImportPaths(sourceFile)
@@ -87,7 +87,7 @@ async function addLinks(fromBox: FileBox, relativeToFilePaths: string[]): Promis
     foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0
   }
 
-  util.logInfo(`Found ${foundLinksCount} links for '${fromBox.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`)
+  coreUtil.logInfo(`Found ${foundLinksCount} links for '${fromBox.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`)
 }
 
 function isImportFromLibrary(importPath: string): boolean {

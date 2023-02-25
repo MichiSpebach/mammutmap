@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.saveToFileSystem = exports.getLinkTags = exports.setDefaultLinkAppereanceColorAndSave = exports.setDefaultLinkAppereanceModeAndSave = exports.getDefaultLinkAppereanceColor = exports.getDefaultLinkAppereanceMode = exports.getComputedColorForLinkTags = exports.getComputedModeForLinkTags = exports.linkTags = exports.linkColorOptions = exports.boxIdHashColorName = exports.linkColors = void 0;
 const pluginFacade = require("../../dist/pluginFacade");
 const pluginFacade_1 = require("../../dist/pluginFacade");
-const util_1 = require("../../dist/util");
-const styleAdapter_1 = require("../../dist/styleAdapter");
-exports.linkColors = ['red', 'green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal', styleAdapter_1.style.getLinkColor()];
+const pluginFacade_2 = require("../../dist/pluginFacade");
+const pluginFacade_3 = require("../../dist/pluginFacade");
+exports.linkColors = ['red', 'green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal', pluginFacade_3.style.getLinkColor()];
 exports.boxIdHashColorName = 'boxId hash';
 exports.linkColorOptions = [...exports.linkColors, exports.boxIdHashColorName];
 exports.linkTags = new pluginFacade_1.Subscribers();
@@ -46,7 +46,7 @@ function getLinkTagsSortedByIndex(tagNames) {
 function getLinkTagsOrWarn() {
     const tagsOrMessage = getLinkTags();
     if (tagsOrMessage instanceof pluginFacade_1.Message) {
-        util_1.util.logWarning('Failed to getLinkTagsOrWarn(), returning empty list. Reason: ' + tagsOrMessage.message);
+        pluginFacade_2.coreUtil.logWarning('Failed to getLinkTagsOrWarn(), returning empty list. Reason: ' + tagsOrMessage.message);
         return [];
     }
     return tagsOrMessage;
@@ -56,7 +56,7 @@ function getDefaultLinkAppereanceMode() {
 }
 exports.getDefaultLinkAppereanceMode = getDefaultLinkAppereanceMode;
 function getDefaultLinkAppereanceColor() {
-    return getDefaultLinkAppereance().color ?? styleAdapter_1.style.getLinkColor();
+    return getDefaultLinkAppereance().color ?? pluginFacade_3.style.getLinkColor();
 }
 exports.getDefaultLinkAppereanceColor = getDefaultLinkAppereanceColor;
 function getDefaultLinkAppereance() {
@@ -83,7 +83,7 @@ exports.getLinkTags = getLinkTags;
 async function saveToFileSystem() {
     const mapOrMessage = pluginFacade.getMap();
     if (mapOrMessage instanceof pluginFacade_1.Message) {
-        return util_1.util.logWarning('Failed to saveToFileSystem, reason: ' + mapOrMessage.message);
+        return pluginFacade_2.coreUtil.logWarning('Failed to saveToFileSystem, reason: ' + mapOrMessage.message);
     }
     await mapOrMessage.getProjectSettings().saveToFileSystem();
 }

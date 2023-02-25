@@ -1,12 +1,12 @@
-import { renderManager } from '../../../dist/RenderManager'
-import { Widget } from '../../../dist/Widget'
+import { renderManager } from '../../../dist/pluginFacade'
+import { Widget } from '../../../dist/pluginFacade'
 import * as linkDidactorSettings from '../linkDidactorSettings'
 import * as pluginFacade from '../../../dist/pluginFacade'
 import { Map, Message, Link } from '../../../dist/pluginFacade'
-import { util } from '../../../dist/util'
-import { RenderElement, RenderElements, createElement, ce, ElementAttributes } from '../../../dist/util/RenderElement'
-import { LinkTagData } from '../../../dist/mapData/LinkTagData'
-import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/mapData/LinkAppearanceData'
+import { coreUtil } from '../../../dist/pluginFacade'
+import { RenderElement, RenderElements, createElement, ce, ElementAttributes } from '../../../dist/pluginFacade'
+import { LinkTagData } from '../../../dist/pluginFacade'
+import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/pluginFacade'
 
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
 export class LinkDidactorToolbarViewWidget extends Widget {
@@ -208,7 +208,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
     private async setDefaultLinkMode(mode: string|undefined): Promise<void> {
         if (mode && !linkAppearanceModes.includes(mode as any)) {
-            util.logWarning(`default LinkTagMode '${mode}' is not known.`)
+            coreUtil.logWarning(`default LinkTagMode '${mode}' is not known.`)
         }
         await linkDidactorSettings.setDefaultLinkAppereanceModeAndSave(mode as LinkAppearanceMode)
         await this.rerenderLinks()
@@ -216,7 +216,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
     private async setLinkTagMode(tag: LinkTagData, mode: string|undefined): Promise<void> {
         if (mode && !linkAppearanceModes.includes(mode as any)) {
-            util.logWarning(`LinkTagMode '${mode}' is not known.`)
+            coreUtil.logWarning(`LinkTagMode '${mode}' is not known.`)
         }
         tag.appearance.mode = (mode as LinkAppearanceMode)
         await linkDidactorSettings.saveToFileSystem()

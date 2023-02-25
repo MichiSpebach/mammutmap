@@ -1,6 +1,7 @@
-import { PopupWidget } from "../../dist/PopupWidget"
-import { renderManager } from "../../dist/RenderManager"
-import { ChildProcess, util } from "../../dist/util"
+import { PopupWidget } from "../../dist/pluginFacade"
+import { renderManager } from "../../dist/pluginFacade"
+import { ChildProcess, coreUtil } from "../../dist/pluginFacade"
+import { ChildProcess as NodeChildProcess } from "child_process"
 import { ResultsWidget } from "./ResultsWidget"
 
 export class WizardWidget extends PopupWidget {
@@ -41,11 +42,11 @@ export class WizardWidget extends PopupWidget {
         this.resultsWidget = undefined
 
         const command: string = await renderManager.getValueOf(this.commandInputId)
-        let process: ChildProcess
+        let process: NodeChildProcess
         try {
-            process = util.runShellCommand(command)
+            process = coreUtil.runShellCommand(command) as NodeChildProcess
         } catch (e: any) {
-            await renderManager.addContentTo(this.outputId, 'Error: '+util.escapeForHtml(e.toString()))
+            await renderManager.addContentTo(this.outputId, 'Error: '+coreUtil.escapeForHtml(e.toString()))
             return
         }
         if (!process.stdout) {
@@ -54,11 +55,11 @@ export class WizardWidget extends PopupWidget {
         }
 
         process.stdout.on('error', (data: string) => {
-            renderManager.addContentTo(this.outputId, util.escapeForHtml(data))
+            renderManager.addContentTo(this.outputId, coreUtil.escapeForHtml(data))
         })
         process.stdout.on('data', (data: string) => {
             this.results.push(data)
-            renderManager.addContentTo(this.outputId, util.escapeForHtml(data))
+            renderManager.addContentTo(this.outputId, coreUtil.escapeForHtml(data))
         })
         process.stdout.on('end', async (data: string) => {
             let message: string = 'finished'
@@ -74,7 +75,7 @@ export class WizardWidget extends PopupWidget {
 
     private async displayResults(): Promise<void> {
         if (this.resultsWidget) {
-            util.logWarning('expected resultsWidget not to be set at this state')
+            coreUtil.logWarning('expected resultsWidget not to be set at this state')
             this.resultsWidget.unrender()
         }
         await renderManager.addContentTo(this.outputId, `<div id="${this.getId()+'Results'}"></div>`)

@@ -1,0 +1,718 @@
+{
+	"id": "u7lnivj4sq",
+	"x": 4,
+	"y": 32,
+	"width": 7.999999999999998,
+	"height": 4,
+	"links": [
+		{
+			"id": "i20bbnp0vgo",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "0rtks9flf28",
+			"from": {
+				"path": [
+					{
+						"boxId": "ailbihcmovo",
+						"boxName": "MenuItemFileWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "60bge439j38",
+						"boxName": "MenuItemWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "ug16a0hmm9",
+			"from": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "eqf4j1old9o",
+			"from": {
+				"path": [
+					{
+						"boxId": "qnq1biukui8",
+						"boxName": "MenuItemFolderWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "60bge439j38",
+						"boxName": "MenuItemWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "djrqhdnuee8",
+			"from": {
+				"path": [
+					{
+						"boxId": "qnq1biukui8",
+						"boxName": "MenuItemFolderWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "4n8l9r5jg8g",
+						"boxName": "MenuItemFolderContainerWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "5e16t6sovso",
+			"from": {
+				"path": [
+					{
+						"boxId": "4n8l9r5jg8g",
+						"boxName": "MenuItemFolderContainerWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "60bge439j38",
+						"boxName": "MenuItemWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "0viajqgliko",
+			"from": {
+				"path": [
+					{
+						"boxId": "4n8l9r5jg8g",
+						"boxName": "MenuItemFolderContainerWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "spf4peal49g",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ailbihcmovo",
+						"boxName": "MenuItemFileWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "b7afasa5fp",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "qnq1biukui8",
+						"boxName": "MenuItemFolderWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "hskl0oa7djo",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "60bge439j38",
+						"boxName": "MenuItemWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ft585jg5dp",
+			"from": {
+				"path": [
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "60bge439j38",
+						"boxName": "MenuItemWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "gr627kul35g",
+			"from": {
+				"path": [
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "dkmnr4vbho",
+			"from": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "57qo9t792s8",
+			"from": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "bjghineg7m8",
+			"from": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "tg8pu44gvko",
+			"from": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "esnih1fe3a",
+			"from": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "bajhr5nkbuo",
+			"from": {
+				"path": [
+					{
+						"boxId": "qnq1biukui8",
+						"boxName": "MenuItemFolderWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ua8vkj4mb",
+			"from": {
+				"path": [
+					{
+						"boxId": "ailbihcmovo",
+						"boxName": "MenuItemFileWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "fuj26htf658",
+			"from": {
+				"path": [
+					{
+						"boxId": "4n8l9r5jg8g",
+						"boxName": "MenuItemFolderContainerWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "8ophrp3uuu",
+			"from": {
+				"path": [
+					{
+						"boxId": "4n8l9r5jg8g",
+						"boxName": "MenuItemFolderContainerWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ocv2juv0gro",
+			"from": {
+				"path": [
+					{
+						"boxId": "60bge439j38",
+						"boxName": "MenuItemWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "b3decu1m498",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "u3vgrec1chg",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "t0binfk5n7o",
+						"boxName": "MenuItemFile.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "sb78d5emebo",
+			"from": {
+				"path": [
+					{
+						"boxId": "hnnhblg2pto",
+						"boxName": "menuItemWidgetFactory.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "sc1ed5s9us",
+			"from": {
+				"path": [
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "bun10rhprqg",
+			"from": {
+				"path": [
+					{
+						"boxId": "6uv8oo9aafo",
+						"boxName": "HtmlApplicationMenuWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "0v5d8e2tjso",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "gdmkf1vt9no",
+						"boxName": "MenuItemFolder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "apvcoaef11o",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "58i7ff05al8",
+			"from": {
+				"path": [
+					{
+						"boxId": "8vq6o31k6o",
+						"boxName": "HtmlApplicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8do6ol70k2g",
+						"boxName": "applicationMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		}
+	],
+	"nodes": []
+}

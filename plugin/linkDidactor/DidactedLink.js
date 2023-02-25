@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidactedLink = void 0;
 const pluginFacade_1 = require("../../dist/pluginFacade");
-const RenderManager_1 = require("../../dist/RenderManager");
+const pluginFacade_2 = require("../../dist/pluginFacade");
 const linkDidactorSettings = require("./linkDidactorSettings");
 class DidactedLink extends pluginFacade_1.LinkImplementation {
     constructor() {
@@ -49,7 +49,7 @@ class DidactedLink extends pluginFacade_1.LinkImplementation {
         const hash = toBoxId.charCodeAt(0) + toBoxId.charCodeAt(toBoxId.length / 2) + toBoxId.charCodeAt(toBoxId.length - 1);
         return linkDidactorSettings.linkColors[hash % linkDidactorSettings.linkColors.length];
     }
-    async updateStyle(priority = RenderManager_1.RenderPriority.NORMAL) {
+    async updateStyle(priority = pluginFacade_2.RenderPriority.NORMAL) {
         let style = '';
         const firstCall = !this.currentStyle;
         const hideTransitionDurationInMs = 1000;
@@ -73,12 +73,12 @@ class DidactedLink extends pluginFacade_1.LinkImplementation {
         this.clearStyleTimer();
         if (startDisplayNoneTimer) {
             this.styleTimer = setTimeout(() => {
-                RenderManager_1.renderManager.setStyleTo(this.getId(), 'display:none;', priority);
+                pluginFacade_2.renderManager.setStyleTo(this.getId(), 'display:none;', priority);
                 this.styleTimer = null;
             }, hideTransitionDurationInMs);
         }
         if (!firstCall || style !== '') {
-            await RenderManager_1.renderManager.setStyleTo(this.getId(), style, priority);
+            await pluginFacade_2.renderManager.setStyleTo(this.getId(), style, priority);
         }
     }
     clearStyleTimer() {

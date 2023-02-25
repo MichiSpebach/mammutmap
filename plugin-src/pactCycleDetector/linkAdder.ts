@@ -1,7 +1,7 @@
-import { BoxWatcher } from "../../dist/box/BoxWatcher"
+import { BoxWatcher } from "../../dist/pluginFacade"
 import * as pluginFacade from "../../dist/pluginFacade"
 import { FileBox, RootFolderBox } from "../../dist/pluginFacade"
-import { util } from "../../dist/util"
+import { coreUtil } from "../../dist/pluginFacade"
 import { Cycle } from "./Cycle"
 
 export async function addLinks(cycles: Cycle[], moduleNamePathDictionary: Map<string, string>): Promise<void> {
@@ -12,23 +12,23 @@ export async function addLinks(cycles: Cycle[], moduleNamePathDictionary: Map<st
             const fromPath: string|undefined = moduleNamePathDictionary.get(fromModuleName)
             const toPath: string|undefined = moduleNamePathDictionary.get(toModuleName)
             if (!fromPath) {
-                util.logWarning('could not map module '+fromModuleName)
+                coreUtil.logWarning('could not map module '+fromModuleName)
                 continue
             }
             if (!toPath) {
-                util.logWarning('could not map module '+toModuleName)
+                coreUtil.logWarning('could not map module '+toModuleName)
                 continue
             }
 
             const rootFolder: RootFolderBox = pluginFacade.getRootFolder()
             const fromBox: BoxWatcher|undefined = (await pluginFacade.findBoxBySourcePath(fromPath, rootFolder)).boxWatcher
             if (!fromBox) {
-                util.logWarning('could not find box for fromPath '+fromPath)
+                coreUtil.logWarning('could not find box for fromPath '+fromPath)
                 continue
             }
             const toBox: BoxWatcher|undefined = (await pluginFacade.findBoxBySourcePath(toPath, rootFolder)).boxWatcher
             if (!toBox) {
-                util.logWarning('could not find box for toPath '+toPath)
+                coreUtil.logWarning('could not find box for toPath '+toPath)
                 continue
             }
 

@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ResultsWidget = void 0;
-const RenderManager_1 = require("../../dist/RenderManager");
-const util_1 = require("../../dist/util");
-const Widget_1 = require("../../dist/Widget");
+const pluginFacade_1 = require("../../dist/pluginFacade");
+const pluginFacade_2 = require("../../dist/pluginFacade");
+const pluginFacade_3 = require("../../dist/pluginFacade");
 const Cycle_1 = require("./Cycle");
 const linkAdder = require("./linkAdder");
-class ResultsWidget extends Widget_1.Widget {
+class ResultsWidget extends pluginFacade_3.Widget {
     constructor(id, results, afterSubmit) {
         super();
         this.id = id;
@@ -35,10 +35,10 @@ class ResultsWidget extends Widget_1.Widget {
         let cyclesHtml = '<details>';
         cyclesHtml += '<summary>cycles</summary>';
         for (const cycle of cycles) {
-            cyclesHtml += util_1.util.escapeForHtml(cycle.involvedModulesChain.toString()) + '<br>';
+            cyclesHtml += pluginFacade_2.coreUtil.escapeForHtml(cycle.involvedModulesChain.toString()) + '<br>';
         }
         cyclesHtml += '</details>';
-        await RenderManager_1.renderManager.addContentTo(this.getId(), cyclesHtml);
+        await pluginFacade_1.renderManager.addContentTo(this.getId(), cyclesHtml);
     }
     async renderResultsMapTable(cycles) {
         const uniqueModuleNames = this.extractUniqueModuleNames(cycles);
@@ -48,12 +48,12 @@ class ResultsWidget extends Widget_1.Widget {
             tableHtml += `<tr> <td>${uniqueModuleName}</td> <td><input id="${this.getPathInputIdPrefix() + uniqueModuleName}" value="${uniqueModuleName}"></td> </tr>`;
         }
         tableHtml += '</table>';
-        await RenderManager_1.renderManager.addContentTo(this.getId(), tableHtml);
-        await RenderManager_1.renderManager.addContentTo(this.getId(), `<button id ="${this.getResultsSubmitId()}">submit and add links</button>`);
-        await RenderManager_1.renderManager.addEventListenerTo(this.getResultsSubmitId(), 'click', async () => {
+        await pluginFacade_1.renderManager.addContentTo(this.getId(), tableHtml);
+        await pluginFacade_1.renderManager.addContentTo(this.getId(), `<button id ="${this.getResultsSubmitId()}">submit and add links</button>`);
+        await pluginFacade_1.renderManager.addEventListenerTo(this.getResultsSubmitId(), 'click', async () => {
             const moduleNamePathDictionary = new Map();
             for (const uniqueModuleName of uniqueModuleNames) {
-                moduleNamePathDictionary.set(uniqueModuleName, await RenderManager_1.renderManager.getValueOf(this.getPathInputIdPrefix() + uniqueModuleName));
+                moduleNamePathDictionary.set(uniqueModuleName, await pluginFacade_1.renderManager.getValueOf(this.getPathInputIdPrefix() + uniqueModuleName));
             }
             await linkAdder.addLinks(cycles, moduleNamePathDictionary);
             await this.afterSubmit();
@@ -71,8 +71,8 @@ class ResultsWidget extends Widget_1.Widget {
         return uniqueModuleNames;
     }
     async unrender() {
-        await RenderManager_1.renderManager.removeEventListenerFrom(this.getResultsSubmitId(), 'click');
-        await RenderManager_1.renderManager.setContentTo(this.getId(), '');
+        await pluginFacade_1.renderManager.removeEventListenerFrom(this.getResultsSubmitId(), 'click');
+        await pluginFacade_1.renderManager.setContentTo(this.getId(), '');
     }
 }
 exports.ResultsWidget = ResultsWidget;

@@ -1,0 +1,38 @@
+{
+	"id": "vhvlusivido",
+	"x": 28.000000000000004,
+	"y": 12.000000000000002,
+	"width": 8,
+	"height": 8,
+	"links": [
+		{
+			"id": "haq7arriaco",
+			"from": {
+				"path": [
+					{
+						"boxId": "hucoli0hl28",
+						"boxName": "ToolbarWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "mre23nmcmm8",
+						"boxName": "ToolbarView.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
+		}
+	],
+	"nodes": []
+}
