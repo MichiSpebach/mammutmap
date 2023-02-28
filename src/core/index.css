@@ -10,16 +10,10 @@ pre {
 }
 
 .applicationMenu {
-  padding: 7px;
   background-color: #333;
 }
 .applicationMenuItem {
-  padding: 7px;
   background-color: #333;
-  box-sizing: border-box;
-  border-style: solid;
-  border-color: #555;
-  border-width: 1px;
 }
 .applicationMenuItem:hover {
   background-color: #468;
@@ -36,10 +30,16 @@ pre {
   cursor: default;
 }
 
-.applicationMenuItemFolderContainer {
+.applicationMenuItemLabel {
   display: inline-block;
+  padding: 7px;
+}
+
+.applicationMenuItemFolderContainer {
   position: absolute;
-  margin-top: -7px;
+  border-style: solid;
+  border-color: #555;
+  border-width: 1px;
   white-space: nowrap;
 }
 
