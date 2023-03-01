@@ -1,4 +1,3 @@
-import { util } from '../util/util'
 import { MenuItem } from './MenuItem'
 
 export class MenuItemFolder extends MenuItem {
@@ -24,18 +23,6 @@ export class MenuItemFolder extends MenuItem {
         }
         
         return matchingItem
-    }
-
-    public switchOpenDirection<RETURN_TYPE>(cases: {right: () => RETURN_TYPE, bottom: () => RETURN_TYPE}): RETURN_TYPE {
-        const openDirection: 'right'|'bottom' = this.preferredOpenDirection
-        if (openDirection === 'bottom' && cases.bottom) {
-            return cases.bottom()
-        }
-        if (openDirection === 'right' && cases.right) {
-            return cases.right()
-        }
-        util.logWarning(`MenuItemFolder::switchOpenDirection() preferredOpenDirection '${openDirection}' not implemented, defaulting to 'right'.`)
-        return cases.right()
     }
 
 }
