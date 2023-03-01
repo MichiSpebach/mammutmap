@@ -4,7 +4,7 @@ import { renderManager } from './RenderManager'
 interface Style {
   getClass(name: 'disableUserSelect'|'draggingInProgress'): string
 
-  getApplicationMenuClass(suffix: ''|'Item'|'ItemDisabled'|'ItemFile'|'ItemFolder'|'ItemFolderContainer'): string
+  getApplicationMenuClass(suffix: ''|'Item'|'ItemDisabled'|'ItemFile'|'ItemFolder'|'ItemLabel'|'ItemFolderContainer'): string
 
   getHintClass(): string
   getPopupClass(): string

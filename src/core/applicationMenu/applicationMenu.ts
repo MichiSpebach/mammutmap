@@ -26,17 +26,17 @@ export abstract class AbstractApplicationMenu implements ApplicationMenu {
   protected readonly menuTree: MenuItemFolder
 
   public constructor() {
-    const fileMenu: MenuItemFolder = new MenuItemFolder({id: 'File', label: 'File', submenu: [
+    const fileMenu: MenuItemFolder = new MenuItemFolder({id: 'File', label: 'File', preferredOpenDirection: 'bottom', submenu: [
       new MenuItemFile({label: 'Open Folder...', click: () => this.openFolder()}),
       new MenuItemFile({label: 'Open ProjectFile '+ProjectSettings.preferredFileNameExtension+'...', click: () => this.openProjectFile()})
     ]})
 
-    const settingsMenu: MenuItemFolder = new MenuItemFolder({id: 'Settings', label: 'Settings', submenu: [
+    const settingsMenu: MenuItemFolder = new MenuItemFolder({id: 'Settings', label: 'Settings', preferredOpenDirection: 'bottom', submenu: [
       new MenuItemFile({label: 'ApplicationSettings', click: () => settingsWidget.openIfNotOpened()}),
       new MenuItemFile({label: 'DeveloperTools', click: () => renderManager.openDevTools()})
     ]})
 
-    const pluginsMenu: MenuItemFolder = new MenuItemFolder({id: 'Plugins', label: 'Plugins', submenu: [
+    const pluginsMenu: MenuItemFolder = new MenuItemFolder({id: 'Plugins', label: 'Plugins', preferredOpenDirection: 'bottom', submenu: [
       new MenuItemFile({label: 'MarketPlace (coming soon)', click: () => util.logInfo('MarketPlace is coming soon')}),
       new MenuItemFile({label: 'Tutorial to create plugins (coming soon)', click: () => util.logInfo('Tutorial to create plugins is coming soon')})
     ]})

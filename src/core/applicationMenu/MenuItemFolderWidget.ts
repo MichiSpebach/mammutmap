@@ -3,6 +3,7 @@ import { MenuItemWidget } from './MenuItemWidget'
 import { MenuItemFolder } from './MenuItemFolder'
 import { MenuItemFolderContainerWidget } from './MenuItemFolderContainerWidget'
 import { style } from '../styleAdapter'
+import { util } from '../util/util'
 
 export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
 
@@ -14,9 +15,25 @@ export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
     }
 
     protected formHtml(): string {
-        const labelHtml: string = this.menuItem.label+' &gt;'
-        const submenuContainerHtml: string = `<span id="${this.submenuContainer.getId()}"></span>`
-        return labelHtml+submenuContainerHtml
+        const openDirection = this.menuItem.preferredOpenDirection
+        const labelHtml: string = `<span class="${style.getApplicationMenuClass('ItemLabel')}">${this.menuItem.label} &gt;</span>`
+        
+        if (openDirection === 'bottom') {
+            return this.formSubmenuContainerHtmlOnBottom()+labelHtml
+        }
+        if (openDirection === 'right') {
+            return labelHtml+this.formSubmenuContainerHtmlOnRight()
+        }
+        util.logWarning(`MenuItemFolderWidget::formHtml() openDirection '${openDirection}' not implemented, defaulting to 'right'.`)
+        return labelHtml+this.formSubmenuContainerHtmlOnRight()
+    }
+
+    private formSubmenuContainerHtmlOnBottom() {
+        return `<span id="${this.submenuContainer.getId()}" style="top:100%;"></span>`
+    }
+
+    private formSubmenuContainerHtmlOnRight() {
+        return `<span id="${this.submenuContainer.getId()}"></span>`
     }
 
     protected async afterRender(): Promise<void> {
@@ -24,6 +41,7 @@ export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
             renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemFolder')),
             renderManager.addEventListenerTo(this.getId(), 'mouseenter', () => this.onMouseenter()),
             renderManager.addEventListenerTo(this.getId(), 'mouseleave', () => this.onMouseleave())
+            // TODO: implement toggle mode (click sets toggle to true and clicking somewhere else to false)? needs to keep track of every click that happens somewhere
         ])
     }
 
@@ -42,7 +60,7 @@ export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
     }
 
     private onMouseleave() {
-        this.submenuContainer.unrender()
+        this.submenuContainer.unrender() // TODO: implement timeout/transition for unrender
     }
 
 }

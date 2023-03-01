@@ -6,7 +6,7 @@ import { MenuItemWidget } from './MenuItemWidget'
 export class MenuItemFileWidget extends MenuItemWidget<MenuItemFile> {
 
     protected formHtml(): string {
-        return this.menuItem.label
+        return `<span class="${style.getApplicationMenuClass('ItemLabel')}">${this.menuItem.label}</span>`
     }
 
     protected async afterRender(): Promise<void> {

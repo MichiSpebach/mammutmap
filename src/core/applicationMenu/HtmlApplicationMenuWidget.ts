@@ -31,7 +31,7 @@ export class HtmlApplicationMenuWidget extends Widget {
 
         this.submenuWidgets = this.menuTree.submenu.map(item => menuItemWidgetFactory.of(item))
 
-        const html: string = this.submenuWidgets.map(widget => `<span id="${widget.getId()}"></span>`).join(' ')
+        const html: string = this.submenuWidgets.map(widget => `<span id="${widget.getId()}" style="display:inline-block"></span>`).join(' ')
         await renderManager.setContentTo(this.getId(), html)
 
         await Promise.all(this.submenuWidgets.map(widget => widget.render()))
