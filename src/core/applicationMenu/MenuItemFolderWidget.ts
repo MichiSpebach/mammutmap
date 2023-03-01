@@ -8,26 +8,24 @@ import { util } from '../util/util'
 export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
 
     private submenuContainer: MenuItemFolderContainerWidget
-    private openDirection: 'right'|'bottom'
 
-    public constructor(menuItem: MenuItemFolder, options?: {openDirection?: 'right'|'bottom'}) {
+    public constructor(menuItem: MenuItemFolder) {
         super(menuItem)
         this.submenuContainer = new MenuItemFolderContainerWidget(this.getId()+'Container', menuItem.submenu)
-        this.openDirection = options?.openDirection ?? 'right'
     }
 
     protected formHtml(): string {
         const labelHtml: string = `<span class="${style.getApplicationMenuClass('ItemLabel')}">${this.menuItem.label} &gt;</span>`
-        let submenuContainerHtml: string
-        if (this.openDirection === 'bottom') {
-            submenuContainerHtml = `<span id="${this.submenuContainer.getId()}" style="top:100%;"></span>`
-            return submenuContainerHtml+labelHtml
-        }
-        if (this.openDirection !== 'right') {
-            util.logWarning(`MenuItemFolderWidget::formHtml() openDirection '${this.openDirection}' not implemented, defaulting to 'right'.`)
-        }
-        submenuContainerHtml = `<span id="${this.submenuContainer.getId()}"></span>`
-        return labelHtml+submenuContainerHtml
+        return this.menuItem.switchOpenDirection({
+            bottom: () => {
+                const submenuContainerHtml: string = `<span id="${this.submenuContainer.getId()}" style="top:100%;"></span>`
+                return submenuContainerHtml+labelHtml
+            },
+            right: () => {
+                const submenuContainerHtml: string = `<span id="${this.submenuContainer.getId()}"></span>`
+                return labelHtml+submenuContainerHtml
+            }
+        })
     }
 
     protected async afterRender(): Promise<void> {

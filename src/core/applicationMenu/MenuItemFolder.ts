@@ -1,11 +1,14 @@
+import { util } from '../util/util'
 import { MenuItem } from './MenuItem'
 
 export class MenuItemFolder extends MenuItem {
+    public readonly preferredOpenDirection: 'right'|'bottom'
     public readonly submenu: MenuItem[]
 
-    public constructor(params: {id?: string, label: string, enabled?: boolean, submenu: MenuItem[]}) {
-        super(params)
-        this.submenu = params.submenu
+    public constructor(options: {id?: string, label: string, enabled?: boolean, preferredOpenDirection?: 'right'|'bottom', submenu: MenuItem[]}) {
+        super(options)
+        this.preferredOpenDirection = options.preferredOpenDirection ?? 'right'
+        this.submenu = options.submenu
     }
 
     public findMenuItemById(id: string): MenuItem|undefined {
@@ -21,6 +24,18 @@ export class MenuItemFolder extends MenuItem {
         }
         
         return matchingItem
+    }
+
+    public switchOpenDirection<RETURN_TYPE>(cases: {right: () => RETURN_TYPE, bottom: () => RETURN_TYPE}): RETURN_TYPE {
+        const openDirection: 'right'|'bottom' = this.preferredOpenDirection
+        if (openDirection === 'bottom' && cases.bottom) {
+            return cases.bottom()
+        }
+        if (openDirection === 'right' && cases.right) {
+            return cases.right()
+        }
+        util.logWarning(`MenuItemFolder::switchOpenDirection() preferredOpenDirection '${openDirection}' not implemented, defaulting to 'right'.`)
+        return cases.right()
     }
 
 }

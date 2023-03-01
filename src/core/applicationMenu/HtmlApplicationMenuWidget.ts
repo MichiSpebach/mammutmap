@@ -29,7 +29,7 @@ export class HtmlApplicationMenuWidget extends Widget {
         }
         renderManager.addClassTo(this.getId(), style.getApplicationMenuClass(''))
 
-        this.submenuWidgets = this.menuTree.submenu.map(item => menuItemWidgetFactory.of(item, 'bottom'))
+        this.submenuWidgets = this.menuTree.submenu.map(item => menuItemWidgetFactory.of(item))
 
         const html: string = this.submenuWidgets.map(widget => `<span id="${widget.getId()}" style="display:inline-block"></span>`).join(' ')
         await renderManager.setContentTo(this.getId(), html)
