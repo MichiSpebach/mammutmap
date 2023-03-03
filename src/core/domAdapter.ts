@@ -6,7 +6,8 @@ export type MouseEventType = 'click'|'contextmenu'|'mousedown'|'mouseup'|'mousem
 export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'
 export type WheelEventType = 'wheel'
 export type InputEventType = 'change'
-export type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType
+export type KeyboardEventType = 'keydown'|'keyup'
+export type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType|KeyboardEventType
 
 export const mouseEventAdvancedDefaultOptions = {stopPropagation: true}
 export type MouseEventResultAdvanced = {
@@ -56,7 +57,7 @@ export interface DocumentObjectModelAdapter {
 
    scrollToBottom(id: string): Promise<void>
 
-   addKeypressListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void>
+   addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void>
 
    addChangeListenerTo<RETURN_TYPE>(
     id: string,

@@ -304,8 +304,8 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return this.executeJsOnElementSuppressingErrors(id, "scrollTop = Number.MAX_SAFE_INTEGER")
     }
   
-    public async addKeypressListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
-      let ipcChannelName = 'keypress_'+id
+    public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
+      let ipcChannelName = 'keydown_'+id
   
       let rendererFunction: string = '(event) => {'
       rendererFunction += 'let ipc = require("electron").ipcRenderer;'
@@ -315,7 +315,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += '}'
       rendererFunction += '}'
   
-      await this.executeJavaScriptInFunction("document.getElementById('"+id+"').onkeypress = "+rendererFunction)
+      await this.addEventListenerJs(id, 'keydown', rendererFunction)
   
       this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, value: string) => callback(value))
     }
@@ -327,7 +327,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     ): Promise<void> {
       let ipcChannelName = 'change_'+id
       const rendererFunction: string = this.createChangeEventRendererFunction(ipcChannelName, returnField)
-      await this.executeJavaScriptInFunction("document.getElementById('"+id+"').onchange = "+rendererFunction)
+      await this.addEventListenerJs(id, 'change', rendererFunction)
       this.addChangeEventChannelListener(ipcChannelName, callback)
     }
   
@@ -340,7 +340,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += 'ipc.send("'+ipcChannelName+'", event.deltaY, event.clientX, event.clientY);'
       rendererFunction += '}'
   
-      await this.executeJavaScriptInFunction("document.getElementById('"+id+"').onwheel = "+rendererFunction)
+      await this.addEventListenerJs(id, 'wheel', rendererFunction)
   
       this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY))
     }
@@ -363,7 +363,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey, cursor);'
       rendererFunction += '}'
   
-      await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
+      await this.addEventListenerJs(id, eventType, rendererFunction)
   
       this.addIpcChannelListener(
         ipcChannelName,
@@ -380,7 +380,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     ): Promise<void> {
       const ipcChannelName = eventType+'_'+id
       const rendererFunction: string = this.createMouseEventRendererFunction(ipcChannelName)
-      await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
+      await this.addEventListenerJs(id, eventType, rendererFunction)
       this.addMouseEventChannelListener(ipcChannelName, callback)
     }
   
@@ -436,9 +436,15 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += '}'
       rendererFunction += '}'
   
-      await this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunction)
+      await this.addEventListenerJs(id, eventType, rendererFunction)
   
       this.addIpcChannelListener(ipcChannelName, (_: IpcMainEvent, clientX:number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed))
+    }
+
+    private addEventListenerJs(id: string, eventType: EventType, rendererFunctionJs: string): Promise<void> {
+      // TODO: use 'element.addEventListener(..)' instead of 'element.on<eventType> =' like in DirectDomAdapter to be able to add multiple listeners
+      // TODO: , removeEventListenerFrom(..) also needs to use 'element.removeEventListener(..)' then
+      return this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunctionJs)
     }
   
     public async removeEventListenerFrom(id: string, eventType: EventType): Promise<void> {
