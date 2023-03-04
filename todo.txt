@@ -84,3 +84,5 @@ improve DragManager to only have one eventListener for each eventType and simply
 when zoomed far towards a file (or double-click on header) render a editor-window (atom, intellij, eclipse (settable in settings)) as box-body
 
 make html source files markable as executable to display stuff like images, notes
+
+MenuItemFile: implement 'stayOpenWhenClicked: boolean' option, for toggles e.g. linkTags this option would be convenient

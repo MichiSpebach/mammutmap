@@ -6,6 +6,7 @@ import { util } from '../util/util'
 import * as menuItemWidgetFactory from './menuItemWidgetFactory'
 import { MenuItem } from './MenuItem'
 import { style } from '../styleAdapter'
+import { MenuItemFolderWidget } from './MenuItemFolderWidget'
 
 export class HtmlApplicationMenuWidget extends Widget {
 
@@ -29,12 +30,21 @@ export class HtmlApplicationMenuWidget extends Widget {
         }
         renderManager.addClassTo(this.getId(), style.getApplicationMenuClass(''))
 
-        this.submenuWidgets = this.menuTree.submenu.map(item => menuItemWidgetFactory.of(item))
+        this.submenuWidgets = this.menuTree.submenu.map((item: MenuItem) => {
+            const menuItemWidget = menuItemWidgetFactory.of(item, async () => this.closeSubmenuOfIfFolder(menuItemWidget))
+            return menuItemWidget
+        })
 
         const html: string = this.submenuWidgets.map(widget => `<span id="${widget.getId()}" style="display:inline-block"></span>`).join(' ')
         await renderManager.setContentTo(this.getId(), html)
 
         await Promise.all(this.submenuWidgets.map(widget => widget.render()))
+    }
+
+    private closeSubmenuOfIfFolder<T extends MenuItem>(menuItemWidget: MenuItemWidget<T>): void {
+        if (menuItemWidget instanceof MenuItemFolderWidget) {
+            menuItemWidget.unrenderSubmenuContainer()
+        }
     }
 
     public async unrender(): Promise<void> {
