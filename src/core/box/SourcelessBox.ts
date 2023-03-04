@@ -7,6 +7,7 @@ import { SourcelessBoxHeader } from './SourcelessBoxHeader'
 import { FolderBox } from './FolderBox'
 import { BoxData } from '../mapData/BoxData'
 import { BoxLinks } from './BoxLinks'
+import { ClientPosition } from '../shape/ClientPosition'
 
 export class SourcelessBox extends Box {
   private content: string
@@ -45,7 +46,7 @@ export class SourcelessBox extends Box {
     if (this.isRendered()) {
       return
     }
-    await renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForSourcelessBox(this, clientX, clientY))
+    await renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForSourcelessBox(this, new ClientPosition(clientX, clientY)))
   }
 
   protected async unrenderAdditional(): Promise<void> {

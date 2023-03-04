@@ -110,7 +110,7 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
             proms.push(this.borderingLinks.renderAll())
             DragManager.addDropTarget(this)
             proms.push(DragManager.addDraggable(this, priority))
-            proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, clientX, clientY)))
+            proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, new ClientPosition(clientX, clientY))))
         }
         
         await Promise.all(proms)

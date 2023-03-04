@@ -151,7 +151,7 @@ export class Link implements Hoverable {
 
   private async addEventListeners(): Promise<void> {
     const proms: Promise<any>[] = []
-    proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, clientX, clientY)))
+    proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, new ClientPosition(clientX, clientY))))
     proms.push(HoverManager.addHoverable(this, () => this.handleHoverOver(),() => this.handleHoverOut()))
     await Promise.all(proms)
   }

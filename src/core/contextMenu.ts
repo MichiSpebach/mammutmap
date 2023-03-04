@@ -26,7 +26,7 @@ export function init(popupImpl: ContextMenuPopup): void {
 }
 
 export interface ContextMenuPopup {
-  popup(items: MenuItem[]): void
+  popup(items: MenuItem[], position: ClientPosition): void
 }
 
 const fileBoxMenuItemGenerators: ((box: FileBox) => MenuItem|undefined)[] = []
@@ -35,11 +35,11 @@ export function addFileBoxMenuItem(generator: (box: FileBox) => MenuItem|undefin
   fileBoxMenuItemGenerators.push(generator)
 }
 
-export function openForFileBox(box: FileBox, clientX: number, clientY: number): void {
+export function openForFileBox(box: FileBox, position: ClientPosition): void {
   const items: MenuItem[] = [
     buildOpenFileInEditorItem(box),
-    buildAddLinkItem(box, clientX, clientY),
-    buildAddNodeItem(box, clientX, clientY),
+    buildAddLinkItem(box, position),
+    buildAddNodeItem(box, position),
     buildRenameBoxItem(box),
     buildRemoveOutgoingLinksItem(box)
   ]
@@ -55,16 +55,16 @@ export function openForFileBox(box: FileBox, clientX: number, clientY: number): 
     }
   })
 
-  contextMenuPopup.popup(items)
+  contextMenuPopup.popup(items, position)
 }
 
-export function openForFolderBox(box: FolderBox, clientX: number, clientY: number): void {
+export function openForFolderBox(box: FolderBox, position: ClientPosition): void {
   const items: MenuItem[] = [
-    buildAddLinkItem(box, clientX, clientY),
-    buildAddNodeItem(box, clientX, clientY),
+    buildAddLinkItem(box, position),
+    buildAddNodeItem(box, position),
     buildRenameBoxItem(box),
-    buildAddNewFileItem(box, clientX, clientY),
-    buildAddNewFolderItem(box, clientX, clientY),
+    buildAddNewFileItem(box, position),
+    buildAddNewFolderItem(box, position),
     buildRemoveOutgoingLinksItem(box)
   ]
 
@@ -72,13 +72,13 @@ export function openForFolderBox(box: FolderBox, clientX: number, clientY: numbe
     items.push(buildDetailsItem('FolderBoxDetails', box))
   }
 
-  contextMenuPopup.popup(items)
+  contextMenuPopup.popup(items, position)
 }
 
-export function openForSourcelessBox(box: SourcelessBox, clientX: number, clientY: number): void {
+export function openForSourcelessBox(box: SourcelessBox, position: ClientPosition): void {
   const items: MenuItem[] = [
-    buildAddLinkItem(box, clientX, clientY),
-    buildAddNodeItem(box, clientX, clientY),
+    buildAddLinkItem(box, position),
+    buildAddNodeItem(box, position),
     buildRenameBoxItem(box)
   ]
 
@@ -86,20 +86,20 @@ export function openForSourcelessBox(box: SourcelessBox, clientX: number, client
     items.push(buildDetailsItem('SourcelessBoxDetails', box))
   }
 
-  contextMenuPopup.popup(items)
+  contextMenuPopup.popup(items, position)
 }
 
-export function openForNode(node: NodeWidget, clientX: number, clientY: number): void {
+export function openForNode(node: NodeWidget, position: ClientPosition): void {
   const items: MenuItem[] = []
 
   if (settings.getBoolean('developerMode')) {
     items.push(buildDetailsItem('NodeDetails', node))
   }
 
-  contextMenuPopup.popup(items)
+  contextMenuPopup.popup(items, position)
 }
 
-export function openForLink(link: Link, clientX: number, clientY: number): void {
+export function openForLink(link: Link, position: ClientPosition): void {
   const items: MenuItem[] = [
     buildTagLinkItemFolder(link),
     buildRemoveLinkItem(link)
@@ -109,7 +109,7 @@ export function openForLink(link: Link, clientX: number, clientY: number): void 
     items.push(buildDetailsItem('LinkDetails', link))
   }
 
-  contextMenuPopup.popup(items)
+  contextMenuPopup.popup(items, position)
 }
 
 function buildOpenFileInEditorItem(box: FileBox): MenuItemFile {
@@ -119,8 +119,8 @@ function buildOpenFileInEditorItem(box: FileBox): MenuItemFile {
   }})
 }
 
-function buildAddLinkItem(box: Box, clientX: number, clientY: number): MenuItemFile {
-  return new MenuItemFile({label: 'link from here', click: () => addLinkToBox(box, clientX, clientY)})
+function buildAddLinkItem(box: Box, position: ClientPosition): MenuItemFile {
+  return new MenuItemFile({label: 'link from here', click: () => addLinkToBox(box, position)})
 }
 
 function buildRemoveOutgoingLinksItem(box: Box): MenuItemFile {
@@ -129,8 +129,8 @@ function buildRemoveOutgoingLinksItem(box: Box): MenuItemFile {
   }})
 }
 
-function buildAddNodeItem(box: Box, clientX: number, clientY: number): MenuItemFile {
-  return new MenuItemFile({label: 'add link node here', click: () => addNodeToBox(box, new ClientPosition(clientX, clientY))})
+function buildAddNodeItem(box: Box, position: ClientPosition): MenuItemFile {
+  return new MenuItemFile({label: 'add link node here', click: () => addNodeToBox(box, position)})
 }
 
 function buildTagLinkItemFolder(link: Link): MenuItemFolder {
@@ -184,25 +184,25 @@ function buildRenameBoxItem(box: Box): MenuItemFile {
   }})
 }
 
-function buildAddNewFileItem(box: FolderBox, clientX: number, clientY: number): MenuItemFile {
+function buildAddNewFileItem(box: FolderBox, position: ClientPosition): MenuItemFile {
   return new MenuItemFile({label: 'new file', click: async () => {
-    const mapData: BoxData = await buildMapDataForNewBox(box, clientX, clientY)
+    const mapData: BoxData = await buildMapDataForNewBox(box, position)
     await box.addNewFileAndSave(mapData.id, mapData)
     //ScaleManager.startWithClickToDropMode(newBox) // TODO: implement
   }})
 }
 
-function buildAddNewFolderItem(box: FolderBox, clientX: number, clientY: number): MenuItemFile {
+function buildAddNewFolderItem(box: FolderBox, position: ClientPosition): MenuItemFile {
   return new MenuItemFile({label: 'new folder', click: async () => {
-    const mapData: BoxData = await buildMapDataForNewBox(box, clientX, clientY)
+    const mapData: BoxData = await buildMapDataForNewBox(box, position)
     await box.addNewFolderAndSave(mapData.id, mapData)
     //ScaleManager.startWithClickToDropMode(newBox) // TODO: implement
   }})
 }
 
-async function buildMapDataForNewBox(parentBox: FolderBox, clientX: number, clientY: number): Promise<BoxData> {
-  const position: LocalPosition = await parentBox.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-  return BoxData.buildNew(position.percentX, position.percentY, 16, 8)
+async function buildMapDataForNewBox(parentBox: FolderBox, position: ClientPosition): Promise<BoxData> {
+  const positionInParentBox: LocalPosition = await parentBox.transform.clientToLocalPosition(position)
+  return BoxData.buildNew(positionInParentBox.percentX, positionInParentBox.percentY, 16, 8)
 }
 
 function buildDetailsItem(title: string, object: any): MenuItemFile {
@@ -237,10 +237,10 @@ function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
 }
 
 // TODO: move into Box?
-async function addLinkToBox(box: Box, clientX: number, clientY: number): Promise<void> {
-  const position: LocalPosition = await box.transform.clientToLocalPosition(new ClientPosition(clientX, clientY))
-  const fromWayPoint = WayPointData.buildNew(box.getId(), box.getName(), position.percentX, position.percentY)
-  const toWayPoint = WayPointData.buildNew(box.getId(), box.getName(), position.percentX, position.percentY)
+async function addLinkToBox(box: Box, position: ClientPosition): Promise<void> {
+  const positionInBox: LocalPosition = await box.transform.clientToLocalPosition(position)
+  const fromWayPoint = WayPointData.buildNew(box.getId(), box.getName(), positionInBox.percentX, positionInBox.percentY)
+  const toWayPoint = WayPointData.buildNew(box.getId(), box.getName(), positionInBox.percentX, positionInBox.percentY)
 
   const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint], true)}
   const toLinkEnd = {mapData: new LinkEndData([toWayPoint], true)}

@@ -4,21 +4,21 @@ import { MenuItemFolderContainerWidget } from '../core/applicationMenu/MenuItemF
 import { MouseEventResultAdvanced, renderManager, RenderPriority } from '../core/RenderManager'
 import * as indexHtmlIds from '../core/indexHtmlIds'
 import { createElement, RenderElement } from '../core/util/RenderElement'
+import { ClientPosition } from '../core/shape/ClientPosition'
 
 export class HtmlContextMenuPopup implements ContextMenuPopup {
 
     private openedWidget: MenuItemFolderContainerWidget|undefined = undefined
 
-    public async popup(items: MenuItem[]): Promise<void> {
+    public async popup(items: MenuItem[], position: ClientPosition): Promise<void> {
         await this.closeIfOpened()
 
-        const cursorClientPosition: {x: number, y: number} = renderManager.getCursorClientPosition()
         const element: RenderElement = createElement('div', {
             id: 'contextMenu',
             style: {
                 position: 'fixed',
-                left: cursorClientPosition.x+'px',
-                top: cursorClientPosition.y+'px'
+                left: position.x+'px',
+                top: position.y+'px'
             }
         }, [])
         renderManager.addElementTo(indexHtmlIds.bodyId, element, RenderPriority.RESPONSIVE)

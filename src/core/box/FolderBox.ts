@@ -9,6 +9,7 @@ import { FolderBoxBody } from './FolderBoxBody'
 import { BoxWatcher } from './BoxWatcher'
 import { BoxLinks } from './BoxLinks'
 import { NodeWidget } from '../node/NodeWidget'
+import { ClientPosition } from '../shape/ClientPosition'
 
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
@@ -50,7 +51,7 @@ export class FolderBox extends Box {
     if (this.isRendered()) {
       return
     }
-    await renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFolderBox(this, clientX, clientY))
+    await renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFolderBox(this, new ClientPosition(clientX, clientY)))
   }
 
   protected async unrenderAdditional(): Promise<void> {
