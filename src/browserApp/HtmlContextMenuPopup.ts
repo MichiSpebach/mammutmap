@@ -26,7 +26,7 @@ export class HtmlContextMenuPopup implements ContextMenuPopup {
         this.openedWidget = new MenuItemFolderContainerWidget('contextMenu', items)
         this.openedWidget.render()
 
-        renderManager.addEventListenerAdvancedTo(indexHtmlIds.htmlId, 'mousedown', {capture: true}, (result: MouseEventResultAdvanced) => {
+        renderManager.addEventListenerAdvancedTo(indexHtmlIds.htmlId, 'mousedown', {stopPropagation: false, capture: true}, (result: MouseEventResultAdvanced) => {
             if (!this.openedWidget || result.targetPathElementIds.includes(this.openedWidget.getId())) {
                 return
             }

@@ -9,7 +9,6 @@ export type InputEventType = 'change'
 export type KeyboardEventType = 'keydown'|'keyup'
 export type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType|KeyboardEventType
 
-export const mouseEventAdvancedDefaultOptions = {stopPropagation: true}
 export type MouseEventResultAdvanced = {
   position: ClientPosition,
   ctrlPressed: boolean,
@@ -71,7 +70,7 @@ export interface DocumentObjectModelAdapter {
    addEventListenerAdvancedTo(
     id: string,
     eventType: MouseEventType,
-    options: {stopPropagation?: boolean, capture?: boolean},
+    options: {stopPropagation: boolean, capture?: boolean},
     callback: (result: MouseEventResultAdvanced) => void
   ): Promise<void>
 

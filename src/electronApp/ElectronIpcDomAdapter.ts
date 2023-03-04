@@ -3,7 +3,7 @@ import { ElementAttributes, RenderElement, RenderElements, Style } from '../core
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
-import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, InputEventType, mouseEventAdvancedDefaultOptions, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
+import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
 
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     private renderWindow: BrowserWindow
@@ -348,7 +348,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     public async addEventListenerAdvancedTo(
       id: string,
       eventType: MouseEventType,
-      options: {stopPropagation?: boolean, capture?: boolean} = mouseEventAdvancedDefaultOptions, // TODO: complete undefined fields in options with defaults also if options are specified
+      options: {stopPropagation: boolean, capture?: boolean},
       callback: (result: MouseEventResultAdvanced) => void
     ): Promise<void> {
       let ipcChannelName = eventType+'_'+id

@@ -1,5 +1,5 @@
 import { ClientRect } from '../core/ClientRect';
-import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, mouseEventAdvancedDefaultOptions, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
+import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
 import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
@@ -13,7 +13,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
 
     public constructor() {
         //this.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', (clientX: number, clientY: number) => { TODO: implement removing of specific eventListeners and use indexHtmlIds.htmlId instead
-        this.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousemove', {}, (result: MouseEventResultAdvanced) => {
+        this.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousemove', {stopPropagation: false}, (result: MouseEventResultAdvanced) => {
             this.latestCursorClientPosition = {x: result.position.x, y: result.position.y}
         })
     }
@@ -423,7 +423,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async addEventListenerAdvancedTo(
         id: string,
         eventType: MouseEventType,
-        options: {stopPropagation?: boolean, capture?: boolean} = mouseEventAdvancedDefaultOptions, // TODO: complete undefined fields in options with defaults also if options are specified
+        options: {stopPropagation: boolean, capture?: boolean},
         callback: (result: MouseEventResultAdvanced) => void
     ): Promise<void> {
         this.addAndRegisterEventListener(id, eventType, (event: MouseEvent) => {
