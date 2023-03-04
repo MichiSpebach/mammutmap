@@ -4,7 +4,7 @@ import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
 import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
 import * as indexHtmlIds from '../core/indexHtmlIds'
-import { EventListenerRegister } from './EventListenerRegister';
+import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister';
 
 // TODO: reschedule all methods that return a Promise so that they are queued and priorized on heavy load to prevent lags
 export class DirectDomAdapter implements DocumentObjectModelAdapter {
@@ -493,9 +493,9 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             util.logWarning(`DirectDomAdapter::addAndRegisterEventListener(..) failed to get element with id '${id}', eventType is '${eventType}'.`)
             return
         }
-        this.eventListeners.add(id, eventType, listener/*, useCapture needs also to be added here, otherwise only bubbling events can be removed*/)
+        const handle: EventListenerHandle = this.eventListeners.add(id, eventType, !!useCapture, listener)
         element.addEventListener(eventType, listener, useCapture)
-        //return listener // TODO: return listener to be able to call removeEventListenerFrom(.., listener) with specific listener?
+        //return handle // TODO: return EventListenerHandle to be able to call removeEventListenerFrom(.., eventListenerHandle) for specific listener?
     }
 
     public async removeEventListenerFrom(id: string, eventType: EventType): Promise<void> {
@@ -504,8 +504,8 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             util.logWarning(`DirectDomAdapter::removeEventListenerFrom(..) failed to get element with id '${id}'.`)
             return
         }
-        const eventListener: (event: Event) => void = this.eventListeners.pop(id, eventType)
-        element.removeEventListener(eventType, eventListener)
+        const handle: EventListenerHandle = this.eventListeners.pop(id, eventType)
+        element.removeEventListener(eventType, handle.listener, handle.capture)
     }
     
     private prefixMouseEventTypeWithOn(eventType: MouseEventType): 'onclick'|'oncontextmenu'|'onmousedown'|'onmouseup'|'onmousemove'|'onmouseover'|'onmouseout'|'onmouseenter'|'onmouseleave' {
