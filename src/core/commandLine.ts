@@ -7,7 +7,7 @@ import * as htmlCursor from './htmlCursor'
 import { setCompatibilityTheme } from './styleAdapter'
 
 export function init(): void {
-  dom.addKeypressListenerTo('commandLine', 'Enter', processCommand)
+  dom.addKeydownListenerTo('commandLine', 'Enter', processCommand)
 }
 
 async function processCommand(command: string): Promise<void> {

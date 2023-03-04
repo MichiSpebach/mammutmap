@@ -7,11 +7,11 @@ import { util } from '../util/util'
 
 export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
 
-    private submenuContainer: MenuItemFolderContainerWidget
+    private readonly submenuContainer: MenuItemFolderContainerWidget
 
-    public constructor(menuItem: MenuItemFolder) {
+    public constructor(menuItem: MenuItemFolder, closeMenu: () => Promise<void>) {
         super(menuItem)
-        this.submenuContainer = new MenuItemFolderContainerWidget(this.getId()+'Container', menuItem.submenu)
+        this.submenuContainer = new MenuItemFolderContainerWidget(this.getId()+'Container', menuItem.submenu, closeMenu)
     }
 
     protected formHtml(): string {
@@ -61,6 +61,10 @@ export class MenuItemFolderWidget extends MenuItemWidget<MenuItemFolder> {
 
     private onMouseleave() {
         this.submenuContainer.unrender() // TODO: implement timeout/transition for unrender
+    }
+
+    public unrenderSubmenuContainer(): Promise<void> {
+        return this.submenuContainer.unrender()
     }
 
 }

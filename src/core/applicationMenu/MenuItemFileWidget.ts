@@ -5,6 +5,13 @@ import { MenuItemWidget } from './MenuItemWidget'
 
 export class MenuItemFileWidget extends MenuItemWidget<MenuItemFile> {
 
+    private readonly closeMenu: () => Promise<void>
+
+    public constructor(menuItem: MenuItemFile, closeMenu: () => Promise<void>) {
+        super(menuItem)
+        this.closeMenu = closeMenu
+    }
+
     protected formHtml(): string {
         return `<span class="${style.getApplicationMenuClass('ItemLabel')}">${this.menuItem.label}</span>`
     }
@@ -20,10 +27,14 @@ export class MenuItemFileWidget extends MenuItemWidget<MenuItemFile> {
         return renderManager.removeEventListenerFrom(this.getId(), 'click')
     }
 
-    private onClick() {
-        if (this.menuItem.enabled) {
-            this.menuItem.click()
+    private async onClick() {
+        if (!this.menuItem.enabled) {
+            return
         }
+        await Promise.all([
+            this.menuItem.click(),
+            this.closeMenu()
+        ])
     }
 
 }

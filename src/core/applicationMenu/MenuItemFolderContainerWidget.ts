@@ -11,13 +11,15 @@ export class MenuItemFolderContainerWidget extends Widget {
 
     private readonly id: string
     private readonly menuItems: MenuItem[]
+    private readonly closeMenu: () => Promise<void>
     private menuItemWidgets: MenuItemWidget<MenuItem>[] | undefined
     private ongoingUnrender: Promise<void> = Promise.resolve()
 
-    public constructor(id: string, menuItems: MenuItem[]) {
+    public constructor(id: string, menuItems: MenuItem[], closeMenu: () => Promise<void>) {
         super()
         this.id = id
         this.menuItems = menuItems
+        this.closeMenu = closeMenu
     }
 
     public getId(): string {
@@ -34,9 +36,9 @@ export class MenuItemFolderContainerWidget extends Widget {
         }
         renderManager.addClassTo(this.getId(), style.getApplicationMenuClass('ItemFolderContainer'))
 
-        this.menuItemWidgets = this.menuItems.map(item => menuItemWidgetFactory.of(item))
+        this.menuItemWidgets = this.menuItems.map(item => menuItemWidgetFactory.of(item, this.closeMenu))
         if (this.menuItemWidgets.length === 0) {
-            this.menuItemWidgets.push(menuItemWidgetFactory.of(new MenuItemFile({label: 'empty', enabled: false, click: () => {}})))
+            this.menuItemWidgets.push(menuItemWidgetFactory.of(new MenuItemFile({label: 'empty', enabled: false, click: () => {}}), this.closeMenu))
         }
 
         let html = this.menuItemWidgets.map(widget => `<div id="${widget.getId()}"></div>`).join('')

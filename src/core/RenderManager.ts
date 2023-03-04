@@ -190,12 +190,12 @@ export class RenderManager {
   public addEventListenerAdvancedTo(
     id: string,
     eventType: MouseEventType,
-    {priority = RenderPriority.NORMAL, stopPropagation}: {priority?: RenderPriority, stopPropagation?: boolean},
+    {priority = RenderPriority.NORMAL, stopPropagation, capture}: {priority?: RenderPriority, stopPropagation: boolean, capture?: boolean},
     callback: (result: MouseEventResultAdvanced) => void
   ): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      command: () => dom.addEventListenerAdvancedTo(id, eventType, {stopPropagation}, callback)
+      command: () => dom.addEventListenerAdvancedTo(id, eventType, {stopPropagation, capture}, callback)
     }))
   }
 

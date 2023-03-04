@@ -7,6 +7,7 @@ import { FolderBox } from './FolderBox'
 import { FileBoxHeader } from './FileBoxHeader'
 import { FileBoxBody } from './FileBoxBody'
 import { BoxLinks } from './BoxLinks'
+import { ClientPosition } from '../shape/ClientPosition'
 
 export class FileBox extends Box {
   private readonly body: FileBoxBody
@@ -48,7 +49,7 @@ export class FileBox extends Box {
     if (this.isRendered()) {
       return
     }
-    await renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, clientX, clientY))
+    await renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForFileBox(this, new ClientPosition(clientX, clientY)))
   }
 
   protected async unrenderAdditional(): Promise<void> {

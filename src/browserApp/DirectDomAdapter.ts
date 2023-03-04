@@ -3,13 +3,19 @@ import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, Mous
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
 import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
+import * as indexHtmlIds from '../core/indexHtmlIds'
+import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister';
 
 // TODO: reschedule all methods that return a Promise so that they are queued and priorized on heavy load to prevent lags
 export class DirectDomAdapter implements DocumentObjectModelAdapter {
-    private latestCursorClientPosition: {x: number, y: number} = {x: 0, y: 0} // TODO: set to center of screen?
+    private latestCursorClientPosition: {x: number, y: number}|undefined = undefined
+    private eventListeners: EventListenerRegister = new EventListenerRegister()
 
     public constructor() {
-        // TODO: addMouseMoveListener to document to track latestCursorClientPosition or find better solution
+        //this.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', (clientX: number, clientY: number) => { TODO: implement removing of specific eventListeners and use indexHtmlIds.htmlId instead
+        this.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousemove', {stopPropagation: false}, (result: MouseEventResultAdvanced) => {
+            this.latestCursorClientPosition = {x: result.position.x, y: result.position.y}
+        })
     }
 
     public openDevTools(): void {
@@ -21,6 +27,10 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
     
     public getCursorClientPosition(): { x: number; y: number; } {
+        if (!this.latestCursorClientPosition) {
+            util.logWarning(`DirectDomAdapter::getCursorClientPosition() latestCursorClientPosition is undefined, defaulting to {x: 0, y: 0}.`)
+            return {x: 0, y: 0}
+        }
         return this.latestCursorClientPosition
     }
 
@@ -369,37 +379,26 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         element.scrollTop = Number.MAX_SAFE_INTEGER
     }
 
-    // TODO: rename to addKeydownListenerTo
-    public async addKeypressListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
-        const element: HTMLElement|null = this.getElement(id)
-        if (!element) {
-            util.logWarning(`DirectDomAdapter::addKeypressListenerTo(..) failed to get element with id '${id}'.`)
-            return
-        }
-        element.onkeypress = (event) => { // TODO: onkeypress is depcrecated, use onkeydown instead
+    public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
+        this.addAndRegisterEventListener(id, 'keydown', (event: KeyboardEvent) => {
             //console.log(event)
             if (event.key === key) {
                 if (!event.target) {
-                    util.logWarning('DirectDomAdapter::addKeypressListenerTo(..) event.target is null')
+                    util.logWarning('DirectDomAdapter::addKeydownListenerTo(..) event.target is null')
                     return
                 }
                 const eventTarget: any = event.target // TODO: cast to any because value does not exist on all types of EventTarget, find better solution
                 if (!eventTarget.value) {
-                    util.logWarning('DirectDomAdapter::addKeypressListenerTo(..) event.target.value is not defined')
+                    util.logWarning('DirectDomAdapter::addKeydownListenerTo(..) event.target.value is not defined')
                     return
                 }
                 callback(eventTarget.value)
             }
-        }
+        })
     }
 
     public async addChangeListenerTo<RETURN_TYPE>(id: string, returnField: 'value' | 'checked', callback: (value: RETURN_TYPE) => void): Promise<void> {
-        const element: HTMLElement|null = this.getElement(id)
-        if (!element) {
-            util.logWarning(`DirectDomAdapter::addChangeListenerTo(..) failed to get element with id '${id}'.`)
-            return
-        }
-        element.onchange = (event) => {
+        this.addAndRegisterEventListener(id, 'change', (event: Event) => {
             //console.log(event)
             if (!event.target) {
                 util.logWarning('DirectDomAdapter::addChangeListenerTo(..) event.target is null')
@@ -411,31 +410,29 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                 return
             }
             callback(eventTarget[returnField]);
-        }
+        })
     }
 
     public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
-        const element: HTMLElement|null = this.getElement(id)
-        if (!element) {
-            util.logWarning(`DirectDomAdapter::addWheelListenerTo(..) failed to get element with id '${id}'.`)
-            return
-        }
-        element.onwheel = (event) => {
+        this.addAndRegisterEventListener(id, 'wheel', (event: WheelEvent) => {
             //console.log(event)
             callback(event.deltaY, event.clientX, event.clientY)
-        }
+        })
     }
 
-    public async addEventListenerAdvancedTo(id: string, eventType: MouseEventType, options: { stopPropagation?: boolean | undefined; }, callback: (result: MouseEventResultAdvanced) => void): Promise<void> {
-        const element: HTMLElement|null = this.getElement(id)
-        if (!element) {
-            util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) failed to get element with id '${id}'.`)
-            return
-        }
-        element[this.prefixMouseEventTypeWithOn(eventType)] = (event) => {
+    public async addEventListenerAdvancedTo(
+        id: string,
+        eventType: MouseEventType,
+        options: {stopPropagation: boolean, capture?: boolean},
+        callback: (result: MouseEventResultAdvanced) => void
+    ): Promise<void> {
+        this.addAndRegisterEventListener(id, eventType, (event: MouseEvent) => {
             //console.log(event)
             if (options.stopPropagation) {
                 event.stopPropagation()
+            }
+            if (eventType === 'contextmenu') {
+                event.preventDefault()
             }
             if (!event.target) {
                 util.logWarning('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is null')
@@ -449,34 +446,32 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             if (!['auto','default','pointer','grab','ns-resize','ew-resize','nwse-resize'].includes(cursor)) { // TODO: use something for type that also works at runtime (e.g. enum)
                 util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) cursor is not known`)
             }
+            const targetPathElementIds: string [] = []
+            for (let targetPathElement: Element|null = event.target; targetPathElement; targetPathElement = targetPathElement.parentElement) {
+                targetPathElementIds.unshift(targetPathElement.id)
+            }
             callback({
                 position: new ClientPosition(event.clientX, event.clientY), 
                 ctrlPressed: event.ctrlKey, 
-                cursor: cursor as ('auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize') // TODO: remove cast as soon as typing is improved
+                cursor: cursor as ('auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'), // TODO: remove cast as soon as typing is improved
+                targetPathElementIds
             })
-        }
+        }, options.capture)
     }
 
     public async addEventListenerTo(id: string, eventType: MouseEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void): Promise<void> {
-        const element: HTMLElement|null = this.getElement(id)
-        if (!element) {
-            util.logWarning(`DirectDomAdapter::addEventListenerTo(..) failed to get element with id '${id}'.`)
-            return
-        }
-        element[this.prefixMouseEventTypeWithOn(eventType)] = (event) => {
+        this.addAndRegisterEventListener(id, eventType, (event: MouseEvent): void => {
             //console.log(event)
             event.stopPropagation()
+            if (eventType === 'contextmenu') {
+                event.preventDefault()
+            }
             callback(event.clientX, event.clientY, event.ctrlKey)
-        }
+        })
     }
 
     public async addDragListenerTo(id: string, eventType: DragEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void): Promise<void> {
-        const element: HTMLElement|null = this.getElement(id)
-        if (!element) {
-            util.logWarning(`DirectDomAdapter::addDragListenerTo(..) failed to get element with id '${id}'.`)
-            return
-        }
-        element[this.prefixDragEventTypeWithOn(eventType)] = (event) => {
+        this.addAndRegisterEventListener(id, eventType, (event: DragEvent): void => {
             //console.log(event)
             event.stopPropagation()
             if (eventType === 'dragstart') {
@@ -489,7 +484,18 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             if (event.clientX != 0 || event.clientY != 0) {
                 callback(event.clientX, event.clientY, event.ctrlKey)
             }
+        })
+    }
+
+    private addAndRegisterEventListener<T extends EventType>(id: string, eventType: T, listener: (event: HTMLElementEventMap[T]) => void, useCapture?: boolean): void {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addAndRegisterEventListener(..) failed to get element with id '${id}', eventType is '${eventType}'.`)
+            return
         }
+        const handle: EventListenerHandle = this.eventListeners.add(id, eventType, !!useCapture, listener)
+        element.addEventListener(eventType, listener, useCapture)
+        //return handle // TODO: return EventListenerHandle to be able to call removeEventListenerFrom(.., eventListenerHandle) for specific listener?
     }
 
     public async removeEventListenerFrom(id: string, eventType: EventType): Promise<void> {
@@ -498,7 +504,8 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             util.logWarning(`DirectDomAdapter::removeEventListenerFrom(..) failed to get element with id '${id}'.`)
             return
         }
-        element[this.prefixEventTypeWithOn(eventType)] = null
+        const handle: EventListenerHandle = this.eventListeners.pop(id, eventType)
+        element.removeEventListener(eventType, handle.listener, handle.capture)
     }
     
     private prefixMouseEventTypeWithOn(eventType: MouseEventType): 'onclick'|'oncontextmenu'|'onmousedown'|'onmouseup'|'onmousemove'|'onmouseover'|'onmouseout'|'onmouseenter'|'onmouseleave' {

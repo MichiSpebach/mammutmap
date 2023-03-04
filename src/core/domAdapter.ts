@@ -6,13 +6,14 @@ export type MouseEventType = 'click'|'contextmenu'|'mousedown'|'mouseup'|'mousem
 export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'
 export type WheelEventType = 'wheel'
 export type InputEventType = 'change'
-export type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType
+export type KeyboardEventType = 'keydown'|'keyup'
+export type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType|KeyboardEventType
 
-export const mouseEventAdvancedDefaultOptions = {stopPropagation: true}
 export type MouseEventResultAdvanced = {
   position: ClientPosition,
   ctrlPressed: boolean,
-  cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'
+  cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize',
+  targetPathElementIds: string[]
 }
 
 export type BatchMethod = 'appendChildTo'|'addContentTo'|'addElementsTo'|'addElementTo'|'setElementsTo'|'setElementTo'|'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
@@ -56,7 +57,7 @@ export interface DocumentObjectModelAdapter {
 
    scrollToBottom(id: string): Promise<void>
 
-   addKeypressListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void>
+   addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void>
 
    addChangeListenerTo<RETURN_TYPE>(
     id: string,
@@ -69,7 +70,7 @@ export interface DocumentObjectModelAdapter {
    addEventListenerAdvancedTo(
     id: string,
     eventType: MouseEventType,
-    options: {stopPropagation?: boolean},
+    options: {stopPropagation: boolean, capture?: boolean},
     callback: (result: MouseEventResultAdvanced) => void
   ): Promise<void>
 

@@ -9,6 +9,7 @@ import * as contextMenu from '../core/contextMenu'
 import { DirectDomAdapter } from './DirectDomAdapter'
 import { HtmlApplicationMenu } from '../core/applicationMenu/HtmlApplicationMenu'
 import { BrowserFileSystemAdapter } from './BrowserFileSystemAdapter'
+import { HtmlContextMenuPopup } from './HtmlContextMenuPopup'
 
 init()
 
@@ -19,7 +20,7 @@ async function init(): Promise<void> {
     await settings.init()
     mainWidget.render()
     commandLine.init()
-    //contextMenu.init(new HtmlContextMenuPopup()) TODO
+    contextMenu.init(new HtmlContextMenuPopup())
     await applicationMenu.initAndRender(new HtmlApplicationMenu())
     await pluginLoader.loadPlugins()
 }
