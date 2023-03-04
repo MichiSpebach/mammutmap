@@ -348,7 +348,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     public async addEventListenerAdvancedTo(
       id: string,
       eventType: MouseEventType,
-      options: {stopPropagation?: boolean} = mouseEventAdvancedDefaultOptions, // TODO: complete undefined fields in options with defaults also if options are specified
+      options: {stopPropagation?: boolean, capture?: boolean} = mouseEventAdvancedDefaultOptions, // TODO: complete undefined fields in options with defaults also if options are specified
       callback: (result: MouseEventResultAdvanced) => void
     ): Promise<void> {
       let ipcChannelName = eventType+'_'+id
@@ -360,15 +360,19 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         rendererFunction += 'event.stopPropagation();'
       }
       rendererFunction += 'let cursor = window.getComputedStyle(event.target)["cursor"];'
-      rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey, cursor);'
+      rendererFunction += 'const targetPathElementIds = [];'
+      rendererFunction += 'for (let targetPathElement = event.target; targetPathElement; targetPathElement = targetPathElement.parentElement) {'
+      rendererFunction += 'targetPathElementIds.unshift(targetPathElement.id);'
+      rendererFunction += '}'
+      rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey, cursor, targetPathElementIds);'
       rendererFunction += '}'
   
       await this.addEventListenerJs(id, eventType, rendererFunction)
   
       this.addIpcChannelListener(
         ipcChannelName,
-        (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any) => callback({
-          position: new ClientPosition(clientX, clientY), ctrlPressed, cursor
+        (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any, targetPathElementIds: string[]) => callback({
+          position: new ClientPosition(clientX, clientY), ctrlPressed, cursor, targetPathElementIds
         })
       )
     }

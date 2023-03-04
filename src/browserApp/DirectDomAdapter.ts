@@ -1,5 +1,5 @@
 import { ClientRect } from '../core/ClientRect';
-import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
+import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, mouseEventAdvancedDefaultOptions, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
 import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
@@ -420,7 +420,12 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         })
     }
 
-    public async addEventListenerAdvancedTo(id: string, eventType: MouseEventType, options: { stopPropagation?: boolean | undefined; }, callback: (result: MouseEventResultAdvanced) => void): Promise<void> {
+    public async addEventListenerAdvancedTo(
+        id: string,
+        eventType: MouseEventType,
+        options: {stopPropagation?: boolean, capture?: boolean} = mouseEventAdvancedDefaultOptions, // TODO: complete undefined fields in options with defaults also if options are specified
+        callback: (result: MouseEventResultAdvanced) => void
+    ): Promise<void> {
         this.addAndRegisterEventListener(id, eventType, (event: MouseEvent) => {
             //console.log(event)
             if (options.stopPropagation) {
@@ -441,12 +446,17 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             if (!['auto','default','pointer','grab','ns-resize','ew-resize','nwse-resize'].includes(cursor)) { // TODO: use something for type that also works at runtime (e.g. enum)
                 util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) cursor is not known`)
             }
+            const targetPathElementIds: string [] = []
+            for (let targetPathElement: Element|null = event.target; targetPathElement; targetPathElement = targetPathElement.parentElement) {
+                targetPathElementIds.unshift(targetPathElement.id)
+            }
             callback({
                 position: new ClientPosition(event.clientX, event.clientY), 
                 ctrlPressed: event.ctrlKey, 
-                cursor: cursor as ('auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize') // TODO: remove cast as soon as typing is improved
+                cursor: cursor as ('auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'), // TODO: remove cast as soon as typing is improved
+                targetPathElementIds
             })
-        })
+        }, options.capture)
     }
 
     public async addEventListenerTo(id: string, eventType: MouseEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void): Promise<void> {
@@ -477,14 +487,14 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         })
     }
 
-    private addAndRegisterEventListener<T extends EventType>(id: string, eventType: T, listener: (event: HTMLElementEventMap[T]) => void): void {
+    private addAndRegisterEventListener<T extends EventType>(id: string, eventType: T, listener: (event: HTMLElementEventMap[T]) => void, useCapture?: boolean): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
             util.logWarning(`DirectDomAdapter::addAndRegisterEventListener(..) failed to get element with id '${id}', eventType is '${eventType}'.`)
             return
         }
-        this.eventListeners.add(id, eventType, listener)
-        element.addEventListener(eventType, listener)
+        this.eventListeners.add(id, eventType, listener/*, useCapture needs also to be added here, otherwise only bubbling events can be removed*/)
+        element.addEventListener(eventType, listener, useCapture)
         //return listener // TODO: return listener to be able to call removeEventListenerFrom(.., listener) with specific listener?
     }
 

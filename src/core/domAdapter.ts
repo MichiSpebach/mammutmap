@@ -13,7 +13,8 @@ export const mouseEventAdvancedDefaultOptions = {stopPropagation: true}
 export type MouseEventResultAdvanced = {
   position: ClientPosition,
   ctrlPressed: boolean,
-  cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'
+  cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize',
+  targetPathElementIds: string[]
 }
 
 export type BatchMethod = 'appendChildTo'|'addContentTo'|'addElementsTo'|'addElementTo'|'setElementsTo'|'setElementTo'|'innerHTML'|'style'|'addClassTo'|'removeClassFrom'
@@ -70,7 +71,7 @@ export interface DocumentObjectModelAdapter {
    addEventListenerAdvancedTo(
     id: string,
     eventType: MouseEventType,
-    options: {stopPropagation?: boolean},
+    options: {stopPropagation?: boolean, capture?: boolean},
     callback: (result: MouseEventResultAdvanced) => void
   ): Promise<void>
 
