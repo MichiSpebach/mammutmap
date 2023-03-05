@@ -12,6 +12,39 @@ export interface Dirent {
   isDirectory(): boolean
 }
 
+export class FileStatsBasicImpl implements Stats {
+  public readonly size: number
+
+  public constructor(sizeInBytes: number) {
+    this.size = sizeInBytes
+  }
+
+  public isFile(): boolean {
+    return true
+  }
+}
+
+export class DirectoryStatsBasicImpl implements Stats {
+  public readonly size: number = 0
+
+  public isFile(): boolean {
+    return false
+  }
+}
+
+export class UnknownDirentKindStatsBasicImpl implements Stats {
+  public readonly size: number = 0
+  public readonly kind: string
+
+  public constructor(kind: string) {
+    this.kind = kind
+  }
+
+  public isFile(): boolean {
+    return false
+  }
+}
+
 export class DirentBasicImpl implements Dirent {
   public readonly name: string
   public readonly kind: 'directory'|'file'

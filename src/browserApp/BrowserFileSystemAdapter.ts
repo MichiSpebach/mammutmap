@@ -1,4 +1,4 @@
-import { Dirent, DirentBasicImpl, FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue, Stats } from '../core/fileSystemAdapter'
+import { DirectoryStatsBasicImpl, Dirent, DirentBasicImpl, FileStatsBasicImpl, FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue, Stats, UnknownDirentKindStatsBasicImpl } from '../core/fileSystemAdapter'
 import { util } from '../core/util/util'
 import * as direntsFromHttpServersHtmlDirectoryPageExtractor from './direntsFromHttpServersHtmlDirectoryPageExtractor'
 
@@ -27,13 +27,28 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         return !!handle
     }
 
-    public async getDirentStatsIfExists(path: string): Promise<Stats | null> {
-        util.logWarning('BrowserFileSystemAdapter::getDirentStatsIfExists(..) not implemented yet.')
-        return null
+    public async getDirentStatsIfExists(path: string): Promise<Stats|null> {
+        const handle: FileSystemHandle|undefined = await this.findHandleByPath(path)
+        if (!handle) {
+            return null
+        }
+        if (handle.kind === 'file' && handle instanceof FileSystemFileHandle) {
+            const file: File = await handle.getFile()
+            return new FileStatsBasicImpl(file.size)
+        }
+        if (handle.kind === 'directory' && handle instanceof FileSystemDirectoryHandle) {
+            return new DirectoryStatsBasicImpl()
+        }
+        util.logWarning(`BrowserFileSystemAdapter::getDirentStatsIfExists(..) path "${path}" does represent kind '${handle.kind}' that is not implemented, defaulting to 'UnknownDirentKindStatsBasicImpl'.`)
+        return new UnknownDirentKindStatsBasicImpl(handle.kind)
     }
 
-    public getDirentStatsOrThrow(path: string): Promise<Stats> {
-        util.logError('BrowserFileSystemAdapter::getDirentStatsOrThrow(..) not implemented yet.')
+    public async getDirentStatsOrThrow(path: string): Promise<Stats>|never {
+        const stats: Stats|null = await this.getDirentStatsIfExists(path)
+        if (!stats) {
+            util.logError(`BrowserFileSystemAdapter::getDirentStatsOrThrow(..) path "${path}" not found.`)
+        }
+        return stats
     }
 
     public async readdir(path: string): Promise<Dirent[]> {
@@ -145,7 +160,7 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         const restElements: string[] = util.getElementsOfPath(path)
         const firstElement: string|undefined = restElements.shift()
         if (!firstElement) {
-            util.logWarning('BrowserFileSystemAdapter::findHandleByPath(..) path is empty, defaulting to undefined.')
+            util.logWarning(`BrowserFileSystemAdapter::findHandleByPath(..) path "${path}" is empty, defaulting to undefined.`)
             return undefined
         }
 
@@ -167,7 +182,7 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
     private async findHandleByPathInDirectoryRecursive(pathElements: string[], directoryHandle: FileSystemDirectoryHandle): Promise<FileSystemHandle|undefined> {
         const firstElement: string|undefined = pathElements.shift()
         if (!firstElement) {
-            util.logWarning('BrowserFileSystemAdapter::findHandleByPathInDirectoryRecursive(..) path is empty, defaulting to undefined.')
+            util.logWarning(`BrowserFileSystemAdapter::findHandleByPathInDirectoryRecursive(..) path "${firstElement}" is empty, defaulting to undefined.`)
             return undefined
         }
         

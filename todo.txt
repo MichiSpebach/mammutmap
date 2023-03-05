@@ -1,3 +1,7 @@
+permission request when creating map folder (or when map/maproot.mapsettings.json does not exist yet): "Make folder to save map files '<rootName>/map/'?"
+
+important: when creating link (contextmenu > 'link from here') it should always be visible (highlighted?) while creating
+
 click or doubleClick on box zooms to fit box in screen?
 
 move sidebar to left by default and make it toggable with ctrl+b?
