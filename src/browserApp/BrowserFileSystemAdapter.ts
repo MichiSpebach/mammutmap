@@ -110,7 +110,29 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
     }
 
     public async writeFile(path: string, data: string): Promise<void> {
-        util.logWarning('BrowserFileSystemAdapter::writeFile(..) not implemented yet.')
+        const parentPath: string = util.removeLastElementFromPath(path)
+        const fileName: string|undefined = util.getElementsOfPath(path).pop()
+        if (!fileName) {
+            util.logWarning(`BrowserFileSystemAdapter::writeFile(..) couldn't get fileName (last element) of path '${path}'.`)
+            return
+        }
+        let parentHandle: FileSystemHandle|undefined = await this.findHandleByPath(parentPath)
+        if (!parentHandle) {
+            await this.makeFolder(path)
+            parentHandle = await this.findHandleByPath(path)
+        }
+        if (!parentHandle) {
+            util.logWarning(`BrowserFileSystemAdapter::writeFile(..) couldn't find file at path '${path}' and failed to create it.`)
+            return
+        }
+        if (parentHandle.kind !== 'directory' || !(parentHandle instanceof FileSystemDirectoryHandle)) {
+            util.logWarning(`BrowserFileSystemAdapter::writeFile(..) parentPath '${parentPath}' of path '${path}' is not a directory but is '${parentHandle.kind}'.`)
+            return
+        }
+        const fileHandle: FileSystemFileHandle = await parentHandle.getFileHandle(fileName, {create: true})
+        const writableFileStream/*: FileSystemWritableFileStream*/ = await (fileHandle as any).createWritable() // TODO: fix as any and outcommented type
+        await writableFileStream.write(data)
+        await writableFileStream.close()
     }
 
     public async makeFolder(path: string): Promise<void> {
