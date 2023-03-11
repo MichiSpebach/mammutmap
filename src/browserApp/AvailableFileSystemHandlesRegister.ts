@@ -1,45 +1,16 @@
 import { util } from '../core/util/util'
-import { DirentNotAvailableError } from './DirentNotAvailableError'
 
-export class AvailableFileSystemDirectoryHandle implements FileSystemDirectoryHandle {
+export class AvailableFileSystemHandlesRegister {
 
-    public readonly kind: 'directory' = 'directory'
-    public readonly name: string = 'availableFileSystemDirectoryHandle'
+    private readonly directoryHandles: FileSystemDirectoryHandle[] = []
+    private readonly fileHandles: FileSystemFileHandle[] = []
 
-    private readonly availableDirectories: FileSystemDirectoryHandle[] = []
-    private readonly availableFiles: FileSystemFileHandle[] = []
-
-    public addAvailableDirectory(directory: FileSystemDirectoryHandle): void {
-        this.availableDirectories.unshift(directory) // unshift to search in newer handles first
+    public addDirectoryHandle(directory: FileSystemDirectoryHandle): void {
+        this.directoryHandles.unshift(directory) // unshift to search in newer handles first
     }
 
-    public addAvailableFile(file: FileSystemFileHandle): void {
-        this.availableFiles.unshift(file) // unshift to search in newer handles first
-    }
-
-    public async getDirectoryHandle(name: string, options?: FileSystemGetDirectoryOptions | undefined): Promise<FileSystemDirectoryHandle> {
-        for (const directory of this.availableDirectories) {
-            if (directory.name === name) {
-                return directory
-            }
-        }
-        throw new DirentNotAvailableError(`No available directory has name '${name}'.`)
-    }
-
-    public getFileHandle(name: string, options?: FileSystemGetFileOptions | undefined): Promise<FileSystemFileHandle> {
-        throw new Error("Method not implemented.");
-    }
-
-    public removeEntry(name: string, options?: FileSystemRemoveOptions | undefined): Promise<void> {
-        throw new Error("Method not implemented.");
-    }
-
-    public resolve(possibleDescendant: FileSystemHandle): Promise<string[] | null> {
-        throw new Error("Method not implemented.");
-    }
-
-    public isSameEntry(other: FileSystemHandle): Promise<boolean> {
-        throw new Error("Method not implemented.");
+    public addFileHandle(file: FileSystemFileHandle): void {
+        this.fileHandles.unshift(file) // unshift to search in newer handles first
     }
 
     public async findHandleByPath(path: string): Promise<FileSystemHandle|undefined> {
@@ -50,7 +21,7 @@ export class AvailableFileSystemDirectoryHandle implements FileSystemDirectoryHa
             return undefined
         }
 
-        for (const searchHandle of this.availableDirectories) {
+        for (const searchHandle of this.directoryHandles) {
             if (searchHandle.name !== firstElement) {
                 continue
             }
@@ -65,6 +36,7 @@ export class AvailableFileSystemDirectoryHandle implements FileSystemDirectoryHa
         return undefined
     }
 
+    // TODO: refactor, remove and use other recursive method instead
     private async findHandleByPathInDirectoryRecursive(pathElements: string[], directoryHandle: FileSystemDirectoryHandle): Promise<FileSystemHandle|undefined> {
         const firstElement: string|undefined = pathElements.shift()
         if (!firstElement) {
@@ -100,16 +72,16 @@ export class AvailableFileSystemDirectoryHandle implements FileSystemDirectoryHa
         }
 
         if (!firstElement) {
-            for (const searchHandle of this.availableFiles) {
+            for (const searchHandle of this.fileHandles) {
                 if (searchHandle.name === fileName) {
                     return searchHandle
                 }
             }
-            return [new DirentNotAvailableError(`No available fileHandle has name '${fileName}'.`)]
+            return [new Error(`No available fileHandle has name '${fileName}'.`)]
         }
 
         const errors: Error[] = []
-        for (const searchHandle of this.availableDirectories) {
+        for (const searchHandle of this.directoryHandles) {
             if (searchHandle.name !== firstElement) {
                 continue
             }
@@ -137,7 +109,7 @@ export class AvailableFileSystemDirectoryHandle implements FileSystemDirectoryHa
         }
 
         const errors: Error[] = []
-        for (const searchHandle of this.availableDirectories) {
+        for (const searchHandle of this.directoryHandles) {
             if (searchHandle.name !== firstElement) {
                 continue
             }

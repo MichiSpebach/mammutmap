@@ -99,6 +99,31 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "qjsmlpqg8n",
+			"from": {
+				"path": [
+					{
+						"boxId": "n0u6e8svi3",
+						"boxName": "BrowserFileSystemAdapter.ts",
+						"x": 74.185,
+						"y": 100.443
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "k3ej5ipds1g",
+						"boxName": "AvailableFileSystemHandlesRegister.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
 		}
 	],
 	"nodes": []

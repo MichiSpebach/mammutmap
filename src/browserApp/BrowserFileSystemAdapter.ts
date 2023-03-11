@@ -1,11 +1,11 @@
 import { DirectoryStatsBasicImpl, Dirent, DirentBasicImpl, FileStatsBasicImpl, FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue, Stats, UnknownDirentKindStatsBasicImpl } from '../core/fileSystemAdapter'
 import { util } from '../core/util/util'
-import { AvailableFileSystemDirectoryHandle } from './AvailableFileSystemDirectoryHandle'
+import { AvailableFileSystemHandlesRegister } from './AvailableFileSystemHandlesRegister'
 import * as direntsFromHttpServersHtmlDirectoryPageExtractor from './direntsFromHttpServersHtmlDirectoryPageExtractor'
 
 export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
-    private availableHandles: AvailableFileSystemDirectoryHandle = new AvailableFileSystemDirectoryHandle()
+    private availableHandles: AvailableFileSystemHandlesRegister = new AvailableFileSystemHandlesRegister()
 
     public async doesDirentExistAndIsFile(path: string): Promise<boolean> {
         if (this.isHostPath(path)) {
@@ -173,13 +173,13 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
     
     private async showDirectoryPicker(): Promise<OpenDialogReturnValue> {
         const directoryHandle: FileSystemDirectoryHandle = await (window as any).showDirectoryPicker() // TODO: fix as any
-        this.availableHandles.addAvailableDirectory(directoryHandle)
+        this.availableHandles.addDirectoryHandle(directoryHandle)
         return {filePaths: [directoryHandle.name]}
     }
     
     private async showFilePicker(): Promise<OpenDialogReturnValue> {
         const fileHandle: FileSystemFileHandle = await (window as any).showOpenFilePicker() // TODO: fix as any
-        this.availableHandles.addAvailableFile(fileHandle)
+        this.availableHandles.addFileHandle(fileHandle)
         return {filePaths: [fileHandle.name]}
     }
 
