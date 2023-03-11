@@ -1920,6 +1920,351 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "l4kvnehmevo",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 70,
+						"y": 80
+					},
+					{
+						"boxId": "k3ej5ipds1g",
+						"boxName": "AvailableFileSystemHandlesRegister.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 82.88,
+						"y": 40
+					},
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 18,
+						"y": 50
+					},
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "4h1cgthbsno",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 80,
+						"y": 40
+					},
+					{
+						"boxId": "v2paij4pdmo",
+						"boxName": "DirectDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 20,
+						"y": 10
+					},
+					{
+						"boxId": "cr2q48p1plg",
+						"boxName": "indexHtmlIds.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "fhcapdhppr",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 48,
+						"y": 63
+					},
+					{
+						"boxId": "7omti4pnmgo",
+						"boxName": "HtmlContextMenuPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 8,
+						"y": 42
+					},
+					{
+						"boxId": "of7n0ghe2po",
+						"boxName": "contextMenu.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "9psd3jlgq7g",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 48,
+						"y": 63
+					},
+					{
+						"boxId": "7omti4pnmgo",
+						"boxName": "HtmlContextMenuPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 5.6,
+						"y": 34.4
+					},
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 20,
+						"y": 60
+					},
+					{
+						"boxId": "6hojqbs8qn8",
+						"boxName": "MenuItem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "nnhau7s5ir",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 48,
+						"y": 63
+					},
+					{
+						"boxId": "7omti4pnmgo",
+						"boxName": "HtmlContextMenuPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 4.64,
+						"y": 32.48
+					},
+					{
+						"boxId": "u7lnivj4sq",
+						"boxName": "applicationMenu",
+						"x": 8,
+						"y": 12
+					},
+					{
+						"boxId": "4n8l9r5jg8g",
+						"boxName": "MenuItemFolderContainerWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "78efr4odul",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 48,
+						"y": 63
+					},
+					{
+						"boxId": "7omti4pnmgo",
+						"boxName": "HtmlContextMenuPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 85,
+						"y": 20
+					},
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "kb0e0ijts9g",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 48,
+						"y": 63
+					},
+					{
+						"boxId": "7omti4pnmgo",
+						"boxName": "HtmlContextMenuPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 20,
+						"y": 10
+					},
+					{
+						"boxId": "cr2q48p1plg",
+						"boxName": "indexHtmlIds.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "c507ckvkjv",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 48,
+						"y": 63
+					},
+					{
+						"boxId": "7omti4pnmgo",
+						"boxName": "HtmlContextMenuPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 82.88,
+						"y": 37.44
+					},
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 18,
+						"y": 18
+					},
+					{
+						"boxId": "i20ugc3f1e8",
+						"boxName": "RenderElement.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "gm3r9i7v9cg",
+			"from": {
+				"path": [
+					{
+						"boxId": "sgho0rk14so",
+						"boxName": "browserApp",
+						"x": 48,
+						"y": 63
+					},
+					{
+						"boxId": "7omti4pnmgo",
+						"boxName": "HtmlContextMenuPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "2cnbfh46bf8",
+						"boxName": "core",
+						"x": 70.48,
+						"y": 39.44
+					},
+					{
+						"boxId": "nsm4nes02ig",
+						"boxName": "shape",
+						"x": 62,
+						"y": 86
+					},
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
 		}
 	],
 	"nodes": []

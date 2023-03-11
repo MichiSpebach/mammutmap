@@ -107,8 +107,8 @@
 					{
 						"boxId": "n0u6e8svi3",
 						"boxName": "BrowserFileSystemAdapter.ts",
-						"x": 74.185,
-						"y": 100.443
+						"x": 50,
+						"y": 50
 					}
 				],
 				"floatToBorder": true
@@ -123,6 +123,52 @@
 					}
 				],
 				"floatToBorder": true
+			}
+		},
+		{
+			"id": "r70rpgcd44",
+			"from": {
+				"path": [
+					{
+						"boxId": "dpd3jokqmm",
+						"boxName": "index.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "7omti4pnmgo",
+						"boxName": "HtmlContextMenuPopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "52d4tv3nch",
+			"from": {
+				"path": [
+					{
+						"boxId": "v2paij4pdmo",
+						"boxName": "DirectDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "g4vp8f1986",
+						"boxName": "EventListenerRegister.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
 			}
 		}
 	],
