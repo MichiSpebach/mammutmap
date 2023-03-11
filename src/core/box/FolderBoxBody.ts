@@ -246,7 +246,7 @@ export class FolderBoxBody extends BoxBody {
 
   public async addNewFolderAndSave(name: string, mapData: BoxData): Promise<void> {
     const newBox: FolderBox = new FolderBox(name, this.referenceFolderBox, mapData, false)
-    await this.addNewBoxAndSave(newBox, fileSystem.makeFolder)
+    await this.addNewBoxAndSave(newBox, (path: string) => fileSystem.makeFolder(path))
   }
 
   private async addNewBoxAndSave(box: Box, saveOnFileSystem: (path: string) => Promise<void>) {
