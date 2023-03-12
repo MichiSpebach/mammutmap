@@ -9,10 +9,13 @@ export type InputEventType = 'change'
 export type KeyboardEventType = 'keydown'|'keyup'
 export type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType|KeyboardEventType
 
+export const cursorStyles = ['auto','default', 'text','pointer','grab','ns-resize','ew-resize','nwse-resize'] as const // "as const" makes CursorStyle a typesafe union of literals
+export type CursorStyle = typeof cursorStyles[number]
+
 export type MouseEventResultAdvanced = {
   position: ClientPosition,
   ctrlPressed: boolean,
-  cursor: 'auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize',
+  cursor: CursorStyle,
   targetPathElementIds: string[]
 }
 

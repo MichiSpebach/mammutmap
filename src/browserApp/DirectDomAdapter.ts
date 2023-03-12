@@ -1,5 +1,5 @@
 import { ClientRect } from '../core/ClientRect';
-import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
+import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
 import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
@@ -443,8 +443,8 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                 return
             }
             const cursor: string = window.getComputedStyle(event.target)["cursor"]
-            if (!['auto','default','pointer','grab','ns-resize','ew-resize','nwse-resize'].includes(cursor)) { // TODO: use something for type that also works at runtime (e.g. enum)
-                util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) cursor is not known`)
+            if (!cursorStyles.includes(cursor as CursorStyle)) {
+                util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) cursor '${cursor}' is not known`)
             }
             const targetPathElementIds: string [] = []
             for (let targetPathElement: Element|null = event.target; targetPathElement; targetPathElement = targetPathElement.parentElement) {
@@ -453,7 +453,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             callback({
                 position: new ClientPosition(event.clientX, event.clientY), 
                 ctrlPressed: event.ctrlKey, 
-                cursor: cursor as ('auto'|'default'|'pointer'|'grab'|'ns-resize'|'ew-resize'|'nwse-resize'), // TODO: remove cast as soon as typing is improved
+                cursor: cursor as CursorStyle,
                 targetPathElementIds
             })
         }, options.capture)
