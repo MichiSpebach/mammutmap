@@ -1,9 +1,11 @@
-import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced } from './domAdapter'
+import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced, EventType, KeyboardEventType } from './domAdapter'
 import { ClientRect } from './ClientRect'
 import { RenderElement, RenderElements } from './util/RenderElement'
 import { ClientPosition } from './shape/ClientPosition'
+import { EventListenerHandle } from '../browserApp/EventListenerRegister'
 
-export { MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced }
+export { EventType, MouseEventType, DragEventType, WheelEventType, InputEventType, KeyboardEventType, MouseEventResultAdvanced }
+export { EventListenerHandle}
 
 export class RenderManager {
   private commands: Command[] = []
@@ -204,7 +206,7 @@ export class RenderManager {
     eventType: MouseEventType,
     callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void,
     priority: RenderPriority = RenderPriority.NORMAL
-  ): Promise<void> {
+  ): Promise<EventListenerHandle> {
     return this.runOrSchedule(new Command({
       priority: priority,
       command: () => dom.addEventListenerTo(id, eventType, callback)
@@ -225,12 +227,15 @@ export class RenderManager {
 
   public removeEventListenerFrom(
     id: string,
-    eventType: MouseEventType|DragEventType|WheelEventType|InputEventType,
-    priority: RenderPriority = RenderPriority.NORMAL
+    eventType: EventType,
+    options?: {
+      priority?: RenderPriority,
+      listener?: EventListenerHandle
+    }
   ): Promise<void> {
     return this.runOrSchedule(new Command({
-      priority: priority,
-      command: () => dom.removeEventListenerFrom(id, eventType)
+      priority: options?.priority?? RenderPriority.NORMAL,
+      command: () => dom.removeEventListenerFrom(id, eventType, options?.listener)
     }))
   }
 

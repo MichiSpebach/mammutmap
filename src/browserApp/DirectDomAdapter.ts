@@ -459,8 +459,12 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         }, options.capture)
     }
 
-    public async addEventListenerTo(id: string, eventType: MouseEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void): Promise<void> {
-        this.addAndRegisterEventListener(id, eventType, (event: MouseEvent): void => {
+    public async addEventListenerTo(
+        id: string, 
+        eventType: MouseEventType, 
+        callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
+    ): Promise<EventListenerHandle> {
+        return this.addAndRegisterEventListener(id, eventType, (event: MouseEvent): void => {
             //console.log(event)
             event.stopPropagation()
             if (eventType === 'contextmenu') {
@@ -492,25 +496,30 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         })
     }
 
-    private addAndRegisterEventListener<T extends EventType>(id: string, eventType: T, listener: (event: HTMLElementEventMap[T]) => void, useCapture?: boolean): void {
+    private addAndRegisterEventListener<T extends EventType>(
+        id: string, 
+        eventType: T, 
+        nativeListener: (event: HTMLElementEventMap[T]) => void, 
+        useCapture?: boolean
+    ): EventListenerHandle {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
             util.logWarning(`DirectDomAdapter::addAndRegisterEventListener(..) failed to get element with id '${id}', eventType is '${eventType}'.`)
-            return
+            return {type: eventType, capture: useCapture, nativeListener}
         }
-        const handle: EventListenerHandle = this.eventListeners.add(id, eventType, !!useCapture, listener)
-        element.addEventListener(eventType, listener, useCapture)
-        //return handle // TODO: return EventListenerHandle to be able to call removeEventListenerFrom(.., eventListenerHandle) for specific listener?
+        const handle: EventListenerHandle = this.eventListeners.add(id, eventType, !!useCapture, nativeListener)
+        element.addEventListener(eventType, nativeListener, useCapture)
+        return handle
     }
 
-    public async removeEventListenerFrom(id: string, eventType: EventType): Promise<void> {
+    public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerHandle): Promise<void> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
             util.logWarning(`DirectDomAdapter::removeEventListenerFrom(..) failed to get element with id '${id}'.`)
             return
         }
-        const handle: EventListenerHandle = this.eventListeners.pop(id, eventType)
-        element.removeEventListener(eventType, handle.listener, handle.capture)
+        const handle: EventListenerHandle = this.eventListeners.pop(id, eventType, listener?.nativeListener)
+        element.removeEventListener(eventType, handle.nativeListener, handle.capture)
     }
     
     private prefixMouseEventTypeWithOn(eventType: MouseEventType): 'onclick'|'oncontextmenu'|'onmousedown'|'onmouseup'|'onmousemove'|'onmouseover'|'onmouseout'|'onmouseenter'|'onmouseleave' {

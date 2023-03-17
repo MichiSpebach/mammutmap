@@ -20,7 +20,7 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     ): Promise<void> {
-        const pros: Promise<void>[] = []
+        const pros: Promise<unknown>[] = []
 
         pros.push(renderManager.addEventListenerAdvancedTo(elementId, 'mousedown', {stopPropagation: true}, (eventResult: MouseEventResultAdvanced) => {
             this.dragStart(eventResult, onDragStart, onDrag, onDragEnd)
@@ -83,7 +83,7 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         }
         
         await Promise.all([
-            renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mousemove', RenderPriority.RESPONSIVE),
+            renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mousemove', {priority: RenderPriority.RESPONSIVE}),
             this.dragState.onDragEnd(position, ctrlPressed),
             this.dragState = null
         ])
