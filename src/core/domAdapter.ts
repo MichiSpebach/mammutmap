@@ -1,7 +1,6 @@
 import { ElementAttributes, RenderElement, RenderElements, Style } from './util/RenderElement'
 import { ClientRect } from './ClientRect'
 import { ClientPosition } from './shape/ClientPosition'
-import { EventListenerHandle } from '../browserApp/EventListenerRegister' // TODO: move EventListenerHandle type to here
 
 export type MouseEventType = 'click'|'contextmenu'|'mousedown'|'mouseup'|'mousemove'|'mouseover'|'mouseout'|'mouseenter'|'mouseleave'
 export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'
@@ -9,6 +8,12 @@ export type WheelEventType = 'wheel'
 export type InputEventType = 'change'
 export type KeyboardEventType = 'keydown'|'keyup'
 export type EventType = MouseEventType|DragEventType|WheelEventType|InputEventType|KeyboardEventType
+
+export type MouseEventListenerAdvancedCallback = (result: MouseEventResultAdvanced) => void
+export type MouseEventListenerCallback = (clientX: number, clientY: number, ctrlPressed: boolean) => void
+export type WheelEventListenerCallback = (delta: number, clientX: number, clientY: number) => void
+export type ChangeEventListenerCallback = (value: any) => void
+export type EventListenerCallback = MouseEventListenerAdvancedCallback|MouseEventListenerCallback|WheelEventListenerCallback|ChangeEventListenerCallback
 
 export const cursorStyles = ['auto','default', 'text','pointer','grab','ns-resize','ew-resize','nwse-resize'] as const // "as const" makes CursorStyle a typesafe union of literals
 export type CursorStyle = typeof cursorStyles[number]
@@ -82,7 +87,7 @@ export interface DocumentObjectModelAdapter {
     id: string,
     eventType: MouseEventType,
     callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
-  ): Promise<EventListenerHandle>
+  ): Promise<void>
 
   addDragListenerTo(
     id: string,
@@ -90,7 +95,7 @@ export interface DocumentObjectModelAdapter {
     callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
   ): Promise<void>
 
-  removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerHandle): Promise<void>
+  removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerCallback): Promise<void>
 
   getIpcChannelsCount(): number
 }

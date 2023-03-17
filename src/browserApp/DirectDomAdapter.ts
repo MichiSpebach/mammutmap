@@ -1,5 +1,5 @@
 import { ClientRect } from '../core/ClientRect';
-import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
+import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
 import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
@@ -380,43 +380,55 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
-        this.addAndRegisterEventListener(id, 'keydown', (event: KeyboardEvent) => {
-            //console.log(event)
-            if (event.key === key) {
-                if (!event.target) {
-                    util.logWarning('DirectDomAdapter::addKeydownListenerTo(..) event.target is null')
-                    return
+        this.addAndRegisterEventListener(id, {
+            type: 'keydown', 
+            listener: callback, 
+            nativeListener: (event: KeyboardEvent) => {
+                //console.log(event)
+                if (event.key === key) {
+                    if (!event.target) {
+                        util.logWarning('DirectDomAdapter::addKeydownListenerTo(..) event.target is null')
+                        return
+                    }
+                    const eventTarget: any = event.target // TODO: cast to any because value does not exist on all types of EventTarget, find better solution
+                    if (!eventTarget.value) {
+                        util.logWarning('DirectDomAdapter::addKeydownListenerTo(..) event.target.value is not defined')
+                        return
+                    }
+                    callback(eventTarget.value)
                 }
-                const eventTarget: any = event.target // TODO: cast to any because value does not exist on all types of EventTarget, find better solution
-                if (!eventTarget.value) {
-                    util.logWarning('DirectDomAdapter::addKeydownListenerTo(..) event.target.value is not defined')
-                    return
-                }
-                callback(eventTarget.value)
             }
         })
     }
 
     public async addChangeListenerTo<RETURN_TYPE>(id: string, returnField: 'value' | 'checked', callback: (value: RETURN_TYPE) => void): Promise<void> {
-        this.addAndRegisterEventListener(id, 'change', (event: Event) => {
-            //console.log(event)
-            if (!event.target) {
-                util.logWarning('DirectDomAdapter::addChangeListenerTo(..) event.target is null')
-                return
+        this.addAndRegisterEventListener(id, {
+            type: 'change', 
+            listener: callback, 
+            nativeListener: (event: Event) => {
+                //console.log(event)
+                if (!event.target) {
+                    util.logWarning('DirectDomAdapter::addChangeListenerTo(..) event.target is null')
+                    return
+                }
+                const eventTarget: any = event.target // TODO: cast to any because returnField does not exist on all types of EventTarget, find better solution
+                if (!eventTarget[returnField]) {
+                    util.logWarning(`DirectDomAdapter::addChangeListenerTo(..) event.target.${returnField} is not defined`)
+                    return
+                }
+                callback(eventTarget[returnField]);
             }
-            const eventTarget: any = event.target // TODO: cast to any because returnField does not exist on all types of EventTarget, find better solution
-            if (!eventTarget[returnField]) {
-                util.logWarning(`DirectDomAdapter::addChangeListenerTo(..) event.target.${returnField} is not defined`)
-                return
-            }
-            callback(eventTarget[returnField]);
         })
     }
 
     public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
-        this.addAndRegisterEventListener(id, 'wheel', (event: WheelEvent) => {
-            //console.log(event)
-            callback(event.deltaY, event.clientX, event.clientY)
+        this.addAndRegisterEventListener(id, {
+            type: 'wheel', 
+            listener: callback, 
+            nativeListener: (event: WheelEvent) => {
+                //console.log(event)
+                callback(event.deltaY, event.clientX, event.clientY)
+            }
         })
     }
 
@@ -426,99 +438,106 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         options: {stopPropagation: boolean, capture?: boolean},
         callback: (result: MouseEventResultAdvanced) => void
     ): Promise<void> {
-        this.addAndRegisterEventListener(id, eventType, (event: MouseEvent) => {
-            //console.log(event)
-            if (options.stopPropagation) {
-                event.stopPropagation()
+        this.addAndRegisterEventListener(id, {
+            type: eventType, 
+            capture: options.capture, 
+            listener: callback, 
+            nativeListener: (event: MouseEvent) => {
+                //console.log(event)
+                if (options.stopPropagation) {
+                    event.stopPropagation()
+                }
+                if (eventType === 'contextmenu') {
+                    event.preventDefault()
+                }
+                if (!event.target) {
+                    util.logWarning('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is null')
+                    return
+                }
+                if (!(event.target instanceof Element)) {
+                    util.logWarning('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is not instance of Element')
+                    return
+                }
+                const cursor: string = window.getComputedStyle(event.target)["cursor"]
+                if (!cursorStyles.includes(cursor as CursorStyle)) {
+                    util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) cursor '${cursor}' is not known`)
+                }
+                const targetPathElementIds: string [] = []
+                for (let targetPathElement: Element|null = event.target; targetPathElement; targetPathElement = targetPathElement.parentElement) {
+                    targetPathElementIds.unshift(targetPathElement.id)
+                }
+                callback({
+                    position: new ClientPosition(event.clientX, event.clientY), 
+                    ctrlPressed: event.ctrlKey, 
+                    cursor: cursor as CursorStyle,
+                    targetPathElementIds
+                })
             }
-            if (eventType === 'contextmenu') {
-                event.preventDefault()
-            }
-            if (!event.target) {
-                util.logWarning('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is null')
-                return
-            }
-            if (!(event.target instanceof Element)) {
-                util.logWarning('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is not instance of Element')
-                return
-            }
-            const cursor: string = window.getComputedStyle(event.target)["cursor"]
-            if (!cursorStyles.includes(cursor as CursorStyle)) {
-                util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) cursor '${cursor}' is not known`)
-            }
-            const targetPathElementIds: string [] = []
-            for (let targetPathElement: Element|null = event.target; targetPathElement; targetPathElement = targetPathElement.parentElement) {
-                targetPathElementIds.unshift(targetPathElement.id)
-            }
-            callback({
-                position: new ClientPosition(event.clientX, event.clientY), 
-                ctrlPressed: event.ctrlKey, 
-                cursor: cursor as CursorStyle,
-                targetPathElementIds
-            })
-        }, options.capture)
+        })
     }
 
     public async addEventListenerTo(
         id: string, 
         eventType: MouseEventType, 
         callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
-    ): Promise<EventListenerHandle> {
-        return this.addAndRegisterEventListener(id, eventType, (event: MouseEvent): void => {
-            //console.log(event)
-            event.stopPropagation()
-            if (eventType === 'contextmenu') {
-                event.preventDefault()
+    ): Promise<void> {
+        this.addAndRegisterEventListener(id, {
+            type: eventType, 
+            listener: callback, 
+            nativeListener: (event: MouseEvent): void => {
+                //console.log(event)
+                event.stopPropagation()
+                if (eventType === 'contextmenu') {
+                    event.preventDefault()
+                }
+                callback(event.clientX, event.clientY, event.ctrlKey)
             }
-            callback(event.clientX, event.clientY, event.ctrlKey)
         })
     }
 
     public async addDragListenerTo(id: string, eventType: DragEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void): Promise<void> {
-        this.addAndRegisterEventListener(id, eventType, (event: DragEvent): void => {
-            //console.log(event)
-            event.stopPropagation()
-            if (eventType === 'dragstart') {
-                if (!event.dataTransfer) {
-                    util.logWarning(`DirectDomAdapter::addDragListenerTo(..) event.dataTransfer is null, cannot setDragImage to not appear.`)
-                } else {
-                    event.dataTransfer.setDragImage(new Image(), 0, 0)
-                }
-            }
-            if (event.clientX !== 0 || event.clientY !== 0) {
+        this.addAndRegisterEventListener(id, {
+            type: eventType, 
+            listener: callback, 
+            nativeListener: (event: DragEvent): void => {
+                //console.log(event)
+                event.stopPropagation()
                 if (eventType === 'dragstart') {
-                    // reschedule because otherwise 'dragend' would fire immediately if callback does dom operations in the same cycle
-                    setTimeout(() => callback(event.clientX, event.clientY, event.ctrlKey))
-                } else {
-                    callback(event.clientX, event.clientY, event.ctrlKey)
+                    if (!event.dataTransfer) {
+                        util.logWarning(`DirectDomAdapter::addDragListenerTo(..) event.dataTransfer is null, cannot setDragImage to not appear.`)
+                    } else {
+                        event.dataTransfer.setDragImage(new Image(), 0, 0)
+                    }
+                }
+                if (event.clientX !== 0 || event.clientY !== 0) {
+                    if (eventType === 'dragstart') {
+                        // reschedule because otherwise 'dragend' would fire immediately if callback does dom operations in the same cycle
+                        setTimeout(() => callback(event.clientX, event.clientY, event.ctrlKey))
+                    } else {
+                        callback(event.clientX, event.clientY, event.ctrlKey)
+                    }
                 }
             }
         })
     }
 
-    private addAndRegisterEventListener<T extends EventType>(
-        id: string, 
-        eventType: T, 
-        nativeListener: (event: HTMLElementEventMap[T]) => void, 
-        useCapture?: boolean
-    ): EventListenerHandle {
+    private addAndRegisterEventListener(id: string, listener: EventListenerHandle): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::addAndRegisterEventListener(..) failed to get element with id '${id}', eventType is '${eventType}'.`)
-            return {type: eventType, capture: useCapture, nativeListener}
+            util.logWarning(`DirectDomAdapter::addAndRegisterEventListener(..) failed to get element with id '${id}', eventType is '${listener.type}'.`)
+            return
         }
-        const handle: EventListenerHandle = this.eventListeners.add(id, eventType, !!useCapture, nativeListener)
-        element.addEventListener(eventType, nativeListener, useCapture)
-        return handle
+        this.eventListeners.add(id, listener)
+        element.addEventListener(listener.type, listener.nativeListener, listener.capture)
     }
 
-    public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerHandle): Promise<void> {
+    public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerCallback): Promise<void> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
             util.logWarning(`DirectDomAdapter::removeEventListenerFrom(..) failed to get element with id '${id}'.`)
             return
         }
-        const handle: EventListenerHandle = this.eventListeners.pop(id, eventType, listener?.nativeListener)
+        const handle: EventListenerHandle = this.eventListeners.pop(id, eventType, listener)
         element.removeEventListener(eventType, handle.nativeListener, handle.capture)
     }
     

@@ -1,4 +1,4 @@
-import { EventListenerHandle, renderManager } from './RenderManager'
+import { EventListenerCallback, MouseEventListenerCallback, renderManager } from './RenderManager'
 import { Hoverable } from './Hoverable'
 import { DragManager } from './DragManager'
 import { ScaleManager } from './ScaleManager'
@@ -6,7 +6,7 @@ import { util } from './util/util'
 
 export class HoverManager {
 
-  private static readonly hoverables: Map<string, EventListenerHandle> = new Map()
+  private static readonly hoverables: Map<string, EventListenerCallback> = new Map()
 
   private static state: {
     hovering: Hoverable,
@@ -22,13 +22,15 @@ export class HoverManager {
   }
 
   public static async addHoverable(hoverable: Hoverable, onHoverOver: () => void, onHoverOut: () => void): Promise<void> {
-    const handle: EventListenerHandle = await renderManager.addEventListenerTo(hoverable.getId(), 'mouseover', (_clientX: number, _clientY: number) => {
-      this.onMouseOver(hoverable, onHoverOver, onHoverOut)
-    })
     if (this.hoverables.has(hoverable.getId())) {
       util.logWarning(`HoverManager::addHoverable(..) hoverable with id '${hoverable.getId()}' already exists.`)
     }
-    this.hoverables.set(hoverable.getId(), handle)
+
+    const mouseoverListener: MouseEventListenerCallback = (_clientX: number, _clientY: number) => {
+      this.onMouseOver(hoverable, onHoverOver, onHoverOut)
+    }
+    this.hoverables.set(hoverable.getId(), mouseoverListener)
+    await renderManager.addEventListenerTo(hoverable.getId(), 'mouseover', mouseoverListener)
     
     const elementHovered: boolean = await renderManager.isElementHovered(hoverable.getId())
     if (elementHovered) {
@@ -52,12 +54,12 @@ export class HoverManager {
   }
 
   public static async removeHoverable(hoverable: Hoverable, callOnHoverOutIfHovered: boolean = false): Promise<void> {
-    const listener: EventListenerHandle|undefined = this.hoverables.get(hoverable.getId())
+    const listener: EventListenerCallback|undefined = this.hoverables.get(hoverable.getId())
     if (!listener) {
       util.logWarning(`HoverManager::removeHoverable(..) hoverable with id '${hoverable.getId()}' not found.`)
     } else {
       this.hoverables.delete(hoverable.getId())
-      await renderManager.removeEventListenerFrom(hoverable.getId(), 'mouseover', {listener})
+      await renderManager.removeEventListenerFrom(hoverable.getId(), 'mouseover', {listenerCallback: listener})
     }
 
     if (this.state !== null && this.state.hovering === hoverable) {

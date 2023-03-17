@@ -1,69 +1,71 @@
 import { util } from '../core/util/util'
-import { EventType } from '../core/domAdapter'
+import { EventListenerCallback, EventType } from '../core/domAdapter'
 
 export type EventListenerHandle = {
-    type: EventType, 
-    capture?: boolean, 
+    type: EventType,
+    capture?: boolean,
+    listener: EventListenerCallback,
     nativeListener: (event: any) => void // TODO: fix any? use something like '(event: ? extends Event) => void'
 }
 
 export class EventListenerRegister {
     private eventListeners: Map<string, EventListenerHandle[]> = new Map()
 
-    public add<T extends Event>(elementId: string, type: EventType, capture: boolean, nativeListener: (event: T) => void): EventListenerHandle {
-        const handle: EventListenerHandle = {type, capture, nativeListener}
+    public add(elementId: string, listenerHandle: EventListenerHandle): void {
         const listenersForElement: EventListenerHandle[] | undefined = this.eventListeners.get(elementId)
         if (!listenersForElement) {
-            this.eventListeners.set(elementId, [handle])
+            this.eventListeners.set(elementId, [listenerHandle])
         } else {
-            if (this.exists(elementId, handle)) {
+            if (this.exists(elementId, listenerHandle)) {
                 // TODO: log warning
             }
-            listenersForElement.push(handle)
+            listenersForElement.push(listenerHandle)
         }
+    }
+
+    public pop(elementId: string, type: EventType, listener?: EventListenerCallback): EventListenerHandle {
+        const handle: EventListenerHandle = this.find(elementId, type, listener)
+        this.remove(elementId, handle.listener)
         return handle
     }
 
-    public pop(elementId: string, type: EventType, nativeListener?: (event: any) => void): EventListenerHandle {
-        const handle: EventListenerHandle = this.find(elementId, type, nativeListener)
-        this.remove(elementId, handle.nativeListener)
-        return handle
-    }
-
-    public find(elementId: string, type: EventType, nativeListener?: (event: any) => void): EventListenerHandle {
+    public find(elementId: string, type: EventType, listener?: EventListenerCallback): EventListenerHandle {
         const listenersForElement: EventListenerHandle[] | undefined = this.eventListeners.get(elementId)
         if (!listenersForElement) {
             util.logWarning(`EventListenerRegister::find(..) no listeners are registered for elementId '${elementId}', defaulting to '() => {}'.`)
-            return {type, capture: false, nativeListener: () => {}}
+            return {type, capture: false, listener: () => {}, nativeListener: () => {}}
         }
         const matchingListeners: EventListenerHandle[] = listenersForElement.filter(value => {
-            if (nativeListener && nativeListener !== value.nativeListener) {
+            if (listener && listener !== value.listener) {
                 return false
             }
             return value.type === type
         })
         if (matchingListeners.length === 0) {
-            util.logWarning(`EventListenerRegister::find(..) no listeners are registered for elementId '${elementId}', type '${type}' and if set nativeListener '${nativeListener}', defaulting to '() => {}'.`)
-            return {type, capture: false, nativeListener: () => {}}
+            let message: string = `EventListenerRegister::find(..) no listeners are registered`
+            message += ` for elementId '${elementId}', type '${type}' and if set listener '${listener}', defaulting to '() => {}'.`
+            message += ` By the way there are ${listenersForElement.length} listeners registered for this element.`
+            util.logWarning(message)
+            return {type, capture: false, listener: () => {}, nativeListener: () => {}}
         }
         if (matchingListeners.length > 1) {
-            util.logWarning(`EventListenerRegister::find(..) multiple listeners are registered for elementId '${elementId}', type '${type}' and if set nativeListener '${nativeListener}', defaulting to first.`)
+            util.logWarning(`EventListenerRegister::find(..) multiple listeners are registered for elementId '${elementId}', type '${type}' and if set listener '${listener}', defaulting to first.`)
         }
         return matchingListeners[0]
     }
 
-    public exists<T extends Event>(elementId: string, handle: EventListenerHandle): boolean {
+    public exists(elementId: string, handle: EventListenerHandle): boolean {
         return false
         // TODO: implement
     }
 
-    public remove(elementId: string, nativeListener: (event: any) => void): void {
+    public remove(elementId: string, listener: EventListenerCallback): void {
         const listenersForElement: EventListenerHandle[] | undefined = this.eventListeners.get(elementId)
         if (!listenersForElement) {
             util.logWarning(`EventListenerRegister::remove(..) no listeners are registered for elementId '${elementId}'.`)
             return
         }
-        const index: number = listenersForElement.findIndex(value => value.nativeListener === nativeListener)
+        const index: number = listenersForElement.findIndex(value => value.listener === listener)
         if (index < 0) {
             util.logWarning(`EventListenerRegister::remove(..) listener for elementId '${elementId}' not found.`)
             return

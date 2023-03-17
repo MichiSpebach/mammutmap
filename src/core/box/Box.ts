@@ -298,17 +298,15 @@ export abstract class Box implements DropTarget, Hoverable {
       util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
     }
 
-    const proms: Promise<any>[] = []
-    
-    DragManager.removeDropTarget(this)
-    proms.push(HoverManager.removeHoverable(this))
-
-    proms.push(this.detachGrid())
-    proms.push(this.header.unrender())
-    proms.push(scaleTool.unrenderFrom(this))
-    proms.push(this.unrenderAdditional())
-    proms.push(this.borderingLinks.renderAllThatShouldBe()) // otherwise borderingLinks would not float back to border of parent
-    await Promise.all(proms)
+    await Promise.all([
+      DragManager.removeDropTarget(this),
+      HoverManager.removeHoverable(this),
+      this.detachGrid(),
+      this.header.unrender(),
+      scaleTool.unrenderFrom(this),
+      this.unrenderAdditional(),
+      this.borderingLinks.renderAllThatShouldBe() // otherwise borderingLinks would not float back to border of parent
+    ])
 
     this.renderState.setUnrenderFinished()
     return

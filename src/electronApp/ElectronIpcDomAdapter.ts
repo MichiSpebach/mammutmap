@@ -3,8 +3,7 @@ import { ElementAttributes, RenderElement, RenderElements, Style } from '../core
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
-import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
-import { EventListenerHandle } from '../browserApp/EventListenerRegister'
+import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
 
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     private renderWindow: BrowserWindow
@@ -382,12 +381,11 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       id: string,
       eventType: MouseEventType,
       callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
-    ): Promise<EventListenerHandle> {
+    ): Promise<void> {
       const ipcChannelName = eventType+'_'+id
       const rendererFunction: string = this.createMouseEventRendererFunction(ipcChannelName)
       await this.addEventListenerJs(id, eventType, rendererFunction)
       this.addMouseEventChannelListener(ipcChannelName, callback)
-      return {type: eventType, nativeListener: () => {}} // TODO
     }
   
     private createChangeEventRendererFunction(ipcChannelName: string, returnField: 'value'|'checked'): string {
@@ -453,7 +451,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunctionJs)
     }
   
-    public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerHandle): Promise<void> {
+    public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerCallback): Promise<void> {
       // TODO: implement to only remove specified listener
       const ipcChannelName = eventType+'_'+id
       await this.executeJsOnElement(id, "on"+eventType+" = null")

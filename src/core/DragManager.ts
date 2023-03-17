@@ -1,5 +1,5 @@
 import { util } from './util/util'
-import { EventListenerHandle, renderManager, RenderPriority } from './RenderManager'
+import { EventListenerCallback, MouseEventListenerCallback, renderManager, RenderPriority } from './RenderManager'
 import { Draggable } from './Draggable'
 import { DropTarget } from './DropTarget'
 import { BoxWatcher } from './box/BoxWatcher'
@@ -15,7 +15,7 @@ export class DragManager {
   private static readonly draggableStyleClass: string = 'draggable'
   public static readonly draggingInProgressStyleClass: string = 'draggingInProgress'
   
-  private static readonly dropTargets: Map<string, EventListenerHandle> = new Map()
+  private static readonly dropTargets: Map<string, {dragenterListener: EventListenerCallback, mouseoverListener: EventListenerCallback}> = new Map()
 
   private static state: State|null = null
 
@@ -128,27 +128,33 @@ export class DragManager {
   }
 
   public static async addDropTarget(dropTarget: DropTarget): Promise<void> {
-    renderManager.addDragListenerTo(dropTarget.getId(), 'dragenter', async (_) => {
-      this.onDragEnter(dropTarget)
-    })
-    const mouseoverListener: EventListenerHandle = await renderManager.addEventListenerTo(dropTarget.getId(), 'mouseover', async (_) => {
-      this.onDragEnter(dropTarget)
-    })
     if (this.dropTargets.has(dropTarget.getId())) {
       util.logWarning(`DragManager::addDropTarget(..) dropTarget with id '${dropTarget.getId()}' already exists.`)
     }
-    this.dropTargets.set(dropTarget.getId(), mouseoverListener)
+
+    const dragenterListener: MouseEventListenerCallback = () => this.onDragEnter(dropTarget)
+    const mouseoverListener: MouseEventListenerCallback = () => this.onDragEnter(dropTarget)
+    this.dropTargets.set(dropTarget.getId(), {dragenterListener, mouseoverListener})
+
+    await Promise.all([
+      renderManager.addDragListenerTo(dropTarget.getId(), 'dragenter', dragenterListener),
+      renderManager.addEventListenerTo(dropTarget.getId(), 'mouseover', mouseoverListener)
+    ])
   }
 
-  public static removeDropTarget(dropTarget: DropTarget): void {
-    renderManager.removeEventListenerFrom(dropTarget.getId(), 'dragenter')
-    const mouseoverListener: EventListenerHandle|undefined = this.dropTargets.get(dropTarget.getId())
-    if (!mouseoverListener) {
+  public static async removeDropTarget(dropTarget: DropTarget): Promise<void> {
+    const listeners: {dragenterListener: EventListenerCallback, mouseoverListener: EventListenerCallback}|undefined = this.dropTargets.get(dropTarget.getId())
+    if (!listeners) {
       util.logWarning(`DragManager::removeDropTarget(..) dropTarget with id '${dropTarget.getId()}' not found.`)
       return
     }
+
     this.dropTargets.delete(dropTarget.getId())
-    renderManager.removeEventListenerFrom(dropTarget.getId(), 'mouseover', {listener: mouseoverListener})
+
+    await Promise.all([
+      renderManager.removeEventListenerFrom(dropTarget.getId(), 'dragenter', {listenerCallback: listeners.dragenterListener}),
+      renderManager.removeEventListenerFrom(dropTarget.getId(), 'mouseover', {listenerCallback: listeners.mouseoverListener})
+    ])
   }
 
   private static onDragEnter(dropTarget: DropTarget): void {

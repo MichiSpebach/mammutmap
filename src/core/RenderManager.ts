@@ -1,11 +1,14 @@
-import { dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced, EventType, KeyboardEventType } from './domAdapter'
+import {
+  dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced, EventType, KeyboardEventType, 
+  EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback
+} from './domAdapter'
 import { ClientRect } from './ClientRect'
 import { RenderElement, RenderElements } from './util/RenderElement'
 import { ClientPosition } from './shape/ClientPosition'
-import { EventListenerHandle } from '../browserApp/EventListenerRegister'
 
-export { EventType, MouseEventType, DragEventType, WheelEventType, InputEventType, KeyboardEventType, MouseEventResultAdvanced }
-export { EventListenerHandle}
+export { EventType, MouseEventType, DragEventType, WheelEventType, InputEventType, KeyboardEventType }
+export { EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback }
+export { MouseEventResultAdvanced }
 
 export class RenderManager {
   private commands: Command[] = []
@@ -206,7 +209,7 @@ export class RenderManager {
     eventType: MouseEventType,
     callback: (clientX:number, clientY: number, ctrlPressed: boolean) => void,
     priority: RenderPriority = RenderPriority.NORMAL
-  ): Promise<EventListenerHandle> {
+  ): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
       command: () => dom.addEventListenerTo(id, eventType, callback)
@@ -230,12 +233,12 @@ export class RenderManager {
     eventType: EventType,
     options?: {
       priority?: RenderPriority,
-      listener?: EventListenerHandle
+      listenerCallback?: EventListenerCallback
     }
   ): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: options?.priority?? RenderPriority.NORMAL,
-      command: () => dom.removeEventListenerFrom(id, eventType, options?.listener)
+      command: () => dom.removeEventListenerFrom(id, eventType, options?.listenerCallback)
     }))
   }
 
