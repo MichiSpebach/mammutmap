@@ -493,11 +493,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
 
       if (!listener) {
         ipcMain.removeAllListeners(channelName)
-        if (channelsForId.length === 1) {
-          this.ipcChannelDictionary.delete(id)
-        } else {
-          channelsForId.splice(channelsForId.indexOf(channel), 1)
-        }
+        this.removeChannelFromChannels(id, channel, channelsForId)
         return
       }
 
@@ -515,13 +511,21 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       }
       ipcMain.removeListener(channelName, listenerAndIpcListener.ipcListener)
       if (channel.listeners.length === 1) {
-        if (channelsForId.length === 1) {
-          this.ipcChannelDictionary.delete(id)
-        } else {
-          channelsForId.splice(channelsForId.indexOf(channel), 1)
-        }
+        this.removeChannelFromChannels(id, channel, channelsForId)
       } else {
         channel.listeners.splice(channel.listeners.indexOf(listenerAndIpcListener), 1)
+      }
+    }
+
+    private removeChannelFromChannels(
+      id: string,
+      channel: {eventType: EventType, listeners: ListenerAndIpcListener[]}, 
+      channels: {eventType: EventType, listeners: ListenerAndIpcListener[]}[]
+    ): void {
+      if (channels.length === 1) {
+        this.ipcChannelDictionary.delete(id)
+      } else {
+        channels.splice(channels.indexOf(channel), 1)
       }
     }
   
