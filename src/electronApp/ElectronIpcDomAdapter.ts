@@ -210,7 +210,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         let id: string
         if (!element.attributes.id) {
           util.logWarning(`Element seems to have '${attribute}' event handler but no id.`)
-          id = util.generateId()
+          id = 'generated'+util.generateId()
         } else {
           id = element.attributes.id
         }
@@ -493,7 +493,11 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
 
       if (!listener) {
         ipcMain.removeAllListeners(channelName)
-        channelsForId.splice(channelsForId.indexOf(channel), 1)
+        if (channelsForId.length === 1) {
+          this.ipcChannelDictionary.delete(id)
+        } else {
+          channelsForId.splice(channelsForId.indexOf(channel), 1)
+        }
         return
       }
 
@@ -510,7 +514,15 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         return
       }
       ipcMain.removeListener(channelName, listenerAndIpcListener.ipcListener)
-      channel.listeners.splice(channel.listeners.indexOf(listenerAndIpcListener), 1)
+      if (channel.listeners.length === 1) {
+        if (channelsForId.length === 1) {
+          this.ipcChannelDictionary.delete(id)
+        } else {
+          channelsForId.splice(channelsForId.indexOf(channel), 1)
+        }
+      } else {
+        channel.listeners.splice(channel.listeners.indexOf(listenerAndIpcListener), 1)
+      }
     }
   
     public getIpcChannelsCount(): number {
