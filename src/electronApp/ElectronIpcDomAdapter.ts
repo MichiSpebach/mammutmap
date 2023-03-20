@@ -214,18 +214,16 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         } else {
           id = element.attributes.id
         }
-        let ipcChannelName: string = id
   
+        let ipcChannelName: string
         switch (attribute) { // TODO: handle all events
           case 'onclick':
-            ipcChannelName = 'click_'+ipcChannelName
-            this.addMouseEventChannelListener(id, 'click', ipcChannelName, element.attributes[attribute]!)
+            ipcChannelName = this.addMouseEventChannelListener(id, 'click', element.attributes[attribute]!)
             element.attributes.onclick = this.createMouseEventRendererFunction(ipcChannelName) as any
             continue
   
           case 'onchangeValue':
-            ipcChannelName = 'change_'+ipcChannelName
-            this.addChangeEventChannelListener(id, 'change', ipcChannelName, element.attributes[attribute]!)
+            ipcChannelName = this.addChangeEventChannelListener(id, 'change', element.attributes[attribute]!)
             if ((element.attributes as any).onchange) {
               util.logWarning(`There are multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
             }
@@ -233,15 +231,14 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
             element.attributes.onchangeValue = undefined
             continue
   
-            case 'onchangeChecked':
-              ipcChannelName = 'change_'+ipcChannelName
-              this.addChangeEventChannelListener(id, 'change', ipcChannelName, element.attributes[attribute]!)
-              if ((element.attributes as any).onchange) {
-                util.logWarning(`There are multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
-              }
-              (element.attributes as any).onchange = this.createChangeEventRendererFunction(ipcChannelName, 'checked')
-              element.attributes.onchangeChecked = undefined
-              continue
+          case 'onchangeChecked':
+            ipcChannelName = this.addChangeEventChannelListener(id, 'change', element.attributes[attribute]!)
+            if ((element.attributes as any).onchange) {
+              util.logWarning(`There are multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
+            }
+            (element.attributes as any).onchange = this.createChangeEventRendererFunction(ipcChannelName, 'checked')
+            element.attributes.onchangeChecked = undefined
+            continue
   
           default:
             util.logWarning(`'${attribute}' event handlers are not yet implemented.`)
@@ -310,7 +307,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
-      let ipcChannelName = 'keydown_'+id
+      const ipcChannelName: string = this.addIpcChannelListener(id, 'keydown', callback, (_: IpcMainEvent, value: string) => callback(value))
   
       let rendererFunction: string = '(event) => {'
       rendererFunction += 'let ipc = require("electron").ipcRenderer;'
@@ -321,8 +318,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += '}'
   
       await this.addEventListenerJs(id, 'keydown', rendererFunction)
-  
-      this.addIpcChannelListener(id, 'keydown', ipcChannelName, callback, (_: IpcMainEvent, value: string) => callback(value))
     }
   
     public async addChangeListenerTo<RETURN_TYPE>(
@@ -330,14 +325,16 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       returnField: 'value'|'checked',
       callback: (value: RETURN_TYPE) => void
     ): Promise<void> {
-      let ipcChannelName = 'change_'+id
+      const ipcChannelName: string = this.addChangeEventChannelListener(id, 'change', callback)
       const rendererFunction: string = this.createChangeEventRendererFunction(ipcChannelName, returnField)
       await this.addEventListenerJs(id, 'change', rendererFunction)
-      this.addChangeEventChannelListener(id, 'change', ipcChannelName, callback)
     }
   
     public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
-      let ipcChannelName = 'wheel_'+id
+      const ipcChannelName: string = this.addIpcChannelListener(
+        id, 'wheel', callback,
+        (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY)
+      )
   
       let rendererFunction: string = '(event) => {'
       rendererFunction += 'let ipc = require("electron").ipcRenderer;'
@@ -347,10 +344,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
       await this.addEventListenerJs(id, 'wheel', rendererFunction)
   
-      this.addIpcChannelListener(
-        id, 'wheel', ipcChannelName, callback,
-        (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY)
-      )
     }
   
     public async addEventListenerAdvancedTo(
@@ -359,7 +352,12 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       options: {stopPropagation: boolean, capture?: boolean},
       callback: (result: MouseEventResultAdvanced) => void
     ): Promise<void> {
-      let ipcChannelName = eventType+'_'+id
+      const ipcChannelName: string = this.addIpcChannelListener(
+        id, eventType, callback,
+        (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any, targetPathElementIds: string[]) => callback({
+          position: new ClientPosition(clientX, clientY), ctrlPressed, cursor, targetPathElementIds
+        })
+      )
   
       let rendererFunction: string = '(event) => {'
       rendererFunction += 'let ipc = require("electron").ipcRenderer;'
@@ -376,13 +374,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += '}'
   
       await this.addEventListenerJs(id, eventType, rendererFunction)
-  
-      this.addIpcChannelListener(
-        id, eventType, ipcChannelName, callback,
-        (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any, targetPathElementIds: string[]) => callback({
-          position: new ClientPosition(clientX, clientY), ctrlPressed, cursor, targetPathElementIds
-        })
-      )
     }
   
     public async addEventListenerTo(
@@ -390,10 +381,9 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       eventType: MouseEventType,
       callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
     ): Promise<void> {
-      const ipcChannelName = eventType+'_'+id
+      const ipcChannelName: string = this.addMouseEventChannelListener(id, eventType, callback)
       const rendererFunction: string = this.createMouseEventRendererFunction(ipcChannelName)
       await this.addEventListenerJs(id, eventType, rendererFunction)
-      this.addMouseEventChannelListener(id, eventType, ipcChannelName, callback)
     }
   
     private createChangeEventRendererFunction(ipcChannelName: string, returnField: 'value'|'checked'): string {
@@ -415,19 +405,15 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return rendererFunction
     }
   
-    private addChangeEventChannelListener<RETURN_TYPE>(
-      id: string, eventType: InputEventType, ipcChannelName: string,
-      callback: (value: RETURN_TYPE) => void
-    ): void {
-      this.addIpcChannelListener(id, eventType, ipcChannelName, callback, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
+    private addChangeEventChannelListener<RETURN_TYPE>(id: string, eventType: InputEventType, callback: (value: RETURN_TYPE) => void): string {
+      return this.addIpcChannelListener(id, eventType, callback, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
     }
   
     private addMouseEventChannelListener(
-      id: string, eventType: MouseEventType, ipcChannelName: string,
-      callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
-    ): void {
-      this.addIpcChannelListener(
-        id, eventType, ipcChannelName, callback,
+      id: string, eventType: MouseEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
+    ): string {
+      return this.addIpcChannelListener(
+        id, eventType, callback,
         (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed)
       )
     }
@@ -437,8 +423,11 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       eventType: DragEventType,
       callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
     ): Promise<void> {
-      let ipcChannelName = eventType+'_'+id
-  
+      const ipcChannelName: string = this.addIpcChannelListener(
+        id, eventType, callback,
+        (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed)
+      )
+
       let rendererFunction: string = '(event) => {'
       rendererFunction += 'let ipc = require("electron").ipcRenderer;'
       //rendererFunction += 'console.log(event);'
@@ -452,11 +441,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += '}'
   
       await this.addEventListenerJs(id, eventType, rendererFunction)
-  
-      this.addIpcChannelListener(
-        id, eventType, ipcChannelName, callback,
-        (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed)
-      )
     }
 
     private addEventListenerJs(id: string, eventType: EventType, rendererFunctionJs: string): Promise<void> {
@@ -469,13 +453,11 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       // TODO: implement to only remove specified listener
       const ipcChannelName = eventType+'_'+id
       await this.executeJsOnElement(id, "on"+eventType+" = null")
-      this.removeIpcChannelListener(id, eventType, ipcChannelName, listener)
+      this.removeIpcChannelListener(id, eventType, listener)
     }
   
-    private addIpcChannelListener(id: string, eventType: EventType, channelName: string/*TODO remove channelName as soon as safe*/, listener: EventListenerCallback, ipcListener: (event: IpcMainEvent, ...args: any[]) => void): void {
-      if (eventType+'_'+id !== channelName) {
-        util.logWarning(`ElectronIpcDomAdapter::addIpcChannelListener(..) eventType+'_'+id !== channelName`)
-      }
+    private addIpcChannelListener(id: string, eventType: EventType, listener: EventListenerCallback, ipcListener: (event: IpcMainEvent, ...args: any[]) => void): string {
+      const channelName = eventType+'_'+id
 
       let channelsForId: {eventType: EventType, listeners: ListenerAndIpcListener[]}[] | undefined = this.ipcChannelDictionary.get(id)
       if (!channelsForId) {
@@ -490,12 +472,12 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         channel.listeners.push({listener, ipcListener})
       }
       ipcMain.on(channelName, ipcListener)
+
+      return channelName
     }
   
-    private removeIpcChannelListener(id: string, eventType: EventType, channelName: string/*TODO remove channelName as soon as safe*/, listener?: EventListenerCallback): void {
-      if (eventType+'_'+id !== channelName) {
-        util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) eventType+'_'+id !== channelName`)
-      }
+    private removeIpcChannelListener(id: string, eventType: EventType, listener?: EventListenerCallback): void {
+      const channelName = eventType+'_'+id
       
       let channelsForId: {eventType: EventType, listeners: ListenerAndIpcListener[]}[] | undefined = this.ipcChannelDictionary.get(id)
       if (!channelsForId) {
