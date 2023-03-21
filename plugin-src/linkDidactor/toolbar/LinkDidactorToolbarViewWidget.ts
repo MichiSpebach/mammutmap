@@ -12,7 +12,6 @@ import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/pluginFac
 export class LinkDidactorToolbarViewWidget extends Widget {
 
     private renderedOrInProgress: boolean = false
-    private elementIdsWithChangeEventListeners: string[] = []
 
     public constructor(
         private readonly id: string
@@ -46,7 +45,6 @@ export class LinkDidactorToolbarViewWidget extends Widget {
             this.renderedOrInProgress = true
         }
 
-        await this.clearEventListeners()
         await renderManager.setElementsTo(this.getId(), this.formInner())
     }
 
@@ -56,15 +54,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         }
         this.renderedOrInProgress = false
 
-        await this.clearEventListeners()
         await renderManager.clearContentOf(this.getId())
-    }
-
-    private async clearEventListeners(): Promise<void> {
-        await Promise.all(this.elementIdsWithChangeEventListeners.map(elementId => 
-            renderManager.removeEventListenerFrom(elementId, 'change')
-        ))
-        this.elementIdsWithChangeEventListeners = []
     }
 
     public formInner(): RenderElements {
@@ -135,41 +125,29 @@ export class LinkDidactorToolbarViewWidget extends Widget {
     }
 
     private formDefaultModeDropDown(): RenderElement {
-        const elementId: string = this.getDefaultModeDropDownId()
-        this.elementIdsWithChangeEventListeners.push(elementId)
-
         return createElement('select', {
-            id: elementId,
+            id: this.getDefaultModeDropDownId(),
             onchangeValue: (value: string) => this.setDefaultLinkMode(value)
         }, this.formDefaultModeDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceMode()))
     }
 
     private formTagModeDropDown(tag: LinkTagData): RenderElement {
-        const elementId: string = this.getTagModeDropDownId(tag)
-        this.elementIdsWithChangeEventListeners.push(elementId)
-
         return createElement('select', {
-            id: elementId,
+            id: this.getTagModeDropDownId(tag),
             onchangeValue: (value: string) => this.setLinkTagMode(tag, value !== 'undefined' ? value : undefined)
         }, this.formTagModeDropDownOptions(tag.appearance.mode))
     }
 
     private formDefaultColorDropDown(): RenderElement {
-        const elementId: string = this.getDefaultColorDropDownId()
-        this.elementIdsWithChangeEventListeners.push(elementId)
-
         return createElement('select', {
-            id: elementId,
+            id: this.getDefaultColorDropDownId(),
             onchangeValue: (value: string) => this.setDefaultLinkColor(value)
         }, this.formDefaultColorDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceColor()))
     }
 
     private formTagColorDropDown(tag: LinkTagData): RenderElement {
-        const elementId: string = this.getTagColorDropDownId(tag)
-        this.elementIdsWithChangeEventListeners.push(elementId)
-
         return createElement('select', {
-            id: elementId,
+            id: this.getTagColorDropDownId(tag),
             onchangeValue: (value: string) => this.setLinkTagColor(tag, value !== 'undefined' ? value : undefined)
         }, this.formTagColorDropDownOptions(tag.appearance.color))
     }

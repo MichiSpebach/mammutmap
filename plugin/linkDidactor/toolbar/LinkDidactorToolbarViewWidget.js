@@ -15,7 +15,6 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
         super();
         this.id = id;
         this.renderedOrInProgress = false;
-        this.elementIdsWithChangeEventListeners = [];
     }
     getId() {
         return this.id;
@@ -37,7 +36,6 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
             linkDidactorSettings.linkTags.subscribe(() => this.render());
             this.renderedOrInProgress = true;
         }
-        await this.clearEventListeners();
         await pluginFacade_1.renderManager.setElementsTo(this.getId(), this.formInner());
     }
     async unrender() {
@@ -45,12 +43,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
             return;
         }
         this.renderedOrInProgress = false;
-        await this.clearEventListeners();
         await pluginFacade_1.renderManager.clearContentOf(this.getId());
-    }
-    async clearEventListeners() {
-        await Promise.all(this.elementIdsWithChangeEventListeners.map(elementId => pluginFacade_1.renderManager.removeEventListenerFrom(elementId, 'change')));
-        this.elementIdsWithChangeEventListeners = [];
     }
     formInner() {
         const mapOrMessage = pluginFacade.getMap();
@@ -110,34 +103,26 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
         return { style: { color } };
     }
     formDefaultModeDropDown() {
-        const elementId = this.getDefaultModeDropDownId();
-        this.elementIdsWithChangeEventListeners.push(elementId);
         return (0, pluginFacade_5.createElement)('select', {
-            id: elementId,
+            id: this.getDefaultModeDropDownId(),
             onchangeValue: (value) => this.setDefaultLinkMode(value)
         }, this.formDefaultModeDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceMode()));
     }
     formTagModeDropDown(tag) {
-        const elementId = this.getTagModeDropDownId(tag);
-        this.elementIdsWithChangeEventListeners.push(elementId);
         return (0, pluginFacade_5.createElement)('select', {
-            id: elementId,
+            id: this.getTagModeDropDownId(tag),
             onchangeValue: (value) => this.setLinkTagMode(tag, value !== 'undefined' ? value : undefined)
         }, this.formTagModeDropDownOptions(tag.appearance.mode));
     }
     formDefaultColorDropDown() {
-        const elementId = this.getDefaultColorDropDownId();
-        this.elementIdsWithChangeEventListeners.push(elementId);
         return (0, pluginFacade_5.createElement)('select', {
-            id: elementId,
+            id: this.getDefaultColorDropDownId(),
             onchangeValue: (value) => this.setDefaultLinkColor(value)
         }, this.formDefaultColorDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceColor()));
     }
     formTagColorDropDown(tag) {
-        const elementId = this.getTagColorDropDownId(tag);
-        this.elementIdsWithChangeEventListeners.push(elementId);
         return (0, pluginFacade_5.createElement)('select', {
-            id: elementId,
+            id: this.getTagColorDropDownId(tag),
             onchangeValue: (value) => this.setLinkTagColor(tag, value !== 'undefined' ? value : undefined)
         }, this.formTagColorDropDownOptions(tag.appearance.color));
     }
