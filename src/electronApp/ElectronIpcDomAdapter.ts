@@ -5,7 +5,7 @@ import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
 
-type ListenerAndIpcListener = {listener: EventListenerCallback, ipcListener: (event: IpcMainEvent, ...args: any[]) => void/*, channelSuffix: number TODO: important when channels are not removed directly*/}
+type ListenerAndIpcListener = {listener: EventListenerCallback, ipcListener: (event: IpcMainEvent, ...args: any[]) => void, channelSuffix: string}
 
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     private renderWindow: BrowserWindow
@@ -451,13 +451,13 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerCallback): Promise<void> {
       // TODO: implement to only remove specified listener
-      const ipcChannelName = eventType+'_'+id
-      await this.executeJsOnElement(id, "on"+eventType+" = null")
       this.removeIpcChannelListener(id, eventType, listener)
+      await this.executeJsOnElement(id, "on"+eventType+" = null")
     }
   
     private addIpcChannelListener(id: string, eventType: EventType, listener: EventListenerCallback, ipcListener: (event: IpcMainEvent, ...args: any[]) => void): string {
-      const channelName = eventType+'_'+id
+      const channelSuffix: string = util.generateId() // important when channels are not removed directly, otherwise old ipcListeners would be recalled
+      const channelName = `${id}_${eventType}_`
 
       let channelsForId: {eventType: EventType, listeners: ListenerAndIpcListener[]}[] | undefined = this.ipcChannelDictionary.get(id)
       if (!channelsForId) {
@@ -467,18 +467,16 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
 
       let channel: {eventType: EventType, listeners: ListenerAndIpcListener[]} | undefined = channelsForId.find(channel => channel.eventType === eventType)
       if (!channel) {
-        channelsForId.push({eventType, listeners: [{listener, ipcListener}]})
+        channelsForId.push({eventType, listeners: [{listener, ipcListener, channelSuffix}]})
       } else {
-        channel.listeners.push({listener, ipcListener})
+        channel.listeners.push({listener, ipcListener, channelSuffix})
       }
-      ipcMain.on(channelName, ipcListener)
+      ipcMain.on(channelName+channelSuffix, ipcListener)
 
-      return channelName
+      return channelName+channelSuffix
     }
   
     private removeIpcChannelListener(id: string, eventType: EventType, listener?: EventListenerCallback): void {
-      const channelName = eventType+'_'+id
-      
       let channelsForId: {eventType: EventType, listeners: ListenerAndIpcListener[]}[] | undefined = this.ipcChannelDictionary.get(id)
       if (!channelsForId) {
         util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) no listeners are registered for element with id '${id}' at all.`)
@@ -492,7 +490,9 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       }
 
       if (!listener) {
-        ipcMain.removeAllListeners(channelName)
+        for (const listener of channel.listeners) {
+          ipcMain.removeAllListeners(`${id}_${eventType}_${listener.channelSuffix}`)
+        }
         this.removeChannelFromChannels(id, channel, channelsForId)
         return
       }
@@ -509,7 +509,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) specific listener for element with id '${id}' and eventType '${eventType} not registered.`)
         return
       }
-      ipcMain.removeListener(channelName, listenerAndIpcListener.ipcListener)
+      ipcMain.removeListener(`${id}_${eventType}_${listenerAndIpcListener.channelSuffix}`, listenerAndIpcListener.ipcListener)
       if (channel.listeners.length === 1) {
         this.removeChannelFromChannels(id, channel, channelsForId)
       } else {
@@ -531,7 +531,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     public getIpcChannelsCount(): number {
       let count = 0
-      this.ipcChannelDictionary.forEach(value => count += value.length)
+      this.ipcChannelDictionary.forEach(channelsForElement => channelsForElement.forEach(channelsForEventType => count += channelsForEventType.listeners.length))
       return count
     }
   
