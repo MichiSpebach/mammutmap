@@ -2,6 +2,7 @@ import { DirectoryStatsBasicImpl, Dirent, DirentBasicImpl, FileStatsBasicImpl, F
 import { util } from '../core/util/util'
 import { AvailableFileSystemHandlesRegister } from './AvailableFileSystemHandlesRegister'
 import * as direntsFromHttpServersHtmlDirectoryPageExtractor from './direntsFromHttpServersHtmlDirectoryPageExtractor'
+import { MessagePopup } from '../core/MessagePopup'
 
 export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
@@ -171,16 +172,51 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         return this.showDirectoryPicker()
     }
     
-    private async showDirectoryPicker(): Promise<OpenDialogReturnValue> {
-        const directoryHandle: FileSystemDirectoryHandle = await (window as any).showDirectoryPicker() // TODO: fix as any
+    private async showDirectoryPicker(): Promise<OpenDialogReturnValue|never> {
+        let directoryHandle: FileSystemDirectoryHandle
+        try {
+            directoryHandle = await (window as any).showDirectoryPicker() // TODO: fix as any
+        } catch (error: any) {
+            this.showAndLogError('Failed to show directory picker', error)
+        }
         this.availableHandles.addDirectoryHandle(directoryHandle)
         return {filePaths: [directoryHandle.name]}
     }
     
     private async showFilePicker(): Promise<OpenDialogReturnValue> {
-        const fileHandle: FileSystemFileHandle = await (window as any).showOpenFilePicker() // TODO: fix as any
+        let fileHandle: FileSystemFileHandle
+        try {
+            fileHandle = await (window as any).showOpenFilePicker() // TODO: fix as any
+        } catch (error: any) {
+            this.showAndLogError('Failed to show file picker', error)
+        }
         this.availableHandles.addFileHandle(fileHandle)
         return {filePaths: [fileHandle.name]}
+    }
+
+    private showAndLogError(title: string, error: any): never {
+        if (error instanceof TypeError) {
+            this.showAndLogFileSystemAccessAPINotAvailableError(title, error)
+        } else {
+            this.showAndLogDefaultError(title, error)
+        }
+    }
+
+    private showAndLogFileSystemAccessAPINotAvailableError(title: string, error: TypeError): never {
+        const message = 'Most likely your browser does not support the FileSystemsAccessAPI yet.'
+        const messageWithLink = `Most likely your browser does not support the <a href="https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API#browser_compatibility" target="_blank">FileSystemAccessAPI</a> yet.`
+        const recommendedBrowsers = 'Try it with a Chromium based browser, they support the FileSystemAccessAPI pretty well already.'
+        const downloadDesktopVersion = 'Or download the desktop version.'
+        const downloadDesktopVersionWithLink = 'Or download the <a href="https://github.com/MichiSpebach/mammutmap" target="_blank">desktop version</a>.'
+        const underlyingError = `Underlying Error is ${error}`
+        MessagePopup.buildAndRender(title, `${messageWithLink}<br>${recommendedBrowsers}<br>${downloadDesktopVersionWithLink}<br>${underlyingError}`)
+        util.logError(`${title}. ${message}\n${recommendedBrowsers} ${downloadDesktopVersion}\n${underlyingError}`)
+    }
+
+    private showAndLogDefaultError(title: string, error: any): never {
+        const underlyingError = `Underlying Error is ${error}`
+        MessagePopup.buildAndRender(title, underlyingError)
+        util.logError(`${title}. ${underlyingError}`)
     }
 
 }

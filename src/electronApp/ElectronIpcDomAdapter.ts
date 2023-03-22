@@ -10,8 +10,8 @@ type ListenerAndIpcListener = {listener: EventListenerCallback, ipcListener: (ev
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     private renderWindow: BrowserWindow
     private webContents: WebContents
-    private ipcChannelDictionary: Map<string, {eventType: EventType, listeners: ListenerAndIpcListener[]}[]> = new Map()
-    // implement cleanup mechanism that is scheduled by RenderManager when there is not much load to cleanup a small chunk (1+0.1%) of dangling ipcEventChannels
+    private ipcChannelDictionary: Map<string, {eventType: EventType, listeners: ListenerAndIpcListener[]}[]> = new Map() // TODO: refactor, move into object oriented classes with methods
+    // TODO: implement cleanup mechanism that is scheduled by RenderManager when there is not much load to cleanup a small chunk (1+0.1%) of dangling ipcEventChannels
     // introduce RenderPriority.BACKGROUND for this
     // asks frontend if element for ipcChannel still exists
   

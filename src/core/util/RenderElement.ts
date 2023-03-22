@@ -30,6 +30,7 @@ export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'button'|'select'|'opti
 export type ElementAttributes = {
   id?: string,
   style?: Style,
+  className?: string,
   selected?: boolean,
   innerHTML?: string,
   onclick?: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
