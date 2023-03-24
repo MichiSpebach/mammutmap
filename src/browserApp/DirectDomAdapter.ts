@@ -379,7 +379,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             util.logWarning(`DirectDomAdapter::scrollToBottom(..) failed to get element with id '${id}'.`)
             return
         }
-        element.scrollTop = Number.MAX_SAFE_INTEGER
+        element.scrollBy(0, 1000*1000) // things like Number.MAX_SAFE_INTEGER don't work on all browsers
     }
 
     public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {

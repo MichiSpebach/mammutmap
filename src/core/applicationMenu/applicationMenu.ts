@@ -31,7 +31,7 @@ export abstract class AbstractApplicationMenu implements ApplicationMenu {
 
     const openFolderMenuItem = new MenuItemFile({label: 'Open Folder...', click: () => this.openFolder()})
     const openFileMenuItem = new MenuItemFile({label: 'Open ProjectFile '+ProjectSettings.preferredFileNameExtension+'... (experimental)', enabled: settings.getBoolean('experimentalFeatures'), click: () => this.openProjectFile()})
-    settings.subscribeBoolean('experimentalFeatures', async (newValue) => {openFileMenuItem.enabled = newValue})
+    settings.subscribeBoolean('experimentalFeatures', (newValue) => this.setMenuItemEnabled(openFileMenuItem, newValue))
 
     const fileMenu: MenuItemFolder = new MenuItemFolder({id: 'File', label: 'File', preferredOpenDirection: 'bottom', submenu: [
       openFolderMenuItem,
