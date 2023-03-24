@@ -70,7 +70,12 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
         const tagRows = tagsOrMessage.map(tag => this.formTagRow(tag));
         const table = (0, pluginFacade_5.createElement)('table', {}, [defaultRow, ...tagRows]);
         if (tagRows.length === 0) {
-            return [table, 'There are no linkTags used in this project yet, right click on links to tag them.'];
+            return [
+                table,
+                (0, pluginFacade_5.ce)('div', {}, ['There are no linkTags used in this project yet.']),
+                (0, pluginFacade_5.ce)('div', {}, ['Right click on links to tag them.']),
+                (0, pluginFacade_5.ce)('div', {}, ['Right click on boxes to create links.'])
+            ];
         }
         else {
             return table;

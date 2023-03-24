@@ -204,10 +204,10 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
     private showAndLogFileSystemAccessAPINotAvailableError(title: string, error: TypeError): never {
         const message = 'Most likely your browser does not support the FileSystemsAccessAPI yet.'
-        const messageWithLink = `Most likely your browser does not support the <a href="https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API#browser_compatibility" target="_blank">FileSystemAccessAPI</a> yet.`
+        const messageWithLink = `Most likely your browser does not support the ${util.createWebLinkHtml('https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API#browser_compatibility', 'FileSystemAccessAPI')} yet.`
         const recommendedBrowsers = 'Try it with a Chromium based browser, they support the FileSystemAccessAPI pretty well already.'
         const downloadDesktopVersion = 'Or download the desktop version.'
-        const downloadDesktopVersionWithLink = 'Or download the <a href="https://github.com/MichiSpebach/mammutmap" target="_blank">desktop version</a>.'
+        const downloadDesktopVersionWithLink = `Or download the ${util.createWebLinkHtml(util.githubProjectAddress, 'desktop version')}.`
         const underlyingError = `Underlying Error is ${error}`
         MessagePopup.buildAndRender(title, `${messageWithLink}<br>${recommendedBrowsers}<br>${downloadDesktopVersionWithLink}<br>${underlyingError}`)
         util.logError(`${title}. ${message}\n${recommendedBrowsers} ${downloadDesktopVersion}\n${underlyingError}`)

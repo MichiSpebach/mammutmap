@@ -2,7 +2,7 @@ import { util } from './util/util'
 import { fileSystem } from './fileSystemAdapter'
 
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
-export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'htmlApplicationMenu'|'sidebar'
+export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'experimentalFeatures'|'htmlApplicationMenu'|'sidebar'
 
 export let settings: Settings
 
@@ -26,6 +26,7 @@ class Settings {
   private boxMinSizeToRender: number
   private boxesDraggableIntoOtherBoxes: boolean
   private developerMode: boolean
+  private experimentalFeatures: boolean
   private htmlApplicationMenu: boolean
   private sidebar: boolean
 
@@ -54,6 +55,7 @@ class Settings {
     this.boxMinSizeToRender = settingsParsed['boxMinSizeToRender']
     this.boxesDraggableIntoOtherBoxes = settingsParsed['boxesDraggableIntoOtherBoxes']
     this.developerMode = settingsParsed['developerMode']
+    this.experimentalFeatures = settingsParsed['experimentalFeatures']
     this.htmlApplicationMenu = settingsParsed['htmlApplicationMenu']
     this.sidebar = settingsParsed['sidebar']
   }
@@ -97,7 +99,7 @@ class Settings {
   }
 
   public getBoolean(setting: BooleanSetting): boolean {
-    return this[setting]
+    return !!this[setting] // !! because otherwise undefined would be returned if value is not specified in settingsFile
   }
 
   public async setBoolean(setting: BooleanSetting, value: boolean): Promise<void> {

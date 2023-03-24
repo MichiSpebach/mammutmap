@@ -5,6 +5,7 @@ import { util } from '../core/util/util';
 import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
 import * as indexHtmlIds from '../core/indexHtmlIds'
 import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister';
+import { MessagePopup } from '../core/MessagePopup';
 
 // TODO: reschedule all methods that return a Promise so that they are queued and priorized on heavy load to prevent lags
 export class DirectDomAdapter implements DocumentObjectModelAdapter {
@@ -19,7 +20,9 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public openDevTools(): void {
-        util.logInfo('DirectDomAdapter::openDevTools() not implemented, simply open it with browser.')
+        const message = 'DirectDomAdapter::openDevTools() not implemented, simply open it with browser. F12 or ctrl+i on most browsers.'
+        MessagePopup.buildAndRender('Open DevTools', message)
+        util.logInfo(message)
     }
 
     public getClientSize(): { width: number; height: number; } {
@@ -412,8 +415,8 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                     return
                 }
                 const eventTarget: any = event.target // TODO: cast to any because returnField does not exist on all types of EventTarget, find better solution
-                if (!eventTarget[returnField]) {
-                    util.logWarning(`DirectDomAdapter::addChangeListenerTo(..) event.target.${returnField} is not defined`)
+                if (returnField === 'value' && !eventTarget.value) {
+                    util.logWarning(`DirectDomAdapter::addChangeListenerTo(..) event.target.value is not defined`)
                     return
                 }
                 callback(eventTarget[returnField]);

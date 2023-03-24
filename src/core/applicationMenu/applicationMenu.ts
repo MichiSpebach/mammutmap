@@ -7,6 +7,8 @@ import { fileSystem, OpenDialogReturnValue } from '../fileSystemAdapter'
 import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
 import { MenuItem } from './MenuItem'
+import { MessagePopup } from '../MessagePopup'
+import { settings } from '../Settings'
 
 export let applicationMenu: ApplicationMenu
 
@@ -26,9 +28,14 @@ export abstract class AbstractApplicationMenu implements ApplicationMenu {
   protected readonly menuTree: MenuItemFolder
 
   public constructor() {
+
+    const openFolderMenuItem = new MenuItemFile({label: 'Open Folder...', click: () => this.openFolder()})
+    const openFileMenuItem = new MenuItemFile({label: 'Open ProjectFile '+ProjectSettings.preferredFileNameExtension+'... (experimental)', enabled: settings.getBoolean('experimentalFeatures'), click: () => this.openProjectFile()})
+    settings.subscribeBoolean('experimentalFeatures', async (newValue) => {openFileMenuItem.enabled = newValue})
+
     const fileMenu: MenuItemFolder = new MenuItemFolder({id: 'File', label: 'File', preferredOpenDirection: 'bottom', submenu: [
-      new MenuItemFile({label: 'Open Folder...', click: () => this.openFolder()}),
-      new MenuItemFile({label: 'Open ProjectFile '+ProjectSettings.preferredFileNameExtension+'...', click: () => this.openProjectFile()})
+      openFolderMenuItem,
+      openFileMenuItem
     ]})
 
     const settingsMenu: MenuItemFolder = new MenuItemFolder({id: 'Settings', label: 'Settings', preferredOpenDirection: 'bottom', submenu: [
@@ -37,11 +44,15 @@ export abstract class AbstractApplicationMenu implements ApplicationMenu {
     ]})
 
     const pluginsMenu: MenuItemFolder = new MenuItemFolder({id: 'Plugins', label: 'Plugins', preferredOpenDirection: 'bottom', submenu: [
-      new MenuItemFile({label: 'MarketPlace (coming soon)', click: () => util.logInfo('MarketPlace is coming soon')}),
-      new MenuItemFile({label: 'Tutorial to create plugins (coming soon)', click: () => util.logInfo('Tutorial to create plugins is coming soon')})
+      new MenuItemFile({label: 'MarketPlace (coming soon)', enabled: false, click: () => util.logInfo('MarketPlace is coming soon')}),
+      new MenuItemFile({label: 'Tutorial to create plugins (coming soon)', enabled: false, click: () => util.logInfo('Tutorial to create plugins is coming soon')})
     ]})
 
-    this.menuTree = new MenuItemFolder({id: 'ApplicationMenu', label: 'ApplicationMenu', submenu: [fileMenu, settingsMenu, pluginsMenu]})
+    const infoMenuItem: MenuItemFile = new MenuItemFile({label: 'Info', click: () => {
+      MessagePopup.buildAndRender('Info', `Join on GitHub: ${util.createWebLinkHtml(util.githubProjectAddress)}`)
+    }})
+
+    this.menuTree = new MenuItemFolder({id: 'ApplicationMenu', label: 'ApplicationMenu', submenu: [fileMenu, settingsMenu, pluginsMenu, infoMenuItem]})
   }
 
   public abstract initAndRender(): Promise<void>

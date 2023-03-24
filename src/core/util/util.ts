@@ -6,6 +6,7 @@ import { RenderElement } from './RenderElement'
 import * as stacktraceUtil from './stacktraceUtil'
 
 class Util {
+  public readonly githubProjectAddress: string = 'https://github.com/MichiSpebach/mammutmap'
   private logDebugActivated: boolean = false
 
   public runShellCommand(command: string): ChildProcess {
@@ -58,6 +59,10 @@ class Util {
         console.trace('WARNING: failed to print log on gui: '+message+', because gui seems not to load.')
       }
     }
+  }
+
+  public createWebLinkHtml(address: string, label?: string): string { // TODO: return RenderElement instead
+    return `<a style="color:skyblue;" target="_blank" href="${address}">${label ?? address}</a>`
   }
 
   // TODO: move to HintManager/HintComponent

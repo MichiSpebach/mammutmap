@@ -87,7 +87,12 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         const table: RenderElement = createElement('table', {}, [defaultRow, ...tagRows])
         
         if (tagRows.length === 0) {
-            return [table, 'There are no linkTags used in this project yet, right click on links to tag them.']
+            return [
+                table, 
+                ce('div', {}, ['There are no linkTags used in this project yet.']),
+                ce('div', {}, ['Right click on links to tag them.']),
+                ce('div', {}, ['Right click on boxes to create links.'])
+            ]
         } else {
             return table
         }
