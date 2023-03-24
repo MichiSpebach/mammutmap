@@ -10,8 +10,8 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
     public async doesDirentExistAndIsFile(path: string): Promise<boolean> {
         if (this.isHostPath(path)) {
-            const response: Response = await this.fetchFromHostServer(path)
-            return response.ok // TODO: this does not check if dirent is a file
+            const stats: Stats|null = await this.getDirentStatsIfExistsOfHostPath(path)
+            return !!stats && stats.isFile()
         }
 
         const result: FileSystemHandle|Error[] = await this.availableHandles.findFileHandleByPath(path)
@@ -44,6 +44,11 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
     }
 
     public async getDirentStatsIfExists(path: string): Promise<Stats|null> {
+        if (this.isHostPath(path)) {
+            return this.getDirentStatsIfExistsOfHostPath(path)
+        }
+
+        // TODO: introduce and move into LocalFileSystemAdapter
         const handle: FileSystemHandle|undefined = await this.availableHandles.findHandleByPath(path)
         if (!handle) {
             return null
@@ -57,6 +62,23 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         }
         util.logWarning(`BrowserFileSystemAdapter::getDirentStatsIfExists(..) path "${path}" does represent kind '${handle.kind}' that is not implemented, defaulting to 'UnknownDirentKindStatsBasicImpl'.`)
         return new UnknownDirentKindStatsBasicImpl(handle.kind)
+    }
+
+    // TODO: introduce and move into HostServerFileSystemAdapter|HttpFileSystemAdapter
+    private async getDirentStatsIfExistsOfHostPath(path: string): Promise<Stats|null> {
+        const response: Response = await this.fetchFromHostServer(path)
+            if (!response.ok) {
+                return null
+            }
+            const blob: Blob = await response.blob()
+            if (blob.type === 'video/mp2t') {
+                return new FileStatsBasicImpl(blob.size)
+            }
+            if (blob.type === 'text/html') {
+                return new DirectoryStatsBasicImpl()
+            }
+            util.logWarning(`BrowserFileSystemAdapter::getDirentStatsIfExists(..) unknown blobType '${blob.type}', defaulting to FileStats.`)
+            return new FileStatsBasicImpl(blob.size)
     }
 
     public async getDirentStatsOrThrow(path: string): Promise<Stats>|never {
@@ -92,7 +114,7 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
 
     public async readFile(path: string): Promise<string> {
         if (this.isHostPath(path)) {
-            const response: Response = await fetch(this.adjustHostPath(path))
+            const response: Response = await this.fetchFromHostServer(path)
             return await response.text()
         }
 

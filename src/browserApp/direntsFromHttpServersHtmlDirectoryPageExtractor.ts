@@ -4,7 +4,7 @@ import { util } from '../core/util/util'
 export function extract(htmlDirectoryPage: string): Dirent[] {
     const tableContentHtml: string = extractTableContent(htmlDirectoryPage)
     const rowsHtml: string[] = extractRowsFromTableContent(tableContentHtml)
-    return rowsHtml.map(rowHtml => buildDirentFromRowHtml(rowHtml)).filter(dirent => dirent.name !== '../')
+    return rowsHtml.map(rowHtml => buildDirentFromRowHtml(rowHtml)).filter(dirent => dirent.name !== '..')
 }
 
 function extractTableContent(htmlDirectoryPage: string): string {
@@ -37,6 +37,9 @@ function buildDirentFromRowHtml(rowHtml: string): Dirent {
     const nameStartIndex: number = getIndexOfExpectExactlyOne(rowHtml, '<a href="./')
     let name: string = rowHtml.substring(nameStartIndex+'<a href="./'.length) // removing beginning first makes detecting end more reliable
     name = name.substring(0, getIndexOfExpectExactlyOne(name, '">'))
+    if (name.endsWith('/')) {
+        name = name.substring(0, name.length-1)
+    }
 
     return {
         name,

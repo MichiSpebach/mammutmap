@@ -10,6 +10,7 @@ import { DirectDomAdapter } from './DirectDomAdapter'
 import { HtmlApplicationMenu } from '../core/applicationMenu/HtmlApplicationMenu'
 import { BrowserFileSystemAdapter } from './BrowserFileSystemAdapter'
 import { HtmlContextMenuPopup } from './HtmlContextMenuPopup'
+import { searchAndLoadMapCloseTo } from '../core/Map'
 
 init()
 
@@ -23,4 +24,5 @@ async function init(): Promise<void> {
     contextMenu.init(new HtmlContextMenuPopup())
     await applicationMenu.initAndRender(new HtmlApplicationMenu())
     await pluginLoader.loadPlugins()
+    await searchAndLoadMapCloseTo('./')
 }
