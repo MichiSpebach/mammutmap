@@ -476,8 +476,14 @@
 					{
 						"boxId": "2cnbfh46bf8",
 						"boxName": "core",
-						"x": 86,
-						"y": 46
+						"x": 82.88,
+						"y": 40
+					},
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 18,
+						"y": 50
 					},
 					{
 						"boxId": "l84ccd69v6g",

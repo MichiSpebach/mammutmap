@@ -65,7 +65,7 @@ class TelescopeBoxHeader extends BoxHeader {
   private formTitleHtmlSplitInMiddle(): string {
     const parts: {left: string, right: string} = this.splitInMiddle(this.referenceBox.getName())
     let html: string = `<span style="white-space:nowrap;text-overflow:ellipsis;overflow:hidden;">${parts.left}</span>`
-    html += `<span style="white-space:nowrap;direction:rtl;overflow:hidden;">${parts.right}</span>`
+    html += `<span style="overflow:hidden;"><span style="white-space:nowrap;float:right;">${parts.right}</span></span>`
     return `<div style="display:flex;">${html}</div>`
   }
 
