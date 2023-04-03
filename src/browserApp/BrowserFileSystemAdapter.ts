@@ -71,13 +71,22 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
                 return null
             }
             const blob: Blob = await response.blob()
-            if (blob.type === 'video/mp2t') {
+            const fileMimeTypes: string [] = [
+                'application/json',
+                'application/javascript',
+                'text/plain',
+                'text/css',
+                'text/markdown',
+                'video/mp2t',
+                'application/octet-stream'
+            ]
+            if (fileMimeTypes.some((mimeType: string) => blob.type.startsWith(mimeType))) { // on some browsers blob.type is e.g. 'text/plain; charset=utf-8'
                 return new FileStatsBasicImpl(blob.size)
             }
             if (blob.type === 'text/html') {
                 return new DirectoryStatsBasicImpl()
             }
-            util.logWarning(`BrowserFileSystemAdapter::getDirentStatsIfExists(..) unknown blobType '${blob.type}', defaulting to FileStats.`)
+            util.logWarning(`BrowserFileSystemAdapter::getDirentStatsIfExists(..) unknown blobType '${blob.type}' at path '${path}', defaulting to FileStats.`)
             return new FileStatsBasicImpl(blob.size)
     }
 
