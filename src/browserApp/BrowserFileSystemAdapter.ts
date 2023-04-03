@@ -199,7 +199,12 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         try {
             directoryHandle = await (window as any).showDirectoryPicker() // TODO: fix as any
         } catch (error: any) {
-            this.showAndLogError('Failed to show directory picker', error)
+            this.showAndLogError(
+                'Failed to show directory picker', 
+                'showDirectoryPicker', 
+                'https://developer.mozilla.org/en-US/docs/Web/API/window/showDirectoryPicker#browser_compatibility', 
+                error
+            )
         }
         this.availableHandles.addDirectoryHandle(directoryHandle)
         return {filePaths: [directoryHandle.name]}
@@ -210,29 +215,34 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         try {
             fileHandle = await (window as any).showOpenFilePicker() // TODO: fix as any
         } catch (error: any) {
-            this.showAndLogError('Failed to show file picker', error)
+            this.showAndLogError(
+                'Failed to show file picker', 
+                'showOpenFilePicker',
+                'https://developer.mozilla.org/en-US/docs/Web/API/window/showOpenFilePicker#browser_compatibility',
+                error
+            )
         }
         this.availableHandles.addFileHandle(fileHandle)
         return {filePaths: [fileHandle.name]}
     }
 
-    private showAndLogError(title: string, error: any): never {
+    private showAndLogError(title: string, featureName: string, featureWebLink: string, error: any): never {
         if (error instanceof TypeError) {
-            this.showAndLogFileSystemAccessAPINotAvailableError(title, error)
+            this.showAndLogFileSystemAccessAPIFeatureNotAvailableError(title, featureName, featureWebLink, error)
         } else {
             this.showAndLogDefaultError(title, error)
         }
     }
 
-    private showAndLogFileSystemAccessAPINotAvailableError(title: string, error: TypeError): never {
-        const message = 'Most likely your browser does not support the FileSystemsAccessAPI yet.'
-        const messageWithLink = `Most likely your browser does not support the ${util.createWebLinkHtml('https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API#browser_compatibility', 'FileSystemAccessAPI')} yet.`
+    private showAndLogFileSystemAccessAPIFeatureNotAvailableError(title: string, featureName: string, featureWebLink: string, error: TypeError): never {
+        const unsupportedFeature = `Most likely your browser does not support ${util.createWebLinkHtml(featureWebLink, featureName)} of the FileSystemsAccessAPI yet.`
+        const secureContext = `Or secure context (HTTPS) is not active.`
         const recommendedBrowsers = 'Try it with a Chromium based browser, they support the FileSystemAccessAPI pretty well already.'
-        const downloadDesktopVersion = 'Or download the desktop version.'
-        const downloadDesktopVersionWithLink = `Or download the ${util.createWebLinkHtml(util.githubProjectAddress, 'desktop version')}.`
+        const downloadDesktopVersion = `Or download the ${util.createWebLinkHtml(util.githubProjectAddress, 'desktop version')}.`
         const underlyingError = `Underlying Error is ${error}`
-        MessagePopup.buildAndRender(title, `${messageWithLink}<br>${recommendedBrowsers}<br>${downloadDesktopVersionWithLink}<br>${underlyingError}`)
-        util.logError(`${title}. ${message}\n${recommendedBrowsers} ${downloadDesktopVersion}\n${underlyingError}`)
+        const message = `${unsupportedFeature} ${secureContext}<br>${recommendedBrowsers}<br>${downloadDesktopVersion}<br>${underlyingError}`
+        MessagePopup.buildAndRender(title, message)
+        util.logError(`${title}. ${message}`, {allowHtml: true})
     }
 
     private showAndLogDefaultError(title: string, error: any): never {

@@ -3,6 +3,9 @@
 Zoomable map for source code.
 Visualize source code in an UML-like diagram that updates with code changes and also be able to share the visualization through Git.
 
+### Try it out in browser
+Also hosted at https://www.mammutmap.com/, runs completely local in your browser, no data is sent back to the server.
+
 ### Install libraries
 `npm install`
 

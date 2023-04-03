@@ -17,36 +17,37 @@ class Util {
     this.logDebugActivated = activated
   }
 
-  public logDebug(message: string): void {
+  public logDebug(message: string, options?: {allowHtml?: boolean}): void {
     if (this.logDebugActivated) {
-      this.log('debug: ' + message, 'grey', 'log')
+      this.log('debug: ' + message, 'grey', 'log', options)
     }
   }
 
-  public logInfo(message: string): void {
-    this.log('Info: ' + message, 'grey', 'log')
+  public logInfo(message: string, options?: {allowHtml?: boolean}): void {
+    this.log('Info: ' + message, 'grey', 'log', options)
   }
 
-  public logWarning(message: string): void {
-    this.log('WARNING: ' + message, 'orange', 'trace')
+  public logWarning(message: string, options?: {allowHtml?: boolean}): void {
+    this.log('WARNING: ' + message, 'orange', 'trace', options)
   }
 
-  public logError(message: string): never {
-    this.log('ERROR: ' + message, 'red', 'trace')
+  public logError(message: string, options?: {allowHtml?: boolean}): never {
+    this.log('ERROR: ' + message, 'red', 'trace', options)
     throw new Error(message)
   }
 
-  private async log(message: string, color: string, mode: 'log'|'trace'): Promise<void> {
+  private async log(message: string, color: string, mode: 'log'|'trace', options?: {allowHtml?: boolean}): Promise<void> {
     if (mode === 'log') {
       console.log(message)
     } else {
       console.trace(message)
     }
-    await this.logToGui(message, color)
+    await this.logToGui(message, color, 5, options)
   }
 
-  private async logToGui(message: string, color: string, triesLeft: number = 5): Promise<void> {
-    const division: string = '<div style="color:' + color + '">'+this.escapeForHtml(message)+'</div>'
+  private async logToGui(message: string, color: string, triesLeft: number, options?: {allowHtml?: boolean}): Promise<void> {
+    const finalMessage: string = options?.allowHtml ? message : this.escapeForHtml(message)
+    const division: string = '<div style="color:' + color + '">'+finalMessage+'</div>'
     if (renderManager.isReady()) {
       await renderManager.addContentTo('log', division)
       await renderManager.scrollToBottom('terminal')

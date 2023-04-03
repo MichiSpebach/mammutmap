@@ -24,5 +24,5 @@ async function init(): Promise<void> {
     contextMenu.init(new HtmlContextMenuPopup())
     await applicationMenu.initAndRender(new HtmlApplicationMenu())
     await pluginLoader.loadPlugins()
-    await searchAndLoadMapCloseTo('./')
+    await searchAndLoadMapCloseTo('./mammutmap')
 }
