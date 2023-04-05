@@ -274,7 +274,7 @@ export class Map {
     if (!this.devStats) {
       this.devStats = createElement('div', {
         id: devStatsId, 
-        style: {position: 'absolute', top: '75px', left: '10px'}
+        style: {position: 'absolute', top: '95px', left: '10px'}
       }, [])
       await renderManager.addElementTo(this.id, this.devStats)
     }

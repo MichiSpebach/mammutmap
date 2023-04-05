@@ -13,27 +13,43 @@ export class AvailableFileSystemHandlesRegister {
         this.fileHandles.unshift(file) // unshift to search in newer handles first
     }
 
-    public async findHandleByPath(path: string): Promise<FileSystemHandle|undefined> {
-        const restElements: string[] = util.getElementsOfPath(path)
-        const firstElement: string|undefined = restElements.shift()
-        if (!firstElement) {
-            util.logWarning(`BrowserFileSystemAdapter::findHandleByPath(..) path "${path}" is empty, defaulting to undefined.`)
-            return undefined
+    public async findHandleByPath(path: string): Promise<FileSystemHandle|Error[]> {
+        const remainingElements: string[] = util.getElementsOfPath(path)
+        const lastElement: string|undefined = remainingElements.pop()
+        const firstElement: string|undefined = remainingElements.shift()
+
+        if (!lastElement) {
+            util.logWarning(`BrowserFileSystemAdapter::findHandleByPath(..) path "${path}" is empty.`)
+            return []
         }
 
+        if (!firstElement) {
+            for (const searchHandle of this.fileHandles) {
+                if (searchHandle.name === lastElement) {
+                    return searchHandle
+                }
+            }
+            return [new Error(`No available fileHandle has name '${lastElement}'.`)]
+        }
+
+        const errors: Error[] = []
         for (const searchHandle of this.directoryHandles) {
             if (searchHandle.name !== firstElement) {
                 continue
             }
-            if (restElements.length === 0) {
-                return searchHandle
+            const directoryHandle: FileSystemDirectoryHandle|Error = await this.findDirectoryHandleByPathInDirectoryRecursive(remainingElements.slice(), searchHandle) // copy with slice because elements are consumed
+            if (!(directoryHandle instanceof FileSystemDirectoryHandle)) {
+                errors.push(directoryHandle)
+                continue
             }
-            const resultHandle: FileSystemHandle|undefined = await this.findHandleByPathInDirectoryRecursive(restElements, searchHandle)
-            if (resultHandle) {
-                return resultHandle
+            for await (const [key, value] of (directoryHandle as any).entries()) { // TODO: fix as any
+                if (key === lastElement) {
+                    return value
+                }
             }
+            errors.push({name: 'NotFoundError', message: `lastElement "${lastElement}" of path "${path}" not found.`})
         }
-        return undefined
+        return errors
     }
 
     // TODO: refactor, remove and use other recursive method instead

@@ -96,7 +96,7 @@ class MainWidget extends Widget {
             this.devStatsInterval = setInterval(() => this.updateDevStats(), 200)
             await renderManager.addElementTo(this.getId(), createElement('div', {
                 id: devStatsId, 
-                style: {position: 'absolute', top: '30px', left: '10px'}
+                style: {position: 'absolute', top: '50px', left: '10px'}
             }, []))
         }
 
