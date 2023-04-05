@@ -13,6 +13,38 @@ export class AvailableFileSystemHandlesRegister {
         this.fileHandles.unshift(file) // unshift to search in newer handles first
     }
 
+    private isNotFoundError(error: Error): boolean {
+        return error.name === 'NotFoundError'
+    }
+
+    private isTypeErrorBecauseOfUpNavigating(error: Error, path: string): boolean {
+        return error.name === 'TypeError' && util.getElementsOfPath(path)[1] === '..'
+    }
+
+    public async findHandleByPathIfExists(path: string): Promise<FileSystemHandle|undefined> {
+        const handle: FileSystemHandle|Error[] = await this.findHandleByPath(path)
+        if (handle instanceof FileSystemHandle) {
+            return handle
+        }
+        const unexpectedErrors: Error[] = handle.filter((error: Error) => !this.isNotFoundError(error) && !this.isTypeErrorBecauseOfUpNavigating(error, path))
+        if (unexpectedErrors.length > 0) {
+            util.logWarning(`BrowserFileSystemAdapter::findHandleByPathIfExists(..) failed at path '${path}', defaulting to undefined. Unexpected errors are: ${handle}`)
+        }
+        return undefined
+    }
+
+    public async findFileHandleByPathIfExists(path: string): Promise<FileSystemFileHandle|undefined> {
+        const handle: FileSystemFileHandle|Error[] = await this.findFileHandleByPath(path)
+        if (handle instanceof FileSystemFileHandle) {
+            return handle
+        }
+        const unexpectedErrors: Error[] = handle.filter((error: Error) => !this.isNotFoundError(error) && !this.isTypeErrorBecauseOfUpNavigating(error, path))
+        if (unexpectedErrors.length > 0) {
+            util.logWarning(`BrowserFileSystemAdapter::findFileHandleByPathIfExists(..) failed at path '${path}', defaulting to undefined. Unexpected errors are: ${handle}`)
+        }
+        return undefined
+    }
+
     public async findHandleByPath(path: string): Promise<FileSystemHandle|Error[]> {
         const remainingElements: string[] = util.getElementsOfPath(path)
         const lastElement: string|undefined = remainingElements.pop()
@@ -29,7 +61,7 @@ export class AvailableFileSystemHandlesRegister {
                     return searchHandle
                 }
             }
-            return [new Error(`No available fileHandle has name '${lastElement}'.`)]
+            return [{name: 'NotFoundError', message: `No available fileHandle has name '${lastElement}'.`}]
         }
 
         const errors: Error[] = []
@@ -52,31 +84,6 @@ export class AvailableFileSystemHandlesRegister {
         return errors
     }
 
-    // TODO: refactor, remove and use other recursive method instead
-    private async findHandleByPathInDirectoryRecursive(pathElements: string[], directoryHandle: FileSystemDirectoryHandle): Promise<FileSystemHandle|undefined> {
-        const firstElement: string|undefined = pathElements.shift()
-        if (!firstElement) {
-            util.logWarning(`BrowserFileSystemAdapter::findHandleByPathInDirectoryRecursive(..) path "${firstElement}" is empty, defaulting to undefined.`)
-            return undefined
-        }
-        
-        for await (const [key, value] of (directoryHandle as any).entries()) { // TODO: fix as any
-            if (key !== firstElement) {
-                continue
-            }
-            if (pathElements.length === 0) {
-                return value
-            }
-            if (value.kind === 'directory') {
-                return this.findHandleByPathInDirectoryRecursive(pathElements, value)
-            }
-            util.logWarning('BrowserFileSystemAdapter::findHandleByPathInDirectoryRecursive(..) matching handle does not represent a directory but there are remaining pathElements, defaulting to undefined.')
-            return undefined
-        }
-
-        return undefined
-    }
-
     public async findFileHandleByPath(filePath: string, options?: {create?: boolean}): Promise<FileSystemFileHandle|Error[]> {
         const remainingElements: string[] = util.getElementsOfPath(filePath)
         const fileName: string|undefined = remainingElements.pop()
@@ -93,7 +100,7 @@ export class AvailableFileSystemHandlesRegister {
                     return searchHandle
                 }
             }
-            return [new Error(`No available fileHandle has name '${fileName}'.`)]
+            return [{name: 'NotFoundError', message: `No available fileHandle has name '${fileName}'.`}]
         }
 
         const errors: Error[] = []

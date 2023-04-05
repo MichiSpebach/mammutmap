@@ -14,15 +14,8 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
             return !!stats && stats.isFile()
         }
 
-        const result: FileSystemFileHandle|Error[] = await this.availableHandles.findFileHandleByPath(path)
-        if (result instanceof FileSystemFileHandle) {
-            return true
-        }
-        const unexpectedErrors: Error[] = result.filter((error: Error) => !this.isNotFoundError(error) && !this.isTypeErrorBecauseOfUpNavigating(error, path))
-        if (unexpectedErrors.length > 0) {
-            util.logWarning(`BrowserFileSystemAdapter::doesDirentExistAndIsFile(..) couldn't find file at path '${path}'. Unexpected errors are: ${result}`)
-        }
-        return false
+        const result: FileSystemFileHandle|undefined = await this.availableHandles.findFileHandleByPathIfExists(path)
+        return !!result
     }
 
     public async doesDirentExist(path: string): Promise<boolean> {
@@ -31,7 +24,7 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
             return response.ok
         }
 
-        const handle: FileSystemHandle|undefined = await this.findHandleByPathIfExists(path)
+        const handle: FileSystemHandle|undefined = await this.availableHandles.findHandleByPathIfExists(path)
         return !!handle
     }
 
@@ -41,7 +34,7 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         }
 
         // TODO: introduce and move into LocalFileSystemAdapter
-        const handle: FileSystemHandle|undefined = await this.findHandleByPathIfExists(path)
+        const handle: FileSystemHandle|undefined = await this.availableHandles.findHandleByPathIfExists(path)
         if (!handle) {
             return null
         }
@@ -54,26 +47,6 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         }
         util.logWarning(`BrowserFileSystemAdapter::getDirentStatsIfExists(..) path "${path}" does represent kind '${handle.kind}' that is not implemented, defaulting to 'UnknownDirentKindStatsBasicImpl'.`)
         return new UnknownDirentKindStatsBasicImpl(handle.kind)
-    }
-
-    private async findHandleByPathIfExists(path: string): Promise<FileSystemHandle|undefined> {
-        const handle: FileSystemHandle|Error[] = await this.availableHandles.findHandleByPath(path)
-        if (handle instanceof FileSystemHandle) {
-            return handle
-        }
-        const unexpectedErrors: Error[] = handle.filter((error: Error) => !this.isNotFoundError(error) && !this.isTypeErrorBecauseOfUpNavigating(error, path))
-        if (unexpectedErrors.length > 0) {
-            util.logWarning(`BrowserFileSystemAdapter::findHandleByPathIfExists(..) failed at path '${path}', defaulting to undefined. Unexpected errors are: ${handle}`)
-        }
-        return undefined
-    }
-
-    private isNotFoundError(error: Error): boolean {
-        return error.name === 'NotFoundError'
-    }
-
-    private isTypeErrorBecauseOfUpNavigating(error: Error, path: string): boolean {
-        return error.name === 'TypeError' && util.getElementsOfPath(path)[1] === '..'
     }
 
     // TODO: introduce and move into HostServerFileSystemAdapter|HttpFileSystemAdapter
