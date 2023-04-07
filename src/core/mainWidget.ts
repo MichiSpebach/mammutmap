@@ -94,16 +94,18 @@ class MainWidget extends Widget {
 
         if (!this.devStatsInterval) {
             this.devStatsInterval = setInterval(() => this.updateDevStats(), 200)
-            await renderManager.addElementTo(this.getId(), createElement('div', {
+            await renderManager.addElementTo(this.getId(), {
+                type: 'div',
                 id: devStatsId, 
-                style: {position: 'absolute', top: '50px', left: '10px'}
-            }, []))
+                style: {position: 'absolute', top: '50px', left: '10px'},
+                children: []
+            })
         }
 
         const cursorPosition: ClientPosition = renderManager.getCursorClientPosition()
         await renderManager.setElementsTo(devStatsId, [
-            createElement('div', {}, [`clientX = ${cursorPosition.x}`]),
-            createElement('div', {}, [`clientY = ${cursorPosition.y}`])
+            {type: 'div', children: `clientX = ${cursorPosition.x}`},
+            {type: 'div', children: `clientY = ${cursorPosition.y}`}
         ])
     }
 

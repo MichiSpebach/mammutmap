@@ -98,8 +98,8 @@ class Util {
       if (this.mouseEventBlockerScreenOverlayState === 'notInitialized') {
         const mapOverlayMoveLock: RenderElement = {
           type: 'div', 
-          attributes: {id: mouseEventBlockerScreenOverlayId, style: {position: "fixed", top: "0px", width: "100%", height: "100%"}}, 
-          children: []
+          id: mouseEventBlockerScreenOverlayId,
+          style: {position: "fixed", top: "0px", width: "100%", height: "100%"}
         }
         pros.push(renderManager.addElementTo(indexHtmlIds.bodyId, mapOverlayMoveLock, priority))
       } else {

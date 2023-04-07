@@ -5,12 +5,12 @@ export {
   createRenderElement as createElement
 }
 
-export function createRenderElement(type: ElementType, attributes: ElementAttributes, children: (string|RenderElement)[]): RenderElement {
-  return {type, attributes, children}
+export function createRenderElement(renderElement: RenderElement): RenderElement {
+  return renderElement
 }
 
 export function createRenderElementRaw(type: string, attributes: any, children: any): RenderElement {
-  return {type: type as ElementType, attributes, children}
+  return {type: type as ElementType, ...attributes, children}
 }
 
 export function concatRenderElements(elementsList: RenderElements[]): RenderElements {
@@ -21,13 +21,6 @@ export type RenderElements = string | RenderElement | (string|RenderElement)[]
 
 export type RenderElement = {
   type: ElementType,
-  attributes: ElementAttributes,
-  children: (string|RenderElement)[]
-}
-
-export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'button'|'select'|'option'
-
-export type ElementAttributes = {
   id?: string,
   style?: Style,
   className?: string,
@@ -37,7 +30,10 @@ export type ElementAttributes = {
   value?: string,
   onchangeValue?: (value: string) => void,
   onchangeChecked?: (checked: boolean) => void
+  children?: RenderElements
 }
+
+export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'button'|'select'|'option'
 
 export type Style = {
   position?: string,

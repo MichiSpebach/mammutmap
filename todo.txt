@@ -66,17 +66,13 @@ introduce interface Linkable|NodeLike or superclass (Abstract)Node, Box and Node
 
 when a linkHead is dragged over another linkHead and a box the dropTarget is the linkHeads baseBox but it should be the box (somehow set pointer-events: none; for all linkHeads while dragging)
 
-cancel drag when escape is pressed
-
 when saving mapData don't override whole file, only update edited fields, this increases backward compatibility
 
 format mapData.jsons, makes it more human readable
 
-settings to adapt zoom out
+settings to adapt zoom out (zoom out at mouse cursor or zoom out at center)
 
 improve box header, should not overlap content
-
-double click on FileBoxHeader should open file in editor/ide that is specified in settings
 
 use fs.watchFile(filename[, options], listener) to be notified when files are changed
   - usable for source files because they are changed from arbitrary editor

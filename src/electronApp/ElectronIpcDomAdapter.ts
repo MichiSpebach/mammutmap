@@ -1,5 +1,5 @@
 import { util } from '../core/util/util'
-import { ElementAttributes, RenderElement, RenderElements, Style } from '../core/util/RenderElement'
+import { RenderElement, RenderElements, Style } from '../core/util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
 import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
@@ -174,22 +174,39 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
       element = this.interceptEventHandlersWithJsAndAddIpcChannelListeners(element)
   
-      for (const attribute in element.attributes) {
-        const attributeValue = element.attributes[attribute as keyof ElementAttributes]
-        if (attribute === 'style') {
-          for (const styleAttribute in (attributeValue as Style)) {
-            const styleAttributeValue = (attributeValue as any)[styleAttribute]
-            if (typeof styleAttributeValue === 'string') {
-              js += `${elementJsName}.style.${styleAttribute}="${styleAttributeValue}";`
+      for (const field in element) {
+        const fieldValue = element[field as keyof RenderElement]
+        if (field === 'type' || field === 'children' || field.startsWith('on')) {
+          // these fields are not assignable
+          // event handlers where parsed to js string in intercept method above
+          continue
+        }
+        if (field === 'style') {
+          for (const styleField in (fieldValue as Style)) {
+            const styleFieldValue = (fieldValue as any)[styleField]
+            if (typeof styleFieldValue === 'string') {
+              js += `${elementJsName}.style.${styleField}="${styleFieldValue}";`
             } else {
-              js += `${elementJsName}.style.${styleAttribute}=${styleAttributeValue};`
+              js += `${elementJsName}.style.${styleField}=${styleFieldValue};`
             }
           }
-        } else if (typeof attributeValue === 'string' && !attribute.startsWith('on')) { // event handlers where parsed to js string in intercept method above
-          js += `${elementJsName}.${attribute}="${attributeValue}";`
+        } else if (typeof fieldValue === 'string') {
+          js += `${elementJsName}.${field}="${fieldValue}";`
         } else {
-          js += `${elementJsName}.${attribute}=${attributeValue};`
+          js += `${elementJsName}.${field}=${fieldValue};`
         }
+      }
+
+      if (!element.children) {
+        return js
+      }
+
+      if (!Array.isArray(element.children)) {
+        const child: string|RenderElement = element.children
+        const childJsName: string = `${elementJsName}i`
+        js += this.createHtmlElementJavaScriptAndAddIpcChannelListeners(child, childJsName)
+        js += `${elementJsName}.append(${childJsName});`
+        return js
       }
   
       for (let i = 0; i < element.children.length; i++) {
@@ -203,45 +220,45 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     private interceptEventHandlersWithJsAndAddIpcChannelListeners(element: RenderElement): RenderElement {
-      for (const attribute in element.attributes) {
-        if (!attribute.startsWith('on')) {
+      for (const field in element) {
+        if (!field.startsWith('on')) {
           continue
         }
         let id: string
-        if (!element.attributes.id) {
-          util.logWarning(`Element seems to have '${attribute}' event handler but no id.`)
+        if (!element.id) {
+          util.logWarning(`Element seems to have '${field}' event handler but no id.`)
           id = 'generated'+util.generateId()
         } else {
-          id = element.attributes.id
+          id = element.id
         }
   
         let ipcChannelName: string
-        switch (attribute) { // TODO: handle all events
+        switch (field) { // TODO: handle all events
           case 'onclick':
-            ipcChannelName = this.addMouseEventChannelListener(id, 'click', element.attributes[attribute]!)
-            element.attributes.onclick = this.createMouseEventRendererFunction(ipcChannelName) as any
+            ipcChannelName = this.addMouseEventChannelListener(id, 'click', element[field]!)
+            element.onclick = this.createMouseEventRendererFunction(ipcChannelName) as any
             continue
   
           case 'onchangeValue':
-            ipcChannelName = this.addChangeEventChannelListener(id, 'change', element.attributes[attribute]!)
-            if ((element.attributes as any).onchange) {
-              util.logWarning(`There are multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
+            ipcChannelName = this.addChangeEventChannelListener(id, 'change', element[field]!)
+            if ((element as any).onchange) {
+              util.logWarning(`There are multiple onchange event handlers for element with id '${element.id}', only one will work.`)
             }
-            (element.attributes as any).onchange = this.createChangeEventRendererFunction(ipcChannelName, 'value')
-            element.attributes.onchangeValue = undefined
+            (element as any).onchange = this.createChangeEventRendererFunction(ipcChannelName, 'value')
+            element.onchangeValue = undefined
             continue
   
           case 'onchangeChecked':
-            ipcChannelName = this.addChangeEventChannelListener(id, 'change', element.attributes[attribute]!)
-            if ((element.attributes as any).onchange) {
-              util.logWarning(`There are multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
+            ipcChannelName = this.addChangeEventChannelListener(id, 'change', element[field]!)
+            if ((element as any).onchange) {
+              util.logWarning(`There are multiple onchange event handlers for element with id '${element.id}', only one will work.`)
             }
-            (element.attributes as any).onchange = this.createChangeEventRendererFunction(ipcChannelName, 'checked')
-            element.attributes.onchangeChecked = undefined
+            (element as any).onchange = this.createChangeEventRendererFunction(ipcChannelName, 'checked')
+            element.onchangeChecked = undefined
             continue
   
           default:
-            util.logWarning(`'${attribute}' event handlers are not yet implemented.`)
+            util.logWarning(`'${field}' event handlers are not yet implemented.`)
         }
       }
   

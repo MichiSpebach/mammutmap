@@ -1,4 +1,4 @@
-import { ElementAttributes, RenderElement, RenderElements, Style } from './util/RenderElement'
+import { RenderElement, RenderElements, Style } from './util/RenderElement'
 import { ClientRect } from './ClientRect'
 import { ClientPosition } from './shape/ClientPosition'
 

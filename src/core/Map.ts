@@ -272,10 +272,11 @@ export class Map {
     const devStatsId: string = this.id+'devStats'
 
     if (!this.devStats) {
-      this.devStats = createElement('div', {
+      this.devStats = {
+        type: 'div',
         id: devStatsId, 
         style: {position: 'absolute', top: '95px', left: '10px'}
-      }, [])
+      }
       await renderManager.addElementTo(this.id, this.devStats)
     }
 
@@ -283,12 +284,12 @@ export class Map {
     const renderedSitesInPath = this.rootFolder.site.getRenderedPath()
     const renderedClientRectsInPath: ClientRect[] = await Promise.all(renderedSitesInPath.map(site => site.referenceNode.getClientRect()))
     await renderManager.setElementsTo(devStatsId, [
-      createElement('div', {}, [`shiftX = ${stats.map(detachment => detachment.shiftX)}%`]),
-      createElement('div', {}, [`shiftY = ${stats.map(detachment => detachment.shiftY)}%`]),
-      createElement('div', {}, [`zoomX = *${stats.map(detachment => detachment.zoomX).join('*')}`]),
-      createElement('div', {}, [`zoomY = *${stats.map(detachment => detachment.zoomY).join('*')}`]),
-      createElement('div', {}, [`clientXs = ${renderedClientRectsInPath.map(rect => Math.round(rect.x)).join(', ')}`]),
-      createElement('div', {}, [`clientWidths = ${renderedClientRectsInPath.map(rect => Math.round(rect.width)).join(', ')}`])
+      {type: 'div', children: `shiftX = ${stats.map(detachment => detachment.shiftX)}%`},
+      {type: 'div', children: `shiftY = ${stats.map(detachment => detachment.shiftY)}%`},
+      {type: 'div', children: `zoomX = *${stats.map(detachment => detachment.zoomX).join('*')}`},
+      {type: 'div', children: `zoomY = *${stats.map(detachment => detachment.zoomY).join('*')}`},
+      {type: 'div', children: `clientXs = ${renderedClientRectsInPath.map(rect => Math.round(rect.x)).join(', ')}`},
+      {type: 'div', children: `clientWidths = ${renderedClientRectsInPath.map(rect => Math.round(rect.width)).join(', ')}`}
     ])
   }
 

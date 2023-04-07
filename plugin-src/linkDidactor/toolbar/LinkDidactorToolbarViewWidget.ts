@@ -4,7 +4,7 @@ import * as linkDidactorSettings from '../linkDidactorSettings'
 import * as pluginFacade from '../../../dist/pluginFacade'
 import { Map, Message, Link } from '../../../dist/pluginFacade'
 import { coreUtil } from '../../../dist/pluginFacade'
-import { RenderElement, RenderElements, createElement, ce, ElementAttributes } from '../../../dist/pluginFacade'
+import { RenderElement, RenderElements, Style } from '../../../dist/pluginFacade'
 import { LinkTagData } from '../../../dist/pluginFacade'
 import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/pluginFacade'
 
@@ -73,7 +73,7 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         if (projectName.length > 20) {
             projectName = '...'+projectName.substring(projectName.length-17)
         }
-        return createElement('div', {}, [`Used linkTags in ${projectName}:`])
+        return {type: 'div', children: `Used linkTags in ${projectName}:`}
     }
 
     private formBody(): RenderElements {
@@ -84,14 +84,14 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         
         const defaultRow: RenderElement = this.formDefaultRow()
         const tagRows: RenderElement[] = tagsOrMessage.map(tag => this.formTagRow(tag))
-        const table: RenderElement = createElement('table', {}, [defaultRow, ...tagRows])
+        const table: RenderElement = {type: 'table', children: [defaultRow, ...tagRows]}
         
         if (tagRows.length === 0) {
             return [
                 table, 
-                ce('div', {}, ['There are no linkTags used in this project yet.']),
-                ce('div', {}, ['Right click on links to tag them.']),
-                ce('div', {}, ['Right click on boxes to create links.'])
+                {type: 'div', children: 'There are no linkTags used in this project yet.'},
+                {type: 'div', children: 'Right click on links to tag them.'},
+                {type: 'div', children: 'Right click on boxes to create links.'}
             ]
         } else {
             return table
@@ -103,11 +103,11 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         const modeDropDown: RenderElement = this.formDefaultModeDropDown()
         const colorDropDown: RenderElement = this.formDefaultColorDropDown()
 
-        return ce('tr', {}, [
-            ce('td', this.getLabelAttributes(linkDidactorSettings.getDefaultLinkAppereanceColor()), [label]), 
-            ce('td', {}, [modeDropDown]),
-            ce('td', {}, [colorDropDown])
-        ])
+        return {type: 'tr', children: [
+            {type: 'td', style: this.getLabelStyle(linkDidactorSettings.getDefaultLinkAppereanceColor()), children: label}, 
+            {type: 'td', children: modeDropDown},
+            {type: 'td', children: colorDropDown}
+        ]}
     }
 
     private formTagRow(tag: LinkTagData): RenderElement {
@@ -115,46 +115,54 @@ export class LinkDidactorToolbarViewWidget extends Widget {
         const modeDropDown: RenderElement = this.formTagModeDropDown(tag)
         const colorDropDown: RenderElement = this.formTagColorDropDown(tag)
 
-        return ce('tr', {}, [
-            ce('td', this.getLabelAttributes(tag.appearance.color), [label]), 
-            ce('td', {}, [modeDropDown]),
-            ce('td', {}, [colorDropDown])
-        ])
+        return {type: 'tr', children: [
+            {type: 'td', style: this.getLabelStyle(tag.appearance.color), children: label}, 
+            {type: 'td', children: modeDropDown},
+            {type: 'td', children: colorDropDown}
+        ]}
     }
 
-    private getLabelAttributes(color: string|undefined): ElementAttributes {
+    private getLabelStyle(color: string|undefined): Style {
         if (!color || color === linkDidactorSettings.boxIdHashColorName) {
             return {}
         }
-        return {style: {color}}
+        return {color}
     }
 
     private formDefaultModeDropDown(): RenderElement {
-        return createElement('select', {
+        return {
+            type: 'select',
             id: this.getDefaultModeDropDownId(),
-            onchangeValue: (value: string) => this.setDefaultLinkMode(value)
-        }, this.formDefaultModeDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceMode()))
+            onchangeValue: (value: string) => this.setDefaultLinkMode(value),
+            children: this.formDefaultModeDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceMode())
+        }
     }
 
     private formTagModeDropDown(tag: LinkTagData): RenderElement {
-        return createElement('select', {
+        return {
+            type: 'select',
             id: this.getTagModeDropDownId(tag),
-            onchangeValue: (value: string) => this.setLinkTagMode(tag, value !== 'undefined' ? value : undefined)
-        }, this.formTagModeDropDownOptions(tag.appearance.mode))
+            onchangeValue: (value: string) => this.setLinkTagMode(tag, value !== 'undefined' ? value : undefined),
+            children: this.formTagModeDropDownOptions(tag.appearance.mode)
+        }
     }
 
     private formDefaultColorDropDown(): RenderElement {
-        return createElement('select', {
+        return {
+            type: 'select',
             id: this.getDefaultColorDropDownId(),
-            onchangeValue: (value: string) => this.setDefaultLinkColor(value)
-        }, this.formDefaultColorDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceColor()))
+            onchangeValue: (value: string) => this.setDefaultLinkColor(value),
+            children: this.formDefaultColorDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceColor())
+        }
     }
 
     private formTagColorDropDown(tag: LinkTagData): RenderElement {
-        return createElement('select', {
+        return {
+            type: 'select',
             id: this.getTagColorDropDownId(tag),
-            onchangeValue: (value: string) => this.setLinkTagColor(tag, value !== 'undefined' ? value : undefined)
-        }, this.formTagColorDropDownOptions(tag.appearance.color))
+            onchangeValue: (value: string) => this.setLinkTagColor(tag, value !== 'undefined' ? value : undefined),
+            children: this.formTagColorDropDownOptions(tag.appearance.color)
+        }
     }
 
     private formDefaultModeDropDownOptions(selectedMode: LinkAppearanceMode): RenderElement[] {
@@ -166,12 +174,22 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
     private formTagModeDropDownOptions(selectedMode: LinkAppearanceMode|undefined): RenderElement[] {
         const elements: RenderElement[] = this.formModeDropDownOptions(selectedMode)
-        elements.push(createElement('option', {value: undefined, selected: undefined === selectedMode}, ['unset']))
+        elements.push({
+            type: 'option', 
+            value: undefined, 
+            selected: undefined === selectedMode, 
+            children: 'unset'
+        })
         return elements
     }
 
     private formModeDropDownOptions(selectedMode: LinkAppearanceMode|undefined): RenderElement[] {
-        return linkAppearanceModes.map(mode => createElement('option', {value: mode, selected: mode === selectedMode}, [mode]))
+        return linkAppearanceModes.map(mode => ({
+            type: 'option', 
+            value: mode, 
+            selected: mode === selectedMode, 
+            children: mode
+        }))
     }
 
     private formDefaultColorDropDownOptions(selectedColor: string): RenderElement[] {
@@ -181,12 +199,22 @@ export class LinkDidactorToolbarViewWidget extends Widget {
 
     private formTagColorDropDownOptions(selectedColor: string|undefined): RenderElement[] {
         const elements: RenderElement[] = this.formColorDropDownOptions(selectedColor)
-        elements.push(createElement('option', {value: undefined, selected: undefined === selectedColor}, ['unset']))
+        elements.push({
+            type: 'option', 
+            value: undefined, 
+            selected: undefined === selectedColor, 
+            children: 'unset'
+        })
         return elements
     }
 
     private formColorDropDownOptions(selectedColor: string|undefined): RenderElement[] {
-        return linkDidactorSettings.linkColorOptions.map(color => createElement('option', {value: color, selected: color === selectedColor}, [color]))
+        return linkDidactorSettings.linkColorOptions.map(color => ({
+            type: 'option', 
+            value: color, 
+            selected: color === selectedColor, 
+            children: color
+        }))
     }
 
     private async setDefaultLinkMode(mode: string|undefined): Promise<void> {

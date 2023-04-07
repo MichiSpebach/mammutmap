@@ -2,7 +2,7 @@ import { ClientRect } from '../core/ClientRect';
 import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
-import { RenderElements, RenderElement, ElementAttributes } from '../core/util/RenderElement';
+import { RenderElements, RenderElement } from '../core/util/RenderElement';
 import * as indexHtmlIds from '../core/indexHtmlIds'
 import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister';
 import { MessagePopup } from '../core/MessagePopup';
@@ -198,27 +198,35 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             return document.createTextNode(element)
         }
 
-        const node: HTMLElement = document.createElement(element.type)
+        const {
+            type: elementType, 
+            children: elementChildren, 
+            ...assignableElementFields
+        } = element // otherwise TypeError: Cannot set property children of #<Element> which has only a getter
 
-        Object.assign(node, element.attributes)
-        if (element.attributes.style) {
-            Object.assign(node.style, element.attributes.style)
+        const node: HTMLElement = document.createElement(elementType)
+
+        Object.assign(node, assignableElementFields)
+        if (element.style) {
+            Object.assign(node.style, element.style)
         }
-        if (element.attributes.onclick) {
-            this.setHtmlElementOnClick(node, element.attributes.onclick)
+        if (element.onclick) {
+            this.setHtmlElementOnClick(node, element.onclick)
         }
-        if (element.attributes.onchangeValue && element.attributes.onchangeChecked) {
-            util.logWarning(`DirectDomAdapter::createHtmlElementFrom(..) multiple onchange event handlers for element with id '${element.attributes.id}', only one will work.`)
+        if (element.onchangeValue && element.onchangeChecked) {
+            util.logWarning(`DirectDomAdapter::createHtmlElementFrom(..) multiple onchange event handlers for element with id '${element.id}', only one will work.`)
         }
-        if (element.attributes.onchangeValue) {
-            this.setHtmlElementOnChangeValue(node, element.attributes.onchangeValue)
+        if (element.onchangeValue) {
+            this.setHtmlElementOnChangeValue(node, element.onchangeValue)
         }
-        if (element.attributes.onchangeChecked) {
-            this.setHtmlElementOnChangeChecked(node, element.attributes.onchangeChecked)
+        if (element.onchangeChecked) {
+            this.setHtmlElementOnChangeChecked(node, element.onchangeChecked)
         }
         // TODO: warn if element.attributes.on... event handler is not implemented yet
 
-        node.append(...this.createHtmlElementsFrom(element.children))
+        if (elementChildren) {
+            node.append(...this.createHtmlElementsFrom(elementChildren))
+        }
 
         return node
     }

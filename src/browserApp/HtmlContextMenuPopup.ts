@@ -13,14 +13,16 @@ export class HtmlContextMenuPopup implements ContextMenuPopup {
     public async popup(items: MenuItem[], position: ClientPosition): Promise<void> {
         await this.closeIfOpened()
 
-        const element: RenderElement = createElement('div', {
+        const element: RenderElement = {
+            type: 'div', 
             id: 'contextMenu',
             style: {
                 position: 'fixed',
                 left: position.x+'px',
                 top: position.y+'px'
-            }
-        }, [])
+            },
+            children: []
+        }
         renderManager.addElementTo(indexHtmlIds.bodyId, element, RenderPriority.RESPONSIVE)
 
         this.openedWidget = new MenuItemFolderContainerWidget('contextMenu', items, () => this.closeIfOpened())
