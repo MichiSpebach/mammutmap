@@ -1,17 +1,4 @@
 // TODO: create folder/module rendering and move RenderElement.ts, renderManager.ts, domAdapter.ts into there
-export {
-  createRenderElement as ce,
-  createRenderElement as cre,
-  createRenderElement as createElement
-}
-
-export function createRenderElement(renderElement: RenderElement): RenderElement {
-  return renderElement
-}
-
-export function createRenderElementRaw(type: string, attributes: any, children: any): RenderElement {
-  return {type: type as ElementType, ...attributes, children}
-}
 
 export function concatRenderElements(elementsList: RenderElements[]): RenderElements {
   return elementsList.flat()
@@ -44,12 +31,4 @@ export type Style = {
   width?: string,
   height?: string
   color?: string
-}
-
-export class RenderElementClass implements RenderElement {
-  public constructor(
-    public type: ElementType,
-    public attributes: any, // TODO: flatten attributes, inline them
-    public children: (string | RenderElement)[]
-  ) {}
 }

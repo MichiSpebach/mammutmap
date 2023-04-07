@@ -5,7 +5,6 @@ import { ToolbarWidget } from './toolbars/ToolbarWidget'
 import { renderManager } from './RenderManager'
 import { settings } from './Settings'
 import { util } from './util/util'
-import { createElement } from './util/RenderElement'
 import { ClientPosition } from './shape/ClientPosition'
 
 // TODO: rename to indexWidget|bodyWidget|appWidget|window(Widget)?

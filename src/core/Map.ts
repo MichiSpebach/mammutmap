@@ -13,7 +13,7 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { fileSystem } from './fileSystemAdapter'
 import { Subscribers } from './util/Subscribers'
 import { mouseDownDragManager } from './mouseDownDragManager'
-import { createElement, RenderElement } from './util/RenderElement'
+import { RenderElement } from './util/RenderElement'
 import { LocalPosition } from './shape/LocalPosition'
 import { ClientRect } from './ClientRect'
 

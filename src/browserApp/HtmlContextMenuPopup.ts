@@ -3,7 +3,7 @@ import { MenuItem } from '../core/applicationMenu/MenuItem'
 import { MenuItemFolderContainerWidget } from '../core/applicationMenu/MenuItemFolderContainerWidget'
 import { MouseEventResultAdvanced, renderManager, RenderPriority } from '../core/RenderManager'
 import * as indexHtmlIds from '../core/indexHtmlIds'
-import { createElement, RenderElement } from '../core/util/RenderElement'
+import { RenderElement } from '../core/util/RenderElement'
 import { ClientPosition } from '../core/shape/ClientPosition'
 
 export class HtmlContextMenuPopup implements ContextMenuPopup {

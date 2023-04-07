@@ -28,14 +28,14 @@ import { NodeWidget } from './core/node/NodeWidget'
 import { LinkTagData } from './core/mapData/LinkTagData'
 import { ToolbarView } from './core/toolbars/ToolbarView'
 import { Widget } from './core/Widget'
-import { ce, createElement, RenderElement, RenderElements, Style } from './core/util/RenderElement'
+import { ElementType, RenderElement, RenderElements, Style } from './core/util/RenderElement'
 import { PopupWidget } from './core/PopupWidget'
 
 export { util as coreUtil }
 export { processing, ChildProcess}
 export { applicationMenu, contextMenu, MenuItemFile }
 export { renderManager, RenderPriority, Subscribers }
-export { RenderElement, RenderElements, Style, createElement, ce }
+export { RenderElements, RenderElement, ElementType, Style }
 export { style }
 export { Widget }
 export { PopupWidget}
