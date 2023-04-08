@@ -1,4 +1,5 @@
 import { util } from '../core/util/util'
+import { NotFoundError } from '../core/util/NotFoundError'
 import { DirectoryStatsBasicImpl, Dirent, DirentBasicImpl, FileStatsBasicImpl, OpenDialogOptions, OpenDialogReturnValue, Stats, UnknownDirentKindStatsBasicImpl } from '../core/fileSystemAdapter'
 import { AvailableFileSystemHandlesRegister } from './AvailableFileSystemHandlesRegister'
 import { MessagePopup } from '../core/MessagePopup'
@@ -65,7 +66,7 @@ export class FileSystemAccessApiAdapter {
         if (!(result instanceof FileSystemHandle)) {
             const message = `FileSystemAccessApiAdapter::writeFile(..) couldn't find file at path '${path}' and failed to create it. Errors that appeared: ${result}`
             if (options?.throwInsteadOfWarn) {
-                throw {name: 'NotFoundError', message}
+                throw new NotFoundError(message)
             } else {
                 util.logWarning(message)
             }

@@ -1,5 +1,6 @@
 import { Dirent, FileSystemAdapter, OpenDialogOptions, OpenDialogReturnValue, Stats } from '../core/fileSystemAdapter'
 import { util } from '../core/util/util'
+import { NotImplementedError } from '../core/util/NotImplementedError'
 import { HostServerFileSystemAdapter } from './HostServerFileSystemAdapter'
 import { FileSystemAccessApiAdapter } from './FileSystemAccessApiAdapter'
 
@@ -64,7 +65,7 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         if (this.hostServer.isHostPath(path)) {
             const message = `BrowserFileSystemAdapter::writeFile(..) on hostServer is not implemented, path "${path}" is interpreted as hostPath.`
             if (options?.throwInsteadOfWarn) {
-                throw new Error(message) // TODO: introduce util.buildError(options: {name?: 'NotFoundError'|'NotImplementedError', message: string}): Error
+                throw new NotImplementedError(message)
             }
             util.logWarning(message)
             return

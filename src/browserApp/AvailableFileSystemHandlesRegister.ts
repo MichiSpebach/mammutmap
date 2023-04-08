@@ -1,4 +1,5 @@
 import { util } from '../core/util/util'
+import { NotFoundError } from '../core/util/NotFoundError'
 
 export class AvailableFileSystemHandlesRegister {
 
@@ -61,7 +62,7 @@ export class AvailableFileSystemHandlesRegister {
                     return searchHandle
                 }
             }
-            return [{name: 'NotFoundError', message: `No available fileHandle has name '${lastElement}'.`}]
+            return [new NotFoundError(`No available fileHandle has name '${lastElement}'.`)]
         }
 
         const errors: Error[] = []
@@ -79,7 +80,7 @@ export class AvailableFileSystemHandlesRegister {
                     return value
                 }
             }
-            errors.push({name: 'NotFoundError', message: `lastElement "${lastElement}" of path "${path}" not found.`})
+            errors.push(new NotFoundError(`lastElement "${lastElement}" of path "${path}" not found.`))
         }
         return errors
     }
@@ -100,7 +101,7 @@ export class AvailableFileSystemHandlesRegister {
                     return searchHandle
                 }
             }
-            return [{name: 'NotFoundError', message: `No available fileHandle has name '${fileName}'.`}]
+            return [new NotFoundError(`No available fileHandle has name '${fileName}'.`)]
         }
 
         const errors: Error[] = []
