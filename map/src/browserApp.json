@@ -82,8 +82,8 @@
 			"from": {
 				"path": [
 					{
-						"boxId": "n0u6e8svi3",
-						"boxName": "BrowserFileSystemAdapter.ts",
+						"boxId": "8nad0qpq98o",
+						"boxName": "HostServerFileSystemAdapter.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -105,8 +105,8 @@
 			"from": {
 				"path": [
 					{
-						"boxId": "n0u6e8svi3",
-						"boxName": "BrowserFileSystemAdapter.ts",
+						"boxId": "8b7l499fono",
+						"boxName": "LocalFileSystemAdapter.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -123,7 +123,10 @@
 					}
 				],
 				"floatToBorder": true
-			}
+			},
+			"tags": [
+				"has"
+			]
 		},
 		{
 			"id": "r70rpgcd44",
@@ -170,6 +173,62 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "46dsjrc63hg",
+			"from": {
+				"path": [
+					{
+						"boxId": "n0u6e8svi3",
+						"boxName": "BrowserFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8nad0qpq98o",
+						"boxName": "HostServerFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "stqp3frc86",
+			"from": {
+				"path": [
+					{
+						"boxId": "n0u6e8svi3",
+						"boxName": "BrowserFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8b7l499fono",
+						"boxName": "LocalFileSystemAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
 		}
 	],
 	"nodes": []

@@ -93,7 +93,7 @@ export abstract class FileSystemAdapter {
 
   private ongoingOperations: {path: string, promise: Promise<unknown>}[] = []
 
-  /** in some operating systems files can get corrupted when accessed concurrently */
+  /** on some operating systems files can get corrupted when accessed concurrently */
   // TODO: use this for all file operations
   private async scheduleOperation<T>(pathToWaitFor: string, action: () => Promise<T>): Promise<T> {
     const ongoing: {path: string, promise: Promise<unknown>} | undefined = this.ongoingOperations.find(ongoing => ongoing.path === pathToWaitFor)
