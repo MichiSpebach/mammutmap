@@ -120,21 +120,19 @@ export abstract class FileSystemAdapter {
       })
   }
 
-  public async saveToJsonFile(filePath: string, object: JsonObject): Promise<void> {
+  public async saveToJsonFile(filePath: string, object: JsonObject, options?: {throwInsteadOfWarn?: boolean}): Promise<void> {
     if (await this.doesDirentExist(filePath)) {
-      await this.mergeObjectIntoJsonFile(filePath, object)
-        .catch(reason => util.logWarning('failed to merge object into '+filePath+': '+reason))
+      await this.mergeObjectIntoJsonFile(filePath, object, options)
     } else {
-      await this.writeFile(filePath, object.toJson())
-        .catch(reason => util.logWarning('failed to write '+filePath+': '+reason))
+      await this.writeFile(filePath, object.toJson(), options)
     }
   }
 
-  public async mergeObjectIntoJsonFile(path: string, object: JsonObject): Promise<void> {
+  public async mergeObjectIntoJsonFile(path: string, object: JsonObject, options?: {throwInsteadOfWarn?: boolean}): Promise<void> {
     await this.scheduleOperation(path, async (): Promise<void> => {
       const originalJson: string = await this.readFile(path)
       const mergedJson: string = object.mergeIntoJson(originalJson)
-      await this.writeFile(path, mergedJson)
+      await this.writeFile(path, mergedJson, options)
     })
   }
 
@@ -156,7 +154,7 @@ export abstract class FileSystemAdapter {
 
   public abstract readFileSync(path: string): string
 
-  public abstract writeFile(path: string, data: string): Promise<void>
+  public abstract writeFile(path: string, data: string, options?: {throwInsteadOfWarn?: boolean}): Promise<void>
 
   public abstract makeFolder(path: string): Promise<void>
 

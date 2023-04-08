@@ -60,13 +60,17 @@ export class BrowserFileSystemAdapter extends FileSystemAdapter {
         util.logError('BrowserFileSystemAdapter::readFileSync(..) not implemented yet.')
     }
 
-    public async writeFile(path: string, data: string): Promise<void> {
+    public async writeFile(path: string, data: string, options?: {throwInsteadOfWarn?: boolean}): Promise<void> {
         if (this.hostServer.isHostPath(path)) {
-            util.logWarning(`BrowserFileSystemAdapter::writeFile(..) on hostServer is not implemented, path "${path}" is interpreted as hostPath.`)
+            const message = `BrowserFileSystemAdapter::writeFile(..) on hostServer is not implemented, path "${path}" is interpreted as hostPath.`
+            if (options?.throwInsteadOfWarn) {
+                throw new Error(message) // TODO: introduce util.buildError(options: {name?: 'NotFoundError'|'NotImplementedError', message: string}): Error
+            }
+            util.logWarning(message)
             return
         }
 
-        return this.localFileSystem.writeFile(path, data)
+        await this.localFileSystem.writeFile(path, data, options)
     }
 
     public async makeFolder(path: string): Promise<void> {

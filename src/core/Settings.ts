@@ -64,11 +64,12 @@ class Settings {
     const thisWithoutLogic: any = {...this}
     thisWithoutLogic.booleanSubscribers = undefined
 
-    await fileSystem.writeFile(Settings.settingsFilePath, util.toFormattedJson(thisWithoutLogic)) // TODO: merge into existing settings file (not replacing whole file)
+    // TODO: merge into existing settings file (not replacing whole file)
+    await fileSystem.writeFile(Settings.settingsFilePath, util.toFormattedJson(thisWithoutLogic), {throwInsteadOfWarn: true})
       .then(() => {
         util.logInfo('saved ' + Settings.settingsFilePath)
       })
-      .catch(error => util.logWarning('failed to save ' + Settings.settingsFilePath + ': ' + error))
+      .catch(reason => util.logWarning(`Settings::save() failed at settingsFilePath "${Settings.settingsFilePath}", reason is ${reason}`))
   }
 
   public getZoomSpeed(): number {

@@ -374,9 +374,12 @@ export abstract class Box implements DropTarget, Hoverable {
 
   public async saveMapData(): Promise<void> {
     const mapDataFilePath: string = this.getMapDataFilePath()
-    await fileSystem.saveToJsonFile(mapDataFilePath, this.mapData)
-    util.logInfo('saved ' + mapDataFilePath)
-    this.setMapDataFileExistsAndUpdateBorderStyle(true)
+    await fileSystem.saveToJsonFile(mapDataFilePath, this.mapData, {throwInsteadOfWarn: true}).then(() => {
+      util.logInfo('saved ' + mapDataFilePath)
+      this.setMapDataFileExistsAndUpdateBorderStyle(true)
+    }).catch(reason => {
+      util.logWarning(`Box::saveMapData() failed at mapDataFilePath "${mapDataFilePath}", reason is ${reason}`)
+    })
   }
 
   public async onDragEnter(): Promise<void> {

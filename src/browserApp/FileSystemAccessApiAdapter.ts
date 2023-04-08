@@ -60,10 +60,15 @@ export class FileSystemAccessApiAdapter {
         throw new Error('Method not implemented.');
     }
 
-    public async writeFile(path: string, data: string): Promise<void> {
+    public async writeFile(path: string, data: string, options?: {throwInsteadOfWarn?: boolean}): Promise<void> {
         const result: FileSystemFileHandle|Error[] = await this.availableHandles.findFileHandleByPath(path, {create: true})
         if (!(result instanceof FileSystemHandle)) {
-            util.logWarning(`FileSystemAccessApiAdapter::writeFile(..) couldn't find file at path '${path}' and failed to create it. Errors that appeared: ${result}`)
+            const message = `FileSystemAccessApiAdapter::writeFile(..) couldn't find file at path '${path}' and failed to create it. Errors that appeared: ${result}`
+            if (options?.throwInsteadOfWarn) {
+                throw {name: 'NotFoundError', message}
+            } else {
+                util.logWarning(message)
+            }
             return
         }
         const writableFileStream/*: FileSystemWritableFileStream*/ = await (result as any).createWritable() // TODO: fix as any and outcommented type

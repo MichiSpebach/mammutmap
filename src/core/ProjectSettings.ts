@@ -57,9 +57,12 @@ export class ProjectSettings { // TODO: rename to MapSettings?
   }
 
   public async saveToFileSystem(): Promise<void> {
-    await fileSystem.saveToJsonFile(this.projectSettingsFilePath, this.data)
-    this.dataFileExists = true
-    util.logInfo('saved ProjectSettings into '+this.projectSettingsFilePath)
+    await fileSystem.saveToJsonFile(this.projectSettingsFilePath, this.data, {throwInsteadOfWarn: true}).then(() => {
+      this.dataFileExists = true
+      util.logInfo('saved ProjectSettings into '+this.projectSettingsFilePath)
+    }).catch(reason => {
+      util.logWarning(`ProjectSettings::saveToFileSystem() failed at projectSettingsFilePath "${this.projectSettingsFilePath}", reason is ${reason}`)
+    })
   }
 
   public isDataFileExisting(): boolean {

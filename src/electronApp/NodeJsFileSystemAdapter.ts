@@ -42,10 +42,17 @@ export class NodeJsFileSystemAdapter extends FileSystemAdapter {
     return fs.readFileSync(path, 'utf-8')
   }
 
-  public async writeFile(path: string, data: string): Promise<void> {
+  public async writeFile(path: string, data: string, options?: {throwInsteadOfWarn?: boolean}): Promise<void> {
     let directory = util.removeLastElementFromPath(path)
     await this.makeFolder(directory)
-    return fsPromises.writeFile(path, data)
+
+    if (options?.throwInsteadOfWarn) {
+      await fsPromises.writeFile(path, data)
+    } else {
+      await fsPromises.writeFile(path, data).catch((reason) => {
+        util.logWarning(`NodeJsFileSystemAdapter::writeFile(..) failed at path "${path}", reason is ${reason}`)
+      })
+    }
   }
 
   public async makeFolder(path: string): Promise<void> {
