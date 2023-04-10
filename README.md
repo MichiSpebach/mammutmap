@@ -9,9 +9,19 @@ Browser version is hosted at https://www.mammutmap.com/, runs completely local i
 ### Install libraries
 `npm install`
 
-### Start
+### Start Electron version
 (run `npm install` first)\
 `npm start`
+
+### Start browser version
+(run `npm install` first)\
+`npm run buildApp`\
+`npm run buildPlugins`\
+(if not installed yet: `npm install http-server --global` or use http-server of your choice)\
+From the project folder (the folder this README is in) run:\
+`http-server ../ --ext js -c no-cache`\
+Mammutmap should now be available at:\
+http://localhost:8080/mammutmap/dist/browserApp/index.html
 
 ### Execute tests
 Run unit tests:\
