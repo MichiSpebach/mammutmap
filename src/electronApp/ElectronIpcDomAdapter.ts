@@ -176,9 +176,8 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
       for (const field in element) {
         const fieldValue = element[field as keyof RenderElement]
-        if (field === 'type' || field === 'children' || field.startsWith('on')) {
+        if (field === 'type' || field === 'children') {
           // these fields are not assignable
-          // event handlers where parsed to js string in intercept method above
           continue
         }
         if (field === 'style') {
@@ -190,7 +189,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
               js += `${elementJsName}.style.${styleField}=${styleFieldValue};`
             }
           }
-        } else if (typeof fieldValue === 'string') {
+        } else if (typeof fieldValue === 'string' && !field.startsWith('on')) { // event handlers where parsed to js string in intercept method above
           js += `${elementJsName}.${field}="${fieldValue}";`
         } else {
           js += `${elementJsName}.${field}=${fieldValue};`
