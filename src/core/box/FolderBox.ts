@@ -35,7 +35,7 @@ export class FolderBox extends Box {
     return false
   }
 
-  public getChilds(): (Box|NodeWidget)[] { // TODO: change return type to AbstractNodeWidget as soon as available
+  public override getChilds(): (Box|NodeWidget)[] { // TODO: change return type to AbstractNodeWidget as soon as available
     return [...super.getChilds(), ...this.getBoxes()]
   }
 

@@ -6,6 +6,7 @@
     "allowJs": false,
     "skipLibCheck": true,
     "noImplicitAny": false,
+    "noImplicitOverride": true,
     "outDir": "../plugin",
     "moduleResolution": "node"
   },

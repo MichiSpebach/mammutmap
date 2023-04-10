@@ -58,7 +58,7 @@ class TelescopeBoxHeader extends BoxHeader {
       return Object.getPrototypeOf(TelescopeBoxHeader.prototype).constructor
   }
 
-  public formTitleHtml(): string {
+  public override formTitleHtml(): string {
     return this.formTitleHtmlSplitInMiddle()
   }
 

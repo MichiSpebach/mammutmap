@@ -62,7 +62,7 @@ class ToggableFancyBorderingLinks extends BorderingLinks {
         BorderingLinks.prototype.setHighlightAll = ToggableFancyBorderingLinks.setHighlightAllBackup
     }
 
-    public async setHighlightAll(highlight: boolean): Promise<void> {
+    public override async setHighlightAll(highlight: boolean): Promise<void> {
         if (this.links.length > 15) {
             await ensureDeactivation()
         } else {

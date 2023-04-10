@@ -6,6 +6,7 @@
     "skipLibCheck": true,
     "module": "es2022", // overriden by buildAppForOlderElectron in package.json, TODO: cleanup as soon as electron supports es-modules
     "noImplicitAny": true,
+    "noImplicitOverride": true,
     "sourceMap": true,
     "declaration": true,
     "baseUrl": ".",

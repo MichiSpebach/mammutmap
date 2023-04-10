@@ -140,7 +140,7 @@ class CompatibilityTheme extends DarkTheme {
     return new CompatibilityTheme()
   }
 
-  public getHighlightTransitionClass(): string {
+  public override getHighlightTransitionClass(): string {
     return ''
   }
 }

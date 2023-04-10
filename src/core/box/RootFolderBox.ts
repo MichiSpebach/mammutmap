@@ -14,43 +14,43 @@ export class RootFolderBox extends FolderBox {
     this.idRenderedInto = idRenderedInto
   }
 
-  public getSrcPath(): string {
+  public override getSrcPath(): string {
     return this.projectSettings.getAbsoluteSrcRootPath()
   }
 
-  public getMapPath(): string {
+  public override getMapPath(): string {
     return this.projectSettings.getAbsoluteMapRootPath()
   }
 
-  public getMapDataFilePath(): string {
+  public override getMapDataFilePath(): string {
     return this.projectSettings.getProjectSettingsFilePath()
   }
 
-  public getProjectSettings(): ProjectSettings {
+  public override getProjectSettings(): ProjectSettings {
     return this.projectSettings
   }
 
-  public isRoot(): boolean {
+  public override isRoot(): boolean {
     return true
   }
 
-  public async saveMapData(): Promise<void> {
+  public override async saveMapData(): Promise<void> {
     if (!this.isMapDataFileExisting()) {
       await this.projectSettings.saveToFileSystem()
     }
     await super.saveMapData()
   }
 
-  public async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+  public override async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     await super.renderStyle(priority)
     this.clearCachedClientRect()
   }
 
-  public async getParentClientRect(): Promise<ClientRect> {
+  public override async getParentClientRect(): Promise<ClientRect> {
     return renderManager.getClientRectOf(this.idRenderedInto, RenderPriority.RESPONSIVE)
   }
 
-  public async getClientRect(): Promise<ClientRect> {
+  public override async getClientRect(): Promise<ClientRect> {
     if (!this.cachedClientRect) {
       this.cachedClientRect = await renderManager.getClientRectOf(this.getId(), RenderPriority.RESPONSIVE)
     } else {

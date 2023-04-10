@@ -11,7 +11,7 @@ export class MapSettingsData extends BoxData {
     public linkTags: LinkTagData[] // TODO: move into data of boxes for tree structure?
     public readonly defaultLinkAppearance: LinkAppearanceData
 
-    public static ofRawObject(object: any): MapSettingsData {
+    public static override ofRawObject(object: any): MapSettingsData {
         const boxData: BoxData = BoxData.ofRawObject(object)
         const mapSettingsData: MapSettingsData = Object.setPrototypeOf(boxData, MapSettingsData.prototype)
 

@@ -13,7 +13,7 @@ export class DidactedLink extends LinkImplementation {
         return Object.getPrototypeOf(DidactedLink.prototype).constructor
     }
 
-    public async render(priority?: RenderPriority): Promise<void> {
+    public override async render(priority?: RenderPriority): Promise<void> {
         if (this.getMode() === 'notRendered') {
             return super.unrender()
         }
@@ -24,7 +24,7 @@ export class DidactedLink extends LinkImplementation {
         ])
     }
 
-    public async unrender(): Promise<void> {
+    public override async unrender(): Promise<void> {
         this.clearStyleTimer()
         await super.unrender()
     }
@@ -33,7 +33,7 @@ export class DidactedLink extends LinkImplementation {
         return linkDidactorSettings.getComputedModeForLinkTags(this.getTags())
     }
 
-    public getColor(): string {
+    public override getColor(): string {
         const color: string = linkDidactorSettings.getComputedColorForLinkTags(this.getTags())
 
         if (color === linkDidactorSettings.boxIdHashColorName) {

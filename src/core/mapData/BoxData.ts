@@ -92,7 +92,7 @@ export class BoxData extends JsonObject {
     util.logWarning('BoxData with id '+this.id+': ' + message)
   }
 
-  public toJson(): string {
+  public override toJson(): string {
     return util.toFormattedJson(this)
   }
 

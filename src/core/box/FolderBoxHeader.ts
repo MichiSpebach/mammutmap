@@ -9,7 +9,7 @@ export class FolderBoxHeader extends BoxHeader {
     super(referenceBox)
   }
 
-  public async render(): Promise<void> {
+  public override async render(): Promise<void> {
     await super.render()
     renderManager.addClassTo(super.getId(), style.getFolderBoxHeaderClass())
   }
