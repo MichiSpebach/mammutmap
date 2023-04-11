@@ -1,6 +1,7 @@
 import * as indexHtmlIds from './indexHtmlIds'
 import { renderManager } from './RenderManager'
 import { style } from './styleAdapter'
+import { RenderElement, RenderElements } from './util/RenderElement'
 import { Widget } from './Widget'
 
 export abstract class PopupWidget extends Widget {
@@ -20,24 +21,43 @@ export abstract class PopupWidget extends Widget {
     }
 
     public async render(): Promise<void> {
-        let html = `<div id="${this.id}" class="${style.getPopupClass()}">`
-        html += `<div style="margin-bottom:5px;">${this.title}<button id="${this.id+'Close'}" style="float:right">X</button></div>`
-        html += this.formContentHtml()
-        html += '</div>'
+        const closeButton: RenderElement = {
+            type: 'button',
+            id: this.id+'Close',
+            style: {float: 'right'},
+            onclick: () => {
+                if (this.onClose) {
+                    this.onClose()
+                }
+                this.unrender()
+            },
+            children: 'X'
+        }
+        const header: RenderElement = {
+            type: 'div',
+            style: {marginBottom: '5px'},
+            children: [this.title, closeButton]
+        }
 
-        await renderManager.addContentTo(indexHtmlIds.bodyId, html)
-
-        await renderManager.addEventListenerTo(this.id+'Close', 'click', async () => {
-            if (this.onClose) {
-                this.onClose()
+        let content: RenderElements = this.formContent()
+        if (typeof content === 'string') { // in order to keep old PopupWidgets work
+            content = {
+                type: 'div',
+                innerHTML: content
             }
-            this.unrender()
+        }
+
+        await renderManager.addElementTo(indexHtmlIds.bodyId, {
+            type: 'div',
+            id: this.id,
+            className: style.getPopupClass(),
+            children: [header, content].flat()
         })
 
         await this.afterRender()
     }
 
-    protected abstract formContentHtml(): string
+    protected abstract formContent(): RenderElements
 
     protected abstract afterRender(): Promise<void>
 
@@ -45,7 +65,6 @@ export abstract class PopupWidget extends Widget {
 
     public async unrender(): Promise<void> {
         await this.beforeUnrender()
-        await renderManager.removeEventListenerFrom(this.id+'Close', 'click')
         await renderManager.remove(this.id)
     }
 

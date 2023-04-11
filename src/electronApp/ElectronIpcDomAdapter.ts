@@ -189,6 +189,17 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
               js += `${elementJsName}.style.${styleField}=${styleFieldValue};`
             }
           }
+        } else if (field === 'innerHTML') {
+          if ((fieldValue as string).includes("'")) {
+            if ((fieldValue as string).includes('"')) {
+              util.logWarning(`innerHTML "${fieldValue}" includes both singleQuotes and doubleQuotes, this can lead to escape mistakes`)
+              js += `${elementJsName}.innerHTML="${(fieldValue as string).replaceAll('"', '&quot;')}";`
+            } else {
+              js += `${elementJsName}.innerHTML="${fieldValue}";`
+            }
+          } else {
+            js += `${elementJsName}.innerHTML='${fieldValue}';`
+          }
         } else if (typeof fieldValue === 'string' && !field.startsWith('on')) { // event handlers where parsed to js string in intercept method above
           js += `${elementJsName}.${field}="${fieldValue}";`
         } else {

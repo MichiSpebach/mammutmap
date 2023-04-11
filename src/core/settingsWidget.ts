@@ -32,7 +32,7 @@ class SettingsWidget extends PopupWidget {
     this.sidebarInputId = this.getId()+'Sidebar'
   }
 
-  protected formContentHtml(): string {
+  protected formContent(): string {
     let zoomSpeedHtml = '<td>'
     zoomSpeedHtml += `<label for="${this.zoomSpeedInputId}">zoomSpeed: </label>`
     zoomSpeedHtml += '</td><td>'

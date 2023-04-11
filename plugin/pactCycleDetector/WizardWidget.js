@@ -13,7 +13,7 @@ class WizardWidget extends pluginFacade_1.PopupWidget {
         this.outputId = this.getId() + 'Output';
         this.results = [];
     }
-    formContentHtml() {
+    formContent() {
         let html = 'Command:<br>';
         html += `<input id="${this.commandInputId}" value="java -jar <path to jar>" autofocus>`;
         html += `<button id="${this.commandSubmitId}">run</button>`;

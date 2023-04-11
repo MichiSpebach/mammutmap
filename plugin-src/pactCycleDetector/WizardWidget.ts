@@ -18,7 +18,7 @@ export class WizardWidget extends PopupWidget {
         super('pactCycleDetectorWizard', 'Pact Cycle Detector')
     }
 
-    protected formContentHtml(): string {
+    protected formContent(): string {
         let html = 'Command:<br>'
         html += `<input id="${this.commandInputId}" value="java -jar <path to jar>" autofocus>`
         html += `<button id="${this.commandSubmitId}">run</button>`

@@ -220,7 +220,7 @@ function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
     public constructor() {
       super(util.generateId()+title, title)
     }
-    protected formContentHtml(): string {
+    protected formContent(): string {
       // TODO: render this in zoomable map would be cool, introduce ObjectBox|JsonBox for this, or better handled by plugin?
       let html = '<pre style="max-width:1500px;max-height:750px;overflow:auto;">'
       html += util.escapeForHtml(util.stringify(object))

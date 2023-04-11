@@ -22,7 +22,7 @@ export class TextInputPopup extends PopupWidget {
         this.resolve = resolve
     }
 
-    protected formContentHtml(): string {
+    protected formContent(): string {
       let html = `<form id="${this.getId()+'Form'}" onsubmit="return false">` // onsubmit="return false" prevents action from trying to call an url
       html += `<input onfocus="this.select()" id="${this.getId()+'Input'}" value="${this.defaultValue}" autofocus>` // TODO: autofocus only works once
       html += `<button id="${this.getId()+'Ok'}">ok</button>`

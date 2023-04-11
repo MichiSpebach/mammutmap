@@ -14,7 +14,7 @@ export class MessagePopup extends PopupWidget {
         this.message = message
     }
 
-    protected formContentHtml(): string {
+    protected formContent(): string {
       return this.message
     }
 

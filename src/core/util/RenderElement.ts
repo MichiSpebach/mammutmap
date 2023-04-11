@@ -28,7 +28,12 @@ export type Style = {
   right?: string,
   top?: string,
   bottom?: string,
+  marginLeft?: string,
+  marginRight?: string,
+  marginTop?: string,
+  marginBottom?: string,
+  float?: 'left'|'right'|'none'|'inherit',
   width?: string,
-  height?: string
+  height?: string,
   color?: string
 }
