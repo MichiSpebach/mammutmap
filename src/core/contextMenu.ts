@@ -227,12 +227,6 @@ function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
       html += '</pre>'
       return html
     }
-    protected afterRender(): Promise<void> {
-      return Promise.resolve()
-    }
-    protected beforeUnrender(): Promise<void> {
-      return Promise.resolve()
-    }
   }
 }
 

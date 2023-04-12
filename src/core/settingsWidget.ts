@@ -75,7 +75,7 @@ class SettingsWidget extends PopupWidget {
     return `<tr>${dataCellsHtml}</tr>`
   }
 
-  protected async afterRender(): Promise<void> {
+  protected override async afterRender(): Promise<void> {
     await Promise.all([
       renderManager.addChangeListenerTo<string>(
         this.zoomSpeedInputId, 'value',
@@ -97,7 +97,7 @@ class SettingsWidget extends PopupWidget {
     await renderManager.addChangeListenerTo<boolean>(id, 'checked', (value: boolean) => settings.setBoolean(settingsName, value))
   }
 
-  protected async beforeUnrender(): Promise<void> {
+  protected override async beforeUnrender(): Promise<void> {
     settingsWidget = undefined
     await Promise.all([
       renderManager.removeEventListenerFrom(this.zoomSpeedInputId, 'change'),

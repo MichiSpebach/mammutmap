@@ -27,11 +27,11 @@ export class WizardWidget extends PopupWidget {
         return html
     }
 
-    protected async afterRender(): Promise<void> {
+    protected override async afterRender(): Promise<void> {
         await renderManager.addEventListenerTo(this.commandSubmitId, 'click', () => this.runCommand())
     }
 
-    protected async beforeUnrender(): Promise<void> {
+    protected override async beforeUnrender(): Promise<void> {
         await renderManager.removeEventListenerFrom(this.commandSubmitId, 'click')
         await this.resultsWidget?.unrender()
     }

@@ -30,7 +30,7 @@ export class TextInputPopup extends PopupWidget {
       return html
     }
 
-    protected async afterRender(): Promise<void> {
+    protected override async afterRender(): Promise<void> {
         await renderManager.addEventListenerTo(this.getId()+'Ok', 'click', async () => {
             const value: string = await renderManager.getValueOf(this.getId()+'Input')
             this.resolve(value)
@@ -38,7 +38,7 @@ export class TextInputPopup extends PopupWidget {
         })
     }
 
-    protected async beforeUnrender(): Promise<void> {
+    protected override async beforeUnrender(): Promise<void> {
         await renderManager.removeEventListenerFrom(this.getId()+'Ok', 'click')
     }
 

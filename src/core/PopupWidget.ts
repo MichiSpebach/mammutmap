@@ -2,12 +2,30 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { renderManager } from './RenderManager'
 import { style } from './styleAdapter'
 import { RenderElement, RenderElements } from './util/RenderElement'
+import { util } from './util/util'
 import { Widget } from './Widget'
 
 export abstract class PopupWidget extends Widget {
     private readonly id: string
     private readonly title: string
     private readonly onClose: (() => void) | undefined
+
+    public static async buildAndRender(title: string, content: RenderElements, onClose?: () => void): Promise<void> {
+        await this.newAndRender({title, content, onClose})
+    }
+
+    public static async newAndRender(options: {title: string, content: RenderElements, onClose?: () => void}): Promise<PopupWidget> {
+        const widget: PopupWidget = new class extends PopupWidget {
+            public constructor() {
+                super(options.title+util.generateId(), options.title, options.onClose)
+            }
+            protected override formContent(): RenderElements {
+                return options.content
+            }
+        }
+        await widget.render()
+        return widget
+    }
 
     protected constructor(id: string, title: string, onClose?: (() => void)) {
         super()
@@ -59,9 +77,11 @@ export abstract class PopupWidget extends Widget {
 
     protected abstract formContent(): RenderElements
 
-    protected abstract afterRender(): Promise<void>
+    // TODO: remove and simply override render() instead
+    protected async afterRender(): Promise<void> {}
 
-    protected abstract beforeUnrender(): Promise<void>
+    // TODO: remove and simply override render() instead
+    protected async beforeUnrender(): Promise<void> {}
 
     public async unrender(): Promise<void> {
         await this.beforeUnrender()
