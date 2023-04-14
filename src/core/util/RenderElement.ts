@@ -22,8 +22,8 @@ export type RenderElement = {
 
 export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'button'|'select'|'option'
 
-export type Style = {
-  position?: string,
+export type Style = Partial<CSSStyleDeclaration> & { // TODO: use something that comes with stricter typing and cleanup overriding
+  position?: 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'inherit', // without overriding any strings would be allowed
   left?: string,
   right?: string,
   top?: string,
@@ -35,5 +35,7 @@ export type Style = {
   float?: 'left'|'right'|'none'|'inherit',
   width?: string,
   height?: string,
-  color?: string
+  color?: string,
+  backgroundColor?: string,
+  pointerEvents?: 'auto'|'none'|'stroke'
 }

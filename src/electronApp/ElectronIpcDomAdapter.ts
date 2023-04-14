@@ -181,14 +181,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
           continue
         }
         if (field === 'style') {
-          for (const styleField in (fieldValue as Style)) {
-            const styleFieldValue = (fieldValue as any)[styleField]
-            if (typeof styleFieldValue === 'string') {
-              js += `${elementJsName}.style.${styleField}="${styleFieldValue}";`
-            } else {
-              js += `${elementJsName}.style.${styleField}=${styleFieldValue};`
-            }
-          }
+          js += this.createSetStyleJavaScript(elementJsName, fieldValue as Style)
         } else if (field === 'innerHTML') {
           if ((fieldValue as string).includes("'")) {
             if ((fieldValue as string).includes('"')) {
@@ -274,6 +267,22 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
       return element
     }
+
+    // TODO: at least create javascriptSnippetGenerator and move javascript generation there
+    private createSetStyleJavaScript(elementJsName: string, style: Style): string {
+      let js = ''
+
+      for (const styleField in style) {
+        const styleFieldValue = style[styleField]
+        if (typeof styleFieldValue === 'string') {
+          js += `${elementJsName}.style.${styleField}="${styleFieldValue}";`
+        } else {
+          js += `${elementJsName}.style.${styleField}=${styleFieldValue};`
+        }
+      }
+
+      return js
+    }
   
     public setContentTo(id: string, content: string): Promise<void> {
       return this.executeJsOnElementSuppressingErrors(id, "innerHTML = '"+content+"'")
@@ -287,8 +296,14 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return this.executeJsOnElementSuppressingErrors(id, "remove()")
     }
   
-    public setStyleTo(id: string, style: string): Promise<void> {
-      return this.executeJsOnElementSuppressingErrors(id, "style = '"+style+"'") // TODO: style is a readonly property, find better solution
+    public setStyleTo(id: string, style: string|Style): Promise<void> {
+      if (typeof style === 'string') {
+        return this.executeJsOnElementSuppressingErrors(id, "style = '"+style+"'") // TODO: style is a readonly property, find better solution
+      }
+
+      let js = `const element = document.getElementById("${id}");`
+      js += this.createSetStyleJavaScript('element', style)
+      return this.executeJavaScript(js)
     }
   
     public addClassTo(id: string, className: string): Promise<void> {

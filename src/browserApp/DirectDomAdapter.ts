@@ -2,7 +2,7 @@ import { ClientRect } from '../core/ClientRect';
 import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
-import { RenderElements, RenderElement } from '../core/util/RenderElement';
+import { RenderElements, RenderElement, Style } from '../core/util/RenderElement';
 import * as indexHtmlIds from '../core/indexHtmlIds'
 import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister';
 import { MessagePopup } from '../core/MessagePopup';
@@ -303,16 +303,20 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         element.remove()
     }
 
-    public async setStyleTo(id: string, style: string): Promise<void> {
+    public async setStyleTo(id: string, style: string|Style): Promise<void> {
         this.setStyleToSync(id, style)
     }
-    public setStyleToSync(id: string, style: string): void {
+    public setStyleToSync(id: string, style: string|Style): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
             util.logWarning(`DirectDomAdapter::setStyleTo(..) failed to get element with id '${id}'.`)
             return
         }
-        (element.style as any)=style // TODO: cast to any because style is a readonly property, find better solution
+        if (typeof style === 'string') {
+            (element.style as any)=style // TODO: cast to any because style is a readonly property, find better solution
+        } else {
+            Object.assign(element.style, style)
+        }
     }
 
     public async addClassTo(id: string, className: string): Promise<void> {

@@ -3,7 +3,7 @@ import {
   EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback
 } from './domAdapter'
 import { ClientRect } from './ClientRect'
-import { RenderElement, RenderElements } from './util/RenderElement'
+import { RenderElement, RenderElements, Style } from './util/RenderElement'
 import { ClientPosition } from './shape/ClientPosition'
 
 export { EventType, MouseEventType, DragEventType, WheelEventType, InputEventType, KeyboardEventType }
@@ -133,7 +133,7 @@ export class RenderManager {
     }))
   }
 
-  public setStyleTo(id: string, style: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+  public setStyleTo(id: string, style: string|Style, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'setStyleTo'+id,
@@ -368,7 +368,7 @@ export class RenderManager {
     }
 
     const maxBatchSize: number = 100
-    const batch: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements}[] = []
+    const batch: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements}[] = []
     let originalCommandAdded: boolean = false
 
     for (let i: number = 0; i < this.commands.length && batch.length < maxBatchSize; i++) {
@@ -414,14 +414,14 @@ export class Command { // only export for unit tests
   public priority: RenderPriority
   public squashableWith: string|undefined
   public updatableWith: string|undefined
-  public batchParameters: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements} | undefined
+  public batchParameters: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements} | undefined
   public readonly promise: SchedulablePromise<Promise<any>>
 
   public constructor(options: {
     priority: RenderPriority,
     squashableWith?: string,
     updatableWith?: string,
-    batchParameters?: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements},
+    batchParameters?: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements},
     command: () => Promise<any>
   }) {
     this.priority = options.priority

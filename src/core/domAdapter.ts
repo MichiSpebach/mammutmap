@@ -42,7 +42,7 @@ export interface DocumentObjectModelAdapter {
   isElementHovered(id: string): Promise<boolean>
   getClientRectOf(id: string): Promise<ClientRect>
 
-  batch(batch: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements}[]): Promise<void>
+  batch(batch: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements}[]): Promise<void>
 
   appendChildTo(parentId: string, childId: string): Promise<void>
   addContentTo(id: string, content: string): Promise<void>
@@ -54,7 +54,7 @@ export interface DocumentObjectModelAdapter {
   clearContentOf(id: string): Promise<void>
   remove(id: string): Promise<void>
 
-  setStyleTo(id: string, style: string): Promise<void>
+  setStyleTo(id: string, style: string|Style): Promise<void>
   addClassTo(id: string, className: string): Promise<void>
   removeClassFrom(id: string, className: string): Promise<void>
   containsClass(id: string, className: string): Promise<boolean>
