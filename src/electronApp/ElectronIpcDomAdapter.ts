@@ -81,8 +81,15 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
             return this.wrapJavaScriptInFunction(setElementJs) // wrap in function because otherwise "Uncaught SyntaxError: Identifier 'element' has already been declared"
   
           case 'innerHTML':
+            return `document.getElementById('${command.elementId}').innerHTML='${command.value}';`// TODO: fails if innerHTML includes "'"
+
           case 'style': // TODO: style is a readonly property, find better solution
-            return `document.getElementById('${command.elementId}').${command.method}='${command.value}';`
+            if (typeof command.value === 'string') {
+              return `document.getElementById('${command.elementId}').style='${command.value}';` // TODO: fails if style includes "'"
+            } else {
+              const elementName = 'elementToSetStyle'+command.elementId
+              return `const ${elementName} = document.getElementById('${command.elementId}');${this.createSetStyleJavaScript(elementName, command.value as Style)}`
+            }
   
           case 'addClassTo':
             return `document.getElementById('${command.elementId}').classList.add('${command.value}');`
@@ -285,7 +292,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     public setContentTo(id: string, content: string): Promise<void> {
-      return this.executeJsOnElementSuppressingErrors(id, "innerHTML = '"+content+"'")
+      return this.executeJsOnElementSuppressingErrors(id, "innerHTML = '"+content+"'") // TODO: fails if innerHTML includes "'"
     }
   
     public clearContentOf(id: string): Promise<void> {
@@ -298,7 +305,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     public setStyleTo(id: string, style: string|Style): Promise<void> {
       if (typeof style === 'string') {
-        return this.executeJsOnElementSuppressingErrors(id, "style = '"+style+"'") // TODO: style is a readonly property, find better solution
+        return this.executeJsOnElementSuppressingErrors(id, "style = '"+style+"'") // TODO: style is a readonly property, find better solution, also fails if style includes "'"
       }
 
       let js = `const element = document.getElementById("${id}");`

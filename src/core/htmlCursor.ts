@@ -1,9 +1,11 @@
 import * as indexHtmlIds from './indexHtmlIds'
 import { MouseEventResultAdvanced, renderManager, RenderPriority } from './RenderManager'
 import { Style } from './util/RenderElement'
+import { util } from './util/util'
 
 const id: string = 'htmlCursor'
 let activated: boolean = false
+let mousedownElementVisible: boolean = false
 
 export async function activate(): Promise<void> {
   if (activated) {
@@ -28,9 +30,9 @@ export async function activate(): Promise<void> {
 
   await renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousemove', {capture: true, stopPropagation: false}, (eventResult: MouseEventResultAdvanced) => {
     setPosition(eventResult.position.x, eventResult.position.y)
-  })
+    })
   await renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousedown', {capture: true, stopPropagation: false}, () => {
-    addMousedownElement()
+      addMousedownElement()
   })
   await renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mouseup', {capture: true, stopPropagation: false}, () => {
     removeMousedownElement()
@@ -62,6 +64,12 @@ async function setPosition(clientX: number, clientY: number): Promise<void> {
 }
 
 async function addMousedownElement(): Promise<void> {
+  if (mousedownElementVisible) {
+    util.logWarning('htmlCursor::addMousedownElement() called although mousedownElement is already visible.')
+    return
+  }
+  mousedownElementVisible = true
+
   await renderManager.addElementTo(id, {
     type: 'div',
     id: id+'Mousedown',
@@ -74,5 +82,11 @@ async function addMousedownElement(): Promise<void> {
 }
 
 async function removeMousedownElement(): Promise<void> {
+  if (!mousedownElementVisible) {
+    //util.logWarning('htmlCursor::removeMousedownElement() called although mousedownElement is not visible.') // happens with puppeteer
+    return
+  }
+  mousedownElementVisible = false
+
   await renderManager.remove(id+'Mousedown', RenderPriority.RESPONSIVE)
 }
