@@ -1,16 +1,15 @@
 import { util } from '../core/util/util'
 import { RenderElement, RenderElements, Style } from '../core/util/RenderElement'
-import { BrowserWindow, WebContents, Point, Rectangle, screen, ipcMain, IpcMainEvent } from 'electron'
+import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent } from 'electron'
 import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
-
-type ListenerAndIpcListener = {listener: EventListenerCallback, ipcListener: (event: IpcMainEvent, ...args: any[]) => void, channelSuffix: string}
+import { IpcChannelRegister, IpcEventListenerChannel } from './IpcChannelRegister'
 
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     private renderWindow: BrowserWindow
     private webContents: WebContents
-    private ipcChannelDictionary: Map<string, {eventType: EventType, listeners: ListenerAndIpcListener[]}[]> = new Map() // TODO: refactor, move into object oriented classes with methods
+    private ipcChannelRegister: IpcChannelRegister = new IpcChannelRegister()
     // TODO: implement cleanup mechanism that is scheduled by RenderManager when there is not much load to cleanup a small chunk (1+0.1%) of dangling ipcEventChannels
     // introduce RenderPriority.BACKGROUND for this
     // asks frontend if element for ipcChannel still exists
@@ -18,6 +17,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     public constructor(windowToRenderIn: BrowserWindow) {
       this.renderWindow = windowToRenderIn
       this.webContents = this.renderWindow.webContents
+      this.webContents.executeJavaScript('const ipcToNativeListenerRegister = new Map();')
       // TODO: define 'let ipc = require("electron").ipcRenderer;' in renderer only once
     }
   
@@ -356,7 +356,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
-      const ipcChannelName: string = this.addIpcChannelListener(id, 'keydown', callback, (_: IpcMainEvent, value: string) => callback(value))
+      const ipcChannelName: string = this.ipcChannelRegister.addIpcChannelListener(id, 'keydown', callback, (_: IpcMainEvent, value: string) => callback(value))
   
       let rendererFunction: string = '(event) => {'
       rendererFunction += 'let ipc = require("electron").ipcRenderer;'
@@ -366,7 +366,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += '}'
       rendererFunction += '}'
   
-      await this.addEventListenerJs(id, 'keydown', rendererFunction)
+      await this.addEventListenerJs(id, 'keydown', ipcChannelName, rendererFunction)
     }
   
     public async addChangeListenerTo<RETURN_TYPE>(
@@ -376,11 +376,11 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     ): Promise<void> {
       const ipcChannelName: string = this.addChangeEventChannelListener(id, 'change', callback)
       const rendererFunction: string = this.createChangeEventRendererFunction(ipcChannelName, returnField)
-      await this.addEventListenerJs(id, 'change', rendererFunction)
+      await this.addEventListenerJs(id, 'change', ipcChannelName, rendererFunction)
     }
   
     public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
-      const ipcChannelName: string = this.addIpcChannelListener(
+      const ipcChannelName: string = this.ipcChannelRegister.addIpcChannelListener(
         id, 'wheel', callback,
         (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY)
       )
@@ -391,7 +391,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += 'ipc.send("'+ipcChannelName+'", event.deltaY, event.clientX, event.clientY);'
       rendererFunction += '}'
   
-      await this.addEventListenerJs(id, 'wheel', rendererFunction)
+      await this.addEventListenerJs(id, 'wheel', ipcChannelName, rendererFunction)
   
     }
   
@@ -401,11 +401,12 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       options: {stopPropagation: boolean, capture?: boolean},
       callback: (result: MouseEventResultAdvanced) => void
     ): Promise<void> {
-      const ipcChannelName: string = this.addIpcChannelListener(
+      const ipcChannelName: string = this.ipcChannelRegister.addIpcChannelListener(
         id, eventType, callback,
         (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any, targetPathElementIds: string[]) => callback({
           position: new ClientPosition(clientX, clientY), ctrlPressed, cursor, targetPathElementIds
-        })
+        }),
+        options.capture
       )
   
       let rendererFunction: string = '(event) => {'
@@ -422,7 +423,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey, cursor, targetPathElementIds);'
       rendererFunction += '}'
   
-      await this.addEventListenerJs(id, eventType, rendererFunction)
+      await this.addEventListenerJs(id, eventType, ipcChannelName, rendererFunction, options.capture)
     }
   
     public async addEventListenerTo(
@@ -432,7 +433,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     ): Promise<void> {
       const ipcChannelName: string = this.addMouseEventChannelListener(id, eventType, callback)
       const rendererFunction: string = this.createMouseEventRendererFunction(ipcChannelName)
-      await this.addEventListenerJs(id, eventType, rendererFunction)
+      await this.addEventListenerJs(id, eventType, ipcChannelName, rendererFunction)
     }
   
     private createChangeEventRendererFunction(ipcChannelName: string, returnField: 'value'|'checked'): string {
@@ -455,13 +456,13 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     private addChangeEventChannelListener<RETURN_TYPE>(id: string, eventType: InputEventType, callback: (value: RETURN_TYPE) => void): string {
-      return this.addIpcChannelListener(id, eventType, callback, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
+      return this.ipcChannelRegister.addIpcChannelListener(id, eventType, callback, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
     }
   
     private addMouseEventChannelListener(
       id: string, eventType: MouseEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
     ): string {
-      return this.addIpcChannelListener(
+      return this.ipcChannelRegister.addIpcChannelListener(
         id, eventType, callback,
         (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed)
       )
@@ -472,7 +473,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       eventType: DragEventType,
       callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
     ): Promise<void> {
-      const ipcChannelName: string = this.addIpcChannelListener(
+      const ipcChannelName: string = this.ipcChannelRegister.addIpcChannelListener(
         id, eventType, callback,
         (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed)
       )
@@ -489,99 +490,30 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       rendererFunction += '}'
       rendererFunction += '}'
   
-      await this.addEventListenerJs(id, eventType, rendererFunction)
+      await this.addEventListenerJs(id, eventType, ipcChannelName, rendererFunction)
     }
 
-    private addEventListenerJs(id: string, eventType: EventType, rendererFunctionJs: string): Promise<void> {
-      // TODO: use 'element.addEventListener(..)' instead of 'element.on<eventType> =' like in DirectDomAdapter to be able to add multiple listeners
-      // TODO: , removeEventListenerFrom(..) also needs to use 'element.removeEventListener(..)' then
-      return this.executeJavaScriptInFunction("document.getElementById('"+id+"').on"+eventType+" = "+rendererFunctionJs)
+    private async addEventListenerJs(id: string, eventType: EventType, ipcChannelName: string, rendererFunctionJs: string, capture?: boolean): Promise<void> {
+      let js = `ipcToNativeListenerRegister.set("${ipcChannelName}", ${rendererFunctionJs});`
+      js += `document.getElementById("${id}").addEventListener("${eventType}", ipcToNativeListenerRegister.get("${ipcChannelName}"), ${capture});`
+      // in line above ipcToNativeListenerRegister.get(..) important, otherwise new anonymous listener would be created that cannot be removed
+      await this.executeJavaScript(js)
     }
   
     public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerCallback): Promise<void> {
-      // TODO: implement to only remove specified listener
-      this.removeIpcChannelListener(id, eventType, listener)
-      await this.executeJsOnElement(id, "on"+eventType+" = null")
-    }
-  
-    private addIpcChannelListener(id: string, eventType: EventType, listener: EventListenerCallback, ipcListener: (event: IpcMainEvent, ...args: any[]) => void): string {
-      const channelSuffix: string = util.generateId() // important when channels are not removed directly, otherwise old ipcListeners would be recalled
-      const channelName = `${id}_${eventType}_`
-
-      let channelsForId: {eventType: EventType, listeners: ListenerAndIpcListener[]}[] | undefined = this.ipcChannelDictionary.get(id)
-      if (!channelsForId) {
-        channelsForId = []
-        this.ipcChannelDictionary.set(id, channelsForId)
+      const listenersToRemove: IpcEventListenerChannel[] = this.ipcChannelRegister.removeIpcChannelListener(id, eventType, listener ?? 'all')
+      let js = `const element = document.getElementById("${id}");`
+      //js += 'console.log(ipcToNativeListenerRegister);'
+      for (const listener of listenersToRemove) {
+        js += `element.removeEventListener("${eventType}", ipcToNativeListenerRegister.get("${listener.getChannelName(id, eventType)}"), ${listener.capture});`
+        js += `ipcToNativeListenerRegister.delete("${listener.getChannelName(id, eventType)}");`
       }
-
-      let channel: {eventType: EventType, listeners: ListenerAndIpcListener[]} | undefined = channelsForId.find(channel => channel.eventType === eventType)
-      if (!channel) {
-        channelsForId.push({eventType, listeners: [{listener, ipcListener, channelSuffix}]})
-      } else {
-        channel.listeners.push({listener, ipcListener, channelSuffix})
-      }
-      ipcMain.on(channelName+channelSuffix, ipcListener)
-
-      return channelName+channelSuffix
-    }
-  
-    private removeIpcChannelListener(id: string, eventType: EventType, listener?: EventListenerCallback): void {
-      let channelsForId: {eventType: EventType, listeners: ListenerAndIpcListener[]}[] | undefined = this.ipcChannelDictionary.get(id)
-      if (!channelsForId) {
-        util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) no listeners are registered for element with id '${id}' at all.`)
-        return
-      }
-
-      let channel: {eventType: EventType, listeners: ListenerAndIpcListener[]} | undefined = channelsForId.find(channel => channel.eventType === eventType)
-      if (!channel) {
-        util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) no '${eventType}' listeners are registered for element with id '${id}'.`)
-        return
-      }
-
-      if (!listener) {
-        for (const listener of channel.listeners) {
-          ipcMain.removeAllListeners(`${id}_${eventType}_${listener.channelSuffix}`)
-        }
-        this.removeChannelFromChannels(id, channel, channelsForId)
-        return
-      }
-
-      /*if (channel.listeners.length > 1) {
-        // TODO: remove warning as soon as 'only remove specified listener' in removeEventListenerFrom(..) is implemented
-        let message = `ElectronIpcDomAdapter::removeIpcChannelListener(..) element with id '${id}' has ${channel.listeners.length} listeners for eventType '${eventType}'`
-        message += `, be aware that removing specific listener is not implemented correctly yet and simply all nativeListeners are removed.`
-        util.logWarning(message)
-      }*/
-
-      const listenerAndIpcListener: ListenerAndIpcListener|undefined = channel.listeners.find(listenerAndIpcListener => listenerAndIpcListener.listener === listener)
-      if (!listenerAndIpcListener) {
-        util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) specific listener for element with id '${id}' and eventType '${eventType} not registered.`)
-        return
-      }
-      ipcMain.removeListener(`${id}_${eventType}_${listenerAndIpcListener.channelSuffix}`, listenerAndIpcListener.ipcListener)
-      if (channel.listeners.length === 1) {
-        this.removeChannelFromChannels(id, channel, channelsForId)
-      } else {
-        channel.listeners.splice(channel.listeners.indexOf(listenerAndIpcListener), 1)
-      }
-    }
-
-    private removeChannelFromChannels(
-      id: string,
-      channel: {eventType: EventType, listeners: ListenerAndIpcListener[]}, 
-      channels: {eventType: EventType, listeners: ListenerAndIpcListener[]}[]
-    ): void {
-      if (channels.length === 1) {
-        this.ipcChannelDictionary.delete(id)
-      } else {
-        channels.splice(channels.indexOf(channel), 1)
-      }
+      //js += 'console.log(ipcToNativeListenerRegister);'
+      await this.executeJavaScript(js)
     }
   
     public getIpcChannelsCount(): number {
-      let count = 0
-      this.ipcChannelDictionary.forEach(channelsForElement => channelsForElement.forEach(channelsForEventType => count += channelsForEventType.listeners.length))
-      return count
+      return this.ipcChannelRegister.getIpcChannelsCount()
     }
   
     private executeJsOnElementSuppressingErrors(elementId: string, jsToExecute: string): Promise<void> {

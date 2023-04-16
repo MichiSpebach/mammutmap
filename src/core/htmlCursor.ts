@@ -28,15 +28,11 @@ export async function activate(): Promise<void> {
     }
   });
 
-  await renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousemove', {capture: true, stopPropagation: false}, (eventResult: MouseEventResultAdvanced) => {
-    setPosition(eventResult.position.x, eventResult.position.y)
-    })
-  await renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousedown', {capture: true, stopPropagation: false}, () => {
-      addMousedownElement()
-  })
-  await renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mouseup', {capture: true, stopPropagation: false}, () => {
-    removeMousedownElement()
-  })
+  await Promise.all([
+    renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousemove', {capture: true, stopPropagation: false}, setPosition),
+    renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousedown', {capture: true, stopPropagation: false}, addMousedownElement),
+    renderManager.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mouseup', {capture: true, stopPropagation: false}, removeMousedownElement)
+  ])
 }
 
 export async function deactivate(): Promise<void> {
@@ -45,8 +41,12 @@ export async function deactivate(): Promise<void> {
   }
   activated = false
 
-  await renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousemove')
-  await renderManager.remove(id)
+  await Promise.all([
+    renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousemove', {listenerCallback: setPosition}),
+    renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mousedown', {listenerCallback: addMousedownElement}),
+    renderManager.removeEventListenerFrom(indexHtmlIds.bodyId, 'mouseup', {listenerCallback: removeMousedownElement}),
+    renderManager.remove(id)
+  ])
 }
 
 function getStyle(): Style {
@@ -56,10 +56,10 @@ function getStyle(): Style {
   }
 }
 
-async function setPosition(clientX: number, clientY: number): Promise<void> {
+async function setPosition(eventResult: MouseEventResultAdvanced): Promise<void> {
   const style: Style = getStyle()
-  style.left = clientX+'px'
-  style.top = clientY+'px'
+  style.left = eventResult.position.x+'px'
+  style.top = eventResult.position.y+'px'
   await renderManager.setStyleTo(id, style, RenderPriority.RESPONSIVE)
 }
 
