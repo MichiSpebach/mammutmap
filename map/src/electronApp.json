@@ -171,6 +171,34 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "1eva0tf4rq",
+			"from": {
+				"path": [
+					{
+						"boxId": "9crc7egp018",
+						"boxName": "ElectronIpcDomAdapter.ts",
+						"x": 40.118,
+						"y": 51.467
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "uvd70rrfvd8",
+						"boxName": "IpcChannelRegister.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
 		}
 	],
 	"nodes": []

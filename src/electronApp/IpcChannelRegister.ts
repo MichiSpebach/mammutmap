@@ -2,21 +2,22 @@ import { IpcMainEvent, ipcMain } from 'electron'
 import { EventListenerCallback, EventType } from '../core/domAdapter'
 import { util } from '../core/util/util'
 
-export class IpcEventListenerChannel {
+export class IpcEventListenerHandle {
+    private readonly ipcChannelSuffix: string = util.generateId() // important when channels are not removed directly, otherwise old ipcListeners would be recalled
+    
     public constructor(
         public readonly listener: EventListenerCallback,
         public readonly ipcListener: (event: IpcMainEvent, ...args: any[]) => void,
-        private readonly channelSuffix: string,
         public readonly capture: boolean|undefined
     ) {}
 
-    public getChannelName(id: string, eventType: EventType) {
-        return `${id}_${eventType}_${this.channelSuffix}`
+    public getIpcChannelName(id: string, eventType: EventType) {
+        return `${id}_${eventType}_${this.ipcChannelSuffix}`
     }
 }
 
 export class IpcChannelRegister {
-    private ipcChannelDictionary: Map<string, { eventType: EventType, listeners: IpcEventListenerChannel[] }[]> = new Map() // TODO: refactor, move into object oriented classes with methods
+    private ipcChannelDictionary: Map<string, { eventType: EventType, listeners: IpcEventListenerHandle[] }[]> = new Map() // TODO: refactor, move into object oriented classes with methods
 
     public getIpcChannelsCount(): number {
         let count = 0
@@ -24,41 +25,40 @@ export class IpcChannelRegister {
         return count
     }
 
-    public addIpcChannelListener(
+    public addEventListener(
         id: string, 
         eventType: EventType, 
         listener: EventListenerCallback, 
         ipcListener: (event: IpcMainEvent, ...args: any[]) => void, 
         capture?: boolean
     ): string {
-        const channelSuffix: string = util.generateId() // important when channels are not removed directly, otherwise old ipcListeners would be recalled
-        const channelName = `${id}_${eventType}_`
+        const eventListenerHandle = new IpcEventListenerHandle(listener, ipcListener, capture)
 
-        let channelsForId: { eventType: EventType, listeners: IpcEventListenerChannel[] }[] | undefined = this.ipcChannelDictionary.get(id)
+        let channelsForId: { eventType: EventType, listeners: IpcEventListenerHandle[] }[] | undefined = this.ipcChannelDictionary.get(id)
         if (!channelsForId) {
             channelsForId = []
             this.ipcChannelDictionary.set(id, channelsForId)
         }
 
-        let channel: { eventType: EventType, listeners: IpcEventListenerChannel[] } | undefined = channelsForId.find(channel => channel.eventType === eventType)
-        if (!channel) {
-            channelsForId.push({ eventType, listeners: [new IpcEventListenerChannel(listener, ipcListener, channelSuffix, capture)] })
+        let channelsForEventType: { eventType: EventType, listeners: IpcEventListenerHandle[] } | undefined = channelsForId.find(channel => channel.eventType === eventType)
+        if (!channelsForEventType) {
+            channelsForId.push({ eventType, listeners: [eventListenerHandle] })
         } else {
-            channel.listeners.push(new IpcEventListenerChannel(listener, ipcListener, channelSuffix, capture))
+            channelsForEventType.listeners.push(eventListenerHandle)
         }
-        ipcMain.on(channelName + channelSuffix, ipcListener)
+        ipcMain.on(eventListenerHandle.getIpcChannelName(id, eventType), ipcListener)
 
-        return channelName + channelSuffix
+        return eventListenerHandle.getIpcChannelName(id, eventType)
     }
 
-    public removeIpcChannelListener(id: string, eventType: EventType, listener: EventListenerCallback|'all'): IpcEventListenerChannel[] {
-        let channelsForId: { eventType: EventType, listeners: IpcEventListenerChannel[] }[] | undefined = this.ipcChannelDictionary.get(id)
+    public removeEventListener(id: string, eventType: EventType, listener: EventListenerCallback|'all'): IpcEventListenerHandle[] {
+        let channelsForId: { eventType: EventType, listeners: IpcEventListenerHandle[] }[] | undefined = this.ipcChannelDictionary.get(id)
         if (!channelsForId) {
             util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) no listeners are registered for element with id '${id}' at all.`)
             return []
         }
 
-        let channel: { eventType: EventType, listeners: IpcEventListenerChannel[] } | undefined = channelsForId.find(channel => channel.eventType === eventType)
+        let channel: { eventType: EventType, listeners: IpcEventListenerHandle[] } | undefined = channelsForId.find(channel => channel.eventType === eventType)
         if (!channel) {
             util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) no '${eventType}' listeners are registered for element with id '${id}'.`)
             return []
@@ -66,37 +66,30 @@ export class IpcChannelRegister {
 
         if (listener === 'all') {
             for (const listener of channel.listeners) {
-                ipcMain.removeAllListeners(listener.getChannelName(id, eventType))
+                ipcMain.removeAllListeners(listener.getIpcChannelName(id, eventType))
             }
             this.removeChannelFromChannels(id, channel, channelsForId)
             return channel.listeners
         }
 
-        /*if (channel.listeners.length > 1) {
-          // TODO: remove warning as soon as 'only remove specified listener' in removeEventListenerFrom(..) is implemented
-          let message = `ElectronIpcDomAdapter::removeIpcChannelListener(..) element with id '${id}' has ${channel.listeners.length} listeners for eventType '${eventType}'`
-          message += `, be aware that removing specific listener is not implemented correctly yet and simply all nativeListeners are removed.`
-          util.logWarning(message)
-        }*/
-
-        const listenerAndIpcListener: IpcEventListenerChannel | undefined = channel.listeners.find(listenerAndIpcListener => listenerAndIpcListener.listener === listener)
-        if (!listenerAndIpcListener) {
+        const eventListenerHandle: IpcEventListenerHandle | undefined = channel.listeners.find(eventListenerChannel => eventListenerChannel.listener === listener)
+        if (!eventListenerHandle) {
             util.logWarning(`ElectronIpcDomAdapter::removeIpcChannelListener(..) specific listener for element with id '${id}' and eventType '${eventType}' not registered.`)
             return []
         }
-        ipcMain.removeListener(listenerAndIpcListener.getChannelName(id, eventType), listenerAndIpcListener.ipcListener)
+        ipcMain.removeListener(eventListenerHandle.getIpcChannelName(id, eventType), eventListenerHandle.ipcListener)
         if (channel.listeners.length === 1) {
             this.removeChannelFromChannels(id, channel, channelsForId)
         } else {
-            channel.listeners.splice(channel.listeners.indexOf(listenerAndIpcListener), 1)
+            channel.listeners.splice(channel.listeners.indexOf(eventListenerHandle), 1)
         }
-        return [listenerAndIpcListener]
+        return [eventListenerHandle]
     }
 
     private removeChannelFromChannels(
         id: string,
-        channel: { eventType: EventType, listeners: IpcEventListenerChannel[] },
-        channels: { eventType: EventType, listeners: IpcEventListenerChannel[] }[]
+        channel: { eventType: EventType, listeners: IpcEventListenerHandle[] },
+        channels: { eventType: EventType, listeners: IpcEventListenerHandle[] }[]
     ): void {
         if (channels.length === 1) {
             this.ipcChannelDictionary.delete(id)

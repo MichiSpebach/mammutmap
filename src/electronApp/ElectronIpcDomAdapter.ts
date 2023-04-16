@@ -4,7 +4,7 @@ import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent } fr
 import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
-import { IpcChannelRegister, IpcEventListenerChannel } from './IpcChannelRegister'
+import { IpcChannelRegister, IpcEventListenerHandle } from './IpcChannelRegister'
 
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     private renderWindow: BrowserWindow
@@ -356,7 +356,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
-      const ipcChannelName: string = this.ipcChannelRegister.addIpcChannelListener(id, 'keydown', callback, (_: IpcMainEvent, value: string) => callback(value))
+      const ipcChannelName: string = this.ipcChannelRegister.addEventListener(id, 'keydown', callback, (_: IpcMainEvent, value: string) => callback(value))
   
       let rendererFunction: string = '(event) => {'
       rendererFunction += 'let ipc = require("electron").ipcRenderer;'
@@ -380,7 +380,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     public async addWheelListenerTo(id: string, callback: (delta: number, clientX: number, clientY: number) => void): Promise<void> {
-      const ipcChannelName: string = this.ipcChannelRegister.addIpcChannelListener(
+      const ipcChannelName: string = this.ipcChannelRegister.addEventListener(
         id, 'wheel', callback,
         (_: IpcMainEvent, deltaY: number, clientX:number, clientY: number) => callback(deltaY, clientX, clientY)
       )
@@ -401,7 +401,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       options: {stopPropagation: boolean, capture?: boolean},
       callback: (result: MouseEventResultAdvanced) => void
     ): Promise<void> {
-      const ipcChannelName: string = this.ipcChannelRegister.addIpcChannelListener(
+      const ipcChannelName: string = this.ipcChannelRegister.addEventListener(
         id, eventType, callback,
         (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any, targetPathElementIds: string[]) => callback({
           position: new ClientPosition(clientX, clientY), ctrlPressed, cursor, targetPathElementIds
@@ -456,13 +456,13 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     private addChangeEventChannelListener<RETURN_TYPE>(id: string, eventType: InputEventType, callback: (value: RETURN_TYPE) => void): string {
-      return this.ipcChannelRegister.addIpcChannelListener(id, eventType, callback, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
+      return this.ipcChannelRegister.addEventListener(id, eventType, callback, (_: IpcMainEvent, value: RETURN_TYPE) => callback(value))
     }
   
     private addMouseEventChannelListener(
       id: string, eventType: MouseEventType, callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
     ): string {
-      return this.ipcChannelRegister.addIpcChannelListener(
+      return this.ipcChannelRegister.addEventListener(
         id, eventType, callback,
         (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed)
       )
@@ -473,7 +473,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       eventType: DragEventType,
       callback: (clientX: number, clientY: number, ctrlPressed: boolean) => void
     ): Promise<void> {
-      const ipcChannelName: string = this.ipcChannelRegister.addIpcChannelListener(
+      const ipcChannelName: string = this.ipcChannelRegister.addEventListener(
         id, eventType, callback,
         (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean) => callback(clientX, clientY, ctrlPressed)
       )
@@ -501,12 +501,12 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
   
     public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerCallback): Promise<void> {
-      const listenersToRemove: IpcEventListenerChannel[] = this.ipcChannelRegister.removeIpcChannelListener(id, eventType, listener ?? 'all')
+      const listenersToRemove: IpcEventListenerHandle[] = this.ipcChannelRegister.removeEventListener(id, eventType, listener ?? 'all')
       let js = `const element = document.getElementById("${id}");`
       //js += 'console.log(ipcToNativeListenerRegister);'
       for (const listener of listenersToRemove) {
-        js += `element.removeEventListener("${eventType}", ipcToNativeListenerRegister.get("${listener.getChannelName(id, eventType)}"), ${listener.capture});`
-        js += `ipcToNativeListenerRegister.delete("${listener.getChannelName(id, eventType)}");`
+        js += `element.removeEventListener("${eventType}", ipcToNativeListenerRegister.get("${listener.getIpcChannelName(id, eventType)}"), ${listener.capture});`
+        js += `ipcToNativeListenerRegister.delete("${listener.getIpcChannelName(id, eventType)}");`
       }
       //js += 'console.log(ipcToNativeListenerRegister);'
       await this.executeJavaScript(js)
