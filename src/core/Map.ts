@@ -165,7 +165,8 @@ export class Map {
         (result: MouseEventResultAdvanced) => this.movestart(result),
         (position: ClientPosition, ctrlPressed: boolean) => this.move(position, ctrlPressed),
         (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
-      )
+      ),
+      DragManager.addDropZone('map')
     ])
   }
 
@@ -174,7 +175,8 @@ export class Map {
     await Promise.all([
       this.rootFolder.destruct(),
       renderManager.removeEventListenerFrom('map', 'wheel'),
-      mouseDownDragManager.removeDraggable('map')
+      mouseDownDragManager.removeDraggable('map'),
+      DragManager.removeDropZone('map')
     ])
     await renderManager.remove('map')
   }

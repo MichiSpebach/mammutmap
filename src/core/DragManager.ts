@@ -127,6 +127,17 @@ export class DragManager {
     util.setHint(util.hintToDeactivateSnapToGrid, false)
   }
 
+  // TODO: remove and do this instead in addDropTarget (for each dropTarget)?
+  /** removes forbidden cursor */
+  public static async addDropZone(elementId: string): Promise<void> {
+    await renderManager.addDragListenerTo(elementId, 'dragover', () => {})
+  }
+
+  // TODO: remove and do this instead in removeDropTarget (for each dropTarget)?
+  public static async removeDropZone(elementId: string): Promise<void> {
+    await renderManager.removeEventListenerFrom(elementId, 'dragover') // TODO: call with specific listener
+  }
+
   public static async addDropTarget(dropTarget: DropTarget): Promise<void> {
     if (this.dropTargets.has(dropTarget.getId())) {
       util.logWarning(`DragManager::addDropTarget(..) dropTarget with id '${dropTarget.getId()}' already exists.`)

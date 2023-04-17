@@ -3,7 +3,7 @@ import { ClientRect } from './ClientRect'
 import { ClientPosition } from './shape/ClientPosition'
 
 export type MouseEventType = 'click'|'contextmenu'|'mousedown'|'mouseup'|'mousemove'|'mouseover'|'mouseout'|'mouseenter'|'mouseleave'
-export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'
+export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'|'dragover'
 export type WheelEventType = 'wheel'
 export type InputEventType = 'change'
 export type KeyboardEventType = 'keydown'|'keyup'

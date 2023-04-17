@@ -76,7 +76,8 @@ async function addMousedownElement(): Promise<void> {
     style: {
       width: '10px',
       height: '10px',
-      backgroundColor: 'white'
+      backgroundColor: '#fff8',
+      border: '1px solid #0008'
     }
   }, RenderPriority.RESPONSIVE)
 }

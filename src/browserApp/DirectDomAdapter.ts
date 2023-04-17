@@ -524,6 +524,9 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                         event.dataTransfer.setDragImage(new Image(), 0, 0)
                     }
                 }
+                if (eventType === 'dragover') {
+                    event.preventDefault() // removes forbidden cursor
+                }
                 if (event.clientX !== 0 || event.clientY !== 0) {
                     if (eventType === 'dragstart') {
                         // reschedule because otherwise 'dragend' would fire immediately if callback does dom operations in the same cycle
