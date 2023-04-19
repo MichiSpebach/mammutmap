@@ -2,7 +2,7 @@ import { util } from './util/util'
 import { dom, MouseEventResultAdvanced } from './domAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import { settings } from './Settings'
-import { DragManager } from './DragManager'
+import { dragManager } from './DragManager'
 import { ScaleManager } from './ScaleManager'
 import { HoverManager } from './HoverManager'
 import { boxManager } from './box/BoxManager'
@@ -118,9 +118,9 @@ function ensureMapUnloaded(): void {
   if (dom.getIpcChannelsCount() !== 0) {
     util.logInfo('There are '+dom.getIpcChannelsCount()+' ipcChannels at this state.')
   }
-  if (DragManager.isDraggingInProgress()) {
+  if (dragManager.isDraggingInProgress()) {
     util.logWarning('Expected dragging not to be in progress at this state.')
-    DragManager.clear()
+    dragManager.clear()
   }
   if (ScaleManager.isScalingInProgress()) {
     util.logWarning('Expected scaling not to be in progress at this state.')
@@ -166,7 +166,7 @@ export class Map {
         (position: ClientPosition, ctrlPressed: boolean) => this.move(position, ctrlPressed),
         (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
       ),
-      DragManager.addDropZone('map')
+      dragManager.addDropZone('map')
     ])
   }
 
@@ -176,7 +176,7 @@ export class Map {
       this.rootFolder.destruct(),
       renderManager.removeEventListenerFrom('map', 'wheel'),
       mouseDownDragManager.removeDraggable('map'),
-      DragManager.removeDropZone('map')
+      dragManager.removeDropZone('map')
     ])
     await renderManager.remove('map')
   }

@@ -3,7 +3,7 @@ import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
-import { DragManager } from '../DragManager'
+import { dragManager } from '../DragManager'
 import { Box } from '../box/Box'
 import { Link } from './Link'
 import { ClientPosition } from '../shape/ClientPosition'
@@ -214,7 +214,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
     if (!this.renderState.isRendered()) {
       this.updateBoxesRegisteredAtAndBorderingBox()
-      DragManager.addDraggable(this)
+      dragManager.addDraggable(this) // TODO: add missing await
     }
 
     this.renderState.setRenderFinished()
@@ -230,7 +230,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
      // TODO: introduce load/unload mechanism and do deregister there
     this.boxesRegisteredAt.forEach(box => box.borderingLinks.deregister(this.referenceLink))
     this.boxesRegisteredAt = []
-    DragManager.removeDraggable(this)
+    dragManager.removeDraggable(this) // TODO: add missing await
     await renderManager.setStyleTo(this.getId(), '')
 
     this.renderState.setUnrenderFinished()

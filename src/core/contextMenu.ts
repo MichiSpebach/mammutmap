@@ -4,7 +4,7 @@ import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
 import { WayPointData } from './mapData/WayPointData'
 import { Link } from './link/Link'
-import { DragManager } from './DragManager'
+import { dragManager } from './DragManager'
 import { LinkEndData } from './mapData/LinkEndData'
 import { ClientPosition } from './shape/ClientPosition'
 import { LocalPosition } from './shape/LocalPosition'
@@ -240,7 +240,7 @@ async function addLinkToBox(box: Box, position: ClientPosition): Promise<void> {
   const toLinkEnd = {mapData: new LinkEndData([toWayPoint], true)}
   const link: Link = await box.links.addLink(fromLinkEnd, toLinkEnd, false)
 
-  DragManager.startDragWithClickToDropMode(link.getTo())
+  await dragManager.startDragWithClickToDropMode(link.getTo())
 }
 
 async function addNodeToBox(box: Box, position: ClientPosition): Promise<void> {

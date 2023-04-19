@@ -1,7 +1,7 @@
 import { renderManager, RenderPriority } from '../RenderManager'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'
-import { DragManager } from '../DragManager'
+import { dragManager } from '../DragManager'
 import { ClientRect } from '../ClientRect'
 import { Box } from './Box'
 import { FolderBox } from './FolderBox'
@@ -55,7 +55,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     if (!this.rendered) {
       proms.push(renderManager.addClassTo(this.getId(), style.getBoxHeaderClass()))
       if (draggableHtml) {
-        proms.push(DragManager.addDraggable(this))
+        proms.push(dragManager.addDraggable(this))
       }
       this.rendered = true
     }
@@ -72,7 +72,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
       return
     }
     if (!this.referenceBox.isRoot()) {
-      await DragManager.removeDraggable(this)
+      await dragManager.removeDraggable(this)
     }
     this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
   }
@@ -85,7 +85,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     let clientRect: ClientRect = await this.referenceBox.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
 
-    await renderManager.addClassTo(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
+    await renderManager.addClassTo(this.referenceBox.getId(), dragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
@@ -108,7 +108,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
 
   public async dragCancel(): Promise<void> {
     await Promise.all([
-      renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE),
+      renderManager.removeClassFrom(this.referenceBox.getId(), dragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE),
       this.referenceBox.restoreMapData()
     ])
   }
@@ -116,7 +116,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   public async dragEnd(dropTarget: FolderBox): Promise<void> {
     const pros: Promise<void>[] = []
 
-    pros.push(renderManager.removeClassFrom(this.referenceBox.getId(), DragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE))
+    pros.push(renderManager.removeClassFrom(this.referenceBox.getId(), dragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE))
 
     if (!this.referenceBox.isRoot() && this.referenceBox.getParent() != dropTarget) {
       pros.push(this.referenceBox.setParentAndFlawlesslyResizeAndSave(dropTarget))

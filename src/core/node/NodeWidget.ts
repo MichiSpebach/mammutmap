@@ -7,7 +7,7 @@ import { DropTarget } from '../DropTarget'
 import { ClientPosition } from '../shape/ClientPosition'
 import { LocalPosition } from '../shape/LocalPosition'
 import { util } from '../util/util'
-import { DragManager } from '../DragManager'
+import { dragManager } from '../DragManager'
 import { BoxNodesWidget } from '../box/BoxNodesWidget'
 import { BorderingLinks } from '../link/BorderingLinks'
 import { ClientRect } from '../ClientRect'
@@ -108,8 +108,8 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
 
         if (!this.rendered) {
             proms.push(this.borderingLinks.renderAll())
-            DragManager.addDropTarget(this)
-            proms.push(DragManager.addDraggable(this, priority))
+            proms.push(dragManager.addDropTarget(this))
+            proms.push(dragManager.addDraggable(this, priority))
             proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, new ClientPosition(clientX, clientY))))
         }
         
@@ -125,8 +125,8 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
         this.unrenderInProgress = true
         const proms: Promise<any>[] = []
         proms.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
-        DragManager.removeDropTarget(this)
-        proms.push(DragManager.removeDraggable(this, priority))
+        proms.push(dragManager.removeDropTarget(this))
+        proms.push(dragManager.removeDraggable(this, priority))
         proms.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))
         await Promise.all(proms)
         this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
