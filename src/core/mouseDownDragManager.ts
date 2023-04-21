@@ -2,10 +2,13 @@ import { MouseEventResultAdvanced, renderManager, RenderPriority } from './Rende
 import * as indexHtmlIds from './indexHtmlIds'
 import { util } from './util/util'
 import { ClientPosition } from './shape/ClientPosition'
+import { DragManager } from './DragManager'
+import { Draggable } from './Draggable'
+import { DropTarget } from './DropTarget'
 
 export let mouseDownDragManager: MouseDownDragManager // = new MouseDownDragManager() // initialized at end of file
 
-class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
+class MouseDownDragManager extends DragManager { // TODO: rename to MouseDownMoveManager?
 
     private initialized: boolean = false
 
@@ -13,6 +16,14 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         latest: {mousePosition: ClientPosition, ctrlPressed: boolean},
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     } | null = null
+
+    public override isDraggingInProgress(): boolean {
+        throw new Error('Method not implemented.')
+    }
+
+    public override clear(): void {
+        throw new Error('Method not implemented.')
+    }
 
     public async addDraggable(
         elementId: string,
@@ -88,6 +99,27 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
             this.dragState = null
         ])
     }
+
+    public override addDropTarget(dropTarget: DropTarget): Promise<void> {
+        throw new Error('Method not implemented.')
+    }
+
+    public override removeDropTarget(dropTarget: DropTarget): Promise<void> {
+        throw new Error('Method not implemented.')
+    }
+
+    public override addDropZone(elementId: string): Promise<void> {
+        throw new Error('Method not implemented.')
+    }
+
+    public override removeDropZone(elementId: string): Promise<void> {
+        throw new Error('Method not implemented.')
+    }
+
+    public override startDragWithClickToDropMode(elementToDrag: Draggable<DropTarget>): Promise<void> {
+        throw new Error('Method not implemented.')
+    }
+
 }
 
 mouseDownDragManager = new MouseDownDragManager()
