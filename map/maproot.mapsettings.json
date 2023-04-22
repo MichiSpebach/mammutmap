@@ -4,13 +4,15 @@
 	"linkTags": [
 		{
 			"name": "hidden",
-			"count": 1,
+			"count": 9,
 			"mode": "visibleEnds",
-			"appearance": {}
+			"appearance": {
+				"mode": "hidden"
+			}
 		},
 		{
 			"name": "has",
-			"count": 29,
+			"count": 30,
 			"appearance": {
 				"mode": "visible",
 				"color": "lime"
@@ -18,7 +20,7 @@
 		},
 		{
 			"name": "isA",
-			"count": 28,
+			"count": 31,
 			"appearance": {
 				"mode": "visible",
 				"color": "aqua"
@@ -42,7 +44,7 @@
 		},
 		{
 			"name": "falsePositive",
-			"count": 3,
+			"count": 6,
 			"appearance": {
 				"mode": "notRendered"
 			}

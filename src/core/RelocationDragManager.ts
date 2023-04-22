@@ -3,10 +3,11 @@ import { EventListenerCallback, MouseEventListenerCallback, MouseEventResultAdva
 import { Draggable } from './Draggable'
 import { DropTarget } from './DropTarget'
 import { BoxWatcher } from './box/BoxWatcher'
-import { mouseDownDragManager } from './mouseDownDragManager'
 import { ClientPosition } from './shape/ClientPosition'
+import { DragManager } from './DragManager'
+import { DragEventDragManager } from './DragEventDragManager'
 
-export let relocationDragManager: RelocationDragManager // = new DragManager() // initialized at end of file
+export let relocationDragManager: RelocationDragManager // = new RelocationDragManager() // initialized at end of file
 
 type State = {
     dragging: Draggable<DropTarget>
@@ -18,6 +19,7 @@ type State = {
 export class RelocationDragManager {
     public readonly draggableStyleClass: string = 'draggable'
     public readonly draggingInProgressStyleClass: string = 'draggingInProgress'
+    private readonly dragManager: DragManager = new DragEventDragManager()
     
     private readonly dropTargets: Map<string, { dragenterListener: EventListenerCallback, mouseoverListener: EventListenerCallback }> = new Map()
 
@@ -74,22 +76,12 @@ export class RelocationDragManager {
 
         await Promise.all([
             renderManager.addClassTo(draggableId, this.draggableStyleClass, priority),
-            mouseDownDragManager.addDraggable({
+            this.dragManager.addDraggable({
                 elementId: elementToDrag.getId(), 
                 onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, false),
                 onDrag: async (position: ClientPosition, ctrlPressed: boolean) => this.onDrag(position.x, position.y, !ctrlPressed),
                 onDragEnd: async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd()
             })
-            //renderManager.addEventListenerTo(draggableId, 'mousedown', () => {/* only to catch mousedown, because mouseDownDragManager would be disturbed by it */ }, priority),
-            /*renderManager.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
-                this.onDragStart(elementToDrag, clientX, clientY, false)
-            }, priority),
-            renderManager.addDragListenerTo(draggableId, 'drag', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-                this.onDrag(clientX, clientY, !ctrlPressed)
-            }, priority),
-            renderManager.addDragListenerTo(draggableId, 'dragend', (_) => {
-                this.onDragEnd()
-            }, priority)*/
         ])
 
         // TODO: call elementToDrag.dragCancel() if esc is pressed (and remove draggingInProgressStyleClass)
@@ -100,11 +92,7 @@ export class RelocationDragManager {
 
         await Promise.all([
             renderManager.removeClassFrom(draggableId, this.draggableStyleClass, priority),
-            mouseDownDragManager.removeDraggable(draggableId)
-            /*renderManager.removeEventListenerFrom(draggableId, 'mousedown', { priority }),
-            renderManager.removeEventListenerFrom(draggableId, 'dragstart', { priority }),
-            renderManager.removeEventListenerFrom(draggableId, 'drag', { priority }),
-            renderManager.removeEventListenerFrom(draggableId, 'dragend', { priority })*/
+            this.dragManager.removeDraggable(draggableId)
         ])
     }
 

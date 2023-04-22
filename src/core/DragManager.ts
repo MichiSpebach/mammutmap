@@ -11,5 +11,5 @@ export interface DragManager {
         priority?: RenderPriority
     }): Promise<void>
 
-    removeDraggable(elementId: string): Promise<void>
+    removeDraggable(elementId: string, priority?: RenderPriority): Promise<void>
 }

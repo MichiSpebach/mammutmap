@@ -99,8 +99,8 @@
 					{
 						"boxId": "82efivc7np8",
 						"boxName": "ScaleManager.ts",
-						"x": 86.45421607378128,
-						"y": -0.1015721603956898
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -119,7 +119,10 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"hidden"
+			]
 		},
 		{
 			"id": "2lre1tod0o8",
@@ -202,9 +205,9 @@
 				"path": [
 					{
 						"boxId": "dub9um70n18",
-						"boxName": "DragManager.ts",
-						"x": 98.52089032049152,
-						"y": 0.03533973430492715
+						"boxName": "RelocationDragManager.ts",
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -223,7 +226,10 @@
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"hidden"
+			]
 		},
 		{
 			"id": "eug1atktn7",
@@ -3422,8 +3428,8 @@
 					{
 						"boxId": "hmdangdf9s",
 						"boxName": "mouseDownDragManager.ts",
-						"x": 100,
-						"y": 0
+						"x": 50,
+						"y": 50
 					}
 				],
 				"floatToBorder": true
@@ -3447,8 +3453,8 @@
 					{
 						"boxId": "hmdangdf9s",
 						"boxName": "mouseDownDragManager.ts",
-						"x": 100,
-						"y": 0
+						"x": 50,
+						"y": 50
 					}
 				],
 				"floatToBorder": true
@@ -3469,7 +3475,10 @@
 					}
 				],
 				"floatToBorder": true
-			}
+			},
+			"tags": [
+				"hidden"
+			]
 		},
 		{
 			"id": "s2j44k2tas",
@@ -3853,6 +3862,463 @@
 				],
 				"floatToBorder": true
 			}
+		},
+		{
+			"id": "7r0bik40vro",
+			"from": {
+				"path": [
+					{
+						"boxId": "4ukfu5ninmo",
+						"boxName": "DragEventDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "f9gc07v31cg",
+						"boxName": "DragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "7rl6mg952mo",
+			"from": {
+				"path": [
+					{
+						"boxId": "4ukfu5ninmo",
+						"boxName": "DragEventDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "6ueagar88ag",
+			"from": {
+				"path": [
+					{
+						"boxId": "4ukfu5ninmo",
+						"boxName": "DragEventDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "nsm4nes02ig",
+						"boxName": "shape",
+						"x": 62,
+						"y": 86
+					},
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "5qo0mcuhnm",
+			"from": {
+				"path": [
+					{
+						"boxId": "hmdangdf9s",
+						"boxName": "mouseDownDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cr2q48p1plg",
+						"boxName": "indexHtmlIds.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "ugentddpcbo",
+			"from": {
+				"path": [
+					{
+						"boxId": "hmdangdf9s",
+						"boxName": "mouseDownDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "nsm4nes02ig",
+						"boxName": "shape",
+						"x": 62,
+						"y": 86
+					},
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "0d0k92pq6ig",
+			"from": {
+				"path": [
+					{
+						"boxId": "hmdangdf9s",
+						"boxName": "mouseDownDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "f9gc07v31cg",
+						"boxName": "DragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "31pas94glhg",
+			"from": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "RelocationDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "nsm4nes02ig",
+						"boxName": "shape",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"falsePositive"
+			]
+		},
+		{
+			"id": "9kfcnqp7pb8",
+			"from": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "RelocationDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"falsePositive"
+			]
+		},
+		{
+			"id": "3d5j33sa6ag",
+			"from": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "RelocationDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "4ukfu5ninmo",
+						"boxName": "DragEventDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "78397ggtpt",
+			"from": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "RelocationDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "f9gc07v31cg",
+						"boxName": "DragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "ingr28cqg",
+			"from": {
+				"path": [
+					{
+						"boxId": "dub9um70n18",
+						"boxName": "RelocationDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "nsm4nes02ig",
+						"boxName": "shape",
+						"x": 62,
+						"y": 86
+					},
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "gjms1aqj2fo",
+			"from": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "mlqeakkf1dg",
+						"boxName": "styleAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "d6u0fj4e16",
+			"from": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "hmdangdf9s",
+						"boxName": "mouseDownDragManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ptia7fugijo",
+			"from": {
+				"path": [
+					{
+						"boxId": "82efivc7np8",
+						"boxName": "ScaleManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "nsm4nes02ig",
+						"boxName": "shape",
+						"x": 62,
+						"y": 86
+					},
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "1f5415bggo8",
+			"from": {
+				"path": [
+					{
+						"boxId": "nldtmnj5po",
+						"boxName": "MessagePopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"falsePositive"
+			]
+		},
+		{
+			"id": "d2ibhpfakvo",
+			"from": {
+				"path": [
+					{
+						"boxId": "nldtmnj5po",
+						"boxName": "MessagePopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "umparj97v8",
+						"boxName": "PopupWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "kmc0i37sqf8",
+			"from": {
+				"path": [
+					{
+						"boxId": "nldtmnj5po",
+						"boxName": "MessagePopup.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 18,
+						"y": 50
+					},
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
 		}
 	],
 	"nodes": [

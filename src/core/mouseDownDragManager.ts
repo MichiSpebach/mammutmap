@@ -38,10 +38,10 @@ class MouseDownDragManager implements DragManager {
         await Promise.all(pros)
     }
 
-    public async removeDraggable(elementId: string): Promise<void> {
+    public async removeDraggable(elementId: string, priority?: RenderPriority): Promise<void> {
         const pros: Promise<void>[] = [
-            renderManager.removeEventListenerFrom(elementId, 'mousedown'),
-            //renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mouseup') // TODO: remove or implement counter or do initializing in constructor and destructor
+            renderManager.removeEventListenerFrom(elementId, 'mousedown', {priority}),
+            //renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mouseup', {priority}) // TODO: remove or implement counter or do initializing in constructor and destructor
         ]
         if (this.dragState) {
             pros.push(this.dragEnd(this.dragState.latest.mousePosition, this.dragState.latest.ctrlPressed))
