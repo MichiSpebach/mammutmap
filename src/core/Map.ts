@@ -160,12 +160,12 @@ export class Map {
     await Promise.all([
       this.rootFolder.render(),
       renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
-      mouseDownDragManager.addDraggable(
-        'map',
-        (result: MouseEventResultAdvanced) => this.movestart(result),
-        (position: ClientPosition, ctrlPressed: boolean) => this.move(position, ctrlPressed),
-        (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
-      ),
+      mouseDownDragManager.addDraggable({
+        elementId: 'map',
+        onDragStart: (result: MouseEventResultAdvanced) => this.movestart(result),
+        onDrag: (position: ClientPosition, ctrlPressed: boolean) => this.move(position, ctrlPressed),
+        onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
+      }),
       relocationDragManager.addDropZone('map')
     ])
   }

@@ -66,7 +66,7 @@ export class ScaleManager {
     function onDragEnd(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
       return ScaleManager.dragEnd()
     }
-    mouseDownDragManager.addDraggable(id, onDragStart, onDrag, onDragEnd)
+    mouseDownDragManager.addDraggable({elementId: id, onDragStart, onDrag, onDragEnd})
   }
 
   private static removeListenersForSide(id: string): void {

@@ -2,10 +2,11 @@ import { MouseEventResultAdvanced, renderManager, RenderPriority } from './Rende
 import * as indexHtmlIds from './indexHtmlIds'
 import { util } from './util/util'
 import { ClientPosition } from './shape/ClientPosition'
+import { DragManager } from './DragManager'
 
 export let mouseDownDragManager: MouseDownDragManager // = new MouseDownDragManager() // initialized at end of file
 
-class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
+class MouseDownDragManager implements DragManager {
 
     private initialized: boolean = false
 
@@ -14,22 +15,23 @@ class MouseDownDragManager { // TODO: rename to MouseDownMoveManager?
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     } | null = null
 
-    public async addDraggable(
+    public async addDraggable(options: {
         elementId: string,
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
-        onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
-    ): Promise<void> {
+        onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
+        priority?: RenderPriority
+    }): Promise<void> {
         const pros: Promise<unknown>[] = []
 
-        pros.push(renderManager.addEventListenerAdvancedTo(elementId, 'mousedown', {stopPropagation: true}, (eventResult: MouseEventResultAdvanced) => {
-            this.dragStart(eventResult, onDragStart, onDrag, onDragEnd)
+        pros.push(renderManager.addEventListenerAdvancedTo(options.elementId, 'mousedown', {priority: options.priority, stopPropagation: true}, (eventResult: MouseEventResultAdvanced) => {
+            this.dragStart(eventResult, options.onDragStart, options.onDrag, options.onDragEnd)
         }))
 
         if (!this.initialized) {
             pros.push(renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mouseup', (clientX: number, clientY: number, ctrlPressed: boolean) => {
                 this.dragEnd(new ClientPosition(clientX, clientY), ctrlPressed)
-            }))
+            }, options.priority))
             this.initialized = true
         }
 

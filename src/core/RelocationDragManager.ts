@@ -74,12 +74,12 @@ export class RelocationDragManager {
 
         await Promise.all([
             renderManager.addClassTo(draggableId, this.draggableStyleClass, priority),
-            mouseDownDragManager.addDraggable(
-                elementToDrag.getId(), 
-                async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, false),
-                async (position: ClientPosition, ctrlPressed: boolean) => this.onDrag(position.x, position.y, !ctrlPressed),
-                async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd()
-            )
+            mouseDownDragManager.addDraggable({
+                elementId: elementToDrag.getId(), 
+                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, false),
+                onDrag: async (position: ClientPosition, ctrlPressed: boolean) => this.onDrag(position.x, position.y, !ctrlPressed),
+                onDragEnd: async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd()
+            })
             //renderManager.addEventListenerTo(draggableId, 'mousedown', () => {/* only to catch mousedown, because mouseDownDragManager would be disturbed by it */ }, priority),
             /*renderManager.addDragListenerTo(draggableId, 'dragstart', (clientX: number, clientY: number) => {
                 this.onDragStart(elementToDrag, clientX, clientY, false)
