@@ -6,7 +6,7 @@ import { BoxWatcher } from './box/BoxWatcher'
 import { mouseDownDragManager } from './mouseDownDragManager'
 import { ClientPosition } from './shape/ClientPosition'
 
-export let dragManager: DragManager // = new DragManager() // initialized at end of file
+export let relocationDragManager: RelocationDragManager // = new DragManager() // initialized at end of file
 
 type State = {
     dragging: Draggable<DropTarget>
@@ -15,7 +15,7 @@ type State = {
     watcherOfManagingBoxToPreventUnrenderWhileDragging: Promise<BoxWatcher>
 }
 
-export class DragManager {
+export class RelocationDragManager {
     public readonly draggableStyleClass: string = 'draggable'
     public readonly draggingInProgressStyleClass: string = 'draggingInProgress'
     
@@ -213,4 +213,4 @@ export class DragManager {
 
 }
 
-dragManager = new DragManager()
+relocationDragManager = new RelocationDragManager()

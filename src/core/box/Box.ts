@@ -12,7 +12,7 @@ import { scaleTool } from './ScaleTool'
 import { BoxLinks } from './BoxLinks'
 import { LinkData } from '../mapData/LinkData'
 import { DropTarget } from '../DropTarget'
-import { dragManager } from '../DragManager'
+import { relocationDragManager } from '../RelocationDragManager'
 import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
@@ -270,7 +270,7 @@ export abstract class Box implements DropTarget, Hoverable {
     pros.push(this.renderBody())
 
     if (!this.renderState.isRendered()) {
-      pros.push(dragManager.addDropTarget(this))
+      pros.push(relocationDragManager.addDropTarget(this))
       pros.push(HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut()))
     }
 
@@ -299,7 +299,7 @@ export abstract class Box implements DropTarget, Hoverable {
     }
 
     await Promise.all([
-      dragManager.removeDropTarget(this),
+      relocationDragManager.removeDropTarget(this),
       HoverManager.removeHoverable(this),
       this.detachGrid(),
       this.header.unrender(),

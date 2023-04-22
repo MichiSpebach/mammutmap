@@ -1,6 +1,6 @@
 import { EventListenerCallback, MouseEventListenerCallback, renderManager } from './RenderManager'
 import { Hoverable } from './Hoverable'
-import { dragManager } from './DragManager'
+import { relocationDragManager } from './RelocationDragManager'
 import { ScaleManager } from './ScaleManager'
 import { util } from './util/util'
 
@@ -39,7 +39,7 @@ export class HoverManager {
   }
 
   private static async onMouseOver(hoverable: Hoverable, onHoverOver: () => void, onHoverOut: () => void): Promise<void> {
-    if (dragManager.isDraggingInProgress() || ScaleManager.isScalingInProgress()) {
+    if (relocationDragManager.isDraggingInProgress() || ScaleManager.isScalingInProgress()) {
       return
     }
     if (this.state !== null && this.state.hovering === hoverable) {
