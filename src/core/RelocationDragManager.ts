@@ -6,6 +6,7 @@ import { BoxWatcher } from './box/BoxWatcher'
 import { ClientPosition } from './shape/ClientPosition'
 import { DragManager } from './DragManager'
 import { DragEventDragManager } from './DragEventDragManager'
+import { mouseDownDragManager } from './mouseDownDragManager'
 
 export let relocationDragManager: RelocationDragManager // = new RelocationDragManager() // initialized at end of file
 
@@ -19,11 +20,15 @@ type State = {
 export class RelocationDragManager {
     public readonly draggableStyleClass: string = 'draggable'
     public readonly draggingInProgressStyleClass: string = 'draggingInProgress'
-    private readonly dragManager: DragManager = new DragEventDragManager()
+    private readonly dragManager: DragManager = new DragEventDragManager() // TODO: use mouseDownDragManager when tested
     
     private readonly dropTargets: Map<string, { dragenterListener: EventListenerCallback, mouseoverListener: EventListenerCallback }> = new Map()
 
     private state: State | null = null
+
+    public isUsingNativeDragEvents(): boolean {
+        return this.dragManager.isUsingNativeDragEvents()
+    }
 
     public isDraggingInProgress(): boolean {
         return this.state !== null
@@ -31,7 +36,7 @@ export class RelocationDragManager {
 
     private getState(): { dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean } | never {
         if (this.state === null) {
-            util.logError("DragManager: state is null but should be set at this moment")
+            util.logError("RelocationDragManager: state is null but should be set at this moment")
         }
         return this.state
     }
@@ -139,37 +144,48 @@ export class RelocationDragManager {
 
     public async addDropTarget(dropTarget: DropTarget): Promise<void> {
         if (this.dropTargets.has(dropTarget.getId())) {
-            util.logWarning(`DragManager::addDropTarget(..) dropTarget with id '${dropTarget.getId()}' already exists.`)
+            util.logWarning(`RelocationDragManager::addDropTarget(..) dropTarget with id '${dropTarget.getId()}' already exists.`)
         }
 
         const dragenterListener: MouseEventListenerCallback = () => this.onDragEnter(dropTarget)
         const mouseoverListener: MouseEventListenerCallback = () => this.onDragEnter(dropTarget)
         this.dropTargets.set(dropTarget.getId(), { dragenterListener, mouseoverListener })
 
-        await Promise.all([
-            renderManager.addDragListenerTo(dropTarget.getId(), 'dragenter', dragenterListener),
-            renderManager.addEventListenerTo(dropTarget.getId(), 'mouseover', mouseoverListener)
-        ])
+        const pros: Promise<void>[] = []
+
+        // also needed if this.isUsingNativeDragEvents() because of startDragWithClickToDropMode
+        pros.push(renderManager.addEventListenerTo(dropTarget.getId(), 'mouseover', mouseoverListener))
+
+        if (this.isUsingNativeDragEvents()) {
+            pros.push(renderManager.addDragListenerTo(dropTarget.getId(), 'dragenter', dragenterListener))
+        }
+
+        await Promise.all(pros)
     }
 
     public async removeDropTarget(dropTarget: DropTarget): Promise<void> {
         const listeners: { dragenterListener: EventListenerCallback, mouseoverListener: EventListenerCallback } | undefined = this.dropTargets.get(dropTarget.getId())
         if (!listeners) {
-            util.logWarning(`DragManager::removeDropTarget(..) dropTarget with id '${dropTarget.getId()}' not found.`)
+            util.logWarning(`RelocationDragManager::removeDropTarget(..) dropTarget with id '${dropTarget.getId()}' not found.`)
             return
         }
 
         this.dropTargets.delete(dropTarget.getId())
 
-        await Promise.all([
-            renderManager.removeEventListenerFrom(dropTarget.getId(), 'dragenter', { listenerCallback: listeners.dragenterListener }),
-            renderManager.removeEventListenerFrom(dropTarget.getId(), 'mouseover', { listenerCallback: listeners.mouseoverListener })
-        ])
+        const pros: Promise<void>[] = []
+
+        pros.push(renderManager.removeEventListenerFrom(dropTarget.getId(), 'mouseover', { listenerCallback: listeners.mouseoverListener }))
+
+        if (this.isUsingNativeDragEvents()) {
+            pros.push(renderManager.removeEventListenerFrom(dropTarget.getId(), 'dragenter', { listenerCallback: listeners.dragenterListener }))
+        }
+
+        await Promise.all(pros)
     }
 
     private onDragEnter(dropTarget: DropTarget): void {
         if (this.state == null) {
-            //util.logWarning("DragManager: state is null although dragging is in progress") // TODO: reactivate when ensured that eventType is from dragenter not mouseover
+            //util.logWarning("RelocationDragManager: state is null although dragging is in progress") // TODO: reactivate when ensured that eventType is from dragenter not mouseover
             return
         }
         if (!this.state.dragging.canBeDroppedInto(dropTarget)) {

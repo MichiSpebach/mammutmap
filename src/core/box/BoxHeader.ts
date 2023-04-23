@@ -42,10 +42,9 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   public async render(): Promise<void> {
     const proms: Promise<any>[] = []
 
-    let draggableHtml: string = 'draggable="true"'
-    if (this.referenceBox.isRoot()) {
-      draggableHtml = ''
-    }
+    const draggableHtml: string = relocationDragManager.isUsingNativeDragEvents() && !this.referenceBox.isRoot()
+      ? 'draggable="true"'
+      : ''
 
     let html: string = `<div ${draggableHtml} class="${style.getBoxHeaderInnerClass()}">`
     html += this.formTitleHtml()
@@ -54,7 +53,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
 
     if (!this.rendered) {
       proms.push(renderManager.addClassTo(this.getId(), style.getBoxHeaderClass()))
-      if (draggableHtml) {
+      if (!this.referenceBox.isRoot()) {
         proms.push(relocationDragManager.addDraggable(this))
       }
       this.rendered = true

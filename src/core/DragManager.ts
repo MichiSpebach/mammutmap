@@ -3,6 +3,8 @@ import { MouseEventResultAdvanced } from './domAdapter'
 import { ClientPosition } from './shape/ClientPosition'
 
 export interface DragManager {
+    isUsingNativeDragEvents(): boolean
+
     addDraggable(options: {
         elementId: string,
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,

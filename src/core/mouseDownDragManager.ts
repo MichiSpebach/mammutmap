@@ -15,6 +15,10 @@ class MouseDownDragManager implements DragManager {
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     } | null = null
 
+    public isUsingNativeDragEvents(): boolean {
+        return false
+    }
+
     public async addDraggable(options: {
         elementId: string,
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,

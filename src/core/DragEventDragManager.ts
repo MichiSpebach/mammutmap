@@ -3,7 +3,11 @@ import { RenderPriority, renderManager, MouseEventResultAdvanced } from './Rende
 import { ClientPosition } from './shape/ClientPosition';
 
 export class DragEventDragManager implements DragManager {
-    async addDraggable(options: {
+    public isUsingNativeDragEvents(): boolean {
+        return true
+    }
+
+    public async addDraggable(options: {
         elementId: string;
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>;
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>;
@@ -26,7 +30,7 @@ export class DragEventDragManager implements DragManager {
         ])
     }
 
-    async removeDraggable(elementId: string, priority?: RenderPriority): Promise<void> {
+    public async removeDraggable(elementId: string, priority?: RenderPriority): Promise<void> {
         await Promise.all([
             renderManager.removeEventListenerFrom(elementId, 'mousedown', { priority }),
             renderManager.removeEventListenerFrom(elementId, 'dragstart', { priority }),
