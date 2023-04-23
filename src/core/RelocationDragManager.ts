@@ -82,7 +82,8 @@ export class RelocationDragManager {
         await Promise.all([
             renderManager.addClassTo(draggableId, this.draggableStyleClass, priority),
             this.dragManager.addDraggable({
-                elementId: elementToDrag.getId(), 
+                elementId: elementToDrag.getId(),
+                movementNeededToStartDrag: true,
                 onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, false),
                 onDrag: async (position: ClientPosition, ctrlPressed: boolean) => this.onDrag(position.x, position.y, !ctrlPressed),
                 onDragEnd: async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd()

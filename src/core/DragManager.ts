@@ -7,6 +7,7 @@ export interface DragManager {
 
     addDraggable(options: {
         elementId: string,
+        movementNeededToStartDrag?: boolean,
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,

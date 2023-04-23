@@ -12,6 +12,7 @@ class MouseDownDragManager implements DragManager {
 
     private dragState: {
         elementId: string,
+        draggingStarted: boolean,
         latest: {mousePosition: ClientPosition, ctrlPressed: boolean},
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     } | null = null
@@ -22,6 +23,7 @@ class MouseDownDragManager implements DragManager {
 
     public async addDraggable(options: {
         elementId: string,
+        movementNeededToStartDrag?: boolean,
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
@@ -30,7 +32,7 @@ class MouseDownDragManager implements DragManager {
         const pros: Promise<unknown>[] = []
 
         pros.push(renderManager.addEventListenerAdvancedTo(options.elementId, 'mousedown', {priority: options.priority, stopPropagation: true}, (eventResult: MouseEventResultAdvanced) => {
-            this.dragStart(eventResult, options.elementId, options.onDragStart, options.onDrag, options.onDragEnd)
+            this.dragStart({eventResult, ...options})
         }))
 
         if (!this.initialized) {
@@ -54,23 +56,40 @@ class MouseDownDragManager implements DragManager {
         await Promise.all(pros)
     }
 
-    private dragStart(
+    private dragStart(options: {
         eventResult: MouseEventResultAdvanced,
         elementId: string,
+        movementNeededToStartDrag?: boolean, // TODO: change to 'movementNeededToStartDragInPixels?: number' and implement
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
-    ): void {
+    }): void {
         if (this.dragState) {
             util.logWarning('MouseDownDragManager: there seem to be multiple elements that catch mousedown event at the same time or multiple mouse buttons are pressed.')
             return
         }
-        this.dragState = {elementId, latest: {mousePosition: eventResult.position, ctrlPressed: eventResult.ctrlPressed}, onDragEnd}
+        this.dragState = {
+            elementId: options.elementId,
+            draggingStarted: false,
+            latest: {mousePosition: options.eventResult.position, ctrlPressed: options.eventResult.ctrlPressed},
+            onDragEnd: options.onDragEnd
+        }
 
-        renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-            this.drag(new ClientPosition(clientX, clientY), ctrlPressed, onDrag)
+        renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', async (clientX: number, clientY: number, ctrlPressed: boolean) => {
+            if (!this.dragState) {
+                return // this happens when mouseup was already fired but mousemove listener is not yet removed
+            }
+            if (!this.dragState.draggingStarted && options.movementNeededToStartDrag) {
+                this.dragState.draggingStarted = true
+                await options.onDragStart(options.eventResult)
+            }
+            this.drag(new ClientPosition(clientX, clientY), ctrlPressed, options.onDrag)
         }, RenderPriority.RESPONSIVE)
-        onDragStart(eventResult)
+
+        if (!options.movementNeededToStartDrag) {
+            this.dragState.draggingStarted = true
+            options.onDragStart(options.eventResult)
+        }
     }
 
     private drag(
@@ -90,11 +109,16 @@ class MouseDownDragManager implements DragManager {
             return // this happens when unrelated mouseup events are fired anywhere in the app
         }
         
-        await Promise.all([
-            renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mousemove', {priority: RenderPriority.RESPONSIVE}),
-            this.dragState.onDragEnd(position, ctrlPressed),
-            this.dragState = null
-        ])
+        const pros: Promise<void>[] = []
+
+        pros.push(renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mousemove', {priority: RenderPriority.RESPONSIVE}))
+        
+        if (this.dragState.draggingStarted) {
+            pros.push(this.dragState.onDragEnd(position, ctrlPressed))
+        }
+
+        this.dragState = null
+        await Promise.all(pros)
     }
 
 }

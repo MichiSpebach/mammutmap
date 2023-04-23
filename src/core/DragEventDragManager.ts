@@ -9,6 +9,7 @@ export class DragEventDragManager implements DragManager {
 
     public async addDraggable(options: {
         elementId: string;
+        movementNeededToStartDrag?: boolean; // movementNeededToStartDrag is ignored or is always true, depends on native drag events
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>;
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>;
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>;
