@@ -11,6 +11,7 @@ class MouseDownDragManager implements DragManager {
     private initialized: boolean = false
 
     private dragState: {
+        elementId: string,
         latest: {mousePosition: ClientPosition, ctrlPressed: boolean},
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     } | null = null
@@ -29,7 +30,7 @@ class MouseDownDragManager implements DragManager {
         const pros: Promise<unknown>[] = []
 
         pros.push(renderManager.addEventListenerAdvancedTo(options.elementId, 'mousedown', {priority: options.priority, stopPropagation: true}, (eventResult: MouseEventResultAdvanced) => {
-            this.dragStart(eventResult, options.onDragStart, options.onDrag, options.onDragEnd)
+            this.dragStart(eventResult, options.elementId, options.onDragStart, options.onDrag, options.onDragEnd)
         }))
 
         if (!this.initialized) {
@@ -47,7 +48,7 @@ class MouseDownDragManager implements DragManager {
             renderManager.removeEventListenerFrom(elementId, 'mousedown', {priority}),
             //renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mouseup', {priority}) // TODO: remove or implement counter or do initializing in constructor and destructor
         ]
-        if (this.dragState) {
+        if (this.dragState && this.dragState.elementId === elementId) {
             pros.push(this.dragEnd(this.dragState.latest.mousePosition, this.dragState.latest.ctrlPressed))
         }
         await Promise.all(pros)
@@ -55,6 +56,7 @@ class MouseDownDragManager implements DragManager {
 
     private dragStart(
         eventResult: MouseEventResultAdvanced,
+        elementId: string,
         onDragStart: (eventResult: MouseEventResultAdvanced) => Promise<void>,
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>,
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
@@ -63,7 +65,7 @@ class MouseDownDragManager implements DragManager {
             util.logWarning('MouseDownDragManager: there seem to be multiple elements that catch mousedown event at the same time or multiple mouse buttons are pressed.')
             return
         }
-        this.dragState = {latest: {mousePosition: eventResult.position, ctrlPressed: eventResult.ctrlPressed}, onDragEnd}
+        this.dragState = {elementId, latest: {mousePosition: eventResult.position, ctrlPressed: eventResult.ctrlPressed}, onDragEnd}
 
         renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
             this.drag(new ClientPosition(clientX, clientY), ctrlPressed, onDrag)
