@@ -26,6 +26,7 @@ beforeAll(() => {
     domAdapterMock.batch = () => Promise.resolve()
     domAdapterMock.addDragListenerTo = () => Promise.resolve()
     domAdapterMock.addEventListenerTo = () => Promise.resolve()
+    domAdapterMock.addEventListenerAdvancedTo = () => Promise.resolve()
     initDocumentObjectModelAdapter(domAdapterMock)
 })
 
