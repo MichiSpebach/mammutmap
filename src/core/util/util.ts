@@ -94,7 +94,6 @@ class Util {
     const pros: Promise<void>[] = []
 
     if (active) {
-      pros.push(renderManager.addClassTo(indexHtmlIds.bodyId, style.getClass('disableUserSelect'))) // needed because sometimes selection is faster than overlay
       if (this.mouseEventBlockerScreenOverlayState === 'notInitialized') {
         const mapOverlayMoveLock: RenderElement = {
           type: 'div', 
@@ -109,7 +108,6 @@ class Util {
 
     } else {
       if (this.mouseEventBlockerScreenOverlayState === 'active') {
-        pros.push(renderManager.removeClassFrom(indexHtmlIds.bodyId, style.getClass('disableUserSelect')))
         pros.push(renderManager.appendChildTo(indexHtmlIds.unplacedElementsId, mouseEventBlockerScreenOverlayId, priority))
         this.mouseEventBlockerScreenOverlayState = 'inactive'
       }

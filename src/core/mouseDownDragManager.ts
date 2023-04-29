@@ -3,6 +3,7 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { util } from './util/util'
 import { ClientPosition } from './shape/ClientPosition'
 import { DragManager } from './DragManager'
+import { style } from './styleAdapter'
 
 export let mouseDownDragManager: MouseDownDragManager // = new MouseDownDragManager() // initialized at end of file
 
@@ -83,8 +84,9 @@ class MouseDownDragManager implements DragManager {
                 this.dragState.draggingStarted = true
                 await options.onDragStart(options.eventResult)
             }
-            this.drag(new ClientPosition(clientX, clientY), ctrlPressed, options.onDrag)
+            this.drag(new ClientPosition(clientX, clientY), ctrlPressed, options.onDrag) // TODO: fix bounce on drag start
         }, RenderPriority.RESPONSIVE)
+        renderManager.addClassTo(indexHtmlIds.htmlId, style.getClass('disableUserSelect'), RenderPriority.RESPONSIVE)
 
         if (!options.movementNeededToStartDrag) {
             this.dragState.draggingStarted = true
@@ -112,6 +114,7 @@ class MouseDownDragManager implements DragManager {
         const pros: Promise<void>[] = []
 
         pros.push(renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mousemove', {priority: RenderPriority.RESPONSIVE}))
+        pros.push(renderManager.removeClassFrom(indexHtmlIds.htmlId, style.getClass('disableUserSelect'), RenderPriority.RESPONSIVE))
         
         if (this.dragState.draggingStarted) {
             pros.push(this.dragState.onDragEnd(position, ctrlPressed))
