@@ -137,6 +137,7 @@ export class Map {
   private static readonly hintToPreventMoving: string = 'Press CTRL to prevent moving'
 
   private readonly id: string
+  private readonly mapId: string = 'map'
   private projectSettings: ProjectSettings
   private rootFolder: RootFolderBox
   private readonly mapRatioAdjusterSizePx: number = 600
@@ -153,20 +154,20 @@ export class Map {
     const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
     const mapRatioAdjusterStyle = `position:relative;width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
     const mapRatioAdjusterHtml = `<div id="mapRatioAdjuster" style="${mapRatioAdjusterStyle}">${rootFolderHtml}</div>`
-    const mapHtml = `<div id="map" style="overflow:hidden; width:100%; height:100%;">${mapRatioAdjusterHtml}</div>`
+    const mapHtml = `<div id="${this.mapId}" style="overflow:hidden; width:100%; height:100%;">${mapRatioAdjusterHtml}</div>`
 
     await renderManager.setContentTo(this.id, mapHtml)
 
     await Promise.all([
       this.rootFolder.render(),
-      renderManager.addWheelListenerTo('map', (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
+      renderManager.addWheelListenerTo(this.mapId, (delta: number, clientX: number, clientY: number) => this.zoom(-delta, clientX, clientY)),
       mouseDownDragManager.addDraggable({
-        elementId: 'map',
+        elementId: this.mapId,
         onDragStart: (result: MouseEventResultAdvanced) => this.movestart(result),
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => this.move(position, ctrlPressed),
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
       }),
-      relocationDragManager.addDropZone('map')
+      relocationDragManager.addDropZone(this.mapId)
     ])
   }
 
@@ -174,11 +175,11 @@ export class Map {
     await this.rootFolder.unrenderIfPossible(true)
     await Promise.all([
       this.rootFolder.destruct(),
-      renderManager.removeEventListenerFrom('map', 'wheel'),
-      mouseDownDragManager.removeDraggable('map'),
-      relocationDragManager.removeDropZone('map')
+      renderManager.removeEventListenerFrom(this.mapId, 'wheel'),
+      mouseDownDragManager.removeDraggable(this.mapId),
+      relocationDragManager.removeDropZone(this.mapId)
     ])
-    await renderManager.remove('map')
+    await renderManager.remove(this.mapId)
   }
 
   public getProjectSettings(): ProjectSettings {
@@ -218,6 +219,9 @@ export class Map {
       prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed,
       movingStarted: false
     }
+    if (this.moveState.prevented) {
+      mouseDownDragManager.cancelDrag(this.mapId)
+    }
   }
 
   private async move(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
@@ -236,6 +240,7 @@ export class Map {
     }
     if (ctrlPressed) {
       this.moveState.prevented = true
+      mouseDownDragManager.cancelDrag(this.mapId)
       this.updateMouseEventBlockerAndHintToPreventMoving()
       return
     }

@@ -124,6 +124,17 @@ class MouseDownDragManager implements DragManager {
         await Promise.all(pros)
     }
 
+    public async cancelDrag(elementId: string): Promise<void> {
+        if (!this.dragState) {
+            util.logWarning(`MouseDownDragManager::cancelDrag(${elementId}) called but dragging is not in progress.`)
+            return
+        }
+        if (this.dragState.elementId !== elementId) {
+            util.logWarning(`MouseDownDragManager::cancelDrag(${elementId}) called but dragging is in progress for '${this.dragState.elementId}' not for '${elementId}'.`)
+        }
+        await this.dragEnd(this.dragState.latest.mousePosition, this.dragState.latest.ctrlPressed)
+    }
+
 }
 
 mouseDownDragManager = new MouseDownDragManager()
