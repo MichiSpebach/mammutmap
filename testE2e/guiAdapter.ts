@@ -65,36 +65,8 @@ export async function mouseDown(): Promise<void> {
   await (await getPage()).mouse.down()
 }
 
-export async function mouseUp(options?: {useWorkAroundWhileDragging?: boolean}): Promise<void> {
-  if (options?.useWorkAroundWhileDragging) {
-    await runInRenderThread((async() => {
-      const element: Element = document.getElementById('q6shnoldaboHeader')?.lastElementChild!
-      const boundingRect: DOMRect = element.getBoundingClientRect()
-      document.addEventListener('pointerup', () => {
-        console.log('mouseup fired on element')
-      })
-      const eventPayload = {bubbles: true, cancelable: true, screenX: 200, screenY: 400, clientX: 200, clientY: 400}
-      document.dispatchEvent(new DragEvent('drag', eventPayload))
-      return
-      document.dispatchEvent(new MouseEvent('pointerup', eventPayload))
-      document.dispatchEvent(new DragEvent('dragend', eventPayload))
-    }) as any)
-    return
-  }
+export async function mouseUp(): Promise<void> {
   await (await getPage()).mouse.up()
-}
-
-export async function mouseDragAndDrop(start: {x: number, y: number}, target: {x: number, y: number}): Promise<void> {
-  //await mouseDown()
-  //const dragAndDrop = (await getPage()).mouse.dragAndDrop(start, target, {delay: 500})
-  const drag = (await getPage()).mouse.drag(start, target)
-  //await dragAndDrop
-  await drag
-  await mouseUp()
-}
-
-export async function drop(position: {x: number, y: number}): Promise<void> {
-  await (await getPage()).mouse.drop(position, {items: [], dragOperationsMask: 16})
 }
 
 export async function takeScreenshot(
@@ -275,10 +247,6 @@ export async function getLogs(): Promise<string[]> {
   const logPromises: Promise<string>[] = logElements.map(log => getContentOf(log))
   return Promise.all(logPromises)
 }
-
-/*export async function getLatestLogs(count: number = 10): Promise<string[]> {
-
-}*/
 
 async function getLogElement(): Promise<puppeteer.ElementHandle<Element>> {
   const logElement: puppeteer.ElementHandle<Element>|null = await findElement('log')
