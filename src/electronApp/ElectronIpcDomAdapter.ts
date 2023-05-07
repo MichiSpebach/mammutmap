@@ -1,6 +1,6 @@
 import { util } from '../core/util/util'
 import { RenderElement, RenderElements, Style } from '../core/util/RenderElement'
-import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent } from 'electron'
+import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain } from 'electron'
 import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
@@ -17,8 +17,26 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     public constructor(windowToRenderIn: BrowserWindow) {
       this.renderWindow = windowToRenderIn
       this.webContents = this.renderWindow.webContents
-      this.webContents.executeJavaScript('const ipcToNativeListenerRegister = new Map();')
-      // TODO: define 'let ipc = require("electron").ipcRenderer;' in renderer only once
+
+      const rendererGlobalJavaScript: string = `
+        const ipc = require("electron").ipcRenderer;
+        const ipcToNativeListenerRegister = new Map();
+        function runInMainThread(code) {
+          ipc.send("runInMainThread", code.toString());
+        }
+      `
+      this.webContents.executeJavaScript(rendererGlobalJavaScript)
+
+      ipcMain.on('runInMainThread', async (_: IpcMainEvent, code: string) => {
+        function importRelativeToSrc(path: string): Promise<any> { // can be used in eval (direct 'import(..)' would also not work)
+          return import(util.concatPaths('../', path))
+        }
+        if (code.startsWith('()') || code.startsWith('async ()')) {
+          eval(`(${code})()`)
+        } else {
+          eval(code)
+        }
+      })
     }
   
     public openDevTools(): void {
@@ -359,7 +377,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       const ipcChannelName: string = this.ipcChannelRegister.addEventListener(id, 'keydown', callback, (_: IpcMainEvent, value: string) => callback(value))
   
       let rendererFunction: string = '(event) => {'
-      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
       //rendererFunction += 'console.log(event);'
       rendererFunction += 'if (event.key === "'+key+'") {'
       rendererFunction += 'ipc.send("'+ipcChannelName+'", event.target.value);'
@@ -386,7 +403,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       )
   
       let rendererFunction: string = '(event) => {'
-      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
       //rendererFunction += 'console.log(event);'
       rendererFunction += 'ipc.send("'+ipcChannelName+'", event.deltaY, event.clientX, event.clientY);'
       rendererFunction += '}'
@@ -410,7 +426,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       )
   
       let rendererFunction: string = '(event) => {'
-      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
       //rendererFunction += 'console.log(event);'
       if (options.stopPropagation) {
         rendererFunction += 'event.stopPropagation();'
@@ -438,7 +453,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     private createChangeEventRendererFunction(ipcChannelName: string, returnField: 'value'|'checked'): string {
       let rendererFunction: string = '(event) => {'
-      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
       //rendererFunction += 'console.log(event);'
       rendererFunction += 'ipc.send("'+ipcChannelName+'", event.target.'+returnField+');'
       rendererFunction += '}'
@@ -447,7 +461,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     private createMouseEventRendererFunction(ipcChannelName: string): string {
       let rendererFunction: string = '(event) => {'
-      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
       //rendererFunction += 'console.log(event);'
       rendererFunction += 'event.stopPropagation();'
       rendererFunction += 'ipc.send("'+ipcChannelName+'", event.clientX, event.clientY, event.ctrlKey);'
@@ -479,7 +492,6 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       )
 
       let rendererFunction: string = '(event) => {'
-      rendererFunction += 'let ipc = require("electron").ipcRenderer;'
       //rendererFunction += 'console.log(event);'
       rendererFunction += 'event.stopPropagation();'
       if (eventType === 'dragstart') {

@@ -20,6 +20,11 @@ export async function startApp(): Promise<void> {
   await command('setCompatibilityTheme')
   await command('setLogDebugActivated true')
   await command('setHtmlCursorActivated true')
+  await runInMainThread(`async () => {
+    const {relocationDragManager} = await importRelativeToSrc('./core/RelocationDragManager')
+    const {mouseDownDragManager} = await importRelativeToSrc('./core/mouseDownDragManager')
+    relocationDragManager.dragManager = mouseDownDragManager // TODO: remove as soon as mouseDownDragManager is standard
+  }`)
 }
 
 export async function shutdownApp(): Promise<void> {
@@ -29,6 +34,21 @@ export async function shutdownApp(): Promise<void> {
 
 export async function getTitle(): Promise<string> {
   return (await getPage()).title()
+}
+
+export async function logInfo(message: string): Promise<void> {
+  await runInMainThread(`async () => {
+    const {util} = await importRelativeToSrc('./core/util/util')
+    util.logInfo('${message}')
+  }`)
+}
+
+export async function runInMainThread(code: string/* | () => Promise<void> TODO*/): Promise<void> {
+  await runInRenderThread(`runInMainThread(${code})`)
+}
+
+export async function runInRenderThread(code: string/* | () => Promise<void> TODO*/): Promise<void> {
+  await (await getPage()).evaluate(code)
 }
 
 export async function moveMouseTo(x: number, y: number, options?: {steps?: number}): Promise<void> {
@@ -45,8 +65,36 @@ export async function mouseDown(): Promise<void> {
   await (await getPage()).mouse.down()
 }
 
-export async function mouseUp(): Promise<void> {
+export async function mouseUp(options?: {useWorkAroundWhileDragging?: boolean}): Promise<void> {
+  if (options?.useWorkAroundWhileDragging) {
+    await runInRenderThread((async() => {
+      const element: Element = document.getElementById('q6shnoldaboHeader')?.lastElementChild!
+      const boundingRect: DOMRect = element.getBoundingClientRect()
+      document.addEventListener('pointerup', () => {
+        console.log('mouseup fired on element')
+      })
+      const eventPayload = {bubbles: true, cancelable: true, screenX: 200, screenY: 400, clientX: 200, clientY: 400}
+      document.dispatchEvent(new DragEvent('drag', eventPayload))
+      return
+      document.dispatchEvent(new MouseEvent('pointerup', eventPayload))
+      document.dispatchEvent(new DragEvent('dragend', eventPayload))
+    }) as any)
+    return
+  }
   await (await getPage()).mouse.up()
+}
+
+export async function mouseDragAndDrop(start: {x: number, y: number}, target: {x: number, y: number}): Promise<void> {
+  //await mouseDown()
+  //const dragAndDrop = (await getPage()).mouse.dragAndDrop(start, target, {delay: 500})
+  const drag = (await getPage()).mouse.drag(start, target)
+  //await dragAndDrop
+  await drag
+  await mouseUp()
+}
+
+export async function drop(position: {x: number, y: number}): Promise<void> {
+  await (await getPage()).mouse.drop(position, {items: [], dragOperationsMask: 16})
 }
 
 export async function takeScreenshot(
@@ -196,7 +244,7 @@ async function waitUntilLastLogMatches(
 async function waitUntilLogMatches(condition:(log: string) => boolean, timelimitInMs: number): Promise<void> {
   const timecap: number = Date.now() + timelimitInMs
   while(true) {
-    const log: string = await getContentOf(await getLog())
+    const log: string = await getContentOf(await getLogElement())
     if (condition(log)) {
       return
     }
@@ -211,14 +259,28 @@ async function waitUntilLogMatches(condition:(log: string) => boolean, timelimit
 }
 
 async function getLastLog(): Promise<string> {
-  const logs: puppeteer.ElementHandle<HTMLDivElement>[] = await (await getLog()).$$('div')
+  const logs: puppeteer.ElementHandle<HTMLDivElement>[] = await (await getLogElement()).$$('div')
   if (logs.length === 0) {
     return ''
   }
   return getContentOf(logs[logs.length-1])
 }
 
-async function getLog(): Promise<puppeteer.ElementHandle<Element>> {
+export async function getLogs(): Promise<string[]> {
+  const logElements: puppeteer.ElementHandle<HTMLDivElement>[] = await (await getLogElement()).$$('div')
+  if (logElements.length === 0) {
+    return []
+  }
+
+  const logPromises: Promise<string>[] = logElements.map(log => getContentOf(log))
+  return Promise.all(logPromises)
+}
+
+/*export async function getLatestLogs(count: number = 10): Promise<string[]> {
+
+}*/
+
+async function getLogElement(): Promise<puppeteer.ElementHandle<Element>> {
   const logElement: puppeteer.ElementHandle<Element>|null = await findElement('log')
   if (!logElement) {
     throw new Error('Failed to get log.')

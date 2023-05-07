@@ -1,0 +1,45 @@
+{
+	"id": "5eai25ovmq8",
+	"x": 5,
+	"y": 5,
+	"width": 90,
+	"height": 90,
+	"links": [
+		{
+			"id": "hs4fm9cnjl",
+			"from": {
+				"path": [
+					{
+						"boxId": "5eai25ovmq8",
+						"boxName": "./mammutmap/testE2e/moveBoxes/scenario/",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "0fj1mk72of8",
+						"boxName": "0fj1mk72of8",
+						"x": 50,
+						"y": 50
+					},
+					{
+						"boxId": "q6shnoldabo",
+						"boxName": "q6shnoldabo",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	],
+	"nodes": [],
+	"srcRootPath": "../",
+	"mapRootPath": "./",
+	"linkTags": [],
+	"defaultLinkAppearance": {}
+}
