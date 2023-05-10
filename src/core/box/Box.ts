@@ -374,6 +374,7 @@ export abstract class Box implements DropTarget, Hoverable {
 
   public async saveMapData(): Promise<void> {
     const mapDataFilePath: string = this.getMapDataFilePath()
+    this.mapData.roundFieldsForSave()
     await fileSystem.saveToJsonFile(mapDataFilePath, this.mapData, {throwInsteadOfWarn: true}).then(() => {
       util.logInfo('saved ' + mapDataFilePath)
       this.setMapDataFileExistsAndUpdateBorderStyle(true)

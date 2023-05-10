@@ -92,6 +92,20 @@ export class BoxData extends JsonObject {
     util.logWarning('BoxData with id '+this.id+': ' + message)
   }
 
+  public roundFieldsForSave(): void {
+    // TODO: only round fields that have been modified, to avoid spamming changes into map files
+    this.x = this.roundPercentForSave(this.x)
+    this.y = this.roundPercentForSave(this.y)
+    this.width = this.roundPercentForSave(this.width)
+    this.height = this.roundPercentForSave(this.height)
+    //this.links.roundFieldsForSave() TODO: but overblending when zooming could become visible
+    //this.nodes.roundFieldsForSave() TODO
+  }
+
+  private roundPercentForSave(percentValue: number): number {
+    return Math.round(percentValue*1000)/1000
+  }
+
   public override toJson(): string {
     return util.toFormattedJson(this)
   }

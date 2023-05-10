@@ -76,15 +76,16 @@ class MouseDownDragManager implements DragManager {
             onDragEnd: options.onDragEnd
         }
 
-        renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', async (clientX: number, clientY: number, ctrlPressed: boolean) => {
+        renderManager.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
             if (!this.dragState) {
                 return // this happens when mouseup was already fired but mousemove listener is not yet removed
             }
             if (!this.dragState.draggingStarted && options.movementNeededToStartDrag) {
                 this.dragState.draggingStarted = true
-                await options.onDragStart(options.eventResult)
+                options.onDragStart(options.eventResult)
+            } else {
+                this.drag(new ClientPosition(clientX, clientY), ctrlPressed, options.onDrag)
             }
-            this.drag(new ClientPosition(clientX, clientY), ctrlPressed, options.onDrag) // TODO: fix bounce on drag start
         }, RenderPriority.RESPONSIVE)
         renderManager.addClassTo(indexHtmlIds.htmlId, style.getClass('disableUserSelect'), RenderPriority.RESPONSIVE)
 

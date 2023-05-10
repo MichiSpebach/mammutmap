@@ -84,7 +84,7 @@ export class RelocationDragManager {
             this.dragManager.addDraggable({
                 elementId: elementToDrag.getId(),
                 movementNeededToStartDrag: true,
-                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, false),
+                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, !eventResult.ctrlPressed, false),
                 onDrag: async (position: ClientPosition, ctrlPressed: boolean) => this.onDrag(position.x, position.y, !ctrlPressed),
                 onDragEnd: async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd()
             })
@@ -102,7 +102,7 @@ export class RelocationDragManager {
         ])
     }
 
-    private onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, clickToDropMode: boolean): void {
+    private async onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, snapToGrid: boolean, clickToDropMode: boolean): Promise<void> {
         if (this.state) {
             util.logWarning('Expected state to be not set onDragstart.')
         }
@@ -113,8 +113,10 @@ export class RelocationDragManager {
             clickToDropMode: clickToDropMode,
             watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher.newAndWatch(elementToDrag.getManagingBox())
         })
-        renderManager.addClassTo(elementToDrag.getId(), this.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
-        elementToDrag.dragStart(clientX, clientY)
+        await Promise.all([
+            renderManager.addClassTo(elementToDrag.getId(), this.draggingInProgressStyleClass, RenderPriority.RESPONSIVE),
+            elementToDrag.dragStart(clientX, clientY, this.getState().draggingOver, snapToGrid)
+        ])
     }
 
     private onDrag(clientX: number, clientY: number, snapToGrid: boolean): void {
@@ -202,9 +204,9 @@ export class RelocationDragManager {
 
     public async startDragWithClickToDropMode(elementToDrag: Draggable<DropTarget>): Promise<void> {
         const cursorClientPosition: { x: number, y: number } = renderManager.getCursorClientPosition();
-        this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, true)
-
+        
         await Promise.all([
+            this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, false/*TODO?: check if ctrl is pressed*/, true),
             renderManager.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
                 this.onDrag(clientX, clientY, !ctrlPressed)
             }, RenderPriority.RESPONSIVE),

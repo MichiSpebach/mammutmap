@@ -7,7 +7,7 @@ export interface Draggable<DropTargetType extends DropTarget> {
   getDropTargetAtDragStart(): DropTargetType
   canBeDroppedInto(dropTarget: DropTarget): boolean
 
-  dragStart(clientX: number, clientY: number): Promise<void>
+  dragStart(clientX: number, clientY: number, dropTarget: DropTargetType, snapToGrid: boolean): Promise<void>
   drag(clientX: number, clientY: number, dropTarget: DropTargetType, snapToGrid: boolean): Promise<void>
   dragCancel(): Promise<void>
   dragEnd(dropTarget: DropTargetType): Promise<void>

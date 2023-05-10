@@ -76,7 +76,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
   }
 
-  public async dragStart(clientX: number, clientY: number): Promise<void> {
+  public async dragStart(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
     if (this.referenceBox.site.isDetached()) {
       util.logWarning(`BoxHeader::dragStart(..) called on detached box "${this.referenceBox.getName()}".`)
     }
@@ -84,7 +84,10 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     let clientRect: ClientRect = await this.referenceBox.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
 
-    await renderManager.addClassTo(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
+    await Promise.all([
+      renderManager.addClassTo(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE),
+      this.drag(clientX, clientY, dropTarget, snapToGrid)
+    ])
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {

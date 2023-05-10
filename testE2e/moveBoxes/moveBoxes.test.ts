@@ -26,8 +26,8 @@ test('move box', async () => {
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-origin'})
 })
 
-test('move box to other folder', async () => { // TODO: activate as soon as bug fixed
-    return
+test('move box to other folder', async () => {
+    return // TODO: activate as soon as bug fixed
     await gui.resetWindow()
     await gui.openFolder('testE2e/moveBoxes/scenario')
 
@@ -57,9 +57,8 @@ test('move box to other folder', async () => { // TODO: activate as soon as bug 
 
 async function dragTo(x: number, y: number): Promise<void> {
     await gui.mouseDown()
-    await coreUtil.wait(100)
     await gui.moveMouseTo(x, y)
-    await gui.moveMouseTo(x, y)
+    await gui.moveMouseTo(x, y) // TODO: second moveMouseTo(..) needed because of how the dragOffset in dragStart(..) and drag(..) is implemented in BoxHeader, improve
     await gui.mouseUp()
-    await coreUtil.wait(100) // TODO: otherwise sometimes mouseUp never finishes or next operations mouseDown does not work, improve
+    await coreUtil.wait(50) // TODO: otherwise operation may not have finished, improve
 }
