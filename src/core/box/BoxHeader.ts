@@ -84,10 +84,7 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
     let clientRect: ClientRect = await this.referenceBox.getClientRect()
     this.dragOffset = {x: clientX - clientRect.x, y: clientY - clientRect.y}
 
-    await Promise.all([
-      renderManager.addClassTo(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE),
-      this.drag(clientX, clientY, dropTarget, snapToGrid)
-    ])
+    await renderManager.addClassTo(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {

@@ -58,7 +58,7 @@ test('move box to other folder', async () => {
 async function dragTo(x: number, y: number): Promise<void> {
     await gui.mouseDown()
     await gui.moveMouseTo(x, y)
-    await gui.moveMouseTo(x, y) // TODO: second moveMouseTo(..) needed because of how the dragOffset in dragStart(..) and drag(..) is implemented in BoxHeader, improve
+    await coreUtil.wait(10) // TODO: otherwise operation may not have finished, improve
     await gui.mouseUp()
-    await coreUtil.wait(50) // TODO: otherwise operation may not have finished, improve
+    await coreUtil.wait(10) // TODO: otherwise operation may not have finished, improve
 }
