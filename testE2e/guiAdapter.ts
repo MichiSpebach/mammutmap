@@ -23,11 +23,18 @@ export async function startApp(): Promise<void> {
   await runInMainThread(`async () => {
     const {relocationDragManager} = await importRelativeToSrc('./core/RelocationDragManager')
     const {mouseDownDragManager} = await importRelativeToSrc('./core/mouseDownDragManager')
+    const {settings} = await importRelativeToSrc('./core/Settings')
+
     relocationDragManager.dragManager = mouseDownDragManager // TODO: remove as soon as mouseDownDragManager is standard
+    settings.setBoolean('boxesDraggableIntoOtherBoxes', true)
   }`)
 }
 
 export async function shutdownApp(): Promise<void> {
+  await runInMainThread(`async () => {
+    const {settings} = await importRelativeToSrc('./core/Settings')
+    settings.setBoolean('boxesDraggableIntoOtherBoxes', false)
+  }`)
   await (await getPage()).close()
   page = undefined
 }
@@ -49,6 +56,12 @@ export async function runInMainThread(code: string/* | () => Promise<void> TODO*
 
 export async function runInRenderThread(code: string/* | () => Promise<void> TODO*/): Promise<void> {
   await (await getPage()).evaluate(code)
+}
+
+export async function fireMouseOver(x: number, y: number): Promise<void> {
+  await runInRenderThread(`
+    document.elementFromPoint(${x}, ${y}).dispatchEvent(new Event('mouseover', {bubbles: true}))
+  `)
 }
 
 export async function moveMouseTo(x: number, y: number, options?: {steps?: number}): Promise<void> {

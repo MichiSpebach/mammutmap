@@ -27,7 +27,6 @@ test('move box', async () => {
 })
 
 test('move box to other folder', async () => {
-    return // TODO: activate as soon as bug fixed
     await gui.resetWindow()
     await gui.openFolder('testE2e/moveBoxes/scenario')
 
@@ -58,6 +57,7 @@ test('move box to other folder', async () => {
 async function dragTo(x: number, y: number): Promise<void> {
     await gui.mouseDown()
     await gui.moveMouseTo(x, y)
+    await gui.fireMouseOver(x, y) // somehow puppeteer does not fire mouseover events while mousedown, TODO: check if playwright works better and switch to playwright if so
     await coreUtil.wait(10) // TODO: otherwise operation may not have finished, improve
     await gui.mouseUp()
     await coreUtil.wait(10) // TODO: otherwise operation may not have finished, improve
