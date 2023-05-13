@@ -98,7 +98,7 @@ test('reorderMapDataPathWithoutRender deep, without any changes, while dragging'
     ])
     scene.linkEnd.getReferenceLink().renderWithOptions = () => Promise.resolve()
 
-    await scene.linkEnd.dragStart(800, 400)
+    await scene.linkEnd.dragStart(800, 400, scene.linkEnd.getDropTargetAtDragStart(), false)
     await scene.linkEnd.reorderMapDataPathWithoutRender(scene.outerBox)
 
     expect(scene.linkEndData.path.length).toBe(2)

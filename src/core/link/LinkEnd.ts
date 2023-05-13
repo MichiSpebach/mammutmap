@@ -78,8 +78,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return this.dragState && this.dragState.dropTarget
   }
 
-  public async dragStart(clientX: number, clientY: number): Promise<void> {
-    this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: this.getDropTargetAtDragStart(), snapToGrid: false} // TODO add dropTarget and snapToGrid to dragstart(..)
+  public async dragStart(clientX: number, clientY: number, dropTarget: Box|NodeWidget, snapToGrid: boolean): Promise<void> {
+    this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget, snapToGrid}
     return this.referenceLink.renderWithOptions({priority: RenderPriority.RESPONSIVE, draggingInProgress: true})
   }
 
