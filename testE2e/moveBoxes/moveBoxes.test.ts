@@ -101,18 +101,18 @@ test('move box with many links to other folder', async () => {
     for (let i = 0; i < 13; i++) {
         expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/maproot.mapsettings.json')
     }
-    await coreUtil.wait(100)
+    await coreUtil.wait(50) // TODO: otherwise operation may not have finished, improve
     expect(await gui.getLogs()).toEqual(expectedLogs)
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-moved-to-other-folder'})
 
-    await dragTo(150, 400) // TODO: otherwise operation may not have finished, improve
+    await dragTo(150, 400)
     expectedLogs.push('Info: moved testE2e/moveBoxes/scenarioWithManyLinks/q6shnoldabo to testE2e/moveBoxes/scenarioWithManyLinks/0fj1mk72of8/q6shnoldabo')
     expectedLogs.push('Info: moved testE2e/moveBoxes/scenarioWithManyLinks/map/q6shnoldabo.json to testE2e/moveBoxes/scenarioWithManyLinks/map/0fj1mk72of8/q6shnoldabo.json')
     expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/0fj1mk72of8/q6shnoldabo.json')
     for (let i = 0; i < 13; i++) {
         expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/maproot.mapsettings.json')
     }
-    await coreUtil.wait(100) // TODO: otherwise operation may not have finished, improve
+    await coreUtil.wait(50) // TODO: otherwise operation may not have finished, improve
     expect(await gui.getLogs()).toEqual(expectedLogs)
     await gui.clearTerminal()
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-origin'})
