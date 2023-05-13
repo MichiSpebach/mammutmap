@@ -54,6 +54,35 @@ test('move box to other folder', async () => {
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-origin'})
 })
 
+test('move deep box to other folder', async () => {
+    const snapshotIdentifier = 'move-deep-box'
+    await gui.resetWindow()
+    await gui.openFolder('testE2e/moveBoxes/deepScenario')
+
+    await gui.clearTerminal()
+    await gui.moveMouseTo(185, 350)
+    const expectedLogs: string[] = []
+    expect(await gui.getLogs()).toEqual(expectedLogs)
+    await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-origin'})
+
+    await dragTo(440, 350)
+    expectedLogs.push('Info: moved testE2e/moveBoxes/deepScenario/depth1/depth2/depth3/file to testE2e/moveBoxes/deepScenario/file')
+    expectedLogs.push('Info: moved testE2e/moveBoxes/deepScenario/map/depth1/depth2/depth3/file.json to testE2e/moveBoxes/deepScenario/map/file.json')
+    expectedLogs.push('Info: saved testE2e/moveBoxes/deepScenario/map/file.json')
+    expectedLogs.push('Info: saved testE2e/moveBoxes/deepScenario/map/maproot.mapsettings.json')
+    expect(await gui.getLogs()).toEqual(expectedLogs)
+    await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-moved-to-other-folder'})
+
+    await dragTo(185, 350)
+    expectedLogs.push('Info: moved testE2e/moveBoxes/deepScenario/file to testE2e/moveBoxes/deepScenario/depth1/depth2/depth3/file')
+    expectedLogs.push('Info: moved testE2e/moveBoxes/deepScenario/map/file.json to testE2e/moveBoxes/deepScenario/map/depth1/depth2/depth3/file.json')
+    expectedLogs.push('Info: saved testE2e/moveBoxes/deepScenario/map/depth1/depth2/depth3/file.json')
+    expectedLogs.push('Info: saved testE2e/moveBoxes/deepScenario/map/maproot.mapsettings.json')
+    expect(await gui.getLogs()).toEqual(expectedLogs)
+    await gui.clearTerminal()
+    await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-origin'})
+})
+
 async function dragTo(x: number, y: number): Promise<void> {
     await gui.mouseDown()
     await gui.moveMouseTo(x, y)

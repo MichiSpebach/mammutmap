@@ -1,0 +1,57 @@
+{
+	"id": "rootFolder",
+	"x": 5,
+	"y": 5,
+	"width": 90,
+	"height": 90,
+	"links": [
+		{
+			"id": "hs4fm9cnjl",
+			"from": {
+				"path": [
+					{
+						"boxId": "rootFolder",
+						"boxName": "./mammutmap/testE2e/moveBoxes/deepScenario/",
+						"x": 60,
+						"y": 40
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "depth1",
+						"boxName": "depth1",
+						"x": 50.001,
+						"y": 53.76
+					},
+					{
+						"boxId": "depth2",
+						"boxName": "depth2",
+						"x": 50.001,
+						"y": 52
+					},
+					{
+						"boxId": "depth3",
+						"boxName": "depth3",
+						"x": 50.001,
+						"y": 50
+					},
+					{
+						"boxId": "file",
+						"boxName": "file",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		}
+	],
+	"nodes": [],
+	"srcRootPath": "../",
+	"mapRootPath": "./",
+	"linkTags": [],
+	"defaultLinkAppearance": {}
+}
