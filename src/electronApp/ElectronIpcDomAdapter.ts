@@ -14,7 +14,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     // introduce RenderPriority.BACKGROUND for this
     // asks frontend if element for ipcChannel still exists
   
-    public constructor(windowToRenderIn: BrowserWindow) {
+    public constructor(windowToRenderIn: BrowserWindow, options?: {deactivateRunInMainThread?: boolean}) {
       this.renderWindow = windowToRenderIn
       this.webContents = this.renderWindow.webContents
 
@@ -27,6 +27,9 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       `
       this.webContents.executeJavaScript(rendererGlobalJavaScript)
 
+      if (options?.deactivateRunInMainThread) {
+        return
+      }
       ipcMain.on('runInMainThread', async (_: IpcMainEvent, code: string) => {
         function importRelativeToSrc(path: string): Promise<any> { // can be used in eval (direct 'import(..)' would also not work)
           return import(util.concatPaths('../', path))

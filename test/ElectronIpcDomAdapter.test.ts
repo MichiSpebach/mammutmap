@@ -59,5 +59,5 @@ function setupScenario(): {dom: ElectronIpcDomAdapter} {
   const windowMock: any = Object
   windowMock.webContents = webContentsMock
 
-  return {dom: new ElectronIpcDomAdapter(windowMock)}
+  return {dom: new ElectronIpcDomAdapter(windowMock, {deactivateRunInMainThread: true})}
 }
