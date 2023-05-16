@@ -43,9 +43,7 @@ const createWindow = async () => {
   commandLine.init()
   contextMenu.init(new ElectronContextMenuPopup())
 
-  if (process.platform !== 'darwin') {
-    await applicationMenu.initAndRender(new ElectronAndHtmlApplicationMenu())
-  }
+  await applicationMenu.initAndRender(new ElectronAndHtmlApplicationMenu())
 
   if (getStartupArgumentBoolean('skip-plugins')) {
     util.logInfo('skip loading of plugins because --skip-plugins=true')
@@ -54,11 +52,11 @@ const createWindow = async () => {
   }
 
   if (process.platform === 'darwin') {
-    let message: string = 'macOS detected, initializing applicationMenu after plugins have loaded'
+    let message: string = 'macOS detected, reinitializing applicationMenu after plugins have loaded'
     message += ' because dynamically changing menus might not work in macOS.\n'
     message += 'When problems with the applicationMenu occur you can activate htmlApplicationMenu in the settings.'
     util.logInfo(message)
-    await applicationMenu.initAndRender(new ElectronAndHtmlApplicationMenu())
+    await applicationMenu.initAndRender(applicationMenu.applicationMenu)
   }
 };
 
