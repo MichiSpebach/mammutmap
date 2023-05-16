@@ -26,8 +26,9 @@ import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { SizeAndPosition } from './SizeAndPosition'
 import { NodeWidget } from '../node/NodeWidget'
+import { AbstractNodeWidget } from '../AbstractNodeWidget'
 
-export abstract class Box implements DropTarget, Hoverable {
+export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   private name: string
   private parent: FolderBox|null
   private mapData: BoxData
@@ -46,6 +47,7 @@ export abstract class Box implements DropTarget, Hoverable {
   private unsavedChanges: boolean = false
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean) {
+    super()
     this.name = name
     this.parent = parent
     this.mapData = mapData
@@ -120,10 +122,6 @@ export abstract class Box implements DropTarget, Hoverable {
     return this.parent
   }
 
-  public isRoot(): boolean {
-    return false // TODO: replace with !this.parent?
-  }
-
   public abstract isFolder(): boolean
 
   public abstract isFile(): boolean
@@ -153,7 +151,7 @@ export abstract class Box implements DropTarget, Hoverable {
     const newParentClientRect: ClientRect = await newParent.getClientRect()
 
     this.parent.removeBox(this)
-    newParent.addBox(this)
+    await newParent.addBox(this)
 
     const oldSrcPath: string = this.getSrcPath()
     const oldMapDataFilePath: string = this.getMapDataFilePath()
@@ -447,11 +445,14 @@ export abstract class Box implements DropTarget, Hoverable {
 
   protected abstract formBody(): string*/
 
-  public static findCommonAncestor(fromBox: Box, toBox: Box): {commonAncestor: Box, fromBoxes: Box[], toBoxes: Box[]} | never {
-    const fromBoxes: Box[] = [fromBox]
-    const toBoxes: Box[] = [toBox]
+  public static findCommonAncestor(fromBox: Box|NodeWidget, toBox: Box|NodeWidget): {commonAncestor: Box, fromBoxes: (Box|NodeWidget)[], toBoxes: (Box|NodeWidget)[]} | never { // TODO: rename fromBoxes to fromPath and toBoxes to toPath
+    const fromBoxes: (Box|NodeWidget)[] = [fromBox]
+    const toBoxes: (Box|NodeWidget)[] = [toBox]
 
-    let commonAncestorCandidate: Box = fromBox
+    let commonAncestorCandidate: Box = fromBox instanceof Box // TODO: in future it will also make sense that commonAncestor is a general node
+      ? fromBox
+      : fromBox.getParent()
+
     while (fromBoxes[0] !== toBoxes[0]) {
       if (fromBoxes[0].isRoot() && toBoxes[0].isRoot()) {
         util.logError(fromBox.getSrcPath()+' and '+toBox.getSrcPath()+' do not have a common ancestor, file structure seems to be corrupted.')

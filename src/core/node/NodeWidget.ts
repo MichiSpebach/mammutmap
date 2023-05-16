@@ -12,8 +12,9 @@ import { BoxNodesWidget } from '../box/BoxNodesWidget'
 import { BorderingLinks } from '../link/BorderingLinks'
 import { ClientRect } from '../ClientRect'
 import * as contextMenu from '../contextMenu'
+import { AbstractNodeWidget } from '../AbstractNodeWidget'
 
-export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
+export class NodeWidget extends AbstractNodeWidget implements DropTarget, Draggable<Box> { // TODO: rename to LinkNodeWidget
     private readonly mapData: NodeData
     private managingBox: Box // TODO: rename to parent?
     public readonly borderingLinks: BorderingLinks
@@ -37,6 +38,10 @@ export class NodeWidget extends Widget implements DropTarget, Draggable<Box> {
 
     public getName(): string {
         return this.mapData.id // TODO: add name field to NodeData
+    }
+
+    public getSrcPath(): string {
+        return util.concatPaths(this.getParent().getSrcPath(), this.getName())
     }
 
     public getMapData(): NodeData {

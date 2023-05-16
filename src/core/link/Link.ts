@@ -190,19 +190,51 @@ export class Link implements Hoverable {
     return style.getHighlightLinkClass()
   }
 
-  public async reorderAndSave(renderOptions?: { // TODO: rename to reorderAndSaveAndRender()?
+  public async reorderAndSaveAndRender(options: {
+    movedWayPoint: Box|NodeWidget
+    movedLinkEnd?: LinkEnd
     priority?: RenderPriority
     highlight?: boolean
     draggingInProgress?: boolean
     hoveringOver?: boolean
   }): Promise<void> {
-    const commonAncestor: Box = Box.findCommonAncestor(this.from.getRenderedTargetBox(), this.to.getRenderedTargetBox()).commonAncestor
+    /*if (!options.newRenderedFromTarget && !options.newRenderedToTarget) {
+      util.logWarning('Link::reorderAndSaveAndRender(..) neither newRenderedFromTarget nor newRenderedToTarget is set, this will not reorder anything.')
+    }*/
+
+    let newRenderedFromTarget: Box|NodeWidget|undefined
+    let newRenderedToTarget: Box|NodeWidget|undefined
+    if (options.movedLinkEnd) {
+      if (options.movedLinkEnd === this.from) {
+        newRenderedFromTarget = options.movedWayPoint
+      } else if (options.movedLinkEnd === this.to) {
+        newRenderedToTarget = options.movedWayPoint
+      } else {
+        util.logWarning('Link::reorderAndSaveAndRender(..) movedLinkEnd is neither fromLinkEnd nor toLinkEnd.')
+      }
+    } else {
+      if (this.from.isBoxInPath(options.movedWayPoint)) {
+        newRenderedFromTarget = options.movedWayPoint
+      }
+      if (this.to.isBoxInPath(options.movedWayPoint)) {
+        newRenderedToTarget = options.movedWayPoint
+      }
+    }
+    if (!newRenderedFromTarget && !newRenderedToTarget) {
+      util.logWarning('Link::reorderAndSaveAndRender(..) movedWayPoint is neither in fromPath nor in toPath.')
+    }
+    
+    const commonAncestor: Box = Box.findCommonAncestor(newRenderedFromTarget ?? this.managingBox, newRenderedToTarget ?? this.managingBox).commonAncestor
     const oldManagingBox: Box = this.managingBox
     this.managingBox = commonAncestor
 
     let proms: Promise<any>[] = []
-    proms.push(this.from.reorderMapDataPathWithoutRender(this.managingBox))
-    proms.push(this.to.reorderMapDataPathWithoutRender(this.managingBox))
+    if (newRenderedFromTarget) {
+      proms.push(this.from.reorderMapDataPathWithoutRender({newManagingBoxForValidation: this.managingBox, movedWayPoint: newRenderedFromTarget}))
+    }
+    if (newRenderedToTarget) {
+      proms.push(this.to.reorderMapDataPathWithoutRender({newManagingBoxForValidation: this.managingBox, movedWayPoint: newRenderedToTarget}))
+    }
     await Promise.all(proms)
 
     proms = []
@@ -213,11 +245,7 @@ export class Link implements Hoverable {
       proms.push(this.managingBox.saveMapData())
     }
 
-    if (renderOptions) {
-      proms.push(this.renderWithOptions(renderOptions))
-    } else {
-      proms.push(this.render())
-    }
+    proms.push(this.renderWithOptions(options))
 
     await Promise.all(proms)
   }

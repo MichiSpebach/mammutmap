@@ -24,7 +24,7 @@ export class BorderingLinks {
   }
 
   public async reorderAndSaveAll(): Promise<void> {
-    await Promise.all(this.links.map(link => link.reorderAndSave()))
+    await Promise.all(this.links.map(link => link.reorderAndSaveAndRender({movedWayPoint: this.referenceBoxOrNode})))
   }
 
   public async renderAll(): Promise<void> {

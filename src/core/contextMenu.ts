@@ -236,9 +236,9 @@ async function addLinkToBox(box: Box, position: ClientPosition): Promise<void> {
   const fromWayPoint = WayPointData.buildNew(box.getId(), box.getName(), positionInBox.percentX, positionInBox.percentY)
   const toWayPoint = WayPointData.buildNew(box.getId(), box.getName(), positionInBox.percentX, positionInBox.percentY)
 
-  const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint], true)}
-  const toLinkEnd = {mapData: new LinkEndData([toWayPoint], true)}
-  const link: Link = await box.links.addLink(fromLinkEnd, toLinkEnd, false)
+  const from = {mapData: new LinkEndData([fromWayPoint], true), linkable: box}
+  const to = {mapData: new LinkEndData([toWayPoint], true), linkable: box}
+  const link: Link = await box.links.addLink(from, to, false)
 
   await relocationDragManager.startDragWithClickToDropMode(link.getTo())
 }

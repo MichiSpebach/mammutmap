@@ -49,8 +49,8 @@ export class BoxLinks extends Widget {
     }
 
     public async addLink(
-      from: {mapData: LinkEndData, linkable?: Box|NodeWidget}, 
-      to: {mapData: LinkEndData, linkable?: Box|NodeWidget}, 
+      from: {mapData: LinkEndData, linkable: Box|NodeWidget}, 
+      to: {mapData: LinkEndData, linkable: Box|NodeWidget}, 
       reorderAndSave: boolean
     ): Promise<Link> {
       const linkData = new LinkData(util.generateId(), from.mapData, to.mapData)
@@ -62,7 +62,8 @@ export class BoxLinks extends Widget {
       await this.addPlaceholderFor(link)
 
       if (reorderAndSave) {
-        await link.reorderAndSave()
+        await link.reorderAndSaveAndRender({movedWayPoint: from.linkable}) // TODO: decide and handle reorder in Link.new(..) and remove reorderAndSave option
+        await link.reorderAndSaveAndRender({movedWayPoint: to.linkable}) // TODO: decide and handle reorder in Link.new(..) and remove reorderAndSave option
       } else {
         await link.render()
       }

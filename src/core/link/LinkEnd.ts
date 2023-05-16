@@ -25,7 +25,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private renderState: RenderState = new RenderState()
   private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private boxesRegisteredAt: (Box|NodeWidget)[] = []
-  private renderedTarget: Box|NodeWidget|undefined
+  private renderedTarget: Box|NodeWidget|undefined // TODO: remove
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box|NodeWidget
@@ -50,6 +50,10 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public getManagingBox(): Box {
     return this.referenceLink.getManagingBox()
+  }
+
+  public isBoxInPath(box: Box|NodeWidget): boolean {
+    return this.data.path.some(wayPoint => wayPoint.boxId === box.getId())
   }
 
   public getRenderedTargetBox(): Box {
@@ -100,21 +104,24 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       this.dragState.dropTarget = dropTarget
     }
     this.renderedTarget = dropTarget
-    await this.referenceLink.reorderAndSave({priority: RenderPriority.RESPONSIVE, draggingInProgress: false})
+    await this.referenceLink.reorderAndSaveAndRender({movedWayPoint: dropTarget, movedLinkEnd: this, priority: RenderPriority.RESPONSIVE, draggingInProgress: false})
     this.dragState = null
   }
 
-  public async reorderMapDataPathWithoutRender(newManagingBoxForValidation: Box): Promise<void> {
-    if (newManagingBoxForValidation !== this.getManagingBox()) {
+  public async reorderMapDataPathWithoutRender(options: {
+    newManagingBoxForValidation: Box
+    movedWayPoint: Box|NodeWidget
+  }): Promise<void> {
+    if (options.newManagingBoxForValidation !== this.getManagingBox()) {
       let message = 'newManagingBox should already be set to referenceLink when calling reorderMapDataPathWithoutRender(..)'
       message += ', this will likely lead to further problems'
       util.logWarning(message)
     }
 
-    let target: Box|NodeWidget
+    const target: Box|NodeWidget = options.movedWayPoint
     let targetWayPoint: WayPointData
     if (this.dragState) {
-      target = this.dragState.dropTarget
+      //target = this.dragState.dropTarget
       if (target instanceof NodeWidget) {
         targetWayPoint = WayPointData.buildNew(target.getId(), 'node'+target.getId(), 50, 50)
       } else {
@@ -122,7 +129,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
         targetWayPoint = WayPointData.buildNew(target.getId(), target.getName(), position.percentX, position.percentY)
       }
     } else {
-      target = this.getRenderedTarget()
+      //target = this.getRenderedTarget()
       targetWayPoint = this.getWayPointOf(target)
     }
 
