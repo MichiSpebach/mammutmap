@@ -152,8 +152,8 @@ function buildTagLinkItemFolder(link: Link): MenuItemFolder {
 
 function buildAddOtherTagLinkItem(link: Link): MenuItemFile {
   return new MenuItemFile({label: 'other...', click: async () => {
-    const fromBoxName: string = link.from.getRenderedTargetBox().getName()
-    const toBoxName: string = link.to.getRenderedTargetBox().getName()
+    const fromBoxName: string = link.from.getDeepestRenderedWayPoint().linkable.getName()
+    const toBoxName: string = link.to.getDeepestRenderedWayPoint().linkable.getName()
     const tagName: string|undefined = await TextInputPopup.buildAndRenderAndAwaitResolve(`tag link ${link.getId()} between ${fromBoxName} and ${toBoxName}`, '')
     if (tagName) {
       link.addTag(tagName)

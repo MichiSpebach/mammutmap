@@ -25,19 +25,17 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private renderState: RenderState = new RenderState()
   private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private boxesRegisteredAt: (Box|NodeWidget)[] = []
-  private renderedTarget: Box|NodeWidget|undefined // TODO: remove
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box|NodeWidget
     snapToGrid: boolean
   } | null = null
 
-  public constructor(id: string, data: LinkEndData, referenceLink: Link, shape: 'square'|'arrow', renderedTarget?: Box|NodeWidget) {
+  public constructor(id: string, data: LinkEndData, referenceLink: Link, shape: 'square'|'arrow') {
     this.id = id
     this.data = data
     this.referenceLink = referenceLink
     this.shape = shape
-    this.renderedTarget = renderedTarget
   }
 
   public getId(): string {
@@ -56,21 +54,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return this.data.path.some(wayPoint => wayPoint.boxId === box.getId())
   }
 
-  public getRenderedTargetBox(): Box {
-    const target: Box|NodeWidget = this.getRenderedTarget()
-    return target instanceof NodeWidget ? target.getManagingBox() : target
-  }
-
-  public getRenderedTarget(): Box|NodeWidget {
-    if (!this.renderedTarget) {
-      util.logWarning('LinkEnd should be rendered before calling getRenderedTarget() or renderedTarget should be set in constructor, but was not.')
-      this.renderedTarget = this.getManagingBox()
-    }
-    return this.renderedTarget
-  }
-
-  public getDropTargetAtDragStart(): Box|NodeWidget|never {
-    return this.getRenderedTarget()
+  public getDropTargetAtDragStart(): Box|NodeWidget {
+    return this.getDeepestRenderedWayPoint().linkable
   }
 
   public canBeDroppedInto(dropTarget: DropTarget): boolean {
@@ -103,7 +88,6 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     } else {
       this.dragState.dropTarget = dropTarget
     }
-    this.renderedTarget = dropTarget
     await this.referenceLink.reorderAndSaveAndRender({movedWayPoint: dropTarget, movedLinkEnd: this, priority: RenderPriority.RESPONSIVE, draggingInProgress: false})
     this.dragState = null
   }
@@ -121,7 +105,6 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     const target: Box|NodeWidget = options.movedWayPoint
     let targetWayPoint: WayPointData
     if (this.dragState) {
-      //target = this.dragState.dropTarget
       if (target instanceof NodeWidget) {
         targetWayPoint = WayPointData.buildNew(target.getId(), 'node'+target.getId(), 50, 50)
       } else {
@@ -129,13 +112,12 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
         targetWayPoint = WayPointData.buildNew(target.getId(), target.getName(), position.percentX, position.percentY)
       }
     } else {
-      //target = this.getRenderedTarget()
       targetWayPoint = this.getWayPointOf(target)
     }
 
     const shallowRenderedPath: {box: Box, wayPoint: WayPointData}[] = []
     if (target instanceof NodeWidget) {
-      const targetBox: Box = target.getManagingBox()
+      const targetBox: Box = target.getParent()
       shallowRenderedPath.unshift({box: targetBox, wayPoint: targetWayPoint})
       if (targetBox !== this.getManagingBox()) {
         const positionInTargetBoxCoords: LocalPosition = target.getSavePosition()
@@ -201,12 +183,6 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     }
 
     this.boxesRegisteredAt = newRenderedBoxes
-
-    if (newRenderedBoxes.length > 0) {
-      this.renderedTarget = newRenderedBoxes[newRenderedBoxes.length-1]
-    } else {
-      this.renderedTarget = this.getManagingBox()
-    }
   }
 
   // TODO: remove parameter positionInManagingBoxCoords

@@ -36,16 +36,16 @@ export class Link implements Hoverable {
   private draggingInProgress: boolean = false
   private hoveringOver: boolean = false
 
-  public static new(data: LinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget): Link {
-    return new LinkImplementation(data, managingBox, from, to)
+  public static new(data: LinkData, managingBox: Box): Link {
+    return new LinkImplementation(data, managingBox)
   }
 
-  protected constructor(data: LinkData, managingBox: Box, from?: Box|NodeWidget, to?: Box|NodeWidget) {
+  protected constructor(data: LinkData, managingBox: Box) {
     this.data = data
     this.managingBox = managingBox
     this.line = LinkLine.new(this.data.id+'line', this)
-    this.from = new LinkEnd(this.data.id+'from', this.data.from, this, 'square', from)
-    this.to = new LinkEnd(this.data.id+'to', this.data.to, this, 'arrow', to)
+    this.from = new LinkEnd(this.data.id+'from', this.data.from, this, 'square')
+    this.to = new LinkEnd(this.data.id+'to', this.data.to, this, 'arrow')
   }
 
   public getId(): string {
@@ -109,7 +109,7 @@ export class Link implements Hoverable {
     if (!this.renderState.isRendered()) {
       const draggableHtml: string = relocationDragManager.isUsingNativeDragEvents() ? 'draggable="true"' : ''
       const fromHtml: string = `<div id="${this.from.getId()}" ${draggableHtml} class="${style.getHighlightTransitionClass()}"></div>`
-      const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
+      const toHtml: string = `<div id="${this.to.getId()}" ${draggableHtml} class="${style.getHighlightTransitionClass()}"></div>`
       const lineStyle: string = 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'
       const lineHtml: string = `<svg id="${this.line.getId()}" style="${lineStyle}">${lineInnerHtml}</svg>`
       await renderManager.setContentTo(this.getId(), lineHtml+fromHtml+toHtml, priority)
@@ -200,10 +200,6 @@ export class Link implements Hoverable {
     draggingInProgress?: boolean
     hoveringOver?: boolean
   }): Promise<void> {
-    /*if (!options.newRenderedFromTarget && !options.newRenderedToTarget) {
-      util.logWarning('Link::reorderAndSaveAndRender(..) neither newRenderedFromTarget nor newRenderedToTarget is set, this will not reorder anything.')
-    }*/
-
     let newRenderedFromTarget: Box|NodeWidget|undefined
     let newRenderedToTarget: Box|NodeWidget|undefined
     if (options.movedLinkEnd) {
@@ -225,31 +221,33 @@ export class Link implements Hoverable {
     if (!newRenderedFromTarget && !newRenderedToTarget) {
       util.logWarning('Link::reorderAndSaveAndRender(..) movedWayPoint is neither in fromPath nor in toPath.')
     }
+    if (!newRenderedFromTarget) {
+      newRenderedFromTarget = this.from.getDeepestRenderedWayPoint().linkable
+    }
+    if (!newRenderedToTarget) {
+      newRenderedToTarget = this.to.getDeepestRenderedWayPoint().linkable
+    }
     
-    const commonAncestor: Box = Box.findCommonAncestor(newRenderedFromTarget ?? this.managingBox, newRenderedToTarget ?? this.managingBox).commonAncestor
+    const commonAncestor: Box = Box.findCommonAncestor(newRenderedFromTarget, newRenderedToTarget).commonAncestor
     const oldManagingBox: Box = this.managingBox
     this.managingBox = commonAncestor
 
-    let proms: Promise<any>[] = []
-    if (newRenderedFromTarget) {
-      proms.push(this.from.reorderMapDataPathWithoutRender({newManagingBoxForValidation: this.managingBox, movedWayPoint: newRenderedFromTarget}))
-    }
-    if (newRenderedToTarget) {
-      proms.push(this.to.reorderMapDataPathWithoutRender({newManagingBoxForValidation: this.managingBox, movedWayPoint: newRenderedToTarget}))
-    }
-    await Promise.all(proms)
-
-    proms = []
+    await Promise.all([
+      this.from.reorderMapDataPathWithoutRender({newManagingBoxForValidation: this.managingBox, movedWayPoint: newRenderedFromTarget}),
+      this.to.reorderMapDataPathWithoutRender({newManagingBoxForValidation: this.managingBox, movedWayPoint: newRenderedToTarget})
+    ])
+    
+    const pros: Promise<any>[] = []
 
     if(oldManagingBox !== this.managingBox) {
-      proms.push(BoxLinks.changeManagingBoxOfLinkAndSave(oldManagingBox, this.managingBox, this))
+      pros.push(BoxLinks.changeManagingBoxOfLinkAndSave(oldManagingBox, this.managingBox, this))
     } else {
-      proms.push(this.managingBox.saveMapData())
+      pros.push(this.managingBox.saveMapData())
     }
 
-    proms.push(this.renderWithOptions(options))
+    pros.push(this.renderWithOptions(options))
 
-    await Promise.all(proms)
+    await Promise.all(pros)
   }
 
   public async getLineInClientCoords(): Promise<{from: ClientPosition, to: ClientPosition}> {

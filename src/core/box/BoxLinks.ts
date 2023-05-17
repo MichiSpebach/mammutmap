@@ -56,7 +56,7 @@ export class BoxLinks extends Widget {
       const linkData = new LinkData(util.generateId(), from.mapData, to.mapData)
       this.referenceBox.getMapLinkData().push(linkData)
 
-      const link: Link = Link.new(linkData, this.referenceBox, from.linkable, to.linkable)
+      const link: Link = Link.new(linkData, this.referenceBox)
       this.links.push(link)
 
       await this.addPlaceholderFor(link)
