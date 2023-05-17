@@ -4,6 +4,7 @@ import { Widget } from '../Widget'
 import { NodeData } from '../mapData/NodeData'
 import { Box } from './Box'
 import { util } from '../util/util'
+import { relocationDragManager } from '../RelocationDragManager'
 
 export class BoxNodesWidget extends Widget {
     private readonly referenceBox: Box
@@ -99,7 +100,8 @@ export class BoxNodesWidget extends Widget {
     }
 
     private formHtmlPlaceholderFor(node: NodeWidget): string {
-      return `<div id="${node.getId()}" draggable="true"></div>`
+      const draggableHtml: string = relocationDragManager.isUsingNativeDragEvents() ? 'draggable="true"' : ''
+      return `<div id="${node.getId()}" ${draggableHtml}></div>`
     }
 
 }

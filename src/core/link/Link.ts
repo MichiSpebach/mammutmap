@@ -15,6 +15,7 @@ import { LinkLine } from './LinkLine'
 import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { ClientRect } from '../ClientRect'
+import { relocationDragManager } from '../RelocationDragManager'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -106,7 +107,8 @@ export class Link implements Hoverable {
     const proms: Promise<any>[] = []
 
     if (!this.renderState.isRendered()) {
-      const fromHtml: string = '<div id="'+this.from.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
+      const draggableHtml: string = relocationDragManager.isUsingNativeDragEvents() ? 'draggable="true"' : ''
+      const fromHtml: string = `<div id="${this.from.getId()}" ${draggableHtml} class="${style.getHighlightTransitionClass()}"></div>`
       const toHtml: string = '<div id="'+this.to.getId()+'" draggable="true" class="'+style.getHighlightTransitionClass()+'"></div>'
       const lineStyle: string = 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'
       const lineHtml: string = `<svg id="${this.line.getId()}" style="${lineStyle}">${lineInnerHtml}</svg>`
