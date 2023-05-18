@@ -51,24 +51,24 @@ async function ensureActivation(): Promise<void> {
 
 class ToggableFancyBorderingLinks extends BorderingLinks {
 
-    private static setHighlightAllBackup: (highlight: boolean) => Promise<void>
+    private static setHighlightAllThatShouldBeRenderedBackup: (highlight: boolean) => Promise<void>
 
     public static activateAndPlugin(): void {
-        this.setHighlightAllBackup = BorderingLinks.prototype.setHighlightAll
-        BorderingLinks.prototype.setHighlightAll = ToggableFancyBorderingLinks.prototype.setHighlightAll
+        this.setHighlightAllThatShouldBeRenderedBackup = BorderingLinks.prototype.setHighlightAllThatShouldBeRendered
+        BorderingLinks.prototype.setHighlightAllThatShouldBeRendered = ToggableFancyBorderingLinks.prototype.setHighlightAllThatShouldBeRendered
     }
 
     public static deactivateAndPlugout(): void {
-        BorderingLinks.prototype.setHighlightAll = ToggableFancyBorderingLinks.setHighlightAllBackup
+        BorderingLinks.prototype.setHighlightAllThatShouldBeRendered = ToggableFancyBorderingLinks.setHighlightAllThatShouldBeRenderedBackup
     }
 
-    public override async setHighlightAll(highlight: boolean): Promise<void> {
+    public override async setHighlightAllThatShouldBeRendered(highlight: boolean): Promise<void> {
         if (this.links.length > 15) {
             await ensureDeactivation()
         } else {
             await ensureActivation()
         }
-        return ToggableFancyBorderingLinks.setHighlightAllBackup.call(this, highlight)
+        return ToggableFancyBorderingLinks.setHighlightAllThatShouldBeRenderedBackup.call(this, highlight)
     }
 
 }

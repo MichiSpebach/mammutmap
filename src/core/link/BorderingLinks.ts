@@ -4,6 +4,8 @@ import { Link } from "./Link"
 import { Box } from "../box/Box"
 import { NodeWidget } from "../node/NodeWidget"
 
+const useOldComplicatedMechanismThatCachesAndIsMaybeFaster: boolean = true // TODO: cleanup as soon as save
+
 export class BorderingLinks {
   private readonly referenceBoxOrNode: Box|NodeWidget
   protected readonly links: Link[]
@@ -23,20 +25,38 @@ export class BorderingLinks {
     }
   }
 
+  public get(): Link[] {
+    if (this.referenceBoxOrNode.isRoot()) {
+      return []
+    }
+
+    const allParentLinks: Link[] = [
+      ...this.referenceBoxOrNode.getParent().links.getLinks(),
+      ...this.referenceBoxOrNode.getParent().borderingLinks.get()
+    ]
+    const boxOrNodeId: string = this.referenceBoxOrNode.getId()
+    return allParentLinks.filter(link => {
+      return link.getData().from.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxOrNodeId)
+          || link.getData().to.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxOrNodeId)
+    })
+  }
+
   public async reorderAndSaveAll(): Promise<void> {
-    await Promise.all(this.links.map(link => link.reorderAndSaveAndRender({movedWayPoint: this.referenceBoxOrNode})))
+    if (useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
+      await Promise.all(this.links.map(link => link.reorderAndSaveAndRender({movedWayPoint: this.referenceBoxOrNode})))
+    }
+    await Promise.all(this.get().map(link => link.reorderAndSaveAndRender({movedWayPoint: this.referenceBoxOrNode})))
   }
 
   public async renderAll(): Promise<void> {
-    await Promise.all(this.links.map(link => link.render()))
+    if (useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
+      await Promise.all(this.links.map(link => link.render()))
+    }
+    await Promise.all(this.get().map(link => link.render()))
   }
 
   public async renderAllThatShouldBe(): Promise<void> {
     await Promise.all(this.getLinksThatShouldBeRendered().map(link => link.render()))
-  }
-
-  public async setHighlightAll(highlight: boolean): Promise<void> {
-    await Promise.all(this.links.map(link => link.renderWithOptions({highlight})))
   }
 
   public async setHighlightAllThatShouldBeRendered(highlight: boolean): Promise<void> {
@@ -44,10 +64,16 @@ export class BorderingLinks {
   }
 
   public getLinksThatShouldBeRendered(): Link[] {
-    return this.links.filter(link => link.getManagingBox().isBodyBeingRendered())
+    if (useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
+      return this.links.filter(link => link.getManagingBox().isBodyBeingRendered())
+    }
+    return this.get().filter(link => link.getManagingBox().isBodyBeingRendered())
   }
 
   public getLinksThatIncludeWayPointFor(boxOrNode: Box|NodeWidget): Link[] {
+    if (!useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
+      return []
+    }
     return this.links.filter((link: Link) => {
         return link.getData().from.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxOrNode.getId())
             || link.getData().to.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxOrNode.getId())
@@ -56,9 +82,12 @@ export class BorderingLinks {
   }
 
   public register(link: Link): void {
+    if (!useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
+      return
+    }
     if (this.includes(link)) {
-      let message = `Trying to register borderingLink with id ${link.getId()}`
-      message += ` to box with name ${this.referenceBoxOrNode.getName()} that is already registered at this box.`
+      let message = `Trying to register borderingLink with id '${link.getId()}'`
+      message += ` to box with name '${this.referenceBoxOrNode.getName()}' that is already registered at this box.`
       util.logWarning(message)
       return
     }
@@ -72,21 +101,27 @@ export class BorderingLinks {
   }
 
   public deregister(link: Link): void {
+    if (!useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
+      return
+    }
     if (!this.includes(link)) {
-      let message = `Trying to deregister borderingLink with id ${link.getId()}`
-      message += ` from box with name ${this.referenceBoxOrNode.getName()} that is not registered at this box.`
+      let message = `Trying to deregister borderingLink with id '${link.getId()}'`
+      message += ` from box with name '${this.referenceBoxOrNode.getName()}' that is not registered at this box.`
       util.logWarning(message)
       return
     }
     this.links.splice(this.links.indexOf(link), 1)
   }
 
-  public includes(link: Link): boolean {
+  private includes(link: Link): boolean {
     return this.links.includes(link)
   }
 
   public getOutgoingLinks(): Link[] {
-    return this.links.filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
+    if (useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
+      return this.links.filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
+    }
+    return this.get().filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
   }
 
 }
