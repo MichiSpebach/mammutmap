@@ -5,6 +5,7 @@ import { NodeData } from '../mapData/NodeData'
 import { Box } from './Box'
 import { util } from '../util/util'
 import { relocationDragManager } from '../RelocationDragManager'
+import { Link } from '../link/Link'
 
 export class BoxNodesWidget extends Widget {
     private readonly referenceBox: Box
@@ -76,6 +77,7 @@ export class BoxNodesWidget extends Widget {
       }
       const proms: Promise<any>[] = []
 
+      const borderingLinksToReorder: Link[] = node.borderingLinks.getAll()
       newManagingBox.nodes.nodeWidgets.push(node)
       proms.push(renderManager.appendChildTo(newManagingBox.nodes.getId(), node.getId()))
       oldManagingBox.nodes.nodeWidgets.splice(oldManagingBox.nodes.nodeWidgets.indexOf(node), 1)
@@ -86,6 +88,7 @@ export class BoxNodesWidget extends Widget {
       proms.push(oldManagingBox.saveMapData())
 
       await Promise.all(proms)
+      await Promise.all(borderingLinksToReorder.map(link => link.reorderAndSaveAndRender({movedWayPoint: node})))
     }
 
     public async add(data: NodeData): Promise<void> {

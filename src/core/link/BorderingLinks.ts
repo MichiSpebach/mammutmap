@@ -4,7 +4,7 @@ import { Link } from "./Link"
 import { Box } from "../box/Box"
 import { NodeWidget } from "../node/NodeWidget"
 
-const useOldComplicatedMechanismThatCachesAndIsMaybeFaster: boolean = true // TODO: cleanup as soon as save
+const useOldComplicatedMechanismThatCachesAndIsMaybeFaster: boolean = false // TODO: cleanup as soon as save
 
 export class BorderingLinks {
   private readonly referenceBoxOrNode: Box|NodeWidget
@@ -25,14 +25,14 @@ export class BorderingLinks {
     }
   }
 
-  public get(): Link[] {
+  public getAll(): Link[] {
     if (this.referenceBoxOrNode.isRoot()) {
       return []
     }
 
     const allParentLinks: Link[] = [
       ...this.referenceBoxOrNode.getParent().links.getLinks(),
-      ...this.referenceBoxOrNode.getParent().borderingLinks.get()
+      ...this.referenceBoxOrNode.getParent().borderingLinks.getAll()
     ]
     const boxOrNodeId: string = this.referenceBoxOrNode.getId()
     return allParentLinks.filter(link => {
@@ -41,18 +41,11 @@ export class BorderingLinks {
     })
   }
 
-  public async reorderAndSaveAll(): Promise<void> {
-    if (useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
-      await Promise.all(this.links.map(link => link.reorderAndSaveAndRender({movedWayPoint: this.referenceBoxOrNode})))
-    }
-    await Promise.all(this.get().map(link => link.reorderAndSaveAndRender({movedWayPoint: this.referenceBoxOrNode})))
-  }
-
   public async renderAll(): Promise<void> {
     if (useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
       await Promise.all(this.links.map(link => link.render()))
     }
-    await Promise.all(this.get().map(link => link.render()))
+    await Promise.all(this.getAll().map(link => link.render()))
   }
 
   public async renderAllThatShouldBe(): Promise<void> {
@@ -67,7 +60,7 @@ export class BorderingLinks {
     if (useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
       return this.links.filter(link => link.getManagingBox().isBodyBeingRendered())
     }
-    return this.get().filter(link => link.getManagingBox().isBodyBeingRendered())
+    return this.getAll().filter(link => link.getManagingBox().isBodyBeingRendered())
   }
 
   public getLinksThatIncludeWayPointFor(boxOrNode: Box|NodeWidget): Link[] {
@@ -117,11 +110,11 @@ export class BorderingLinks {
     return this.links.includes(link)
   }
 
-  public getOutgoingLinks(): Link[] {
+  public getOutgoing(): Link[] {
     if (useOldComplicatedMechanismThatCachesAndIsMaybeFaster) {
       return this.links.filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
     }
-    return this.get().filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
+    return this.getAll().filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
   }
 
 }

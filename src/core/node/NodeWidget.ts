@@ -183,24 +183,23 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
             return this.dragCancel()
         }
 
-        const proms: Promise<any>[] = []
+        const pros: Promise<any>[] = []
 
-        if (this.getManagingBox() === dropTarget) {
+        if (this.getParent() === dropTarget) {
             this.mapData.setPosition(this.dragState.positionInManagingBoxCoords)
-            proms.push(this.getManagingBox().saveMapData())
+            pros.push(this.getParent().saveMapData())
         } else {
             const clientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(this.dragState.positionInManagingBoxCoords)
             const positionInDropTargetCoords: LocalPosition = await dropTarget.transform.clientToLocalPosition(clientPosition)
             this.mapData.setPosition(positionInDropTargetCoords)
             const oldManagingBox: Box = this.managingBox
             this.managingBox = dropTarget
-            await BoxNodesWidget.changeManagingBoxOfNodeAndSave(oldManagingBox, dropTarget, this)
-            proms.push(this.borderingLinks.reorderAndSaveAll()) // TODO: this should be included in changeManagingBoxOfNodeAndSave()
+            pros.push(BoxNodesWidget.changeManagingBoxOfNodeAndSave(oldManagingBox, dropTarget, this))
         }
 
-        proms.push(this.setDragStateAndRender(null, RenderPriority.RESPONSIVE))
+        pros.push(this.setDragStateAndRender(null, RenderPriority.RESPONSIVE))
 
-        await Promise.all(proms)
+        await Promise.all(pros)
     }
 
 }

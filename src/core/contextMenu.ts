@@ -125,7 +125,7 @@ function buildAddLinkItem(box: Box, position: ClientPosition): MenuItemFile {
 
 function buildRemoveOutgoingLinksItem(box: Box): MenuItemFile {
   return new MenuItemFile({label: 'remove all outgoing links', click: () => {
-    box.borderingLinks.getOutgoingLinks().forEach(link => link.getManagingBoxLinks().removeLink(link))
+    box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
   }})
 }
 

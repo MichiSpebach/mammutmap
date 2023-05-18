@@ -1,9 +1,9 @@
 {
 	"id": "depth3",
-	"x": 4,
+	"x": 8,
 	"y": 8,
-	"width": 92,
-	"height": 88,
+	"width": 84,
+	"height": 84,
 	"links": [],
 	"nodes": []
 }

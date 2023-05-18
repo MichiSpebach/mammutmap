@@ -23,19 +23,25 @@
 					{
 						"boxId": "depth1",
 						"boxName": "depth1",
-						"x": 50.001,
-						"y": 53.76
+						"x": 50,
+						"y": 50
 					},
 					{
 						"boxId": "depth2",
 						"boxName": "depth2",
-						"x": 50.001,
-						"y": 52
+						"x": 50,
+						"y": 50
 					},
 					{
 						"boxId": "depth3",
 						"boxName": "depth3",
-						"x": 50.001,
+						"x": 50,
+						"y": 50
+					},
+					{
+						"boxId": "depth4",
+						"boxName": "depth4",
+						"x": 50,
 						"y": 50
 					},
 					{

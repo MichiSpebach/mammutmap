@@ -27,6 +27,7 @@ import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { SizeAndPosition } from './SizeAndPosition'
 import { NodeWidget } from '../node/NodeWidget'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
+import { Link } from '../link/Link'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   private name: string
@@ -149,7 +150,8 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
     const parentClientRect: ClientRect = await this.parent.getClientRect()
     const newParentClientRect: ClientRect = await newParent.getClientRect()
-
+    
+    const borderingLinksToReorder: Link[] = this.borderingLinks.getAll()
     this.parent.removeBox(this)
     await newParent.addBox(this)
 
@@ -172,7 +174,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
     await this.renameAndMoveOnFileSystem(oldSrcPath, newSrcPath, oldMapDataFilePath, newMapDataFilePath)
     await this.saveMapData()
-    await this.borderingLinks.reorderAndSaveAll()
+    await Promise.all(borderingLinksToReorder.map(link => link.reorderAndSaveAndRender({movedWayPoint: this})))
   }
 
   public async rename(newName: string): Promise<void> {

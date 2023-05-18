@@ -46,19 +46,19 @@ async function ensureActivation() {
 }
 class ToggableFancyBorderingLinks extends pluginFacade_4.BorderingLinks {
     static activateAndPlugin() {
-        this.setHighlightAllBackup = pluginFacade_4.BorderingLinks.prototype.setHighlightAll;
-        pluginFacade_4.BorderingLinks.prototype.setHighlightAll = ToggableFancyBorderingLinks.prototype.setHighlightAll;
+        this.setHighlightAllThatShouldBeRenderedBackup = pluginFacade_4.BorderingLinks.prototype.setHighlightAllThatShouldBeRendered;
+        pluginFacade_4.BorderingLinks.prototype.setHighlightAllThatShouldBeRendered = ToggableFancyBorderingLinks.prototype.setHighlightAllThatShouldBeRendered;
     }
     static deactivateAndPlugout() {
-        pluginFacade_4.BorderingLinks.prototype.setHighlightAll = ToggableFancyBorderingLinks.setHighlightAllBackup;
+        pluginFacade_4.BorderingLinks.prototype.setHighlightAllThatShouldBeRendered = ToggableFancyBorderingLinks.setHighlightAllThatShouldBeRenderedBackup;
     }
-    async setHighlightAll(highlight) {
+    async setHighlightAllThatShouldBeRendered(highlight) {
         if (this.links.length > 15) {
             await ensureDeactivation();
         }
         else {
             await ensureActivation();
         }
-        return ToggableFancyBorderingLinks.setHighlightAllBackup.call(this, highlight);
+        return ToggableFancyBorderingLinks.setHighlightAllThatShouldBeRenderedBackup.call(this, highlight);
     }
 }
