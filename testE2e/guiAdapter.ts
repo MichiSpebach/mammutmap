@@ -97,9 +97,9 @@ export async function zoomWithoutWaitingInBetween(deltas: number[]): Promise<voi
   for (const delta of deltas) {
     await zoomWithoutWaitingUntilFinished(delta)
   }
-  await waitUntilLogMatches((log: string): boolean => {
+  await waitUntilLogsMatch((logs: string[]): boolean => {
     for (const delta of deltas) {
-      if (!log.includes(`zooming ${delta} finished`)) {
+      if (!logs.some(log => log.includes(`zooming ${delta} finished`))) {
         return false
       }
     }
@@ -131,7 +131,7 @@ export async function closeFolder(): Promise<void> {
 
 export async function clearTerminal(): Promise<void> {
   await command('clear')
-  await waitUntilLogMatches((log: string) => log === '', 500)
+  await waitUntilLogsEqual([], 500)
 }
 
 export async function startBoxIterator(): Promise<void> {
@@ -192,6 +192,25 @@ async function removeFocus(): Promise<void> {
   }
 }
 
+export async function waitUntilLogsEqual(expectedLogs: string[], timelimitInMs: number): Promise<void> {
+  try {
+    await waitUntilLogsMatch((logs: string[]) => {
+      if (logs.length !== expectedLogs.length) {
+        return false
+      }
+      for (let i = 0; i < logs.length; i++) {
+        if (logs[i] !== expectedLogs[i]) {
+          return false
+        }
+      }
+      return true
+    }, timelimitInMs)
+  } catch (error) {
+    console.trace(error)
+  }
+  expect(await getLogs()).toEqual(expectedLogs) // for nice message
+}
+
 async function waitUntilLastLogEndsWith(ending: string, timelimitInMs: number): Promise<string> {
   return waitUntilLastLogMatches(
     (log: string) => log.endsWith(ending),
@@ -214,6 +233,7 @@ async function waitUntilLastLogMatches(
   generateErrorMessage: (lastLog: string) => string
 ): Promise<string> {
   const timecap: number = Date.now() + timelimitInMs
+  let nextSleepInMs: number = 1
   while(true) {
     const lastLog: string = await getLastLog()
     if (condition(lastLog)) {
@@ -222,24 +242,27 @@ async function waitUntilLastLogMatches(
     if (Date.now() > timecap) {
       throw new Error(generateErrorMessage(lastLog))
     }
-    await util.wait(50)
+    await util.wait(nextSleepInMs)
+    nextSleepInMs *= 2
   }
 }
 
-async function waitUntilLogMatches(condition:(log: string) => boolean, timelimitInMs: number): Promise<void> {
+async function waitUntilLogsMatch(condition:(logs: string[]) => boolean, timelimitInMs: number): Promise<void> {
   const timecap: number = Date.now() + timelimitInMs
+  let nextSleepInMs: number = 1
   while(true) {
-    const log: string = await getContentOf(await getLogElement())
-    if (condition(log)) {
+    const logs: string[] = await getLogs()
+    if (condition(logs)) {
       return
     }
     if (Date.now() > timecap) {
-      let message = `Log does not match condition in time of ${timelimitInMs}ms.`
+      let message = `Logs do not match condition in time of ${timelimitInMs}ms.`
       message += `\nCondition is: "${condition}".`
-      message += `\nLog is: "${log}".`
+      message += `\nLogs are: "${logs}".`
       throw new Error(message)
     }
-    await util.wait(50) // TODO: improve, start with short wait time and increase it incrementally
+    await util.wait(nextSleepInMs)
+    nextSleepInMs *= 2
   }
 }
 
