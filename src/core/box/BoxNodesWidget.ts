@@ -5,7 +5,6 @@ import { NodeData } from '../mapData/NodeData'
 import { Box } from './Box'
 import { util } from '../util/util'
 import { relocationDragManager } from '../RelocationDragManager'
-import { Link } from '../link/Link'
 
 export class BoxNodesWidget extends Widget {
     private readonly referenceBox: Box
@@ -41,7 +40,9 @@ export class BoxNodesWidget extends Widget {
         this.nodeWidgets.push(new NodeWidget(nodeData, this.referenceBox))
       }
 
-      const nodePlaceholders: string = this.nodeWidgets.reduce<string>((placeholders, node) => placeholders += this.formHtmlPlaceholderFor(node), '')
+      const nodePlaceholders: string = this.nodeWidgets
+        .filter(node => !node.isBeingRendered()) // this happens for nodes that where dropped in when this was not rendered
+        .reduce<string>((placeholders, node) => placeholders += this.formHtmlPlaceholderFor(node), '')
       await renderManager.addContentTo(this.getId(), nodePlaceholders)
 
       await Promise.all(this.nodeWidgets.map(async (node: NodeWidget) => {
@@ -77,7 +78,6 @@ export class BoxNodesWidget extends Widget {
       }
       const proms: Promise<any>[] = []
 
-      const borderingLinksToReorder: Link[] = node.borderingLinks.getAll()
       newManagingBox.nodes.nodeWidgets.push(node)
       proms.push(renderManager.appendChildTo(newManagingBox.nodes.getId(), node.getId()))
       oldManagingBox.nodes.nodeWidgets.splice(oldManagingBox.nodes.nodeWidgets.indexOf(node), 1)
@@ -88,7 +88,6 @@ export class BoxNodesWidget extends Widget {
       proms.push(oldManagingBox.saveMapData())
 
       await Promise.all(proms)
-      await Promise.all(borderingLinksToReorder.map(link => link.reorderAndSaveAndRender({movedWayPoint: node})))
     }
 
     public async add(data: NodeData): Promise<void> {

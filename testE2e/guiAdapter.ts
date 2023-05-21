@@ -69,6 +69,16 @@ export async function moveMouseTo(x: number, y: number, options?: {steps?: numbe
   await (await getPage()).mouse.move(x, y, options)
 }
 
+export async function dragTo(x: number, y: number): Promise<void> {
+  await mouseDown()
+  await fireMouseOver(x, y) // somehow puppeteer does not fire mouseover events while mousedown, TODO: check if playwright works better and switch to playwright if so
+  await moveMouseTo(x, y)
+  await fireMouseOver(x, y) // somehow puppeteer does not fire mouseover events while mousedown, TODO: check if playwright works better and switch to playwright if so
+  await util.wait(10) // TODO: otherwise operation may not have finished, improve
+  await mouseUp()
+  // await waitUntilLastLogIncludes(`dragging to {x: ${x}, y: ${y}} finished`) TODO: await until finished
+}
+
 export async function click(x: number, y: number): Promise<void> {
   latestMousePosition = {x, y}
   await (await getPage()).mouse.click(x, y)

@@ -13,6 +13,8 @@ import { BorderingLinks } from '../link/BorderingLinks'
 import { ClientRect } from '../ClientRect'
 import * as contextMenu from '../contextMenu'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
+import { Link } from '../link/Link'
+import { Style } from '../util/RenderElement'
 
 export class NodeWidget extends AbstractNodeWidget implements DropTarget, Draggable<Box> { // TODO: rename to LinkNodeWidget
     private readonly mapData: NodeData
@@ -105,11 +107,17 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         const proms: Promise<any>[] = []
 
         const position: LocalPosition = this.getRenderPosition()
-        const positionStyle = `position:absolute;top:${position.percentY}%;left:${position.percentX}%;`
-        const sizeStyle = 'width:14px;height:14px;transform:translate(-7px,-7px);'
-        const borderStyle = 'border-radius:30%;'
-        const colorStyle = 'background-color:#0aa8;'
-        proms.push(renderManager.setStyleTo(this.getId(), positionStyle+sizeStyle+borderStyle+colorStyle, priority))
+        const style: Style = {
+            position: 'absolute',
+            top: position.percentY+'%',
+            left: position.percentX+'%',
+            width: '14px',
+            height: '14px',
+            transform: 'translate(-7px,-7px)',
+            borderRadius: '30%',
+            backgroundColor: '#0aa8'
+        }
+        proms.push(renderManager.setStyleTo(this.getId(), style, priority))
 
         if (!this.rendered) {
             proms.push(this.borderingLinks.renderAll())
@@ -183,23 +191,23 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
             return this.dragCancel()
         }
 
-        const pros: Promise<any>[] = []
-
         if (this.getParent() === dropTarget) {
             this.mapData.setPosition(this.dragState.positionInManagingBoxCoords)
-            pros.push(this.getParent().saveMapData())
+            await Promise.all([
+                this.getParent().saveMapData(),
+                this.setDragStateAndRender(null, RenderPriority.RESPONSIVE)
+            ])
         } else {
             const clientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(this.dragState.positionInManagingBoxCoords)
             const positionInDropTargetCoords: LocalPosition = await dropTarget.transform.clientToLocalPosition(clientPosition)
             this.mapData.setPosition(positionInDropTargetCoords)
+            const borderingLinksToReorder: Link[] = this.borderingLinks.getAll()
             const oldManagingBox: Box = this.managingBox
             this.managingBox = dropTarget
-            pros.push(BoxNodesWidget.changeManagingBoxOfNodeAndSave(oldManagingBox, dropTarget, this))
+            await BoxNodesWidget.changeManagingBoxOfNodeAndSave(oldManagingBox, dropTarget, this)
+            await this.setDragStateAndRender(null, RenderPriority.RESPONSIVE)
+            await Promise.all(borderingLinksToReorder.map(link => link.reorderAndSaveAndRender({movedWayPoint: this})))
         }
-
-        pros.push(this.setDragStateAndRender(null, RenderPriority.RESPONSIVE))
-
-        await Promise.all(pros)
     }
 
 }
