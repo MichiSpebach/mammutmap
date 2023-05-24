@@ -11,6 +11,7 @@ import { HtmlApplicationMenu } from '../core/applicationMenu/HtmlApplicationMenu
 import { BrowserFileSystemAdapter } from './BrowserFileSystemAdapter'
 import { HtmlContextMenuPopup } from './HtmlContextMenuPopup'
 import { searchAndLoadMapCloseTo } from '../core/Map'
+import { util } from '../core/util/util'
 
 init()
 
@@ -26,3 +27,7 @@ async function init(): Promise<void> {
     await pluginLoader.loadPlugins()
     await searchAndLoadMapCloseTo('./mammutmap')
 }
+
+window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+  util.logErrorWithoutThrow(event.reason)
+})

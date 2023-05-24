@@ -60,6 +60,13 @@ const createWindow = async () => {
   }
 };
 
+process.on('unhandledRejection', (reason: any) => {
+  util.logErrorWithoutThrow(reason)
+  if (!settings?.settings?.getBoolean('notRethrowUnhandledErrors')) { // ?. so that in weird case where settings are not initialized original error is known
+    throw new Error(reason)
+  }
+})
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

@@ -27,6 +27,7 @@ export async function startApp(): Promise<void> {
 
     relocationDragManager.dragManager = mouseDownDragManager // TODO: remove as soon as mouseDownDragManager is standard
     settings.setBoolean('boxesDraggableIntoOtherBoxes', true)
+    settings.setBoolean('notRethrowUnhandledErrors', true)
   }`)
 }
 

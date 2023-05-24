@@ -15,3 +15,10 @@ test('snapshot empty window', async () => {
   const image = await gui.takeScreenshot()
   await e2eUtil.expectImageToMatchSnapshot({image})
 })
+
+test('unhandled errors are logged and visible', async () => {
+  await gui.resetWindow()
+  await gui.runInMainThread(`() => {throw new Error('unhandled errors are logged and visible')}`)
+  await gui.waitUntilLogsEqual(['ERROR: unhandled errors are logged and visible'], 50)
+  await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'unhandled-errors'})
+})

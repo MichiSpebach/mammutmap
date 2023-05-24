@@ -31,9 +31,17 @@ class Util {
     this.log('WARNING: ' + message, 'orange', 'trace', options)
   }
 
+  /**@deprecated simply throw new Error(..) instead*/
   public logError(message: string, options?: {allowHtml?: boolean}): never {
-    this.log('ERROR: ' + message, 'red', 'trace', options)
+    this.logErrorWithoutThrow(message, options)
     throw new Error(message)
+  }
+
+  public logErrorWithoutThrow(message: string, options?: {allowHtml?: boolean}): void {
+    if (message) { // check so that in case of weird type casts logging errors still work
+      message = message.toString().replace(/^Error: /, '')
+    }
+    this.log('ERROR: ' + message, 'red', 'trace', options)
   }
 
   private async log(message: string, color: string, mode: 'log'|'trace', options?: {allowHtml?: boolean}): Promise<void> {
