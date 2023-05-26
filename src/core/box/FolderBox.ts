@@ -10,6 +10,7 @@ import { BoxWatcher } from './BoxWatcher'
 import { BoxLinks } from './BoxLinks'
 import { NodeWidget } from '../node/NodeWidget'
 import { ClientPosition } from '../shape/ClientPosition'
+import { fileSystem } from '../fileSystemAdapter'
 
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
@@ -37,6 +38,21 @@ export class FolderBox extends Box {
 
   public override getChilds(): (Box|NodeWidget)[] { // TODO: change return type to AbstractNodeWidget as soon as available
     return [...super.getChilds(), ...this.getBoxes()]
+  }
+
+  protected override async renameAndMoveOnFileSystem(oldSrcPath: string, newSrcPath: string, oldMapDataFilePath: string, newMapDataFilePath: string): Promise<void> {
+    await super.renameAndMoveOnFileSystem(oldSrcPath, newSrcPath, oldMapDataFilePath, newMapDataFilePath)
+    if (this.isMapDataFileExisting()) {
+      const oldMapDataFolderPath: string = oldMapDataFilePath.replace(/.json$/, '')
+      const newMapDataFolderPath: string = newMapDataFilePath.replace(/.json$/, '')
+      if (newMapDataFolderPath !== this.getMapPath()) {
+        let message = `FolderBox::renameAndMoveOnFileSystem(..) expected newMapDataFolderPath to be '${this.getMapPath()}', but is '${newMapDataFolderPath}'.`
+        message += ` Hint: newMapDataFolderPath is derived from newMapDataFilePath that is '${newMapDataFilePath}'.`
+        util.logWarning(message)
+      }
+      await fileSystem.rename(oldMapDataFolderPath, newMapDataFolderPath)
+      util.logInfo(`moved '${oldMapDataFolderPath}' to '${newMapDataFolderPath}'`)
+    }
   }
 
   protected getBodyOverflowStyle(): 'auto'|'hidden'|'visible' {

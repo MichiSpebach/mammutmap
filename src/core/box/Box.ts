@@ -193,11 +193,11 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   ): Promise<void> {
     if (!this.isSourceless()) {
       await fileSystem.rename(oldSrcPath, newSrcPath)
-      util.logInfo('moved ' + oldSrcPath + ' to ' + newSrcPath)
+      util.logInfo(`moved '${oldSrcPath}' to '${newSrcPath}'`)
     }
     if (this.isMapDataFileExisting()) {
       await fileSystem.rename(oldMapDataFilePath, newMapDataFilePath)
-      util.logInfo('moved ' + oldMapDataFilePath + ' to ' + newMapDataFilePath)
+      util.logInfo(`moved '${oldMapDataFilePath}' to '${newMapDataFilePath}'`)
     }
   }
 
