@@ -305,7 +305,7 @@ function setupRenderedScenarioWithDepthZero(): {linkEnd: LinkEnd, linkEndData: L
 
     const managingBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: 'managingBoxId', rendered: true})
 
-    const linkEnd = linkEndFactory.renderedOf(linkEndData, managingBox, [])
+    const linkEnd = linkEndFactory.of(linkEndData, managingBox)
 
     return {linkEnd, linkEndData}
 }
@@ -345,9 +345,8 @@ function setupRenderedScenarioWithDepth(): {
     rootBox.addBox(outerBox)
     outerBox.addBox(innerBox)
     innerBox.addBox(deepBox)
-    const renderedBoxesInPath: Box[] = [innerBox, deepBox]
 
-    const linkEnd = linkEndFactory.renderedOf(linkEndData, outerBox, renderedBoxesInPath)
+    const linkEnd = linkEndFactory.of(linkEndData, outerBox)
 
     return {linkEnd, linkEndData, rootBox, outerBox, innerBox, deepBox}
 }
@@ -368,9 +367,8 @@ function setupShallowRenderedScenarioWithDepth(): {
     const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, rendered: true})
     rootBox.addBox(outerBox)
     outerBox.addBox(innerBox)
-    const renderedBoxesInPath: Box[] = [innerBox]
 
-    const linkEnd = linkEndFactory.renderedOf(linkEndData, outerBox, renderedBoxesInPath)
+    const linkEnd = linkEndFactory.of(linkEndData, outerBox)
 
     return {linkEnd, linkEndData, rootBox, outerBox, innerBox}
 }

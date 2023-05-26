@@ -1,6 +1,5 @@
 import { renderManager, RenderPriority } from '../RenderManager'
 import { NodeData } from '../mapData/NodeData'
-import { Widget } from '../Widget'
 import { Draggable } from '../Draggable'
 import { Box } from '../box/Box'
 import { DropTarget } from '../DropTarget'
@@ -31,7 +30,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         super()
         this.mapData = mapData
         this.managingBox = managingBox
-        this.borderingLinks = new BorderingLinks(this, this.getParentBorderingLinks().getLinksThatIncludeWayPointFor(this)) // TODO: handle second parameter in BorderingLinks
+        this.borderingLinks = new BorderingLinks(this)
     }
 
     public getId(): string {

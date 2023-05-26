@@ -53,7 +53,7 @@ class ToggableFancyBorderingLinks extends pluginFacade_4.BorderingLinks {
         pluginFacade_4.BorderingLinks.prototype.setHighlightAllThatShouldBeRendered = ToggableFancyBorderingLinks.setHighlightAllThatShouldBeRenderedBackup;
     }
     async setHighlightAllThatShouldBeRendered(highlight) {
-        if (this.links.length > 15) {
+        if (this.getLinksThatShouldBeRendered().length > 15) {
             await ensureDeactivation();
         }
         else {

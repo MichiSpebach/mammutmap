@@ -63,7 +63,7 @@ class ToggableFancyBorderingLinks extends BorderingLinks {
     }
 
     public override async setHighlightAllThatShouldBeRendered(highlight: boolean): Promise<void> {
-        if (this.links.length > 15) {
+        if (this.getLinksThatShouldBeRendered().length > 15) {
             await ensureDeactivation()
         } else {
             await ensureActivation()

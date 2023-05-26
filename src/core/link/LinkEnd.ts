@@ -24,7 +24,6 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private shape: 'square'|'arrow'
   private renderState: RenderState = new RenderState()
   private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
-  private boxesRegisteredAt: (Box|NodeWidget)[] = []
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box|NodeWidget
@@ -156,7 +155,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       newPath = linkUtil.calculatePathOfUnchangedLinkEndOfChangedLink(this.data.path, shallowRenderedPath.map(tuple => tuple.wayPoint))
     }
     this.data.path = newPath
-    this.updateBoxesRegisteredAtAndBorderingBox()
+    await this.saveBorderingBoxesWithoutMapFile()
   }
 
   private getWayPointOf(box: Box|NodeWidget): WayPointData {
@@ -169,37 +168,26 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return WayPointData.buildNew(box.getId(), 'workaround', 50, 50)
   }
 
-  private updateBoxesRegisteredAtAndBorderingBox(): void {
-    const newRenderedBoxes: (Box|NodeWidget)[] = this.getRenderedPathWithoutManagingBox()
-    for (const box of newRenderedBoxes) {
-      if (!this.boxesRegisteredAt.includes(box)) {
-        box.borderingLinks.register(this.referenceLink)
-      }
-    }
-    for (const box of this.boxesRegisteredAt) {
-      if (!newRenderedBoxes.includes(box)) {
-        box.borderingLinks.deregister(this.referenceLink)
-      }
-    }
-
-    this.boxesRegisteredAt = newRenderedBoxes
+  private async saveBorderingBoxesWithoutMapFile(): Promise<void> {
+    const borderingBoxesWithoutMapFile: (Box|NodeWidget)[] = this.getRenderedPathWithoutManagingBox().filter(box => !box.isMapDataFileExisting())
+    await Promise.all(borderingBoxesWithoutMapFile.map(box => box.saveMapData()))
   }
 
   // TODO: remove parameter positionInManagingBoxCoords
   // TODO: now more frequent called, add renderPriority
   public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> { await this.renderScheduler.schedule(async () => {
     this.renderState.setRenderStarted()
+    const pros: Promise<void>[] = []
 
-    await Promise.all([ // TODO: await at end of method
-      this.renderShape(positionInManagingBoxCoords, angleInRadians),
-      this.setHighlight()
-    ])
-
+    pros.push(this.renderShape(positionInManagingBoxCoords, angleInRadians))
+    pros.push(this.setHighlight())
+  
     if (!this.renderState.isRendered()) {
-      this.updateBoxesRegisteredAtAndBorderingBox()
-      relocationDragManager.addDraggable(this) // TODO: add missing await
+      this.saveBorderingBoxesWithoutMapFile() // TODO: add missing await? but could take longer and block rerenders
+      pros.push(relocationDragManager.addDraggable(this))
     }
 
+    await Promise.all(pros)
     this.renderState.setRenderFinished()
   })}
 
@@ -209,12 +197,10 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     }
     this.renderState.setUnrenderStarted()
 
-     // TODO: in some cases link should also be tracked by borderingBoxes when unrendered,
-     // TODO: introduce load/unload mechanism and do deregister there
-    this.boxesRegisteredAt.forEach(box => box.borderingLinks.deregister(this.referenceLink))
-    this.boxesRegisteredAt = []
-    relocationDragManager.removeDraggable(this) // TODO: add missing await
-    await renderManager.setStyleTo(this.getId(), '')
+    await Promise.all([
+      relocationDragManager.removeDraggable(this),
+      renderManager.setStyleTo(this.getId(), '')
+    ])
 
     this.renderState.setUnrenderFinished()
   })}

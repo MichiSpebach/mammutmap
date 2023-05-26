@@ -58,7 +58,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     this.header = this.createHeader()
     this.nodes = new BoxNodesWidget(this)
     this.links = new BoxLinks(this)
-    this.borderingLinks = new BorderingLinks(this, this.getParentBorderingLinks().getLinksThatIncludeWayPointFor(this))
+    this.borderingLinks = new BorderingLinks(this)
 
     boxManager.addBox(this)
   }
@@ -107,13 +107,6 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
   public getProjectSettings(): ProjectSettings {
     return this.getParent().getProjectSettings()
-  }
-
-  public getParentBorderingLinks(): BorderingLinks {
-    if (!this.parent) {
-      return new BorderingLinks(this, []) // TODO: override/implement this in RootFolderBox, don't give in 'this' (maybe implement BorderingLinks.buildEmpty())
-    }
-    return this.parent.borderingLinks
   }
 
   public getParent(): FolderBox|never {
