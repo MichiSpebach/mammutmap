@@ -16,6 +16,11 @@ import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxMan
 import { MapSettingsData } from '../../../src/core/mapData/MapSettingsData'
 import * as boxFactory from '../box/factories/boxFactory'
 import { RootFolderBox } from '../../../src/pluginFacade'
+import { HoverManager } from '../../../src/core/HoverManager'
+
+afterEach(() => {
+  (HoverManager as any).hoverables = new Map() // otherwise "WARNING: HoverManager::addHoverable(..) hoverable with id 'link' already exists."
+})
 
 test('render', async () => {
   const scenario = setupSimpleScenario()
@@ -31,21 +36,11 @@ test('render', async () => {
   //expect(dragManager.addDraggable).toHaveBeenCalledWith(from) // TODO: mock dragManager
 })
 
-test('reorderAndSave not rendered yet', async () => {
-  const scenario = setupSimpleScenario()
-  const logWarning = jest.fn()
-  util.logWarning = logWarning
-
-  await scenario.link.reorderAndSave()
-
-  expect(logWarning).toHaveBeenCalledWith('LinkEnd should be rendered before calling getRenderedTarget() or renderedTarget should be set in constructor, but was not.')
-})
-
-test('reorderAndSave', async () => {
+test('reorderAndSaveAndRender', async () => {
   const scenario = setupSimpleScenario()
   await scenario.link.render()
 
-  await scenario.link.reorderAndSave()
+  await scenario.link.reorderAndSaveAndRender({movedWayPoint: scenario.fromBox})
 
   const linkData: LinkData = scenario.link.getData()
   expect(linkData.from.path).toHaveLength(1)

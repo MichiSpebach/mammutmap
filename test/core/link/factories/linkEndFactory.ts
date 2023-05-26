@@ -19,6 +19,7 @@ export function renderedOf(linkEndData: LinkEndData, managingBox: Box, boxesRegi
 export function of(linkEndData: LinkEndData, managingBox: Box): {linkEnd: LinkEnd, referenceLink: Link} {
     // TODO: implement this a little bit more deeply to be usable for more cases
     const referenceLink: Link = linkFactory.of('linkId', managingBox)
+    ;(managingBox.links as any).links.push(referenceLink)
 
     const linkEnd = new LinkEnd('linkEndId', linkEndData, referenceLink, 'arrow')
 

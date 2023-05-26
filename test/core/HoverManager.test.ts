@@ -3,6 +3,10 @@ import { HoverManager } from '../../src/core/HoverManager'
 import { Hoverable } from '../../src/core/Hoverable'
 import { RenderManager, init as initRenderManager } from '../../src/core/RenderManager'
 
+afterEach(() => {
+    (HoverManager as any).hoverables = new Map() // otherwise "WARNING: HoverManager::addHoverable(..) hoverable with id 'elementId' already exists."
+})
+
 test('addHoverable, element is already hovered and mouseover is not fired because it was fired before mouseover listener was added', async () => {
     const renderManager: MockProxy<RenderManager> = mock<RenderManager>()
     initRenderManager(renderManager)
