@@ -1,8 +1,16 @@
 import { renderManager } from './RenderManager'
 import { util } from './util/util'
+import * as indexHtmlIds from './indexHtmlIds'
 
 class LogService {
     private logDebugActivated: boolean = false
+    private latestLog: {
+        message: string
+        color: string
+        options?: {allowHtml?: boolean}
+        count: number
+        id: string
+    } | undefined
 
     public setLogDebugActivated(activated: boolean): void {
         this.logDebugActivated = activated
@@ -41,24 +49,48 @@ class LogService {
         } else {
             console.trace(message)
         }
-        await this.logToGui(message, color, 5, options)
+        await this.scheduleLogToGui(message, color, 5, options)
     }
 
-    private async logToGui(message: string, color: string, triesLeft: number, options?: {allowHtml?: boolean}): Promise<void> {
-        const finalMessage: string = options?.allowHtml ? message : util.escapeForHtml(message)
-        const division: string = '<div style="color:' + color + '">'+finalMessage+'</div>'
+    private async scheduleLogToGui(message: string, color: string, triesLeft: number, options?: {allowHtml?: boolean}): Promise<void> {
         if (renderManager.isReady()) {
-            await renderManager.addContentTo('log', division)
-            await renderManager.scrollToBottom('terminal')
+            await this.logToGui(message, color, options)
         } else { // happens when called before gui is ready // TODO find better solution
             if (triesLeft > 0) {
-            await util.wait(1000)
-            message += ' -1s'
-            await this.logToGui(message, color, triesLeft--)
+                await util.wait(1000)
+                message += ' -1s'
+                await this.scheduleLogToGui(message, color, triesLeft--)
             } else {
-            console.trace('WARNING: failed to print log on gui: '+message+', because gui seems not to load.')
+                console.trace('WARNING: failed to print log on gui: '+message+', because gui seems not to load.')
             }
         }
+    }
+    
+    private async logToGui(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
+        if (this.latestLog && this.latestLog.message === message && this.latestLog.color === color) {
+            if (this.latestLog.options) {
+                this.latestLog.options.allowHtml = this.latestLog.options.allowHtml ?? options?.allowHtml
+            } else {
+                this.latestLog.options = options
+            }
+            this.latestLog.count++
+        } else {
+            this.latestLog = {message, color, options, count: 1, id: util.generateId()}
+        }
+
+        let finalMessage: string = this.latestLog.options?.allowHtml ? message : util.escapeForHtml(message)
+        if (this.latestLog.count > 1) {
+            finalMessage += ` (${this.latestLog.count})`
+            await renderManager.setContentTo(this.latestLog.id, finalMessage)
+        } else {
+            await renderManager.addElementTo(indexHtmlIds.logId, {
+                type: 'div',
+                id: this.latestLog.id,
+                style: {color: this.latestLog.color},
+                innerHTML: finalMessage
+            })
+        }
+        await renderManager.scrollToBottom(indexHtmlIds.terminalId)
     }
 
 }
