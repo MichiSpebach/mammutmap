@@ -7,9 +7,6 @@ export let log: LogService // = new LogService() // initialized at end of file
 
 class LogService {
     private readonly originalConsole: Console
-    private readonly originalConsoleLog: (message?: any, ...optionalParams: any[]) => void
-    private readonly originalConsoleInfo: (message?: any, ...optionalParams: any[]) => void
-    private readonly originalConsoleTrace: (message?: any, ...optionalParams: any[]) => void
     private logDebugActivated: boolean = false
     private latestLog: {
         message: string
@@ -22,12 +19,6 @@ class LogService {
     public constructor() {
         this.originalConsole = console
         console = new ConsoleDecorator(console)
-        this.originalConsoleLog = console.log
-        this.originalConsoleInfo = console.info
-        this.originalConsoleTrace = console.trace
-        //console.log = (message?: any, ...optionalParams: any[]) => this.log(message, 'grey', 'log')
-        //console.info = (message?: any, ...optionalParams: any[]) => this.log(message, 'grey', 'log')
-        //console.trace = (message?: any, ...optionalParams: any[]) => this.log(message, 'orange', 'trace')
     }
 
     public setLogDebugActivated(activated: boolean): void {
