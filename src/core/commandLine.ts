@@ -57,7 +57,7 @@ async function processCommand(command: string): Promise<void> {
       }
       return
     case 'clear':
-      await renderManager.setContentTo('log', '', RenderPriority.RESPONSIVE)
+      await log.clear(RenderPriority.RESPONSIVE)
       return
     case 'pluginFacade':
       await commandLinePluginFacade.processCommand(parameter)
