@@ -20,7 +20,7 @@ type State = {
 export class RelocationDragManager {
     public readonly draggableStyleClass: string = 'draggable'
     public readonly draggingInProgressStyleClass: string = 'draggingInProgress'
-    private readonly dragManager: DragManager = new DragEventDragManager() // TODO: use mouseDownDragManager when tested
+    private readonly dragManager: DragManager = mouseDownDragManager
     
     private readonly dropTargets: Map<string, { dragenterListener: EventListenerCallback, mouseoverListener: EventListenerCallback }> = new Map()
 
