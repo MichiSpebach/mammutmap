@@ -67,6 +67,11 @@ process.on('unhandledRejection', (reason: any) => {
   }
 })
 
+/*process.on('uncaughtException', (error: Error) => { // TODO: activate? otherwise popup is shown anyway
+  // happens when error in unawaited async calls is not caught
+  util.logErrorWithoutThrow(error.toString())
+})*/
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.

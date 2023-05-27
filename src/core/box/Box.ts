@@ -440,41 +440,45 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
   protected abstract formBody(): string*/
 
-  public static findCommonAncestor(fromBox: Box|NodeWidget, toBox: Box|NodeWidget): {commonAncestor: Box, fromBoxes: (Box|NodeWidget)[], toBoxes: (Box|NodeWidget)[]} | never { // TODO: rename fromBoxes to fromPath and toBoxes to toPath
-    const fromBoxes: (Box|NodeWidget)[] = [fromBox]
-    const toBoxes: (Box|NodeWidget)[] = [toBox]
+  public static findCommonAncestor(fromBox: Box|NodeWidget, toBox: Box|NodeWidget): {
+    commonAncestor: Box, 
+    fromPath: (Box|NodeWidget)[], 
+    toPath: (Box|NodeWidget)[]
+  } | never {
+    const fromPath: (Box|NodeWidget)[] = [fromBox]
+    const toPath: (Box|NodeWidget)[] = [toBox]
 
     let commonAncestorCandidate: Box = fromBox instanceof Box // TODO: in future it will also make sense that commonAncestor is a general node
       ? fromBox
       : fromBox.getParent()
 
-    while (fromBoxes[0] !== toBoxes[0]) {
-      if (fromBoxes[0].isRoot() && toBoxes[0].isRoot()) {
+    while (fromPath[0] !== toPath[0]) {
+      if (fromPath[0].isRoot() && toPath[0].isRoot()) {
         util.logError(fromBox.getSrcPath()+' and '+toBox.getSrcPath()+' do not have a common ancestor, file structure seems to be corrupted.')
       }
 
-      if (!fromBoxes[0].isRoot()) {
-        commonAncestorCandidate = fromBoxes[0].getParent()
-        if (toBoxes.includes(commonAncestorCandidate)) {
-          toBoxes.splice(0, Math.min(toBoxes.indexOf(commonAncestorCandidate)+1, toBoxes.length-1))
+      if (!fromPath[0].isRoot()) {
+        commonAncestorCandidate = fromPath[0].getParent()
+        if (toPath.includes(commonAncestorCandidate)) {
+          toPath.splice(0, Math.min(toPath.indexOf(commonAncestorCandidate)+1, toPath.length-1))
           break
         } else {
-          fromBoxes.unshift(commonAncestorCandidate)
+          fromPath.unshift(commonAncestorCandidate)
         }
       }
 
-      if (!toBoxes[0].isRoot()) {
-        commonAncestorCandidate = toBoxes[0].getParent()
-        if (fromBoxes.includes(commonAncestorCandidate)) {
-          fromBoxes.splice(0, Math.min(fromBoxes.indexOf(commonAncestorCandidate)+1, fromBoxes.length-1))
+      if (!toPath[0].isRoot()) {
+        commonAncestorCandidate = toPath[0].getParent()
+        if (fromPath.includes(commonAncestorCandidate)) {
+          fromPath.splice(0, Math.min(fromPath.indexOf(commonAncestorCandidate)+1, fromPath.length-1))
           break
         } else {
-          toBoxes.unshift(commonAncestorCandidate)
+          toPath.unshift(commonAncestorCandidate)
         }
       }
     }
 
-    return {commonAncestor: commonAncestorCandidate, fromBoxes: fromBoxes, toBoxes: toBoxes}
+    return {commonAncestor: commonAncestorCandidate, fromPath, toPath}
   }
 
 }

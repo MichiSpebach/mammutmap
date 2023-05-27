@@ -4,70 +4,38 @@ import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { RenderElement } from './RenderElement'
 import * as stacktraceUtil from './stacktraceUtil'
+import { log } from '../logService'
 
 class Util {
   public readonly githubProjectAddress: string = 'https://github.com/MichiSpebach/mammutmap'
-  private logDebugActivated: boolean = false
 
   public runShellCommand(command: string): ChildProcess {
     return processing.runShellCommand(command)
   }
 
-  public setLogDebugActivated(activated: boolean): void {
-    this.logDebugActivated = activated
-  }
-
+  /** @deprecated use log.debug(..) instead */
   public logDebug(message: string, options?: {allowHtml?: boolean}): void {
-    if (this.logDebugActivated) {
-      this.log('debug: ' + message, 'grey', 'log', options)
-    }
+    log.debug(message, options)
   }
 
+  /** @deprecated use log.info(..) instead */
   public logInfo(message: string, options?: {allowHtml?: boolean}): void {
-    this.log('Info: ' + message, 'grey', 'log', options)
+    log.info(message, options)
   }
 
+  /** @deprecated use log.warning(..) instead */
   public logWarning(message: string, options?: {allowHtml?: boolean}): void {
-    this.log('WARNING: ' + message, 'orange', 'trace', options)
+    log.warning(message, options)
   }
 
-  /**@deprecated simply throw new Error(..) instead*/
+  /** @deprecated use log.errorAndThrow(..) instead */
   public logError(message: string, options?: {allowHtml?: boolean}): never {
-    this.logErrorWithoutThrow(message, options)
-    throw new Error(message)
+    log.errorAndThrow(message, options)
   }
 
+  /** @deprecated use log.errorWithoutThrow(..) instead */
   public logErrorWithoutThrow(message: string, options?: {allowHtml?: boolean}): void {
-    if (message) { // check so that in case of weird type casts logging errors still work
-      message = message.toString().replace(/^Error: /, '')
-    }
-    this.log('ERROR: ' + message, 'red', 'trace', options)
-  }
-
-  private async log(message: string, color: string, mode: 'log'|'trace', options?: {allowHtml?: boolean}): Promise<void> {
-    if (mode === 'log') {
-      console.log(message)
-    } else {
-      console.trace(message)
-    }
-    await this.logToGui(message, color, 5, options)
-  }
-
-  private async logToGui(message: string, color: string, triesLeft: number, options?: {allowHtml?: boolean}): Promise<void> {
-    const finalMessage: string = options?.allowHtml ? message : this.escapeForHtml(message)
-    const division: string = '<div style="color:' + color + '">'+finalMessage+'</div>'
-    if (renderManager.isReady()) {
-      await renderManager.addContentTo('log', division)
-      await renderManager.scrollToBottom('terminal')
-    } else { // happens when called before gui is ready // TODO find better solution
-      if (triesLeft > 0) {
-        await this.wait(1000)
-        message += ' -1s'
-        await this.logToGui(message, color, triesLeft--)
-      } else {
-        console.trace('WARNING: failed to print log on gui: '+message+', because gui seems not to load.')
-      }
-    }
+    log.errorWithoutThrow(message, options)
   }
 
   public createWebLinkHtml(address: string, label?: string): string { // TODO: return RenderElement instead

@@ -1,10 +1,10 @@
 import { dom } from './domAdapter'
 import { renderManager, RenderPriority } from './RenderManager'
 import * as map from './Map'
-import { util } from './util/util'
 import * as commandLinePluginFacade from './commandLinePluginFacade'
 import * as htmlCursor from './htmlCursor'
 import { setCompatibilityTheme } from './styleAdapter'
+import { log } from './logService'
 
 export function init(): void {
   dom.addKeydownListenerTo('commandLine', 'Enter', processCommand)
@@ -17,43 +17,43 @@ async function processCommand(command: string): Promise<void> {
   switch (commandName) {
     case 'open':
       const folderPath: string = parameter
-      util.logInfo('opening '+folderPath)
+      log.info('opening '+folderPath)
       await map.searchAndLoadMapCloseTo(folderPath)
-      util.logInfo('opening finished')
+      log.info('opening finished')
       return
     case 'close':
-      util.logInfo('closing current opened folder')
+      log.info('closing current opened folder')
       await map.unloadAndUnsetMap()
-      util.logInfo('closing finished')
+      log.info('closing finished')
       return
     case 'openDevTools':
-      util.logInfo('opening developerTools')
+      log.info('opening developerTools')
       renderManager.openDevTools()
       return
     case 'setCompatibilityTheme':
       await setCompatibilityTheme()
-      util.logInfo('activated compatibilityTheme')
+      log.info('activated compatibilityTheme')
       return
     case 'setLogDebugActivated':
       if (parameter === 'true') {
-        util.setLogDebugActivated(true)
-        util.logInfo('activated debug logging')
+        log.setLogDebugActivated(true)
+        log.info('activated debug logging')
       } else if (parameter === 'false') {
-        util.setLogDebugActivated(false)
-        util.logInfo('deactivated debug logging')
+        log.setLogDebugActivated(false)
+        log.info('deactivated debug logging')
       } else {
-        util.logWarning('setLogDebugActivated expects true or false as parameter')
+        log.warning('setLogDebugActivated expects true or false as parameter')
       }
       return
     case 'setHtmlCursorActivated':
       if (parameter === 'true') {
         await htmlCursor.activate()
-        util.logInfo('activated htmlCursor')
+        log.info('activated htmlCursor')
       } else if (parameter === 'false') {
         await htmlCursor.deactivate()
-        util.logInfo('deactivated htmlCursor')
+        log.info('deactivated htmlCursor')
       } else {
-        util.logWarning('setHtmlCursorActivated expects true or false as parameter')
+        log.warning('setHtmlCursorActivated expects true or false as parameter')
       }
       return
     case 'clear':
@@ -63,6 +63,6 @@ async function processCommand(command: string): Promise<void> {
       await commandLinePluginFacade.processCommand(parameter)
       return
     default:
-      util.logWarning(`unknown command ${command}`)
+      log.warning(`unknown command ${command}`)
   }
 }
