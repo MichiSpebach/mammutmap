@@ -3,7 +3,7 @@ import { LinkAppearanceMode } from '../../dist/pluginFacade'
 import { NodeWidget } from '../../dist/pluginFacade'
 import { Box, LinkImplementation } from '../../dist/pluginFacade'
 import { renderManager, RenderPriority } from '../../dist/pluginFacade'
-import * as linkDidactorSettings from './linkDidactorSettings'
+import * as linkAppearanceSettings from './linkAppearanceSettings'
 
 export class DidactedLink extends LinkImplementation {
     private currentStyle: string|null = null
@@ -30,13 +30,13 @@ export class DidactedLink extends LinkImplementation {
     }
 
     public getMode(): LinkAppearanceMode {
-        return linkDidactorSettings.getComputedModeForLinkTags(this.getTags())
+        return linkAppearanceSettings.getComputedModeForLinkTags(this.getTags())
     }
 
     public override getColor(): string {
-        const color: string = linkDidactorSettings.getComputedColorForLinkTags(this.getTags())
+        const color: string = linkAppearanceSettings.getComputedColorForLinkTags(this.getTags())
 
-        if (color === linkDidactorSettings.boxIdHashColorName) {
+        if (color === linkAppearanceSettings.boxIdHashColorName) {
             return this.getColorByToBoxIdHash()
         }
 
@@ -54,7 +54,7 @@ export class DidactedLink extends LinkImplementation {
         }
         
         const hash: number = toBoxId.charCodeAt(0) + toBoxId.charCodeAt(toBoxId.length/2) + toBoxId.charCodeAt(toBoxId.length-1)
-        return linkDidactorSettings.linkColors[hash % linkDidactorSettings.linkColors.length]
+        return linkAppearanceSettings.linkColors[hash % linkAppearanceSettings.linkColors.length]
     }
 
     private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {

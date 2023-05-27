@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidactedLink = void 0;
 const pluginFacade_1 = require("../../dist/pluginFacade");
 const pluginFacade_2 = require("../../dist/pluginFacade");
-const linkDidactorSettings = require("./linkDidactorSettings");
+const linkAppearanceSettings = require("./linkAppearanceSettings");
 class DidactedLink extends pluginFacade_1.LinkImplementation {
     constructor() {
         super(...arguments);
@@ -27,11 +27,11 @@ class DidactedLink extends pluginFacade_1.LinkImplementation {
         await super.unrender();
     }
     getMode() {
-        return linkDidactorSettings.getComputedModeForLinkTags(this.getTags());
+        return linkAppearanceSettings.getComputedModeForLinkTags(this.getTags());
     }
     getColor() {
-        const color = linkDidactorSettings.getComputedColorForLinkTags(this.getTags());
-        if (color === linkDidactorSettings.boxIdHashColorName) {
+        const color = linkAppearanceSettings.getComputedColorForLinkTags(this.getTags());
+        if (color === linkAppearanceSettings.boxIdHashColorName) {
             return this.getColorByToBoxIdHash();
         }
         return color;
@@ -47,7 +47,7 @@ class DidactedLink extends pluginFacade_1.LinkImplementation {
             toBoxId = path[path.length - 1].boxId;
         }
         const hash = toBoxId.charCodeAt(0) + toBoxId.charCodeAt(toBoxId.length / 2) + toBoxId.charCodeAt(toBoxId.length - 1);
-        return linkDidactorSettings.linkColors[hash % linkDidactorSettings.linkColors.length];
+        return linkAppearanceSettings.linkColors[hash % linkAppearanceSettings.linkColors.length];
     }
     async updateStyle(priority = pluginFacade_2.RenderPriority.NORMAL) {
         let style = '';

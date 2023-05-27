@@ -2,7 +2,7 @@ import { LocalPosition } from '../../dist/pluginFacade'
 import { LinkLineImplementation } from '../../dist/pluginFacade'
 import { LinkAppearanceMode } from '../../dist/pluginFacade'
 import { coreUtil } from '../../dist/pluginFacade'
-import * as linkDidactorSettings from './linkDidactorSettings'
+import * as linkAppearanceSettings from './linkAppearanceSettings'
 
 export class DidactedLinkLine extends LinkLineImplementation {
 
@@ -24,7 +24,7 @@ export class DidactedLinkLine extends LinkLineImplementation {
 
         const tagNames: string[]|undefined = this.referenceLink.getData().tags
 
-        const mode: LinkAppearanceMode = linkDidactorSettings.getComputedModeForLinkTags(tagNames)
+        const mode: LinkAppearanceMode = linkAppearanceSettings.getComputedModeForLinkTags(tagNames)
         switch (mode) {
             case 'visible':
                 return true

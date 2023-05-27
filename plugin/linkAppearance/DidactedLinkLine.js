@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DidactedLinkLine = void 0;
 const pluginFacade_1 = require("../../dist/pluginFacade");
 const pluginFacade_2 = require("../../dist/pluginFacade");
-const linkDidactorSettings = require("./linkDidactorSettings");
+const linkAppearanceSettings = require("./linkAppearanceSettings");
 class DidactedLinkLine extends pluginFacade_1.LinkLineImplementation {
     static getSuperClass() {
         return Object.getPrototypeOf(DidactedLinkLine.prototype).constructor;
@@ -19,7 +19,7 @@ class DidactedLinkLine extends pluginFacade_1.LinkLineImplementation {
             return true;
         }
         const tagNames = this.referenceLink.getData().tags;
-        const mode = linkDidactorSettings.getComputedModeForLinkTags(tagNames);
+        const mode = linkAppearanceSettings.getComputedModeForLinkTags(tagNames);
         switch (mode) {
             case 'visible':
                 return true;

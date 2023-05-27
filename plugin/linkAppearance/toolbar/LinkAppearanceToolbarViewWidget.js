@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LinkDidactorToolbarViewWidget = void 0;
+exports.LinkAppearanceToolbarViewWidget = void 0;
 const pluginFacade_1 = require("../../../dist/pluginFacade");
 const pluginFacade_2 = require("../../../dist/pluginFacade");
-const linkDidactorSettings = require("../linkDidactorSettings");
+const linkAppearanceSettings = require("../linkAppearanceSettings");
 const pluginFacade = require("../../../dist/pluginFacade");
 const pluginFacade_3 = require("../../../dist/pluginFacade");
 const pluginFacade_4 = require("../../../dist/pluginFacade");
 const pluginFacade_5 = require("../../../dist/pluginFacade");
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
-class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
+class LinkAppearanceToolbarViewWidget extends pluginFacade_2.Widget {
     constructor(id) {
         super();
         this.id = id;
@@ -32,7 +32,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
     }
     async render() {
         if (!this.renderedOrInProgress) {
-            linkDidactorSettings.linkTags.subscribe(() => this.render());
+            linkAppearanceSettings.linkTags.subscribe(() => this.render());
             this.renderedOrInProgress = true;
         }
         await pluginFacade_1.renderManager.setElementsTo(this.getId(), this.formInner());
@@ -61,7 +61,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
         return { type: 'div', children: `Used linkTags in ${projectName}:` };
     }
     formBody() {
-        const tagsOrMessage = linkDidactorSettings.getLinkTags();
+        const tagsOrMessage = linkAppearanceSettings.getLinkTags();
         if (tagsOrMessage instanceof pluginFacade_3.Message) {
             return tagsOrMessage.message;
         }
@@ -85,7 +85,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
         const modeDropDown = this.formDefaultModeDropDown();
         const colorDropDown = this.formDefaultColorDropDown();
         return { type: 'tr', children: [
-                { type: 'td', style: this.getLabelStyle(linkDidactorSettings.getDefaultLinkAppereanceColor()), children: label },
+                { type: 'td', style: this.getLabelStyle(linkAppearanceSettings.getDefaultLinkAppereanceColor()), children: label },
                 { type: 'td', children: modeDropDown },
                 { type: 'td', children: colorDropDown }
             ] };
@@ -101,7 +101,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
             ] };
     }
     getLabelStyle(color) {
-        if (!color || color === linkDidactorSettings.boxIdHashColorName) {
+        if (!color || color === linkAppearanceSettings.boxIdHashColorName) {
             return {};
         }
         return { color };
@@ -111,7 +111,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
             type: 'select',
             id: this.getDefaultModeDropDownId(),
             onchangeValue: (value) => this.setDefaultLinkMode(value),
-            children: this.formDefaultModeDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceMode())
+            children: this.formDefaultModeDropDownOptions(linkAppearanceSettings.getDefaultLinkAppereanceMode())
         };
     }
     formTagModeDropDown(tag) {
@@ -127,7 +127,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
             type: 'select',
             id: this.getDefaultColorDropDownId(),
             onchangeValue: (value) => this.setDefaultLinkColor(value),
-            children: this.formDefaultColorDropDownOptions(linkDidactorSettings.getDefaultLinkAppereanceColor())
+            children: this.formDefaultColorDropDownOptions(linkAppearanceSettings.getDefaultLinkAppereanceColor())
         };
     }
     formTagColorDropDown(tag) {
@@ -177,7 +177,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
         return elements;
     }
     formColorDropDownOptions(selectedColor) {
-        return linkDidactorSettings.linkColorOptions.map(color => ({
+        return linkAppearanceSettings.linkColorOptions.map(color => ({
             type: 'option',
             value: color,
             selected: color === selectedColor,
@@ -188,7 +188,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
         if (mode && !pluginFacade_5.linkAppearanceModes.includes(mode)) {
             pluginFacade_4.coreUtil.logWarning(`default LinkTagMode '${mode}' is not known.`);
         }
-        await linkDidactorSettings.setDefaultLinkAppereanceModeAndSave(mode);
+        await linkAppearanceSettings.setDefaultLinkAppereanceModeAndSave(mode);
         await this.rerenderLinks();
     }
     async setLinkTagMode(tag, mode) {
@@ -196,11 +196,11 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
             pluginFacade_4.coreUtil.logWarning(`LinkTagMode '${mode}' is not known.`);
         }
         tag.appearance.mode = mode;
-        await linkDidactorSettings.saveToFileSystem();
+        await linkAppearanceSettings.saveToFileSystem();
         await this.rerenderLinks();
     }
     async setDefaultLinkColor(color) {
-        await linkDidactorSettings.setDefaultLinkAppereanceColorAndSave(color);
+        await linkAppearanceSettings.setDefaultLinkAppereanceColorAndSave(color);
         await Promise.all([
             this.rerenderLinks(),
             this.render()
@@ -208,7 +208,7 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
     }
     async setLinkTagColor(tag, color) {
         tag.appearance.color = color;
-        await linkDidactorSettings.saveToFileSystem();
+        await linkAppearanceSettings.saveToFileSystem();
         await Promise.all([
             this.rerenderLinks(),
             this.render()
@@ -219,4 +219,4 @@ class LinkDidactorToolbarViewWidget extends pluginFacade_2.Widget {
         await Promise.all(links.map(link => link.render()));
     }
 }
-exports.LinkDidactorToolbarViewWidget = LinkDidactorToolbarViewWidget;
+exports.LinkAppearanceToolbarViewWidget = LinkAppearanceToolbarViewWidget;

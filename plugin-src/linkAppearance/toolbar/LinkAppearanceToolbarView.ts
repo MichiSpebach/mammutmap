@@ -1,16 +1,16 @@
 import { coreUtil } from '../../../dist/pluginFacade'
 import { ToolbarView } from '../../../dist/pluginFacade'
 import { Widget } from '../../../dist/pluginFacade'
-import { LinkDidactorToolbarViewWidget } from './LinkDidactorToolbarViewWidget'
+import { LinkAppearanceToolbarViewWidget } from './LinkAppearanceToolbarViewWidget'
 
-export class LinkDidactorToolbarView implements ToolbarView {
+export class LinkAppearanceToolbarView implements ToolbarView {
 
     private readonly widget: Widget
 
     public constructor(
         private readonly name: string
     ) {
-        this.widget = new LinkDidactorToolbarViewWidget(name+coreUtil.generateId())
+        this.widget = new LinkAppearanceToolbarViewWidget(name+coreUtil.generateId())
     }
 
     public getName(): string {
