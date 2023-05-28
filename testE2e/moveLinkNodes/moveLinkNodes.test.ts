@@ -13,19 +13,23 @@ test('move linkNode into other box', async () => {
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'origin'})
     
     await gui.dragTo(270, 300)
-    const expectedLogs: string[] = [
+    const expectedLogsVariantA: string[] = [
         'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json',
-        'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json',
+        'Info: saved testE2e/moveLinkNodes/scenario/map/5p2442vnde.json',
+        'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json'
+    ]
+    const expectedLogsVariantB: string[] = [
+        'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json (2)',
         'Info: saved testE2e/moveLinkNodes/scenario/map/5p2442vnde.json'
     ]
     await coreUtil.wait(50) // TODO: otherwise operation may not have finished, improve
-    expect((await gui.getLogs()).sort()).toEqual(expectedLogs.sort())
+    expect([expectedLogsVariantA.sort(), expectedLogsVariantB.sort()]).toContainEqual((await gui.getLogs()).sort())
     await gui.clearTerminal()
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'moved-into-other-box'})
 
     await gui.dragTo(115, 300)
     await coreUtil.wait(50) // TODO: otherwise operation may not have finished, improve
-    expect((await gui.getLogs()).sort()).toEqual(expectedLogs.sort())
+    expect([expectedLogsVariantA.sort(), expectedLogsVariantB.sort()]).toContainEqual((await gui.getLogs()).sort())
     await gui.clearTerminal()
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'origin'})
 })
@@ -41,19 +45,23 @@ test('move linkNode into unrendered box', async () => {
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'origin'})
     
     await gui.dragTo(440, 300)
-    const expectedLogs: string[] = [
-        'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json',
-        'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json',
+    const expectedLogsVariantA: string[] = [
+        'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json (2)',
         'Info: saved testE2e/moveLinkNodes/scenario/map/5p2442vnde/r7hopm62bmg.json'
     ]
+    const expectedLogsVariantB: string[] = [
+        'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json',
+        'Info: saved testE2e/moveLinkNodes/scenario/map/5p2442vnde/r7hopm62bmg.json',
+        'Info: saved testE2e/moveLinkNodes/scenario/map/maproot.mapsettings.json'
+    ]
     await coreUtil.wait(50) // TODO: otherwise operation may not have finished, improve
-    expect((await gui.getLogs()).sort()).toEqual(expectedLogs.sort())
+    expect([expectedLogsVariantA.sort(), expectedLogsVariantB.sort()]).toContainEqual((await gui.getLogs()).sort())
     await gui.clearTerminal()
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'moved-into-unrendered-box'})
 
     await gui.dragTo(115, 300)
     await coreUtil.wait(50) // TODO: otherwise operation may not have finished, improve
-    expect((await gui.getLogs()).sort()).toEqual(expectedLogs.sort())
+    expect([expectedLogsVariantA.sort(), expectedLogsVariantB.sort()]).toContainEqual((await gui.getLogs()).sort())
     await gui.clearTerminal()
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: 'origin'})
 })

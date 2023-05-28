@@ -10,18 +10,15 @@ test('move box', async () => {
     
     await gui.clearTerminal()
     await gui.moveMouseTo(150, 400)
-    const expectedLogs: string[] = []
-    expect(await gui.getLogs()).toEqual(expectedLogs)
+    expect(await gui.getLogs()).toEqual([])
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-origin'})
 
     await gui.dragTo(200, 400)
-    expectedLogs.push('Info: saved testE2e/moveBoxes/scenario/map/0fj1mk72of8/q6shnoldabo.json')
-    await gui.waitUntilLogsEqual(expectedLogs, 100)
+    await gui.waitUntilLogsEqual(['Info: saved testE2e/moveBoxes/scenario/map/0fj1mk72of8/q6shnoldabo.json'], 100)
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-moved'})
 
     await gui.dragTo(150, 400)
-    expectedLogs.push('Info: saved testE2e/moveBoxes/scenario/map/0fj1mk72of8/q6shnoldabo.json')
-    await gui.waitUntilLogsEqual(expectedLogs, 100)
+    await gui.waitUntilLogsEqual(['Info: saved testE2e/moveBoxes/scenario/map/0fj1mk72of8/q6shnoldabo.json (2)'], 100)
     await gui.clearTerminal()
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-origin'})
 })
@@ -69,9 +66,7 @@ test('move box with many links to other folder', async () => {
     expectedLogs.push(`Info: moved 'testE2e/moveBoxes/scenarioWithManyLinks/0fj1mk72of8/q6shnoldabo' to 'testE2e/moveBoxes/scenarioWithManyLinks/q6shnoldabo'`)
     expectedLogs.push(`Info: moved 'testE2e/moveBoxes/scenarioWithManyLinks/map/0fj1mk72of8/q6shnoldabo.json' to 'testE2e/moveBoxes/scenarioWithManyLinks/map/q6shnoldabo.json'`)
     expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/q6shnoldabo.json')
-    for (let i = 0; i < 13; i++) {
-        expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/maproot.mapsettings.json')
-    }
+    expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/maproot.mapsettings.json (13)')
     await gui.waitUntilLogsEqual(expectedLogs, 100)
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-moved-to-other-folder'})
 
@@ -79,9 +74,7 @@ test('move box with many links to other folder', async () => {
     expectedLogs.push(`Info: moved 'testE2e/moveBoxes/scenarioWithManyLinks/q6shnoldabo' to 'testE2e/moveBoxes/scenarioWithManyLinks/0fj1mk72of8/q6shnoldabo'`)
     expectedLogs.push(`Info: moved 'testE2e/moveBoxes/scenarioWithManyLinks/map/q6shnoldabo.json' to 'testE2e/moveBoxes/scenarioWithManyLinks/map/0fj1mk72of8/q6shnoldabo.json'`)
     expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/0fj1mk72of8/q6shnoldabo.json')
-    for (let i = 0; i < 13; i++) {
-        expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/maproot.mapsettings.json')
-    }
+    expectedLogs.push('Info: saved testE2e/moveBoxes/scenarioWithManyLinks/map/maproot.mapsettings.json (13)')
     await gui.waitUntilLogsEqual(expectedLogs, 100)
     await gui.clearTerminal()
     await e2eUtil.expectImageToMatchSnapshot({image: await gui.takeScreenshot(), snapshotIdentifier: snapshotIdentifier+'-origin'})
