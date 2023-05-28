@@ -14,6 +14,7 @@ import * as boxFactory from '../box/factories/boxFactory'
 import * as linkEndFactory from './factories/linkEndFactory'
 import { LinkData } from '../../../src/core/mapData/LinkData'
 import { ClientRect } from '../../../src/core/ClientRect'
+import { HoverManager } from '../../../src/core/HoverManager'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 
@@ -322,6 +323,7 @@ async function setupRenderedScenarioWithDepthAndNode(): Promise<{
     const scene = setupRenderedScenarioWithDepth()
     const boxMapLinkData = new LinkData('linkId', scene.linkEndData, scene.linkEndData)
     scene.linkEnd.getReferenceLink().getData = () => boxMapLinkData
+    HoverManager.addHoverable = () => Promise.resolve()
     await scene.innerBox.nodes.add(new NodeData('nodeId', 75, 25))
     return { ...scene, node: scene.innerBox.nodes.getNodeById('nodeId')! }
 }

@@ -4,7 +4,7 @@ import { relocationDragManager } from './RelocationDragManager'
 import { ScaleManager } from './ScaleManager'
 import { util } from './util/util'
 
-export class HoverManager {
+export class HoverManager { // rename to FocusManager as it describes better that this ensures that only one Widget is focused/hovered?
 
   private static readonly hoverables: Map<string, EventListenerCallback> = new Map()
 

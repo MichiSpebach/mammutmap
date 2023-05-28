@@ -14,8 +14,10 @@ import * as contextMenu from '../contextMenu'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { Link } from '../link/Link'
 import { Style } from '../util/RenderElement'
+import { HoverManager } from '../HoverManager'
+import { Hoverable } from '../Hoverable'
 
-export class NodeWidget extends AbstractNodeWidget implements DropTarget, Draggable<Box> { // TODO: rename to LinkNodeWidget
+export class NodeWidget extends AbstractNodeWidget implements DropTarget, Draggable<Box>, Hoverable { // TODO: rename to LinkNodeWidget
     private readonly mapData: NodeData
     private managingBox: Box // TODO: rename to parent?
     public readonly borderingLinks: BorderingLinks
@@ -25,6 +27,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
     private dragState: {
         positionInManagingBoxCoords: LocalPosition
     } | null = null
+    private highlight: boolean = false
 
     public constructor(mapData: NodeData, managingBox: Box) {
         super()
@@ -103,29 +106,31 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
 
     public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
         this.renderInProgress = true
-        const proms: Promise<any>[] = []
+        const pros: Promise<any>[] = []
 
         const position: LocalPosition = this.getRenderPosition()
+        const radiusInPx = this.highlight ? 10 : 7
         const style: Style = {
             position: 'absolute',
             top: position.percentY+'%',
             left: position.percentX+'%',
-            width: '14px',
-            height: '14px',
-            transform: 'translate(-7px,-7px)',
+            width: radiusInPx*2+'px',
+            height: radiusInPx*2+'px',
+            transform: `translate(-${radiusInPx}px,-${radiusInPx}px)`,
             borderRadius: '30%',
-            backgroundColor: '#0aa8'
+            backgroundColor: this.highlight ? '#8ccc' : '#0aa8'
         }
-        proms.push(renderManager.setStyleTo(this.getId(), style, priority))
+        pros.push(renderManager.setStyleTo(this.getId(), style, priority))
 
         if (!this.rendered) {
-            proms.push(this.borderingLinks.renderAll())
-            proms.push(relocationDragManager.addDropTarget(this))
-            proms.push(relocationDragManager.addDraggable(this, priority))
-            proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, new ClientPosition(clientX, clientY))))
+            pros.push(this.borderingLinks.renderAll())
+            pros.push(relocationDragManager.addDropTarget(this))
+            pros.push(relocationDragManager.addDraggable(this, priority))
+            pros.push(HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut()))
+            pros.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, new ClientPosition(clientX, clientY))))
         }
         
-        await Promise.all(proms)
+        await Promise.all(pros)
         this.rendered = true
         this.renderInProgress = false
     }
@@ -135,22 +140,41 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
             return
         }
         this.unrenderInProgress = true
-        const proms: Promise<any>[] = []
-        proms.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
-        proms.push(relocationDragManager.removeDropTarget(this))
-        proms.push(relocationDragManager.removeDraggable(this, priority))
-        proms.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))
-        await Promise.all(proms)
+        const pros: Promise<any>[] = []
+        pros.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
+        pros.push(relocationDragManager.removeDropTarget(this))
+        pros.push(relocationDragManager.removeDraggable(this, priority))
+        pros.push(HoverManager.removeHoverable(this)),
+        pros.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))
+        await Promise.all(pros)
         this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
         this.unrenderInProgress = false
     }
 
+    private async onHoverOver(): Promise<void> {
+        this.highlight = true
+        await Promise.all([
+            this.render(RenderPriority.RESPONSIVE),
+            this.borderingLinks.setHighlightAllThatShouldBeRendered(true)
+        ])
+    }
+    
+    private async onHoverOut(): Promise<void> {
+        this.highlight = false
+        await Promise.all([
+            this.render(RenderPriority.RESPONSIVE),
+            this.borderingLinks.setHighlightAllThatShouldBeRendered(false)
+        ])
+    }
+
     public async onDragEnter(): Promise<void> {
-        return Promise.resolve() // TODO: highlight
+        this.highlight = true
+        await this.render(RenderPriority.RESPONSIVE)
     }
 
     public async onDragLeave(): Promise<void> {
-        return Promise.resolve() // TODO: stop highlight
+        this.highlight = false
+        await this.render(RenderPriority.RESPONSIVE)
     }
 
     public getDropTargetAtDragStart(): Box {
