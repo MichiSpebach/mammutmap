@@ -28,6 +28,7 @@ import { SizeAndPosition } from './SizeAndPosition'
 import { NodeWidget } from '../node/NodeWidget'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { Link } from '../link/Link'
+import { log } from '../logService'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   private name: string
@@ -279,16 +280,16 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
     this.renderState.setUnrenderStarted()
     
-    if ((await this.unrenderBodyIfPossible(force)).rendered) {
-      this.renderState.setUnrenderFinishedStillRendered()
-      return
-    }
     if (this.hasWatchers()) {
       if (!force) {
         this.renderState.setUnrenderFinishedStillRendered()
         return
       }
-      util.logWarning('unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up')
+      log.warning('Box::unrenderIfPossible(force=true) unrendering box that has watchers, this can happen when folder gets closed while plugins are busy or plugins don\'t clean up.')
+    }
+    if ((await this.unrenderBodyIfPossible(force)).rendered) {
+      this.renderState.setUnrenderFinishedStillRendered()
+      return
     }
 
     await Promise.all([

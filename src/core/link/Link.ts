@@ -16,6 +16,7 @@ import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { ClientRect } from '../ClientRect'
 import { relocationDragManager } from '../RelocationDragManager'
+import { log } from '../logService'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -93,7 +94,7 @@ export class Link implements Hoverable {
 
   public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { await this.renderScheduler.schedule(async () => {
     if (!this.getManagingBox().isBodyBeingRendered()) {
-      util.logWarning(`Link::render(..) called for Link with id ${this.getId()} unless its managingBox with name ${this.getManagingBox().getName()} is being unrendered.`)
+      log.warning(`Link::render(..) called for Link with id ${this.getId()} unless the body its managingBox with name ${this.getManagingBox().getName()} is being unrendered.`)
       return
     }
     this.renderState.setRenderStarted()
