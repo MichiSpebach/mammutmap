@@ -1,8 +1,8 @@
 import { applicationMenu, MenuItemFile, BoxHeader, Box } from '../dist/pluginFacade'
 import { coreUtil } from '../dist/pluginFacade'
 
-const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate})
-const activateMenuItem: MenuItemFile = new MenuItemFile({label: 'activate', click: activate})
+const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate, enabled: false})
+const activateMenuItem: MenuItemFile = new MenuItemFile({label: 'activate', click: activate, enabled: true})
 applicationMenu.addMenuItemTo('telescopeTitles.js', deactivateMenuItem)
 applicationMenu.addMenuItemTo('telescopeTitles.js', activateMenuItem)
 
@@ -102,4 +102,4 @@ class TelescopeBoxHeader extends BoxHeader {
   }
 }
 
-activate()
+//activate()
