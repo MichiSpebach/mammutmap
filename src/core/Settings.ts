@@ -16,6 +16,7 @@ export async function init(): Promise<void> {
   settings = await Settings.loadFromFileSystem()
 }
 
+// rename to ApplicationSettings?
 class Settings {
 
   private static readonly settingsFileName: string = 'settings.json'

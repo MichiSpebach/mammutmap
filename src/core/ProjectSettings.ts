@@ -4,6 +4,7 @@ import { MapSettingsData } from './mapData/MapSettingsData'
 import { Subscribers } from './util/Subscribers'
 import { util } from './util/util'
 import { LinkAppearanceData } from './mapData/LinkAppearanceData'
+import { log } from './logService'
 
 export class ProjectSettings { // TODO: rename to MapSettings?
 
@@ -58,15 +59,34 @@ export class ProjectSettings { // TODO: rename to MapSettings?
 
   public async saveToFileSystem(): Promise<void> {
     await fileSystem.saveToJsonFile(this.projectSettingsFilePath, this.data, {throwInsteadOfWarn: true}).then(() => {
+      log.info('saved ProjectSettings into '+this.projectSettingsFilePath)
+      if (!this.dataFileExists) {
+        this.addMapFolderToGitignore()
+      }
       this.dataFileExists = true
-      util.logInfo('saved ProjectSettings into '+this.projectSettingsFilePath)
     }).catch(reason => {
-      util.logWarning(`ProjectSettings::saveToFileSystem() failed at projectSettingsFilePath "${this.projectSettingsFilePath}", reason is ${reason}`)
+      log.warning(`ProjectSettings::saveToFileSystem() failed at projectSettingsFilePath "${this.projectSettingsFilePath}", reason is ${reason}`)
     })
   }
 
   public isDataFileExisting(): boolean {
     return this.dataFileExists
+  }
+
+  public async addMapFolderToGitignore(): Promise<void> {
+    const mapFolderPath: string = this.getAbsoluteMapRootPath()
+    const mapFolderName: string|undefined = util.getElementsOfPath(mapFolderPath).pop()
+    if (!mapFolderName) {
+      log.warning(`ProjectSettings::addMapFolderToGitignore() mapFolderPath '${mapFolderPath}' seems to be empty.`)
+      return
+    }
+    const gitignorePath: string = util.removeLastElementFromPath(mapFolderPath)+'.gitignore'
+    if (await fileSystem.doesDirentExistAndIsFile(gitignorePath)) {
+      let gitignoreContent: string = await fileSystem.readFile(gitignorePath)
+      gitignoreContent = `# Mammutmap, feel free to remove this line to share the map via Git\n${mapFolderName}/\n\n${gitignoreContent}`
+      await fileSystem.writeFile(gitignorePath, gitignoreContent)
+      log.info(`ProjectSettings::addMapFolderToGitignore() added '${mapFolderName}/' to '${gitignorePath}', feel free to remove this line from .gitignore to share the map via Git.`)
+    }
   }
 
   public getProjectSettingsFilePath(): string {

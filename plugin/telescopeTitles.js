@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const pluginFacade_1 = require("../dist/pluginFacade");
 const pluginFacade_2 = require("../dist/pluginFacade");
-const deactivateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'deactivate', click: deactivate });
-const activateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'activate', click: activate });
+const deactivateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'deactivate', click: deactivate, enabled: false });
+const activateMenuItem = new pluginFacade_1.MenuItemFile({ label: 'activate', click: activate, enabled: true });
 pluginFacade_1.applicationMenu.addMenuItemTo('telescopeTitles.js', deactivateMenuItem);
 pluginFacade_1.applicationMenu.addMenuItemTo('telescopeTitles.js', activateMenuItem);
 async function deactivate() {
@@ -85,4 +85,4 @@ class TelescopeBoxHeader extends pluginFacade_1.BoxHeader {
         return parts;
     }
 }
-activate();
+//activate()
