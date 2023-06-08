@@ -94,7 +94,7 @@ export class Link implements Hoverable {
 
   public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { await this.renderScheduler.schedule(async () => {
     if (!this.getManagingBox().isBodyBeingRendered()) {
-      log.warning(`Link::render(..) called for Link with id ${this.getId()} unless the body its managingBox with name ${this.getManagingBox().getName()} is being unrendered.`)
+      log.warning(`Link::render(..) called for Link with id '${this.getId()}' unless the body of its managingBox with name '${this.getManagingBox().getName()}' is being unrendered.`)
       return
     }
     this.renderState.setRenderStarted()

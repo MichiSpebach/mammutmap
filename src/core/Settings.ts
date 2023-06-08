@@ -1,5 +1,6 @@
 import { util } from './util/util'
 import { fileSystem } from './fileSystemAdapter'
+import { log } from './logService'
 
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
 export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|'htmlApplicationMenu'|'sidebar'
@@ -11,9 +12,14 @@ export let settings: Settings
  */
 export async function init(): Promise<void> {
   if (!fileSystem) {
-    util.logWarning('Settings.init() fileSystem is not defined, most likely fileSystemAdapter.init(..) was not called before.')
+    log.warning('Settings.init() fileSystem is not defined, most likely fileSystemAdapter.init(..) was not called before.')
   }
-  settings = await Settings.loadFromFileSystem()
+  try {
+    settings = await Settings.loadFromFileSystem()
+  } catch (error: unknown) {
+    log.warning(`Settings::init() failed to load application settings from fileSystem, reason: "${error}", defaulting to fallback application settings.`)
+    settings = Settings.buildFallback()
+  }
 }
 
 // rename to ApplicationSettings?
@@ -41,13 +47,15 @@ class Settings {
     } else { // happens when deployed application is started for the first time
       let message = Settings.settingsFilePath+' not found'
       message += ', loading application settings from '+Settings.alternativeSettingsFilePath+'.'
-      util.logInfo(message)
-      settingsJson = await fileSystem.readFile(Settings.alternativeSettingsFilePath).catch((reason) => {
-        util.logError('Failed to load application settings because: '+reason)
-      })
+      log.info(message)
+      settingsJson = await fileSystem.readFile(Settings.alternativeSettingsFilePath)
     }
 
     return new Settings(settingsJson)
+  }
+
+  public static buildFallback(): Settings {
+    return new Settings('{"zoomSpeed": 3, "boxMinSizeToRender": 200, "sidebar": true}')
   }
 
   private constructor(settingsJson: string) {
@@ -70,9 +78,9 @@ class Settings {
     // TODO: merge into existing settings file (not replacing whole file)
     await fileSystem.writeFile(Settings.settingsFilePath, util.toFormattedJson(thisWithoutLogic), {throwInsteadOfWarn: true})
       .then(() => {
-        util.logInfo('saved ' + Settings.settingsFilePath)
+        log.info('saved ' + Settings.settingsFilePath)
       })
-      .catch(reason => util.logWarning(`Settings::save() failed at settingsFilePath "${Settings.settingsFilePath}", reason is ${reason}`))
+      .catch(reason => log.warning(`Settings::save() failed at settingsFilePath "${Settings.settingsFilePath}", reason is ${reason}`))
   }
 
   public getZoomSpeed(): number {
