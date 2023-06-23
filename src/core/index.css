@@ -162,7 +162,7 @@ pre {
 }
 
 .boxHeaderInner {
-  line-break: anywhere;
+  word-wrap: break-word;
   padding: 2px;
   color: #ddd;
 }
