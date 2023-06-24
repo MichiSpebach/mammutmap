@@ -138,11 +138,13 @@ export class Map {
 
   private readonly id: string
   private readonly mapId: string = 'map'
+  private readonly mapRatioAdjusterId: string = 'mapRatioAdjuster'
   private projectSettings: ProjectSettings
   private rootFolder: RootFolderBox
   private readonly mapRatioAdjusterSizePx: number = 600
   private moveState: {latestMousePosition: ClientPosition, prevented: boolean, movingStarted: boolean} | null = null
   private devStats: RenderElement|undefined
+  private cachedMapRatioAdjusterClientRect: ClientRect|null = null
 
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
@@ -152,8 +154,11 @@ export class Map {
 
   public async render(): Promise<void> {
     const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
-    const mapRatioAdjusterStyle = `position:relative;width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
-    const mapRatioAdjusterHtml = `<div id="mapRatioAdjuster" style="${mapRatioAdjusterStyle}">${rootFolderHtml}</div>`
+    let mapRatioAdjusterStyle = `position:relative;width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
+    if (!settings.getBoolean('positionMapOnTopLeft')) {
+      mapRatioAdjusterStyle += 'left:50%;top:50%;transform:translate(-50%,-50%);'
+    }
+    const mapRatioAdjusterHtml = `<div id="${this.mapRatioAdjusterId}" style="${mapRatioAdjusterStyle}">${rootFolderHtml}</div>`
     const mapHtml = `<div id="${this.mapId}" style="overflow:hidden; width:100%; height:100%;">${mapRatioAdjusterHtml}</div>`
 
     await renderManager.setContentTo(this.id, mapHtml)
@@ -190,15 +195,26 @@ export class Map {
     return this.rootFolder
   }
 
+  private async getMapRatioAdjusterClientRect(): Promise<ClientRect> {
+    if (!this.cachedMapRatioAdjusterClientRect) {
+      this.cachedMapRatioAdjusterClientRect = await renderManager.getClientRectOf(this.mapRatioAdjusterId, RenderPriority.RESPONSIVE)
+    } else {
+      // in case of some weird window changes, fault is fixed asynchronously and is not permanent
+      renderManager.getClientRectOf(this.mapRatioAdjusterId, RenderPriority.NORMAL).then(rect => this.cachedMapRatioAdjusterClientRect = rect)
+    }
+    return this.cachedMapRatioAdjusterClientRect
+  }
+
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {
     const deltaNormalized: number = delta*settings.getZoomSpeed() / 1500
     const scaleFactor: number = delta > 0
       ? 1+deltaNormalized
       : 1 / (1-deltaNormalized)
 
+    const mapRatioAdjusterClientRect = await this.getMapRatioAdjusterClientRect()
     const cursorLocalPosition: LocalPosition = new LocalPosition(
-      100 * clientX / this.mapRatioAdjusterSizePx,
-      100 * clientY / this.mapRatioAdjusterSizePx
+      100 * (clientX-mapRatioAdjusterClientRect.x) / mapRatioAdjusterClientRect.width,
+      100 * (clientY-mapRatioAdjusterClientRect.y) / mapRatioAdjusterClientRect.height
     )
 
     await this.rootFolder.site.zoomInParentCoords(scaleFactor, cursorLocalPosition)
@@ -247,9 +263,10 @@ export class Map {
 
     const marginTopOffsetPx: number = position.y - this.moveState.latestMousePosition.y
     const marginLeftOffsetPx: number = position.x - this.moveState.latestMousePosition.x
+    const mapRatioAdjusterClientRect = await this.getMapRatioAdjusterClientRect()
 
-    const marginTopOffsetPercent: number = marginTopOffsetPx / (this.mapRatioAdjusterSizePx/100)
-    const marginLeftOffsetPercent: number = marginLeftOffsetPx / (this.mapRatioAdjusterSizePx/100)
+    const marginTopOffsetPercent: number = marginTopOffsetPx / (mapRatioAdjusterClientRect.height/100)
+    const marginLeftOffsetPercent: number = marginLeftOffsetPx / (mapRatioAdjusterClientRect.width/100)
 
     this.moveState.latestMousePosition = position
 

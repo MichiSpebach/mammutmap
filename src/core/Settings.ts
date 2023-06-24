@@ -3,7 +3,7 @@ import { fileSystem } from './fileSystemAdapter'
 import { log } from './logService'
 
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
-export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|'htmlApplicationMenu'|'sidebar'
+export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|'htmlApplicationMenu'|'sidebar'|'positionMapOnTopLeft'
 
 export let settings: Settings
 
@@ -37,6 +37,7 @@ class Settings {
   private experimentalFeatures: boolean
   private htmlApplicationMenu: boolean
   private sidebar: boolean
+  private positionMapOnTopLeft: boolean // only needed for old e2e tests, TODO: update e2e tests and remove this option
 
   private booleanSubscribers: {setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>}[] = []
 
@@ -69,6 +70,7 @@ class Settings {
     this.experimentalFeatures = settingsParsed['experimentalFeatures']
     this.htmlApplicationMenu = settingsParsed['htmlApplicationMenu']
     this.sidebar = settingsParsed['sidebar']
+    this.positionMapOnTopLeft = settingsParsed['positionMapOnTopLeft']
   }
 
   private async save(): Promise<void> {
