@@ -94,8 +94,7 @@ export class SizeAndPosition {
             this.referenceNodeMapSiteData.height = measuresInPercentIfChanged.height
         }
     
-        await this.referenceNode.renderStyle(priority)
-        // TODO: call this.referenceNode.render(RenderPriority.LOW) with very low priority and
+        await this.referenceNode.renderStyleWithRerender({renderStylePriority: priority}) // TODO: add 'rerenderPriority: RenderPriority.LOW' with very low priority and
         // TODO: return '{renderStyle: Promise<void>, rerenderChilds: Promise<void>}> to prevent rerenderChilds from blocking rerenderBorderingLinks in Box
     }
 
@@ -135,8 +134,35 @@ export class SizeAndPosition {
         this.detached.shiftX += x
         this.detached.shiftY += y
 
-        await this.referenceNode.renderStyle(RenderPriority.RESPONSIVE)
-        await this.referenceNode.render()
+        await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE})
+    }
+
+    public async zoomToFitRect(rect: LocalRect): Promise<void> {
+        if (!this.detached) {
+            if (!this.referenceNode.isRoot()) {
+                const topLeftInParentCoords: LocalPosition = this.referenceNode.transform.toParentPosition(rect.getTopLeftPosition())
+                const bottomRightInParentCoords: LocalPosition = this.referenceNode.transform.toParentPosition(rect.getBottomRightPosition())
+                return this.referenceNode.getParent().site.zoomToFitRect(LocalRect.fromPositions(topLeftInParentCoords, bottomRightInParentCoords))
+            }
+            this.detached = {
+                shiftX: 0,
+                shiftY: 0,
+                zoomX: 1,
+                zoomY: 1
+            }
+        }
+        
+        const saveRect: LocalRect = this.getLocalRectToSave()
+        const zoom = 100 / Math.max(rect.width, rect.height)
+    
+        // TODO: implement delegate mechanism for large values
+        this.detached.shiftX = -zoom*rect.x - saveRect.x
+        this.detached.shiftY = -zoom*rect.y - saveRect.y
+        this.detached.zoomX = zoom / (saveRect.width/100)
+        this.detached.zoomY = zoom / (saveRect.height/100)
+
+        const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transition:true})
+        await renderStyleWithRerender.transitionAndRerender
     }
 
     public async zoom(factor: number, position: LocalPosition): Promise<void> {

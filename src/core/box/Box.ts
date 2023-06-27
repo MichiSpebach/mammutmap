@@ -29,6 +29,7 @@ import { NodeWidget } from '../node/NodeWidget'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { Link } from '../link/Link'
 import { log } from '../logService'
+import { Style } from '../util/RenderElement'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   private name: string
@@ -266,6 +267,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     if (!this.renderState.isRendered()) {
       pros.push(relocationDragManager.addDropTarget(this))
       pros.push(HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut()))
+      pros.push(renderManager.addEventListenerTo(this.getId(), 'dblclick', () => this.site.zoomToFitRect(new LocalRect(0, 0, 100, 100))))
     }
 
     pros.push(this.renderAdditional())
@@ -397,14 +399,41 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     await grid.unrenderFrom(this.getGridPlaceHolderId(), priority)
   }
 
-  public async renderStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+  public async renderStyleWithRerender(options?: {
+    renderStylePriority?: RenderPriority,
+    transition?: boolean
+  }): Promise<{transitionAndRerender: Promise<void>} > {
+    await this.renderStyle(options?.renderStylePriority, options?.transition)
+    const rendered: Promise<void> = this.render()
+    if (!options?.transition) {
+      return {transitionAndRerender: rendered}
+    }
+
+    const transitionAndRerender: Promise<void> = new Promise<void>(async resolve => {
+      const timelimit: number = Date.now() + 500
+      await rendered
+      while (timelimit > Date.now()) {
+        await util.wait(Math.min(20, timelimit-Date.now()))
+        if (timelimit <= Date.now()) {
+          break
+        }
+        await this.render()
+      }
+      await this.render() // rerender at least once after transition finished, to be sure that childs get rendered if they should
+      resolve()
+    })
+    return {transitionAndRerender}
+  }
+
+  public async renderStyle(priority: RenderPriority = RenderPriority.NORMAL, transition?: boolean): Promise<void> {
     const rect: LocalRect = this.getLocalRect()
 
     const basicStyle: string = 'display:inline-block;position:absolute;overflow:visible;'
     const scaleStyle: string = 'width:'+rect.width+'%;height:'+rect.height+'%;'
     const positionStyle: string = 'left:'+rect.x+'%;top:'+rect.y+'%;'
+    const transitionStyle: string = transition ? 'transition:0.5s;' : ''
 
-    await renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle, priority)
+    await renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + transitionStyle, priority)
   }
 
   public async updateMeasuresAndBorderingLinks(
