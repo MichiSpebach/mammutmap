@@ -141,6 +141,7 @@ export class Map {
   private readonly mapRatioAdjusterId: string = 'mapRatioAdjuster'
   private projectSettings: ProjectSettings
   private rootFolder: RootFolderBox
+  /** @deprecated calculate dynamically instead */
   private readonly mapRatioAdjusterSizePx: number = 600
   private moveState: {latestMousePosition: ClientPosition, prevented: boolean, movingStarted: boolean} | null = null
   private devStats: RenderElement|undefined
@@ -153,15 +154,20 @@ export class Map {
   }
 
   public async render(): Promise<void> {
-    const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
-    let mapRatioAdjusterStyle = `position:relative;width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
-    if (!settings.getBoolean('positionMapOnTopLeft')) {
-      mapRatioAdjusterStyle += 'left:50%;top:50%;transform:translate(-50%,-50%);'
-    }
-    const mapRatioAdjusterHtml = `<div id="${this.mapRatioAdjusterId}" style="${mapRatioAdjusterStyle}">${rootFolderHtml}</div>`
-    const mapHtml = `<div id="${this.mapId}" style="overflow:hidden; width:100%; height:100%;">${mapRatioAdjusterHtml}</div>`
-
+    const mapHtml = `<div id="${this.mapId}" style="overflow:hidden; width:100%; height:100%;"></div>`
     await renderManager.setContentTo(this.id, mapHtml)
+
+    let mapRatioAdjusterStyle: string = 'position:relative;'
+    if (settings.getBoolean('positionMapOnTopLeft')) {
+      mapRatioAdjusterStyle += `width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
+    } else {
+      const mapClientRect: ClientRect = await renderManager.getClientRectOf(this.mapId)
+      const mapRatioAdjusterSizePx: number = Math.min(mapClientRect.width, mapClientRect.height) * 0.95
+      mapRatioAdjusterStyle += `width:${mapRatioAdjusterSizePx}px;height:${mapRatioAdjusterSizePx}px;left:50%;top:50%;transform:translate(-50%,-50%);`
+    }
+    const rootFolderHtml = '<div id="'+this.rootFolder.getId()+'" style="width:100%; height:100%;"></div>'
+    const mapRatioAdjusterHtml = `<div id="${this.mapRatioAdjusterId}" style="${mapRatioAdjusterStyle}">${rootFolderHtml}</div>`
+    await renderManager.setContentTo(this.mapId, mapRatioAdjusterHtml)
 
     await Promise.all([
       this.rootFolder.render(),

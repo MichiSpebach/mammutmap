@@ -156,9 +156,18 @@ export class SizeAndPosition {
         const zoom = 100 / Math.max(rect.width, rect.height)
     
         // TODO: implement delegate mechanism for large values
-        this.detached.shiftX = -zoom*rect.x - saveRect.x
-        this.detached.shiftY = -zoom*rect.y - saveRect.y
-        this.detached.zoomX = zoom / (saveRect.width/100)
+
+        let offsetToCenterX: number = 0
+        let offsetToCenterY: number = 0
+        if (rect.width < rect.height) {
+            offsetToCenterX = (rect.height-rect.width)/2
+        } else {
+            offsetToCenterY = (rect.width-rect.height)/2
+        }
+        
+        this.detached.shiftX = -zoom*(rect.x-offsetToCenterX) - saveRect.x // TODO: improve, e.g. does display longer boxes not as big as they could
+        this.detached.shiftY = -zoom*(rect.y-offsetToCenterY) - saveRect.y
+        this.detached.zoomX = zoom / (saveRect.width/100) // TODO: improve, stashes this always to a square
         this.detached.zoomY = zoom / (saveRect.height/100)
 
         const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transition:true})
