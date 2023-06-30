@@ -16,6 +16,7 @@ import { mouseDownDragManager } from './mouseDownDragManager'
 import { RenderElement } from './util/RenderElement'
 import { LocalPosition } from './shape/LocalPosition'
 import { ClientRect } from './ClientRect'
+import { LocalRect } from './LocalRect'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -178,7 +179,8 @@ export class Map {
         onDrag: (position: ClientPosition, ctrlPressed: boolean) => this.move(position, ctrlPressed),
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
       }),
-      relocationDragManager.addDropZone(this.mapId)
+      relocationDragManager.addDropZone(this.mapId),
+      renderManager.addEventListenerTo(this.mapId, 'dblclick', () => this.rootFolder.site.zoomToFitRect(new LocalRect(0, 0, 100, 100)))
     ])
   }
 
@@ -188,7 +190,8 @@ export class Map {
       this.rootFolder.destruct(),
       renderManager.removeEventListenerFrom(this.mapId, 'wheel'),
       mouseDownDragManager.removeDraggable(this.mapId),
-      relocationDragManager.removeDropZone(this.mapId)
+      relocationDragManager.removeDropZone(this.mapId),
+      renderManager.removeEventListenerFrom(this.mapId, 'dblclick')
     ])
     await renderManager.remove(this.mapId)
   }

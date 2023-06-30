@@ -153,7 +153,7 @@ export class SizeAndPosition {
         }
         
         const saveRect: LocalRect = this.getLocalRectToSave()
-        const zoom = 100 / Math.max(rect.width, rect.height)
+        const zoom = 100 / Math.max(rect.width, rect.height) // TODO: improve, e.g. does display longer boxes not as big as they could
     
         // TODO: implement delegate mechanism for large values
 
@@ -165,10 +165,10 @@ export class SizeAndPosition {
             offsetToCenterY = (rect.width-rect.height)/2
         }
         
-        this.detached.shiftX = -zoom*(rect.x-offsetToCenterX) - saveRect.x // TODO: improve, e.g. does display longer boxes not as big as they could
-        this.detached.shiftY = -zoom*(rect.y-offsetToCenterY) - saveRect.y
-        this.detached.zoomX = zoom / (saveRect.width/100) // TODO: improve, stashes this always to a square
-        this.detached.zoomY = zoom / (saveRect.height/100)
+        this.detached.shiftX = -zoom*(saveRect.width/100)*(rect.x-offsetToCenterX) - saveRect.x - (saveRect.width-100)/2
+        this.detached.shiftY = -zoom*(saveRect.height/100)*(rect.y-offsetToCenterY) - saveRect.y - (saveRect.height-100)/2
+        this.detached.zoomX = zoom
+        this.detached.zoomY = zoom
 
         const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transition:true})
         await renderStyleWithRerender.transitionAndRerender
