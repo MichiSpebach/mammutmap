@@ -16,7 +16,9 @@ import { mouseDownDragManager } from './mouseDownDragManager'
 import { RenderElement } from './util/RenderElement'
 import { LocalPosition } from './shape/LocalPosition'
 import { ClientRect } from './ClientRect'
-import { LocalRect } from './LocalRect'
+import { BoxWatcher } from './box/BoxWatcher'
+import { Box } from './box/Box'
+import { log } from './logService'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -140,8 +142,8 @@ export class Map {
   private readonly id: string
   private readonly mapId: string = 'map'
   private readonly mapRatioAdjusterId: string = 'mapRatioAdjuster'
-  private projectSettings: ProjectSettings
-  private rootFolder: RootFolderBox
+  private readonly projectSettings: ProjectSettings
+  private readonly rootFolder: RootFolderBox
   /** @deprecated calculate dynamically instead */
   private readonly mapRatioAdjusterSizePx: number = 600
   private moveState: {latestMousePosition: ClientPosition, prevented: boolean, movingStarted: boolean} | null = null
@@ -180,7 +182,7 @@ export class Map {
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
       }),
       relocationDragManager.addDropZone(this.mapId),
-      renderManager.addEventListenerTo(this.mapId, 'dblclick', () => this.rootFolder.site.zoomToFitRect(new LocalRect(0, 0, 100, 100)))
+      renderManager.addEventListenerTo(this.mapId, 'dblclick', () => this.rootFolder.site.zoomToFit())
     ])
   }
 
@@ -212,6 +214,46 @@ export class Map {
       renderManager.getClientRectOf(this.mapRatioAdjusterId, RenderPriority.NORMAL).then(rect => this.cachedMapRatioAdjusterClientRect = rect)
     }
     return this.cachedMapRatioAdjusterClientRect
+  }
+
+  public async flyTo(path: string): Promise<void> {
+    const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(/*await this.getMapRatioAdjusterClientRect() TODO fix and activate*/)
+    const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
+    const zoomingToCommonAncestor: Promise<void> = this.zoomToFitAll(zoomedInPath, renderedTargetPath)
+
+    let latestZoomTo: {box: Box, promise: Promise<void>}|undefined /*= undefined TODO explicitly set*/
+    const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path/*, {foreachBoxInPath: (box: Box) => {
+      // TODO
+    }}*/)
+    if (renderTargetReport.warnings) {
+      log.warning(`Map::flyTo(path: '${path}') ${renderTargetReport.warnings}`)
+    }
+    if (!renderTargetReport.boxWatcher) {
+      log.warning(`Map::flyTo(path: '${path}') failed to getBoxBySourcePathAndRenderIfNecessary`)
+      return
+    }
+    const targetBox: Box = await renderTargetReport.boxWatcher.get()
+
+    await zoomingToCommonAncestor
+    if (latestZoomTo && targetBox === latestZoomTo.box) {
+      await latestZoomTo.promise
+    } else {
+      await targetBox.site.zoomToFit()
+    }
+    await this.zoom(0, 0, 0) // TODO otherwise lots of "has path with no rendered boxes. This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn't." warnings, fix and remove this line
+    await renderTargetReport.boxWatcher!.unwatch()
+  }
+
+  private zoomToFitAll(path: Box[], otherPath: Box[]): Promise<void> {
+    let commonAncestor: Box = this.rootFolder
+    for (let i = 0; i < path.length && i < otherPath.length; i++) {
+      if (path[i] === otherPath[i]) {
+        commonAncestor = path[i]
+      } else {
+        break
+      }
+    }
+    return commonAncestor.site.zoomToFit()
   }
 
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {
@@ -313,9 +355,9 @@ export class Map {
       await renderManager.addElementTo(this.id, this.devStats)
     }
 
-    const stats = this.rootFolder.site.getDetachmentsInRenderedPath()
-    const renderedSitesInPath = this.rootFolder.site.getRenderedPath()
-    const renderedClientRectsInPath: ClientRect[] = await Promise.all(renderedSitesInPath.map(site => site.referenceNode.getClientRect()))
+    const stats = await this.rootFolder.site.getDetachmentsInRenderedPath()
+    const renderedSitesInPath = await this.rootFolder.getZoomedInPath()
+    const renderedClientRectsInPath: ClientRect[] = await Promise.all(renderedSitesInPath.map(box => box.getClientRect()))
     await renderManager.setElementsTo(devStatsId, [
       {type: 'div', children: `shiftX = ${stats.map(detachment => detachment.shiftX)}%`},
       {type: 'div', children: `shiftY = ${stats.map(detachment => detachment.shiftY)}%`},

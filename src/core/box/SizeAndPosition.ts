@@ -1,16 +1,18 @@
 import { LocalPosition } from '../shape/LocalPosition'
 import { LocalRect } from '../LocalRect'
 import { Box } from './Box'
-import { RenderPriority } from '../RenderManager'
+import { RenderPriority, renderManager } from '../RenderManager'
 import { util } from '../util/util'
 import { ClientRect } from '../ClientRect'
+import { RootFolderBox } from './RootFolderBox'
+import { log } from '../logService'
 
 export class SizeAndPosition {
     public static readonly delegateZoomToChildInPixels: number = 1000*1000 // TODO: can still be increased by magnitude when implementation is improved, worth it?
 
     public readonly referenceNode: Box // TODO: simply rename to parent?
     public readonly referenceNodeMapSiteData: {x: number, y: number, width: number, height: number}
-    private detached: {
+    private detached: { // TODO: rename to unhinged or unpinned?
         shiftX: number
         shiftY: number
         zoomX: number
@@ -26,13 +28,13 @@ export class SizeAndPosition {
         return !!this.detached
     }
 
-    public getDetachmentsInRenderedPath(): Readonly<{
+    public async getDetachmentsInRenderedPath(): Promise<Readonly<{
         shiftX: number
         shiftY: number
         zoomX: number
         zoomY: number
-    }>[] {
-        return this.getDetachedRenderedPath().map(site => {
+    }>[]> {
+        return (await this.getDetachedRenderedPath()).map(site => {
             if (!site.detached) {
                 util.logWarning('SizeAndPosition::getDetachmentsInRenderedPath() expected site to be detached')
             }
@@ -40,16 +42,8 @@ export class SizeAndPosition {
         })
     }
 
-    public getDetachedRenderedPath(): SizeAndPosition[] {
-        return this.getRenderedPath().filter(site => site.detached)
-    }
-
-    public getRenderedPath(): SizeAndPosition[] {
-        const detachedChildSite: SizeAndPosition|undefined = this.findChildSiteToDelegateZoom({warningOff: true})
-        if (!detachedChildSite) {
-            return [this]
-        }
-        return [this, ...detachedChildSite.getRenderedPath()]
+    public async getDetachedRenderedPath(): Promise<SizeAndPosition[]> {
+        return (await this.referenceNode.getZoomedInPath()).map(box => box.site).filter(site => site.detached)
     }
 
     public getLocalRectToRender(): LocalRect {
@@ -137,6 +131,10 @@ export class SizeAndPosition {
         await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE})
     }
 
+    public zoomToFit(): Promise<void> {
+        return this.zoomToFitRect(new LocalRect(0, 0, 100, 100))
+    }
+
     public async zoomToFitRect(rect: LocalRect): Promise<void> {
         if (!this.detached) {
             if (!this.referenceNode.isRoot()) {
@@ -188,7 +186,7 @@ export class SizeAndPosition {
             }
         }
 
-        const childSiteToDelegateZoom: SizeAndPosition|undefined = this.findDetachedChildSite() // TODO: cache?, small lags appear while zooming on heavy load, this could be why, did not recognize them before
+        const childSiteToDelegateZoom: SizeAndPosition|undefined = await this.findDetachedChildSite() // TODO: cache?, small lags appear while zooming on heavy load, this could be why, did not recognize them before
         if (childSiteToDelegateZoom) {
             return this.delegateZoomToChild(factor, positionInParentCoords, childSiteToDelegateZoom)
         }
@@ -225,7 +223,7 @@ export class SizeAndPosition {
 
     private async delegateZoomToChild(factor: number, positionInParentCoords: LocalPosition, childSiteToDelegateZoom?: SizeAndPosition): Promise<void> {
         if (!childSiteToDelegateZoom) {
-            childSiteToDelegateZoom = this.findChildSiteToDelegateZoom()
+            childSiteToDelegateZoom = await this.findChildSiteToDelegateZoom()
         }
         return childSiteToDelegateZoom?.zoomInParentCoords(factor, this.referenceNode.transform.fromParentPosition(positionInParentCoords))
     }
@@ -269,34 +267,22 @@ export class SizeAndPosition {
         ])
     }
 
-    private findDetachedChildSite(): SizeAndPosition|undefined {
-        const renderedChildSite: SizeAndPosition|undefined = this.findChildSiteToDelegateZoom({warningOff: true})
+    private async findDetachedChildSite(): Promise<SizeAndPosition | undefined> {
+        const renderedChildSite: SizeAndPosition|undefined = await this.findChildSiteToDelegateZoom({warningOff: true})
         if (!renderedChildSite || !renderedChildSite.isDetached()) {
             return undefined
         }
         return renderedChildSite
     }
 
-    private findChildSiteToDelegateZoom(options?: {warningOff?: boolean}): SizeAndPosition|undefined {
-        const renderedChildBoxes: Box[] = []
-        for (const child of this.referenceNode.getChilds()) {
-            if (child instanceof Box && child.isBodyBeingRendered()) {
-                renderedChildBoxes.push(child)
-            }
-        }
-
-        if (renderedChildBoxes.length < 1) {
+    private async findChildSiteToDelegateZoom(options?: {warningOff?: boolean}): Promise<SizeAndPosition | undefined> {
+        const zoomedInChild: Box|undefined = await this.referenceNode.getZoomedInChild()
+        if (!zoomedInChild) {
             if (!options?.warningOff) {
-                util.logWarning('SizeAndPosition::findChildSiteToDelegateZoom(..) Deeper zoom not implemented.')
+                log.warning('SizeAndPosition::findChildSiteToDelegateZoom(..) Deeper zoom not implemented.')
             }
             return undefined
         }
-
-        if (renderedChildBoxes.length !== 1 && !options?.warningOff) {
-            let message: string = `SizeAndPosition::findChildSiteToDelegateZoom(..) Expected exactly 1 child with rendered body`
-            message += `, but are ${renderedChildBoxes.length} (${renderedChildBoxes.map(box => box.getName())}).`
-            util.logWarning(message)
-        }
-        return renderedChildBoxes[0]?.site
+        return zoomedInChild.site
     }
 }

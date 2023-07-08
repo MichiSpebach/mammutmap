@@ -124,6 +124,38 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
   public abstract isSourceless(): boolean
 
+  public async getZoomedInPath(mapClientRect?: ClientRect): Promise<Box[]> {
+    const zoomedInChild: Box|undefined = await this.getZoomedInChild(mapClientRect)
+    if (!zoomedInChild) {
+        return [this]
+    }
+    return [this, ...await zoomedInChild.getZoomedInPath(mapClientRect)]
+  }
+
+  // TODO: introduce 'context' object with 'getMapClientRect(): ClientRect' that every box has and remove 'mapClientRect' argument?
+  public async getZoomedInChild(mapClientRect?: ClientRect): Promise<Box | undefined> {
+    let renderedChildBoxes: Box[] = []
+    for (const child of this.getChilds()) { // filter does not support promises
+      if (child instanceof Box && child.isBodyBeingRendered()) {
+        if (mapClientRect && !(await child.getClientRect()).isInsideOrEqual(mapClientRect)) {
+            continue
+        }
+        renderedChildBoxes.push(child)
+      }
+    }
+
+    if (renderedChildBoxes.length < 1) {
+      return undefined
+    }
+    
+    if (renderedChildBoxes.length !== 1) {
+      let message: string = `Box::getZoomedInChild(..) Expected exactly 1 zoomed in child`
+      message += `, but are ${renderedChildBoxes.length} (${renderedChildBoxes.map(box => box.getName())}).`
+      log.warning(message)
+    }
+    return renderedChildBoxes[0]
+  }
+
   public getChilds(): (Box|NodeWidget)[] { // TODO: change return type to AbstractNodeWidget as soon as available
     return this.nodes.getNodes()
   }
@@ -267,7 +299,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     if (!this.renderState.isRendered()) {
       pros.push(relocationDragManager.addDropTarget(this))
       pros.push(HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut()))
-      pros.push(renderManager.addEventListenerTo(this.getId(), 'dblclick', () => this.site.zoomToFitRect(new LocalRect(0, 0, 100, 100))))
+      pros.push(renderManager.addEventListenerTo(this.getId(), 'dblclick', () => this.site.zoomToFit()))
     }
 
     pros.push(this.renderAdditional())

@@ -11,6 +11,7 @@ import { BoxLinks } from './BoxLinks'
 import { NodeWidget } from '../node/NodeWidget'
 import { ClientPosition } from '../shape/ClientPosition'
 import { fileSystem } from '../fileSystemAdapter'
+import { log } from '../logService'
 
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
@@ -121,10 +122,7 @@ export class FolderBox extends Box {
     path: string, 
     options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean}
   ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
-    let remainingPath: string = path.substring(this.getName().length)
-    if (remainingPath.startsWith('/') || remainingPath.startsWith('\\')) {
-      remainingPath = remainingPath.substring(1)
-    }
+    const remainingPath: string = util.removeStartFromPath(this.getName(), path)
 
     for (const box of this.getBoxes()) {
       if (util.getElementCountOfPath(remainingPath) === 1 && util.matchFileNames(remainingPath, box.getName(), options)) {
@@ -132,7 +130,7 @@ export class FolderBox extends Box {
         await box.addWatcherAndUpdateRender(boxWatcher)
         return {boxWatcher}
       }
-      if (remainingPath.startsWith(box.getName())) {
+      if (util.getElementsOfPath(remainingPath)[0] === box.getName()) {
         if (!box.isFolder()) {
           return this.warn(box.getSrcPath()+' is not last element in path '+path+' but is not a folder', options)
         }
@@ -149,6 +147,25 @@ export class FolderBox extends Box {
       util.logWarning(message)
     }
     return {warnings: [message]}
+  }
+
+  // TODO: 'getLoadedBoxesInPath' would be more exact, rename?
+  public getRenderedBoxesInPath(path: string): Box[] {
+    const remainingPath: string = util.removeStartFromPath(this.getName(), path)
+
+    for (const box of this.getBoxes()) {
+      if (util.getElementCountOfPath(remainingPath) === 1 && util.matchFileNames(remainingPath, box.getName())) {
+        return [this, box]
+      }
+      if (util.getElementsOfPath(remainingPath)[0] === box.getName()) {
+        if (!box.isFolder() || !(box instanceof FolderBox)) {
+          log.warning(`FolderBox::getRenderedBoxesInPath(path: '${path}') '${box.getSrcPath()}' is not last element in path but is also not a folder.`)
+          return [this, box]
+        }
+        return [this, ...box.getRenderedBoxesInPath(remainingPath)]
+      }
+    }
+    return [this]
   }
 
   public getBox(id: string): Box|undefined {

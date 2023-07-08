@@ -46,6 +46,10 @@ export abstract class Rect<POSITION extends Position<POSITION>> extends Shape<PO
       return this.buildPosition(this.x, this.getBottomY())
   }
 
+  public isInsideOrEqual(other: Rect<POSITION>): boolean {
+    return this.x >= other.x && this.width <= other.width && this.y >= other.y && this.height <= other.height
+  }
+
   public isOverlappingWith(other: Rect<POSITION>): boolean {
     return this.isPositionInside(other.getTopLeftPosition())
       || this.isPositionInside(other.getBottomRightPosition())

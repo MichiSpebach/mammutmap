@@ -171,6 +171,8 @@ class Util {
     }
   }
 
+  // TODO: introduce Path class and move path util methods there
+
   public joinPaths(paths: string[]): string {
     let jointedPath: string = ''
     for (let path of paths) {
@@ -228,6 +230,17 @@ class Util {
       return elements.filter(element => element.length > 0)
     }
     return elements
+  }
+
+  public removeStartFromPath(start: string, path: string): string {
+    if (!path.startsWith(start)) {
+      log.warning(`Util::removeStartFromPath(..) path '${path}' does not start with start '${start}'.`)
+    }
+    let remainingPath: string = path.substring(start.length)
+    if (remainingPath.startsWith('/') || remainingPath.startsWith('\\')) {
+      remainingPath = remainingPath.substring(1)
+    }
+    return remainingPath
   }
 
   public removeLastElementFromPath(path: string): string {

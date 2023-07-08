@@ -20,7 +20,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public openDevTools(): void {
-        const message = 'DirectDomAdapter::openDevTools() not implemented, simply open it with browser. F12 or ctrl+i on most browsers.'
+        const message = 'DirectDomAdapter::openDevTools() not implemented, simply open it with browser. F12 or ctrl+shift+i on most browsers.'
         MessagePopup.buildAndRender('Open DevTools', message)
         util.logInfo(message)
     }
