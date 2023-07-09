@@ -148,6 +148,7 @@ export class Map {
   private readonly mapRatioAdjusterSizePx: number = 600
   private moveState: {latestMousePosition: ClientPosition, prevented: boolean, movingStarted: boolean} | null = null
   private devStats: RenderElement|undefined
+  private cachedMapClientRect: ClientRect|null = null
   private cachedMapRatioAdjusterClientRect: ClientRect|null = null
 
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
@@ -164,7 +165,7 @@ export class Map {
     if (settings.getBoolean('positionMapOnTopLeft')) {
       mapRatioAdjusterStyle += `width:${this.mapRatioAdjusterSizePx}px;height:${this.mapRatioAdjusterSizePx}px;`
     } else {
-      const mapClientRect: ClientRect = await renderManager.getClientRectOf(this.mapId)
+      const mapClientRect: ClientRect = await this.getMapClientRect()
       const mapRatioAdjusterSizePx: number = Math.min(mapClientRect.width, mapClientRect.height) * 0.95
       mapRatioAdjusterStyle += `width:${mapRatioAdjusterSizePx}px;height:${mapRatioAdjusterSizePx}px;left:50%;top:50%;transform:translate(-50%,-50%);`
     }
@@ -206,6 +207,16 @@ export class Map {
     return this.rootFolder
   }
 
+  private async getMapClientRect(): Promise<ClientRect> {
+    if (!this.cachedMapClientRect) {
+      this.cachedMapClientRect = await renderManager.getClientRectOf(this.mapId, RenderPriority.RESPONSIVE)
+    } else {
+      // in case of some weird window changes, fault is fixed asynchronously and is not permanent
+      renderManager.getClientRectOf(this.mapId, RenderPriority.NORMAL).then(rect => this.cachedMapClientRect = rect)
+    }
+    return this.cachedMapClientRect
+  }
+
   private async getMapRatioAdjusterClientRect(): Promise<ClientRect> {
     if (!this.cachedMapRatioAdjusterClientRect) {
       this.cachedMapRatioAdjusterClientRect = await renderManager.getClientRectOf(this.mapRatioAdjusterId, RenderPriority.RESPONSIVE)
@@ -219,7 +230,7 @@ export class Map {
   public async flyTo(path: string): Promise<void> {
     const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(await this.getMapRatioAdjusterClientRect())
     const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
-    const zoomingToCommonAncestor: Promise<void> = this.zoomToFitAll(zoomedInPath, renderedTargetPath)
+    const zoomingToCommonAncestor: Promise<void> = this.zoomToFitAll(zoomedInPath, renderedTargetPath, {skipIfAllInScreen: true})
 
     let latestZoomTo: {box: Box, promise: Promise<void>}|undefined
     const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
@@ -246,7 +257,7 @@ export class Map {
     await renderTargetReport.boxWatcher!.unwatch()
   }
 
-  private async zoomToFitAll(path: Box[], otherPath: Box[]): Promise<void> {
+  private async zoomToFitAll(path: Box[], otherPath: Box[], options?: {skipIfAllInScreen?: boolean}): Promise<void> {
     let commonAncestor: Box = this.rootFolder
     for (let i = 0; i < path.length && i < otherPath.length; i++) {
       if (path[i] === otherPath[i]) {
@@ -254,6 +265,9 @@ export class Map {
       } else {
         break
       }
+    }
+    if (options?.skipIfAllInScreen && (await commonAncestor.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
+      return
     }
     return commonAncestor.site.zoomToFit()
   }
