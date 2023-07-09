@@ -221,10 +221,13 @@ export class Map {
     const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
     const zoomingToCommonAncestor: Promise<void> = this.zoomToFitAll(zoomedInPath, renderedTargetPath)
 
-    let latestZoomTo: {box: Box, promise: Promise<void>}|undefined /*= undefined TODO explicitly set*/
-    const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path/*, {foreachBoxInPath: (box: Box) => {
-      // TODO
-    }}*/)
+    let latestZoomTo: {box: Box, promise: Promise<void>}|undefined
+    const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
+      await zoomingToCommonAncestor
+      if (!latestZoomTo || box.isDescendantOf(latestZoomTo.box)) {
+        latestZoomTo = {box, promise: box.site.zoomToFit()}
+      }
+    }})
     if (renderTargetReport.warnings) {
       log.warning(`Map::flyTo(path: '${path}') ${renderTargetReport.warnings}`)
     }
@@ -235,16 +238,15 @@ export class Map {
     const targetBox: Box = await renderTargetReport.boxWatcher.get()
 
     await zoomingToCommonAncestor
-    if (latestZoomTo && targetBox === latestZoomTo.box) {
-      await latestZoomTo.promise
-    } else {
-      await targetBox.site.zoomToFit()
+    if (!latestZoomTo || targetBox !== latestZoomTo.box) {
+      latestZoomTo = {box: targetBox, promise: targetBox.site.zoomToFit()}
     }
+    await latestZoomTo.promise
     await this.zoom(0, 0, 0) // TODO otherwise lots of "has path with no rendered boxes. This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn't." warnings, fix and remove this line
     await renderTargetReport.boxWatcher!.unwatch()
   }
 
-  private zoomToFitAll(path: Box[], otherPath: Box[]): Promise<void> {
+  private async zoomToFitAll(path: Box[], otherPath: Box[]): Promise<void> {
     let commonAncestor: Box = this.rootFolder
     for (let i = 0; i < path.length && i < otherPath.length; i++) {
       if (path[i] === otherPath[i]) {

@@ -503,6 +503,15 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
   protected abstract formBody(): string*/
 
+  public isDescendantOf(ancestor: Box): boolean {
+    for (let descendant: Box = this; !descendant.isRoot(); descendant = descendant.getParent()) {
+      if (descendant.getParent() === ancestor) {
+        return true
+      }
+    }
+    return false
+  }
+
   public static findCommonAncestor(fromBox: Box|NodeWidget, toBox: Box|NodeWidget): {
     commonAncestor: Box, 
     fromPath: (Box|NodeWidget)[], 

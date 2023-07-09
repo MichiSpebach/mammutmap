@@ -101,7 +101,7 @@ export class FolderBox extends Box {
   // TODO: only used by plugins, move into pluginUtil/boxFinder?
   public async getBoxBySourcePathAndRenderIfNecessary(
     path: string, 
-    options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean}
+    options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean, foreachBoxInPath?: (box: Box) => void}
   ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
     if (!path.startsWith(this.getName())) {
       return this.warn('path '+path+' must start with name of box '+this.getName(), options)
@@ -120,21 +120,27 @@ export class FolderBox extends Box {
 
   private async findBoxInChildsBySourcePathAndRenderIfNecessary(
     path: string, 
-    options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean}
+    options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean, foreachBoxInPath?: (box: Box) => void}
   ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
     const remainingPath: string = util.removeStartFromPath(this.getName(), path)
 
     for (const box of this.getBoxes()) {
       if (util.getElementCountOfPath(remainingPath) === 1 && util.matchFileNames(remainingPath, box.getName(), options)) {
+        if (options?.foreachBoxInPath) {
+          options.foreachBoxInPath(box)
+        }
         const boxWatcher: BoxWatcher = new BoxWatcher(box)
         await box.addWatcherAndUpdateRender(boxWatcher)
         return {boxWatcher}
       }
       if (util.getElementsOfPath(remainingPath)[0] === box.getName()) {
-        if (!box.isFolder()) {
+        if (options?.foreachBoxInPath) {
+          options.foreachBoxInPath(box)
+        }
+        if (!box.isFolder() || !(box instanceof FolderBox)) {
           return this.warn(box.getSrcPath()+' is not last element in path '+path+' but is not a folder', options)
         }
-        return (box as FolderBox).getBoxBySourcePathAndRenderIfNecessary(remainingPath, options)
+        return box.getBoxBySourcePathAndRenderIfNecessary(remainingPath, options)
       }
     }
 
