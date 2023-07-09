@@ -124,21 +124,22 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
   public abstract isSourceless(): boolean
 
-  public async getZoomedInPath(mapClientRect?: ClientRect): Promise<Box[]> {
-    const zoomedInChild: Box|undefined = await this.getZoomedInChild(mapClientRect)
+  // TODO: belongs more into map, move?
+  public async getZoomedInPath(clientRect?: ClientRect): Promise<Box[]> {
+    const zoomedInChild: Box|undefined = await this.getZoomedInChild(clientRect)
     if (!zoomedInChild) {
         return [this]
     }
-    return [this, ...await zoomedInChild.getZoomedInPath(mapClientRect)]
+    return [this, ...await zoomedInChild.getZoomedInPath(clientRect)]
   }
 
-  // TODO: introduce 'context' object with 'getMapClientRect(): ClientRect' that every box has and remove 'mapClientRect' argument?
-  public async getZoomedInChild(mapClientRect?: ClientRect): Promise<Box | undefined> {
+  // TODO: introduce 'context' object with 'getMapClientRect(): ClientRect' that every box has and remove 'clientRect' argument?
+  public async getZoomedInChild(clientRect?: ClientRect): Promise<Box | undefined> {
     let renderedChildBoxes: Box[] = []
     for (const child of this.getChilds()) { // filter does not support promises
       if (child instanceof Box && child.isBodyBeingRendered()) {
-        if (mapClientRect && !(await child.getClientRect()).isInsideOrEqual(mapClientRect)) {
-            continue
+        if (clientRect && !clientRect.isInsideOrEqual(await child.getClientRect())) {
+          continue
         }
         renderedChildBoxes.push(child)
       }

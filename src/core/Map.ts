@@ -217,7 +217,7 @@ export class Map {
   }
 
   public async flyTo(path: string): Promise<void> {
-    const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(/*await this.getMapRatioAdjusterClientRect() TODO fix and activate*/)
+    const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(await this.getMapRatioAdjusterClientRect())
     const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
     const zoomingToCommonAncestor: Promise<void> = this.zoomToFitAll(zoomedInPath, renderedTargetPath)
 
