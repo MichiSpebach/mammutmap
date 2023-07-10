@@ -64,6 +64,7 @@ export abstract class BoxBody {
 
   private async runUnrenderIfPossible(force?: boolean): Promise<void> {
     if (this.renderState.isUnrendered()) {
+      await this.unrenderZoomInToRenderHint()
       return
     }
     this.renderState.setUnrenderStarted()

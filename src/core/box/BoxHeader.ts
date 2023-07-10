@@ -63,7 +63,9 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
   }
 
   public formTitleHtml(): string {
-    return this.referenceBox.getName()
+    return settings.getBoolean('developerMode')
+      ? `${this.referenceBox.getName()} (${this.referenceBox.getId()})`
+      : this.referenceBox.getName()
   }
 
   public async unrender(): Promise<void> {
