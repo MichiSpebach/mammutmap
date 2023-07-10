@@ -228,7 +228,7 @@ export class Map {
   }
 
   public async flyTo(path: string): Promise<void> {
-    const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(await this.getMapRatioAdjusterClientRect())
+    const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(await this.getInnerMapClientRect())
     const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
     const zoomingToCommonAncestor: Promise<void> = this.zoomToFitAll(zoomedInPath, renderedTargetPath, {skipIfAllInScreen: true})
 
@@ -257,7 +257,17 @@ export class Map {
     await renderTargetReport.boxWatcher!.unwatch()
   }
 
+  private async getInnerMapClientRect(): Promise<ClientRect> {
+    const mapRect: ClientRect = await this.getMapClientRect()
+    const paddingX: number = mapRect.width/4
+    const paddingY: number = mapRect.height/4
+    return new ClientRect(mapRect.x+paddingX, mapRect.y+paddingY, mapRect.width-paddingX*2, mapRect.height-paddingY*2)
+  }
+
   private async zoomToFitAll(path: Box[], otherPath: Box[], options?: {skipIfAllInScreen?: boolean}): Promise<void> {
+    if (path[0] !== otherPath[0]) {
+      log.warning(`Map::zoomToFitAll(path: '${path.map(box => box.getName())}', otherPath: '${otherPath.map(box => box.getName())}') expected paths to start with same object.`)
+    }
     let commonAncestor: Box = this.rootFolder
     for (let i = 0; i < path.length && i < otherPath.length; i++) {
       if (path[i] === otherPath[i]) {
