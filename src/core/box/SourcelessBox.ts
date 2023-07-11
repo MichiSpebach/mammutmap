@@ -8,13 +8,14 @@ import { FolderBox } from './FolderBox'
 import { BoxData } from '../mapData/BoxData'
 import { BoxLinks } from './BoxLinks'
 import { ClientPosition } from '../shape/ClientPosition'
+import { BoxContext } from './BoxContext'
 
 export class SourcelessBox extends Box {
   private content: string
   private bodyRendered: boolean = false
 
-  public constructor(name: string, parent: FolderBox, mapData: BoxData, mapDataFileExists: boolean, content: string) {
-    super(name, parent, mapData, mapDataFileExists)
+  public constructor(name: string, parent: FolderBox, mapData: BoxData, mapDataFileExists: boolean, context: BoxContext, content: string) {
+    super(name, parent, mapData, mapDataFileExists, context)
     this.content = content
   }
 

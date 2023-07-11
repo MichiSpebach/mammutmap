@@ -58,7 +58,7 @@ test('reorderMapDataPathWithoutRender misplaced managingBox', async () => {
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path[0]).toEqual({boxId: 'managingBoxId', boxName: 'managingBoxName', x: 75, y: 50})
     const actualManagingBox: Box = scene.linkEnd.getManagingBox()
-    const misplacedManagingBox: Box = boxFactory.rootFolderOf({idOrProjectSettings:'misplacedManagingBoxId', rendered: true})
+    const misplacedManagingBox: Box = boxFactory.rootFolderOf({idOrSettings:'misplacedManagingBoxId', rendered: true})
     scene.linkEnd.getManagingBox = () => misplacedManagingBox
 
     await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: actualManagingBox, movedWayPoint: actualManagingBox})
@@ -304,7 +304,7 @@ function setupRenderedScenarioWithDepthZero(): {linkEnd: LinkEnd, linkEndData: L
     const wayPoint = WayPointData.buildNew('managingBoxId', 'managingBoxName', 75, 50)
     const linkEndData = new LinkEndData([wayPoint])
 
-    const managingBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: 'managingBoxId', rendered: true})
+    const managingBox: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'managingBoxId', rendered: true})
 
     const linkEnd = linkEndFactory.of(linkEndData, managingBox)
 
@@ -340,7 +340,7 @@ function setupRenderedScenarioWithDepth(): {
     const deepWayPoint = WayPointData.buildNew('deepBoxId', 'deepBoxName', 50, 50)
     const linkEndData = new LinkEndData([innerWayPoint, deepWayPoint])
 
-    const rootBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: 'rootBoxId', rendered: true})
+    const rootBox: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'rootBoxId', rendered: true})
     const outerBox: FolderBox = boxFactory.folderOf({idOrData: 'outerBoxId', parent: rootBox, rendered: true})
     const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, rendered: true})
     const deepBox: FolderBox = boxFactory.folderOf({idOrData: 'deepBoxId', parent: innerBox, rendered: true})
@@ -364,7 +364,7 @@ function setupShallowRenderedScenarioWithDepth(): {
     const deepWayPoint = WayPointData.buildNew('deepBoxId', 'deepBoxName', 50, 50)
     const linkEndData = new LinkEndData([innerWayPoint, deepWayPoint])
 
-    const rootBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: 'rootBoxId'})
+    const rootBox: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'rootBoxId'})
     const outerBox: FolderBox = boxFactory.folderOf({idOrData: 'outerBoxId', parent: rootBox, rendered: true})
     const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, rendered: true})
     rootBox.addBox(outerBox)

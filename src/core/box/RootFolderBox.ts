@@ -2,32 +2,37 @@ import { FolderBox } from './FolderBox'
 import { ProjectSettings } from '../ProjectSettings'
 import { ClientRect } from '../ClientRect'
 import { renderManager, RenderPriority } from '../RenderManager'
+import { BoxContext } from './BoxContext'
 
 export class RootFolderBox extends FolderBox {
-  private readonly projectSettings: ProjectSettings
   private readonly idRenderedInto: string
   private cachedClientRect: ClientRect|null = null
 
-  public constructor(projectSettings: ProjectSettings, idRenderedInto: string) {
-    super(projectSettings.getAbsoluteSrcRootPath(), null, projectSettings.data, projectSettings.isDataFileExisting())
-    this.projectSettings = projectSettings
+  public constructor(context: BoxContext, idRenderedInto: string) {
+    super(
+      context.projectSettings.getAbsoluteSrcRootPath(), 
+      null, 
+      context.projectSettings.data, 
+      context.projectSettings.isDataFileExisting(), 
+      context
+    )
     this.idRenderedInto = idRenderedInto
   }
 
   public override getSrcPath(): string {
-    return this.projectSettings.getAbsoluteSrcRootPath()
+    return this.context.projectSettings.getAbsoluteSrcRootPath()
   }
 
   public override getMapPath(): string {
-    return this.projectSettings.getAbsoluteMapRootPath()
+    return this.context.projectSettings.getAbsoluteMapRootPath()
   }
 
   public override getMapDataFilePath(): string {
-    return this.projectSettings.getProjectSettingsFilePath()
+    return this.context.projectSettings.getProjectSettingsFilePath()
   }
 
   public override getProjectSettings(): ProjectSettings {
-    return this.projectSettings
+    return this.context.projectSettings
   }
 
   public override isRoot(): boolean {
@@ -36,7 +41,7 @@ export class RootFolderBox extends FolderBox {
 
   public override async saveMapData(): Promise<void> {
     if (!this.isMapDataFileExisting()) {
-      await this.projectSettings.saveToFileSystem()
+      await this.context.projectSettings.saveToFileSystem()
     }
     await super.saveMapData()
   }

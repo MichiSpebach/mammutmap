@@ -19,6 +19,7 @@ import { ClientRect } from './ClientRect'
 import { BoxWatcher } from './box/BoxWatcher'
 import { Box } from './box/Box'
 import { log } from './logService'
+import { BoxContext } from './box/BoxContext'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -154,7 +155,8 @@ export class Map {
   public constructor(idToRenderIn: string, projectSettings: ProjectSettings) {
     this.id = idToRenderIn
     this.projectSettings = projectSettings
-    this.rootFolder = new RootFolderBox(projectSettings, 'mapRatioAdjuster')
+    const boxContext: BoxContext = {projectSettings, getMapClientRect: () => this.getMapClientRect()}
+    this.rootFolder = new RootFolderBox(boxContext, 'mapRatioAdjuster')
   }
 
   public async render(): Promise<void> {

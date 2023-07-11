@@ -4,6 +4,11 @@ import { FolderBox } from '../../../src/core/box/FolderBox'
 import { FileBox } from '../../../src/core/box/FileBox'
 import { BoxWatcher } from '../../../src/core/box/BoxWatcher'
 import { util } from '../../../src/core/util/util'
+import * as mapSettingsDataFactory from '../mapData/factories/mapSettingsDataFactory'
+import * as projectSettingsFactory from '../factories/projectSettingsFactory'
+import * as boxFactory from './factories/boxFactory'
+import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
+import { ProjectSettings } from '../../../src/core/ProjectSettings'
 
 test('getBoxBySourcePathAndRenderIfNecessary path with one element', async () => {
   const scenario = setupScenarioForGetBoxBySourcePathAndRenderIfNecessary()
@@ -61,9 +66,15 @@ function setupScenarioForGetBoxBySourcePathAndRenderIfNecessary(): {
   innerBox: FolderBox,
   fileBox: FileBox
 } {
-  const box: FolderBox = new FolderBox('src/box', null, mock<BoxData>(), false)
-  const innerBox: FolderBox = new FolderBox('innerBox', box, mock<BoxData>(), false)
-  const fileBox: FileBox = new FileBox('fileBox', innerBox, mock<BoxData>(), false)
+  initBoxManager(new BoxManager())
+
+  const projectSettings: ProjectSettings = projectSettingsFactory.of({
+    projectSettingsFilePath: '', 
+    data: mapSettingsDataFactory.of({id: 'src/box', srcRootPath: 'src/box'})
+  })
+  const box: FolderBox = boxFactory.rootFolderOf({idOrSettings: projectSettings})
+  const innerBox: FolderBox = boxFactory.folderOf({name: 'innerBox', parent: box, idOrData: mock<BoxData>()})
+  const fileBox: FileBox = boxFactory.fileOf({name: 'fileBox', parent: innerBox, idOrData: mock<BoxData>()})
 
   box.getSrcPath = () => 'src/box'
   box.getBoxes = () => [innerBox]

@@ -1,10 +1,11 @@
-import { mock } from 'jest-mock-extended'
 import { Transform } from '../../../src/core/box/Transform'
 import { ClientPosition } from '../../../src/core/shape/ClientPosition'
 import { LocalPosition } from '../../../src/core/shape/LocalPosition'
-import { BoxData } from '../../../src/core/mapData/BoxData'
 import { FolderBox } from '../../../src/core/box/FolderBox'
 import { ClientRect } from '../../../src/core/ClientRect'
+import * as boxFactory from './factories/boxFactory'
+import { RootFolderBox } from '../../../src/core/box/RootFolderBox'
+import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
 
 test('localToClientPosition', async () => {
   const result: ClientPosition = await setupScenario().transform.localToClientPosition(new LocalPosition(50, 50))
@@ -26,9 +27,12 @@ test('getNearestGridPositionOf rounds to multiple of 4', () => {
 })
 
 function setupScenario(): {transform: Transform, otherTransform: Transform} {
-  const box: FolderBox = new FolderBox('src/box', null, mock<BoxData>(), false)
+  initBoxManager(new BoxManager())
+
+  const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root'})
+  const box: FolderBox = boxFactory.folderOf({idOrData: 'src/box', parent: root})
   box.getClientRect = () => Promise.resolve(new ClientRect(500, 300, 400, 200))
-  const otherBox: FolderBox = new FolderBox('src/box/other', null, mock<BoxData>(), false)
+  const otherBox: FolderBox = boxFactory.folderOf({idOrData: 'src/box/other', parent: box})
   otherBox.getClientRect = () => Promise.resolve(new ClientRect(550, 350, 200, 100))
 
   return {transform: box.transform, otherTransform: otherBox.transform}

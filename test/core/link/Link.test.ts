@@ -75,7 +75,7 @@ function setupSimpleScenario(): {
     linkTags: []
   })
   const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, mapSettingsData, false)
-  const managingBox: RootFolderBox = boxFactory.rootFolderOf({idOrProjectSettings: projectSettings, rendered: true})
+  const managingBox: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: projectSettings, rendered: true})
   const fromBox: Box = boxFactory.folderOf({idOrData: BoxData.buildNewWithId('fromBox', 5, 5, 10, 10), name: 'FromBox', parent: managingBox, rendered: true})
   const toBox: Box = boxFactory.folderOf({idOrData: BoxData.buildNewWithId('toBox', 85, 5, 10, 10), name: 'ToBox', parent: managingBox, rendered: true})
 

@@ -30,12 +30,14 @@ import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { Link } from '../link/Link'
 import { log } from '../logService'
 import { Style } from '../util/RenderElement'
+import { BoxContext } from './BoxContext'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   private name: string
   private parent: FolderBox|null
   private mapData: BoxData
   private mapDataFileExists: boolean
+  public readonly context: BoxContext
   public readonly transform: Transform
   public readonly site: SizeAndPosition
   private readonly header: BoxHeader
@@ -49,12 +51,13 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
 
-  public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean) {
+  public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context: BoxContext) {
     super()
     this.name = name
     this.parent = parent
     this.mapData = mapData
     this.mapDataFileExists = mapDataFileExists
+    this.context = context
     this.transform = new Transform(this)
     this.site = new SizeAndPosition(this, this.mapData)
     this.header = this.createHeader()
@@ -133,15 +136,16 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return [this, ...await zoomedInChild.getZoomedInPath(clientRect)]
   }
 
-  // TODO: introduce 'context' object with 'getMapClientRect(): ClientRect' that every box has and remove 'clientRect' argument?
   public async getZoomedInChild(clientRect?: ClientRect): Promise<Box | undefined> {
+    if (!clientRect) {
+      clientRect = await this.context.getMapClientRect()
+    }
     let renderedChildBoxes: Box[] = []
     for (const child of this.getChilds()) { // filter does not support promises
       if (child instanceof Box && child.isBodyBeingRendered()) {
-        if (clientRect && !clientRect.isInsideOrEqual(await child.getClientRect())) {
-          continue
+        if (clientRect.isInsideOrEqual(await child.getClientRect())) {
+          renderedChildBoxes.push(child)
         }
-        renderedChildBoxes.push(child)
       }
     }
 
