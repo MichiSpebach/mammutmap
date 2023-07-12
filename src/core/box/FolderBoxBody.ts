@@ -183,13 +183,13 @@ export class FolderBoxBody extends BoxBody {
     let box: Box
 
     if (!dirEntry) {
-      box = new SourcelessBox(name, this.referenceFolderBox, mapData, mapDataFileExists, this.referenceFolderBox.context, 'source not found')
+      box = new SourcelessBox(name, this.referenceFolderBox, mapData, mapDataFileExists, 'source not found')
     } else if (dirEntry.isDirectory()) {
-      box = new FolderBox(name, this.referenceFolderBox, mapData, mapDataFileExists, this.referenceFolderBox.context)
+      box = new FolderBox(name, this.referenceFolderBox, mapData, mapDataFileExists)
     } else if (dirEntry.isFile()) {
-      box = new FileBox(name, this.referenceFolderBox, mapData, mapDataFileExists, this.referenceFolderBox.context)
+      box = new FileBox(name, this.referenceFolderBox, mapData, mapDataFileExists)
     } else {
-      box = new SourcelessBox(name, this.referenceFolderBox, mapData, mapDataFileExists, this.referenceFolderBox.context, 'is neither file nor directory')
+      box = new SourcelessBox(name, this.referenceFolderBox, mapData, mapDataFileExists, 'is neither file nor directory')
     }
     await this.renderBoxPlaceholderFor(box)
 

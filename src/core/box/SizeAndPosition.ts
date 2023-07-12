@@ -151,7 +151,10 @@ export class SizeAndPosition {
         }
         
         const saveRect: LocalRect = this.getLocalRectToSave()
-        const zoom = 100 / Math.max(rect.width, rect.height) // TODO: improve, e.g. does display longer boxes not as big as they could
+        if (this.referenceNode.isRoot()) {
+            rect = await this.enlargeRectInMapRatioAdjusterCoordsToFillMap(rect)
+        }
+        const zoom = 100 / Math.max(rect.width, rect.height)
     
         // TODO: implement delegate mechanism for large values
 
@@ -170,6 +173,13 @@ export class SizeAndPosition {
 
         const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transition:true})
         await renderStyleWithRerender.transitionAndRerender
+    }
+
+    // TODO: this is a hack implement better solution
+    private async enlargeRectInMapRatioAdjusterCoordsToFillMap(rect: LocalRect): Promise<LocalRect> {
+        const mapClientRect: ClientRect = await this.referenceNode.context.getMapClientRect()
+        const mapRatio: number =  mapClientRect.width/mapClientRect.height
+        return new LocalRect(rect.x + (rect.width - rect.width/mapRatio)/2, rect.y, rect.width/mapRatio, rect.height)
     }
 
     public async zoom(factor: number, position: LocalPosition): Promise<void> {

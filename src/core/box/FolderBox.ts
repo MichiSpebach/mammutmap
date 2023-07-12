@@ -17,7 +17,7 @@ import { BoxContext } from './BoxContext'
 export class FolderBox extends Box {
   private readonly body: FolderBoxBody
 
-  public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context: BoxContext) {
+  public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context?: BoxContext) {
     super(name, parent, mapData, mapDataFileExists, context)
     this.body = new FolderBoxBody(this)
   }

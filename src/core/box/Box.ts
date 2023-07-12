@@ -51,13 +51,19 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
 
-  public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context: BoxContext) {
+  public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context?: BoxContext) {
     super()
     this.name = name
     this.parent = parent
     this.mapData = mapData
     this.mapDataFileExists = mapDataFileExists
-    this.context = context
+    if (context) {
+      this.context = context
+    } else if (parent) {
+      this.context = parent.context
+    } else {
+      util.logError('Box::constructor neither parent nor context are specified, for a RootFolder context has to be specified.')
+    }
     this.transform = new Transform(this)
     this.site = new SizeAndPosition(this, this.mapData)
     this.header = this.createHeader()

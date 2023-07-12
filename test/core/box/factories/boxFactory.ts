@@ -52,7 +52,7 @@ export function folderOf(options: {
     }
     const name = options.name ?? mapData.id+'Name'
 
-    const box = new FolderBox(name, options.parent, mapData, false, options.parent.context)
+    const box = new FolderBox(name, options.parent, mapData, false)
     box.saveMapData = () => Promise.resolve()
     setRenderStateToBox(box, options.rendered)
 
@@ -73,7 +73,7 @@ export function fileOf(options: {
     }
     const name = options.name ?? mapData.id+'Name'
 
-    const box = new FileBox(name, options.parent, mapData, false, options.parent.context)
+    const box = new FileBox(name, options.parent, mapData, false)
     box.saveMapData = () => Promise.resolve()
     setRenderStateToBox(box, options.rendered)
 

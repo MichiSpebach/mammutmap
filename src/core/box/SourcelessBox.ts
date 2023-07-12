@@ -14,7 +14,7 @@ export class SourcelessBox extends Box {
   private content: string
   private bodyRendered: boolean = false
 
-  public constructor(name: string, parent: FolderBox, mapData: BoxData, mapDataFileExists: boolean, context: BoxContext, content: string) {
+  public constructor(name: string, parent: FolderBox, mapData: BoxData, mapDataFileExists: boolean, content: string, context?: BoxContext) {
     super(name, parent, mapData, mapDataFileExists, context)
     this.content = content
   }
