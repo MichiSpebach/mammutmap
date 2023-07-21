@@ -3,7 +3,7 @@ import { MenuItemFolder } from './MenuItemFolder'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { renderManager } from '../RenderManager'
 import { HtmlApplicationMenuWidget } from './HtmlApplicationMenuWidget'
-import { AbstractApplicationMenu } from './applicationMenu'
+import { AbstractApplicationMenu, ApplicationMenuOptions } from './applicationMenu'
 
 export class HtmlApplicationMenu extends AbstractApplicationMenu {
 
@@ -13,8 +13,8 @@ export class HtmlApplicationMenu extends AbstractApplicationMenu {
     private ongoingRender: Promise<void>|undefined = undefined
     private ongoingUnrender: Promise<void>|undefined = undefined
 
-    public constructor() {
-        super()
+    public constructor(options?: ApplicationMenuOptions) {
+        super(options)
         this.widget = new HtmlApplicationMenuWidget('htmlApplicationMenu', this.menuTree)
     }
 

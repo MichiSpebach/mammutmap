@@ -3,15 +3,15 @@ import { ElectronApplicationMenu } from './ElectronApplicationMenu'
 import { HtmlApplicationMenu } from '../core/applicationMenu/HtmlApplicationMenu'
 import { settings } from '../core/Settings'
 import { MenuItem } from '../core/applicationMenu/MenuItem'
-import { ApplicationMenu } from '../core/applicationMenu/applicationMenu'
+import { ApplicationMenu, ApplicationMenuOptions } from '../core/applicationMenu/applicationMenu'
 
 export class ElectronAndHtmlApplicationMenu implements ApplicationMenu {
   private readonly electronApplicationMenu: ElectronApplicationMenu
   private readonly htmlApplicatioinMenu: HtmlApplicationMenu
 
-  public constructor() {
-    this.electronApplicationMenu = new ElectronApplicationMenu()
-    this.htmlApplicatioinMenu = new HtmlApplicationMenu()
+  public constructor(options?: ApplicationMenuOptions) {
+    this.electronApplicationMenu = new ElectronApplicationMenu(options)
+    this.htmlApplicatioinMenu = new HtmlApplicationMenu(options)
   }
 
   public async initAndRender(): Promise<void> {

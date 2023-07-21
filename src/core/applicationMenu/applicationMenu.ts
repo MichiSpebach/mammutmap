@@ -17,6 +17,8 @@ export async function initAndRender(object: ApplicationMenu): Promise<void> {
   await object.initAndRender()
 }
 
+export type ApplicationMenuOptions = {hideFileMenu?: boolean}
+
 export interface ApplicationMenu { // TODO: rename to interface ApplicationMenuView and AbstractApplicationMenu to ApplicationMenu calling the view which was set by init?
   initAndRender(): Promise<void>
   addMenuItemToPlugins(menuItem: MenuItem): Promise<void>
@@ -27,32 +29,48 @@ export interface ApplicationMenu { // TODO: rename to interface ApplicationMenuV
 export abstract class AbstractApplicationMenu implements ApplicationMenu {
   protected readonly menuTree: MenuItemFolder
 
-  public constructor() {
+  public constructor(options?: ApplicationMenuOptions) {
+    const submenu: MenuItem[] = []
 
+    if (!options?.hideFileMenu) {
+      submenu.push(this.buildFileMenu())
+    }
+    submenu.push(this.buildSettingsMenu())
+    submenu.push(this.buildPluginsMenu())
+    submenu.push(this.buildInfoMenu())
+
+    this.menuTree = new MenuItemFolder({id: 'ApplicationMenu', label: 'ApplicationMenu', submenu})
+  }
+
+  private buildFileMenu(): MenuItem {
     const openFolderMenuItem = new MenuItemFile({label: 'Open Folder...', click: () => this.openFolder()})
     const openFileMenuItem = new MenuItemFile({label: 'Open ProjectFile '+ProjectSettings.preferredFileNameExtension+'... (experimental)', enabled: settings.getBoolean('experimentalFeatures'), click: () => this.openProjectFile()})
     settings.subscribeBoolean('experimentalFeatures', (newValue) => this.setMenuItemEnabled(openFileMenuItem, newValue))
 
-    const fileMenu: MenuItemFolder = new MenuItemFolder({id: 'File', label: 'File', preferredOpenDirection: 'bottom', submenu: [
+    return new MenuItemFolder({id: 'File', label: 'File', preferredOpenDirection: 'bottom', submenu: [
       openFolderMenuItem,
       openFileMenuItem
     ]})
+  }
 
-    const settingsMenu: MenuItemFolder = new MenuItemFolder({id: 'Settings', label: 'Settings', preferredOpenDirection: 'bottom', submenu: [
+  private buildSettingsMenu(): MenuItem {
+    return new MenuItemFolder({id: 'Settings', label: 'Settings', preferredOpenDirection: 'bottom', submenu: [
       new MenuItemFile({label: 'ApplicationSettings', click: () => settingsWidget.openIfNotOpened()}),
       new MenuItemFile({label: 'DeveloperTools', click: () => renderManager.openDevTools()})
     ]})
+  }
 
-    const pluginsMenu: MenuItemFolder = new MenuItemFolder({id: 'Plugins', label: 'Plugins', preferredOpenDirection: 'bottom', submenu: [
+  private buildPluginsMenu(): MenuItem {
+    return new MenuItemFolder({id: 'Plugins', label: 'Plugins', preferredOpenDirection: 'bottom', submenu: [
       new MenuItemFile({label: 'MarketPlace (coming soon)', enabled: false, click: () => util.logInfo('MarketPlace is coming soon')}),
       new MenuItemFile({label: 'Tutorial to create plugins (coming soon)', enabled: false, click: () => util.logInfo('Tutorial to create plugins is coming soon')})
     ]})
+  }
 
-    const infoMenuItem: MenuItemFile = new MenuItemFile({label: 'Info', click: () => {
+  private buildInfoMenu(): MenuItem {
+    return new MenuItemFile({label: 'Info', click: () => {
       MessagePopup.buildAndRender('Info', `Join on GitHub: ${util.createWebLinkHtml(util.githubProjectAddress)}`)
     }})
-
-    this.menuTree = new MenuItemFolder({id: 'ApplicationMenu', label: 'ApplicationMenu', submenu: [fileMenu, settingsMenu, pluginsMenu, infoMenuItem]})
   }
 
   public abstract initAndRender(): Promise<void>

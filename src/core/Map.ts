@@ -185,7 +185,7 @@ export class Map {
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => this.moveend()
       }),
       relocationDragManager.addDropZone(this.mapId),
-      renderManager.addEventListenerTo(this.mapId, 'dblclick', () => this.rootFolder.site.zoomToFit())
+      renderManager.addEventListenerTo(this.mapId, 'dblclick', () => this.rootFolder.site.zoomToFit({animationIfAlreadyFitting: true}))
     ])
   }
 
