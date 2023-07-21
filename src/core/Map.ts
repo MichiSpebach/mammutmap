@@ -270,28 +270,12 @@ export class Map {
   }
 
   private async zoomToFitAll(path: Box[], otherPath: Box[], options?: {skipIfAllInScreen?: boolean}): Promise<{zoomedTo: Box|undefined}> {
-    const commonAncestor: Box = this.getCommonAncestor(path, otherPath)
+    const commonAncestor: Box = Box.getCommonAncestorOfPaths(path, otherPath)
     if (options?.skipIfAllInScreen && (await commonAncestor.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
       return {zoomedTo: undefined}
     }
     await commonAncestor.site.zoomToFit()
     return {zoomedTo: commonAncestor}
-  }
-
-  // TODO: move into Box
-  private getCommonAncestor(path: Box[], otherPath: Box[]): Box {
-    if (path[0] !== otherPath[0]) {
-      log.warning(`Map::getCommonAncestor(path: '${path.map(box => box.getName())}', otherPath: '${otherPath.map(box => box.getName())}') expected paths to start with same object.`)
-    }
-    let commonAncestor: Box = this.rootFolder
-    for (let i = 0; i < path.length && i < otherPath.length; i++) {
-      if (path[i] === otherPath[i]) {
-        commonAncestor = path[i]
-      } else {
-        break
-      }
-    }
-    return commonAncestor
   }
 
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {

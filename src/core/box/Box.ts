@@ -564,4 +564,19 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return {commonAncestor: commonAncestorCandidate, fromPath, toPath}
   }
 
+  public static getCommonAncestorOfPaths(path: Box[], otherPath: Box[]): Box {
+    if (!path[0] || path[0] !== otherPath[0]) {
+      log.warning(`Box::getCommonAncestor(path: '${path.map(box => box.getName())}', otherPath: '${otherPath.map(box => box.getName())}') expected paths to start with same object.`)
+    }
+    let commonAncestor: Box = path[0]
+    for (let i = 0; i < path.length && i < otherPath.length; i++) {
+      if (path[i] === otherPath[i]) {
+        commonAncestor = path[i]
+      } else {
+        break
+      }
+    }
+    return commonAncestor
+  }
+
 }

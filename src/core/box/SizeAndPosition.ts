@@ -157,7 +157,7 @@ export class SizeAndPosition {
             : rect
         const zoom = 100 / Math.max(effectiveRect.width, effectiveRect.height)
     
-        // TODO: implement delegate mechanism for large values
+        // TODO IMPORTANT: implement delegate mechanism for large values
 
         let offsetToCenterX: number = 0
         let offsetToCenterY: number = 0
@@ -187,10 +187,7 @@ export class SizeAndPosition {
             return
         }
 
-        //const zoomDurationInMS = this.calculateZoomDistance(this.detached, newDetached) * 100
-        //const zoomDurationInMS = await this.calculateRectDifference(effectiveRect) * 100
         this.detached = newDetached
-
         const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
         await renderStyleWithRerender.transitionAndRerender
     }
@@ -200,42 +197,6 @@ export class SizeAndPosition {
         const mapClientRect: ClientRect = await this.referenceNode.context.getMapClientRect()
         const mapRatio: number =  mapClientRect.width/mapClientRect.height
         return new LocalRect(rect.x + (rect.width - rect.width/mapRatio)/2, rect.y, rect.width/mapRatio, rect.height)
-    }
-
-    private async calculateRectDifference(rect: LocalRect): Promise<number> {
-        //const renderedRect = this.getLocalRectToRender()
-        //console.log(`renderedRect.width=${renderedRect.width}, rect.width=${rect.width}`)
-        //return Math.abs(renderedRect.width - rect.width)
-        
-        const clientRect = await this.referenceNode.transform.localToClientRect(rect)
-        const renderedClientRect = await renderManager.getClientRectOf(this.referenceNode.getId())
-        console.log(`clientRect.width=${clientRect.width}, renderedClientRect.width=${renderedClientRect.width}`)
-        return clientRect > renderedClientRect ? clientRect.width/renderedClientRect.width : renderedClientRect.width/clientRect.width
-    }
-
-    private calculateZoomDistance(
-        detached: {
-            shiftX: number
-            shiftY: number
-            zoomX: number
-            zoomY: number
-        },
-        otherDetached: {
-            shiftX: number
-            shiftY: number
-            zoomX: number
-            zoomY: number
-        }
-    ): number {
-        const zoom: number = (detached.zoomX+detached.zoomY) / 2
-        const otherZoom: number = (otherDetached.zoomX+otherDetached.zoomY) / 2
-        const averageZoom: number = (zoom+otherZoom) / 2
-        const deltaShiftX: number = detached.shiftX-otherDetached.shiftX
-        const deltaShiftY: number = detached.shiftY-otherDetached.shiftY
-        const deltaShift: number = Math.sqrt(deltaShiftX*deltaShiftX + deltaShiftY*deltaShiftY) / 100 * averageZoom
-        const deltaZoom: number = zoom > otherZoom ? zoom/otherZoom : otherZoom/zoom
-        console.log(`deltaShift=${deltaShift}, deltaZoom=${Math.log(deltaZoom)}, zoom=${zoom}, otherZoom=${otherZoom}`)
-        return Math.log(deltaZoom)
     }
 
     public async zoom(factor: number, position: LocalPosition): Promise<void> {
