@@ -248,7 +248,7 @@ class Util {
     return path.replace(/[/][^/]*.$/, '/')
   }
 
-  private replaceBackslashesWithSlashes(s: string) {
+  public replaceBackslashesWithSlashes(s: string) {
     return s.split('\\').join('/')
   }
 

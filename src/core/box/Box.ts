@@ -310,7 +310,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     if (!this.renderState.isRendered()) {
       pros.push(relocationDragManager.addDropTarget(this))
       pros.push(HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut()))
-      pros.push(renderManager.addEventListenerTo(this.getId(), 'dblclick', () => this.site.zoomToFit()))
+      pros.push(renderManager.addEventListenerTo(this.getId(), 'dblclick', () => this.site.zoomToFit({animationIfAlreadyFitting: true})))
     }
 
     pros.push(this.renderAdditional())
@@ -444,16 +444,17 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
   public async renderStyleWithRerender(options?: {
     renderStylePriority?: RenderPriority,
-    transition?: boolean
+    transitionDurationInMS?: number
   }): Promise<{transitionAndRerender: Promise<void>} > {
-    await this.renderStyle(options?.renderStylePriority, options?.transition)
+    await this.renderStyle(options?.renderStylePriority, options?.transitionDurationInMS)
     const rendered: Promise<void> = this.render()
-    if (!options?.transition) {
+    if (!options?.transitionDurationInMS) {
       return {transitionAndRerender: rendered}
     }
 
+    const transitionDurationInMS: number = options.transitionDurationInMS
     const transitionAndRerender: Promise<void> = new Promise<void>(async resolve => {
-      const timelimit: number = Date.now() + 500
+      const timelimit: number = Date.now() + transitionDurationInMS
       await rendered
       while (timelimit > Date.now()) {
         await util.wait(Math.min(20, timelimit-Date.now()))
@@ -468,13 +469,13 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return {transitionAndRerender}
   }
 
-  public async renderStyle(priority: RenderPriority = RenderPriority.NORMAL, transition?: boolean): Promise<void> {
+  public async renderStyle(priority: RenderPriority = RenderPriority.NORMAL, transitionDurationInMS?: number): Promise<void> {
     const rect: LocalRect = this.getLocalRect()
 
     const basicStyle: string = 'display:inline-block;position:absolute;overflow:visible;'
     const scaleStyle: string = 'width:'+rect.width+'%;height:'+rect.height+'%;'
     const positionStyle: string = 'left:'+rect.x+'%;top:'+rect.y+'%;'
-    const transitionStyle: string = transition ? 'transition:0.5s;' : ''
+    const transitionStyle: string = transitionDurationInMS ? `transition:${transitionDurationInMS}ms;` : ''
 
     await renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + transitionStyle, priority)
   }

@@ -131,16 +131,16 @@ export class SizeAndPosition {
         await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE})
     }
 
-    public zoomToFit(): Promise<void> {
-        return this.zoomToFitRect(new LocalRect(0, 0, 100, 100))
+    public zoomToFit(options?: {animationIfAlreadyFitting?: boolean}): Promise<void> {
+        return this.zoomToFitRect(new LocalRect(0, 0, 100, 100), options)
     }
 
-    public async zoomToFitRect(rect: LocalRect): Promise<void> {
+    public async zoomToFitRect(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
         if (!this.detached) {
             if (!this.referenceNode.isRoot()) {
                 const topLeftInParentCoords: LocalPosition = this.referenceNode.transform.toParentPosition(rect.getTopLeftPosition())
                 const bottomRightInParentCoords: LocalPosition = this.referenceNode.transform.toParentPosition(rect.getBottomRightPosition())
-                return this.referenceNode.getParent().site.zoomToFitRect(LocalRect.fromPositions(topLeftInParentCoords, bottomRightInParentCoords))
+                return this.referenceNode.getParent().site.zoomToFitRect(LocalRect.fromPositions(topLeftInParentCoords, bottomRightInParentCoords), options)
             }
             this.detached = {
                 shiftX: 0,
@@ -149,29 +149,49 @@ export class SizeAndPosition {
                 zoomY: 1
             }
         }
+        const transitionDurationInMS: number = options?.transitionDurationInMS ?? 500
         
         const saveRect: LocalRect = this.getLocalRectToSave()
-        if (this.referenceNode.isRoot()) {
-            rect = await this.enlargeRectInMapRatioAdjusterCoordsToFillMap(rect)
-        }
-        const zoom = 100 / Math.max(rect.width, rect.height)
+        const effectiveRect = this.referenceNode.isRoot()
+            ? await this.enlargeRectInMapRatioAdjusterCoordsToFillMap(rect)
+            : rect
+        const zoom = 100 / Math.max(effectiveRect.width, effectiveRect.height)
     
         // TODO: implement delegate mechanism for large values
 
         let offsetToCenterX: number = 0
         let offsetToCenterY: number = 0
-        if (rect.width < rect.height) {
-            offsetToCenterX = (rect.height-rect.width)/2
+        if (effectiveRect.width < effectiveRect.height) {
+            offsetToCenterX = (effectiveRect.height-effectiveRect.width)/2
         } else {
-            offsetToCenterY = (rect.width-rect.height)/2
+            offsetToCenterY = (effectiveRect.width-effectiveRect.height)/2
+        }
+
+        const newDetached = {
+            shiftX: -zoom*(saveRect.width/100)*(effectiveRect.x-offsetToCenterX) - saveRect.x - (saveRect.width-100)/2,
+            shiftY: -zoom*(saveRect.height/100)*(effectiveRect.y-offsetToCenterY) - saveRect.y - (saveRect.height-100)/2,
+            zoomX: zoom,
+            zoomY: zoom
         }
         
-        this.detached.shiftX = -zoom*(saveRect.width/100)*(rect.x-offsetToCenterX) - saveRect.x - (saveRect.width-100)/2
-        this.detached.shiftY = -zoom*(saveRect.height/100)*(rect.y-offsetToCenterY) - saveRect.y - (saveRect.height-100)/2
-        this.detached.zoomX = zoom
-        this.detached.zoomY = zoom
+        if (options?.animationIfAlreadyFitting &&
+            Math.abs(newDetached.shiftX-this.detached.shiftX) < 1 &&
+            Math.abs(newDetached.shiftY-this.detached.shiftY) < 1 &&
+            Math.abs(newDetached.zoomX-this.detached.zoomX) < 1 &&
+            Math.abs(newDetached.zoomY-this.detached.zoomY) < 1
+        ) {
+            const deltaX = rect.width/100
+            const deltaY = rect.height/100
+            await this.zoomToFitRect(new LocalRect(rect.x - deltaX, rect.y - deltaY, rect.width + deltaX*2, rect.height + deltaY*2), {transitionDurationInMS: transitionDurationInMS/2})
+            await this.zoomToFitRect(rect, {transitionDurationInMS: transitionDurationInMS/2})
+            return
+        }
 
-        const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transition:true})
+        //const zoomDurationInMS = this.calculateZoomDistance(this.detached, newDetached) * 100
+        //const zoomDurationInMS = await this.calculateRectDifference(effectiveRect) * 100
+        this.detached = newDetached
+
+        const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
         await renderStyleWithRerender.transitionAndRerender
     }
 
@@ -180,6 +200,42 @@ export class SizeAndPosition {
         const mapClientRect: ClientRect = await this.referenceNode.context.getMapClientRect()
         const mapRatio: number =  mapClientRect.width/mapClientRect.height
         return new LocalRect(rect.x + (rect.width - rect.width/mapRatio)/2, rect.y, rect.width/mapRatio, rect.height)
+    }
+
+    private async calculateRectDifference(rect: LocalRect): Promise<number> {
+        //const renderedRect = this.getLocalRectToRender()
+        //console.log(`renderedRect.width=${renderedRect.width}, rect.width=${rect.width}`)
+        //return Math.abs(renderedRect.width - rect.width)
+        
+        const clientRect = await this.referenceNode.transform.localToClientRect(rect)
+        const renderedClientRect = await renderManager.getClientRectOf(this.referenceNode.getId())
+        console.log(`clientRect.width=${clientRect.width}, renderedClientRect.width=${renderedClientRect.width}`)
+        return clientRect > renderedClientRect ? clientRect.width/renderedClientRect.width : renderedClientRect.width/clientRect.width
+    }
+
+    private calculateZoomDistance(
+        detached: {
+            shiftX: number
+            shiftY: number
+            zoomX: number
+            zoomY: number
+        },
+        otherDetached: {
+            shiftX: number
+            shiftY: number
+            zoomX: number
+            zoomY: number
+        }
+    ): number {
+        const zoom: number = (detached.zoomX+detached.zoomY) / 2
+        const otherZoom: number = (otherDetached.zoomX+otherDetached.zoomY) / 2
+        const averageZoom: number = (zoom+otherZoom) / 2
+        const deltaShiftX: number = detached.shiftX-otherDetached.shiftX
+        const deltaShiftY: number = detached.shiftY-otherDetached.shiftY
+        const deltaShift: number = Math.sqrt(deltaShiftX*deltaShiftX + deltaShiftY*deltaShiftY) / 100 * averageZoom
+        const deltaZoom: number = zoom > otherZoom ? zoom/otherZoom : otherZoom/zoom
+        console.log(`deltaShift=${deltaShift}, deltaZoom=${Math.log(deltaZoom)}, zoom=${zoom}, otherZoom=${otherZoom}`)
+        return Math.log(deltaZoom)
     }
 
     public async zoom(factor: number, position: LocalPosition): Promise<void> {

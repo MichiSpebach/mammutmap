@@ -232,13 +232,16 @@ export class Map {
   public async flyTo(path: string): Promise<void> {
     const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(await this.getInnerMapClientRect())
     const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
-    const zoomingToCommonAncestor: Promise<void> = this.zoomToFitAll(zoomedInPath, renderedTargetPath, {skipIfAllInScreen: true})
+    const zoomingToFitAll: Promise<{zoomedTo: Box|undefined}> = this.zoomToFitAll(zoomedInPath, renderedTargetPath, {skipIfAllInScreen: true})
 
     let latestZoomTo: {box: Box, promise: Promise<void>}|undefined
     const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
-      await zoomingToCommonAncestor
-      if (!latestZoomTo || box.isDescendantOf(latestZoomTo.box)) {
-        latestZoomTo = {box, promise: box.site.zoomToFit()}
+      const {zoomedTo} = await zoomingToFitAll
+      if (zoomedTo && !latestZoomTo) {
+        latestZoomTo = {box: zoomedTo, promise: Promise.resolve()}
+      }
+      if ((!latestZoomTo || box.isDescendantOf(latestZoomTo.box)) && !zoomedInPath.includes(box)) {
+        latestZoomTo = {box, promise: box.site.zoomToFit({animationIfAlreadyFitting: true})}
       }
     }})
     if (renderTargetReport.warnings) {
@@ -250,9 +253,9 @@ export class Map {
     }
     const targetBox: Box = await renderTargetReport.boxWatcher.get()
 
-    await zoomingToCommonAncestor
+    await zoomingToFitAll
     if (!latestZoomTo || targetBox !== latestZoomTo.box) {
-      latestZoomTo = {box: targetBox, promise: targetBox.site.zoomToFit()}
+      latestZoomTo = {box: targetBox, promise: targetBox.site.zoomToFit({animationIfAlreadyFitting: true})}
     }
     await latestZoomTo.promise
     await this.zoom(0, 0, 0) // TODO otherwise lots of "has path with no rendered boxes. This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn't." warnings, fix and remove this line
@@ -266,9 +269,19 @@ export class Map {
     return new ClientRect(mapRect.x+paddingX, mapRect.y+paddingY, mapRect.width-paddingX*2, mapRect.height-paddingY*2)
   }
 
-  private async zoomToFitAll(path: Box[], otherPath: Box[], options?: {skipIfAllInScreen?: boolean}): Promise<void> {
+  private async zoomToFitAll(path: Box[], otherPath: Box[], options?: {skipIfAllInScreen?: boolean}): Promise<{zoomedTo: Box|undefined}> {
+    const commonAncestor: Box = this.getCommonAncestor(path, otherPath)
+    if (options?.skipIfAllInScreen && (await commonAncestor.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
+      return {zoomedTo: undefined}
+    }
+    await commonAncestor.site.zoomToFit()
+    return {zoomedTo: commonAncestor}
+  }
+
+  // TODO: move into Box
+  private getCommonAncestor(path: Box[], otherPath: Box[]): Box {
     if (path[0] !== otherPath[0]) {
-      log.warning(`Map::zoomToFitAll(path: '${path.map(box => box.getName())}', otherPath: '${otherPath.map(box => box.getName())}') expected paths to start with same object.`)
+      log.warning(`Map::getCommonAncestor(path: '${path.map(box => box.getName())}', otherPath: '${otherPath.map(box => box.getName())}') expected paths to start with same object.`)
     }
     let commonAncestor: Box = this.rootFolder
     for (let i = 0; i < path.length && i < otherPath.length; i++) {
@@ -278,10 +291,7 @@ export class Map {
         break
       }
     }
-    if (options?.skipIfAllInScreen && (await commonAncestor.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
-      return
-    }
-    return commonAncestor.site.zoomToFit()
+    return commonAncestor
   }
 
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {
