@@ -69,7 +69,7 @@ class LogService {
                 message += ' -1s'
                 await this.scheduleLogToGui(message, color, triesLeft--)
             } else {
-                console.trace('WARNING: failed to print log on gui: '+message+', because gui seems not to load.')
+                this.originalConsole.trace('WARNING: failed to print log on gui: '+message+', because gui seems not to load.')
             }
         }
     }

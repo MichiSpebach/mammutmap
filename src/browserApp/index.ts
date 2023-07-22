@@ -11,11 +11,15 @@ import { HtmlApplicationMenu } from '../core/applicationMenu/HtmlApplicationMenu
 import { BrowserFileSystemAdapter } from './BrowserFileSystemAdapter'
 import { HtmlContextMenuPopup } from './HtmlContextMenuPopup'
 import { searchAndLoadMapCloseTo } from '../core/Map'
-import { util } from '../core/util/util'
+import { log } from '../core/logService'
 
 init()
 
 async function init(): Promise<void> {
+    window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
+      log.errorWithoutThrow(event.reason)
+    })
+
     //processing.init(new BrowserProcessingAdapter()) TODO
     domAdapter.init(new DirectDomAdapter())
     fileSystemAdapter.init(new BrowserFileSystemAdapter())
@@ -27,7 +31,3 @@ async function init(): Promise<void> {
     await pluginLoader.loadPlugins()
     await searchAndLoadMapCloseTo('./mammutmap')
 }
-
-window.addEventListener('unhandledrejection', (event: PromiseRejectionEvent) => {
-  util.logErrorWithoutThrow(event.reason)
-})
