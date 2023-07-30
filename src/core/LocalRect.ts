@@ -15,6 +15,15 @@ export class LocalRect extends Rect<LocalPosition> {
       )
     }
 
+    // TODO: works same as in ClientRect, make generic and move into Rect
+    public static createEnclosing(rects: LocalRect[]): LocalRect {
+      const minX: number = Math.min(...rects.map(rect => rect.x))
+      const minY: number = Math.min(...rects.map(rect => rect.y))
+      const maxX: number = Math.max(...rects.map(rect => rect.x + rect.width))
+      const maxY: number = Math.max(...rects.map(rect => rect.y + rect.height))
+      return new LocalRect(minX, minY, maxX - minX, maxY - minY)
+    }
+
     protected buildPosition(x: number, y: number): LocalPosition {
       return new LocalPosition(x, y)
     }

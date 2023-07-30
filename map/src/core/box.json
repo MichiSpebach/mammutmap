@@ -1362,6 +1362,34 @@
 			"tags": [
 				"has"
 			]
+		},
+		{
+			"id": "8r9g1ai4mro",
+			"from": {
+				"path": [
+					{
+						"boxId": "iu4msv07ut8",
+						"boxName": "Box.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "utj91len21o",
+						"boxName": "BoxContext.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
 		}
 	],
 	"nodes": [

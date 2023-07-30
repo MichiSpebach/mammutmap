@@ -1260,8 +1260,8 @@
 					{
 						"boxId": "jnk7eechpkg",
 						"boxName": "ProjectSettings.ts",
-						"x": 44.99960065264767,
-						"y": 100
+						"x": 50,
+						"y": 50
 					}
 				]
 			}
@@ -4538,6 +4538,101 @@
 						"boxName": "AbstractNodeWidget.ts",
 						"x": 56,
 						"y": 56
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "0ko241nq65o",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 20,
+						"y": 20
+					},
+					{
+						"boxId": "utj91len21o",
+						"boxName": "BoxContext.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jnk7eechpkg",
+						"boxName": "ProjectSettings.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "6po780vt25",
+			"from": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 20,
+						"y": 20
+					},
+					{
+						"boxId": "utj91len21o",
+						"boxName": "BoxContext.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "1a5e3kn3reo",
+						"boxName": "ClientRect.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "b7j7oavnaug",
+			"from": {
+				"path": [
+					{
+						"boxId": "6o0ikrr8ru",
+						"boxName": "Map.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3lnmuaqr88",
+						"boxName": "box",
+						"x": 8,
+						"y": 40
+					},
+					{
+						"boxId": "utj91len21o",
+						"boxName": "BoxContext.ts",
+						"x": 50,
+						"y": 50
 					}
 				],
 				"floatToBorder": true

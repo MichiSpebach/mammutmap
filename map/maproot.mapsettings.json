@@ -4,7 +4,7 @@
 	"linkTags": [
 		{
 			"name": "hidden",
-			"count": 10,
+			"count": 11,
 			"mode": "visibleEnds",
 			"appearance": {
 				"mode": "hidden"
@@ -12,7 +12,7 @@
 		},
 		{
 			"name": "has",
-			"count": 30,
+			"count": 32,
 			"appearance": {
 				"mode": "visible",
 				"color": "lime"

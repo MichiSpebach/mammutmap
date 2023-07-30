@@ -20,6 +20,7 @@ import { BoxWatcher } from './box/BoxWatcher'
 import { Box } from './box/Box'
 import { log } from './logService'
 import { BoxContext } from './box/BoxContext'
+import { LocalRect } from './LocalRect'
 
 export const onMapLoaded: Subscribers<Map> = new Subscribers()
 export const onMapRendered: Subscribers<Map> = new Subscribers()
@@ -274,7 +275,13 @@ export class Map {
     if (options?.skipIfAllInScreen && (await commonAncestor.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
       return {zoomedTo: undefined}
     }
-    await commonAncestor.site.zoomToFit()
+    const boxToFit: Box|undefined = path[path.indexOf(commonAncestor)+1]
+    const otherBoxToFit: Box|undefined = otherPath[path.indexOf(commonAncestor)+1]
+    if (boxToFit && otherBoxToFit) {
+      await commonAncestor.site.zoomToFitRect(LocalRect.createEnclosing([boxToFit.getLocalRect(), otherBoxToFit.getLocalRect()]))
+    } else {
+      await commonAncestor.site.zoomToFit()
+    }
     return {zoomedTo: commonAncestor}
   }
 
