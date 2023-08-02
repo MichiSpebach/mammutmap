@@ -5,6 +5,7 @@ import { Subscribers } from './util/Subscribers'
 import { util } from './util/util'
 import { LinkAppearanceData } from './mapData/LinkAppearanceData'
 import { log } from './logService'
+import { settings } from './Settings'
 
 export class ProjectSettings { // TODO: rename to MapSettings?
 
@@ -36,13 +37,20 @@ export class ProjectSettings { // TODO: rename to MapSettings?
   public static newWithDefaultData(filePath: string): ProjectSettings {
     const data: MapSettingsData = new MapSettingsData({
       id: util.generateId(),
-      x: 5, y: 5, width: 90, height: 90,
+      x: 0, y: 0, width: 100, height: 100,
       links: [],
       nodes: [],
       srcRootPath: '../',
       mapRootPath: './',
       linkTags: []
     })
+    if (settings.getBoolean('positionMapOnTopLeft')) {
+      // TODO: backwards compatibility for e2e tests, remove asap
+      data.x = 5
+      data.y = 5
+      data.width = 90
+      data.height = 90
+    }
     return new ProjectSettings(filePath, data, false)
   }
 

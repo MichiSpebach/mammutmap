@@ -412,6 +412,10 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   }
 
   public async saveMapData(): Promise<void> {
+    if (!this.context.projectSettings.isDataFileExisting()) {
+      await this.context.projectSettings.saveToFileSystem()
+    }
+
     const mapDataFilePath: string = this.getMapDataFilePath()
     this.mapData.roundFieldsForSave()
     await fileSystem.saveToJsonFile(mapDataFilePath, this.mapData, {throwInsteadOfWarn: true}).then(() => {
