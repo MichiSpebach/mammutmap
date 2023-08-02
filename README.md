@@ -1,10 +1,27 @@
 
 ### About
-Zoomable map for source code.
-Visualize source code in an UML-like diagram that updates with code changes and also be able to share the visualization through Git.
+Visualize the source code of your entire project.\
+Zoom out to get the rough structure, zoom in as deep as you want to get the details at an appropriate level.\
+Customize the visualization and share your imagination through Git.\
+Mammutmap visualizes source code in an UML-like diagram that updates with code changes.\
+Mammutmap scales extremely well and can handle huge projects.
 
-### Try it out in browser
+This is an early version but I am working frequently on improving it.
+
+### Try it out
 Browser version is hosted at https://www.mammutmap.com/, runs completely local in your browser, no data is sent back to the server, try it out!
+
+There's now also a VSCode extension https://marketplace.visualstudio.com/items?itemName=mammutmap.mammutmap
+
+Zooming works with scroll wheel or double click, moving with dragging mouse:\
+![](https://github.com/MichiSpebach/mammutmap-vscode-extension/raw/HEAD/resources/navigation.gif)
+
+Generating links works manually (right click) or with a link generation plugin (also accessible via right click):\
+![](https://github.com/MichiSpebach/mammutmap-vscode-extension/raw/HEAD/resources/generateLinks.gif)
+
+### Feedback and contributions are welcome
+https://github.com/MichiSpebach/mammutmap/issues\
+Also as Mammutmap is written in TypeScript it is very simple to write plugins for it.
 
 ### Install libraries
 `npm install`

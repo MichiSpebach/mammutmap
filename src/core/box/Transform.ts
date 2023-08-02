@@ -82,6 +82,13 @@ export class Transform {
         return tempPosition
     }
 
+    public innerRectRecursiveToLocal(innerBox: Box, rectInInnerBoxCoords: LocalRect): LocalRect {
+        return LocalRect.fromPositions(
+            this.innerCoordsRecursiveToLocal(innerBox, rectInInnerBoxCoords.getTopLeftPosition()),
+            this.innerCoordsRecursiveToLocal(innerBox, rectInInnerBoxCoords.getBottomRightPosition())
+        )
+    }
+
     public async getNearestGridPositionOfOtherTransform(position: ClientPosition, other: Transform): Promise<LocalPosition> {
         const clientPositionSnappedToGrid: ClientPosition = await other.getNearestGridPositionInClientCoords(position)
         return this.referenceBox.transform.clientToLocalPosition(clientPositionSnappedToGrid)
