@@ -136,6 +136,7 @@ class CompatibilityTheme extends DarkTheme {
   public static async new(): Promise<CompatibilityTheme> {
     let additionalStyleSheets = '<link href="../../node_modules/@fontsource/source-sans-pro/400.css" rel="stylesheet" type="text/css">'
     additionalStyleSheets += '<link href="../../node_modules/@fontsource/source-code-pro/400.css" rel="stylesheet" type="text/css">'
+    additionalStyleSheets += '<link href="../core/indexCompatibilityTheme.css" rel="stylesheet" type="text/css">'
     await renderManager.addContentTo(indexHtmlIds.headId, additionalStyleSheets)
     return new CompatibilityTheme()
   }
