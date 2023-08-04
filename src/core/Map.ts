@@ -237,7 +237,7 @@ export class Map {
     const renderedTarget: Box = renderedTargetPath[renderedTargetPath.length-1]
 
     let zoomingOut: Promise<void> = Promise.resolve()
-    let latestZoomTo: {box: Box, promise: Promise<void>} = {box: zoomedTo, promise: Promise.resolve()}
+    let latestZoomTo: {box: Box, promise: Promise<void>} | 'did not zoom' = 'did not zoom'
     if (!(await renderedTarget.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
       zoomingOut = this.zoomToFitBoxes([zoomedTo, renderedTarget])
       latestZoomTo = {box: Box.getCommonAncestorOfPaths(zoomedInPath, renderedTargetPath), promise: zoomingOut}
@@ -246,7 +246,7 @@ export class Map {
     const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
       await zoomingOut
       if (!zoomedInPath.includes(box)) {
-        latestZoomTo = {box, promise: box.site.zoomToFit({animationIfAlreadyFitting: true})}
+        latestZoomTo = {box, promise: box.site.zoomToFit()}
       }
     }})
     if (renderTargetReport.warnings) {
@@ -259,7 +259,7 @@ export class Map {
     const targetBox: Box = await renderTargetReport.boxWatcher.get()
 
     await zoomingOut
-    if (targetBox !== latestZoomTo.box) {
+    if (latestZoomTo === 'did not zoom' || targetBox !== latestZoomTo.box) {
       latestZoomTo = {box: targetBox, promise: targetBox.site.zoomToFit({animationIfAlreadyFitting: true})}
     }
     await latestZoomTo.promise
@@ -269,8 +269,8 @@ export class Map {
 
   private async getInnerMapClientRect(): Promise<ClientRect> {
     const mapRect: ClientRect = await this.getMapClientRect()
-    const paddingX: number = mapRect.width/4
-    const paddingY: number = mapRect.height/4
+    const paddingX: number = mapRect.width/2.5
+    const paddingY: number = mapRect.height/2.5
     return new ClientRect(mapRect.x+paddingX, mapRect.y+paddingY, mapRect.width-paddingX*2, mapRect.height-paddingY*2)
   }
 
