@@ -1,6 +1,23 @@
 import { ClientPosition } from '../../src/core/shape/ClientPosition'
 import { ClientRect } from '../../src/core/ClientRect'
 
+test('isInsideOrEqual', () => {
+  const centerRect = new ClientRect(400, 200, 800, 400)
+  const bigRect = new ClientRect(0, 0, 1600, 800)
+  const topRect = new ClientRect(400, -200, 800, 400)
+  const bottomRect = new ClientRect(400, 600, 800, 400)
+  const leftRect = new ClientRect(-400, 200, 800, 400)
+  const rightRect = new ClientRect(1200, 200, 800, 400)
+  
+  expect(centerRect.isInsideOrEqual(centerRect)).toBe(true)
+  expect(centerRect.isInsideOrEqual(bigRect)).toBe(true)
+  expect(bigRect.isInsideOrEqual(centerRect)).toBe(false)
+  expect(topRect.isInsideOrEqual(bigRect)).toBe(false)
+  expect(bottomRect.isInsideOrEqual(bigRect)).toBe(false)
+  expect(leftRect.isInsideOrEqual(bigRect)).toBe(false)
+  expect(rightRect.isInsideOrEqual(bigRect)).toBe(false)
+})
+
 test('calculateIntersectionsWithLine', () => {
   const rect = new ClientRect(40, 40, 20, 20)
 

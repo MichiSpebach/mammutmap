@@ -47,7 +47,11 @@ export abstract class Rect<POSITION extends Position<POSITION>> extends Shape<PO
   }
 
   public isInsideOrEqual(other: Rect<POSITION>): boolean {
-    return this.x >= other.x && this.width <= other.width && this.y >= other.y && this.height <= other.height
+    const maxX: number = this.width + this.x
+    const maxY: number = this.height + this.y
+    const otherMaxX: number = other.width + other.x
+    const otherMaxY: number = other.height + other.y
+    return this.x >= other.x && maxX <= otherMaxX && this.y >= other.y && maxY <= otherMaxY
   }
 
   public isOverlappingWith(other: Rect<POSITION>): boolean {
