@@ -141,7 +141,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         }
         this.unrenderInProgress = true
         const pros: Promise<any>[] = []
-        pros.push(this.borderingLinks.renderAll()) // otherwise borderingLinks would not float back to border of parent
+        pros.push(this.borderingLinks.renderAllThatShouldBe()) // otherwise borderingLinks would not float back to border of parent
         pros.push(relocationDragManager.removeDropTarget(this))
         pros.push(relocationDragManager.removeDraggable(this, priority))
         pros.push(HoverManager.removeHoverable(this)),

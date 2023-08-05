@@ -92,9 +92,15 @@ export class Link implements Hoverable {
     return this.render(options.priority)
   }
 
-  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { await this.renderScheduler.schedule(async () => {
+  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { 
     if (!this.getManagingBox().isBodyBeingRendered()) {
       log.warning(`Link::render(..) called for Link with id '${this.getId()}' unless the body of its managingBox with name '${this.getManagingBox().getName()}' is being unrendered.`)
+      return
+    }
+    await this.renderScheduler.schedule(async () => {
+    if (!this.getManagingBox().isBodyBeingRendered()) {
+      // no warning here as this is hard to prevent
+      //log.warning(`Link::render(..) called for Link with id '${this.getId()}' unless the body of its managingBox with name '${this.getManagingBox().getName()}' is being unrendered. (rescheduled)`)
       return
     }
     this.renderState.setRenderStarted()
@@ -167,8 +173,7 @@ export class Link implements Hoverable {
   }
 
   private async handleHoverOver(): Promise<void> {
-    if (this.renderState.isBeingUnrendered()) {
-      util.logWarning('handleHoverHover() called on link with id '+this.getId()+' altough link is not rendered.')
+    if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
       this.highlight = true
       this.hoveringOver = true
       return
@@ -177,7 +182,7 @@ export class Link implements Hoverable {
   }
 
   private async handleHoverOut(): Promise<void> {
-    if (this.renderState.isBeingUnrendered()) {
+    if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
       this.highlight = false
       this.hoveringOver = false
       return

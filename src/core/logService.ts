@@ -38,8 +38,9 @@ class LogService {
     }
 
     public warning(message: string, options?: {allowHtml?: boolean}): void {
-        this.originalConsole.warn(message)
-        this.logToGui('WARNING: ' + message, 'orange', options)
+        //this.originalConsole.warn(message) TODO: this would be nicer than trace but does not log a stacktrace
+        this.originalConsole.trace('WARNING: '+message)
+        this.logToGui('WARNING: '+message, 'orange', options)
     }
 
     /** @deprecated simply throw new Error(..) instead */
@@ -49,11 +50,12 @@ class LogService {
     }
 
     public errorWithoutThrow(message: string, options?: {allowHtml?: boolean}): void {
-        this.originalConsole.error(message)
+        //this.originalConsole.error(message) TODO: this would be nicer than trace but does not log a stacktrace
+        this.originalConsole.trace('ERROR: '+message)
         if (message) { // check so that in case of weird type casts logging errors still work
             message = message.toString().replace(/^Error: /, '')
         }
-        this.logToGui('ERROR: ' + message, 'red', options)
+        this.logToGui('ERROR: '+message, 'red', options)
     }
 
     public async logToGui(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
