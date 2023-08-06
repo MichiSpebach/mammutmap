@@ -327,6 +327,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       .filter(linkable => linkable !== this.getManagingBox())
   }
 
+  // TODO: rewrite, fragility comes from breaking the encapsulation of Box. simply call this.getManagingBox().getRenderedBoxesInPath(path: Path): Box[] and merge it with wayPointData
   private getRenderedPath(): {linkable: Box|NodeWidget, wayPoint: WayPointData}[] {
     if (this.data.path.length === 0) {
       let message = 'Corrupted mapData detected: '
@@ -366,7 +367,11 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     if (renderedPath.length === 0) {
       const managingBox: Box = this.getManagingBox()
       let message = `Link with id ${this.referenceLink.getId()} in ${managingBox.getSrcPath()} has path with no rendered boxes.`
-      message += ' This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn\'t.'
+      if (managingBox.isBodyBeingRendered()) {
+        message += ' This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn\'t.'
+      } else {
+        message += ' Reason is most likely that the managingBox of the link is (being) unrendered.'
+      }
       message += ' Defaulting LinkEnd to center of managingBox.'
       util.logWarning(message)
       renderedPath.push({linkable: managingBox, wayPoint: WayPointData.buildNew(managingBox.getId(), managingBox.getName(), 50, 50)})
