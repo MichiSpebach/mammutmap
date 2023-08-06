@@ -242,7 +242,7 @@ export class Map {
     if (!(await renderedTarget.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
       zoomingOut = this.zoomToFitBoxes([zoomedTo, renderedTarget], {transitionDurationInMS})
       latestZoomTo = {box: Box.getCommonAncestorOfPaths(zoomedInPath, renderedTargetPath), promise: zoomingOut}
-      zoomingOut = util.wait(transitionDurationInMS*0.8) // looks more fluent to not stop while flying to await until everything is rendered
+      zoomingOut = util.wait(transitionDurationInMS*0.9) // looks more fluent to not stop while flying to await until everything is rendered
     }
 
     const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
