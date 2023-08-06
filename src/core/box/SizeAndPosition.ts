@@ -131,7 +131,7 @@ export class SizeAndPosition {
         await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE})
     }
 
-    public zoomToFit(options?: {animationIfAlreadyFitting?: boolean}): Promise<void> {
+    public zoomToFit(options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
         return this.zoomToFitRect(new LocalRect(0, 0, 100, 100), options)
     }
 

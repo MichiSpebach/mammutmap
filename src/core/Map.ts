@@ -231,6 +231,7 @@ export class Map {
   }
 
   public async flyTo(path: string): Promise<void> {
+    const transitionDurationInMS = 500
     const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(await this.getInnerMapClientRect())
     const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
     const zoomedTo: Box = zoomedInPath[zoomedInPath.length-1]
@@ -239,14 +240,15 @@ export class Map {
     let zoomingOut: Promise<void> = Promise.resolve()
     let latestZoomTo: {box: Box, promise: Promise<void>} | 'did not zoom' = 'did not zoom'
     if (!(await renderedTarget.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
-      zoomingOut = this.zoomToFitBoxes([zoomedTo, renderedTarget])
+      zoomingOut = this.zoomToFitBoxes([zoomedTo, renderedTarget], {transitionDurationInMS})
       latestZoomTo = {box: Box.getCommonAncestorOfPaths(zoomedInPath, renderedTargetPath), promise: zoomingOut}
+      zoomingOut = util.wait(transitionDurationInMS*0.8) // looks more fluent to not stop while flying to await until everything is rendered
     }
 
     const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
       await zoomingOut
       if (!zoomedInPath.includes(box)) {
-        latestZoomTo = {box, promise: box.site.zoomToFit()}
+        latestZoomTo = {box, promise: box.site.zoomToFit({transitionDurationInMS})}
       }
     }})
     if (renderTargetReport.warnings) {
@@ -260,7 +262,7 @@ export class Map {
 
     await zoomingOut
     if (latestZoomTo === 'did not zoom' || targetBox !== latestZoomTo.box) {
-      latestZoomTo = {box: targetBox, promise: targetBox.site.zoomToFit({animationIfAlreadyFitting: true})}
+      latestZoomTo = {box: targetBox, promise: targetBox.site.zoomToFit({animationIfAlreadyFitting: true, transitionDurationInMS})}
     }
     await latestZoomTo.promise
     await this.zoom(0, 0, 0) // TODO otherwise lots of "has path with no rendered boxes. This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn't." warnings, fix and remove this line
@@ -274,9 +276,9 @@ export class Map {
     return new ClientRect(mapRect.x+paddingX, mapRect.y+paddingY, mapRect.width-paddingX*2, mapRect.height-paddingY*2)
   }
 
-  public async zoomToFitBoxes(boxes: Box[]): Promise<void> {
+  public async zoomToFitBoxes(boxes: Box[], options?: {transitionDurationInMS?: number}): Promise<void> {
     const rectsToFit: LocalRect[] = boxes.map(box => this.rootFolder.transform.innerRectRecursiveToLocal(box, new LocalRect(0, 0, 100, 100)))
-    return this.rootFolder.site.zoomToFitRect(LocalRect.createEnclosing(rectsToFit))
+    return this.rootFolder.site.zoomToFitRect(LocalRect.createEnclosing(rectsToFit), options)
   }
 
   private async zoom(delta: number, clientX: number, clientY: number): Promise<void> {
