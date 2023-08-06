@@ -159,19 +159,26 @@ export class FolderBox extends Box {
   // TODO: 'getLoadedBoxesInPath' would be more exact, rename?
   public getRenderedBoxesInPath(path: string): Box[] {
     const remainingPath: string = util.removeStartFromPath(this.getName(), path)
+    if (remainingPath === '' || !this.isBodyBeingRendered()) {
+      return [this]
+    }
+    const remainingPathElements: string[] = util.getElementsOfPath(remainingPath)
 
     for (const box of this.getBoxes()) {
-      if (util.getElementCountOfPath(remainingPath) === 1 && util.matchFileNames(remainingPath, box.getName())) {
-        return [this, box]
-      }
-      if (util.getElementsOfPath(remainingPath)[0] === box.getName()) {
+      if (util.matchFileNames(remainingPathElements[0], box.getName())) {
+        if (remainingPathElements.length === 1) {
+          return [this, box]
+        }
         if (!box.isFolder() || !(box instanceof FolderBox)) {
+          // TODO: move this method into Box as soon as general Nodes are implemented
           log.warning(`FolderBox::getRenderedBoxesInPath(path: '${path}') '${box.getSrcPath()}' is not last element in path but is also not a folder.`)
           return [this, box]
         }
         return [this, ...box.getRenderedBoxesInPath(remainingPath)]
       }
     }
+
+    log.warning(`FolderBox::getRenderedBoxesInPath(path: '${path}') not found in '${this.getSrcPath()}'.`)
     return [this]
   }
 

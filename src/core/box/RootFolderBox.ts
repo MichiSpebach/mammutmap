@@ -9,8 +9,12 @@ export class RootFolderBox extends FolderBox {
   private cachedClientRect: ClientRect|null = null
 
   public constructor(context: BoxContext, idRenderedInto: string) {
+    let name: string = context.projectSettings.getAbsoluteSrcRootPath()
+    if (name.endsWith('/')) {
+      name = name.substring(0, name.length-1)
+    }
     super(
-      context.projectSettings.getAbsoluteSrcRootPath(), 
+      name, 
       null, 
       context.projectSettings.data, 
       context.projectSettings.isDataFileExisting(), 
