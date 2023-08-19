@@ -149,6 +149,44 @@ export class SizeAndPosition {
                 zoomY: 1
             }
         }
+
+        if (rect.width <= 0 || rect.height <= 0) {
+            log.warning(`Site::zoomToFitRect(..) spatial rift detected, width is ${rect.width}, height is ${rect.height}.`)
+        }
+        
+        let zoomingChild: Promise<void>|undefined = undefined
+        SizeAndPosition.delegateZoomToChildInPixels // TODO
+        const minSize: number = 10
+        if (rect.width < minSize || rect.height < minSize) {
+            log.info(`'Site::zoomToFitRect(..) delegateZoomToChild from '${this.referenceNode.getName()}' '${rect.width}' '${rect.height}`)
+            const delegationFactor: number = minSize / Math.min(rect.width, rect.height)
+            const widthChange: number = rect.width*delegationFactor - rect.width
+            const heightChange: number = rect.height*delegationFactor - rect.height
+
+            const originalRect: LocalRect = rect
+            rect = new LocalRect(rect.x - widthChange/2, rect.y - heightChange/2, rect.width + widthChange, rect.height + heightChange)
+            
+            const childSite: SizeAndPosition|undefined = await this.findChildSiteToDelegateZoom()
+            if (childSite) {
+                log.info(`delegating to ${childSite.referenceNode.getName()}`)
+                if (childSite.detached) {
+                    log.warning('childSite is already detached')
+                } else {
+                    childSite.detached = {
+                        shiftX: 0,
+                        shiftY: 0,
+                        zoomX: 1,
+                        zoomY: 1
+                    }
+                }
+                const delegationRectSize: number = 100/delegationFactor
+                const delegationRectMidPosition: LocalPosition = originalRect.getMidPosition()
+                const delegationRectMidPositionInChildCoords: LocalPosition = childSite.referenceNode.transform.fromParentPosition(delegationRectMidPosition)
+                const delegationRect = new LocalRect(delegationRectMidPositionInChildCoords.percentX - delegationRectSize/2, delegationRectMidPositionInChildCoords.percentY - delegationRectSize/2, delegationRectSize, delegationRectSize)
+                zoomingChild = childSite.zoomToFitRect(delegationRect, options)
+            }
+        }
+
         const transitionDurationInMS: number = options?.transitionDurationInMS ?? 500
         
         const saveRect: LocalRect = this.getLocalRectToSave()
@@ -156,8 +194,6 @@ export class SizeAndPosition {
             ? await this.enlargeRectInMapRatioAdjusterCoordsToFillMap(rect)
             : rect
         const zoom = 100 / Math.max(effectiveRect.width, effectiveRect.height)
-    
-        // TODO IMPORTANT: implement delegate mechanism for large values
 
         let offsetToCenterX: number = 0
         let offsetToCenterY: number = 0
@@ -168,8 +204,8 @@ export class SizeAndPosition {
         }
 
         const newDetached = {
-            shiftX: -zoom*(saveRect.width/100)*(effectiveRect.x-offsetToCenterX) - saveRect.x - (saveRect.width-100)/2,
-            shiftY: -zoom*(saveRect.height/100)*(effectiveRect.y-offsetToCenterY) - saveRect.y - (saveRect.height-100)/2,
+            shiftX: -zoom*(saveRect.width/100)*(effectiveRect.x-offsetToCenterX),
+            shiftY: -zoom*(saveRect.height/100)*(effectiveRect.y-offsetToCenterY),
             zoomX: zoom,
             zoomY: zoom
         }
@@ -190,6 +226,9 @@ export class SizeAndPosition {
         this.detached = newDetached
         const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
         await renderStyleWithRerender.transitionAndRerender
+        if (zoomingChild) {
+            await zoomingChild
+        }
     }
 
     // TODO: this is a hack implement better solution
@@ -306,6 +345,7 @@ export class SizeAndPosition {
         const zoomedInChild: Box|undefined = await this.referenceNode.getZoomedInChild()
         if (!zoomedInChild) {
             if (!options?.warningOff) {
+                // TODO: remove options and log warning where called
                 log.warning('SizeAndPosition::findChildSiteToDelegateZoom(..) Deeper zoom not implemented.')
             }
             return undefined

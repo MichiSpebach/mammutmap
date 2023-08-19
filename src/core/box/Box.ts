@@ -149,7 +149,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     let renderedChildBoxes: Box[] = []
     for (const child of this.getChilds()) { // filter does not support promises
       if (child instanceof Box && child.isBodyBeingRendered()) {
-        if (clientRect.isInsideOrEqual(await child.getClientRect())) {
+        if ((await child.getClientRect()).isPositionInside(clientRect.getMidPosition())) {
           renderedChildBoxes.push(child)
         }
       }

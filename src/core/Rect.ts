@@ -30,6 +30,10 @@ export abstract class Rect<POSITION extends Position<POSITION>> extends Shape<PO
     return this.y+this.height
   }
 
+  public getMidPosition(): POSITION {
+    return this.buildPosition(this.x + this.width/2, this.y + this.height/2)
+  }
+
   public getTopLeftPosition(): POSITION {
       return this.buildPosition(this.x, this.y)
   }

@@ -6,11 +6,33 @@ import { ClientRect } from '../../../src/core/ClientRect'
 import * as boxFactory from './factories/boxFactory'
 import { RootFolderBox } from '../../../src/core/box/RootFolderBox'
 import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
+import { LocalRect } from '../../../src/core/LocalRect'
 
 test('localToClientPosition', async () => {
   const result: ClientPosition = await setupScenario().transform.localToClientPosition(new LocalPosition(50, 50))
   expect(result.x).toBe(700)
   expect(result.y).toBe(400)
+})
+
+test('fromParentPosition', async () => {
+  initBoxManager(new BoxManager())
+  const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root'})
+  const box: FolderBox = boxFactory.folderOf({idOrData: 'src/box', parent: root})
+
+  box.getLocalRect = () => new LocalRect(25, 25, 50, 50)
+  expect(box.transform.fromParentPosition(new LocalPosition(50, 50))).toEqual(new LocalPosition(50, 50))
+  expect(box.transform.fromParentPosition(new LocalPosition(25, 25))).toEqual(new LocalPosition(0, 0))
+  expect(box.transform.fromParentPosition(new LocalPosition(75, 25))).toEqual(new LocalPosition(100, 0))
+  expect(box.transform.fromParentPosition(new LocalPosition(0, 100))).toEqual(new LocalPosition(-50, 150))
+
+  box.getLocalRect = () => new LocalRect(50, 0, 50, 50)
+  expect(box.transform.fromParentPosition(new LocalPosition(50, 50))).toEqual(new LocalPosition(0, 100))
+  expect(box.transform.fromParentPosition(new LocalPosition(75, 25))).toEqual(new LocalPosition(50, 50))
+  expect(box.transform.fromParentPosition(new LocalPosition(25, 25))).toEqual(new LocalPosition(-50, 50))
+  expect(box.transform.fromParentPosition(new LocalPosition(100, 100))).toEqual(new LocalPosition(100, 200))
+  expect(box.transform.fromParentPosition(new LocalPosition(100, 0))).toEqual(new LocalPosition(100, 0))
+  expect(box.transform.fromParentPosition(new LocalPosition(200, 25))).toEqual(new LocalPosition(300, 50))
+  expect(box.transform.fromParentPosition(new LocalPosition(-50, -50))).toEqual(new LocalPosition(-200, -100))
 })
 
 test('getNearestGridPositionOfOtherTransform', async () => {
