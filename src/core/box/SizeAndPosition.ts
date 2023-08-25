@@ -171,51 +171,14 @@ export class SizeAndPosition {
         const referenceBoxClientRect: ClientRect = await this.referenceNode.getClientRect()
         const wouldBeWidthInPixels: number = referenceBoxClientRect.width*zoom
         const wouldBeHeightInPixels: number = referenceBoxClientRect.height*zoom
-        let zoomingChildOrParent: Promise<void>|undefined = undefined
-        if (zoom > 1 && (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels)) {
-            const childSite: SizeAndPosition|undefined = await this.findChildSiteToDelegateZoom()
-            if (childSite) {
-                log.info(`Site::zoomToFitRect(..) delegating zoom to child '${childSite.referenceNode.getName()}'.`)
-                if (childSite.detached) {
-                    log.warning('childSite is already detached')
-                } else {
-                    childSite.detached = {
-                        shiftX: 0,
-                        shiftY: 0,
-                        zoomX: 1,
-                        zoomY: 1
-                    }
-                }
-                //if (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*5 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*5) {
-                //    if (!(wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*10 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*10)) {
-                        const rectInChildCoords: LocalRect = childSite.referenceNode.transform.fromParentRect(rect)
-                        return childSite.zoomToFitRect(rectInChildCoords, options)
-                //    } else {
-                //        const delegationFactor: number = SizeAndPosition.delegateZoomToChildInPixels / Math.min(wouldBeWidthInPixels, wouldBeHeightInPixels)
-                //        const widthChange: number = rect.width*delegationFactor - rect.width
-                //        const heightChange: number = rect.height*delegationFactor - rect.height
-        
-                //        const delegationRectSize: number = 100/delegationFactor
-                //        const delegationRectMidPosition: LocalPosition = rect.getMidPosition()
-                //        const delegationRectMidPositionInChildCoords: LocalPosition = childSite.referenceNode.transform.fromParentPosition(delegationRectMidPosition)
-                //        const delegationRect = new LocalRect(delegationRectMidPositionInChildCoords.percentX - delegationRectSize/2, delegationRectMidPositionInChildCoords.percentY - delegationRectSize/2, delegationRectSize, delegationRectSize)
-                //        rect = new LocalRect(rect.x - widthChange/2, rect.y - heightChange/2, rect.width + widthChange, rect.height + heightChange)
-                //        zoomingChild = childSite.zoomToFitRect(delegationRect, options)
-                //    }
-                //}
-            }
-        }
-        if (zoom < 1 
-            && !this.referenceNode.isRoot() 
+        if (zoom > 1
+            && (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels)
+        ) {
+            return this.delegateZoomToFitRectToChild(rect, options)
+        } else if (!this.referenceNode.isRoot() 
             && (this.detached.shiftX > 0 && this.detached.shiftY > 0 && this.detached.zoomX < 1 && this.detached.zoomY < 1)
         ) {
-            log.info(`Site::zoomToFitRect(..) delegating zoom from '${this.referenceNode.getName()}' to parent.`)
-            this.detached = undefined // important to unset unpinning before calling 'transform.toParentRect(rect)' because it should calculate with updated site
-            zoomingChildOrParent = this.referenceNode.getParent().site.zoomToFitRect(this.referenceNode.transform.toParentRect(rect), options)
-            const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
-            await renderStyleWithRerender.transitionAndRerender
-            await zoomingChildOrParent
-            return
+            return this.delegateZoomToFitRectToParent(rect, {transitionDurationInMS, ...options})
         }
 
         const renderRect: LocalRect = this.getLocalRectToRender()
@@ -240,9 +203,54 @@ export class SizeAndPosition {
 
         const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
         await renderStyleWithRerender.transitionAndRerender
-        if (zoomingChildOrParent) {
-            await zoomingChildOrParent
+    }
+
+    private async delegateZoomToFitRectToChild(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+        const childSite: SizeAndPosition|undefined = await this.findChildSiteToDelegateZoom()
+        if (!childSite) {
+            log.warning(`SizeAndPosition::delegateZoomToFitRectToChild(..) Deeper zoom not implemented for '${this.referenceNode.getName()}'.`)
+            return
         }
+
+        log.info(`Site::zoomToFitRect(..) delegating zoom to child '${childSite.referenceNode.getName()}'.`)
+        if (childSite.detached) {
+            log.warning('childSite is already detached')
+        } else {
+            childSite.detached = {
+                shiftX: 0,
+                shiftY: 0,
+                zoomX: 1,
+                zoomY: 1
+            }
+        }
+        //if (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*5 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*5) {
+        //    if (!(wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*10 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*10)) {
+                const rectInChildCoords: LocalRect = childSite.referenceNode.transform.fromParentRect(rect)
+                return childSite.zoomToFitRect(rectInChildCoords, options)
+        //    } else {
+        //        const delegationFactor: number = SizeAndPosition.delegateZoomToChildInPixels / Math.min(wouldBeWidthInPixels, wouldBeHeightInPixels)
+        //        const widthChange: number = rect.width*delegationFactor - rect.width
+        //        const heightChange: number = rect.height*delegationFactor - rect.height
+
+        //        const delegationRectSize: number = 100/delegationFactor
+        //        const delegationRectMidPosition: LocalPosition = rect.getMidPosition()
+        //        const delegationRectMidPositionInChildCoords: LocalPosition = childSite.referenceNode.transform.fromParentPosition(delegationRectMidPosition)
+        //        const delegationRect = new LocalRect(delegationRectMidPositionInChildCoords.percentX - delegationRectSize/2, delegationRectMidPositionInChildCoords.percentY - delegationRectSize/2, delegationRectSize, delegationRectSize)
+        //        rect = new LocalRect(rect.x - widthChange/2, rect.y - heightChange/2, rect.width + widthChange, rect.height + heightChange)
+        //        zoomingChild = childSite.zoomToFitRect(delegationRect, options)
+        //    }
+        //}
+    }
+
+    private async delegateZoomToFitRectToParent(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+        log.info(`Site::zoomToFitRect(..) delegating zoom from '${this.referenceNode.getName()}' to parent.`)
+        this.detached = undefined // important to unset unpinning before calling 'transform.toParentRect(rect)' because it should calculate with updated site
+        const transitionDurationInMS: number|undefined = options?.transitionDurationInMS
+        const rendering = this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
+        const zoomingParent = this.referenceNode.getParent().site.zoomToFitRect(this.referenceNode.transform.toParentRect(rect), options)
+        await (await rendering).transitionAndRerender
+        await zoomingParent
+        return
     }
 
     public async zoom(factor: number, position: LocalPosition): Promise<void> {
