@@ -135,14 +135,13 @@ export class SizeAndPosition {
 
     public zoomToFit(options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
         return this.zoomToFitRect(new LocalRect(0, 0, 100, 100), options)
+        //return this.zoomToFitRect(new LocalRect(-5, -5, 110, 110), options)
     }
 
     public async zoomToFitRect(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
         if (!this.detached) {
             if (!this.referenceNode.isRoot()) {
-                const topLeftInParentCoords: LocalPosition = this.referenceNode.transform.toParentPosition(rect.getTopLeftPosition())
-                const bottomRightInParentCoords: LocalPosition = this.referenceNode.transform.toParentPosition(rect.getBottomRightPosition())
-                return this.referenceNode.getParent().site.zoomToFitRect(LocalRect.fromPositions(topLeftInParentCoords, bottomRightInParentCoords), options)
+                return this.referenceNode.getParent().site.zoomToFitRect(this.referenceNode.transform.toParentRect(rect), options)
             }
             this.detached = {
                 shiftX: 0,
@@ -152,24 +151,18 @@ export class SizeAndPosition {
             }
         }
 
+        const transitionDurationInMS: number = options?.transitionDurationInMS ?? 500
+
         if (rect.width <= 0 || rect.height <= 0) {
             log.warning(`Site::zoomToFitRect(..) spatial rift detected, width is ${rect.width}, height is ${rect.height}.`)
         }
 
-        const transitionDurationInMS: number = options?.transitionDurationInMS ?? 500
-
-        const renderRect: LocalRect = this.getLocalRectToRender()
-
         const mapClientRect: ClientRect = await this.referenceNode.context.getMapClientRect()
-
         const mapRectInParentCoords: LocalRect = LocalRect.fromPositions(
             await this.referenceNode.transform.clientToParentLocalPosition(mapClientRect.getTopLeftPosition()),
             await this.referenceNode.transform.clientToParentLocalPosition(mapClientRect.getBottomRightPosition())
         )
-        const rectInParentCoords: LocalRect = LocalRect.fromPositions(
-            this.referenceNode.transform.toParentPosition(rect.getTopLeftPosition()),
-            this.referenceNode.transform.toParentPosition(rect.getBottomRightPosition())
-        )
+        const rectInParentCoords: LocalRect = this.referenceNode.transform.toParentRect(rect)
 
         const zoomX = mapRectInParentCoords.width / rectInParentCoords.width
         const zoomY = mapRectInParentCoords.height / rectInParentCoords.height
@@ -178,16 +171,8 @@ export class SizeAndPosition {
         const referenceBoxClientRect: ClientRect = await this.referenceNode.getClientRect()
         const wouldBeWidthInPixels: number = referenceBoxClientRect.width*zoom
         const wouldBeHeightInPixels: number = referenceBoxClientRect.height*zoom
-        let zoomingChild: Promise<void>|undefined = undefined
-        if (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels) {
-            /*log.info(`Site::zoomToFitRect(..) delegateZoomToChild from '${this.referenceNode.getName()}' '${rect.width}' '${rect.height}`)
-            const delegationFactor: number = minSize / Math.min(rect.width, rect.height)
-            const widthChange: number = rect.width*delegationFactor - rect.width
-            const heightChange: number = rect.height*delegationFactor - rect.height
-
-            const originalRect: LocalRect = rect
-            rect = new LocalRect(rect.x - widthChange/2, rect.y - heightChange/2, rect.width + widthChange, rect.height + heightChange)*/
-            
+        let zoomingChildOrParent: Promise<void>|undefined = undefined
+        if (zoom > 1 && (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels)) {
             const childSite: SizeAndPosition|undefined = await this.findChildSiteToDelegateZoom()
             if (childSite) {
                 log.info(`Site::zoomToFitRect(..) delegating zoom to child '${childSite.referenceNode.getName()}'.`)
@@ -201,19 +186,39 @@ export class SizeAndPosition {
                         zoomY: 1
                     }
                 }
-                const rectInChildCoords: LocalRect = LocalRect.fromPositions(
-                    childSite.referenceNode.transform.fromParentPosition(rect.getTopLeftPosition()),
-                    childSite.referenceNode.transform.fromParentPosition(rect.getBottomRightPosition())
-                )
-                return childSite.zoomToFitRect(rectInChildCoords, options)
-                /*const delegationRectSize: number = 100/delegationFactor
-                const delegationRectMidPosition: LocalPosition = originalRect.getMidPosition()
-                const delegationRectMidPositionInChildCoords: LocalPosition = childSite.referenceNode.transform.fromParentPosition(delegationRectMidPosition)
-                const delegationRect = new LocalRect(delegationRectMidPositionInChildCoords.percentX - delegationRectSize/2, delegationRectMidPositionInChildCoords.percentY - delegationRectSize/2, delegationRectSize, delegationRectSize)
-                return zoomingChild = childSite.zoomToFitRect(delegationRect, options)*/
+                //if (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*5 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*5) {
+                //    if (!(wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*10 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*10)) {
+                        const rectInChildCoords: LocalRect = childSite.referenceNode.transform.fromParentRect(rect)
+                        return childSite.zoomToFitRect(rectInChildCoords, options)
+                //    } else {
+                //        const delegationFactor: number = SizeAndPosition.delegateZoomToChildInPixels / Math.min(wouldBeWidthInPixels, wouldBeHeightInPixels)
+                //        const widthChange: number = rect.width*delegationFactor - rect.width
+                //        const heightChange: number = rect.height*delegationFactor - rect.height
+        
+                //        const delegationRectSize: number = 100/delegationFactor
+                //        const delegationRectMidPosition: LocalPosition = rect.getMidPosition()
+                //        const delegationRectMidPositionInChildCoords: LocalPosition = childSite.referenceNode.transform.fromParentPosition(delegationRectMidPosition)
+                //        const delegationRect = new LocalRect(delegationRectMidPositionInChildCoords.percentX - delegationRectSize/2, delegationRectMidPositionInChildCoords.percentY - delegationRectSize/2, delegationRectSize, delegationRectSize)
+                //        rect = new LocalRect(rect.x - widthChange/2, rect.y - heightChange/2, rect.width + widthChange, rect.height + heightChange)
+                //        zoomingChild = childSite.zoomToFitRect(delegationRect, options)
+                //    }
+                //}
             }
         }
+        if (zoom < 1 
+            && !this.referenceNode.isRoot() 
+            && (this.detached.shiftX > 0 && this.detached.shiftY > 0 && this.detached.zoomX < 1 && this.detached.zoomY < 1)
+        ) {
+            log.info(`Site::zoomToFitRect(..) delegating zoom from '${this.referenceNode.getName()}' to parent.`)
+            this.detached = undefined // important to unset unpinning before calling 'transform.toParentRect(rect)' because it should calculate with updated site
+            zoomingChildOrParent = this.referenceNode.getParent().site.zoomToFitRect(this.referenceNode.transform.toParentRect(rect), options)
+            const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
+            await renderStyleWithRerender.transitionAndRerender
+            await zoomingChildOrParent
+            return
+        }
 
+        const renderRect: LocalRect = this.getLocalRectToRender()
         const mapMidInParentCoords: LocalPosition = mapRectInParentCoords.getMidPosition()
         const rectOffsetXInParentCoords: number = rect.x * (renderRect.width/100) * zoom
         const rectOffsetYInParentCoords: number = rect.y * (renderRect.height/100) * zoom
@@ -235,8 +240,8 @@ export class SizeAndPosition {
 
         const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
         await renderStyleWithRerender.transitionAndRerender
-        if (zoomingChild) {
-            await zoomingChild
+        if (zoomingChildOrParent) {
+            await zoomingChildOrParent
         }
     }
 

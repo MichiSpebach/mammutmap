@@ -64,11 +64,25 @@ export class Transform {
         )
     }
 
+    public fromParentRect(rectInParentCoords: LocalRect): LocalRect {
+        return LocalRect.fromPositions(
+            this.fromParentPosition(rectInParentCoords.getTopLeftPosition()),
+            this.fromParentPosition(rectInParentCoords.getBottomRightPosition())
+        )
+    }
+
     public toParentPosition(position: LocalPosition): LocalPosition {
         const rect: LocalRect = this.referenceBox.getLocalRect()
         return new LocalPosition(
             rect.x + position.percentX * (rect.width / 100),
             rect.y + position.percentY * (rect.height / 100)
+        )
+    }
+
+    public toParentRect(rect: LocalRect): LocalRect {
+        return LocalRect.fromPositions(
+            this.toParentPosition(rect.getTopLeftPosition()),
+            this.toParentPosition(rect.getBottomRightPosition())
         )
     }
 
