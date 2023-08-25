@@ -381,13 +381,27 @@ export class Map {
     }
 
     const stats = await this.rootFolder.site.getDetachmentsInRenderedPath()
+
+    const zoomXs: number[] = stats.map(detachment => detachment.zoomX)
+    let zoomXText: string = `zoomX = *${zoomXs.join('*')}`
+    if (zoomXs.length > 1) {
+      zoomXText += ` = ${zoomXs.reduce((product, value) => product*value)}`
+    }
+
+    const zoomYs: number[] = stats.map(detachment => detachment.zoomY)
+    let zoomYText: string = `zoomY = *${zoomYs.join('*')}`
+    if (zoomYs.length > 1) {
+      zoomYText += ` = ${zoomYs.reduce((product, value) => product*value)}` 
+    }
+
     const renderedSitesInPath = await this.rootFolder.getZoomedInPath()
     const renderedClientRectsInPath: ClientRect[] = await Promise.all(renderedSitesInPath.map(box => box.getClientRect()))
+
     await renderManager.setElementsTo(devStatsId, [
       {type: 'div', children: `shiftX = ${stats.map(detachment => detachment.shiftX)}%`},
       {type: 'div', children: `shiftY = ${stats.map(detachment => detachment.shiftY)}%`},
-      {type: 'div', children: `zoomX = *${stats.map(detachment => detachment.zoomX).join('*')}`},
-      {type: 'div', children: `zoomY = *${stats.map(detachment => detachment.zoomY).join('*')}`},
+      {type: 'div', children: zoomXText},
+      {type: 'div', children: zoomYText},
       {type: 'div', children: `clientXs = ${renderedClientRectsInPath.map(rect => Math.round(rect.x)).join(', ')}`},
       {type: 'div', children: `clientWidths = ${renderedClientRectsInPath.map(rect => Math.round(rect.width)).join(', ')}`}
     ])
