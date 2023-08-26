@@ -164,31 +164,27 @@ export class SizeAndPosition {
         )
         const rectInParentCoords: LocalRect = this.referenceNode.transform.toParentRect(rect)
 
-        const zoomX = mapRectInParentCoords.width / rectInParentCoords.width
-        const zoomY = mapRectInParentCoords.height / rectInParentCoords.height
-        const zoom: number = Math.min(zoomX, zoomY)
+        const factorX = mapRectInParentCoords.width / rectInParentCoords.width
+        const factorY = mapRectInParentCoords.height / rectInParentCoords.height
+        const factor: number = Math.min(factorX, factorY)
 
         const referenceBoxClientRect: ClientRect = await this.referenceNode.getClientRect()
-        const wouldBeWidthInPixels: number = referenceBoxClientRect.width*zoom
-        const wouldBeHeightInPixels: number = referenceBoxClientRect.height*zoom
-        if (zoom > 1
-            && (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels)
-        ) {
+        const wouldBeWidthInPixels: number = referenceBoxClientRect.width*factor
+        const wouldBeHeightInPixels: number = referenceBoxClientRect.height*factor
+        if (factor > 1 && (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels)) {
             return this.delegateZoomToFitRectToChild(rect, options)
-        } else if (!this.referenceNode.isRoot() 
-            && (this.detached.shiftX > 0 && this.detached.shiftY > 0 && this.detached.zoomX < 1 && this.detached.zoomY < 1)
-        ) {
+        } else if (!this.referenceNode.isRoot() && this.detached.zoomX*factor < 1 && this.detached.zoomY*factor < 1) {
             return this.delegateZoomToFitRectToParent(rect, {transitionDurationInMS, ...options})
         }
 
         const renderRect: LocalRect = this.getLocalRectToRender()
         const mapMidInParentCoords: LocalPosition = mapRectInParentCoords.getMidPosition()
-        const rectOffsetXInParentCoords: number = rect.x * (renderRect.width/100) * zoom
-        const rectOffsetYInParentCoords: number = rect.y * (renderRect.height/100) * zoom
-        const shiftX: number = mapMidInParentCoords.percentX - renderRect.x - rectInParentCoords.width*zoom/2 - rectOffsetXInParentCoords
-        const shiftY: number = mapMidInParentCoords.percentY - renderRect.y - rectInParentCoords.height*zoom/2 - rectOffsetYInParentCoords
+        const rectOffsetXInParentCoords: number = rect.x * (renderRect.width/100) * factor
+        const rectOffsetYInParentCoords: number = rect.y * (renderRect.height/100) * factor
+        const shiftIncreaseX: number = mapMidInParentCoords.percentX - renderRect.x - rectInParentCoords.width*factor/2 - rectOffsetXInParentCoords
+        const shiftIncreaseY: number = mapMidInParentCoords.percentY - renderRect.y - rectInParentCoords.height*factor/2 - rectOffsetYInParentCoords
         
-        if (options?.animationIfAlreadyFitting && Math.abs(shiftX) < 1 && Math.abs(shiftY) < 1 && Math.abs(zoom-1) < 0.01) {
+        if (options?.animationIfAlreadyFitting && Math.abs(shiftIncreaseX) < 1 && Math.abs(shiftIncreaseY) < 1 && Math.abs(factor-1) < 0.01) {
             const deltaX = rect.width/100
             const deltaY = rect.height/100
             await this.zoomToFitRect(new LocalRect(rect.x - deltaX, rect.y - deltaY, rect.width + deltaX*2, rect.height + deltaY*2), {transitionDurationInMS: transitionDurationInMS/2})
@@ -196,10 +192,10 @@ export class SizeAndPosition {
             return
         }
 
-        this.detached.shiftX += shiftX
-        this.detached.shiftY += shiftY
-        this.detached.zoomX *= zoom
-        this.detached.zoomY *= zoom
+        this.detached.shiftX += shiftIncreaseX
+        this.detached.shiftY += shiftIncreaseY
+        this.detached.zoomX *= factor
+        this.detached.zoomY *= factor
 
         const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
         await renderStyleWithRerender.transitionAndRerender
