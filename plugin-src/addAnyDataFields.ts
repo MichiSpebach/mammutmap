@@ -7,8 +7,8 @@ plugin.getMenuItemFolder()
 applicationMenu.addMenuItemTo(plugin.getMenuItemFolder(), ...)
 plugin.applicationMenuItemFolder.addItem(...)*/
 
-//applicationMenu.addMenuItemTo('saveAnyFields.js', new MenuItemFile({label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting()}))
-applicationMenu.addMenuItemTo('saveAnyFields.js', new MenuItemFile({label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField()}))
+//applicationMenu.addMenuItemTo('addAnyDataFields.js', new MenuItemFile({label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting()}))
+applicationMenu.addMenuItemTo('addAnyDataFields.js', new MenuItemFile({label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField()}))
 
 // TODO this does not work yet but should work like this in future
 async function setAnyApplicationSetting(): Promise<void> {
@@ -28,7 +28,7 @@ async function setAnyApplicationSetting(): Promise<void> {
 
 async function setAnyBoxMapDataField(): Promise<void> {
     if (!map) {
-        console.warn('no map is loaded')
+        console.warn('addAnyDataFields.js plugin: no map is loaded')
         return
     }
 

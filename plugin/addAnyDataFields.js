@@ -8,8 +8,8 @@ plugin.getName()
 plugin.getMenuItemFolder()
 applicationMenu.addMenuItemTo(plugin.getMenuItemFolder(), ...)
 plugin.applicationMenuItemFolder.addItem(...)*/
-//applicationMenu.addMenuItemTo('saveAnyFields.js', new MenuItemFile({label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting()}))
-pluginFacade_1.applicationMenu.addMenuItemTo('saveAnyFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField() }));
+//applicationMenu.addMenuItemTo('addAnyDataFields.js', new MenuItemFile({label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting()}))
+pluginFacade_1.applicationMenu.addMenuItemTo('addAnyDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField() }));
 // TODO this does not work yet but should work like this in future
 async function setAnyApplicationSetting() {
     let anyValue = pluginFacade_1.applicationSettings.getRawField('anyField');
@@ -26,7 +26,7 @@ async function setAnyApplicationSetting() {
 }
 async function setAnyBoxMapDataField() {
     if (!Map_1.map) {
-        console.warn('no map is loaded');
+        console.warn('addAnyDataFields.js plugin: no map is loaded');
         return;
     }
     const box = Map_1.map.getRootFolder();
