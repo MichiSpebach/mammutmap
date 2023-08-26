@@ -219,6 +219,7 @@ export class SizeAndPosition {
                 zoomY: 1
             }
         }
+        // TODO finish mechanism that splits zoom for very big zoomSteps (so very small rects) but not an issue so far
         //if (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*5 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*5) {
         //    if (!(wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*10 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*10)) {
                 const rectInChildCoords: LocalRect = childSite.referenceNode.transform.fromParentRect(rect)
@@ -301,6 +302,9 @@ export class SizeAndPosition {
     private async delegateZoomToChild(factor: number, positionInParentCoords: LocalPosition, childSiteToDelegateZoom?: SizeAndPosition): Promise<void> {
         if (!childSiteToDelegateZoom) {
             childSiteToDelegateZoom = await this.findChildSiteToDelegateZoom()
+            if (!childSiteToDelegateZoom) {
+                log.warning(`SizeAndPosition::delegateZoomToChild(..) Deeper zoom not implemented for '${this.referenceNode.getName()}'.`)
+            }
         }
         return childSiteToDelegateZoom?.zoomInParentCoords(factor, this.referenceNode.transform.fromParentPosition(positionInParentCoords))
     }
@@ -345,22 +349,15 @@ export class SizeAndPosition {
     }
 
     private async findDetachedChildSite(): Promise<SizeAndPosition | undefined> {
-        const renderedChildSite: SizeAndPosition|undefined = await this.findChildSiteToDelegateZoom({warningOff: true})
+        const renderedChildSite: SizeAndPosition|undefined = await this.findChildSiteToDelegateZoom()
         if (!renderedChildSite || !renderedChildSite.isDetached()) {
             return undefined
         }
         return renderedChildSite
     }
 
-    private async findChildSiteToDelegateZoom(options?: {warningOff?: boolean}): Promise<SizeAndPosition | undefined> {
+    private async findChildSiteToDelegateZoom(): Promise<SizeAndPosition | undefined> {
         const zoomedInChild: Box|undefined = await this.referenceNode.getZoomedInChild()
-        if (!zoomedInChild) {
-            if (!options?.warningOff) {
-                // TODO: remove options and log warning where called
-                log.warning('SizeAndPosition::findChildSiteToDelegateZoom(..) Deeper zoom not implemented.')
-            }
-            return undefined
-        }
-        return zoomedInChild.site
+        return zoomedInChild?.site
     }
 }
