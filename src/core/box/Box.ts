@@ -390,6 +390,10 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
   }
 
+  public getMapData(): BoxData {
+    return this.mapData
+  }
+
   public getMapNodeData(): NodeData[] {
     return this.mapData.nodes
   }

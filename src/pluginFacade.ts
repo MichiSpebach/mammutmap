@@ -30,6 +30,7 @@ import { ToolbarView } from './core/toolbars/ToolbarView'
 import { Widget } from './core/Widget'
 import { ElementType, RenderElement, RenderElements, Style } from './core/util/RenderElement'
 import { PopupWidget } from './core/PopupWidget'
+import { settings } from './core/Settings'
 
 export { util as coreUtil }
 export { processing, ChildProcess}
@@ -43,6 +44,7 @@ export { mainWidget }
 export { ToolbarView }
 export { Map, onMapLoaded, onMapRendered, onMapUnload }
 export { ProjectSettings }
+export { settings as applicationSettings}
 export { LinkAppearanceData, LinkAppearanceMode, linkAppearanceModes }
 export { LinkTagData }
 export { WayPointData }

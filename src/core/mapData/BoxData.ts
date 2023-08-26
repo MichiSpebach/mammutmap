@@ -122,4 +122,12 @@ export class BoxData extends JsonObject {
     return new LocalRect(this.x, this.y, this.width, this.height)
   }
 
+  public getRawField(name: string): unknown {
+    return (this as any)[name]
+  }
+
+  public setRawField(name: string, value: any): void {
+    (this as any)[name] = value
+  }
+
 }

@@ -124,6 +124,15 @@ class Settings {
     ])
   }
 
+  public getRawField(name: string): unknown {
+    return (this as any)[name]
+  }
+
+  public async setRawField(name: string, value: any): Promise<void> {
+    (this as any)[name] = value
+    await this.save()
+  }
+
   private async notifyBooleanSubscribersFor(setting: BooleanSetting): Promise<void> {
     await Promise.all(this.booleanSubscribers
       .filter(subscriber => subscriber.setting === setting)
