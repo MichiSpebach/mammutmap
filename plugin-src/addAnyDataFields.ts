@@ -8,7 +8,6 @@ applicationMenu.addMenuItemTo(plugin.getMenuItemFolder(), ...)
 plugin.applicationMenuItemFolder.addItem(...)*/
 
 //applicationMenu.addMenuItemTo('saveAnyFields.js', new MenuItemFile({label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting()}))
-
 applicationMenu.addMenuItemTo('saveAnyFields.js', new MenuItemFile({label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField()}))
 
 // TODO this does not work yet but should work like this in future
