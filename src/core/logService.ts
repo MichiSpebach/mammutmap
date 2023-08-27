@@ -5,16 +5,45 @@ import { ConsoleDecorator } from './ConsoleDecorator'
 
 export let log: LogService // = new LogService() // initialized at end of file
 
+type Log = {
+    message: string
+    color: string
+    options?: {allowHtml?: boolean}
+    count: number
+    id: string
+}
+
+class Logs {
+    private allLogs: Log[] = []
+    private logsToDisplay: Log[] = []
+
+    public add(log: Log): void {
+        this.allLogs.push(log)
+        this.logsToDisplay.push(log)
+    }
+
+    public getLatest(): Log|undefined {
+        return this.logsToDisplay[this.logsToDisplay.length-1]
+    }
+
+    public getAndRemoveOldestToDisplay(): Log[] {
+        const toRemove: Log[] = []
+        while (this.logsToDisplay.length > 50) {
+            toRemove.push(this.logsToDisplay.shift()!)
+        }
+        return toRemove
+    }
+
+    public clear(): void {
+        this.allLogs = []
+        this.logsToDisplay = []
+    }
+}
+
 class LogService {
     private readonly originalConsole: Console
+    private readonly logs: Logs = new Logs()
     private logDebugActivated: boolean = false
-    private latestLog: {
-        message: string
-        color: string
-        options?: {allowHtml?: boolean}
-        count: number
-        id: string
-    } | undefined
 
     public constructor() {
         this.originalConsole = console
@@ -77,34 +106,43 @@ class LogService {
     }
     
     private async executeLogToGui(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
-        if (this.latestLog && this.latestLog.message === message && this.latestLog.color === color) {
-            if (this.latestLog.options) {
-                this.latestLog.options.allowHtml = this.latestLog.options.allowHtml ?? options?.allowHtml
+        let latestLog: Log|undefined = this.logs.getLatest()
+        if (latestLog && latestLog.message === message && latestLog.color === color) {
+            if (latestLog.options) {
+                latestLog.options.allowHtml = latestLog.options.allowHtml ?? options?.allowHtml
             } else {
-                this.latestLog.options = options
+                latestLog.options = options
             }
-            this.latestLog.count++
+            latestLog.count++
         } else {
-            this.latestLog = {message, color, options, count: 1, id: util.generateId()}
+            latestLog = {message, color, options, count: 1, id: util.generateId()}
+            this.logs.add(latestLog)
         }
 
-        let finalMessage: string = this.latestLog.options?.allowHtml ? message : util.escapeForHtml(message)
-        if (this.latestLog.count > 1) {
-            finalMessage += ` (${this.latestLog.count})`
-            await renderManager.setContentTo(this.latestLog.id, finalMessage)
+        let finalMessage: string = latestLog.options?.allowHtml ? message : util.escapeForHtml(message)
+        if (latestLog.count > 1) {
+            finalMessage += ` (${latestLog.count})`
+            await renderManager.setContentTo(latestLog.id, finalMessage)
         } else {
             await renderManager.addElementTo(indexHtmlIds.logId, {
                 type: 'div',
-                id: this.latestLog.id,
-                style: {color: this.latestLog.color},
+                id: latestLog.id,
+                style: {color: latestLog.color},
                 innerHTML: finalMessage
             })
         }
         await renderManager.scrollToBottom(indexHtmlIds.terminalId)
+        this.removeOldLogsFromGui()
+    }
+
+    private async removeOldLogsFromGui(): Promise<void> {
+        const logsToRemove: Log[] = this.logs.getAndRemoveOldestToDisplay()
+        const pros: Promise<void>[] = logsToRemove.map(log => renderManager.remove(log.id))
+        await Promise.all(pros)
     }
 
     public async clear(priority?: RenderPriority): Promise<void> {
-        this.latestLog = undefined
+        this.logs.clear()
         await renderManager.clearContentOf(indexHtmlIds.logId, priority)
     }
 
