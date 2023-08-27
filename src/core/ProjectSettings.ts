@@ -145,7 +145,7 @@ export class ProjectSettings { // TODO: rename to MapSettings?
     return this.data.getRawField(name)
   }
 
-  public async setRawField(name: string, value: any): Promise<void> {
+  public async setRawFieldAndSave(name: string, value: any): Promise<void> {
     this.data.setRawField(name, value)
     await this.saveToFileSystem()
   }
