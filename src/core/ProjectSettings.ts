@@ -141,4 +141,13 @@ export class ProjectSettings { // TODO: rename to MapSettings?
     return this.data.defaultLinkAppearance
   }
 
+  public getRawField(name: string): unknown {
+    return this.data.getRawField(name)
+  }
+
+  public async setRawField(name: string, value: any): Promise<void> {
+    this.data.setRawField(name, value)
+    await this.saveToFileSystem()
+  }
+
 }
