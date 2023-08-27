@@ -29,15 +29,21 @@ class Settings {
   private static readonly settingsFilePath: string = './'+Settings.settingsFileName
   private static readonly alternativeSettingsFilePath: string = './resources/app/'+Settings.settingsFileName
 
-  private zoomSpeed: number
-  private boxMinSizeToRender: number
-  private boxesDraggableIntoOtherBoxes: boolean
-  private developerMode: boolean
-  private notRethrowUnhandledErrors: boolean
-  private experimentalFeatures: boolean
-  private htmlApplicationMenu: boolean
-  private sidebar: boolean
-  private positionMapOnTopLeft: boolean // only needed for old e2e tests, TODO: update e2e tests and remove this option
+  private static readonly defaults = {
+    zoomSpeed: 3,
+    boxMinSizeToRenderInPixels: 200,
+    sidebar: true
+  }
+
+  private zoomSpeed: number = Settings.defaults.zoomSpeed
+  private boxMinSizeToRender: number = Settings.defaults.boxMinSizeToRenderInPixels
+  private boxesDraggableIntoOtherBoxes: boolean|undefined = undefined
+  private developerMode: boolean|undefined = undefined
+  private notRethrowUnhandledErrors: boolean|undefined = undefined
+  private experimentalFeatures: boolean|undefined = undefined
+  private htmlApplicationMenu: boolean|undefined = undefined
+  private sidebar: boolean = Settings.defaults.sidebar
+  private positionMapOnTopLeft: boolean|undefined = undefined // only needed for old e2e tests, TODO: update e2e tests and remove this option
 
   private booleanSubscribers: {setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>}[] = []
 
@@ -52,25 +58,38 @@ class Settings {
       settingsJson = await fileSystem.readFile(Settings.alternativeSettingsFilePath)
     }
 
-    return new Settings(settingsJson)
+    return Settings.buildFromJson(settingsJson)
+  }
+
+  public static buildFromJson(settingsJson: string) {
+    const settingsData: any = JSON.parse(settingsJson)
+    settingsData.booleanSubscribers = []
+
+    const settings: Settings = Object.setPrototypeOf(settingsData, Settings.prototype)
+    settings.validate()
+    return settings
   }
 
   public static buildFallback(): Settings {
-    return new Settings('{"zoomSpeed": 3, "boxMinSizeToRender": 200, "sidebar": true}')
+    return new Settings()
   }
 
-  private constructor(settingsJson: string) {
-    const settingsParsed: any = JSON.parse(settingsJson)
+  private constructor() {
+  }
 
-    this.zoomSpeed = settingsParsed['zoomSpeed']
-    this.boxMinSizeToRender = settingsParsed['boxMinSizeToRender']
-    this.boxesDraggableIntoOtherBoxes = settingsParsed['boxesDraggableIntoOtherBoxes']
-    this.developerMode = settingsParsed['developerMode']
-    this.notRethrowUnhandledErrors = settingsParsed['notRethrowUnhandledErrors']
-    this.experimentalFeatures = settingsParsed['experimentalFeatures']
-    this.htmlApplicationMenu = settingsParsed['htmlApplicationMenu']
-    this.sidebar = settingsParsed['sidebar']
-    this.positionMapOnTopLeft = settingsParsed['positionMapOnTopLeft']
+  private validate(): void {
+    if (typeof this.zoomSpeed !== 'number') {
+      log.warning(`Settings::validate() expected zoomSpeed to be a number but is ${this.zoomSpeed}, defaulting it to ${Settings.defaults.zoomSpeed}.`)
+      this.zoomSpeed = Settings.defaults.zoomSpeed
+    }
+    if (typeof this.boxMinSizeToRender !== 'number') {
+      log.warning(`Settings::validate() expected boxMinSizeToRender to be a number but is ${this.boxMinSizeToRender}, defaulting it to ${Settings.defaults.boxMinSizeToRenderInPixels}.`)
+      this.boxMinSizeToRender = Settings.defaults.boxMinSizeToRenderInPixels
+    }
+    if (typeof this.sidebar !== 'boolean') {
+      log.warning(`Settings::validate() expected sidebar to be a number but is ${this.sidebar}, defaulting it to ${Settings.defaults.sidebar}.`)
+      this.sidebar = Settings.defaults.sidebar
+    }
   }
 
   private async save(): Promise<void> {
@@ -134,9 +153,14 @@ class Settings {
   }
 
   private async notifyBooleanSubscribersFor(setting: BooleanSetting): Promise<void> {
+    const value: boolean|undefined = this[setting]
+    if (typeof value !== 'boolean') {
+      log.warning(`Settings::notifyBooleanSubscribersFor(${setting}) expected boolean but is ${value}.`)
+      return
+    }
     await Promise.all(this.booleanSubscribers
       .filter(subscriber => subscriber.setting === setting)
-      .map(subscriber => subscriber.onSet(this[setting]))
+      .map(subscriber => subscriber.onSet(value))
     )
   }
 

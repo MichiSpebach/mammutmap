@@ -2,15 +2,15 @@ import { map } from '../dist/core/Map'
 import { Box, MenuItemFile, applicationMenu, applicationSettings } from '../dist/pluginFacade'
 // TODO make something like this possible:
 /*import { plugin } from '../dist/pluginFacade'
+import { thisPlugin } from '../dist/pluginFacade'
 plugin.getName()
 plugin.getMenuItemFolder()
 applicationMenu.addMenuItemTo(plugin.getMenuItemFolder(), ...)
 plugin.applicationMenuItemFolder.addItem(...)*/
 
-//applicationMenu.addMenuItemTo('addAnyDataFields.js', new MenuItemFile({label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting()}))
+applicationMenu.addMenuItemTo('addAnyDataFields.js', new MenuItemFile({label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting()}))
 applicationMenu.addMenuItemTo('addAnyDataFields.js', new MenuItemFile({label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField()}))
 
-// TODO this does not work yet but should work like this in future
 async function setAnyApplicationSetting(): Promise<void> {
     let anyValue: unknown = applicationSettings.getRawField('anyField')
     

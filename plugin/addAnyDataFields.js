@@ -4,13 +4,13 @@ const Map_1 = require("../dist/core/Map");
 const pluginFacade_1 = require("../dist/pluginFacade");
 // TODO make something like this possible:
 /*import { plugin } from '../dist/pluginFacade'
+import { thisPlugin } from '../dist/pluginFacade'
 plugin.getName()
 plugin.getMenuItemFolder()
 applicationMenu.addMenuItemTo(plugin.getMenuItemFolder(), ...)
 plugin.applicationMenuItemFolder.addItem(...)*/
-//applicationMenu.addMenuItemTo('addAnyDataFields.js', new MenuItemFile({label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting()}))
+pluginFacade_1.applicationMenu.addMenuItemTo('addAnyDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting() }));
 pluginFacade_1.applicationMenu.addMenuItemTo('addAnyDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField() }));
-// TODO this does not work yet but should work like this in future
 async function setAnyApplicationSetting() {
     let anyValue = pluginFacade_1.applicationSettings.getRawField('anyField');
     if (typeof anyValue === 'number') {

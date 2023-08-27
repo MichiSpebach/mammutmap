@@ -1,7 +1,7 @@
 {
   "name": "mammutmap",
   "productName": "mammutmap",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "TODO",
   "main": "dist/electronApp/index.js",
   "scripts": {
