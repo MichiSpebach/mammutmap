@@ -20,7 +20,7 @@ export type RenderElement = {
   children?: RenderElements
 }
 
-export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'button'|'select'|'option'
+export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'pre'|'button'|'select'|'option'
 
 export type Style = Partial<CSSStyleDeclaration> & { // TODO: use something that comes with stricter typing and cleanup overriding
   position?: 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'inherit', // without overriding any strings would be allowed

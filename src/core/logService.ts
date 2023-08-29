@@ -2,15 +2,49 @@ import { RenderPriority, renderManager } from './RenderManager'
 import { util } from './util/util'
 import * as indexHtmlIds from './indexHtmlIds'
 import { ConsoleDecorator } from './ConsoleDecorator'
+import { PopupWidget } from './PopupWidget'
+import { RenderElement } from './util/RenderElement'
 
 export let log: LogService // = new LogService() // initialized at end of file
 
-type Log = {
-    message: string
-    color: string
-    options?: {allowHtml?: boolean}
-    count: number
-    id: string
+class Log {
+    public readonly id: string
+    public readonly message: string
+    public readonly color: string
+    public allowHtml: boolean|undefined
+    public count: number
+
+    /*public constructor({ I want something like this to work
+        public readonly id: string,
+        public readonly message: string,
+        public readonly color: string,
+        public allowHtml?: boolean,
+        public count: number
+    }) {}*/
+    public constructor(options: {id: string, message: string, color: string, allowHtml?: boolean, count: number}) {
+        this.id = options.id
+        this.message = options.message
+        this.color = options.color
+        this.allowHtml = options.allowHtml
+        this.count = options.count
+    }
+
+    public toHtmlString(): string {
+        let htmlMessage: string = this.allowHtml ? this.message : util.escapeForHtml(this.message)
+        if (this.count > 1) {
+            htmlMessage += ` (${this.count})`
+        }
+        return htmlMessage
+    }
+
+    public toRenderElement(): RenderElement {
+        return {
+            type: 'div',
+            id: this.id,
+            style: {color: this.color},
+            innerHTML: this.toHtmlString()
+        }
+    }
 }
 
 class Logs {
@@ -20,6 +54,10 @@ class Logs {
     public add(log: Log): void {
         this.allLogs.push(log)
         this.logsToDisplay.push(log)
+    }
+
+    public getAll(): Log[] {
+        return this.allLogs
     }
 
     public getLatest(): Log|undefined {
@@ -43,6 +81,8 @@ class Logs {
 class LogService {
     private readonly originalConsole: Console
     private readonly logs: Logs = new Logs()
+    private readonly showAllLogsButtonId: string = indexHtmlIds.logId+'ShowAllLogs'
+    private showAllLogsButtonState: 'notInitialized'|'notDisplayed'|'displayed' = 'notInitialized'
     private logDebugActivated: boolean = false
 
     public constructor() {
@@ -106,30 +146,30 @@ class LogService {
     }
     
     private async executeLogToGui(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
+        if (this.showAllLogsButtonState === 'notInitialized') {
+            this.showAllLogsButtonState = 'notDisplayed'
+            await renderManager.addElementTo(indexHtmlIds.logId, {
+                type: 'button',
+                id: this.showAllLogsButtonId,
+                style: {display: 'none'},
+                onclick: () => PopupWidget.buildAndRender('All Logs', this.logs.getAll().map(log => log.toRenderElement())),
+                children: 'Show All Logs',
+            })
+        }
+
         let latestLog: Log|undefined = this.logs.getLatest()
         if (latestLog && latestLog.message === message && latestLog.color === color) {
-            if (latestLog.options) {
-                latestLog.options.allowHtml = latestLog.options.allowHtml ?? options?.allowHtml
-            } else {
-                latestLog.options = options
-            }
+            latestLog.allowHtml = latestLog.allowHtml ?? options?.allowHtml
             latestLog.count++
         } else {
-            latestLog = {message, color, options, count: 1, id: util.generateId()}
+            latestLog = new Log({message, color, allowHtml: options?.allowHtml, count: 1, id: util.generateId()})
             this.logs.add(latestLog)
         }
 
-        let finalMessage: string = latestLog.options?.allowHtml ? message : util.escapeForHtml(message)
         if (latestLog.count > 1) {
-            finalMessage += ` (${latestLog.count})`
-            await renderManager.setContentTo(latestLog.id, finalMessage)
+            await renderManager.setContentTo(latestLog.id, latestLog.toHtmlString())
         } else {
-            await renderManager.addElementTo(indexHtmlIds.logId, {
-                type: 'div',
-                id: latestLog.id,
-                style: {color: latestLog.color},
-                innerHTML: finalMessage
-            })
+            await renderManager.addElementTo(indexHtmlIds.logId, latestLog.toRenderElement())
         }
         await renderManager.scrollToBottom(indexHtmlIds.terminalId)
         this.removeOldLogsFromGui()
@@ -138,6 +178,9 @@ class LogService {
     private async removeOldLogsFromGui(): Promise<void> {
         const logsToRemove: Log[] = this.logs.getAndRemoveOldestToDisplay()
         const pros: Promise<void>[] = logsToRemove.map(log => renderManager.remove(log.id))
+        if (logsToRemove.length > 0 ) {
+            renderManager.setStyleTo(this.showAllLogsButtonId, {display: 'inline-block'})
+        }
         await Promise.all(pros)
     }
 

@@ -58,18 +58,27 @@ export abstract class PopupWidget extends Widget {
         }
 
         let content: RenderElements = this.formContent()
-        if (typeof content === 'string') { // in order to keep old PopupWidgets work
+        if (typeof content === 'string') { // in order to keep old PopupWidgets work, would not be interpreted as html otherwise
             content = {
                 type: 'div',
                 innerHTML: content
             }
+        }
+        const body: RenderElement = {
+            type: 'div',
+            style: {
+                maxWidth: '90vw',
+                maxHeight: '85vh',
+                overflow: 'auto'
+            },
+            children: content
         }
 
         await renderManager.addElementTo(indexHtmlIds.bodyId, {
             type: 'div',
             id: this.id,
             className: style.getPopupClass(),
-            children: [header, content].flat()
+            children: [header, body].flat()
         })
 
         await this.afterRender()

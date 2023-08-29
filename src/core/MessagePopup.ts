@@ -1,4 +1,5 @@
 import { PopupWidget } from './PopupWidget'
+import { RenderElements } from './util/RenderElement'
 import { util } from './util/util'
 
 export class MessagePopup extends PopupWidget {
@@ -14,8 +15,11 @@ export class MessagePopup extends PopupWidget {
         this.message = message
     }
 
-    protected formContent(): string {
-      return this.message
+    protected formContent(): RenderElements {
+      return {
+        type: 'div',
+        innerHTML: this.message
+      }
     }
 
 }
