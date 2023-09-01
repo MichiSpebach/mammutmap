@@ -31,8 +31,10 @@ import { Link } from '../link/Link'
 import { log } from '../logService'
 import { Style } from '../util/RenderElement'
 import { BoxContext } from './BoxContext'
+import { BoxTabs } from './BoxTabs'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
+  public static readonly Tabs: typeof BoxTabs = BoxTabs
   private name: string
   private parent: FolderBox|null
   private mapData: BoxData
@@ -40,7 +42,8 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   public readonly context: BoxContext
   public readonly transform: Transform
   public readonly site: SizeAndPosition
-  private readonly header: BoxHeader
+  public readonly header: BoxHeader
+  private readonly tabs: BoxTabs
   // TODO: move nodes into BoxBody
   public readonly nodes: BoxNodesWidget // TODO: introduce (Abstract)NodesWidget|SubNodesWidget|ChildNodesWidget that contains all sorts of childNodes (Boxes and LinkNodes)?
   // TODO: move links into BoxBody?
@@ -67,6 +70,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     this.transform = new Transform(this)
     this.site = new SizeAndPosition(this, this.mapData)
     this.header = this.createHeader()
+    this.tabs = new BoxTabs(this)
     this.nodes = new BoxNodesWidget(this)
     this.links = new BoxLinks(this)
     this.borderingLinks = new BorderingLinks(this)
@@ -362,7 +366,8 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
     await Promise.all([
       scaleTool.renderInto(this),
-      this.borderingLinks.setHighlightAllThatShouldBeRendered(true)
+      this.borderingLinks.setHighlightAllThatShouldBeRendered(true),
+      this.tabs.renderBar()
     ])
   }
 
@@ -374,7 +379,8 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
     await Promise.all([
       scaleTool.unrenderFrom(this),
-      this.borderingLinks.setHighlightAllThatShouldBeRendered(false)
+      this.borderingLinks.setHighlightAllThatShouldBeRendered(false),
+      this.tabs.unrenderBar()
     ])
   }
 
