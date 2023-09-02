@@ -15,12 +15,11 @@ interface Style {
   getBoxBorderClass(): string
   getAdditionalBoxBorderClass(mapDataFileExisting: boolean): string
 
-  getBoxHeaderClass(): string
-  getFileBoxHeaderClass(): string
-  getFolderBoxHeaderClass(): string
-  getSourcelessBoxHeaderClass(): string
-
   getBoxHeaderInnerClass(): string
+  getFileBoxHeaderInnerClass(): string
+  getFolderBoxHeaderInnerClass(): string
+  getSourcelessBoxHeaderInnerClass(): string
+
   getBoxBodyZoomInToRenderHintClass(): string
   getBoxBodyZoomInToRenderHintTextClass(): string
   getFileBoxBodyTextClass(): string
@@ -74,22 +73,19 @@ class DarkTheme implements Style {
     }
   }
 
-  public getBoxHeaderClass(): string {
-    return 'boxHeader'
-  }
-  public getFileBoxHeaderClass(): string {
-    return 'fileBoxHeader'
-  }
-  public getFolderBoxHeaderClass(): string {
-    return 'folderBoxHeader'
-  }
-  public getSourcelessBoxHeaderClass(): string {
-    return 'sourcelessBoxHeader'
-  }
-
   public getBoxHeaderInnerClass(): string {
     return 'boxHeaderInner'
   }
+  public getFileBoxHeaderInnerClass(): string {
+    return 'fileBoxHeaderInner'
+  }
+  public getFolderBoxHeaderInnerClass(): string {
+    return 'folderBoxHeaderInner'
+  }
+  public getSourcelessBoxHeaderInnerClass(): string {
+    return 'sourcelessBoxHeaderInner'
+  }
+
 
   public getBoxBodyZoomInToRenderHintClass(): string {
     return 'boxBodyZoomInToRenderHint'

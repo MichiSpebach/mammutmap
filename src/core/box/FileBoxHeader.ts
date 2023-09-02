@@ -9,9 +9,10 @@ export class FileBoxHeader extends BoxHeader {
     super(referenceBox)
   }
 
-  public override async render(): Promise<void> {
-    await super.render()
-    renderManager.addClassTo(super.getId(), style.getFileBoxHeaderClass())
+  protected override getInnerStyleClassNames(): string[] {
+    const classNames: string[] = super.getInnerStyleClassNames()
+    classNames.push(style.getFileBoxHeaderInnerClass())
+    return classNames
   }
 
 }

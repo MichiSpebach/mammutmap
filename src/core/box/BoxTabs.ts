@@ -7,7 +7,7 @@ import { Box } from './Box'
 type BoxTab = {
     name: string,
     isAvailableFor: (box: Box) => boolean|Promise<boolean>,
-    buildWidget: (box: Box) => RenderElement|Widget|Promise<RenderElement|Widget>
+    buildWidget: (box: Box) => RenderElements|Widget|Promise<RenderElements|Widget>
 }
 
 class BoxTabBarWidget extends Widget {
@@ -120,6 +120,11 @@ export class BoxTabs {
             ongoing.push(renderManager.addElementTo(this.referenceBox.header.getId(), {
                 type: 'div',
                 id: this.getId(),
+                style: {
+                    paddingLeft: '5px',
+                    paddingRight: '5px',
+                    backgroundColor: '#000a'
+                },
                 children: this.bar.shapeFormOuter()
             }))
         }
@@ -136,7 +141,7 @@ export class BoxTabs {
             return this.clearContent()
         }
 
-        let tabContent: RenderElement|Widget = await tab.buildWidget(this.referenceBox)
+        let tabContent: RenderElements|Widget = await tab.buildWidget(this.referenceBox)
         let contentWidget: Widget|undefined = undefined
         if (tabContent instanceof Widget) {
             contentWidget = tabContent
@@ -147,7 +152,7 @@ export class BoxTabs {
         }
 
         if (this.contentRendered) {
-            return renderManager.setElementTo(this.getContentId(), tabContent)
+            return renderManager.setElementsTo(this.getContentId(), tabContent)
         }
         
         this.contentRendered = true

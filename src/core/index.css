@@ -146,25 +146,22 @@ pre {
   border-color: slateblue;
 }
 
-.boxHeader {
+.boxHeaderInner {
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   border-bottom: 1px solid #404040a0;
-}
-.fileBoxHeader {
-  background-color: steelblue;
-}
-.folderBoxHeader {
-  background-color: slategrey;
-}
-.sourcelessBoxHeader {
-  background-color: darkorange;
-}
-
-.boxHeaderInner {
   word-wrap: break-word;
   padding: 2px;
   color: #ddd;
+}
+.fileBoxHeaderInner {
+  background-color: steelblue;
+}
+.folderBoxHeaderInner {
+  background-color: slategrey;
+}
+.sourcelessBoxHeaderInner {
+  background-color: darkorange;
 }
 
 .boxBodyZoomInToRenderHint {

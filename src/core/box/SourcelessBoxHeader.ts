@@ -4,9 +4,10 @@ import { BoxHeader } from './BoxHeader'
 
 export class SourcelessBoxHeader extends BoxHeader {
 
-  public override async render(): Promise<void> {
-    await super.render()
-    renderManager.addClassTo(super.getId(), style.getSourcelessBoxHeaderClass())
+  protected override getInnerStyleClassNames(): string[] {
+    const classNames: string[] = super.getInnerStyleClassNames()
+    classNames.push(style.getSourcelessBoxHeaderInnerClass())
+    return classNames
   }
 
 }
