@@ -11,32 +11,18 @@ import { style } from '../styleAdapter'
 import { settings } from '../Settings'
 import { util } from '../util/util'
 
-export abstract  class BoxHeader implements Draggable<FolderBox> {
+export abstract  class BoxHeader {
   public readonly referenceBox: Box
+  private readonly draggable: BoxHeaderDraggable
   private rendered: boolean = false
-  private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
 
   public constructor(referenceBox: Box) {
     this.referenceBox = referenceBox
+    this.draggable = new BoxHeaderDraggable(this.getId()+'Inner', this.referenceBox)
   }
 
   public getId(): string {
     return this.referenceBox.getId()+'Header'
-  }
-
-  public getManagingBox(): Box {
-    return this.referenceBox.getParent()
-  }
-
-  public getDropTargetAtDragStart(): FolderBox {
-    if (this.referenceBox.isRoot()) {
-      return this.referenceBox as FolderBox // in order that RootFolderBox can be dragged
-    }
-    return this.referenceBox.getParent()
-  }
-
-  public canBeDroppedInto(dropTarget: DropTarget): boolean {
-    return settings.getBoolean('boxesDraggableIntoOtherBoxes') && dropTarget instanceof FolderBox
   }
 
   public async render(): Promise<void> {
@@ -46,14 +32,14 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
       ? 'draggable="true"'
       : ''
 
-    let html: string = `<div ${draggableHtml} class="${this.getInnerStyleClassNames().join(' ')}">`
+    let html: string = `<div id="${this.getId()+'Inner'}" ${draggableHtml} class="${this.getInnerStyleClassNames().join(' ')}">`
     html += this.formTitleHtml()
     html += '</div>'
     proms.push(renderManager.setContentTo(this.getId(), html))
 
     if (!this.rendered) {
       if (!this.referenceBox.isRoot()) {
-        proms.push(relocationDragManager.addDraggable(this))
+        proms.push(relocationDragManager.addDraggable(this.draggable))
       }
       this.rendered = true
     }
@@ -76,9 +62,38 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
       return
     }
     if (!this.referenceBox.isRoot()) {
-      await relocationDragManager.removeDraggable(this)
+      await relocationDragManager.removeDraggable(this.draggable)
     }
     this.rendered = false // TODO: implement rerenderAfter(Un)RenderFinished mechanism?
+  }
+
+}
+
+class BoxHeaderDraggable implements Draggable<FolderBox> {
+  private dragOffset: {x: number, y: number} = {x:0 , y:0} // TODO: move into DragManager and let DragManager return calculated position of box (instead of pointer)
+
+  public constructor(
+    public readonly id: string,
+    public readonly referenceBox: Box
+  ) {}
+
+  public getId(): string {
+    return this.id
+  }
+
+  public getManagingBox(): Box {
+    return this.referenceBox.getParent()
+  }
+
+  public getDropTargetAtDragStart(): FolderBox {
+    if (this.referenceBox.isRoot()) {
+      return this.referenceBox as FolderBox // in order that RootFolderBox can be dragged
+    }
+    return this.referenceBox.getParent()
+  }
+
+  public canBeDroppedInto(dropTarget: DropTarget): boolean {
+    return settings.getBoolean('boxesDraggableIntoOtherBoxes') && dropTarget instanceof FolderBox
   }
 
   public async dragStart(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
@@ -130,5 +145,4 @@ export abstract  class BoxHeader implements Draggable<FolderBox> {
 
     await Promise.all(pros)
   }
-
 }
