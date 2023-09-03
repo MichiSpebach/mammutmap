@@ -1,5 +1,5 @@
-import { style } from '../styleAdapter'
-import { renderManager } from '../RenderManager'
+import { style } from '../../styleAdapter'
+import { renderManager } from '../../RenderManager'
 import { BoxHeader } from './BoxHeader'
 
 export class SourcelessBoxHeader extends BoxHeader {

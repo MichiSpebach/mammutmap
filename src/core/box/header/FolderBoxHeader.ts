@@ -1,9 +1,9 @@
-import { renderManager } from '../RenderManager'
-import { style } from '../styleAdapter'
+import { renderManager } from '../../RenderManager'
+import { style } from '../../styleAdapter'
 import { BoxHeader } from './BoxHeader'
-import { Box } from './Box'
+import { Box } from '../Box'
 
-export class FileBoxHeader extends BoxHeader {
+export class FolderBoxHeader extends BoxHeader {
 
   public constructor(referenceBox: Box) {
     super(referenceBox)
@@ -11,7 +11,7 @@ export class FileBoxHeader extends BoxHeader {
 
   protected override getInnerStyleClassNames(): string[] {
     const classNames: string[] = super.getInnerStyleClassNames()
-    classNames.push(style.getFileBoxHeaderInnerClass())
+    classNames.push(style.getFolderBoxHeaderInnerClass())
     return classNames
   }
 

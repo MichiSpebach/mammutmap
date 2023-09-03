@@ -2,8 +2,8 @@ import { renderManager } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu'
 import { Box } from './Box'
-import { BoxHeader } from './BoxHeader'
-import { SourcelessBoxHeader } from './SourcelessBoxHeader'
+import { BoxHeader } from './header/BoxHeader'
+import { SourcelessBoxHeader } from './header/SourcelessBoxHeader'
 import { FolderBox } from './FolderBox'
 import { BoxData } from '../mapData/BoxData'
 import { BoxLinks } from './BoxLinks'
@@ -32,7 +32,7 @@ export class SourcelessBox extends Box {
   }
 
   public isSourceless(): boolean {
-    return false
+    return true
   }
 
   protected getBodyOverflowStyle(): 'hidden' | 'visible' {

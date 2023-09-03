@@ -1,0 +1,90 @@
+{
+	"id": "00uebqpnvlg",
+	"x": 76,
+	"y": 36,
+	"width": 20,
+	"height": 20,
+	"links": [
+		{
+			"id": "k7l97462cho",
+			"from": {
+				"path": [
+					{
+						"boxId": "n2rcvc1did8",
+						"boxName": "FileBoxHeader.ts",
+						"x": 50,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 50.00168412543366,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "mfo5vt3k0j8",
+			"from": {
+				"path": [
+					{
+						"boxId": "lsppgrrk3so",
+						"boxName": "FolderBoxHeader.ts",
+						"x": 50,
+						"y": 100
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 49.99880907012195,
+						"y": 0
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "l1nuj0h4jgg",
+			"from": {
+				"path": [
+					{
+						"boxId": "cc805vhgr3g",
+						"boxName": "SourcelessBoxHeader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "710vhdi6un8",
+						"boxName": "BoxHeader.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"isA"
+			]
+		}
+	],
+	"nodes": []
+}
