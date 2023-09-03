@@ -1,4 +1,3 @@
-import { renderManager } from '../../RenderManager'
 import { style } from '../../styleAdapter'
 import { BoxHeader } from './BoxHeader'
 import { Box } from '../Box'
