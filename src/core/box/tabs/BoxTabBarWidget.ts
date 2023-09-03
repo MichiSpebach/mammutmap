@@ -98,8 +98,9 @@ export class BoxTabBarWidget extends Widget {
         await Promise.all([
             renderManager.setStyleTo(this.getTabId(oldSelectedTab), this.getTabStyle(oldSelectedTab)),
             renderManager.setStyleTo(this.getTabId(this.selectedTab), this.getTabStyle(this.selectedTab)),
-            this.onSelect(tab)
+            //this.onSelect(tab) must not be in same batch as setStyleTo(..) because of bug in domAdapter TODO: fix this bug
         ]);
+        await this.onSelect(tab)
     }
 
     public shapeFormOuter(): RenderElement {
