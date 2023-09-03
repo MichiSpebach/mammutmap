@@ -1,7 +1,7 @@
 import { renderManager } from '../RenderManager'
 import { Widget } from '../Widget'
 import { log } from '../logService'
-import { RenderElement, RenderElements } from '../util/RenderElement'
+import { RenderElement, RenderElements, Style } from '../util/RenderElement'
 import { Box } from './Box'
 
 type BoxTab = {
@@ -12,6 +12,7 @@ type BoxTab = {
 
 class BoxTabBarWidget extends Widget {
     private someTabRendered: boolean = false
+    private selectedTab: 'map'|BoxTab = 'map'
 
     public constructor(
         private readonly id: string,
@@ -42,6 +43,12 @@ class BoxTabBarWidget extends Widget {
         await renderManager.clearContentOf(this.getId())
     }
 
+    private getTabId(tab: 'map'|BoxTab): string {
+        return tab === 'map'
+            ? this.getId()+'Map'
+            : this.getId()+tab.name
+    }
+
     private async renderTab(tab: BoxTab): Promise<void> {
         if (!await tab.isAvailableFor(this.parent.referenceBox)) {
             return
@@ -49,8 +56,9 @@ class BoxTabBarWidget extends Widget {
 
         const tabElement: RenderElement = {
             type: 'button',
-            id: this.getId()+tab.name,
-            onclick: () => this.onSelect(tab),
+            id: this.getTabId(tab),
+            style: this.getTabStyle(tab),
+            onclick: () => this.select(tab),
             children: tab.name
         }
         if (this.someTabRendered) {
@@ -59,12 +67,44 @@ class BoxTabBarWidget extends Widget {
             this.someTabRendered = true
             const defaultMapTabElement: RenderElement = {
                 type: 'button',
-                id: this.getId()+'Map',
-                onclick: () => this.onSelect('map'),
+                id: this.getTabId('map'),
+                style: this.getTabStyle('map'),
+                onclick: () => this.select('map'),
                 children: 'Map'
             }
             await renderManager.addElementsTo(this.getId(), [defaultMapTabElement, tabElement])
         }
+    }
+
+    private getTabStyle(tab: 'map'|BoxTab): Style {
+        let style: Style = {
+            padding: '4px 8px',
+            fontSize: 'inherit',
+            color: 'inherit',
+            backgroundColor: '#222',
+            border: 'none',
+            borderRight: '1px solid gray',
+            borderBottom: '1px solid gray',
+            cursor: 'pointer'
+        }
+        if (this.selectedTab === tab) {
+            style = {
+                ...style,
+                backgroundColor: 'transparent',
+                borderBottom: 'none'
+            }
+        }
+        return style
+    }
+
+    private async select(tab: 'map'|BoxTab): Promise<void> {
+        const oldSelectedTab: 'map'|BoxTab = this.selectedTab
+        this.selectedTab = tab
+        await Promise.all([
+            renderManager.setStyleTo(this.getTabId(oldSelectedTab), this.getTabStyle(oldSelectedTab)),
+            renderManager.setStyleTo(this.getTabId(this.selectedTab), this.getTabStyle(this.selectedTab)),
+            this.onSelect(tab)
+        ])
     }
 
     public shapeFormOuter(): RenderElement {
@@ -121,9 +161,7 @@ export class BoxTabs {
                 type: 'div',
                 id: this.getId(),
                 style: {
-                    paddingLeft: '5px',
-                    paddingRight: '5px',
-                    backgroundColor: '#000a'
+                    backgroundColor: '#002040e0'
                 },
                 children: this.bar.shapeFormOuter()
             }))
@@ -159,6 +197,9 @@ export class BoxTabs {
         const rendering: Promise<void> = renderManager.addElementTo(this.getId(), {
             type: 'div',
             id: this.getContentId(),
+            style: {
+                padding: '0px 5px 5px 5px'
+            },
             children: tabContent
         })
         if (contentWidget) {
