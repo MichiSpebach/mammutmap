@@ -1,7 +1,7 @@
 {
 	"id": "nsm4nes02ig",
 	"x": 68,
-	"y": 36.00000000000001,
+	"y": 36,
 	"width": 4,
 	"height": 4,
 	"links": [
@@ -154,7 +154,63 @@
 			"tags": [
 				"isA"
 			]
+		},
+		{
+			"id": "78rs0r71pv8",
+			"from": {
+				"path": [
+					{
+						"boxId": "pkjjvinq058",
+						"boxName": "nodepkjjvinq058",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "6e0alhgnc3",
+						"boxName": "LocalPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
+		},
+		{
+			"id": "kn22ul7augg",
+			"from": {
+				"path": [
+					{
+						"boxId": "pkjjvinq058",
+						"boxName": "nodepkjjvinq058",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			}
 		}
 	],
-	"nodes": []
+	"nodes": [
+		{
+			"id": "pkjjvinq058",
+			"x": 76,
+			"y": 100
+		}
+	]
 }

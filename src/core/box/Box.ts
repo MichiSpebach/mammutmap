@@ -31,7 +31,7 @@ import { Link } from '../link/Link'
 import { log } from '../logService'
 import { Style } from '../util/RenderElement'
 import { BoxContext } from './BoxContext'
-import { BoxTabs } from './BoxTabs'
+import { BoxTabs } from './tabs/BoxTabs'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   public static readonly Tabs: typeof BoxTabs = BoxTabs

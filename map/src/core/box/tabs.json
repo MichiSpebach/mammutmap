@@ -1,0 +1,90 @@
+{
+	"id": "hgp5l53ubug",
+	"x": 76,
+	"y": 64,
+	"width": 8,
+	"height": 8,
+	"links": [
+		{
+			"id": "jv8ralsp6j",
+			"from": {
+				"path": [
+					{
+						"boxId": "vngroopjfdo",
+						"boxName": "BoxTabBarWidget.ts",
+						"x": 50,
+						"y": 52
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "lnh7lgq1bd8",
+						"boxName": "BoxTab.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "04fkfte57i8",
+			"from": {
+				"path": [
+					{
+						"boxId": "8g8v607ad1g",
+						"boxName": "BoxTabs.ts",
+						"x": 50,
+						"y": 48
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "vngroopjfdo",
+						"boxName": "BoxTabBarWidget.ts",
+						"x": 50,
+						"y": 48
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "3dbi7l0vk6",
+			"from": {
+				"path": [
+					{
+						"boxId": "8g8v607ad1g",
+						"boxName": "BoxTabs.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "lnh7lgq1bd8",
+						"boxName": "BoxTab.ts",
+						"x": 50,
+						"y": 50
+					}
+				],
+				"floatToBorder": true
+			},
+			"tags": [
+				"has"
+			]
+		}
+	],
+	"nodes": []
+}
