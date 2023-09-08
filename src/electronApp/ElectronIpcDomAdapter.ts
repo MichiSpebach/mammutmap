@@ -1,3 +1,4 @@
+import * as JSON5 from 'JSON5'
 import { util } from '../core/util/util'
 import { RenderElement, RenderElements, Style } from '../core/util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain } from 'electron'
@@ -104,12 +105,11 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
           case 'innerHTML':
             return `document.getElementById('${command.elementId}').innerHTML='${command.value}';`// TODO: fails if innerHTML includes "'"
 
-          case 'style': // TODO: style is a readonly property, find better solution
+          case 'style':
             if (typeof command.value === 'string') {
-              return `document.getElementById('${command.elementId}').style='${command.value}';` // TODO: fails if style includes "'"
+              return `document.getElementById('${command.elementId}').style.cssText='${command.value}';` // TODO: fails if style includes "'"
             } else {
-              const elementName = 'elementToSetStyle'+command.elementId
-              return `const ${elementName} = document.getElementById('${command.elementId}');${this.createSetStyleJavaScript(elementName, command.value as Style)}`
+              return this.createSetStyleJavaScriptForElementId(command.elementId, command.value as Style)
             }
   
           case 'addClassTo':
@@ -209,7 +209,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
           continue
         }
         if (field === 'style') {
-          js += this.createSetStyleJavaScript(elementJsName, fieldValue as Style)
+          js += this.createSetStyleJavaScriptForElementName(elementJsName, fieldValue as Style)
         } else if (field === 'innerHTML') {
           if ((fieldValue as string).includes("'")) {
             if ((fieldValue as string).includes('"')) {
@@ -296,10 +296,14 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return element
     }
 
-    // TODO: at least create javascriptSnippetGenerator and move javascript generation there
-    private createSetStyleJavaScript(elementJsName: string, style: Style): string {
-      let js = ''
+    private createSetStyleJavaScriptForElementId(id: string, style: Style): string {
+      return this.createSetStyleJavaScriptForElementName(`document.getElementById("${id}")`, style)
+    }
 
+    // TODO: at least create javascriptSnippetGenerator and move javascript generation there
+    private createSetStyleJavaScriptForElementName(elementJsName: string, style: Style): string {
+      return `Object.assign(${elementJsName}.style,${JSON5.stringify(style).replaceAll("'", '"')});`
+      let js = ''
       for (const styleField in style) {
         const styleFieldValue = style[styleField]
         if (typeof styleFieldValue === 'string') {
@@ -326,12 +330,9 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     public setStyleTo(id: string, style: string|Style): Promise<void> {
       if (typeof style === 'string') {
-        return this.executeJsOnElementSuppressingErrors(id, "style = '"+style+"'") // TODO: style is a readonly property, find better solution, also fails if style includes "'"
+        return this.executeJsOnElementSuppressingErrors(id, "style.cssText = '"+style+"'") // TODO: fails if style includes "'"
       }
-
-      let js = `const element = document.getElementById("${id}");`
-      js += this.createSetStyleJavaScript('element', style)
-      return this.executeJavaScript(js)
+      return this.executeJavaScriptInFunction(this.createSetStyleJavaScriptForElementId(id, style)) // execute in function because otherwise "Error: An object could not be cloned."
     }
   
     public addClassTo(id: string, className: string): Promise<void> {
