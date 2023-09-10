@@ -218,12 +218,7 @@ export async function addLinkBetweenBoxes(fromBox: Box, toBox: Box): Promise<{
   let link: Link|undefined = managingBox.links.getLinkWithEndBoxes(fromBox, toBox)
   const linkAlreadyExisted: boolean = !!link
   if (!link) {
-    const fromWayPoint = WayPointData.buildNew(fromBox.getId(), fromBox.getName(), 50, 50)
-    const toWayPoint = WayPointData.buildNew(toBox.getId(), toBox.getName(), 50, 50)
-
-    const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint]), linkable: fromBox}
-    const toLinkEnd = {mapData: new LinkEndData([toWayPoint]), linkable: toBox}
-    link = await managingBox.links.addLink(fromLinkEnd, toLinkEnd, true)
+    link = await managingBox.links.add(fromBox, toBox)
   }
 
   return {link, linkAlreadyExisted}

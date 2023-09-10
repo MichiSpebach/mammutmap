@@ -11,7 +11,7 @@ import { ClientPosition } from '../shape/ClientPosition'
 import { BoxContext } from './BoxContext'
 
 export class FileBox extends Box {
-  private readonly body: FileBoxBody
+  public readonly body: FileBoxBody
 
   public constructor(name: string, parent: FolderBox, mapData: BoxData, mapDataFileExists: boolean, context?: BoxContext) {
     super(name, parent, mapData, mapDataFileExists, context)

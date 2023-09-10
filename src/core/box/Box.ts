@@ -537,6 +537,15 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return false
   }
 
+  public isAncestorOf(descendant: AbstractNodeWidget): boolean {
+    for (; !descendant.isRoot(); descendant = descendant.getParent()) {
+      if (this === descendant.getParent()) {
+        return true
+      }
+    }
+    return false
+  }
+
   public static findCommonAncestor(fromBox: Box|NodeWidget, toBox: Box|NodeWidget): {
     commonAncestor: Box, 
     fromPath: (Box|NodeWidget)[], 

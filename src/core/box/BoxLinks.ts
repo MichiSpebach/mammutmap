@@ -8,6 +8,8 @@ import { LinkEndData } from '../mapData/LinkEndData'
 import { NodeWidget } from '../node/NodeWidget'
 import { Widget } from '../Widget'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
+import { AbstractNodeWidget } from '../AbstractNodeWidget'
+import { log } from '../logService'
 
 export class BoxLinks extends Widget {
     private readonly referenceBox: Box
@@ -48,6 +50,24 @@ export class BoxLinks extends Widget {
       await Promise.all(proms)
     }
 
+    public async add(from: Box|NodeWidget, to: Box|NodeWidget): Promise<Link> {
+      if (!this.referenceBox.isAncestorOf(from)) {
+        log.warning(`BoxLinks::add(from: ${from.getName()}, to: ${to.getName()}) from is not an descendant of referred box (${this.referenceBox.getName()}).`)
+      }
+      if (!this.referenceBox.isAncestorOf(to)) {
+        log.warning(`BoxLinks::add(from: ${from.getName()}, to: ${to.getName()}) to is not an descendant of referred box (${this.referenceBox.getName()}).`)
+      }
+
+      const fromWayPoint = WayPointData.buildNew(from.getId(), from.getName(), 50, 50)
+      const toWayPoint = WayPointData.buildNew(to.getId(), to.getName(), 50, 50)
+
+      const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint]), linkable: from}
+      const toLinkEnd = {mapData: new LinkEndData([toWayPoint]), linkable: to}
+
+      return this.addLink(fromLinkEnd, toLinkEnd, true)
+    }
+
+    // TODO: rename to addWithData
     public async addLink(
       from: {mapData: LinkEndData, linkable: Box|NodeWidget}, 
       to: {mapData: LinkEndData, linkable: Box|NodeWidget}, 
@@ -141,6 +161,29 @@ export class BoxLinks extends Widget {
         const linkToBoxId: string = linkToWayPoints[linkToWayPoints.length-1].boxId
         return linkFromBoxId === from.getId() && linkToBoxId === to.getId()
       })
+    }
+
+    public static getLinkRouteWithEndBoxes(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxNodes: number} = {maxNodes: 2,}): Link[]|undefined {
+      const directed: boolean = false
+      if (options.maxNodes < 0) {
+        return undefined
+      }
+      for (const link of from.borderingLinks.getOutgoing()) {
+        const node: AbstractNodeWidget = link.to.getDeepestRenderedWayPoint().linkable
+        if (node.getId() === to.getId()) {
+          return [link]
+        }
+        const linkToPath: WayPointData[] = link.getData().to.path
+        const linkTargetId: string = linkToPath[linkToPath.length-1].boxId
+        if (linkTargetId !== node.getId()) {
+          log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) linkTargetId(${linkTargetId}) does not match deepestRenderedNodeId(${node.getId()}).`)
+        }
+        const route: Link[]|undefined = this.getLinkRouteWithEndBoxes(node, to, {maxNodes: options.maxNodes--})
+        if (route) {
+          return [link, ...route]
+        }
+      }
+      return undefined
     }
 
     public getLinks(): Link[] {

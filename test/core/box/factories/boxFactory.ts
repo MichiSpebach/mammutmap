@@ -10,10 +10,12 @@ import * as projectSettingsFactory from '../../factories/projectSettingsFactory'
 import { BoxContext } from '../../../../src/core/box/BoxContext'
 import { FileBox } from '../../../../src/core/box/FileBox'
 import { MapSettingsData } from '../../../../src/core/mapData/MapSettingsData'
+import { BoxBody } from '../../../../src/core/box/BoxBody'
 
 export function rootFolderOf(options: {
     idOrSettings: string|MapSettingsData|ProjectSettings, 
-    rendered?: boolean
+    rendered?: boolean,
+    bodyRendered?: boolean
 }): RootFolderBox {
     let projectSettings: ProjectSettings
     if (options.idOrSettings instanceof ProjectSettings) {
@@ -34,6 +36,7 @@ export function rootFolderOf(options: {
     box.getClientRect = () => Promise.resolve(new ClientRect(1600*0.2, 800*0.2, 1600*0.6, 800*0.6))
     box.saveMapData = () => Promise.resolve()
     setRenderStateToBox(box, options.rendered)
+    setRenderStateToBoxBody(box.body, options.bodyRendered)
 
     return box
 }
@@ -42,7 +45,8 @@ export function folderOf(options: {
     idOrData: string|BoxData, 
     name?: string,
     parent: FolderBox, 
-    rendered?: boolean
+    rendered?: boolean,
+    bodyRendered?: boolean
 }): FolderBox {
     let mapData: BoxData
     if (options.idOrData instanceof BoxData) {
@@ -55,6 +59,7 @@ export function folderOf(options: {
     const box = new FolderBox(name, options.parent, mapData, false)
     box.saveMapData = () => Promise.resolve()
     setRenderStateToBox(box, options.rendered)
+    setRenderStateToBoxBody(box.body, options.bodyRendered)
 
     return box
 }
@@ -63,7 +68,8 @@ export function fileOf(options: {
     idOrData: string|BoxData, 
     name?: string,
     parent: FolderBox, 
-    rendered?: boolean
+    rendered?: boolean,
+    bodyRendered?: boolean
 }): FileBox {
     let mapData: BoxData
     if (options.idOrData instanceof BoxData) {
@@ -76,6 +82,7 @@ export function fileOf(options: {
     const box = new FileBox(name, options.parent, mapData, false)
     box.saveMapData = () => Promise.resolve()
     setRenderStateToBox(box, options.rendered)
+    setRenderStateToBoxBody(box.body, options.bodyRendered)
 
     return box
 }
@@ -83,6 +90,14 @@ export function fileOf(options: {
 function setRenderStateToBox(box: Box, rendered?: boolean): void {
     if (rendered) {
         const renderState: RenderState = (box as any).renderState
+        renderState.setRenderStarted()
+        renderState.setRenderFinished()
+    }
+}
+
+function setRenderStateToBoxBody(boxBody: BoxBody, rendered?: boolean): void {
+    if (rendered) {
+        const renderState: RenderState = (boxBody as any).renderState
         renderState.setRenderStarted()
         renderState.setRenderFinished()
     }

@@ -48,6 +48,7 @@ export class BoxTabBarWidget extends Widget {
 		if (!await tab.isAvailableFor(this.parent.referenceBox)) {
 			return;
 		}
+		const ongoing: Promise<void>[] = []
 
 		const tabElement: RenderElement = {
 			type: 'button',
@@ -57,7 +58,7 @@ export class BoxTabBarWidget extends Widget {
 			children: tab.name
 		};
 		if (this.someTabRendered) {
-			await renderManager.addElementTo(this.getId(), tabElement);
+			ongoing.push(renderManager.addElementTo(this.getId(), tabElement))
 		} else {
 			this.someTabRendered = true;
 			const defaultMapTabElement: RenderElement = {
@@ -67,11 +68,14 @@ export class BoxTabBarWidget extends Widget {
 				onclick: () => this.select('map'),
 				children: 'Map'
 			};
-			await renderManager.addElementsTo(this.getId(), [defaultMapTabElement, tabElement]);
+			ongoing.push(renderManager.addElementsTo(this.getId(), [defaultMapTabElement, tabElement]))
 		}
+
 		if (tab.isDefaultSelectedFor && await tab.isDefaultSelectedFor(this.parent.referenceBox)) {
-			await this.select(tab)
+			ongoing.push(this.select(tab))
 		}
+
+		await Promise.all(ongoing)
 	}
 
 	private getTabStyle(tab: 'map' | BoxTab): Style {
