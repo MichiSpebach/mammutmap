@@ -9,12 +9,12 @@ plugin.getName()
 plugin.getMenuItemFolder()
 applicationMenu.addMenuItemTo(plugin.getMenuItemFolder(), ...)
 plugin.applicationMenuItemFolder.addItem(...)*/
-pluginFacade_1.applicationMenu.addMenuItemTo('addAnyDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField() }));
-pluginFacade_1.applicationMenu.addMenuItemTo('addAnyDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyProjectSetting', click: () => setAnyProjectSetting() }));
-pluginFacade_1.applicationMenu.addMenuItemTo('addAnyDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting() }));
+pluginFacade_1.applicationMenu.addMenuItemTo('tutorialAddRawDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyBoxMapDataField', click: () => setAnyBoxMapDataField() }));
+pluginFacade_1.applicationMenu.addMenuItemTo('tutorialAddRawDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyProjectSetting', click: () => setAnyProjectSetting() }));
+pluginFacade_1.applicationMenu.addMenuItemTo('tutorialAddRawDataFields.js', new pluginFacade_1.MenuItemFile({ label: 'setAnyApplicationSetting', click: () => setAnyApplicationSetting() }));
 async function setAnyBoxMapDataField() {
     if (!Map_1.map) {
-        console.warn('addAnyDataFields.js plugin: no map is loaded');
+        console.warn('tutorialAddRawDataFields.js plugin: no map is loaded');
         return;
     }
     const box = Map_1.map.getRootFolder();

@@ -134,8 +134,8 @@ export class SizeAndPosition {
     }
 
     public zoomToFit(options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
-        return this.zoomToFitRect(new LocalRect(0, 0, 100, 100), options)
-        //return this.zoomToFitRect(new LocalRect(-5, -5, 110, 110), options)
+        //return this.zoomToFitRect(new LocalRect(0, 0, 100, 100), options)
+        return this.zoomToFitRect(new LocalRect(-5, -5, 110, 110), options)
     }
 
     public async zoomToFitRect(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {

@@ -109,7 +109,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
             if (typeof command.value === 'string') {
               return `document.getElementById('${command.elementId}').style.cssText='${command.value}';` // TODO: fails if style includes "'"
             } else {
-              return this.createSetStyleJavaScriptForElementId(command.elementId, command.value as Style)
+              return this.wrapJavaScriptInFunction(this.createSetStyleJavaScriptForElementId(command.elementId, command.value as Style)) // wrap in function because otherwise "Error: An object could not be cloned."
             }
   
           case 'addClassTo':
@@ -124,7 +124,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         }
       })
   
-      return this.executeJavaScript(jsCommands.join(''))
+      return this.executeJavaScriptSuppressingErrors(jsCommands.join(''))
     }
   
     public appendChildTo(parentId: string, childId: string): Promise<void> {
@@ -297,12 +297,12 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     }
 
     private createSetStyleJavaScriptForElementId(id: string, style: Style): string {
-      return this.createSetStyleJavaScriptForElementName(`document.getElementById("${id}")`, style)
+      return this.createSetStyleJavaScriptForElementName(`document.getElementById('${id}')`, style)
     }
 
     // TODO: at least create javascriptSnippetGenerator and move javascript generation there
     private createSetStyleJavaScriptForElementName(elementJsName: string, style: Style): string {
-      return `Object.assign(${elementJsName}.style,${JSON5.stringify(style).replaceAll("'", '"')});`
+      return `Object.assign(${elementJsName}.style,${JSON5.stringify(style)});`
       let js = ''
       for (const styleField in style) {
         const styleFieldValue = style[styleField]
@@ -546,9 +546,8 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     public async executeJavaScriptSuppressingErrors(jsToExecute: string): Promise<void> { // public only for unit tests
       try {
         await this.executeJavaScript(jsToExecute)
-      } catch(error: any) {
-        // TODO this should never happen anymore, remove as soon as save
-        util.logWarning(error.message)
+      } catch(error: any) { // TODO this should never happen anymore, remove as soon as save
+        util.logWarning(`ElectronIpcDomAdapter: ${error.message} The jsToExecute was "${jsToExecute}".`)
       }
     }
   
