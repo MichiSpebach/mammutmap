@@ -255,19 +255,16 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         if (!field.startsWith('on')) {
           continue
         }
-        let id: string
-        if (!element.id) {
-          util.logWarning(`Element seems to have '${field}' event handler but no id.`)
-          id = 'generated'+util.generateId()
-        } else {
-          id = element.id
-        }
+        let id: string = element.id ?? 'generated'+util.generateId()
   
         let ipcChannelName: string
         switch (field) { // TODO: handle all events
           case 'onclick':
-            ipcChannelName = this.addMouseEventChannelListener(id, 'click', element[field]!)
-            element.onclick = this.createMouseEventRendererFunction(ipcChannelName) as any
+          case 'onmouseenter':
+          case 'onmouseleave':
+            const eventType: MouseEventType = field.substring(2) as MouseEventType
+            ipcChannelName = this.addMouseEventChannelListener(id, eventType, element[field]!)
+            element[field] = this.createMouseEventRendererFunction(ipcChannelName) as any
             continue
   
           case 'onchangeValue':

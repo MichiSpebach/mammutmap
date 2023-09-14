@@ -14,6 +14,8 @@ export type RenderElement = {
   selected?: boolean,
   innerHTML?: string,
   onclick?: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
+  onmouseenter?: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
+  onmouseleave?: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
   value?: string,
   onchangeValue?: (value: string) => void,
   onchangeChecked?: (checked: boolean) => void
