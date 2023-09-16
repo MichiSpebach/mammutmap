@@ -36,7 +36,7 @@
 		},
 		{
 			"name": "important",
-			"count": 13,
+			"count": 19,
 			"appearance": {
 				"mode": "visible",
 				"color": "yellow"
@@ -44,7 +44,7 @@
 		},
 		{
 			"name": "falsePositive",
-			"count": 6,
+			"count": 7,
 			"appearance": {
 				"mode": "notRendered"
 			}
@@ -63,20 +63,20 @@
 					{
 						"boxId": "irkt9q2cnb",
 						"boxName": "src",
-						"x": 36.462,
-						"y": 38.474
+						"x": 39.52,
+						"y": 66
 					},
 					{
 						"boxId": "2cnbfh46bf8",
-						"boxName": "src",
-						"x": 20,
-						"y": 27.5
+						"boxName": "core",
+						"x": 8,
+						"y": 50
 					},
 					{
 						"boxId": "ua13104dlao",
 						"boxName": "pluginLoader.ts",
-						"x": 0,
-						"y": 49.98939554612937
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
@@ -236,6 +236,90 @@
 			},
 			"tags": [
 				"important"
+			]
+		},
+		{
+			"id": "ri23q158kjo",
+			"from": {
+				"path": [
+					{
+						"boxId": "vikqtk3puo",
+						"boxName": "README.md",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "septho8nqg8",
+						"boxName": "pluginTutorial.md",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"important"
+			]
+		},
+		{
+			"id": "v73bj1ak46g",
+			"from": {
+				"path": [
+					{
+						"boxId": "septho8nqg8",
+						"boxName": "pluginTutorial.md",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "9qijbsd85t8",
+						"boxName": "plugin-src",
+						"x": 50,
+						"y": 0
+					},
+					{
+						"boxId": "up073p4qms",
+						"boxName": "nodeup073p4qms",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"important"
+			]
+		},
+		{
+			"id": "s78t03ng43g",
+			"from": {
+				"path": [
+					{
+						"boxId": "septho8nqg8",
+						"boxName": "pluginTutorial.md",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5ug3rcnfhgo",
+						"boxName": "plugin",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"falsePositive"
 			]
 		}
 	],
