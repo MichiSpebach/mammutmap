@@ -189,7 +189,7 @@ export class FolderBoxBody extends BoxBody {
     } else if (dirEntry.isFile()) {
       box = new FileBox(name, this.referenceFolderBox, mapData, mapDataFileExists)
     } else {
-      box = new SourcelessBox(name, this.referenceFolderBox, mapData, mapDataFileExists, 'is neither file nor directory')
+      box = new SourcelessBox(name, this.referenceFolderBox, mapData, mapDataFileExists, 'unknown source type')
     }
     await this.renderBoxPlaceholderFor(box)
 
