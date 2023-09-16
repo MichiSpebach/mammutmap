@@ -25,6 +25,10 @@ export class RenderManager {
     dom.openDevTools()
   }
 
+  public openWebLink(webLink: string): void {
+    dom.openWebLink(webLink)
+  }
+
   public getClientSize(): {width: number, height: number} {
     return dom.getClientSize()
   }

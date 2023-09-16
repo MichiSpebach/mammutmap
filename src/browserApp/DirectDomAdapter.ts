@@ -25,6 +25,10 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         util.logInfo(message)
     }
 
+    public openWebLink(webLink: string): void {
+        window.open(webLink)
+    }
+
     public getClientSize(): { width: number; height: number; } {
         return {width: window.screen.width, height: window.screen.height}
     }

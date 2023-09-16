@@ -8,6 +8,7 @@ import { log } from '../logService'
 
 class Util {
   public readonly githubProjectAddress: string = 'https://github.com/MichiSpebach/mammutmap'
+  public readonly pluginTutorialAddress: string = this.githubProjectAddress+'/blob/main/pluginTutorial.md'
 
   public runShellCommand(command: string): ChildProcess {
     return processing.runShellCommand(command)

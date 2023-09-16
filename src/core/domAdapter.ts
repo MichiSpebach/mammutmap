@@ -36,6 +36,7 @@ export function init(object: DocumentObjectModelAdapter): void {
 export interface DocumentObjectModelAdapter {
 
   openDevTools(): void
+  openWebLink(webLink: string): void
 
   getClientSize(): {width: number, height: number}
   getCursorClientPosition(): {x: number, y: number}

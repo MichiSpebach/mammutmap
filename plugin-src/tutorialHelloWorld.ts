@@ -1,6 +1,6 @@
 import { MenuItemFile, applicationMenu, PopupWidget } from '../dist/pluginFacade'
 
-applicationMenu.addMenuItemTo('tutorialHelloWorld.js', new MenuItemFile({label: 'perform "Hello World!"', click: () => performHelloWorld()}))
+applicationMenu.addMenuItemTo('tutorialHelloWorld.js', new MenuItemFile({label: 'perform Hello World!', click: () => performHelloWorld()}))
 
 function performHelloWorld(): void {
 	PopupWidget.newAndRender({

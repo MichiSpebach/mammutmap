@@ -20,8 +20,9 @@ Generating links works manually (right click) or with a link generation plugin (
 ![](https://github.com/MichiSpebach/mammutmap-vscode-extension/raw/HEAD/resources/generateLinks.gif)
 
 ### Feedback and contributions are welcome
-https://github.com/MichiSpebach/mammutmap/issues\
-Also as Mammutmap is written in TypeScript it is very simple to write plugins for it.
+https://github.com/MichiSpebach/mammutmap/issues \
+Also as Mammutmap is written in TypeScript it is very simple to write plugins.\
+Here is a tutorial to write plugins for Mammutmap: [pluginTutorial.md](./pluginTutorial.md)
 
 ### Install libraries
 `npm install`

@@ -7,7 +7,7 @@ import { fileSystem, OpenDialogReturnValue } from '../fileSystemAdapter'
 import * as settingsWidget from '../settingsWidget'
 import { renderManager } from '../RenderManager'
 import { MenuItem } from './MenuItem'
-import { MessagePopup } from '../MessagePopup'
+import { PopupWidget } from '../PopupWidget'
 import { settings } from '../Settings'
 
 export let applicationMenu: ApplicationMenu
@@ -63,13 +63,16 @@ export abstract class AbstractApplicationMenu implements ApplicationMenu {
   private buildPluginsMenu(): MenuItem {
     return new MenuItemFolder({id: 'Plugins', label: 'Plugins', preferredOpenDirection: 'bottom', submenu: [
       new MenuItemFile({label: 'MarketPlace (coming soon)', enabled: false, click: () => util.logInfo('MarketPlace is coming soon')}),
-      new MenuItemFile({label: 'Tutorial to create plugins (coming soon)', enabled: false, click: () => util.logInfo('Tutorial to create plugins is coming soon')})
+      new MenuItemFile({label: 'Tutorial to create plugins', click: () => renderManager.openWebLink(util.pluginTutorialAddress)})
     ]})
   }
 
   private buildInfoMenu(): MenuItem {
     return new MenuItemFile({label: 'Info', click: () => {
-      MessagePopup.buildAndRender('Info', `Join on GitHub: ${util.createWebLinkHtml(util.githubProjectAddress)}`)
+      PopupWidget.buildAndRender('Info', [
+        {type: 'div', innerHTML: `Join on GitHub: ${util.createWebLinkHtml(util.githubProjectAddress)}`},
+        {type: 'div', innerHTML: `Tutorial to create plugins: ${util.createWebLinkHtml(util.pluginTutorialAddress)}`},
+      ])
     }})
   }
 

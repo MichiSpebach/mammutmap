@@ -1,7 +1,7 @@
 import * as JSON5 from 'JSON5'
 import { util } from '../core/util/util'
 import { RenderElement, RenderElements, Style } from '../core/util/RenderElement'
-import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain } from 'electron'
+import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain, shell } from 'electron'
 import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
@@ -45,6 +45,10 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     public openDevTools(): void {
       this.webContents.openDevTools()
+    }
+
+    public openWebLink(webLink: string): void {
+      shell.openExternal(webLink)
     }
   
     public getClientSize(): {width: number, height: number} {
