@@ -48,11 +48,14 @@ pre {
 }
 
 .commandLine {
-  padding:0px;
-  border-style:none;
-  outline:none;
-  color:white;
-  background:none;
+  position: fixed;
+  bottom: 0px;
+  width: inherit;
+  padding: 0px;
+  border-style: none;
+  outline: none;
+  color: white;
+  background: none;
 }
 .commandLine:focus {
   background-color: #202428;

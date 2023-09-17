@@ -58,6 +58,14 @@ export class RenderManager {
     }))
   }
 
+  public setValueTo(id: string, value: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'setValueTo'+id,
+      command: () => dom.setValueTo(id, value)
+    }))
+  }
+
   public appendChildTo(parentId: string, childId: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
@@ -170,6 +178,18 @@ export class RenderManager {
     return this.runOrSchedule(new Command({
       priority: priority,
       command: () => dom.scrollToBottom(id)
+    }))
+  }
+
+  public addKeydownListenerTo(
+    id: string,
+    key: 'Enter',
+    callback: (value: string) => void,
+    priority: RenderPriority = RenderPriority.NORMAL
+  ): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addKeydownListenerTo(id, key, callback)
     }))
   }
 

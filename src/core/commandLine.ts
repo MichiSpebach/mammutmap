@@ -5,14 +5,22 @@ import * as commandLinePluginFacade from './commandLinePluginFacade'
 import * as htmlCursor from './htmlCursor'
 import { setCompatibilityTheme } from './styleAdapter'
 import { log } from './logService'
+import * as indexHtmlIds from './indexHtmlIds'
 
-export function init(): void {
-  dom.addKeydownListenerTo('commandLine', 'Enter', processCommand)
+const id: string = 'commandLine'
+
+export async function initAndRender(): Promise<void> {
+  await renderManager.addElementTo(indexHtmlIds.terminalId, {
+    type: 'input',
+    id,
+    className: 'commandLine'
+  })
+  await renderManager.addKeydownListenerTo(id, 'Enter', processCommand)
 }
 
 async function processCommand(command: string): Promise<void> {
   const [commandName, parameter]: string[] = command.split(/ (.+)/, 2)
-  dom.setValueTo('commandLine', '')
+  renderManager.setValueTo(id, '')
 
   switch (commandName) {
     case 'open':
