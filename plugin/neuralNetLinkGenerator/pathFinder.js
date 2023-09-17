@@ -16,6 +16,7 @@ function findPaths(text) {
 }
 exports.findPaths = findPaths;
 function postProcessPaths(paths) {
+    paths = paths.filter(path => !path.startsWith('https://') && !path.startsWith('http://'));
     return paths.map(path => {
         if (path.startsWith('package:')) {
             path = path.substring('package:'.length);

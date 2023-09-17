@@ -28,7 +28,13 @@ async function generateOutgoingLinksForBox(box: FileBox): Promise<void> {
 }
 
 function getSiblingFileNamesWithoutEndings(box: Box): string[] {
-    return getSiblings(box).map((sibling: Box) => sibling.getName().split('.')[0])
+    return getSiblings(box).map((sibling: Box) => {
+        const parts: string[] = sibling.getName().split('.')
+        if (parts[0].length === 0) {
+            return '.'+parts[1]
+        }
+        return parts[0]
+    })
 }
 
 function getSiblings(box: Box): Box[] {

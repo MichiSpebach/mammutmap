@@ -1,6 +1,9 @@
 import * as typeFinder from './typeFinder'
 
 test('findTypesInText', () => {
+    expect(typeFinder.findTypesInText(['type'], '')).toEqual([])
+    expect(typeFinder.findTypesInText(['type'], '\n')).toEqual([])
+
     expect(typeFinder.findTypesInText(['type'], 'type')).toEqual(['type'])
     expect(typeFinder.findTypesInText(['Type'], 'Type')).toEqual(['Type'])
     expect(typeFinder.findTypesInText(['Type'], 'type')).toEqual([])

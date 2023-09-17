@@ -1,6 +1,8 @@
 import * as pathFinder from './pathFinder'
 
 test('findPaths', () => {
+    expect(pathFinder.findPaths('')).toEqual([])
+    expect(pathFinder.findPaths('\n')).toEqual([])
     expect(pathFinder.findPaths('not a path')).toEqual([])
     expect(pathFinder.findPaths('.')).toEqual([])
     expect(pathFinder.findPaths('/')).toEqual([])
@@ -80,6 +82,13 @@ test('findPaths with mountPoints', () => {
     expect(pathFinder.findPaths('file://path/separated/with/slashes')).toEqual(['file://path/separated/with/slashes'])
     expect(pathFinder.findPaths("'file://path/separated/with/slashes'")).toEqual(['file://path/separated/with/slashes'])
     expect(pathFinder.findPaths('"file://path/separated/with/slashes"')).toEqual(['file://path/separated/with/slashes'])
+
+    expect(pathFinder.findPaths('http://path/separated/with/slashes')).toEqual([])
+    expect(pathFinder.findPaths("'http://path/separated/with/slashes'")).toEqual([])
+    expect(pathFinder.findPaths('"http://path/separated/with/slashes"')).toEqual([])
+    expect(pathFinder.findPaths('https://path/separated/with/slashes')).toEqual([])
+    expect(pathFinder.findPaths("'https://path/separated/with/slashes'")).toEqual([])
+    expect(pathFinder.findPaths('"https://path/separated/with/slashes"')).toEqual([])
 })
 
 test('findPaths multiple paths in text', () => {

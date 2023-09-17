@@ -23,7 +23,13 @@ async function generateOutgoingLinksForBox(box) {
     pluginFacade_2.coreUtil.logInfo(`Found ${foundLinksCount} links for '${box.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`);
 }
 function getSiblingFileNamesWithoutEndings(box) {
-    return getSiblings(box).map((sibling) => sibling.getName().split('.')[0]);
+    return getSiblings(box).map((sibling) => {
+        const parts = sibling.getName().split('.');
+        if (parts[0].length === 0) {
+            return '.' + parts[1];
+        }
+        return parts[0];
+    });
 }
 function getSiblings(box) {
     if (box.isRoot()) {
