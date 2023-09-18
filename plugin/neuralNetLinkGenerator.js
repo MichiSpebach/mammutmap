@@ -11,8 +11,10 @@ pluginFacade_1.contextMenu.addFileBoxMenuItem((box) => {
 async function generateOutgoingLinksForBox(box) {
     const fileContent = await box.getBody().getFileContent();
     let paths = pathFinder.findPaths(fileContent);
-    const otherTypesInFolder = getSiblingFileNamesWithoutEndings(box);
-    paths = paths.concat(typeFinder.findTypesInText(otherTypesInFolder, fileContent));
+    if (box.getName().toLowerCase().endsWith('.java')) {
+        const otherTypesInFolder = getSiblingFileNamesWithoutEndings(box);
+        paths = paths.concat(typeFinder.findTypesInText(otherTypesInFolder, fileContent));
+    }
     let foundLinksCount = 0;
     let foundLinksAlreadyExistedCount = 0;
     await Promise.all(paths.map(async (path) => {
