@@ -1,4 +1,4 @@
-import * as JSON5 from 'JSON5'
+import * as JSON5 from 'json5'
 import { util } from '../core/util/util'
 import { RenderElement, RenderElements, Style } from '../core/util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain, shell } from 'electron'
