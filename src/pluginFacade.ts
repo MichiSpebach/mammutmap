@@ -218,7 +218,7 @@ export async function addLinkBetweenBoxes(fromBox: Box, toBox: Box): Promise<{
   let link: Link|undefined = managingBox.links.getLinkWithEndBoxes(fromBox, toBox)
   const linkAlreadyExisted: boolean = !!link
   if (!link) {
-    link = await managingBox.links.add(fromBox, toBox)
+    link = await managingBox.links.add({from: fromBox, to: toBox, save: true})
   }
 
   return {link, linkAlreadyExisted}

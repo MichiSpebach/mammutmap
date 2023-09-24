@@ -17,6 +17,9 @@ import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { ClientRect } from '../ClientRect'
 import { relocationDragManager } from '../RelocationDragManager'
 import { log } from '../logService'
+import { AbstractNodeWidget } from '../AbstractNodeWidget'
+import { LinkEndData } from '../mapData/LinkEndData'
+import { WayPointData } from '../mapData/WayPointData'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -36,6 +39,33 @@ export class Link implements Hoverable {
   private highlight: boolean = false
   private draggingInProgress: boolean = false
   private hoveringOver: boolean = false
+
+  public static async newOfEnds(options: {
+    from: Box|NodeWidget | {node: Box|NodeWidget, positionInFromNodeCoords?: LocalPosition}
+    to: Box|NodeWidget | {node: Box|NodeWidget, positionInToNodeCoords?: LocalPosition}
+    managingBox: Box
+  }): Promise<Link> {
+    const from: {node: Box|NodeWidget, positionInFromNodeCoords?: LocalPosition} = options.from instanceof Box || options.from instanceof NodeWidget
+      ? {node: options.from}
+      : options.from
+    const to: {node: Box|NodeWidget, positionInToNodeCoords?: LocalPosition} = options.to instanceof Box || options.to instanceof NodeWidget
+      ? {node: options.to}
+      : options.to
+    
+    const fromWayPoint: WayPointData = WayPointData.new(from.node.getId(), from.node.getName(), from.positionInFromNodeCoords)
+    const toWayPoint: WayPointData = WayPointData.new(to.node.getId(), to.node.getName(), to.positionInToNodeCoords)
+    const linkData = new LinkData(util.generateId(), new LinkEndData([fromWayPoint]), new LinkEndData([toWayPoint]))
+    const link: Link = Link.new(linkData, options.managingBox)
+
+    if (from.node !== options.managingBox) {
+      await link.from.reorderMapDataPathWithoutRender({newManagingBoxForValidation: options.managingBox, movedWayPoint: from.node})
+    }
+    if (to.node !== options.managingBox) {
+      await link.to.reorderMapDataPathWithoutRender({newManagingBoxForValidation: options.managingBox, movedWayPoint: to.node})
+    }
+
+    return link
+  }
 
   public static new(data: LinkData, managingBox: Box): Link {
     return new LinkImplementation(data, managingBox)

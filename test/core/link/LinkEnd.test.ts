@@ -341,12 +341,9 @@ function setupRenderedScenarioWithDepth(): {
     const linkEndData = new LinkEndData([innerWayPoint, deepWayPoint])
 
     const rootBox: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'rootBoxId', rendered: true})
-    const outerBox: FolderBox = boxFactory.folderOf({idOrData: 'outerBoxId', parent: rootBox, rendered: true})
-    const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, rendered: true})
-    const deepBox: FolderBox = boxFactory.folderOf({idOrData: 'deepBoxId', parent: innerBox, rendered: true})
-    rootBox.addBox(outerBox)
-    outerBox.addBox(innerBox)
-    innerBox.addBox(deepBox)
+    const outerBox: FolderBox = boxFactory.folderOf({idOrData: 'outerBoxId', parent: rootBox, addToParent: true, rendered: true})
+    const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, addToParent: true, rendered: true})
+    const deepBox: FolderBox = boxFactory.folderOf({idOrData: 'deepBoxId', parent: innerBox, addToParent: true, rendered: true})
 
     const linkEnd = linkEndFactory.of(linkEndData, outerBox)
 
@@ -365,10 +362,8 @@ function setupShallowRenderedScenarioWithDepth(): {
     const linkEndData = new LinkEndData([innerWayPoint, deepWayPoint])
 
     const rootBox: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'rootBoxId'})
-    const outerBox: FolderBox = boxFactory.folderOf({idOrData: 'outerBoxId', parent: rootBox, rendered: true})
-    const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, rendered: true})
-    rootBox.addBox(outerBox)
-    outerBox.addBox(innerBox)
+    const outerBox: FolderBox = boxFactory.folderOf({idOrData: 'outerBoxId', parent: rootBox, addToParent: true, rendered: true})
+    const innerBox: FolderBox = boxFactory.folderOf({idOrData: 'innerBoxId', parent: outerBox, addToParent: true, rendered: true})
 
     const linkEnd = linkEndFactory.of(linkEndData, outerBox)
 

@@ -234,12 +234,10 @@ function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
 // TODO: move into Box?
 async function addLinkToBox(box: Box, position: ClientPosition): Promise<void> {
   const positionInBox: LocalPosition = await box.transform.clientToLocalPosition(position)
-  const fromWayPoint = WayPointData.buildNew(box.getId(), box.getName(), positionInBox.percentX, positionInBox.percentY)
-  const toWayPoint = WayPointData.buildNew(box.getId(), box.getName(), positionInBox.percentX, positionInBox.percentY)
 
-  const from = {mapData: new LinkEndData([fromWayPoint], true), linkable: box}
-  const to = {mapData: new LinkEndData([toWayPoint], true), linkable: box}
-  const link: Link = await box.links.addLink(from, to, false)
+  const from = {node: box, positionInFromNodeCoords: positionInBox}
+  const to = {node: box, positionInToNodeCoords: positionInBox}
+  const link: Link = await box.links.add({from, to, save: false})
 
   await relocationDragManager.startDragWithClickToDropMode(link.getTo())
 }

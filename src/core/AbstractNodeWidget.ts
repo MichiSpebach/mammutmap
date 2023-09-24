@@ -6,6 +6,8 @@ export abstract class AbstractNodeWidget /*TODO extends Widget*/ { // TODO: rena
 
 	public abstract getId(): string
 
+	public abstract getName(): string
+
 	public isRoot(): boolean {
 		return false // TODO: replace with !this.parent?
 	}
