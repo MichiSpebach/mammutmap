@@ -30,6 +30,7 @@ import { ToolbarView } from './core/toolbars/ToolbarView'
 import { Widget } from './core/Widget'
 import { ElementType, RenderElement, RenderElements, Style } from './core/util/RenderElement'
 import { PopupWidget } from './core/PopupWidget'
+import { TextInputPopup } from './core/TextInputPopup';
 import { settings } from './core/Settings'
 
 export { util as coreUtil }
@@ -40,6 +41,7 @@ export { RenderElements, RenderElement, ElementType, Style }
 export { style }
 export { Widget }
 export { PopupWidget}
+export { TextInputPopup };
 export { mainWidget }
 export { ToolbarView }
 export { Map, onMapLoaded, onMapRendered, onMapUnload }

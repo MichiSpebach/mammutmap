@@ -11,15 +11,19 @@ function _loadBoxFileData(box) {
     const path = box.getSrcPath();
     return (0, fs_1.readFileSync)(path, "utf8");
 }
-function _summarizerFactory(source) {
-    const llm = new SummaryOpenAI_1.SummaryOpenAI().getLLM();
+function _summarizerFactory(source, config) {
+    const llm = new SummaryOpenAI_1.SummaryOpenAI(config).getLLM();
     if (source.length > 4000) {
         return new MapReduceChainSummarizer_1.MapReduceChainSummarizer({ model: llm });
     }
     return new SingleShotSummarizer_1.SingleShotSummarizer({ model: llm });
 }
 async function summarize(box) {
-    // TODO add info to settings
+    const config = await _loadOrCreateConfig();
+    // 25/09/2023  
+    // TODO: catch error if no key is provided
+    // 25/09/2023  
+    // TODO: Refactor
     // TODO add tests
     const source = _loadBoxFileData(box);
     if (source.length > 4000) {
@@ -32,15 +36,36 @@ async function summarize(box) {
             return;
         }
     }
-    const summarizer = _summarizerFactory(source);
+    const summarizer = _summarizerFactory(source, config);
     try {
         const summary = await summarizer.summarize(source);
         console.log(summary);
-        //TODO extra daten zu Box hinzufügen
-        box.getBody().setContent("<h2>Summary</h2><p>" + summary.text + "</p>");
+        pluginFacade_1.Box.Tabs.register({
+            name: 'Summary',
+            isAvailableFor: (box) => box.isFile(),
+            buildWidget: (box) => buildSummaryTabFor(box, summary.text)
+        });
     }
     catch (err) {
         console.error(err);
     }
     return;
+}
+function buildSummaryTabFor(box, summary) {
+    return {
+        type: 'div',
+        children: summary
+    };
+}
+async function _loadOrCreateConfig() {
+    const apiKey = pluginFacade_1.applicationSettings.getRawField('openaiApiKey');
+    if (apiKey) {
+        return { model: 'openai', apiKey: apiKey.toString() };
+    }
+    const newApiKey = await pluginFacade_1.TextInputPopup.buildAndRenderAndAwaitResolve('Please enter a valid openai key', ''); //TODO get from popup
+    pluginFacade_1.applicationSettings.setRawField('openaiApiKey', newApiKey);
+    if (!newApiKey) {
+        throw new Error('No openai key provided');
+    }
+    return { model: 'openai', apiKey: newApiKey };
 }

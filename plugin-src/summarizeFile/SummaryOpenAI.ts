@@ -8,9 +8,12 @@ export class SummaryOpenAI extends SummaryLLM{
     public override getLLM(): BaseLLM {
         return this.llm;
     }
-    constructor(){
+    constructor(config:{model:string,apiKey:string}){
         super();
-        const key= readFileSync("/home/thj/.openai/key.key","utf-8");
+        if(config.model!="openai"){
+            throw new Error("This class is only for openai");
+        }
+        const key= config.apiKey;
         this.llm = new OpenAI({openAIApiKey:key,modelName:"gpt-3.5-turbo"});
     }
 

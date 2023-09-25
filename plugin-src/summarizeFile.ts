@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import { dialog } from "electron"
 
-import { Box, FileBox, MenuItemFile, PopupWidget, RenderElements, contextMenu,  } from "../dist/pluginFacade"
+import { Box, FileBox, MenuItemFile, TextInputPopup, RenderElements, applicationSettings, contextMenu, } from "../dist/pluginFacade"
 import { SingleShotSummarizer } from "./summarizeFile/SingleShotSummarizer";
 
 import { SummaryOpenAI } from "./summarizeFile/SummaryOpenAI";
@@ -16,8 +16,8 @@ function _loadBoxFileData(box: FileBox): string {
     return readFileSync(path, "utf8");
 }
 
-function _summarizerFactory(source: string): Summarizer {
-    const llm = new SummaryOpenAI().getLLM();
+function _summarizerFactory(source: string, config: { model: string, apiKey: string }): Summarizer {
+    const llm = new SummaryOpenAI(config).getLLM();
     if (source.length > 4000) {
         return new MapReduceChainSummarizer({ model: llm });
     }
@@ -25,7 +25,12 @@ function _summarizerFactory(source: string): Summarizer {
 }
 
 async function summarize(box: FileBox) {
-    // TODO add info to settings
+
+    const config = await _loadOrCreateConfig();
+    // 25/09/2023  
+    // TODO: catch error if no key is provided
+    // 25/09/2023  
+    // TODO: Refactor
 
     // TODO add tests
     const source = _loadBoxFileData(box);
@@ -36,17 +41,17 @@ async function summarize(box: FileBox) {
             message: "The file it to long to summarize it with one call to the llm. Should we try to summarize it with multiple calls?",
             type: "question", buttons: ["OK", "Cancel"]
         });
-        if(!doYouWantToProceed){
+        if (!doYouWantToProceed) {
             return;
         }
     }
-    const summarizer = _summarizerFactory(source);
-    
+    const summarizer = _summarizerFactory(source, config);
+
     try {
         const summary = await summarizer.summarize(source);
         console.log(summary);
         Box.Tabs.register({
-            name: 'TutorialBoxTabs',
+            name: 'Summary',
             isAvailableFor: (box: Box) => box.isFile(),
             buildWidget: (box: Box) => buildSummaryTabFor(box, summary.text)
         });
@@ -56,10 +61,24 @@ async function summarize(box: FileBox) {
     return;
 }
 
-function buildSummaryTabFor(box: Box,summary:string): RenderElements{
+function buildSummaryTabFor(box: Box, summary: string): RenderElements {
     return {
         type: 'div',
-        children: '<h2>Summary</h2><p>' + summary + '</p>'
+        children: summary
     }
+}
+
+async function _loadOrCreateConfig(): Promise<{ model: string, apiKey: string }> {
+    const apiKey = applicationSettings.getRawField('openaiApiKey');
+    if (apiKey) {
+        return { model: 'openai', apiKey: apiKey.toString() };
+    }
+
+    const newApiKey = await TextInputPopup.buildAndRenderAndAwaitResolve('Please enter a valid openai key', '');//TODO get from popup
+    applicationSettings.setRawField('openaiApiKey', newApiKey);
+    if (!newApiKey) {
+        throw new Error('No openai key provided');
+    }
+    return { model: 'openai', apiKey: newApiKey };
 }
 
