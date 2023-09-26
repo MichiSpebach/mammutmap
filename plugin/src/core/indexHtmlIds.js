@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.unplacedElementsId = exports.logId = exports.terminalId = exports.contentId = exports.bodyId = exports.headId = exports.htmlId = void 0;
+exports.htmlId = 'html';
+exports.headId = 'head';
+exports.bodyId = 'body';
+exports.contentId = 'content';
+exports.terminalId = 'terminal';
+exports.logId = 'log';
+exports.unplacedElementsId = 'unplacedElements';

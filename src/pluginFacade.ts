@@ -32,21 +32,23 @@ import { ElementType, RenderElement, RenderElements, Style } from './core/util/R
 import { PopupWidget } from './core/PopupWidget'
 import { TextInputPopup } from './core/TextInputPopup';
 import { settings } from './core/Settings'
+import { log } from './core/logService'
+
 
 export { util as coreUtil }
-export { processing, ChildProcess}
+export { processing, ChildProcess }
 export { applicationMenu, contextMenu, MenuItemFile }
 export { renderManager, RenderPriority, Subscribers }
 export { RenderElements, RenderElement, ElementType, Style }
 export { style }
 export { Widget }
-export { PopupWidget}
+export { PopupWidget }
 export { TextInputPopup };
 export { mainWidget }
 export { ToolbarView }
 export { Map, onMapLoaded, onMapRendered, onMapUnload }
 export { ProjectSettings }
-export { settings as applicationSettings}
+export { settings as applicationSettings }
 export { LinkAppearanceData, LinkAppearanceMode, linkAppearanceModes }
 export { LinkTagData }
 export { WayPointData }
@@ -58,31 +60,33 @@ export { BorderingLinks }
 export { Link, LinkImplementation, overrideLink }
 export { LinkLine, LinkLineImplementation, overrideLinkLine }
 export { NodeWidget }
+export { log }
+
 
 let boxWatchers: BoxWatcher[] = []
 
-export class Message{
+export class Message {
   public constructor(
     public message: string
-  ) {}
+  ) { }
 }
 
 export function getFileBoxIterator(): FileBoxDepthTreeIterator {
   return new FileBoxDepthTreeIterator(getRootFolder())
 }
 
-export function getRootFolder(): RootFolderBox|never {
+export function getRootFolder(): RootFolderBox | never {
   return getMapOrError().getRootFolder()
 }
 
-export function getMapOrError(): Map|never {
+export function getMapOrError(): Map | never {
   if (!map) {
     util.logError('a folder has to be openend first to execute this plugin')
   }
   return map
 }
 
-export function getMap(): Map|Message {
+export function getMap(): Map | Message {
   if (!map) {
     return new Message('No folder/project/map opened.')
   }
@@ -91,7 +95,7 @@ export function getMap(): Map|Message {
 
 export class FileBoxDepthTreeIterator {
   private readonly boxIterators: BoxIterator[]
-  private nextBox: FileBox|null
+  private nextBox: FileBox | null
 
   public constructor(rootBox: FolderBox) {
     this.boxIterators = []
@@ -135,7 +139,7 @@ export class FileBoxDepthTreeIterator {
       } else if (nextBox.isSourceless()) {
         await this.prepareNext()
       } else {
-        util.logWarning('nextBox (id '+nextBox.getId()+') is neither FileBox nor FolderBox nor SourcelessBox')
+        util.logWarning('nextBox (id ' + nextBox.getId() + ') is neither FileBox nor FolderBox nor SourcelessBox')
         await this.prepareNext()
       }
     } else {
@@ -186,44 +190,44 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   onlyReturnWarnings?: boolean
   registerBoxWatchersInsteadOfUnwatch?: boolean
 }): Promise<{
-  link: Link|undefined,
+  link: Link | undefined,
   linkAlreadyExisted: boolean,
   warnings?: string[]
 }> {
-  const toReport = await findBoxBySourcePath(toFilePath, fromBox.getParent(), {...options, registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch})
+  const toReport = await findBoxBySourcePath(toFilePath, fromBox.getParent(), { ...options, registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch })
   if (!toReport.boxWatcher) {
-    const message: string = 'failed to add link because file for toFilePath "'+toFilePath+'" was not found'
+    const message: string = 'failed to add link because file for toFilePath "' + toFilePath + '" was not found'
     if (!options?.onlyReturnWarnings) {
       util.logWarning(message)
     }
-    const warnings: string[] = toReport.warnings? toReport.warnings.concat(message) : [message]
-    return {link: undefined, linkAlreadyExisted: false, warnings}
+    const warnings: string[] = toReport.warnings ? toReport.warnings.concat(message) : [message]
+    return { link: undefined, linkAlreadyExisted: false, warnings }
   }
 
   const toBox: Box = await toReport.boxWatcher.get()
 
-  const {link, linkAlreadyExisted} = await addLinkBetweenBoxes(fromBox, toBox)
+  const { link, linkAlreadyExisted } = await addLinkBetweenBoxes(fromBox, toBox)
 
   if (!options?.registerBoxWatchersInsteadOfUnwatch) {
     toReport.boxWatcher.unwatch()
   }
 
-  return {link, linkAlreadyExisted, warnings: toReport.warnings}
+  return { link, linkAlreadyExisted, warnings: toReport.warnings }
 }
 
 export async function addLinkBetweenBoxes(fromBox: Box, toBox: Box): Promise<{
-  link: Link|undefined,
+  link: Link | undefined,
   linkAlreadyExisted: boolean
 }> {
   const managingBox: Box = Box.findCommonAncestor(fromBox, toBox).commonAncestor;
 
-  let link: Link|undefined = managingBox.links.getLinkWithEndBoxes(fromBox, toBox)
+  let link: Link | undefined = managingBox.links.getLinkWithEndBoxes(fromBox, toBox)
   const linkAlreadyExisted: boolean = !!link
   if (!link) {
     link = await managingBox.links.add(fromBox, toBox)
   }
 
-  return {link, linkAlreadyExisted}
+  return { link, linkAlreadyExisted }
 }
 
 async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
@@ -239,7 +243,7 @@ export async function findBoxBySourcePath(
     onlyReturnWarnings?: boolean
     registerBoxWatcher?: boolean
   }
-): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
+): Promise<{ boxWatcher?: BoxWatcher, warnings?: string[] }> {
   const report = await boxFinder.findBox(path, baseOfPath, options)
 
   if (report.boxWatcher && options?.registerBoxWatcher) {
@@ -251,7 +255,7 @@ export async function findBoxBySourcePath(
 
 export async function clearWatchedBoxes(): Promise<void> {
   while (boxWatchers.length > 0) {
-    const boxWatcher: BoxWatcher|undefined = boxWatchers.shift()
+    const boxWatcher: BoxWatcher | undefined = boxWatchers.shift()
     if (boxWatcher) {
       await boxWatcher.unwatch()
     }

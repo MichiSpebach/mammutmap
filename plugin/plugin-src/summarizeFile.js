@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
-const pluginFacade_1 = require("../dist/pluginFacade");
+const pluginFacade_1 = require("../src/pluginFacade");
 const SummarizerFactory_1 = require("./summarizeFile/SummarizerFactory");
 pluginFacade_1.contextMenu.addFileBoxMenuItem((item) => new pluginFacade_1.MenuItemFile({ label: "Summarize File", click: () => summarize(item) }));
 function _loadBoxFileData(box) {
@@ -13,7 +13,7 @@ async function summarize(box) {
     const source = _loadBoxFileData(box);
     const summarizer = await new SummarizerFactory_1.SummarizerFactory().getSummarizerFor(source);
     if (!summarizer.isPresent()) {
-        console.error(summarizer.getError());
+        pluginFacade_1.log.errorWithoutThrow(summarizer.getError());
         return;
     }
     try {
@@ -26,7 +26,7 @@ async function summarize(box) {
         });
     }
     catch (err) {
-        console.error(err);
+        pluginFacade_1.log.errorWithoutThrow(err.toString());
     }
     return;
 }
