@@ -120,7 +120,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
             borderRadius: '30%',
             backgroundColor: this.highlight ? '#8ccc' : '#0aa8'
         }
-        pros.push(renderManager.setStyleTo(this.getId(), style, priority))
+        pros.push(renderManager.addStyleTo(this.getId(), style, priority))
 
         if (!this.rendered) {
             pros.push(this.borderingLinks.renderAll())

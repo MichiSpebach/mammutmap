@@ -42,9 +42,9 @@ async function addElement(): Promise<void> {
 }
 
 async function highlightElement(elementId: string): Promise<void> {
-	await renderManager.setStyleTo(elementId, {color: 'skyblue'}, RenderPriority.RESPONSIVE)
+	await renderManager.addStyleTo(elementId, {color: 'skyblue'}, RenderPriority.RESPONSIVE)
 }
 
 async function resetElement(elementId: string): Promise<void> {
-	await renderManager.setStyleTo(elementId, {color: 'unset'}, RenderPriority.RESPONSIVE)
+	await renderManager.addStyleTo(elementId, {color: 'unset'}, RenderPriority.RESPONSIVE)
 }

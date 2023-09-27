@@ -199,7 +199,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
     await Promise.all([
       relocationDragManager.removeDraggable(this),
-      renderManager.setStyleTo(this.getId(), '')
+      renderManager.addStyleTo(this.getId(), '')
     ])
 
     this.renderState.setUnrenderFinished()
@@ -225,7 +225,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
         util.logWarning('Shape '+this.shape+' is not implemented.')
     }
 
-    await renderManager.setStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle)
+    await renderManager.addStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle)
   }
 
   private async setHighlight(): Promise<void> {

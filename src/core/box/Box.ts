@@ -491,7 +491,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     const positionStyle: string = 'left:'+rect.x+'%;top:'+rect.y+'%;'
     const transitionStyle: string = transitionDurationInMS ? `transition:${transitionDurationInMS}ms;` : ''
 
-    await renderManager.setStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + transitionStyle, priority)
+    await renderManager.addStyleTo(this.getId(), basicStyle + scaleStyle + positionStyle + transitionStyle, priority)
   }
 
   public async updateMeasuresAndBorderingLinks(
@@ -507,7 +507,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   }
 
   public async showContentIfRendered(): Promise<void> {
-    return this.addStyleToContentIfRendered({display: 'block'})
+    return this.addStyleToContentIfRendered({display: null!})
   }
   
   private async addStyleToContentIfRendered(style: Style): Promise<void> {
@@ -516,9 +516,9 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       return
     }
     await Promise.all([
-      renderManager.setStyleTo(this.getBodyId(), style), // TODO: rename setStyleTo(..) to addStyleTo(..)
-      renderManager.setStyleTo(this.nodes.getId(), style),
-      renderManager.setStyleTo(this.links.getId(), style)
+      renderManager.addStyleTo(this.getBodyId(), style),
+      renderManager.addStyleTo(this.nodes.getId(), style),
+      renderManager.addStyleTo(this.links.getId(), style)
     ])
   }
 

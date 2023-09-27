@@ -60,7 +60,7 @@ async function setPosition(eventResult: MouseEventResultAdvanced): Promise<void>
   const style: Style = getStyle()
   style.left = eventResult.position.x+'px'
   style.top = eventResult.position.y+'px'
-  await renderManager.setStyleTo(id, style, RenderPriority.RESPONSIVE)
+  await renderManager.addStyleTo(id, style, RenderPriority.RESPONSIVE)
 }
 
 async function addMousedownElement(): Promise<void> {
