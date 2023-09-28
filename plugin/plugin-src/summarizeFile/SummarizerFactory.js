@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SummarizerFactory = void 0;
 const electron_1 = require("electron");
 const pluginFacade_1 = require("../../dist/pluginFacade");
-const MapReduceChainSummarizer_1 = require("./MapReduceChainSummarizer");
-const SingleShotSummarizer_1 = require("./SingleShotSummarizer");
+const map_reduce_chain_summarizer_1 = require("./summarizers/map-reduce-chain-summarizer");
 const SummaryOpenAI_1 = require("./SummaryOpenAI");
 const Result_1 = require("./util/Result");
+const single_shot_summarizer_1 = require("./summarizers/single-shot-summarizer");
 class SummarizerFactory {
     async getSummarizerFor(source) {
         const config = await this.loadOrCreateConfig();
@@ -28,9 +28,9 @@ class SummarizerFactory {
     createSummarizer(source, config) {
         const llm = new SummaryOpenAI_1.SummaryOpenAI(config).getLLM();
         if (source.length > SummarizerFactory.lengthThreshold) {
-            return new MapReduceChainSummarizer_1.MapReduceChainSummarizer({ model: llm });
+            return new map_reduce_chain_summarizer_1.MapReduceChainSummarizer({ model: llm });
         }
-        return new SingleShotSummarizer_1.SingleShotSummarizer({ model: llm });
+        return new single_shot_summarizer_1.SingleShotSummarizer({ model: llm });
     }
     async loadOrCreateConfig() {
         const apiKey = pluginFacade_1.applicationSettings.getRawField('openaiApiKey');
@@ -46,4 +46,7 @@ class SummarizerFactory {
     }
 }
 exports.SummarizerFactory = SummarizerFactory;
+/* constructor(private summaryLLM:SummaryLLM){
+    TODO extract summaryLLM and config loader/creator to improve testablility
+ }*/
 SummarizerFactory.lengthThreshold = 4000;

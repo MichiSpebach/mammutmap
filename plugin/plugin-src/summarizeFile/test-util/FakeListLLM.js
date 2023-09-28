@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FakeListLLM = void 0;
-const llms_1 = require("langchain/llms");
-class FakeListLLM extends llms_1.BaseLLM {
+const base_1 = require("langchain/llms/base");
+class FakeListLLM extends base_1.BaseLLM {
     constructor(answers, params) {
         super(params ?? {});
         this.answers = answers;
@@ -22,6 +22,9 @@ class FakeListLLM extends llms_1.BaseLLM {
     }
     _llmType() {
         return "FakeListLLM";
+    }
+    getCalledPrompts() {
+        return this.calledPrompts;
     }
 }
 exports.FakeListLLM = FakeListLLM;

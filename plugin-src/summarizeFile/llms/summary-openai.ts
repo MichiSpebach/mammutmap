@@ -1,7 +1,6 @@
 import { BaseLLM } from "langchain/dist/llms/base";
-import { SummaryLLM } from "./SummaryLLM";
+import { SummaryLLM } from "./summary-llm";
 import { OpenAI } from "langchain/llms/openai";
-import { readFileSync } from "fs";
 
 export class SummaryOpenAI extends SummaryLLM{
     private llm:BaseLLM;

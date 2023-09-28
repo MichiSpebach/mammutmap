@@ -1,4 +1,4 @@
-import { Summarizer } from "./Summarizer";
+import { Summarizer } from "./summarizer";
 import { BaseLLM, LLM } from "langchain/dist/llms/base";
 import { PromptTemplate } from "langchain/prompts";
 import { BaseChain, LLMChain } from "langchain/chains";

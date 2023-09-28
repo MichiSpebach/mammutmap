@@ -2,7 +2,7 @@ import { PromptTemplate } from "langchain/prompts";
 import { BaseLLM} from "langchain/dist/llms/base";
 import { ConsoleCallbackHandler } from "langchain/callbacks";
 import { LLMChain } from "langchain/chains";
-import { Summarizer } from "./Summarizer";
+import { Summarizer } from "./summarizer";
 
 export class SingleShotSummarizer extends Summarizer{
     chain: LLMChain;

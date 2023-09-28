@@ -1,12 +1,17 @@
 import { dialog } from "electron";
 import { TextInputPopup, applicationSettings } from "../../dist/pluginFacade";
-import { MapReduceChainSummarizer } from "./MapReduceChainSummarizer";
-import { SingleShotSummarizer } from "./SingleShotSummarizer";
-import { Summarizer } from "./Summarizer";
-import { SummaryOpenAI } from "./SummaryOpenAI";
-import { Result } from "./util/Result";
+import { MapReduceChainSummarizer } from "./summarizers/map-reduce-chain-summarizer";
+
+import { SummaryOpenAI } from "./llms/summary-openai";
+import { Result } from "./util/result";
+import { SingleShotSummarizer } from "./summarizers/single-shot-summarizer";
+import { Summarizer } from "./summarizers/summarizer";
 
 export class SummarizerFactory{
+   /* constructor(private summaryLLM:SummaryLLM){
+       TODO extract summaryLLM and config loader/creator to improve testablility 
+    }*/
+
     private static lengthThreshold = 4000;
     public async getSummarizerFor(source: string):Promise<Result<Summarizer>>{
         const config = await this.loadOrCreateConfig();

@@ -1,6 +1,6 @@
 import { CallbackManagerForLLMRun } from "langchain/callbacks";
 import { Generation, LLMResult } from "langchain/dist/schema";
-import { BaseLLM, BaseLLMParams } from "langchain/llms";
+import { BaseLLM, BaseLLMParams } from "langchain/llms/base";
 
 export class FakeListLLM extends BaseLLM {
     private index = 0;
@@ -26,4 +26,7 @@ export class FakeListLLM extends BaseLLM {
         return "FakeListLLM";
     }
 
+    getCalledPrompts():string[]{
+        return this.calledPrompts;
+    }   
 }
