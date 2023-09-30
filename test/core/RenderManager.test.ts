@@ -437,3 +437,170 @@ function buildCommand(options: {
     command: options.command
   });
 }
+
+describe('setStyleTo', () => {
+  test('setStyleTo', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await renderManager.setStyleTo('elementId', {display: 'block'})
+  
+    expect(dom.setStyleTo).toBeCalledTimes(1)
+    expect(dom.setStyleTo).toBeCalledWith("elementId", {"display": "block"})
+  })
+  
+  test('setStyleTo overriding queued commands', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await Promise.all([
+      renderManager.setStyleTo('elementId', {display: 'block'}), // runs directly, does not wait for other commands to batch
+      renderManager.setStyleTo('elementId', {position: 'absolute', top: '0%'}),
+      renderManager.setStyleTo('elementId', {top: '10%'}),
+    ])
+  
+    expect(dom.setStyleTo).toBeCalledTimes(2)
+    expect(dom.setStyleTo).toBeCalledWith('elementId', {display: 'block'})
+    expect(dom.setStyleTo).toBeCalledWith('elementId', {top: '10%'})
+  
+    expect(dom.batch).toBeCalledTimes(0)
+  })
+  
+  test('setStyleTo overriding queued commands in batch', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await Promise.all([
+      renderManager.setStyleTo('elementId', {display: 'block'}), // runs directly, does not wait for other commands to batch
+      renderManager.setStyleTo('elementId', {position: 'absolute', top: '0%'}),
+      renderManager.setStyleTo('otherElementId', {left: '50%'}),
+      renderManager.setStyleTo('elementId', {top: '10%'}),
+    ])
+  
+    expect(dom.setStyleTo).toBeCalledTimes(1)
+    expect(dom.setStyleTo).toBeCalledWith('elementId', {display: 'block'})
+  
+    expect(dom.batch).toBeCalledTimes(1)
+    expect(dom.batch).toBeCalledWith([
+      {elementId: 'elementId', method: 'setStyleTo', value: {top: '10%'}},
+      {elementId: 'otherElementId', method: 'setStyleTo', value: {left: '50%'}}
+    ])
+  })
+  
+  test('setStyleTo when scheduled addStyleTo before', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await Promise.all([
+      renderManager.setStyleTo('elementId', {display: 'block'}), // runs directly, does not wait for other commands to batch
+      renderManager.addStyleTo('elementId', {position: 'absolute', top: '0%'}),
+      renderManager.setStyleTo('elementId', {top: '10%'}),
+    ])
+  
+    expect(dom.setStyleTo).toBeCalledTimes(2)
+    expect(dom.setStyleTo).toBeCalledWith('elementId', {display: 'block'})
+    expect(dom.setStyleTo).toBeCalledWith('elementId', {top: '10%'})
+  
+    expect(dom.addStyleTo).toBeCalledTimes(0)
+    expect(dom.batch).toBeCalledTimes(0)
+  })
+})
+
+describe('addStyleTo', () => {
+  test('addStyleTo', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await renderManager.addStyleTo('elementId', {display: 'block'})
+  
+    expect(dom.addStyleTo).toBeCalledTimes(1)
+    expect(dom.addStyleTo).toBeCalledWith("elementId", {"display": "block"})
+  })
+  
+  test('addStyleTo overriding queued commands', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await Promise.all([
+      renderManager.addStyleTo('elementId', {display: 'block'}), // runs directly, does not wait for other commands to batch
+      renderManager.addStyleTo('elementId', {position: 'absolute', top: '0%'}),
+      renderManager.addStyleTo('elementId', {top: '10%'}),
+    ])
+  
+    expect(dom.addStyleTo).toBeCalledTimes(2)
+    expect(dom.addStyleTo).toBeCalledWith('elementId', {display: 'block'})
+    expect(dom.addStyleTo).toBeCalledWith('elementId', {position: 'absolute', top: '10%'})
+  
+    expect(dom.batch).toBeCalledTimes(0)
+  })
+  
+  test('addStyleTo overriding queued commands in batch', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await Promise.all([
+      renderManager.addStyleTo('elementId', {display: 'block'}), // runs directly, does not wait for other commands to batch
+      renderManager.addStyleTo('elementId', {position: 'absolute', top: '0%'}),
+      renderManager.addStyleTo('otherElementId', {left: '50%'}),
+      renderManager.addStyleTo('elementId', {top: '10%'}),
+    ])
+  
+    expect(dom.addStyleTo).toBeCalledTimes(1)
+    expect(dom.addStyleTo).toBeCalledWith('elementId', {display: 'block'})
+  
+    expect(dom.batch).toBeCalledTimes(1)
+    expect(dom.batch).toBeCalledWith([
+      {elementId: 'elementId', method: 'addStyleTo', value: {position: 'absolute', top: '10%'}},
+      {elementId: 'otherElementId', method: 'addStyleTo', value: {left: '50%'}}
+    ])
+  })
+
+  test('addStyleTo overriding queued commands and increase priority', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await Promise.all([
+      renderManager.addStyleTo('elementId', {display: 'block'}), // runs directly, does not wait for other commands to batch
+      renderManager.addStyleTo('otherElementId', {left: '50%'}), // is added first but is overtaken because of RenderPriority.RESPONSIVE
+      renderManager.addStyleTo('elementId', {position: 'absolute', top: '0%'}),
+      renderManager.addStyleTo('elementId', {top: '10%'}, RenderPriority.RESPONSIVE),
+    ])
+  
+    expect(dom.addStyleTo).toBeCalledTimes(1)
+    expect(dom.addStyleTo).toBeCalledWith('elementId', {display: 'block'})
+  
+    expect(dom.batch).toBeCalledTimes(1)
+    expect(dom.batch).toBeCalledWith([
+      {elementId: 'elementId', method: 'addStyleTo', value: {position: 'absolute', top: '10%'}},
+      {elementId: 'otherElementId', method: 'addStyleTo', value: {left: '50%'}}
+    ])
+  })
+  
+  test('addStyleTo when scheduled setStyleTo before', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await Promise.all([
+      renderManager.addStyleTo('elementId', {display: 'block'}), // runs directly, does not wait for other commands to batch
+      renderManager.setStyleTo('elementId', {position: 'absolute', top: '0%'}),
+      renderManager.addStyleTo('elementId', {top: '10%'}),
+    ])
+  
+    expect(dom.addStyleTo).toBeCalledTimes(1)
+    expect(dom.addStyleTo).toBeCalledWith('elementId', {display: 'block'})
+  
+    expect(dom.setStyleTo).toBeCalledTimes(1)
+    expect(dom.setStyleTo).toBeCalledWith('elementId', {position: 'absolute', top: '10%'})
+  
+    expect(dom.batch).toBeCalledTimes(0)
+  })
+})

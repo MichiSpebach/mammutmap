@@ -93,10 +93,10 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                     return this.setContentToSync(command.elementId, command.value as string)
 
                 case 'setStyleTo':
-                    return this.setStyleToSync(command.elementId, command.value as string)
+                    return this.setStyleToSync(command.elementId, command.value as string|Style)
         
                 case 'addStyleTo':
-                    return this.addStyleToSync(command.elementId, command.value as string|Style)
+                    return this.addStyleToSync(command.elementId, command.value as Style)
         
                 case 'addClassTo':
                     return this.addClassToSync(command.elementId, command.value as string)
@@ -310,32 +310,33 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         element.remove()
     }
 
-    public async setStyleTo(id: string, style: string): Promise<void> {
+    public async setStyleTo(id: string, style: string|Style): Promise<void> {
         this.setStyleToSync(id, style)
     }
-    public setStyleToSync(id: string, style: string): void {
+    public setStyleToSync(id: string, style: string|Style): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
             util.logWarning(`DirectDomAdapter::setStyleTo(..) failed to get element with id '${id}'.`)
             return
         }
-        element.style.cssText = style
+        if (typeof style === 'string') {
+            element.style.cssText = style
+        } else {
+            element.style.cssText = ''
+            Object.assign(element.style, style)
+        }
     }
 
-    public async addStyleTo(id: string, style: string|Style): Promise<void> {
+    public async addStyleTo(id: string, style: Style): Promise<void> {
         this.addStyleToSync(id, style)
     }
-    public addStyleToSync(id: string, style: string|Style): void {
+    public addStyleToSync(id: string, style: Style): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
             util.logWarning(`DirectDomAdapter::addStyleTo(..) failed to get element with id '${id}'.`)
             return
         }
-        if (typeof style === 'string') {
-            element.style.cssText += style
-        } else {
-            Object.assign(element.style, style)
-        }
+        Object.assign(element.style, style)
     }
 
     public async addClassTo(id: string, className: string): Promise<void> {

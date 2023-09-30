@@ -29,11 +29,11 @@ export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'pre'|'button'|'input'|
  * undefined means letting it like it is, like not mentioning it
  * null means removing a style property
  */
-export type Style = Partial<Record<keyof CSSStyleDeclaration, string>> & { // 'Record' because otherwise a string could be assigned (e.g.: 'const style: Style = "not a style object"')
-  display?: 'block'|'inline'|'inline-block'|'flex'|'none' // TODO: use something that comes with stricter typing and cleanup overriding
-  position?: 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'inherit', // without overriding any strings would be allowed
-  float?: 'left'|'right'|'none'|'inherit',
-  pointerEvents?: 'auto'|'none'|'stroke',
-} | {
-  [key in keyof CSSStyleDeclaration]?: null
+export type Style = Partial<Record<keyof CSSStyleDeclaration, string>> | { // 'Record' because otherwise a string could be assigned (e.g.: 'const style: Style = "not a style object"')
+  [key in keyof CSSStyleDeclaration]?: string|null // allow nulls
+} & {
+  display?: 'block'|'inline'|'inline-block'|'flex'|'none'|null // TODO: use something that comes with stricter typing and cleanup overriding
+  position?: 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'inherit'|null // without overriding any strings would be allowed
+  float?: 'left'|'right'|'none'|'inherit'|null
+  pointerEvents?: 'auto'|'none'|'stroke'|null
 }
