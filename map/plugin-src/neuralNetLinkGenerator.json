@@ -1,0 +1,56 @@
+{
+	"id": "kct55ur2k08",
+	"x": 56,
+	"y": 32,
+	"width": 14,
+	"height": 14,
+	"links": [
+		{
+			"id": "85409ebflso",
+			"from": {
+				"path": [
+					{
+						"boxId": "vmvt1olt1q",
+						"boxName": "typeFinder.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5tr5eao6ij",
+						"boxName": "typeFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "m8ufs00ngr8",
+			"from": {
+				"path": [
+					{
+						"boxId": "pelo2b3c67g",
+						"boxName": "pathFinder.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8t591q9sp5",
+						"boxName": "pathFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		}
+	],
+	"nodes": []
+}

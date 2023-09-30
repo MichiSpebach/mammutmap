@@ -103,6 +103,12 @@
 						"boxName": "plugin-src",
 						"x": 100,
 						"y": 50
+					},
+					{
+						"boxId": "8i4h8qgs2io",
+						"boxName": "node8i4h8qgs2io",
+						"x": 50,
+						"y": 50
 					}
 				]
 			},

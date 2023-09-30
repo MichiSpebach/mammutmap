@@ -145,6 +145,15 @@ export class RenderManager {
     }))
   }
 
+  public setStyleTo(id: string, style: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'setStyleTo'+id,
+      batchParameters: {elementId: id, method: 'setStyleTo', value: style},
+      command: () => dom.setStyleTo(id, style)
+    }))
+  }
+
   public addStyleTo(id: string, style: string|Style, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,

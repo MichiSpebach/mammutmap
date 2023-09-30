@@ -73,12 +73,12 @@ class DidactedLink extends pluginFacade_1.LinkImplementation {
         this.clearStyleTimer();
         if (startDisplayNoneTimer) {
             this.styleTimer = setTimeout(() => {
-                pluginFacade_2.renderManager.addStyleTo(this.getId(), 'display:none;', priority);
+                pluginFacade_2.renderManager.setStyleTo(this.getId(), 'display:none;', priority);
                 this.styleTimer = null;
             }, hideTransitionDurationInMs);
         }
         if (!firstCall || style !== '') {
-            await pluginFacade_2.renderManager.addStyleTo(this.getId(), style, priority);
+            await pluginFacade_2.renderManager.setStyleTo(this.getId(), style, priority);
         }
     }
     clearStyleTimer() {

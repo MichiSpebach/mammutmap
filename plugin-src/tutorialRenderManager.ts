@@ -1,4 +1,4 @@
-import { MenuItemFile, applicationMenu, PopupWidget, renderManager, coreUtil, RenderPriority, RenderElement } from '../dist/pluginFacade'
+import { MenuItemFile, applicationMenu, renderManager, coreUtil, RenderPriority, RenderElement } from '../dist/pluginFacade'
 
 applicationMenu.addMenuItemTo('tutorialRenderManager.js', new MenuItemFile({label: 'add element', click: () => addElement()}))
 
@@ -46,5 +46,5 @@ async function highlightElement(elementId: string): Promise<void> {
 }
 
 async function resetElement(elementId: string): Promise<void> {
-	await renderManager.addStyleTo(elementId, {color: 'unset'}, RenderPriority.RESPONSIVE)
+	await renderManager.addStyleTo(elementId, {color: null}, RenderPriority.RESPONSIVE)
 }

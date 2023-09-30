@@ -58,15 +58,15 @@ class MainWidget extends Widget {
     private async adjustWidgets(): Promise<void> {
         if (settings.getBoolean('sidebar')) {
             await Promise.all([
-                renderManager.addStyleTo(this.sidebar.getId(), 'position:absolute;top:0;right:0;height:100%;width:20%;background-color:#303438;'),
-                renderManager.addStyleTo(indexHtmlIds.contentId, this.getContentStyle(80)),
-                renderManager.addStyleTo(indexHtmlIds.terminalId, this.getTerminalStyle(80))
+                renderManager.setStyleTo(this.sidebar.getId(), 'position:absolute;top:0;right:0;height:100%;width:20%;background-color:#303438;'),
+                renderManager.setStyleTo(indexHtmlIds.contentId, this.getContentStyle(80)),
+                renderManager.setStyleTo(indexHtmlIds.terminalId, this.getTerminalStyle(80))
             ])
         } else {
             await Promise.all([
-                renderManager.addStyleTo(this.sidebar.getId(), 'display:none;'),
-                renderManager.addStyleTo(indexHtmlIds.contentId, this.getContentStyle(100)),
-                renderManager.addStyleTo(indexHtmlIds.terminalId, this.getTerminalStyle(100))
+                renderManager.setStyleTo(this.sidebar.getId(), 'display:none;'),
+                renderManager.setStyleTo(indexHtmlIds.contentId, this.getContentStyle(100)),
+                renderManager.setStyleTo(indexHtmlIds.terminalId, this.getTerminalStyle(100))
             ])
         }
     }

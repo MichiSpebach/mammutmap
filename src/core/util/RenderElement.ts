@@ -24,20 +24,16 @@ export type RenderElement = {
 
 export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'pre'|'button'|'input'|'select'|'option'
 
-export type Style = Partial<CSSStyleDeclaration> & { // TODO: use something that comes with stricter typing and cleanup overriding
+/**
+ * when adding/amending Style to an Element:
+ * undefined means letting it like it is, like not mentioning it
+ * null means removing a style property
+ */
+export type Style = Partial<Record<keyof CSSStyleDeclaration, string>> & { // 'Record' because otherwise a string could be assigned (e.g.: 'const style: Style = "not a style object"')
+  display?: 'block'|'inline'|'inline-block'|'flex'|'none' // TODO: use something that comes with stricter typing and cleanup overriding
   position?: 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'inherit', // without overriding any strings would be allowed
-  left?: string,
-  right?: string,
-  top?: string,
-  bottom?: string,
-  marginLeft?: string,
-  marginRight?: string,
-  marginTop?: string,
-  marginBottom?: string,
   float?: 'left'|'right'|'none'|'inherit',
-  width?: string,
-  height?: string,
-  color?: string,
-  backgroundColor?: string,
-  pointerEvents?: 'auto'|'none'|'stroke'
+  pointerEvents?: 'auto'|'none'|'stroke',
+} | {
+  [key in keyof CSSStyleDeclaration]?: null
 }

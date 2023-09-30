@@ -82,13 +82,13 @@ export class DidactedLink extends LinkImplementation {
         this.clearStyleTimer()
         if (startDisplayNoneTimer) {
           this.styleTimer = setTimeout(() => {
-            renderManager.addStyleTo(this.getId(), 'display:none;', priority)
+            renderManager.setStyleTo(this.getId(), 'display:none;', priority)
             this.styleTimer = null
           }, hideTransitionDurationInMs)
         }
     
         if (!firstCall || style !== '') {
-          await renderManager.addStyleTo(this.getId(), style, priority)
+          await renderManager.setStyleTo(this.getId(), style, priority)
         }
     }
 

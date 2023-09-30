@@ -43,5 +43,5 @@ async function highlightElement(elementId) {
     await pluginFacade_1.renderManager.addStyleTo(elementId, { color: 'skyblue' }, pluginFacade_1.RenderPriority.RESPONSIVE);
 }
 async function resetElement(elementId) {
-    await pluginFacade_1.renderManager.addStyleTo(elementId, { color: 'unset' }, pluginFacade_1.RenderPriority.RESPONSIVE);
+    await pluginFacade_1.renderManager.addStyleTo(elementId, { color: null }, pluginFacade_1.RenderPriority.RESPONSIVE);
 }

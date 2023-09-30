@@ -92,8 +92,11 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                 case 'innerHTML':
                     return this.setContentToSync(command.elementId, command.value as string)
 
+                case 'setStyleTo':
+                    return this.setStyleToSync(command.elementId, command.value as string)
+        
                 case 'addStyleTo':
-                    return this.addStyleToSync(command.elementId, command.value as string)
+                    return this.addStyleToSync(command.elementId, command.value as string|Style)
         
                 case 'addClassTo':
                     return this.addClassToSync(command.elementId, command.value as string)
@@ -295,7 +298,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             util.logWarning(`DirectDomAdapter::clearContentOf(..) failed to get element with id '${id}'.`)
             return
         }
-        element.innerHTML=''
+        element.innerHTML = ''
     }
 
     public async remove(id: string): Promise<void> {
@@ -305,6 +308,18 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             return
         }
         element.remove()
+    }
+
+    public async setStyleTo(id: string, style: string): Promise<void> {
+        this.setStyleToSync(id, style)
+    }
+    public setStyleToSync(id: string, style: string): void {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::setStyleTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        element.style.cssText = style
     }
 
     public async addStyleTo(id: string, style: string|Style): Promise<void> {
@@ -317,7 +332,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             return
         }
         if (typeof style === 'string') {
-            (element.style as any)=style // TODO: cast to any because style is a readonly property, find better solution, TODO: move this behaviour into setStyleTo(..) method
+            element.style.cssText += style
         } else {
             Object.assign(element.style, style)
         }
