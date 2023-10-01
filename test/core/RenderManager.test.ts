@@ -603,4 +603,27 @@ describe('addStyleTo', () => {
   
     expect(dom.batch).toBeCalledTimes(0)
   })
+
+  test('addStyleTo when scheduled setStyleTo with cssText before', async () => {
+    const dom: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
+    initDomAdapter(dom)
+    const renderManager = new RenderManager()
+    
+    await Promise.all([
+      renderManager.addStyleTo('elementId', {display: 'block'}), // runs directly, does not wait for other commands to batch
+      renderManager.setStyleTo('elementId', 'position:"absolute";top:"0%";'),
+      renderManager.addStyleTo('elementId', {top: '10%'}),
+    ])
+  
+    expect(dom.addStyleTo).toBeCalledTimes(1)
+    expect(dom.addStyleTo).toBeCalledWith('elementId', {display: 'block'})
+  
+    expect(dom.setStyleTo).toBeCalledTimes(0)
+  
+    expect(dom.batch).toBeCalledTimes(1)
+    expect(dom.batch).toBeCalledWith([
+      {elementId: 'elementId', method: 'setStyleTo', value: 'position:"absolute";top:"0%";'},
+      {elementId: 'elementId', method: 'addStyleTo', value: {top: '10%'}}
+    ])
+  })
 })

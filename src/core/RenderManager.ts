@@ -149,7 +149,7 @@ export class RenderManager {
   public setStyleTo(id: string, style: string|Style, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const command: Command = new Command({
       priority: priority,
-      combineIfPossible: (combineInto: Command) => this.tryToCombineSetStyleToCommand(command, combineInto),
+      combineIfPossible: (commandScheduledBefore: Command) => this.tryToCombineSetStyleToCommand(command, commandScheduledBefore),
       batchParameters: {elementId: id, method: 'setStyleTo', value: style},
       command: () => dom.setStyleTo(id, style)
     })
@@ -159,7 +159,7 @@ export class RenderManager {
   public addStyleTo(id: string, style: Style, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const command: Command = new Command({
       priority: priority,
-      combineIfPossible: (combineInto: Command) => this.tryToCombineAddStyleToCommand(command, combineInto),
+      combineIfPossible: (commandScheduledBefore: Command) => this.tryToCombineAddStyleToCommand(command, commandScheduledBefore),
       batchParameters: {elementId: id, method: 'addStyleTo', value: style},
       command: () => dom.addStyleTo(id, style)
     })
@@ -344,12 +344,13 @@ export class RenderManager {
     }
 
     for (let i = 0; i < this.commands.length; i++) {
-      const compareCommand: Command = this.commands[i]
-      if (compareCommand.batchParameters?.elementId !== command.batchParameters?.elementId || compareCommand.promise.isStarted()) {
+      const commandScheduledBefore: Command = this.commands[i]
+      if (commandScheduledBefore.batchParameters?.elementId !== command.batchParameters?.elementId || commandScheduledBefore.promise.isStarted()) {
         continue
       }
-      const combinedCommand = command.combineIfPossible(compareCommand)
+      const combinedCommand = command.combineIfPossible(commandScheduledBefore)
       if (combinedCommand) {
+        this.increasePriorityOfCommandIfNecessary(combinedCommand, command.priority)
         return combinedCommand
       }
     }
@@ -375,7 +376,6 @@ export class RenderManager {
     commandScheduledBefore.combineIfPossible = command.combineIfPossible
     commandScheduledBefore.batchParameters.value = value
     commandScheduledBefore.promise.setCommand(() => dom.setStyleTo(elementId, value))
-    this.increasePriorityOfCommandIfNecessary(commandScheduledBefore, command.priority)
     return commandScheduledBefore
   }
 
@@ -391,13 +391,15 @@ export class RenderManager {
       log.warning(`RenderManager::tryToCombineAddStyleToCommand(..) command..elementId ('${command.batchParameters.elementId}') differs from commandScheduledBefore..elementId ('${commandScheduledBefore.batchParameters.elementId}').`)
       return undefined
     }
+    if (typeof commandScheduledBefore.batchParameters.value === 'string') {
+      return undefined // can happen if commandScheduledBefore..method is 'setStyleTo'
+    }
 
     const elementId: string = command.batchParameters.elementId
     const method: 'addStyleTo'|'setStyleTo' = commandScheduledBefore.batchParameters.method
     const newValue: Style = Object.assign(commandScheduledBefore.batchParameters.value, command.batchParameters.value) as Style
     commandScheduledBefore.batchParameters.value = newValue
     commandScheduledBefore.promise.setCommand(() => dom[method](elementId, newValue))
-    this.increasePriorityOfCommandIfNecessary(commandScheduledBefore, command.priority)
     return commandScheduledBefore
   }
 
@@ -517,7 +519,7 @@ export enum RenderPriority {
 
 export class Command { // only export for unit tests
   public priority: RenderPriority
-  public combineIfPossible?: (combineInto: Command) => Command|undefined
+  public combineIfPossible?: (commandScheduledBefore: Command) => Command|undefined
   public squashableWith: string|undefined
   public updatableWith: string|undefined
   public batchParameters: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements} | undefined
@@ -525,7 +527,7 @@ export class Command { // only export for unit tests
 
   public constructor(options: {
     priority: RenderPriority,
-    combineIfPossible?: (combineInto: Command) => Command|undefined,
+    combineIfPossible?: (commandScheduledBefore: Command) => Command|undefined,
     squashableWith?: string,
     updatableWith?: string,
     batchParameters?: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements},
