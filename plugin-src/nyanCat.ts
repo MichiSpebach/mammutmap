@@ -29,7 +29,6 @@ const a = async () => {
 			top: `${top}%`,
 			transition: 'all 3s linear 0s',
 			left: '-20%',
-			transform: 'rotate(0deg)'
 		},
 		innerHTML: '<img style="height: 200px; width: 300px" src="https://media.tenor.com/-AyTtMgs2mMAAAAi/nyan-cat-nyan.gif">',
 		onclick: () => {
@@ -37,10 +36,7 @@ const a = async () => {
 				audio.play();
 				isPlaying = true;
 			}
-			for (let i = 0; i <= 100; i++) {
-
-				a();
-			}
+			a();
 		}
 	});
 	
@@ -50,24 +46,13 @@ const a = async () => {
 			left: `100%`,
 			top: `${topEnd}%`,
 			transition: 'all 3s linear 0s',
-			transform: 'rotate(360deg)'
 		})
 		await coreUtil.wait(3000);
 		await renderManager.setStyleTo(nyancatId, {
 			top: `${top}%`,
 			left: `-20%`,
 			transition: 'all 0s',
-			transform: 'rotate(0deg)'
 		})
-	}
-	return;
-	let i = 0;
-	while(true) {
-		await renderManager.setStyleTo('nyancat', {
-			left: `${(i % 300) / 3}%`,
-		})
-		await coreUtil.wait(10);
-		i++;
 	}
 }
 
