@@ -1,23 +1,10 @@
-import { PopupWidget, coreUtil, renderManager } from '../dist/pluginFacade';
+import { MenuItemFile, applicationMenu, coreUtil, renderManager } from '../dist/pluginFacade';
 
-function performHelloWorld(): void {
-	PopupWidget.newAndRender({
-		title: 'Hello World!',
-		content: {
-			type: 'div',
-			style: {color: 'lightgreen', cursor: 'pointer'},
-			onclick: () => console.log('Hello World!'),
-			children: 'Hello, nice to see you!'
-		},
-		onClose: () => console.log('Have a nice day!')
-	})
-}
+applicationMenu.addMenuItemTo('nyanCat.js', new MenuItemFile({label: 'spawn', click: () => spawn()}))
 
-const audio = new Audio('https://files.voicy.network/public/Content/Clips/Sound/c9243b3a-5a05-432e-88a8-48e4c5f9c93e.mp3')
-audio.loop = true;
-let isPlaying = false;
+let musicPlaying = false;
 
-const a = async () => {
+const spawn = async () => {
 	const nyancatId = 'nyancat' + coreUtil.generateId();
 	const top = Math.random() * 100;
 	const topEnd = Math.random() * 100;
@@ -29,26 +16,24 @@ const a = async () => {
 			top: `${top}%`,
 			transition: 'all 3s linear 0s',
 			left: '-20%',
+			cursor: 'pointer'
 		},
 		innerHTML: '<img style="height: 200px; width: 300px" src="https://media.tenor.com/-AyTtMgs2mMAAAAi/nyan-cat-nyan.gif">',
 		onclick: () => {
-			if (!isPlaying) {
-				audio.play();
-				isPlaying = true;
-			}
-			a();
+			spawn();
+			playMusic();
 		}
 	});
 	
 	while (true) {
 		await coreUtil.wait(10);
-		await renderManager.setStyleTo(nyancatId, {
+		await renderManager.addStyleTo(nyancatId, {
 			left: `100%`,
 			top: `${topEnd}%`,
 			transition: 'all 3s linear 0s',
 		})
 		await coreUtil.wait(3000);
-		await renderManager.setStyleTo(nyancatId, {
+		await renderManager.addStyleTo(nyancatId, {
 			top: `${top}%`,
 			left: `-20%`,
 			transition: 'all 0s',
@@ -56,4 +41,16 @@ const a = async () => {
 	}
 }
 
-a();
+function playMusic(): void {
+	if (musicPlaying) {
+		return
+	}
+	try {
+		const audio = new Audio('https://files.voicy.network/public/Content/Clips/Sound/c9243b3a-5a05-432e-88a8-48e4c5f9c93e.mp3')
+		audio.loop = true;
+		audio.play()
+		musicPlaying = true
+	} catch (error) {
+		console.warn(`Failed to play music, most likely because of running in electron: ${error}`)
+	}
+}
