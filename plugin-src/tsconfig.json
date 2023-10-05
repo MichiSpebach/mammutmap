@@ -8,6 +8,7 @@
     "noImplicitAny": false,
     "noImplicitOverride": true,
     "outDir": "../plugin",
+    "rootDir": ".",
     "moduleResolution": "node"
   },
   "exclude": ["**/*.test.ts"]
