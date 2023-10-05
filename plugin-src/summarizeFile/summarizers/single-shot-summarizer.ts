@@ -17,15 +17,17 @@ export class SingleShotSummarizer extends Summarizer{
             {source}
             `)
         }
-        const callbacks= new ConsoleCallbackHandler();
         this.chain=new LLMChain({
             llm:modelAndPrompt.model,
             prompt:modelAndPrompt.template,
-            verbose:true,
-            callbacks:[callbacks]});
+            verbose:true
+        });
     }
     public async summarize(input:string) {
         return this.chain.call({source:input});   
+    }
+    public getType(): string {
+        return "SingleShotSummarizer";
     }
 }
 

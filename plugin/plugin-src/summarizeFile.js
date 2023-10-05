@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const pluginFacade_1 = require("../src/pluginFacade");
-const SummarizerFactory_1 = require("./summarizeFile/SummarizerFactory");
 const SUMMARY_FIELD_NAME = 'summary';
-pluginFacade_1.contextMenu.addFileBoxMenuItem((item) => new pluginFacade_1.MenuItemFile({ label: "Summarize File", click: () => summarize(item, new SummarizerFactory_1.SummarizerFactory()) }));
+pluginFacade_1.contextMenu.addFileBoxMenuItem((item) => new pluginFacade_1.MenuItemFile({ label: "Summarize File", click: () => console.error("hi") }));
+// summarize(item,new SummarizerFactory(openaiSummaryLLMFactory,new ConfigManager()))
 pluginFacade_1.Box.Tabs.register({
     name: 'Summary',
     isAvailableFor: (box) => box.isFile(),

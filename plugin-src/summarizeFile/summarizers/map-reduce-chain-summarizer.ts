@@ -92,4 +92,7 @@ export class MapReduceChainSummarizer extends Summarizer {
         return await this.chain.call({ input: input });
     }
 
+    public override getType(): string {
+        return "MapReduceChainSummarizer";
+    }
 }

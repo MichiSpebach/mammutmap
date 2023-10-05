@@ -3,13 +3,15 @@ import { readFileSync } from "fs";
 
 import { Box, log, FileBox, MenuItemFile, RenderElements, contextMenu, } from "../src/pluginFacade"
 
-import { SummarizerFactory } from "./summarizeFile/SummarizerFactory";
+import { SummarizerFactory } from "./summarizeFile/summarizer-factory";
+import { openaiSummaryLLMFactory } from "./summarizeFile/llms/summary-openai";
+import { ConfigManager } from "./summarizeFile/config-manager";
 
 const SUMMARY_FIELD_NAME = 'summary';
 
 
-contextMenu.addFileBoxMenuItem((item) => new MenuItemFile({ label: "Summarize File", click: () => summarize(item,new SummarizerFactory()) }));
-
+contextMenu.addFileBoxMenuItem((item) => new MenuItemFile({ label: "Summarize File", click: () => console.error("hi")  }));
+// summarize(item,new SummarizerFactory(openaiSummaryLLMFactory,new ConfigManager()))
 
 Box.Tabs.register({
     name: 'Summary',

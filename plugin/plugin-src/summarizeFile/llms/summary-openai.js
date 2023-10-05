@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SummaryOpenAI = void 0;
-const SummaryLLM_1 = require("./SummaryLLM");
+exports.openaiSummaryLLMFactory = exports.SummaryOpenAI = void 0;
+const summary_llm_1 = require("./summary-llm");
 const openai_1 = require("langchain/llms/openai");
-class SummaryOpenAI extends SummaryLLM_1.SummaryLLM {
+class SummaryOpenAI extends summary_llm_1.SummaryLLM {
     getLLM() {
         return this.llm;
     }
@@ -17,3 +17,7 @@ class SummaryOpenAI extends SummaryLLM_1.SummaryLLM {
     }
 }
 exports.SummaryOpenAI = SummaryOpenAI;
+const openaiSummaryLLMFactory = (config) => {
+    return new SummaryOpenAI(config);
+};
+exports.openaiSummaryLLMFactory = openaiSummaryLLMFactory;

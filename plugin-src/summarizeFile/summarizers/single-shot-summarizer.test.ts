@@ -1,6 +1,5 @@
 import {SingleShotSummarizer} from "./single-shot-summarizer";
 import {FakeListLLM} from '../test-util/fake-list-llm';
-import { PromptTemplate } from "langchain/prompts";
 
 describe("SingleShortSummarizer", () => {
 

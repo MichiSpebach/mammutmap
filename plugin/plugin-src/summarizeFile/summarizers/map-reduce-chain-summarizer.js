@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MapReduceChainSummarizer = void 0;
-const Summarizer_1 = require("./Summarizer");
+const summarizer_1 = require("./summarizer");
 const prompts_1 = require("langchain/prompts");
 const chains_1 = require("langchain/chains");
 const text_splitter_1 = require("langchain/text_splitter");
@@ -52,7 +52,7 @@ class MapReducerChain extends chains_1.BaseChain {
         return ["answer"];
     }
 }
-class MapReduceChainSummarizer extends Summarizer_1.Summarizer {
+class MapReduceChainSummarizer extends summarizer_1.Summarizer {
     constructor(modelAndPrompt) {
         super();
         const mapPrompt = prompts_1.PromptTemplate.fromTemplate(`You are an expert software developer.
@@ -66,6 +66,9 @@ class MapReduceChainSummarizer extends Summarizer_1.Summarizer {
     }
     async summarize(input) {
         return await this.chain.call({ input: input });
+    }
+    getType() {
+        return "MapReduceChainSummarizer";
     }
 }
 exports.MapReduceChainSummarizer = MapReduceChainSummarizer;

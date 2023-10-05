@@ -1,5 +1,5 @@
 import { BaseLLM } from "langchain/dist/llms/base";
-import { SummaryLLM } from "./summary-llm";
+import { LLMConfig, SummaryLLM, summaryLLMFactory } from "./summary-llm";
 import { OpenAI } from "langchain/llms/openai";
 
 export class SummaryOpenAI extends SummaryLLM{
@@ -17,3 +17,6 @@ export class SummaryOpenAI extends SummaryLLM{
     }
 
 }
+export const openaiSummaryLLMFactory:summaryLLMFactory = (config: LLMConfig) => {
+    return new SummaryOpenAI(config);
+};
