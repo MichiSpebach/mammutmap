@@ -1,6 +1,11 @@
 import { MenuItemFile, applicationMenu, coreUtil, renderManager } from '../dist/pluginFacade';
+import * as commandLine from '../dist/core/commandLine'
 
 applicationMenu.addMenuItemTo('nyanCat.js', new MenuItemFile({label: 'spawn', click: () => spawn()}))
+commandLine.registerCommand('nyanCat', (parameter: string) => spawn())
+commandLine.registerCommand('nyancat', (parameter: string) => spawn())
+commandLine.registerCommand('nyan', (parameter: string) => spawn())
+commandLine.registerCommand('cat', (parameter: string) => spawn())
 
 let musicPlaying = false;
 

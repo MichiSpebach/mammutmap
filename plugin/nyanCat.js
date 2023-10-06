@@ -1,7 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const pluginFacade_1 = require("../dist/pluginFacade");
+const commandLine = require("../dist/core/commandLine");
 pluginFacade_1.applicationMenu.addMenuItemTo('nyanCat.js', new pluginFacade_1.MenuItemFile({ label: 'spawn', click: () => spawn() }));
+commandLine.registerCommand('nyanCat', (parameter) => spawn());
+commandLine.registerCommand('nyancat', (parameter) => spawn());
+commandLine.registerCommand('nyan', (parameter) => spawn());
+commandLine.registerCommand('cat', (parameter) => spawn());
 let musicPlaying = false;
 const spawn = async () => {
     const nyancatId = 'nyancat' + pluginFacade_1.coreUtil.generateId();
