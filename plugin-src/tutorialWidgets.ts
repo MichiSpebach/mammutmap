@@ -1,5 +1,5 @@
-import { RenderElementWithId, SimpleWidget } from '../dist/core/Widget'
-import { ElementType, MenuItemFile, PopupWidget, RenderElement, RenderElements, Style, applicationMenu, coreUtil } from '../dist/pluginFacade'
+import { SimpleWidget } from '../dist/core/Widget'
+import { MenuItemFile, PopupWidget, RenderElements, applicationMenu, coreUtil } from '../dist/pluginFacade'
 
 applicationMenu.addMenuItemTo('tutorialWidgets.js', new MenuItemFile({label: 'show popup with widget', click: () => showPopupWithWidget()}))
 
@@ -13,10 +13,11 @@ async function showPopupWithWidget(): Promise<void> {
 }
 
 class TutorialWidget extends SimpleWidget {
-	public override readonly id: string = `tutorialWidget${coreUtil.generateId()}`
-	public override readonly type: ElementType = 'div'
-	protected override readonly style?: Style | undefined
 	private counter: number = 0
+
+	public constructor() {
+		super(`tutorialWidget${coreUtil.generateId()}`, 'div')
+	}
 
 	protected override shapeFormInner(): RenderElements {
 		return [

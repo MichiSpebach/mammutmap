@@ -24,9 +24,16 @@ export abstract class BasicWidget extends Widget {
 }
 
 export abstract class SimpleWidget extends BasicWidget {
-	public abstract readonly id: string
-	public abstract readonly type: ElementType
-	protected abstract readonly style?: Style
+	public readonly id: string
+	private readonly elementType: ElementType
+	private readonly elementStyle?: Style
+
+	public constructor(id: string, elementType: ElementType, elementStyle?: Style) {
+		super()
+		this.id = id
+		this.elementType = elementType
+		this.elementStyle = elementStyle
+	}
 
 	public override getId(): string {
 		return this.id
@@ -34,9 +41,9 @@ export abstract class SimpleWidget extends BasicWidget {
 
 	public async shapeForm(): Promise<RenderElementWithId> {
 		return {
-			type: this.type,
+			type: this.elementType,
 			id: this.id,
-			style: this.style,
+			style: this.elementStyle,
 			children: await this.shapeFormInner()
 		}
 	}
