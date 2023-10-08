@@ -61,6 +61,7 @@ export interface DocumentObjectModelAdapter {
   removeClassFrom(id: string, className: string): Promise<void>
   containsClass(id: string, className: string): Promise<boolean>
   getClassesOf(id: string): Promise<string[]>
+  addStyleSheet(styleSheet: {[ruleName: string]: Style}): Promise<void>
   modifyCssRule(cssRuleName: string, propertyName: string, propertyValue: string): Promise<{propertyValueBefore: string}>
 
   getValueOf(id: string): Promise<string>

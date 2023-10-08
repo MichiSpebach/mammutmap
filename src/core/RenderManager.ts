@@ -186,6 +186,13 @@ export class RenderManager {
     }))
   }
 
+  public addStyleSheet(styles: {[ruleName: string]: Style}, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      command: () => dom.addStyleSheet(styles)
+    }))
+  }
+
   public scrollToBottom(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,

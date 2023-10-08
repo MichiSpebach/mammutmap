@@ -383,6 +383,12 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         return classNames
     }
 
+    public async addStyleSheet(styleSheet: {[ruleName: string]: Style}): Promise<void> {
+        const cssStyleSheet = new CSSStyleSheet()
+        cssStyleSheet.replace(util.stylesToCssText(styleSheet))
+        document.adoptedStyleSheets.push(cssStyleSheet)
+    }
+
     public modifyCssRule(cssRuleName: string, propertyName: string, propertyValue: string): Promise<{ propertyValueBefore: string; }> {
         throw new Error('DirectDomAdapter::modifyCssRule(..) not implemented yet.');
     }

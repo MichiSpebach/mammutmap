@@ -2,7 +2,7 @@ import { processing, ChildProcess } from '../processingAdapter'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
-import { RenderElement } from './RenderElement'
+import { RenderElement, Style } from './RenderElement'
 import * as stacktraceUtil from './stacktraceUtil'
 import { log } from '../logService'
 
@@ -270,12 +270,24 @@ class Util {
     return JSON.stringify(object, null, '\t')
   }
 
-  public wait(milliSeconds: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, milliSeconds))
+  public stylesToCssText(styles: {[key: string]: Style}): string {
+    let cssText: string = ''
+    for (const [styleRuleName, style] of Object.entries(styles)) {
+        cssText += `.${styleRuleName}{`
+        for (const [key, value] of Object.entries(style)) {
+            cssText += `${key.replaceAll(/[A-Z]/g, match => '-'+match)}:${value};`
+        }
+        cssText += '}'
+    }
+    return cssText
   }
-
+  
   public generateId(): string {
     return Math.random().toString(32).substring(2)
+  }
+
+  public wait(milliSeconds: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, milliSeconds))
   }
 
   public getCallerDirPath(skipThroughFilePath?: string): string {

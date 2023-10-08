@@ -1,3 +1,7 @@
 .boxBorderWithoutMapData {
     border-color: red;
 }
+
+.boxHeaderInner {
+    padding-left: 2px !important;
+}

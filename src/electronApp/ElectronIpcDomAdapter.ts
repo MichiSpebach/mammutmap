@@ -1,4 +1,4 @@
-import * as JSON5 from 'JSON5'
+import * as JSON5 from 'json5'
 import { util } from '../core/util/util'
 import { RenderElement, RenderElements, Style } from '../core/util/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain, shell } from 'electron'
@@ -350,6 +350,15 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     public getClassesOf(id: string): Promise<string[]> {
       return this.executeJsOnElement(id, "classList")  // throws error: object could not be cloned
+    }
+
+    public async addStyleSheet(styleSheet: {[ruleName: string]: Style}): Promise<void> {
+      let jsToExecute: string = `
+      const cssStyleSheet = new CSSStyleSheet()
+      cssStyleSheet.replace("${util.stylesToCssText(styleSheet)}")
+      document.adoptedStyleSheets.push(cssStyleSheet)
+      `
+      return this.executeJavaScriptSuppressingErrors(jsToExecute)
     }
   
     public async modifyCssRule(cssRuleName: string, propertyName: string, propertyValue: string): Promise<{propertyValueBefore: string}> {
