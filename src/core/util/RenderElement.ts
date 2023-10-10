@@ -36,4 +36,5 @@ export type Style = {
   position?: 'static'|'absolute'|'fixed'|'relative'|'sticky'|'initial'|'inherit'|null // without overriding any strings would be allowed
   float?: 'left'|'right'|'none'|'inherit'|null
   pointerEvents?: 'auto'|'none'|'stroke'|null
+  top?: '0'|`${number}px`|`${number}%`
 }

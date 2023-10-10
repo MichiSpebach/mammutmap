@@ -19,7 +19,7 @@ export class HtmlContextMenuPopup implements ContextMenuPopup {
             style: {
                 position: 'fixed',
                 left: position.x+'px',
-                top: position.y+'px'
+                top: `${position.y}px`
             },
             children: []
         }

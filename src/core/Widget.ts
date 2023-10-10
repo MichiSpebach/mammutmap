@@ -19,6 +19,7 @@ export abstract class BasicWidget extends Widget {
 	public async unrender(): Promise<void> {
 		await renderManager.clearContentOf(this.getId())
 	}
+	// TODO: rename to "shape" because "form" could be confused with <form> element in html context
 	public abstract shapeForm(): RenderElementWithId | Promise<RenderElementWithId>
 	protected abstract shapeFormInner(): RenderElements | Promise<RenderElements>
 }

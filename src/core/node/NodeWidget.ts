@@ -112,7 +112,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         const radiusInPx = this.highlight ? 10 : 7
         const style: Style = {
             position: 'absolute',
-            top: position.percentY+'%',
+            top: `${position.percentY}%`,
             left: position.percentX+'%',
             width: radiusInPx*2+'px',
             height: radiusInPx*2+'px',

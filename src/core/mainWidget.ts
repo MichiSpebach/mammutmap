@@ -6,107 +6,123 @@ import { renderManager } from './RenderManager'
 import { settings } from './Settings'
 import { util } from './util/util'
 import { ClientPosition } from './shape/ClientPosition'
+import { Style } from './util/RenderElement'
 
 // TODO: rename to indexWidget|bodyWidget|appWidget|window(Widget)?
 
 export let mainWidget: MainWidget
 
 class MainWidget extends Widget {
-    private map: Map|undefined
-    //private terminal: TerminalWidget // TODO implement, or bottomBar?
-    public readonly sidebar: ToolbarWidget
-    private devStatsInterval: NodeJS.Timer|undefined
+	private map: Map|undefined
+	public readonly sidebar: ToolbarWidget
+	public readonly bottomBar: ToolbarWidget
+	private devStatsInterval: NodeJS.Timer|undefined
 
-    private renderedOrInProgress: boolean = false
+	private renderedOrInProgress: boolean = false
 
-    public constructor() {
-        super()
-        this.map = mapWidget
-        this.sidebar = new ToolbarWidget('sidebar')
-    }
+	public constructor() {
+		super()
+		this.map = mapWidget
+		this.sidebar = new ToolbarWidget('sidebar')
+		this.bottomBar = new ToolbarWidget('bottomBar')
+	}
 
-    public getId(): string {
-        return indexHtmlIds.bodyId
-    }
+	public getId(): string {
+		return indexHtmlIds.bodyId
+	}
 
-    public async render(): Promise<void> {
-        const pros: Promise<void>[] = []
-        
-        if (!this.renderedOrInProgress) {
-            this.renderedOrInProgress = true
-            settings.subscribeBoolean('sidebar', async (active: boolean) => this.render())
-            settings.subscribeBoolean('developerMode', (newValue: boolean) => this.updateDevStats())
-            this.updateDevStats()
-            await renderManager.addContentTo(indexHtmlIds.bodyId, `<div id="${this.sidebar.getId()}"></div>`)
-        }
-        
-        if (settings.getBoolean('sidebar')) {
-            pros.push(this.sidebar.render())
-        } else {
-            pros.push(this.sidebar.unrender())
-        }
+	public async render(): Promise<void> {
+		const pros: Promise<void>[] = []
 
-        pros.push(this.adjustWidgets())
+		const sidebarEnabled: boolean = settings.getBoolean('sidebar')
+		const sidebarDisplay: Style['display'] = sidebarEnabled ? null : 'none'
+		const contentWidth: Style['width'] = sidebarEnabled ? '80%' : '100%'
+		const bottomBarWidth: Style['width'] = sidebarEnabled ? '80%' : '100%'
+		
+		if (!this.renderedOrInProgress) {
+			this.renderedOrInProgress = true
+			settings.subscribeBoolean('sidebar', async (active: boolean) => this.render())
+			settings.subscribeBoolean('developerMode', (newValue: boolean) => this.updateDevStats())
+			this.updateDevStats()
+			await Promise.all([
+				renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth, height: '85%'}), // TODO: add content as element as well instead of in index.html
+				renderManager.addElementsTo(indexHtmlIds.bodyId, [
+					{
+						type: 'div',
+						id: this.sidebar.getId(),
+						style: {
+							display: sidebarDisplay,
+							position: 'absolute',
+							top: '0',
+							right: '0',
+							width:'20%',
+							height: '100%',
+							backgroundColor: '#303438'
+						}
+					},
+					/*{
+						type: 'div',
+						id: this.bottomBar.getId(),
+						style: {
+							position: 'absolute',
+							width: bottomBarWidth,
+							height: '15%'
+						}
+					},*/
+				]),
+				pros.push(renderManager.addStyleTo(indexHtmlIds.terminalId, { // TODO: remove as soon as bottomBar implemented
+					width: bottomBarWidth, 
+					height: '15%', 
+					overflowX: 'auto'
+				}))
+			])
+		} else {
+			pros.push(renderManager.addStyleTo(this.sidebar.getId(), {display: sidebarDisplay}))
+			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth}))
+			pros.push(renderManager.addStyleTo(indexHtmlIds.terminalId, {width: bottomBarWidth}))
+		}
+		
+		if (sidebarEnabled) {
+			pros.push(this.sidebar.render())
+		} else {
+			pros.push(this.sidebar.unrender())
+		}
 
-        await Promise.all(pros)
-    }
+		await Promise.all(pros)
+	}
 
-    public async unrender(): Promise<void> {
-        util.logWarning('expected MainWidget::unrender not to be called') // TODO: add default implementation in super class?
-    }
+	public async unrender(): Promise<void> {
+		util.logWarning('expected MainWidget::unrender not to be called') // TODO: add default implementation in super class?
+	}
 
-    private async adjustWidgets(): Promise<void> {
-        if (settings.getBoolean('sidebar')) {
-            await Promise.all([
-                renderManager.setStyleTo(this.sidebar.getId(), 'position:absolute;top:0;right:0;height:100%;width:20%;background-color:#303438;'),
-                renderManager.setStyleTo(indexHtmlIds.contentId, this.getContentStyle(80)),
-                renderManager.setStyleTo(indexHtmlIds.terminalId, this.getTerminalStyle(80))
-            ])
-        } else {
-            await Promise.all([
-                renderManager.setStyleTo(this.sidebar.getId(), 'display:none;'),
-                renderManager.setStyleTo(indexHtmlIds.contentId, this.getContentStyle(100)),
-                renderManager.setStyleTo(indexHtmlIds.terminalId, this.getTerminalStyle(100))
-            ])
-        }
-    }
+	private async updateDevStats(): Promise<void> {
+		const devStatsId: string = this.getId()+'devStats'
 
-    private getContentStyle(widthInPercent: number): string {
-        return `width:${widthInPercent}%;height:85%;`
-    }
+		if (!settings.getBoolean('developerMode')) {
+			if (this.devStatsInterval) {
+				clearInterval(this.devStatsInterval)
+				this.devStatsInterval = undefined
+				await renderManager.remove(devStatsId)
+			}
+			return
+		}
 
-    private getTerminalStyle(widthInPercent: number): string {
-        return `width:${widthInPercent}%;height:15%;overflow-x:auto;`
-    }
+		if (!this.devStatsInterval) {
+			this.devStatsInterval = setInterval(() => this.updateDevStats(), 200)
+			await renderManager.addElementTo(this.getId(), {
+				type: 'div',
+				id: devStatsId, 
+				style: {position: 'absolute', top: '50px', left: '10px'},
+				children: []
+			})
+		}
 
-    private async updateDevStats(): Promise<void> {
-        const devStatsId: string = this.getId()+'devStats'
-
-        if (!settings.getBoolean('developerMode')) {
-            if (this.devStatsInterval) {
-                clearInterval(this.devStatsInterval)
-                this.devStatsInterval = undefined
-                await renderManager.remove(devStatsId)
-            }
-            return
-        }
-
-        if (!this.devStatsInterval) {
-            this.devStatsInterval = setInterval(() => this.updateDevStats(), 200)
-            await renderManager.addElementTo(this.getId(), {
-                type: 'div',
-                id: devStatsId, 
-                style: {position: 'absolute', top: '50px', left: '10px'},
-                children: []
-            })
-        }
-
-        const cursorPosition: ClientPosition = renderManager.getCursorClientPosition()
-        await renderManager.setElementsTo(devStatsId, [
-            {type: 'div', children: `clientX = ${cursorPosition.x}`},
-            {type: 'div', children: `clientY = ${cursorPosition.y}`}
-        ])
-    }
+		const cursorPosition: ClientPosition = renderManager.getCursorClientPosition()
+		await renderManager.setElementsTo(devStatsId, [
+			{type: 'div', children: `clientX = ${cursorPosition.x}`},
+			{type: 'div', children: `clientY = ${cursorPosition.y}`}
+		])
+	}
 
 }
 

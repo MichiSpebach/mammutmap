@@ -25,3 +25,4 @@ In `./plugin-src/` there are some example plugins that you can activate in the a
 - [tutorialBoxTabs.ts](./plugin-src/tutorialBoxTabs.ts): A plugin that let's you add tabs to boxes where you can render everything (meant for file/folder related stuff).
 - [tutorialAddRawDataFields.ts](./plugin-src/tutorialAddRawDataFields.ts): A tutorial that let's you save arbitrary data in the boxMapData json files, the project settings and the application settings.json file.
 - [tutorialRenderManager.ts](./plugin-src/tutorialRenderManager.ts): A more advanced example how to directly access the renderManager.
+- [tutorialWidgets.ts](./plugin-src/tutorialWidgets.ts): An example that uses Widgets as pattern to structure frontend components
