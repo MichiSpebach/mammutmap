@@ -10,6 +10,7 @@ import { Widget } from '../Widget'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { log } from '../logService'
+import { LocalPosition } from '../shape/LocalPosition'
 
 export class BoxLinks extends Widget {
     private readonly referenceBox: Box
@@ -50,43 +51,36 @@ export class BoxLinks extends Widget {
       await Promise.all(proms)
     }
 
-    public async add(from: Box|NodeWidget, to: Box|NodeWidget): Promise<Link> {
-      if (!this.referenceBox.isAncestorOf(from)) {
-        log.warning(`BoxLinks::add(from: ${from.getName()}, to: ${to.getName()}) from is not an descendant of referred box (${this.referenceBox.getName()}).`)
+    public async add(options: {
+      from: Box|NodeWidget | {node: Box|NodeWidget, positionInFromNodeCoords?: LocalPosition}
+      to: Box|NodeWidget | {node: Box|NodeWidget, positionInToNodeCoords?: LocalPosition}
+      save: boolean
+    }): Promise<Link> {
+      const fromNode: Box|NodeWidget = options.from instanceof Box || options.from instanceof NodeWidget
+        ? options.from
+        : options.from.node
+      const toNode: Box|NodeWidget = options.to instanceof Box || options.to instanceof NodeWidget
+        ? options.to
+        : options.to.node
+
+      if (this.referenceBox !== fromNode && !this.referenceBox.isAncestorOf(fromNode)) {
+        log.warning(`BoxLinks::add(from: ${fromNode.getName()}, to: ${toNode.getName()}) from is not an descendant of referred box (${this.referenceBox.getName()}).`)
       }
-      if (!this.referenceBox.isAncestorOf(to)) {
-        log.warning(`BoxLinks::add(from: ${from.getName()}, to: ${to.getName()}) to is not an descendant of referred box (${this.referenceBox.getName()}).`)
+      if (this.referenceBox !== toNode && !this.referenceBox.isAncestorOf(toNode)) {
+        log.warning(`BoxLinks::add(from: ${fromNode.getName()}, to: ${toNode.getName()}) to is not an descendant of referred box (${this.referenceBox.getName()}).`)
       }
-
-      const fromWayPoint = WayPointData.buildNew(from.getId(), from.getName(), 50, 50)
-      const toWayPoint = WayPointData.buildNew(to.getId(), to.getName(), 50, 50)
-
-      const fromLinkEnd = {mapData: new LinkEndData([fromWayPoint]), linkable: from}
-      const toLinkEnd = {mapData: new LinkEndData([toWayPoint]), linkable: to}
-
-      return this.addLink(fromLinkEnd, toLinkEnd, true)
-    }
-
-    // TODO: rename to addWithData
-    public async addLink(
-      from: {mapData: LinkEndData, linkable: Box|NodeWidget}, 
-      to: {mapData: LinkEndData, linkable: Box|NodeWidget}, 
-      reorderAndSave: boolean
-    ): Promise<Link> {
-      const linkData = new LinkData(util.generateId(), from.mapData, to.mapData)
-      this.referenceBox.getMapLinkData().push(linkData)
-
-      const link: Link = Link.new(linkData, this.referenceBox)
+      
+      const link: Link = await Link.newOfEnds({from: options.from, to: options.to, managingBox: this.referenceBox})
+      this.referenceBox.getMapLinkData().push(link.getData()) // TODO: move into Link?
       this.links.push(link)
 
-      await this.addPlaceholderFor(link)
-
-      if (reorderAndSave) {
-        await link.reorderAndSaveAndRender({movedWayPoint: from.linkable}) // TODO: decide and handle reorder in Link.new(..) and remove reorderAndSave option
-        await link.reorderAndSaveAndRender({movedWayPoint: to.linkable}) // TODO: decide and handle reorder in Link.new(..) and remove reorderAndSave option
-      } else {
-        await link.render()
+      const ongoing: Promise<void>[] = []
+      if (options.save) {
+        ongoing.push(this.referenceBox.saveMapData())
       }
+      await this.addPlaceholderFor(link)
+      ongoing.push(link.render())
+      await Promise.all([ongoing])
 
       return link
     }

@@ -76,8 +76,8 @@ function setupSimpleScenario(): {
   })
   const projectSettings: ProjectSettings = new ProjectSettings(ProjectSettings.preferredFileName, mapSettingsData, false)
   const managingBox: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: projectSettings, rendered: true})
-  const fromBox: Box = boxFactory.folderOf({idOrData: BoxData.buildNewWithId('fromBox', 5, 5, 10, 10), name: 'FromBox', parent: managingBox, rendered: true})
-  const toBox: Box = boxFactory.folderOf({idOrData: BoxData.buildNewWithId('toBox', 85, 5, 10, 10), name: 'ToBox', parent: managingBox, rendered: true})
+  const fromBox: Box = boxFactory.folderOf({idOrData: BoxData.buildNewWithId('fromBox', 5, 5, 10, 10), name: 'FromBox', parent: managingBox, addToParent: false, rendered: true})
+  const toBox: Box = boxFactory.folderOf({idOrData: BoxData.buildNewWithId('toBox', 85, 5, 10, 10), name: 'ToBox', parent: managingBox, addToParent: false, rendered: true})
 
   Object.defineProperty(managingBox, 'transform', {value: new Transform(managingBox)})
   managingBox.getClientRect = () => Promise.resolve(new ClientRect(0, 0, 100, 100))

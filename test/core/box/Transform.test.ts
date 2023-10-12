@@ -17,7 +17,7 @@ test('localToClientPosition', async () => {
 test('fromParentPosition', async () => {
   initBoxManager(new BoxManager())
   const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root'})
-  const box: FolderBox = boxFactory.folderOf({idOrData: 'src/box', parent: root})
+  const box: FolderBox = boxFactory.folderOf({idOrData: 'src/box', parent: root, addToParent: false})
 
   box.getLocalRect = () => new LocalRect(25, 25, 50, 50)
   expect(box.transform.fromParentPosition(new LocalPosition(50, 50))).toEqual(new LocalPosition(50, 50))
@@ -52,9 +52,9 @@ function setupScenario(): {transform: Transform, otherTransform: Transform} {
   initBoxManager(new BoxManager())
 
   const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root'})
-  const box: FolderBox = boxFactory.folderOf({idOrData: 'src/box', parent: root})
+  const box: FolderBox = boxFactory.folderOf({idOrData: 'src/box', parent: root, addToParent: false})
   box.getClientRect = () => Promise.resolve(new ClientRect(500, 300, 400, 200))
-  const otherBox: FolderBox = boxFactory.folderOf({idOrData: 'src/box/other', parent: box})
+  const otherBox: FolderBox = boxFactory.folderOf({idOrData: 'src/box/other', parent: box, addToParent: false})
   otherBox.getClientRect = () => Promise.resolve(new ClientRect(550, 350, 200, 100))
 
   return {transform: box.transform, otherTransform: otherBox.transform}

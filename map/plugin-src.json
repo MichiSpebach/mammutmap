@@ -116,6 +116,87 @@
 			"tags": [
 				"important"
 			]
+		},
+		{
+			"id": "t39t7vnabao",
+			"from": {
+				"path": [
+					{
+						"boxId": "7lqlmvnq5pg",
+						"boxName": "neuralNetLinkGenerator.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "kct55ur2k08",
+						"boxName": "neuralNetLinkGenerator",
+						"x": 82,
+						"y": 42
+					},
+					{
+						"boxId": "8t591q9sp5",
+						"boxName": "pathFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "ph7uvli3klo",
+			"from": {
+				"path": [
+					{
+						"boxId": "7lqlmvnq5pg",
+						"boxName": "neuralNetLinkGenerator.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "kct55ur2k08",
+						"boxName": "neuralNetLinkGenerator",
+						"x": 82,
+						"y": 74
+					},
+					{
+						"boxId": "5tr5eao6ij",
+						"boxName": "typeFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "g3o19pc07kg",
+			"from": {
+				"path": [
+					{
+						"boxId": "7lqlmvnq5pg",
+						"boxName": "neuralNetLinkGenerator.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "8i4h8qgs2io",
+						"boxName": "node8i4h8qgs2io",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
 		}
 	],
 	"nodes": [
@@ -123,6 +204,11 @@
 			"id": "up073p4qms",
 			"x": 50,
 			"y": 0
+		},
+		{
+			"id": "8i4h8qgs2io",
+			"x": 100,
+			"y": 50
 		}
 	]
 }

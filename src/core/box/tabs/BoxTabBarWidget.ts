@@ -103,8 +103,8 @@ export class BoxTabBarWidget extends Widget {
 		const oldSelectedTab: 'map' | BoxTab = this.selectedTab;
 		this.selectedTab = tab;
 		await Promise.all([
-			renderManager.setStyleTo(this.getTabId(oldSelectedTab), this.getTabStyle(oldSelectedTab)),
-			renderManager.setStyleTo(this.getTabId(this.selectedTab), this.getTabStyle(this.selectedTab)),
+			renderManager.addStyleTo(this.getTabId(oldSelectedTab), this.getTabStyle(oldSelectedTab)),
+			renderManager.addStyleTo(this.getTabId(this.selectedTab), this.getTabStyle(this.selectedTab)),
 			this.onSelect(tab)
 		]);
 	}

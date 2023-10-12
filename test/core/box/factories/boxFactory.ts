@@ -11,6 +11,8 @@ import { BoxContext } from '../../../../src/core/box/BoxContext'
 import { FileBox } from '../../../../src/core/box/FileBox'
 import { MapSettingsData } from '../../../../src/core/mapData/MapSettingsData'
 import { BoxBody } from '../../../../src/core/box/BoxBody'
+import { dom } from '../../../../src/core/domAdapter'
+import { RenderManager, renderManager } from '../../../../src/core/RenderManager'
 
 export function rootFolderOf(options: {
     idOrSettings: string|MapSettingsData|ProjectSettings, 
@@ -44,7 +46,8 @@ export function rootFolderOf(options: {
 export function folderOf(options: {
     idOrData: string|BoxData, 
     name?: string,
-    parent: FolderBox, 
+    parent: FolderBox,
+    addToParent: boolean,
     rendered?: boolean,
     bodyRendered?: boolean
 }): FolderBox {
@@ -60,6 +63,9 @@ export function folderOf(options: {
     box.saveMapData = () => Promise.resolve()
     setRenderStateToBox(box, options.rendered)
     setRenderStateToBoxBody(box.body, options.bodyRendered)
+    if (options.addToParent) {
+        addBoxToParentOrWarn({box, parent: options.parent})
+    }
 
     return box
 }
@@ -67,7 +73,8 @@ export function folderOf(options: {
 export function fileOf(options: {
     idOrData: string|BoxData, 
     name?: string,
-    parent: FolderBox, 
+    parent: FolderBox,
+    addToParent: boolean,
     rendered?: boolean,
     bodyRendered?: boolean
 }): FileBox {
@@ -83,6 +90,9 @@ export function fileOf(options: {
     box.saveMapData = () => Promise.resolve()
     setRenderStateToBox(box, options.rendered)
     setRenderStateToBoxBody(box.body, options.bodyRendered)
+    if (options.addToParent) {
+        addBoxToParentOrWarn({box, parent: options.parent})
+    }
 
     return box
 }
@@ -101,4 +111,16 @@ function setRenderStateToBoxBody(boxBody: BoxBody, rendered?: boolean): void {
         renderState.setRenderStarted()
         renderState.setRenderFinished()
     }
+}
+
+function addBoxToParentOrWarn(options: {box: Box, parent: FolderBox}): void {
+    if (dom || isRenderManagerMocked()) {
+        options.parent.addBox(options.box) // calls renderManager.appendChildTo(parent.getId(), box.getId()) which calls domAdapter
+    } else {
+        console.warn('boxFactory::addBoxToParentOrWarn(..) renderManager is not mocked and dom is undefined, initialize renderManager or domAdapter with at least some mock.')
+    }
+}
+
+function isRenderManagerMocked(): boolean {
+    return !(renderManager instanceof RenderManager)
 }

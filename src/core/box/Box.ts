@@ -44,9 +44,9 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   public readonly site: SizeAndPosition
   public readonly header: BoxHeader
   private readonly tabs: BoxTabs
-  // TODO: move nodes into BoxBody
+  // TODO: move nodes into BoxBody? then header is rendered in front of nodes
   public readonly nodes: BoxNodesWidget // TODO: introduce (Abstract)NodesWidget|SubNodesWidget|ChildNodesWidget that contains all sorts of childNodes (Boxes and LinkNodes)?
-  // TODO: move links into BoxBody?
+  // TODO: move links into BoxBody? then header is rendered in front of links
   public readonly links: BoxLinks // TODO: rename to managedLinks?
   public readonly borderingLinks: BorderingLinks
   private renderState: RenderState = new RenderState()
@@ -500,6 +500,26 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   ): Promise<void> {
     await this.site.updateMeasures(measuresInPercentIfChanged, priority)
     await this.borderingLinks.renderAll()
+  }
+
+  public async hideContentIfRendered(): Promise<void> {
+    return this.addStyleToContentIfRendered({display: 'none'})
+  }
+
+  public async showContentIfRendered(): Promise<void> {
+    return this.addStyleToContentIfRendered({display: null})
+  }
+  
+  private async addStyleToContentIfRendered(style: Style): Promise<void> {
+    if (!this.isRendered()) {
+      log.warning(`'${this.getName()}': Box::addStyleOfContentIfRendered(${util.stringify(style)}) box is not rendered, no effect.`)
+      return
+    }
+    await Promise.all([
+      renderManager.addStyleTo(this.getBodyId(), style),
+      renderManager.addStyleTo(this.nodes.getId(), style),
+      renderManager.addStyleTo(this.links.getId(), style)
+    ])
   }
 
   protected abstract getBodyOverflowStyle(): 'auto'|'hidden'|'visible'

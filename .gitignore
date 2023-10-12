@@ -1,4 +1,6 @@
+settings.json
 dist/
+plugin/
 
 # Logs
 logs

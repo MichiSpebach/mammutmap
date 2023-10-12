@@ -92,8 +92,11 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                 case 'innerHTML':
                     return this.setContentToSync(command.elementId, command.value as string)
 
-                case 'style':
-                    return this.setStyleToSync(command.elementId, command.value as string)
+                case 'setStyleTo':
+                    return this.setStyleToSync(command.elementId, command.value as string|Style)
+        
+                case 'addStyleTo':
+                    return this.addStyleToSync(command.elementId, command.value as Style)
         
                 case 'addClassTo':
                     return this.addClassToSync(command.elementId, command.value as string)
@@ -295,7 +298,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             util.logWarning(`DirectDomAdapter::clearContentOf(..) failed to get element with id '${id}'.`)
             return
         }
-        element.innerHTML=''
+        element.innerHTML = ''
     }
 
     public async remove(id: string): Promise<void> {
@@ -317,10 +320,23 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             return
         }
         if (typeof style === 'string') {
-            (element.style as any)=style // TODO: cast to any because style is a readonly property, find better solution
+            element.style.cssText = style
         } else {
+            element.style.cssText = ''
             Object.assign(element.style, style)
         }
+    }
+
+    public async addStyleTo(id: string, style: Style): Promise<void> {
+        this.addStyleToSync(id, style)
+    }
+    public addStyleToSync(id: string, style: Style): void {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::addStyleTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        Object.assign(element.style, style)
     }
 
     public async addClassTo(id: string, className: string): Promise<void> {

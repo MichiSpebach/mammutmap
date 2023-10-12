@@ -73,8 +73,8 @@ function setupScenarioForGetBoxBySourcePathAndRenderIfNecessary(): {
     data: mapSettingsDataFactory.of({id: 'src/box', srcRootPath: 'src/box'})
   })
   const box: FolderBox = boxFactory.rootFolderOf({idOrSettings: projectSettings})
-  const innerBox: FolderBox = boxFactory.folderOf({name: 'innerBox', parent: box, idOrData: mock<BoxData>()})
-  const fileBox: FileBox = boxFactory.fileOf({name: 'fileBox', parent: innerBox, idOrData: mock<BoxData>()})
+  const innerBox: FolderBox = boxFactory.folderOf({name: 'innerBox', parent: box, addToParent: false, idOrData: mock<BoxData>()})
+  const fileBox: FileBox = boxFactory.fileOf({name: 'fileBox', parent: innerBox, addToParent: false, idOrData: mock<BoxData>()})
 
   box.getSrcPath = () => 'src/box'
   box.getBoxes = () => [innerBox]

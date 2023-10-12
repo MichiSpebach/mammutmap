@@ -5,6 +5,7 @@ import {
 import { ClientRect } from './ClientRect'
 import { RenderElement, RenderElements, Style } from './util/RenderElement'
 import { ClientPosition } from './shape/ClientPosition'
+import { log } from './logService'
 
 export { EventType, MouseEventType, DragEventType, WheelEventType, InputEventType, KeyboardEventType }
 export { EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback }
@@ -78,7 +79,7 @@ export class RenderManager {
   public addContentTo(id: string, content: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break addStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'addContentTo', value: content},
       command: () => dom.addContentTo(id, content)
     }))
@@ -87,7 +88,7 @@ export class RenderManager {
   public addElementsTo(id: string, elements: RenderElements, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break addStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'addElementsTo', value: elements},
       command: () => dom.addElementsTo(id, elements)
     }))
@@ -96,7 +97,7 @@ export class RenderManager {
   public addElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      // updatableWith: 'setContentOrElementTo'+id, // not sure about this, could break addStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'addElementTo', value: element},
       command: () => dom.addElementTo(id, element)
     }))
@@ -105,7 +106,7 @@ export class RenderManager {
   public setElementsTo(id: string, elements: RenderElements, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break addStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'setElementsTo', value: elements},
       command: () => dom.setElementsTo(id, elements)
     }))
@@ -114,7 +115,7 @@ export class RenderManager {
   public setElementTo(id: string, element: RenderElement, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break addStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'setElementTo', value: element},
       command: () => dom.setElementTo(id, element)
     }))
@@ -123,7 +124,7 @@ export class RenderManager {
   public setContentTo(id: string, content: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break addStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'innerHTML', value: content},
       command: () => dom.setContentTo(id, content)
     }))
@@ -132,7 +133,7 @@ export class RenderManager {
   public clearContentOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break setStyleTo(id) and addClassTo(id)
+      // squashableWith: 'setContentOrElementTo'+id, // not sure about this, could break addStyleTo(id) and addClassTo(id)
       batchParameters: {elementId: id, method: 'innerHTML', value: ''},
       command: () => dom.clearContentOf(id)
     }))
@@ -146,12 +147,23 @@ export class RenderManager {
   }
 
   public setStyleTo(id: string, style: string|Style, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    return this.runOrSchedule(new Command({
+    const command: Command = new Command({
       priority: priority,
-      squashableWith: 'setStyleTo'+id,
-      batchParameters: {elementId: id, method: 'style', value: style},
+      combineIfPossible: (commandScheduledBefore: Command) => this.tryToCombineSetStyleToCommand(command, commandScheduledBefore),
+      batchParameters: {elementId: id, method: 'setStyleTo', value: style},
       command: () => dom.setStyleTo(id, style)
-    }))
+    })
+    return this.runOrSchedule(command)
+  }
+
+  public addStyleTo(id: string, style: Style, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    const command: Command = new Command({
+      priority: priority,
+      combineIfPossible: (commandScheduledBefore: Command) => this.tryToCombineAddStyleToCommand(command, commandScheduledBefore),
+      batchParameters: {elementId: id, method: 'addStyleTo', value: style},
+      command: () => dom.addStyleTo(id, style)
+    })
+    return this.runOrSchedule(command)
   }
 
   public addClassTo(id: string, className: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
@@ -267,6 +279,11 @@ export class RenderManager {
   }
 
   public async runOrSchedule<T>(command: Command): Promise<T> { // only public for unit tests
+    const combinedCommand: Command|undefined = this.tryToCombineWithQueuedCommands(command)
+    if (combinedCommand) {
+      return combinedCommand.promise.get()
+    }
+
     const updatedCommand: Command|undefined = this.tryToUpdateQueuedCommands(command)
     if (updatedCommand) {
       return updatedCommand.promise.get()
@@ -321,6 +338,71 @@ export class RenderManager {
     return {}
   }
 
+  private tryToCombineWithQueuedCommands(command: Command): Command|undefined {
+    if (!command.combineIfPossible) {
+      return undefined
+    }
+
+    for (let i = 0; i < this.commands.length; i++) {
+      const commandScheduledBefore: Command = this.commands[i]
+      if (commandScheduledBefore.batchParameters?.elementId !== command.batchParameters?.elementId || commandScheduledBefore.promise.isStarted()) {
+        continue
+      }
+      const combinedCommand = command.combineIfPossible(commandScheduledBefore)
+      if (combinedCommand) {
+        this.increasePriorityOfCommandIfNecessary(combinedCommand, command.priority)
+        return combinedCommand
+      }
+    }
+
+    return undefined
+  }
+
+  private tryToCombineSetStyleToCommand(command: Command, commandScheduledBefore: Command): Command|undefined {
+    if (commandScheduledBefore.batchParameters?.method !== 'addStyleTo' && commandScheduledBefore.batchParameters?.method !== 'setStyleTo') {
+      return undefined
+    }
+    if (command.batchParameters?.method !== 'setStyleTo') {
+      log.warning(`RenderManager::tryToCombineSetStyleToCommand(..) expected command.batchParameters?.method to be 'setStyleTo' but is '${command.batchParameters?.method}'.`)
+      return undefined
+    }
+    if (command.batchParameters.elementId !== commandScheduledBefore.batchParameters.elementId) {
+      log.warning(`RenderManager::tryToCombineSetStyleToCommand(..) command..elementId ('${command.batchParameters.elementId}') differs from commandScheduledBefore..elementId ('${commandScheduledBefore.batchParameters.elementId}').`)
+      return undefined
+    }
+
+    const elementId: string = command.batchParameters.elementId
+    const value: Style = command.batchParameters.value as Style
+    commandScheduledBefore.combineIfPossible = command.combineIfPossible
+    commandScheduledBefore.batchParameters.value = value
+    commandScheduledBefore.promise.setCommand(() => dom.setStyleTo(elementId, value))
+    return commandScheduledBefore
+  }
+
+  private tryToCombineAddStyleToCommand(command: Command, commandScheduledBefore: Command): Command|undefined {
+    if (commandScheduledBefore.batchParameters?.method !== 'addStyleTo' && commandScheduledBefore.batchParameters?.method !== 'setStyleTo') {
+      return undefined
+    }
+    if (command.batchParameters?.method !== 'addStyleTo') {
+      log.warning(`RenderManager::tryToCombineAddStyleToCommand(..) expected command.batchParameters?.method to be 'addStyleTo' but is '${command.batchParameters?.method}'.`)
+      return undefined
+    }
+    if (command.batchParameters.elementId !== commandScheduledBefore.batchParameters.elementId) {
+      log.warning(`RenderManager::tryToCombineAddStyleToCommand(..) command..elementId ('${command.batchParameters.elementId}') differs from commandScheduledBefore..elementId ('${commandScheduledBefore.batchParameters.elementId}').`)
+      return undefined
+    }
+    if (typeof commandScheduledBefore.batchParameters.value === 'string') {
+      return undefined // can happen if commandScheduledBefore..method is 'setStyleTo'
+    }
+
+    const elementId: string = command.batchParameters.elementId
+    const method: 'addStyleTo'|'setStyleTo' = commandScheduledBefore.batchParameters.method
+    const newValue: Style = Object.assign(commandScheduledBefore.batchParameters.value, command.batchParameters.value) as Style
+    commandScheduledBefore.batchParameters.value = newValue
+    commandScheduledBefore.promise.setCommand(() => dom[method](elementId, newValue))
+    return commandScheduledBefore
+  }
+
   // TODO: remove and simply use tryToUpdateQueuedCommands(..)
   private tryToSquashIntoQueuedCommands(command: Command): Command|undefined {
     if (!command.squashableWith) {
@@ -343,6 +425,7 @@ export class RenderManager {
     return undefined
   }
 
+  // TODO: remove and simply use tryToCombineWithQueuedCommands(..)
   private tryToUpdateQueuedCommands(command: Command): Command|undefined {
     if (!command.updatableWith) {
       return undefined
@@ -436,6 +519,7 @@ export enum RenderPriority {
 
 export class Command { // only export for unit tests
   public priority: RenderPriority
+  public combineIfPossible?: (commandScheduledBefore: Command) => Command|undefined
   public squashableWith: string|undefined
   public updatableWith: string|undefined
   public batchParameters: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements} | undefined
@@ -443,12 +527,14 @@ export class Command { // only export for unit tests
 
   public constructor(options: {
     priority: RenderPriority,
+    combineIfPossible?: (commandScheduledBefore: Command) => Command|undefined,
     squashableWith?: string,
     updatableWith?: string,
     batchParameters?: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements},
     command: () => Promise<any>
   }) {
     this.priority = options.priority
+    this.combineIfPossible = options.combineIfPossible
     this.squashableWith = options.squashableWith
     this.updatableWith = options.updatableWith
     this.batchParameters = options.batchParameters

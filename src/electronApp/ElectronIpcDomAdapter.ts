@@ -109,12 +109,17 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
           case 'innerHTML':
             return `document.getElementById('${command.elementId}').innerHTML='${command.value}';`// TODO: fails if innerHTML includes "'"
 
-          case 'style':
+          case 'setStyleTo':
             if (typeof command.value === 'string') {
               return `document.getElementById('${command.elementId}').style.cssText='${command.value}';` // TODO: fails if style includes "'"
             } else {
-              return this.wrapJavaScriptInFunction(this.createSetStyleJavaScriptForElementId(command.elementId, command.value as Style)) // wrap in function because otherwise "Error: An object could not be cloned."
+              const clearStyleJs: string = `document.getElementById('${command.elementId}').style.cssText='';`
+              const addStyleJs: string = this.createAddStyleJavaScriptForElementId(command.elementId, command.value as Style)
+              return this.wrapJavaScriptInFunction(clearStyleJs+addStyleJs) // wrap in function because otherwise "Error: An object could not be cloned."
             }
+  
+          case 'addStyleTo':
+            return this.wrapJavaScriptInFunction(this.createAddStyleJavaScriptForElementId(command.elementId, command.value as Style)) // wrap in function because otherwise "Error: An object could not be cloned."
   
           case 'addClassTo':
             return `document.getElementById('${command.elementId}').classList.add('${command.value}');`
@@ -213,7 +218,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
           continue
         }
         if (field === 'style') {
-          js += this.createSetStyleJavaScriptForElementName(elementJsName, fieldValue as Style)
+          js += this.createAddStyleJavaScriptForElementName(elementJsName, fieldValue as Style)
         } else if (field === 'innerHTML') {
           if ((fieldValue as string).includes("'")) {
             if ((fieldValue as string).includes('"')) {
@@ -297,24 +302,13 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return element
     }
 
-    private createSetStyleJavaScriptForElementId(id: string, style: Style): string {
-      return this.createSetStyleJavaScriptForElementName(`document.getElementById('${id}')`, style)
+    private createAddStyleJavaScriptForElementId(id: string, style: Style): string {
+      return this.createAddStyleJavaScriptForElementName(`document.getElementById('${id}')`, style)
     }
 
     // TODO: at least create javascriptSnippetGenerator and move javascript generation there
-    private createSetStyleJavaScriptForElementName(elementJsName: string, style: Style): string {
+    private createAddStyleJavaScriptForElementName(elementJsName: string, style: Style): string {
       return `Object.assign(${elementJsName}.style,${JSON5.stringify(style)});`
-      let js = ''
-      for (const styleField in style) {
-        const styleFieldValue = style[styleField]
-        if (typeof styleFieldValue === 'string') {
-          js += `${elementJsName}.style.${styleField}="${styleFieldValue}";`
-        } else {
-          js += `${elementJsName}.style.${styleField}=${styleFieldValue};`
-        }
-      }
-
-      return js
     }
   
     public setContentTo(id: string, content: string): Promise<void> {
@@ -333,7 +327,13 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       if (typeof style === 'string') {
         return this.executeJsOnElementSuppressingErrors(id, "style.cssText = '"+style+"'") // TODO: fails if style includes "'"
       }
-      return this.executeJavaScriptInFunction(this.createSetStyleJavaScriptForElementId(id, style)) // execute in function because otherwise "Error: An object could not be cloned."
+      const clearStyleJs: string = `document.getElementById('${id}').style.cssText='';`
+      const addStyleJs: string = this.createAddStyleJavaScriptForElementId(id, style)
+      return this.executeJavaScriptInFunction(clearStyleJs+addStyleJs) // execute in function because otherwise "Error: An object could not be cloned."
+    }
+  
+    public addStyleTo(id: string, style: Style): Promise<void> {
+      return this.executeJavaScriptInFunction(this.createAddStyleJavaScriptForElementId(id, style)) // execute in function because otherwise "Error: An object could not be cloned."
     }
   
     public addClassTo(id: string, className: string): Promise<void> {

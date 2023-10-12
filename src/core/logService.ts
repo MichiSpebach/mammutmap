@@ -179,7 +179,7 @@ class LogService {
         const logsToRemove: Log[] = this.logs.getAndRemoveOldestToDisplay()
         const pros: Promise<void>[] = logsToRemove.map(log => renderManager.remove(log.id))
         if (logsToRemove.length > 0 ) {
-            renderManager.setStyleTo(this.showAllLogsButtonId, {display: 'inline-block'})
+            renderManager.addStyleTo(this.showAllLogsButtonId, {display: 'inline-block'})
         }
         await Promise.all(pros)
     }

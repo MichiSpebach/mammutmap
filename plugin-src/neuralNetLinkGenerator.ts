@@ -13,8 +13,10 @@ async function generateOutgoingLinksForBox(box: FileBox): Promise<void> {
 
     let paths: string[] = pathFinder.findPaths(fileContent)
 
-    const otherTypesInFolder: string[] = getSiblingFileNamesWithoutEndings(box)
-    paths = paths.concat(typeFinder.findTypesInText(otherTypesInFolder, fileContent))
+    if (box.getName().toLowerCase().endsWith('.java')) {
+        const otherTypesInFolder: string[] = getSiblingFileNamesWithoutEndings(box)
+        paths = paths.concat(typeFinder.findTypesInText(otherTypesInFolder, fileContent))
+    }
 
     let foundLinksCount: number = 0
     let foundLinksAlreadyExistedCount: number = 0

@@ -7,6 +7,10 @@ export class WayPointData {
   public x: number
   public y: number
 
+  public static new(nodeId: string, nodeName: string, positionInNodeCoords?: LocalPosition) {
+    return this.buildNew(nodeId, nodeName, positionInNodeCoords?.percentX ?? 50, positionInNodeCoords?.percentY ?? 50)
+  }
+
   public static buildNew(boxId: string, boxName: string, x: number, y: number) {
     return new WayPointData(boxId, boxName, Math.round(x*1000)/1000, Math.round(y*1000)/1000)
   }
