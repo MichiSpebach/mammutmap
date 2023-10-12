@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
-const pluginFacade_1 = require("../src/pluginFacade");
+const pluginFacade_1 = require("../dist/pluginFacade");
 const SUMMARY_FIELD_NAME = 'summary';
-pluginFacade_1.contextMenu.addFileBoxMenuItem((item) => new pluginFacade_1.MenuItemFile({ label: "Summarize File", click: () => console.error("hi") }));
+pluginFacade_1.contextMenu.addFileBoxMenuItem((item) => new pluginFacade_1.MenuItemFile({ label: "Summarize File", click: () => { } }));
 // summarize(item,new SummarizerFactory(openaiSummaryLLMFactory,new ConfigManager()))
 pluginFacade_1.Box.Tabs.register({
     name: 'Summary',

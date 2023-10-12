@@ -1,4 +1,4 @@
-import { TextInputPopup, applicationSettings } from "../../src/pluginFacade";
+import { TextInputPopup, applicationSettings } from "../../dist/pluginFacade";
 import { Result } from "./util/result";
 
 

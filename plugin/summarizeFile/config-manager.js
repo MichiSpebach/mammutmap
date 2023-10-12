@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ConfigManager = exports.ConfigManagerInterface = void 0;
-const pluginFacade_1 = require("../../src/pluginFacade");
+const pluginFacade_1 = require("../../dist/pluginFacade");
 const result_1 = require("./util/result");
 class ConfigManagerInterface {
 }
