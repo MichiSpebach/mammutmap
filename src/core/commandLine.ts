@@ -4,15 +4,11 @@ import * as commandLinePluginFacade from './commandLinePluginFacade'
 import * as htmlCursor from './htmlCursor'
 import { setCompatibilityTheme } from './styleAdapter'
 import { log } from './logService'
-import * as indexHtmlIds from './indexHtmlIds'
-import { mainWidget } from './mainWidget'
 
 type CommandFunction = (parameter: string) => Promise<void>
 const commands: Map<string, CommandFunction> = new Map()
 
-export async function initAndRender(): Promise<void> { // TODO rename or remove
-  registerDefaultCommands()
-}
+registerDefaultCommands()
 
 export function registerCommand(commandName: string, commandFunction: (parameter: string) => Promise<void>): void {
   if (commands.has(commandName)) {

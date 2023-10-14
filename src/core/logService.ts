@@ -1,8 +1,6 @@
 import { RenderPriority, renderManager } from './RenderManager'
 import { util } from './util/util'
-import * as indexHtmlIds from './indexHtmlIds'
 import { ConsoleDecorator } from './ConsoleDecorator'
-import { PopupWidget } from './PopupWidget'
 import { RenderElement } from './util/RenderElement'
 import { Subscribers } from './util/Subscribers'
 
@@ -48,29 +46,9 @@ export class LogEntry {
     }
 }
 
-class Logs {
-    public allLogs: LogEntry[] = []
-
-    public add(log: LogEntry): void {
-        this.allLogs.push(log)
-    }
-
-    public getAll(): LogEntry[] {
-        return this.allLogs
-    }
-
-    public getLatest(): LogEntry|undefined {
-        return this.allLogs[this.allLogs.length-1]
-    }
-
-    public clear(): void {
-        this.allLogs = []
-    }
-}
-
 class LogService {
     private readonly originalConsole: Console
-    public readonly logs: Logs = new Logs()
+    private logs: LogEntry[] = []
     public readonly onAddLog: Subscribers<LogEntry> = new Subscribers()
     public readonly onClearLog: Subscribers<RenderPriority|undefined> = new Subscribers()
     private logDebugActivated: boolean = false
@@ -78,6 +56,10 @@ class LogService {
     public constructor() {
         this.originalConsole = console
         console = new ConsoleDecorator(console)
+    }
+
+    public getLogs(): Readonly<LogEntry[]> {
+        return this.logs
     }
 
     public setLogDebugActivated(activated: boolean): void {
@@ -136,19 +118,19 @@ class LogService {
     }
     
     private async executeLogToGui(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
-        let latestLog: LogEntry|undefined = this.logs.getLatest()
+        let latestLog: LogEntry|undefined = this.logs[this.logs.length-1]
         if (latestLog && latestLog.message === message && latestLog.color === color) {
             latestLog.allowHtml = latestLog.allowHtml ?? options?.allowHtml
             latestLog.count++
         } else {
             latestLog = new LogEntry({message, color, allowHtml: options?.allowHtml, count: 1, id: util.generateId()})
-            this.logs.add(latestLog)
+            this.logs.push(latestLog)
         }
         this.onAddLog.callSubscribers(latestLog)
     }
 
     public async clear(priority?: RenderPriority): Promise<void> {
-        this.logs.clear()
+        this.logs = []
         this.onClearLog.callSubscribers(priority)
     }
 

@@ -25,7 +25,6 @@ async function init(): Promise<void> {
     fileSystemAdapter.init(new BrowserFileSystemAdapter())
     await settings.init()
     mainWidget.render()
-    commandLine.initAndRender()
     contextMenu.init(new HtmlContextMenuPopup())
     await applicationMenu.initAndRender(new HtmlApplicationMenu())
     await pluginLoader.loadPlugins()

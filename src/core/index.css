@@ -43,10 +43,6 @@ pre {
   white-space: nowrap;
 }
 
-.terminal {
-  background-color: #202428;
-}
-
 .commandLine {
   position: fixed;
   bottom: 0px;

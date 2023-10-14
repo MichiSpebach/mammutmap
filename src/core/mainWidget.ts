@@ -74,19 +74,13 @@ class MainWidget extends Widget {
 						backgroundColor: '#202428',
 						overflow: 'auto'
 					})
-				]),
-				pros.push(renderManager.addStyleTo(indexHtmlIds.terminalId, { // TODO: remove as soon as bottomBar implemented
-					display: 'none',
-					width: bottomBarWidth, 
-					height: '15%', 
-					overflowX: 'auto'
-				}))
+				])
 			])
 			pros.push(this.bottomBar.renderSelectedView())
 		} else {
-			pros.push(renderManager.addStyleTo(this.sidebar.getId(), {display: sidebarDisplay}))
 			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth}))
-			pros.push(renderManager.addStyleTo(indexHtmlIds.terminalId, {width: bottomBarWidth}))
+			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth}))
+			pros.push(renderManager.addStyleTo(this.sidebar.getId(), {display: sidebarDisplay}))
 		}
 		
 		if (sidebarEnabled) {

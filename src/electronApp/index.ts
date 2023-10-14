@@ -74,7 +74,6 @@ async function createWindow(): Promise<void> {
   fileSystemAdapter.init(new NodeJsFileSystemAdapter())
   await settings.init()
   mainWidget.render()
-  commandLine.initAndRender()
   contextMenu.init(new ElectronContextMenuPopup())
 
   await applicationMenu.initAndRender(new ElectronAndHtmlApplicationMenu())

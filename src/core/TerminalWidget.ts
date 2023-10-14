@@ -36,8 +36,8 @@ export class TerminalWidget extends SimpleWidget {
 		if (!this.rendered) {
 			log.onAddLog.subscribe((logEntry: LogEntry) => this.addLogEntry(logEntry))
 			log.onClearLog.subscribe((priority: RenderPriority|undefined) => this.clear(priority))
-			this.displayedLogs = log.logs.allLogs.slice(log.logs.allLogs.length-TerminalWidget.maxDisplayedLogsCount)
-			this.showAllLogsButtonDisplay = log.logs.allLogs.length > TerminalWidget.maxDisplayedLogsCount ? 'inline-block' : 'none'
+			this.displayedLogs = log.getLogs().slice(log.getLogs().length-TerminalWidget.maxDisplayedLogsCount)
+			this.showAllLogsButtonDisplay = log.getLogs().length > TerminalWidget.maxDisplayedLogsCount ? 'inline-block' : 'none'
 			;(async () => {
 				await util.wait(0) // TODO improve this ASAP
 				renderManager.scrollToBottom('bottomBar'/* TODO replace with this.id as soon as scrollbar is correctly implemented*/)
@@ -58,7 +58,7 @@ export class TerminalWidget extends SimpleWidget {
 						type: 'button',
 						id: this.getShowAllLogsButtonId(),
 						style: {display: this.showAllLogsButtonDisplay},
-						onclick: () => PopupWidget.buildAndRender('All Logs', log.logs.allLogs.map(logEntry => logEntry.toRenderElement())),
+						onclick: () => PopupWidget.buildAndRender('All Logs', log.getLogs().map(logEntry => logEntry.toRenderElement())),
 						children: 'Show All Logs'
 					},
 					...this.displayedLogs.map(logEntry => logEntry.toRenderElement())
