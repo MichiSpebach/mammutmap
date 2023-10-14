@@ -1,21 +1,28 @@
 import { PopupWidget } from './PopupWidget'
 import { RenderPriority, renderManager } from './RenderManager'
-import { SimpleWidget } from './Widget'
+import { RenderElementWithId, UltimateWidget } from './Widget'
 import { LogEntry, log } from './logService'
-import { RenderElements } from './util/RenderElement'
-import * as commandLine from './commandLine'
+import { RenderElement, RenderElements } from './util/RenderElement'
+import * as commandLine from './commandRegister'
 import { util } from './util/util'
 
-export class TerminalWidget extends SimpleWidget {
+export class TerminalWidget extends UltimateWidget {
 	private static maxDisplayedLogsCount = 50
-	private rendered: boolean = false
+	
+	public readonly id: string
+	private beingRendered: boolean = false
 	private displayedLogs: LogEntry[] = []
 	private showAllLogsButtonDisplay: 'none'|'inline-block' = 'none'
 
 	public constructor(id: string) {
-		super(id, 'div')
+		super()
+		this.id = id
 	}
 	
+	public override getId(): string {
+		return `${this.id}-log`
+	}
+
 	private getLogId(): string {
 		return `${this.id}-log`
 	}
@@ -27,13 +34,51 @@ export class TerminalWidget extends SimpleWidget {
 	private getShowAllLogsButtonId (): string {
 		return `${this.getLogId()}-showAllLogs`
 	}
-	
-	public override async unrender(): Promise<void> {
-		log.warning('TerminalWidget::unrender() not implemented yet.')
+
+	public shape(): {element: RenderElementWithId, rendering?: Promise<void>} {
+		const inner: {elements: RenderElements, rendering?: Promise<void>} = this.shapeInner()
+		return {
+			element: {
+				type: 'div',
+				id: this.id,
+				children: inner.elements
+			},
+			rendering: inner.rendering
+		}
 	}
 	
-	protected override shapeInner(): RenderElements | Promise<RenderElements> {
-		if (!this.rendered) {
+	private shapeInner(): {elements: RenderElements, rendering?: Promise<void>} {
+		return {
+			elements: [
+				{
+					type: 'div',
+					id: this.getLogId(),
+					style: {marginBottom: '15px'},
+					children: [
+						{
+							type: 'button',
+							id: this.getShowAllLogsButtonId(),
+							style: {display: this.showAllLogsButtonDisplay},
+							onclick: () => PopupWidget.buildAndRender('All Logs', log.getLogs().map(logEntry => logEntry.toRenderElement())),
+							children: 'Show All Logs'
+						},
+						...this.displayedLogs.map(logEntry => logEntry.toRenderElement())
+					]
+				},
+				{
+					type: 'input',
+					id: this.getCommandLineId(),
+					className: 'commandLine',
+					style: {width: '100%'}
+				}
+			],
+			rendering: this.render()
+		}
+	}
+
+	public override async render(): Promise<void> {
+		if (!this.beingRendered) {
+			this.beingRendered = true
 			log.onAddLog.subscribe((logEntry: LogEntry) => this.addLogEntry(logEntry))
 			log.onClearLog.subscribe((priority: RenderPriority|undefined) => this.clear(priority))
 			this.displayedLogs = log.getLogs().slice(log.getLogs().length-TerminalWidget.maxDisplayedLogsCount)
@@ -47,30 +92,10 @@ export class TerminalWidget extends SimpleWidget {
 				})
 			})()
 		}
-		this.rendered = true
-		return [
-			{
-				type: 'div',
-				id: this.getLogId(),
-				style: {marginBottom: '15px'},
-				children: [
-					{
-						type: 'button',
-						id: this.getShowAllLogsButtonId(),
-						style: {display: this.showAllLogsButtonDisplay},
-						onclick: () => PopupWidget.buildAndRender('All Logs', log.getLogs().map(logEntry => logEntry.toRenderElement())),
-						children: 'Show All Logs'
-					},
-					...this.displayedLogs.map(logEntry => logEntry.toRenderElement())
-				]
-			},
-			{
-				type: 'input',
-				id: this.getCommandLineId(),
-				className: 'commandLine',
-				style: {width: '100%'}
-			}
-		]
+	}
+
+	public override async unrender(): Promise<void> {
+		log.warning('TerminalWidget::unrender() not implemented yet.')
 	}
 
 	private async addLogEntry(logEntry: LogEntry): Promise<void> {

@@ -7,9 +7,10 @@ import { coreUtil } from '../../../dist/pluginFacade'
 import { RenderElement, RenderElements, Style } from '../../../dist/pluginFacade'
 import { LinkTagData } from '../../../dist/pluginFacade'
 import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/pluginFacade'
+import { RenderElementWithId, UltimateWidget } from '../../../dist/core/Widget'
 
 // TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
-export class LinkAppearanceToolbarViewWidget extends Widget {
+export class LinkAppearanceToolbarViewWidget extends UltimateWidget {
 
     private renderedOrInProgress: boolean = false
 
@@ -39,8 +40,19 @@ export class LinkAppearanceToolbarViewWidget extends Widget {
         return `${this.getId()}-color-${tag.name}`
     }
 
+    public override shape(): { element: RenderElementWithId; rendering?: Promise<void> | undefined } {
+        return {
+            element: {
+                type: 'div',
+                id: this.id
+            },
+            //rendering: this.render() TODO: activate as soon as 'await this.mounting' is implemented
+        }
+    }
+
     public async render(): Promise<void> {
         if (!this.renderedOrInProgress) {
+            //await this.mounting TODO: activate as soon as 'await this.mounting' is implemented
             linkAppearanceSettings.linkTags.subscribe(() => this.render())
             this.renderedOrInProgress = true
         }

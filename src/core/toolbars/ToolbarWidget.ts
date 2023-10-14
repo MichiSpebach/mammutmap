@@ -4,7 +4,7 @@ import { RenderElement, RenderElements, Style } from '../util/RenderElement'
 import { ToolbarView } from './ToolbarView'
 
 export class ToolbarWidget extends Widget {
-	private readonly id: string
+	public readonly id: string
 	private readonly views: ToolbarView[] = []
 	private readonly hideHeader: boolean
 	private selectedView: ToolbarView|undefined
@@ -36,11 +36,6 @@ export class ToolbarWidget extends Widget {
 		this.shouldBeRendered = true
 
 		await renderManager.setElementsTo(this.getId(), this.shapeInner())
-		await this.renderSelectedView()
-	}
-
-	// TODO: find better solution than needing to call this method from the outside
-	public async renderSelectedView(): Promise<void> {
 		if (this.selectedView) {
 			await this.selectedView.getWidget().render()
 		}
@@ -65,11 +60,9 @@ export class ToolbarWidget extends Widget {
 	}
 
 	private shapeInner(): RenderElements {
-		const elements: RenderElements = []
-
-		if (!this.hideHeader) {
-			elements.concat(this.shapeHeader())
-		}
+		const elements: RenderElements = this.hideHeader
+			? []
+			: this.shapeHeader()
 
 		if (this.views.length === 0) {
 			elements.push('no ToolbarViews added')
@@ -78,15 +71,7 @@ export class ToolbarWidget extends Widget {
 			elements.push('no ToolbarView selected')
 			return elements
 		}
-
-		elements.push({
-			type: 'div',
-			id: this.selectedView.getWidget().getId()
-		})
-		/*;(async () => {
-			await this.mounting // TODO
-			await this.selectedView.getWidget().render()
-		})()*/
+		elements.push(this.selectedView.getWidget().shape().element)
 		return elements
 	}
 

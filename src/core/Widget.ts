@@ -1,17 +1,19 @@
 import { renderManager } from './RenderManager'
 import { ElementType, RenderElement, RenderElements, Style } from './util/RenderElement'
 
-export type RenderElementWithId = RenderElement & {id: string}
+export type RenderElementWithId = RenderElement & {id: string} // TODO: required at all?
 
 // TODO move into util folder
 // TODO rename to RenderingWidget and introduce (Simple)Widget with formHtml() method that does not need to know renderManager
 // TODO all gui components should inherit this (Box, BoxHeader, BoxBody, Link, LinkEnd, ...)
 export abstract class Widget {
-	public abstract getId(): string
+	//public abstract readonly id: string // TODO: required at all?
+	public abstract getId(): string // TODO: remove
 	public abstract render(): Promise<void> // TODO for some gui components render needs arguments
 	public abstract unrender(): Promise<void>  // TODO: add default implementation?
 }
 
+/** @deprecated */
 export abstract class BasicWidget extends Widget {
 	public async render(): Promise<void> {
 		await renderManager.setElementsTo(this.getId(), await this.shapeInner())
@@ -23,6 +25,7 @@ export abstract class BasicWidget extends Widget {
 	protected abstract shapeInner(): RenderElements | Promise<RenderElements>
 }
 
+/** @deprecated */
 export abstract class SimpleWidget extends BasicWidget {
 	public readonly id: string
 	private readonly elementType: ElementType
@@ -47,4 +50,21 @@ export abstract class SimpleWidget extends BasicWidget {
 			children: await this.shapeInner()
 		}
 	}
+}
+
+/** @deprecated */
+export abstract class AdvancedWidget extends Widget {
+	public async render(): Promise<void> {
+		await renderManager.setElementsTo(this.getId(), (await this.shapeInner()).elements)
+	}
+	public async unrender(): Promise<void> {
+		await renderManager.clearContentOf(this.getId())
+	}
+	public abstract shape(): Promise<{element: RenderElementWithId, rendering: Promise<void>}>
+	//public abstract shape(): {element: RenderElementWithId, rendering: Promise<void>} calling shape would be nicer with direct return
+	protected abstract shapeInner(): Promise<{elements: RenderElements, rendering: Promise<void>}>
+}
+
+export abstract class UltimateWidget extends Widget {
+	public abstract shape(): {element: RenderElementWithId, rendering?: Promise<void>}
 }

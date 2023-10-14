@@ -10,7 +10,7 @@ import { MenuItemFolderWidget } from './MenuItemFolderWidget'
 
 export class HtmlApplicationMenuWidget extends Widget {
 
-    private readonly id: string
+    public readonly id: string
     private readonly menuTree: MenuItemFolder
     private submenuWidgets: MenuItemWidget<MenuItem>[]|undefined
 

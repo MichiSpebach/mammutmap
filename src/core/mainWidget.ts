@@ -14,10 +14,10 @@ import { TerminalWidget } from './TerminalWidget'
 export let mainWidget: MainWidget
 
 class MainWidget extends Widget {
-	private map: Map|undefined
 	public readonly sidebar: ToolbarWidget
 	public readonly bottomBar: ToolbarWidget
 	public readonly terminal: TerminalWidget
+	private map: Map|undefined
 	private devStatsInterval: NodeJS.Timer|undefined
 
 	private renderedOrInProgress: boolean = false
@@ -26,7 +26,7 @@ class MainWidget extends Widget {
 		super()
 		this.map = mapWidget
 		this.sidebar = new ToolbarWidget('sidebar')
-		this.bottomBar = new ToolbarWidget('bottomBar')
+		this.bottomBar = new ToolbarWidget('bottomBar', {hideHeader: true})
 		this.terminal = new TerminalWidget(this.bottomBar.getId()+'-terminal')
 		this.bottomBar.addView({
 			getName: () => 'Terminal',
@@ -54,19 +54,15 @@ class MainWidget extends Widget {
 			await Promise.all([
 				renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth, height: '85%'}), // TODO: add content as element as well instead of in index.html
 				renderManager.addElementsTo(indexHtmlIds.bodyId, [
-					{
-						type: 'div',
-						id: this.sidebar.getId(),
-						style: {
-							display: sidebarDisplay,
-							position: 'absolute',
-							top: '0',
-							right: '0',
-							width:'20%',
-							height: '100%',
-							backgroundColor: '#303438'
-						}
-					},
+					this.sidebar.shape({
+						display: sidebarDisplay,
+						position: 'absolute',
+						top: '0',
+						right: '0',
+						width:'20%',
+						height: '100%',
+						backgroundColor: '#303438'
+					}),
 					this.bottomBar.shape({
 						position: 'absolute',
 						width: bottomBarWidth,
@@ -76,7 +72,6 @@ class MainWidget extends Widget {
 					})
 				])
 			])
-			pros.push(this.bottomBar.renderSelectedView())
 		} else {
 			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth}))
 			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth}))

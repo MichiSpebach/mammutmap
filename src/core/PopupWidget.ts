@@ -6,7 +6,7 @@ import { util } from './util/util'
 import { Widget } from './Widget'
 
 export abstract class PopupWidget extends Widget {
-    private readonly id: string
+    public readonly id: string
     private readonly title: string
     private readonly onClose: (() => void) | undefined
 

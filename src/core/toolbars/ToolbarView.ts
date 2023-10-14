@@ -1,6 +1,6 @@
-import { Widget } from '../Widget'
+import { UltimateWidget, Widget } from '../Widget'
 
 export interface ToolbarView {
   getName(): string
-  getWidget(): Widget
+  getWidget(): UltimateWidget
 }

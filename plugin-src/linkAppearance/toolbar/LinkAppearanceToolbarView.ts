@@ -1,3 +1,4 @@
+import { UltimateWidget } from '../../../dist/core/Widget'
 import { coreUtil } from '../../../dist/pluginFacade'
 import { ToolbarView } from '../../../dist/pluginFacade'
 import { Widget } from '../../../dist/pluginFacade'
@@ -5,7 +6,7 @@ import { LinkAppearanceToolbarViewWidget } from './LinkAppearanceToolbarViewWidg
 
 export class LinkAppearanceToolbarView implements ToolbarView {
 
-    private readonly widget: Widget
+    private readonly widget: UltimateWidget
 
     public constructor(
         private readonly name: string
@@ -17,7 +18,7 @@ export class LinkAppearanceToolbarView implements ToolbarView {
         return this.name
     }
 
-    public getWidget(): Widget {
+    public getWidget(): UltimateWidget {
         return this.widget
     }
 

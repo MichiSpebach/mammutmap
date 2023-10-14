@@ -10,7 +10,7 @@ export class BoxTabBarWidget extends Widget {
 	private selectedTab: 'map' | BoxTab = 'map';
 
 	public constructor(
-		private readonly id: string,
+		public readonly id: string,
 		private readonly parent: BoxTabs,
 		private readonly onSelect: (tab: 'map' | BoxTab) => Promise<void>
 	) {
