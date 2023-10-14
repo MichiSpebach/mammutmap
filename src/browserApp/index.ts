@@ -1,5 +1,4 @@
 import * as domAdapter from '../core/domAdapter'
-import * as commandLine from '../core/commandLine'
 import * as applicationMenu from '../core/applicationMenu/applicationMenu'
 import * as pluginLoader from '../core/pluginLoader'
 import { mainWidget } from '../core/mainWidget'

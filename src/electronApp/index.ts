@@ -1,7 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import * as path from 'path'
 import * as domAdapter from '../core/domAdapter'
-import * as commandLine from '../core/commandLine'
 import * as applicationMenu from '../core/applicationMenu/applicationMenu'
 import * as pluginLoader from '../core/pluginLoader'
 import { util } from '../core/util/util'

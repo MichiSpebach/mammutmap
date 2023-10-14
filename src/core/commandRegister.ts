@@ -1,6 +1,6 @@
 import { renderManager, RenderPriority } from './RenderManager'
 import * as map from './Map'
-import * as commandLinePluginFacade from './commandLinePluginFacade'
+import * as commandLinePluginFacade from './commandRegisterPluginFacade'
 import * as htmlCursor from './htmlCursor'
 import { setCompatibilityTheme } from './styleAdapter'
 import { log } from './logService'
