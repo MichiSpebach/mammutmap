@@ -5,20 +5,13 @@ import * as htmlCursor from './htmlCursor'
 import { setCompatibilityTheme } from './styleAdapter'
 import { log } from './logService'
 import * as indexHtmlIds from './indexHtmlIds'
-
-const id: string = 'commandLine'
+import { mainWidget } from './mainWidget'
 
 type CommandFunction = (parameter: string) => Promise<void>
 const commands: Map<string, CommandFunction> = new Map()
 
-export async function initAndRender(): Promise<void> {
+export async function initAndRender(): Promise<void> { // TODO rename or remove
   registerDefaultCommands()
-  await renderManager.addElementTo(indexHtmlIds.terminalId, {
-    type: 'input',
-    id,
-    className: 'commandLine'
-  })
-  await renderManager.addKeydownListenerTo(id, 'Enter', processCommand)
 }
 
 export function registerCommand(commandName: string, commandFunction: (parameter: string) => Promise<void>): void {
@@ -28,9 +21,8 @@ export function registerCommand(commandName: string, commandFunction: (parameter
   commands.set(commandName, commandFunction)
 }
 
-async function processCommand(command: string): Promise<void> {
+export async function processCommand(command: string): Promise<void> {
   const [commandName, parameter]: string[] = command.split(/ (.+)/, 2)
-  renderManager.setValueTo(id, '')
 
   const commandFunction: CommandFunction|undefined = commands.get(commandName)
   if (commandFunction) {

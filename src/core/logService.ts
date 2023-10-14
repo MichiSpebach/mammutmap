@@ -4,10 +4,11 @@ import * as indexHtmlIds from './indexHtmlIds'
 import { ConsoleDecorator } from './ConsoleDecorator'
 import { PopupWidget } from './PopupWidget'
 import { RenderElement } from './util/RenderElement'
+import { Subscribers } from './util/Subscribers'
 
 export let log: LogService // = new LogService() // initialized at end of file
 
-class Log {
+export class LogEntry {
     public readonly id: string
     public readonly message: string
     public readonly color: string
@@ -48,41 +49,30 @@ class Log {
 }
 
 class Logs {
-    private allLogs: Log[] = []
-    private logsToDisplay: Log[] = []
+    public allLogs: LogEntry[] = []
 
-    public add(log: Log): void {
+    public add(log: LogEntry): void {
         this.allLogs.push(log)
-        this.logsToDisplay.push(log)
     }
 
-    public getAll(): Log[] {
+    public getAll(): LogEntry[] {
         return this.allLogs
     }
 
-    public getLatest(): Log|undefined {
-        return this.logsToDisplay[this.logsToDisplay.length-1]
-    }
-
-    public getAndRemoveOldestToDisplay(): Log[] {
-        const toRemove: Log[] = []
-        while (this.logsToDisplay.length > 50) {
-            toRemove.push(this.logsToDisplay.shift()!)
-        }
-        return toRemove
+    public getLatest(): LogEntry|undefined {
+        return this.allLogs[this.allLogs.length-1]
     }
 
     public clear(): void {
         this.allLogs = []
-        this.logsToDisplay = []
     }
 }
 
 class LogService {
     private readonly originalConsole: Console
-    private readonly logs: Logs = new Logs()
-    private readonly showAllLogsButtonId: string = indexHtmlIds.logId+'ShowAllLogs'
-    private showAllLogsButtonState: 'notInitialized'|'notDisplayed'|'displayed' = 'notInitialized'
+    public readonly logs: Logs = new Logs()
+    public readonly onAddLog: Subscribers<LogEntry> = new Subscribers()
+    public readonly onClearLog: Subscribers<RenderPriority|undefined> = new Subscribers()
     private logDebugActivated: boolean = false
 
     public constructor() {
@@ -146,47 +136,20 @@ class LogService {
     }
     
     private async executeLogToGui(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
-        if (this.showAllLogsButtonState === 'notInitialized') {
-            this.showAllLogsButtonState = 'notDisplayed'
-            await renderManager.addElementTo(indexHtmlIds.logId, {
-                type: 'button',
-                id: this.showAllLogsButtonId,
-                style: {display: 'none'},
-                onclick: () => PopupWidget.buildAndRender('All Logs', this.logs.getAll().map(log => log.toRenderElement())),
-                children: 'Show All Logs',
-            })
-        }
-
-        let latestLog: Log|undefined = this.logs.getLatest()
+        let latestLog: LogEntry|undefined = this.logs.getLatest()
         if (latestLog && latestLog.message === message && latestLog.color === color) {
             latestLog.allowHtml = latestLog.allowHtml ?? options?.allowHtml
             latestLog.count++
         } else {
-            latestLog = new Log({message, color, allowHtml: options?.allowHtml, count: 1, id: util.generateId()})
+            latestLog = new LogEntry({message, color, allowHtml: options?.allowHtml, count: 1, id: util.generateId()})
             this.logs.add(latestLog)
         }
-
-        if (latestLog.count > 1) {
-            await renderManager.setContentTo(latestLog.id, latestLog.toHtmlString())
-        } else {
-            await renderManager.addElementTo(indexHtmlIds.logId, latestLog.toRenderElement())
-        }
-        await renderManager.scrollToBottom(indexHtmlIds.terminalId)
-        this.removeOldLogsFromGui()
-    }
-
-    private async removeOldLogsFromGui(): Promise<void> {
-        const logsToRemove: Log[] = this.logs.getAndRemoveOldestToDisplay()
-        const pros: Promise<void>[] = logsToRemove.map(log => renderManager.remove(log.id))
-        if (logsToRemove.length > 0 ) {
-            renderManager.addStyleTo(this.showAllLogsButtonId, {display: 'inline-block'})
-        }
-        await Promise.all(pros)
+        this.onAddLog.callSubscribers(latestLog)
     }
 
     public async clear(priority?: RenderPriority): Promise<void> {
         this.logs.clear()
-        await renderManager.clearContentOf(indexHtmlIds.logId, priority)
+        this.onClearLog.callSubscribers(priority)
     }
 
 }

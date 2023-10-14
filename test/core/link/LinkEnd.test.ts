@@ -23,6 +23,7 @@ beforeAll(() => {
     domAdapterMock.appendChildTo = () => Promise.resolve()
     domAdapterMock.addContentTo = () => Promise.resolve()
     domAdapterMock.addStyleTo = () => Promise.resolve()
+    domAdapterMock.addStyleSheet = () => Promise.resolve()
     domAdapterMock.addClassTo = () => Promise.resolve()
     domAdapterMock.batch = () => Promise.resolve()
     domAdapterMock.addDragListenerTo = () => Promise.resolve()

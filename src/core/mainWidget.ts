@@ -7,6 +7,7 @@ import { settings } from './Settings'
 import { util } from './util/util'
 import { ClientPosition } from './shape/ClientPosition'
 import { Style } from './util/RenderElement'
+import { TerminalWidget } from './TerminalWidget'
 
 // TODO: rename to indexWidget|bodyWidget|appWidget|window(Widget)?
 
@@ -16,6 +17,7 @@ class MainWidget extends Widget {
 	private map: Map|undefined
 	public readonly sidebar: ToolbarWidget
 	public readonly bottomBar: ToolbarWidget
+	public readonly terminal: TerminalWidget
 	private devStatsInterval: NodeJS.Timer|undefined
 
 	private renderedOrInProgress: boolean = false
@@ -25,6 +27,11 @@ class MainWidget extends Widget {
 		this.map = mapWidget
 		this.sidebar = new ToolbarWidget('sidebar')
 		this.bottomBar = new ToolbarWidget('bottomBar')
+		this.terminal = new TerminalWidget(this.bottomBar.getId()+'-terminal')
+		this.bottomBar.addView({
+			getName: () => 'Terminal',
+			getWidget: () => this.terminal
+		})
 	}
 
 	public getId(): string {
@@ -60,22 +67,22 @@ class MainWidget extends Widget {
 							backgroundColor: '#303438'
 						}
 					},
-					/*{
-						type: 'div',
-						id: this.bottomBar.getId(),
-						style: {
-							position: 'absolute',
-							width: bottomBarWidth,
-							height: '15%'
-						}
-					},*/
+					this.bottomBar.shape({
+						position: 'absolute',
+						width: bottomBarWidth,
+						height: '15%',
+						backgroundColor: '#202428',
+						overflow: 'auto'
+					})
 				]),
 				pros.push(renderManager.addStyleTo(indexHtmlIds.terminalId, { // TODO: remove as soon as bottomBar implemented
+					display: 'none',
 					width: bottomBarWidth, 
 					height: '15%', 
 					overflowX: 'auto'
 				}))
 			])
+			pros.push(this.bottomBar.renderSelectedView())
 		} else {
 			pros.push(renderManager.addStyleTo(this.sidebar.getId(), {display: sidebarDisplay}))
 			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth}))
