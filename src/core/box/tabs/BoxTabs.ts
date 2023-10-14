@@ -50,7 +50,7 @@ export class BoxTabs {
 			ongoing.push(renderManager.addElementTo(this.referenceBox.header.getId(), {
 				type: 'div',
 				id: this.getId(),
-				children: this.bar.shapeFormOuter()
+				children: this.bar.shapeOuter()
 			}))
 		}
 		ongoing.push(this.bar.render())

@@ -7,7 +7,7 @@ async function showPopupWithWidget(): Promise<void> {
 	const widget = new TutorialWidget()
 	PopupWidget.newAndRender({
 		title: widget.getId(),
-		content: await widget.shapeForm(),
+		content: await widget.shape(),
 		onClose: () => widget.unrender()
 	})
 }
@@ -19,7 +19,7 @@ class TutorialWidget extends SimpleWidget {
 		super(`tutorialWidget${coreUtil.generateId()}`, 'div')
 	}
 
-	protected override shapeFormInner(): RenderElements {
+	protected override shapeInner(): RenderElements {
 		return [
 			{
 				type: 'button',

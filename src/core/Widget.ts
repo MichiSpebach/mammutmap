@@ -14,14 +14,13 @@ export abstract class Widget {
 
 export abstract class BasicWidget extends Widget {
 	public async render(): Promise<void> {
-		await renderManager.setElementsTo(this.getId(), await this.shapeFormInner())
+		await renderManager.setElementsTo(this.getId(), await this.shapeInner())
 	}
 	public async unrender(): Promise<void> {
 		await renderManager.clearContentOf(this.getId())
 	}
-	// TODO: rename to "shape" because "form" could be confused with <form> element in html context
-	public abstract shapeForm(): RenderElementWithId | Promise<RenderElementWithId>
-	protected abstract shapeFormInner(): RenderElements | Promise<RenderElements>
+	public abstract shape(): RenderElementWithId | Promise<RenderElementWithId>
+	protected abstract shapeInner(): RenderElements | Promise<RenderElements>
 }
 
 export abstract class SimpleWidget extends BasicWidget {
@@ -40,12 +39,12 @@ export abstract class SimpleWidget extends BasicWidget {
 		return this.id
 	}
 
-	public async shapeForm(): Promise<RenderElementWithId> {
+	public async shape(): Promise<RenderElementWithId> {
 		return {
 			type: this.elementType,
 			id: this.id,
 			style: this.elementStyle,
-			children: await this.shapeFormInner()
+			children: await this.shapeInner()
 		}
 	}
 }

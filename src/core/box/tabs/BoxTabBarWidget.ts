@@ -109,7 +109,7 @@ export class BoxTabBarWidget extends Widget {
 		]);
 	}
 
-	public shapeFormOuter(): RenderElement {
+	public shapeOuter(): RenderElement {
 		return {
 			type: 'div',
 			id: this.getId()
