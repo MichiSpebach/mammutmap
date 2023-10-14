@@ -12,7 +12,7 @@ export class ConsoleDecorator implements Console {
     assert(value?: any, message?: string, ...optionalParams: any[]): void {
         this.originalConsole.assert(value, message, ...optionalParams)
         if (!value) {
-            log.logToGui(`Assertion failed: ${message}`, 'orange')
+            log.storeLogAndCallSubscribers(`Assertion failed: ${message}`, 'orange')
         }
     }
 
@@ -31,7 +31,7 @@ export class ConsoleDecorator implements Console {
 
     debug(message?: string, ...optionalParams: any[]): void {
         this.originalConsole.debug(message, ...optionalParams)
-        log.logToGui(`debug: ${message}`, 'grey')
+        log.storeLogAndCallSubscribers(`debug: ${message}`, 'grey')
     }
 
     dir(obj?: any, options?: InspectOptions): void {
@@ -44,7 +44,7 @@ export class ConsoleDecorator implements Console {
 
     error(message?: any, ...optionalParams: any[]): void {
         this.originalConsole.error(message, ...optionalParams)
-        log.logToGui(`error: ${message}`, 'red')
+        log.storeLogAndCallSubscribers(`error: ${message}`, 'red')
     }
 
     group(...label: any[]): void {
@@ -61,12 +61,12 @@ export class ConsoleDecorator implements Console {
 
     info(message?: any, ...optionalParams: any[]): void {
         this.originalConsole.info(message, ...optionalParams)
-        log.logToGui(`info: ${message}`, 'grey')
+        log.storeLogAndCallSubscribers(`info: ${message}`, 'grey')
     }
 
     log(message?: any, ...optionalParams: any[]): void {
         this.originalConsole.log(message, ...optionalParams)
-        log.logToGui(`log: ${message}`, 'grey')
+        log.storeLogAndCallSubscribers(`log: ${message}`, 'grey')
     }
 
     table(tabularData: any, properties?: ReadonlyArray<string>): void {
@@ -91,12 +91,12 @@ export class ConsoleDecorator implements Console {
 
     trace(message?: any, ...optionalParams: any[]): void {
         this.originalConsole.trace(message, ...optionalParams)
-        log.logToGui(`trace: ${message}`, 'orange')
+        log.storeLogAndCallSubscribers(`trace: ${message}`, 'orange')
     }
 
     warn(message?: any, ...optionalParams: any[]): void {
         this.originalConsole.warn(message, ...optionalParams)
-        log.logToGui(`warning: ${message}`, 'orange')
+        log.storeLogAndCallSubscribers(`warning: ${message}`, 'orange')
     }
 
     profile(label?: string): void {

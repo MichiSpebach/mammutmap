@@ -1,4 +1,4 @@
-import { RenderPriority, renderManager } from './RenderManager'
+import { RenderPriority } from './RenderManager'
 import { util } from './util/util'
 import { ConsoleDecorator } from './ConsoleDecorator'
 import { RenderElement } from './util/RenderElement'
@@ -47,10 +47,10 @@ export class LogEntry {
 }
 
 class LogService {
-    private readonly originalConsole: Console
-    private logs: LogEntry[] = []
     public readonly onAddLog: Subscribers<LogEntry> = new Subscribers()
     public readonly onClearLog: Subscribers<RenderPriority|undefined> = new Subscribers()
+    private readonly originalConsole: Console
+    private logs: LogEntry[] = []
     private logDebugActivated: boolean = false
 
     public constructor() {
@@ -69,19 +69,19 @@ class LogService {
     public debug(message: string, options?: {allowHtml?: boolean}): void {
         if (this.logDebugActivated) {
             this.originalConsole.debug(message)
-            this.logToGui('debug: ' + message, 'grey', options)
+            this.storeLogAndCallSubscribers('debug: ' + message, 'grey', options)
         }
     }
 
     public info(message: string, options?: {allowHtml?: boolean}): void {
         this.originalConsole.info(message)
-        this.logToGui('Info: ' + message, 'grey', options)
+        this.storeLogAndCallSubscribers('Info: ' + message, 'grey', options)
     }
 
     public warning(message: string, options?: {allowHtml?: boolean}): void {
         //this.originalConsole.warn(message) TODO: this would be nicer than trace but does not log a stacktrace
         this.originalConsole.trace('WARNING: '+message)
-        this.logToGui('WARNING: '+message, 'orange', options)
+        this.storeLogAndCallSubscribers('WARNING: '+message, 'orange', options)
     }
 
     /** @deprecated simply throw new Error(..) instead */
@@ -96,28 +96,10 @@ class LogService {
         if (message) { // check so that in case of weird type casts logging errors still work
             message = message.toString().replace(/^Error: /, '')
         }
-        this.logToGui('ERROR: '+message, 'red', options)
+        this.storeLogAndCallSubscribers('ERROR: '+message, 'red', options)
     }
 
-    public async logToGui(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
-        await this.scheduleLogToGui(message, color, 5, options)
-    }
-
-    private async scheduleLogToGui(message: string, color: string, triesLeft: number, options?: {allowHtml?: boolean}): Promise<void> {
-        if (renderManager.isReady()) {
-            await this.executeLogToGui(message, color, options)
-        } else { // happens when called before gui is ready // TODO find better solution
-            if (triesLeft > 0) {
-                await util.wait(1000)
-                message += ' -1s'
-                await this.scheduleLogToGui(message, color, triesLeft--)
-            } else {
-                this.originalConsole.trace('WARNING: failed to print log on gui: '+message+', because gui seems not to load.')
-            }
-        }
-    }
-    
-    private async executeLogToGui(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
+    public async storeLogAndCallSubscribers(message: string, color: string, options?: {allowHtml?: boolean}): Promise<void> {
         let latestLog: LogEntry|undefined = this.logs[this.logs.length-1]
         if (latestLog && latestLog.message === message && latestLog.color === color) {
             latestLog.allowHtml = latestLog.allowHtml ?? options?.allowHtml
@@ -126,7 +108,7 @@ class LogService {
             latestLog = new LogEntry({message, color, allowHtml: options?.allowHtml, count: 1, id: util.generateId()})
             this.logs.push(latestLog)
         }
-        this.onAddLog.callSubscribers(latestLog)
+        await this.onAddLog.callSubscribers(latestLog)
     }
 
     public async clear(priority?: RenderPriority): Promise<void> {
