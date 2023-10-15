@@ -36,9 +36,6 @@ export class ToolbarWidget extends Widget {
 		this.shouldBeRendered = true
 
 		await renderManager.setElementsTo(this.getId(), this.shapeInner())
-		if (this.selectedView) {
-			await this.selectedView.getWidget().render()
-		}
 	}
 
 	public async unrender(): Promise<void> {
@@ -50,12 +47,11 @@ export class ToolbarWidget extends Widget {
 		await renderManager.setContentTo(this.getId(), '')
 	}
 
-	public shape(additionalStyle?: Style): RenderElement {
+	public shapeOuter(additionalStyle?: Style): RenderElement {
 		return {
 			type: 'div',
 			id: this.id,
-			style: additionalStyle,
-			children: this.shapeInner()
+			style: additionalStyle
 		}
 	}
 

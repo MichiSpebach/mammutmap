@@ -8,11 +8,12 @@ import { RenderElement, RenderElements, Style } from '../../../dist/pluginFacade
 import { LinkTagData } from '../../../dist/pluginFacade'
 import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/pluginFacade'
 import { RenderElementWithId, UltimateWidget } from '../../../dist/core/Widget'
+import { util } from '../../../dist/core/util/util'
 
-// TODO: extend from SimpleWidget that does not need to know renderManager and only contains formHtml()
 export class LinkAppearanceToolbarViewWidget extends UltimateWidget {
 
     private renderedOrInProgress: boolean = false
+    private linkTagsSubscriber: () => Promise<void> = () => this.render() // anonym function couldn't be unsubscribed
 
     public constructor(
         private readonly id: string
@@ -46,14 +47,15 @@ export class LinkAppearanceToolbarViewWidget extends UltimateWidget {
                 type: 'div',
                 id: this.id
             },
-            //rendering: this.render() TODO: activate as soon as 'await this.mounting' is implemented
+            rendering: this.render()
         }
     }
 
     public async render(): Promise<void> {
         if (!this.renderedOrInProgress) {
-            //await this.mounting TODO: activate as soon as 'await this.mounting' is implemented
-            linkAppearanceSettings.linkTags.subscribe(() => this.render())
+            await util.wait(0) // TODO implement 'await this.mounting' instead
+            //await this.mounting TODO implement and use instead of 'await util.wait(0)'
+            linkAppearanceSettings.linkTags.subscribe(this.linkTagsSubscriber)
             this.renderedOrInProgress = true
         }
 
@@ -64,6 +66,7 @@ export class LinkAppearanceToolbarViewWidget extends UltimateWidget {
         if (!this.renderedOrInProgress) {
             return
         }
+        linkAppearanceSettings.linkTags.unsubscribe(this.linkTagsSubscriber)
         this.renderedOrInProgress = false
 
         await renderManager.clearContentOf(this.getId())

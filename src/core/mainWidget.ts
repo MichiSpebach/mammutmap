@@ -54,7 +54,7 @@ class MainWidget extends Widget {
 			await Promise.all([
 				renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth, height: '85%'}), // TODO: add content as element as well instead of in index.html
 				renderManager.addElementsTo(indexHtmlIds.bodyId, [
-					this.sidebar.shape({
+					this.sidebar.shapeOuter({
 						display: sidebarDisplay,
 						position: 'absolute',
 						top: '0',
@@ -63,7 +63,7 @@ class MainWidget extends Widget {
 						height: '100%',
 						backgroundColor: '#303438'
 					}),
-					this.bottomBar.shape({
+					this.bottomBar.shapeOuter({
 						position: 'absolute',
 						width: bottomBarWidth,
 						height: '15%',
@@ -72,6 +72,7 @@ class MainWidget extends Widget {
 					})
 				])
 			])
+			pros.push(this.bottomBar.render())
 		} else {
 			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth}))
 			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth}))

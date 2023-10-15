@@ -48,6 +48,8 @@ export class TerminalWidget extends UltimateWidget {
 	}
 	
 	private shapeInner(): {elements: RenderElements, rendering?: Promise<void>} {
+		this.displayedLogs = log.getLogs().slice(log.getLogs().length-TerminalWidget.maxDisplayedLogsCount)
+		this.showAllLogsButtonDisplay = log.getLogs().length > TerminalWidget.maxDisplayedLogsCount ? 'inline-block' : 'none'
 		return {
 			elements: [
 				{
@@ -81,16 +83,13 @@ export class TerminalWidget extends UltimateWidget {
 			this.beingRendered = true
 			log.onAddLog.subscribe((logEntry: LogEntry) => this.addLogEntry(logEntry))
 			log.onClearLog.subscribe((priority: RenderPriority|undefined) => this.clear(priority))
-			this.displayedLogs = log.getLogs().slice(log.getLogs().length-TerminalWidget.maxDisplayedLogsCount)
-			this.showAllLogsButtonDisplay = log.getLogs().length > TerminalWidget.maxDisplayedLogsCount ? 'inline-block' : 'none'
-			;(async () => {
-				await util.wait(0) // TODO improve this ASAP
-				renderManager.scrollToBottom('bottomBar'/* TODO replace with this.id as soon as scrollbar is correctly implemented*/)
-				renderManager.addKeydownListenerTo(this.getCommandLineId(), 'Enter', (value: string) => {
-					renderManager.setValueTo(this.getCommandLineId(), '')
-					commandLine.processCommand(value)
-				})
-			})()
+			await util.wait(0) // TODO implement 'await this.mounting' instead
+			//await this.mounting TODO implement and use instead of 'await util.wait(0)'
+			renderManager.scrollToBottom('bottomBar'/* TODO replace with this.id as soon as scrollbar is correctly implemented*/)
+			renderManager.addKeydownListenerTo(this.getCommandLineId(), 'Enter', (value: string) => {
+				renderManager.setValueTo(this.getCommandLineId(), '')
+				commandLine.processCommand(value)
+			})
 		}
 	}
 

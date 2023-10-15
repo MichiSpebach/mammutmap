@@ -67,4 +67,5 @@ export abstract class AdvancedWidget extends Widget {
 
 export abstract class UltimateWidget extends Widget {
 	public abstract shape(): {element: RenderElementWithId, rendering?: Promise<void>}
+	//public override abstract render(): {element: RenderElementWithId, rendering?: Promise<void>} // TODO: simply fuse shape and render into one?
 }
