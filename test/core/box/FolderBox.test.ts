@@ -7,8 +7,8 @@ import { util } from '../../../src/core/util/util'
 import * as mapSettingsDataFactory from '../mapData/factories/mapSettingsDataFactory'
 import * as projectSettingsFactory from '../factories/projectSettingsFactory'
 import * as boxFactory from './factories/boxFactory'
-import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
 import { ProjectSettings } from '../../../src/core/ProjectSettings'
+import * as testUtil from '../../testUtil'
 
 test('getBoxBySourcePathAndRenderIfNecessary path with one element', async () => {
   const scenario = setupScenarioForGetBoxBySourcePathAndRenderIfNecessary()
@@ -66,7 +66,7 @@ function setupScenarioForGetBoxBySourcePathAndRenderIfNecessary(): {
   innerBox: FolderBox,
   fileBox: FileBox
 } {
-  initBoxManager(new BoxManager())
+  testUtil.initGeneralServicesWithMocks()
 
   const projectSettings: ProjectSettings = projectSettingsFactory.of({
     projectSettingsFilePath: '', 

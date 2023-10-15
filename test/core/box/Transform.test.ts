@@ -7,6 +7,7 @@ import * as boxFactory from './factories/boxFactory'
 import { RootFolderBox } from '../../../src/core/box/RootFolderBox'
 import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
 import { LocalRect } from '../../../src/core/LocalRect'
+import * as testUtil from '../../testUtil'
 
 test('localToClientPosition', async () => {
   const result: ClientPosition = await setupScenario().transform.localToClientPosition(new LocalPosition(50, 50))
@@ -49,7 +50,7 @@ test('getNearestGridPositionOf rounds to multiple of 4', () => {
 })
 
 function setupScenario(): {transform: Transform, otherTransform: Transform} {
-  initBoxManager(new BoxManager())
+  testUtil.initGeneralServicesWithMocks()
 
   const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root'})
   const box: FolderBox = boxFactory.folderOf({idOrData: 'src/box', parent: root, addToParent: false})

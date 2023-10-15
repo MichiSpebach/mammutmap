@@ -4,19 +4,18 @@ import { WayPointData } from '../../../src/core/mapData/WayPointData'
 import { Box } from '../../../src/core/box/Box'
 import { Link } from '../../../src/core/link/Link'
 import { ClientRect } from '../../../src/core/ClientRect'
-import { DocumentObjectModelAdapter, init as initDomAdapter } from '../../../src/core/domAdapter'
-import { RenderManager, init as initRenderManager } from '../../../src/core/RenderManager'
+import { RenderManager } from '../../../src/core/RenderManager'
 import { Transform } from '../../../src/core/box/Transform'
 import { LinkEndData } from '../../../src/core/mapData/LinkEndData'
 import { BoxData } from '../../../src/core/mapData/BoxData'
 import { ProjectSettings } from '../../../src/core/ProjectSettings'
 import { FileSystemAdapter, init as initFileSystemAdapter } from '../../../src/core/fileSystemAdapter'
 import { util } from '../../../src/core/util/util'
-import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
 import { MapSettingsData } from '../../../src/core/mapData/MapSettingsData'
 import * as boxFactory from '../box/factories/boxFactory'
 import { RootFolderBox } from '../../../src/pluginFacade'
 import { HoverManager } from '../../../src/core/HoverManager'
+import * as testUtil from '../../testUtil'
 
 afterEach(() => {
   (HoverManager as any).hoverables = new Map() // otherwise "WARNING: HoverManager::addHoverable(..) hoverable with id 'link' already exists."
@@ -61,6 +60,8 @@ function setupSimpleScenario(): {
   toBox: Box,
   renderMan: MockProxy<RenderManager>
 } {
+  const mocks = testUtil.initGeneralServicesWithMocks()
+
   const fromWayPoints: WayPointData[] = [WayPointData.buildNew('fromBox', 'FromBox', 50, 50)]
   const toWayPoints: WayPointData[] = [WayPointData.buildNew('toBox', 'ToBox', 50, 50)]
   const linkData: LinkData = new LinkData('link', new LinkEndData(fromWayPoints), new LinkEndData(toWayPoints))
@@ -92,15 +93,6 @@ function setupSimpleScenario(): {
   }
   managingBox.isBodyBeingRendered = () => true
 
-  const domAdapter: MockProxy<DocumentObjectModelAdapter> = mock<DocumentObjectModelAdapter>()
-  initDomAdapter(domAdapter)
-
-  const renderMan: MockProxy<RenderManager> = mock<RenderManager>()
-  initRenderManager(renderMan)
-
-  const boxManager: MockProxy<BoxManager> = mock<BoxManager>()
-  initBoxManager(boxManager)
-
   const fileSystemAdapter: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
   fileSystemAdapter.saveToJsonFile.mockReturnValue(Promise.resolve())
   initFileSystemAdapter(fileSystemAdapter)
@@ -112,6 +104,6 @@ function setupSimpleScenario(): {
     managingBox: managingBox,
     fromBox: fromBox,
     toBox: toBox,
-    renderMan: renderMan
+    renderMan: mocks.renderManager
   }
 }
