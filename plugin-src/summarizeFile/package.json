@@ -1,0 +1,17 @@
+{
+    "name": "summarizer",
+    "version": "1.0.0",
+    "description": "",
+    "main": "summarizer",
+    "scripts": {
+      "test": "jest"
+    },
+    "keywords": [
+      "summarizer",
+      "llm",
+      "openai"
+    ],
+    "author": "",
+    "license": "ISC"
+  }
+  
