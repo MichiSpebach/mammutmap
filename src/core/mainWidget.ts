@@ -18,6 +18,7 @@ class MainWidget extends Widget {
 	public readonly bottomBar: ToolbarWidget
 	public readonly terminal: TerminalWidget
 	private map: Map|undefined
+	private hovered: boolean = false
 	private devStatsInterval: NodeJS.Timer|undefined
 
 	private renderedOrInProgress: boolean = false
@@ -42,17 +43,21 @@ class MainWidget extends Widget {
 		const pros: Promise<void>[] = []
 
 		const sidebarEnabled: boolean = settings.getBoolean('sidebar')
+		const transparentBottomBar: boolean = settings.getBoolean('transparentBottomBar')
 		const sidebarDisplay: Style['display'] = sidebarEnabled ? null : 'none'
 		const contentWidth: Style['width'] = sidebarEnabled ? '80%' : '100%'
+		const contentHeight: Style['height'] = transparentBottomBar ? '100%' : '85%'
 		const bottomBarWidth: Style['width'] = sidebarEnabled ? '80%' : '100%'
+		const bottomBarBackgroundColor: Style['backgroundColor'] = transparentBottomBar && !this.hovered ? null : '#202428'
 		
 		if (!this.renderedOrInProgress) {
 			this.renderedOrInProgress = true
 			settings.subscribeBoolean('sidebar', async (active: boolean) => this.render())
+			settings.subscribeBoolean('transparentBottomBar', async (checked: boolean) => this.render())
 			settings.subscribeBoolean('developerMode', (newValue: boolean) => this.updateDevStats())
 			this.updateDevStats()
 			await Promise.all([
-				renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth, height: '85%'}), // TODO: add content as element as well instead of in index.html
+				renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth, height: contentHeight}), // TODO: add content as element as well instead of in index.html
 				renderManager.addElementsTo(indexHtmlIds.bodyId, [
 					this.sidebar.shapeOuter({
 						display: sidebarDisplay,
@@ -65,17 +70,27 @@ class MainWidget extends Widget {
 					}),
 					this.bottomBar.shapeOuter({
 						position: 'absolute',
+						bottom: '0',
 						width: bottomBarWidth,
 						height: '15%',
-						backgroundColor: '#202428',
-						overflow: 'auto'
+						backgroundColor: bottomBarBackgroundColor,
+						overflow: 'auto',
+						transition: 'background-color 0.2s'
 					})
 				])
 			])
 			pros.push(this.bottomBar.render())
+			pros.push(renderManager.addEventListenerTo(this.bottomBar.getId(), 'mouseenter', () => {
+				this.hovered = true
+				this.render()
+			}))
+			pros.push(renderManager.addEventListenerTo(this.bottomBar.getId(), 'mouseleave', () => {
+				this.hovered = false
+				this.render()
+			}))
 		} else {
-			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth}))
-			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth}))
+			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth, height: contentHeight}))
+			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth, backgroundColor: bottomBarBackgroundColor}))
 			pros.push(renderManager.addStyleTo(this.sidebar.getId(), {display: sidebarDisplay}))
 		}
 		

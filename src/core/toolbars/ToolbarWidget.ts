@@ -8,7 +8,7 @@ export class ToolbarWidget extends Widget {
 	private readonly views: ToolbarView[] = []
 	private readonly hideHeader: boolean
 	private selectedView: ToolbarView|undefined
-	private shouldBeRendered: boolean = false
+	private beingRendered: boolean = false
 
 	public constructor(id: string, options?: {hideHeader?: boolean}) {
 		super()
@@ -27,19 +27,25 @@ export class ToolbarWidget extends Widget {
 			this.selectedView = this.views[0]
 		}
 
-		if (this.shouldBeRendered) {
-			await this.render()
+		if (this.beingRendered) {
+			await renderManager.setElementsTo(this.getId(), this.shapeInner())
 		}
 	}
 
 	public async render(): Promise<void> {
-		this.shouldBeRendered = true
+		if (this.beingRendered) {
+			return
+		}
+		this.beingRendered = true
 
 		await renderManager.setElementsTo(this.getId(), this.shapeInner())
 	}
 
 	public async unrender(): Promise<void> {
-		this.shouldBeRendered = false
+		if (!this.beingRendered) {
+			return
+		}
+		this.beingRendered = false
 		
 		if (this.selectedView) {
 			await this.selectedView.getWidget().unrender()

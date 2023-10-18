@@ -3,7 +3,7 @@ import { fileSystem } from './fileSystemAdapter'
 import { log } from './logService'
 
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
-export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|'htmlApplicationMenu'|'sidebar'|'positionMapOnTopLeft'
+export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|'htmlApplicationMenu'|'sidebar'|'transparentBottomBar'|'positionMapOnTopLeft'
 
 export let settings: Settings
 
@@ -32,7 +32,8 @@ class Settings {
   private static readonly defaults = {
     zoomSpeed: 3,
     boxMinSizeToRenderInPixels: 200,
-    sidebar: true
+    sidebar: true,
+    transparentBottomBar: true
   }
 
   private zoomSpeed: number = Settings.defaults.zoomSpeed
@@ -43,6 +44,7 @@ class Settings {
   private experimentalFeatures: boolean|undefined = undefined
   private htmlApplicationMenu: boolean|undefined = undefined
   private sidebar: boolean = Settings.defaults.sidebar
+  private transparentBottomBar: boolean = Settings.defaults.transparentBottomBar
   private positionMapOnTopLeft: boolean|undefined = undefined // only needed for old e2e tests, TODO: update e2e tests and remove this option
 
   private booleanSubscribers: {setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>}[] = []

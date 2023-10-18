@@ -65,7 +65,7 @@ export abstract class AdvancedWidget extends Widget {
 	protected abstract shapeInner(): Promise<{elements: RenderElements, rendering: Promise<void>}>
 }
 
-export abstract class UltimateWidget extends Widget {
+export abstract class UltimateWidget extends Widget { // leads to problems if shape() is called again, then inner rendering finishes first and is overridden by parent rendering
 	public abstract shape(): {element: RenderElementWithId, rendering?: Promise<void>}
 	//public override abstract render(): {element: RenderElementWithId, rendering?: Promise<void>} // TODO: simply fuse shape and render into one?
 }

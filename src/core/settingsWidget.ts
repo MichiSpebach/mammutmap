@@ -1,6 +1,7 @@
 import { PopupWidget } from './PopupWidget'
 import { renderManager } from './RenderManager'
 import { BooleanSetting, settings } from './Settings'
+import { BooleanSettingsWidget } from './settings/BooleanSettingsWidget'
 
 export async function openIfNotOpened(): Promise<void> {
   if (!settingsWidget) {
@@ -19,6 +20,7 @@ class SettingsWidget extends PopupWidget {
   private readonly experimentalFeaturesInputId: string
   private readonly htmlApplicationMenuInputId: string
   private readonly sidebarInputId: string
+  private readonly transparentBottomBar: BooleanSettingsWidget
 
   public constructor() {
     super('applicationSettingsWidget', 'ApplicationSettings')
@@ -30,6 +32,11 @@ class SettingsWidget extends PopupWidget {
     this.experimentalFeaturesInputId = this.getId()+'ExperimentalFeatures'
     this.htmlApplicationMenuInputId = this.getId()+'HtmlApplicationMenu'
     this.sidebarInputId = this.getId()+'Sidebar'
+    this.transparentBottomBar = new BooleanSettingsWidget(this.id, 'transparentBottomBar')
+  }
+
+  private getTableId(): string {
+    return `${this.getId()}-table`
   }
 
   protected formContent(): string {
@@ -51,7 +58,7 @@ class SettingsWidget extends PopupWidget {
     boxMinSizeToRenderHtml += `>`
     boxMinSizeToRenderHtml += '</td>'
 
-    let html = '<table>'
+    let html = `<table id="${this.getTableId()}">`
     html += `<tr>${zoomSpeedHtml}</tr>`
     html += `<tr>${boxMinSizeToRenderHtml}</tr>`
     html += this.formCheckboxRowHtml(this.boxesDraggableIntoOtherBoxesInputId, 'boxesDraggableIntoOtherBoxes')
@@ -89,7 +96,8 @@ class SettingsWidget extends PopupWidget {
       this.addChangeListenerToCheckbox(this.developerModeInputId, 'developerMode'),
       this.addChangeListenerToCheckbox(this.experimentalFeaturesInputId, 'experimentalFeatures'),
       this.addChangeListenerToCheckbox(this.htmlApplicationMenuInputId, 'htmlApplicationMenu'),
-      this.addChangeListenerToCheckbox(this.sidebarInputId, 'sidebar')
+      this.addChangeListenerToCheckbox(this.sidebarInputId, 'sidebar'),
+      renderManager.addElementTo(this.getTableId(), this.transparentBottomBar.shape())
     ])
   }
 
