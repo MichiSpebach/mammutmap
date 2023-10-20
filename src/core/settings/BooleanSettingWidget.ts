@@ -1,7 +1,7 @@
 import { BooleanSetting, settings } from '../Settings';
 import { RenderElement } from '../util/RenderElement';
 
-export class BooleanSettingsWidget /*extends ?Widget TODO*/ {
+export class BooleanSettingWidget /*extends ?Widget TODO*/ {
 
 	public constructor(
 		public readonly id: string,

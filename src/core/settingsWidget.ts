@@ -1,7 +1,7 @@
 import { PopupWidget } from './PopupWidget'
 import { renderManager } from './RenderManager'
 import { BooleanSetting, settings } from './Settings'
-import { BooleanSettingsWidget } from './settings/BooleanSettingsWidget'
+import { BooleanSettingWidget } from './settings/BooleanSettingWidget'
 
 export async function openIfNotOpened(): Promise<void> {
   if (!settingsWidget) {
@@ -15,24 +15,25 @@ let settingsWidget: SettingsWidget|undefined
 class SettingsWidget extends PopupWidget {
   private readonly zoomSpeedInputId: string
   private readonly boxMinSizeToRenderInputId: string
-  private readonly boxesDraggableIntoOtherBoxesInputId: string
-  private readonly developerModeInputId: string
-  private readonly experimentalFeaturesInputId: string
-  private readonly htmlApplicationMenuInputId: string
-  private readonly sidebarInputId: string
-  private readonly transparentBottomBar: BooleanSettingsWidget
+  private settingWidgets: BooleanSettingWidget[]
 
   public constructor() {
     super('applicationSettingsWidget', 'ApplicationSettings')
 
     this.zoomSpeedInputId = this.getId()+'ZoomSpeed'
     this.boxMinSizeToRenderInputId = this.getId()+'BoxMinSizeToRender'
-    this.boxesDraggableIntoOtherBoxesInputId = this.getId()+'BoxesDraggableIntoOtherBoxes'
-    this.developerModeInputId = this.getId()+'DeveloperMode'
-    this.experimentalFeaturesInputId = this.getId()+'ExperimentalFeatures'
-    this.htmlApplicationMenuInputId = this.getId()+'HtmlApplicationMenu'
-    this.sidebarInputId = this.getId()+'Sidebar'
-    this.transparentBottomBar = new BooleanSettingsWidget(this.id, 'transparentBottomBar')
+    this.settingWidgets = [
+      this.buildBooleanSettingWidget('boxesDraggableIntoOtherBoxes'),
+      this.buildBooleanSettingWidget('developerMode'),
+      this.buildBooleanSettingWidget('experimentalFeatures'),
+      this.buildBooleanSettingWidget('htmlApplicationMenu'),
+      this.buildBooleanSettingWidget('sidebar'),
+      this.buildBooleanSettingWidget('transparentBottomBar')
+    ]
+  }
+
+  private buildBooleanSettingWidget(setting: BooleanSetting): BooleanSettingWidget {
+    return new BooleanSettingWidget(`${this.id}-${setting}`, setting)
   }
 
   private getTableId(): string {
@@ -61,25 +62,9 @@ class SettingsWidget extends PopupWidget {
     let html = `<table id="${this.getTableId()}">`
     html += `<tr>${zoomSpeedHtml}</tr>`
     html += `<tr>${boxMinSizeToRenderHtml}</tr>`
-    html += this.formCheckboxRowHtml(this.boxesDraggableIntoOtherBoxesInputId, 'boxesDraggableIntoOtherBoxes')
-    html += this.formCheckboxRowHtml(this.developerModeInputId, 'developerMode')
-    html += this.formCheckboxRowHtml(this.experimentalFeaturesInputId, 'experimentalFeatures')
-    html += this.formCheckboxRowHtml(this.htmlApplicationMenuInputId, 'htmlApplicationMenu')
-    html += this.formCheckboxRowHtml(this.sidebarInputId, 'sidebar')
     html += '</table>'
 
     return html
-  }
-
-  private formCheckboxRowHtml(id: string, settingsName: BooleanSetting): string {
-    let dataCellsHtml = '<td>'
-    dataCellsHtml += `<label for="${id}">${settingsName}: </label>`
-    dataCellsHtml += '</td><td>'
-    dataCellsHtml += `<input id="${id}"`
-    dataCellsHtml += ` type="checkbox" ${settings.getBoolean(settingsName) ? 'checked' : ''}`
-    dataCellsHtml += `>`
-    dataCellsHtml += '</td>'
-    return `<tr>${dataCellsHtml}</tr>`
   }
 
   protected override async afterRender(): Promise<void> {
@@ -92,17 +77,8 @@ class SettingsWidget extends PopupWidget {
         this.boxMinSizeToRenderInputId, 'value',
         (value: string) => settings.setBoxMinSizeToRender(parseInt(value))
       ),
-      this.addChangeListenerToCheckbox(this.boxesDraggableIntoOtherBoxesInputId, 'boxesDraggableIntoOtherBoxes'),
-      this.addChangeListenerToCheckbox(this.developerModeInputId, 'developerMode'),
-      this.addChangeListenerToCheckbox(this.experimentalFeaturesInputId, 'experimentalFeatures'),
-      this.addChangeListenerToCheckbox(this.htmlApplicationMenuInputId, 'htmlApplicationMenu'),
-      this.addChangeListenerToCheckbox(this.sidebarInputId, 'sidebar'),
-      renderManager.addElementTo(this.getTableId(), this.transparentBottomBar.shape())
+      renderManager.addElementsTo(this.getTableId(), this.settingWidgets.map(widget => widget.shape()))
     ])
-  }
-
-  private async addChangeListenerToCheckbox(id: string, settingsName: BooleanSetting): Promise<void> {
-    await renderManager.addChangeListenerTo<boolean>(id, 'checked', (value: boolean) => settings.setBoolean(settingsName, value))
   }
 
   protected override async beforeUnrender(): Promise<void> {
@@ -110,11 +86,6 @@ class SettingsWidget extends PopupWidget {
     await Promise.all([
       renderManager.removeEventListenerFrom(this.zoomSpeedInputId, 'change'),
       renderManager.removeEventListenerFrom(this.boxMinSizeToRenderInputId, 'change'),
-      renderManager.removeEventListenerFrom(this.boxesDraggableIntoOtherBoxesInputId, 'change'),
-      renderManager.removeEventListenerFrom(this.developerModeInputId, 'change'),
-      renderManager.removeEventListenerFrom(this.experimentalFeaturesInputId, 'change'),
-      renderManager.removeEventListenerFrom(this.htmlApplicationMenuInputId, 'change'),
-      renderManager.removeEventListenerFrom(this.sidebarInputId, 'change')
     ])
   }
 
