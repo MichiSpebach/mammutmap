@@ -8,12 +8,12 @@ import { mainWidget } from '../core/mainWidget'
 import { ElectronIpcDomAdapter } from './ElectronIpcDomAdapter'
 import * as fileSystemAdapter from '../core/fileSystemAdapter'
 import { NodeJsFileSystemAdapter } from './NodeJsFileSystemAdapter'
-import * as settings from '../core/Settings'
+import * as settings from '../core/settings/settings'
 import { ElectronAndHtmlApplicationMenu } from './ElectronAndHtmlApplicationMenu'
 import * as contextMenu from '../core/contextMenu'
 import { ElectronContextMenuPopup } from './ElectronContextMenuPopup'
-import * as processingAdapter from '../core/processingAdapter'
-import { NodeJsProcessingAdapter } from './NodeJsProcessingAdapter'
+import * as processingAdapter from '../core/environmentAdapter'
+import { NodeJsEnvironmentAdapter } from './NodeJsEnvironmentAdapter'
 
 var mainWindow: BrowserWindow
 
@@ -68,7 +68,7 @@ async function createWindow(): Promise<void> {
 
   mainWindow.loadFile(path.join(__dirname, './index.html'))
 
-  processingAdapter.init(new NodeJsProcessingAdapter())
+  processingAdapter.init(new NodeJsEnvironmentAdapter())
   domAdapter.init(new ElectronIpcDomAdapter(mainWindow))
   fileSystemAdapter.init(new NodeJsFileSystemAdapter())
   await settings.init()

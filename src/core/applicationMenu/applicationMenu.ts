@@ -4,11 +4,11 @@ import { util } from '../util/util'
 import * as map from '../Map'
 import { ProjectSettings } from '../ProjectSettings'
 import { fileSystem, OpenDialogReturnValue } from '../fileSystemAdapter'
-import * as settingsWidget from '../settingsWidget'
+import * as settingsWidget from '../settings/settingsWidget'
 import { renderManager } from '../RenderManager'
 import { MenuItem } from './MenuItem'
 import { PopupWidget } from '../PopupWidget'
-import { settings } from '../Settings'
+import { settings } from '../settings/settings'
 
 export let applicationMenu: ApplicationMenu
 

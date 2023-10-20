@@ -1,6 +1,6 @@
-import { util } from './util/util'
-import { fileSystem } from './fileSystemAdapter'
-import { log } from './logService'
+import { util } from '../util/util'
+import { fileSystem } from '../fileSystemAdapter'
+import { log } from '../logService'
 
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
 export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|'htmlApplicationMenu'|'sidebar'|'transparentBottomBar'|'positionMapOnTopLeft'

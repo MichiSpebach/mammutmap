@@ -5,7 +5,7 @@ import { Subscribers } from './util/Subscribers'
 import { util } from './util/util'
 import { LinkAppearanceData } from './mapData/LinkAppearanceData'
 import { log } from './logService'
-import { settings } from './Settings'
+import { settings } from './settings/settings'
 
 export class ProjectSettings { // TODO: rename to MapSettings?
 

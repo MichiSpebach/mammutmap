@@ -13,12 +13,13 @@ import { TextInputPopup } from './TextInputPopup'
 import { SourcelessBox } from './box/SourcelessBox'
 import { NodeData } from './mapData/NodeData'
 import { PopupWidget } from './PopupWidget'
-import { settings } from './Settings'
+import { settings } from './settings/settings'
 import { NodeWidget } from './node/NodeWidget'
 import { MenuItem } from './applicationMenu/MenuItem'
 import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
 import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import { RenderElements } from './util/RenderElement'
+import { environment } from './environmentAdapter'
 
 let contextMenuPopup: ContextMenuPopup
 
@@ -114,9 +115,8 @@ export function openForLink(link: Link, position: ClientPosition): void {
 }
 
 function buildOpenFileInEditorItem(box: FileBox): MenuItemFile {
-  const command: string = 'code '+box.getSrcPath()
-  return new MenuItemFile({label: 'run '+command, click: () => {
-    util.runShellCommand(command)
+  return new MenuItemFile({label: 'open', click: () => {
+    environment.openFile(box.getSrcPath())
   }})
 }
 

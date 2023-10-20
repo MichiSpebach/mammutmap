@@ -550,7 +550,7 @@ export class Command { // only export for unit tests
 }
 
 export class SchedulablePromise<T> { // only export for unit tests
-  private promise: Promise<T>
+  public readonly promise: Promise<T>
   private resolve: ((value: T) => void) | undefined
   private command: () => T
   private started: boolean = false

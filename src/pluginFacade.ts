@@ -4,7 +4,7 @@ import { FolderBox } from './core/box/FolderBox'
 import { RootFolderBox } from './core/box/RootFolderBox'
 import { Map, map, onMapLoaded, onMapRendered, onMapUnload } from './core/Map'
 import { util } from './core/util/util'
-import { ChildProcess, processing } from './core/processingAdapter'
+import { ChildProcess, environment } from './core/environmentAdapter'
 import { WayPointData } from './core/mapData/WayPointData'
 import { BoxWatcher } from './core/box/BoxWatcher'
 import { LinkEndData } from './core/mapData/LinkEndData'
@@ -31,12 +31,12 @@ import { Widget } from './core/Widget'
 import { ElementType, RenderElement, RenderElements, Style } from './core/util/RenderElement'
 import { PopupWidget } from './core/PopupWidget'
 import { TextInputPopup } from './core/TextInputPopup';
-import { settings } from './core/Settings'
+import { settings } from './core/settings/settings'
 import { log } from './core/logService'
 
 
 export { util as coreUtil }
-export { processing, ChildProcess }
+export { environment, ChildProcess }
 export { applicationMenu, contextMenu, MenuItemFile }
 export { renderManager, RenderPriority, Subscribers }
 export { RenderElements, RenderElement, ElementType, Style }

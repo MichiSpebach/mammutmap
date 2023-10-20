@@ -1,4 +1,4 @@
-import { processing, ChildProcess } from '../processingAdapter'
+import { environment, ChildProcess } from '../environmentAdapter'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
@@ -11,7 +11,7 @@ class Util {
   public readonly pluginTutorialAddress: string = this.githubProjectAddress+'/blob/main/pluginTutorial.md'
 
   public runShellCommand(command: string): ChildProcess {
-    return processing.runShellCommand(command)
+    return environment.runShellCommand(command)
   }
 
   /** @deprecated use log.debug(..) instead */

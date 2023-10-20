@@ -1,7 +1,7 @@
 import { MenuItemFolder } from '../core/applicationMenu/MenuItemFolder'
 import { ElectronApplicationMenu } from './ElectronApplicationMenu'
 import { HtmlApplicationMenu } from '../core/applicationMenu/HtmlApplicationMenu'
-import { settings } from '../core/Settings'
+import { settings } from '../core/settings/settings'
 import { MenuItem } from '../core/applicationMenu/MenuItem'
 import { ApplicationMenu, ApplicationMenuOptions } from '../core/applicationMenu/applicationMenu'
 

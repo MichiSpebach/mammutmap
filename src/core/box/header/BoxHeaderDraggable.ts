@@ -7,7 +7,7 @@ import { Box } from '../Box';
 import { FolderBox } from '../FolderBox';
 import { ClientPosition } from '../../shape/ClientPosition';
 import { LocalPosition } from '../../shape/LocalPosition';
-import { settings } from '../../Settings';
+import { settings } from '../../settings/settings';
 import { util } from '../../util/util';
 
 export class BoxHeaderDraggable implements Draggable<FolderBox> {

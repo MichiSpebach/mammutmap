@@ -786,6 +786,12 @@
 						"y": 42
 					},
 					{
+						"boxId": "ja8vdv1t5sg",
+						"boxName": "settings",
+						"x": 20.682,
+						"y": 57.263
+					},
+					{
 						"boxId": "7b4gp3csto8",
 						"boxName": "Settings.ts",
 						"x": 50,
@@ -1490,6 +1496,12 @@
 						"boxName": "core",
 						"x": 8,
 						"y": 26
+					},
+					{
+						"boxId": "ja8vdv1t5sg",
+						"boxName": "settings",
+						"x": 20.682,
+						"y": 57.263
 					},
 					{
 						"boxId": "7b4gp3csto8",

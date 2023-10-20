@@ -1,5 +1,5 @@
 import { renderManager } from '../RenderManager'
-import { settings } from '../Settings'
+import { settings } from '../settings/settings'
 import { ClientRect } from '../ClientRect'
 import { Box } from './Box'
 import { style } from '../styleAdapter'

@@ -1,7 +1,7 @@
-import { PopupWidget } from './PopupWidget'
-import { renderManager } from './RenderManager'
-import { BooleanSetting, settings } from './Settings'
-import { BooleanSettingWidget } from './settings/BooleanSettingWidget'
+import { PopupWidget } from '../PopupWidget'
+import { renderManager } from '../RenderManager'
+import { BooleanSetting, settings } from './settings'
+import { BooleanSettingWidget } from './BooleanSettingWidget'
 
 export async function openIfNotOpened(): Promise<void> {
   if (!settingsWidget) {
