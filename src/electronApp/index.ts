@@ -13,7 +13,7 @@ import { ElectronAndHtmlApplicationMenu } from './ElectronAndHtmlApplicationMenu
 import * as contextMenu from '../core/contextMenu'
 import { ElectronContextMenuPopup } from './ElectronContextMenuPopup'
 import * as processingAdapter from '../core/environmentAdapter'
-import { NodeJsEnvironmentAdapter } from './NodeJsEnvironmentAdapter'
+import { ElectronEnvironmentAdapter } from './ElectronEnvironmentAdapter'
 
 var mainWindow: BrowserWindow
 
@@ -68,7 +68,7 @@ async function createWindow(): Promise<void> {
 
   mainWindow.loadFile(path.join(__dirname, './index.html'))
 
-  processingAdapter.init(new NodeJsEnvironmentAdapter())
+  processingAdapter.init(new ElectronEnvironmentAdapter())
   domAdapter.init(new ElectronIpcDomAdapter(mainWindow))
   fileSystemAdapter.init(new NodeJsFileSystemAdapter())
   await settings.init()

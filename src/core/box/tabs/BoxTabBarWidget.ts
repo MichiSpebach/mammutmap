@@ -92,6 +92,7 @@ export class BoxTabBarWidget extends Widget {
 		if (this.selectedTab === tab) {
 			style = {
 				...style,
+				color: tab === 'map' ? 'transparent' : style.color,
 				backgroundColor: 'transparent',
 				borderBottom: 'none'
 			};

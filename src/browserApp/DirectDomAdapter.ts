@@ -245,14 +245,14 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     private setHtmlElementOnChangeValue(node: HTMLElement, onchangeValue: (value: string) => void): void {
         node.onchange = (event) => {
             if (!event.target) {
-                let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to precess onchange event on element with id '${node.id}'`
+                let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target is undefined, defaulting to empty string.'
                 util.logWarning(message)
                 return ''
             }
             const value: string|undefined = (event.target as any).value
             if (!value) {
-                let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to precess onchange event on element with id '${node.id}'`
+                let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target.value is undefined, defaulting to empty string.'
                 util.logWarning(message)
                 return ''
@@ -264,14 +264,14 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     private setHtmlElementOnChangeChecked(node: HTMLElement, onchangeChecked: (checked: boolean) => void): void {
         node.onchange = (event) => {
             if (!event.target) {
-                let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to precess onchange event on element with id '${node.id}'`
+                let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target is undefined, defaulting to false.'
                 util.logWarning(message)
                 return false
             }
             const checked: boolean|undefined = (event.target as any).checked
             if (!checked) {
-                let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to precess onchange event on element with id '${node.id}'`
+                let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target.checked is undefined, defaulting to false.'
                 util.logWarning(message)
                 return false

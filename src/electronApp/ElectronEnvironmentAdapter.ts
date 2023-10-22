@@ -1,8 +1,9 @@
 import { exec, ChildProcess } from 'child_process'
 import { EnvironmentAdapter } from '../core/environmentAdapter'
 import { log } from '../core/logService'
+import { shell } from 'electron'
 
-export class NodeJsEnvironmentAdapter implements EnvironmentAdapter {
+export class ElectronEnvironmentAdapter implements EnvironmentAdapter {
 
 	public runShellCommand(command: string): ChildProcess {
 		log.info(`executing '${command}'`)
@@ -14,7 +15,8 @@ export class NodeJsEnvironmentAdapter implements EnvironmentAdapter {
 	}
 
 	public openFile(path: string): void {
-		this.runShellCommand('code '+path)
+		shell.openPath(path)
+		//this.runShellCommand('code '+path)
 	}
 
 }
