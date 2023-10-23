@@ -5,6 +5,10 @@ import { shell } from 'electron'
 
 export class ElectronEnvironmentAdapter implements EnvironmentAdapter {
 
+	public getEnvironmentName(): 'electron' {
+		return 'electron'
+	}
+
 	public runShellCommand(command: string): ChildProcess {
 		log.info(`executing '${command}'`)
 		return exec(command, (error: unknown|null, stdout: string, stderr: string) => {

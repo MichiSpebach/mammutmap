@@ -84,7 +84,7 @@ class LogService {
         this.storeLogAndCallSubscribers('WARNING: '+message, 'orange', options)
     }
 
-    /** @deprecated simply throw new Error(..) instead */
+    /** @deprecated simply throw new Error(..) instead, but options would not be supported */
     public errorAndThrow(message: string, options?: {allowHtml?: boolean}): never {
         this.errorWithoutThrow(message, options)
         throw new Error(message)

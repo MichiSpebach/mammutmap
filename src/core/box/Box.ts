@@ -32,6 +32,7 @@ import { log } from '../logService'
 import { Style } from '../util/RenderElement'
 import { BoxContext } from './BoxContext'
 import { BoxTabs } from './tabs/BoxTabs'
+import { environment } from '../environmentAdapter'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   public static readonly Tabs: typeof BoxTabs = BoxTabs
@@ -44,6 +45,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   public readonly site: SizeAndPosition
   public readonly header: BoxHeader
   private readonly tabs: BoxTabs
+  //private readonly hoverBar: ToolbarWidget // appears right from box
   // TODO: move nodes into BoxBody? then header is rendered in front of nodes
   public readonly nodes: BoxNodesWidget // TODO: introduce (Abstract)NodesWidget|SubNodesWidget|ChildNodesWidget that contains all sorts of childNodes (Boxes and LinkNodes)?
   // TODO: move links into BoxBody? then header is rendered in front of links
@@ -367,7 +369,16 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     await Promise.all([
       scaleTool.renderInto(this),
       this.borderingLinks.setHighlightAllThatShouldBeRendered(true),
-      this.tabs.renderBar()
+      this.tabs.renderBar(),
+      this.isFile()
+        ? renderManager.addElementTo(this.getId(), {
+            type: 'button',
+            id: this.getId()+'-openButton',
+            style: {position: 'absolute', top: '4px', right: '4px', cursor: 'pointer'},
+            onclick: () => environment.openFile(this.getSrcPath()),
+            children: 'Open'
+          })
+        : undefined
     ])
   }
 
@@ -380,7 +391,10 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     await Promise.all([
       scaleTool.unrenderFrom(this),
       this.borderingLinks.setHighlightAllThatShouldBeRendered(false),
-      this.tabs.unrenderBar()
+      this.tabs.unrenderBar(),
+      this.isFile()
+        ? renderManager.remove(this.getId()+'-openButton')
+        : undefined
     ])
   }
 
