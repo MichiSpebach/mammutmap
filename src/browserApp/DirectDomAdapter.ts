@@ -248,14 +248,16 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target is undefined, defaulting to empty string.'
                 util.logWarning(message)
-                return ''
+                onchangeValue('')
+                return
             }
             const value: string|undefined = (event.target as any).value
             if (!value) {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target.value is undefined, defaulting to empty string.'
                 util.logWarning(message)
-                return ''
+                onchangeValue('')
+                return
             }
             onchangeValue(value)
         }
@@ -267,14 +269,16 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target is undefined, defaulting to false.'
                 util.logWarning(message)
-                return false
+                onchangeChecked(false)
+                return
             }
             const checked: boolean|undefined = (event.target as any).checked
-            if (!checked) {
+            if (checked === undefined) {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target.checked is undefined, defaulting to false.'
                 util.logWarning(message)
-                return false
+                onchangeChecked(false)
+                return
             }
             onchangeChecked(checked)
         }

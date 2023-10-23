@@ -87,14 +87,15 @@ export class BoxTabBarWidget extends Widget {
 			border: 'none',
 			borderRight: '1px solid gray',
 			borderBottom: '1px solid gray',
-			cursor: 'pointer'
+			cursor: 'pointer',
+			visibility: null // reset visibility in case it is 'hidden'
 		};
 		if (this.selectedTab === tab) {
 			style = {
 				...style,
-				color: tab === 'map' ? 'transparent' : style.color,
 				backgroundColor: 'transparent',
-				borderBottom: 'none'
+				borderBottom: 'none',
+				visibility: tab === 'map' ? 'hidden' : null
 			};
 		}
 		return style;
