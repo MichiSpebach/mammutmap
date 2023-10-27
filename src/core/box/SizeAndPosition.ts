@@ -134,23 +134,23 @@ export class SizeAndPosition {
     }
 
     public zoomToFit(options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
-        return this.zoomToFitRectWithoutMargin(new LocalRect(-5, -5, 110, 110), options)
+        return this.zoomToFitRectIntern(new LocalRect(-5, -5, 110, 110), options)
     }
 
     public zoomToFitRect(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
         const rectWithMargin = new LocalRect(
-            rect.x - rect.width*1.05,
-            rect.y - rect.height*1.05,
+            rect.x - rect.width*0.05,
+            rect.y - rect.height*0.05,
             rect.width*1.1,
             rect.height*1.1
         )
-        return this.zoomToFitRectWithoutMargin(rectWithMargin, options)
+        return this.zoomToFitRectIntern(rectWithMargin, options)
     }
 
-    private async zoomToFitRectWithoutMargin(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+    private async zoomToFitRectIntern(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
         if (!this.detached) {
             if (!this.referenceNode.isRoot()) {
-                return this.referenceNode.getParent().site.zoomToFitRectWithoutMargin(this.referenceNode.transform.toParentRect(rect), options)
+                return this.referenceNode.getParent().site.zoomToFitRectIntern(this.referenceNode.transform.toParentRect(rect), options)
             }
             this.detached = {
                 shiftX: 0,
@@ -196,8 +196,8 @@ export class SizeAndPosition {
         if (options?.animationIfAlreadyFitting && Math.abs(shiftIncreaseX) < 1 && Math.abs(shiftIncreaseY) < 1 && Math.abs(factor-1) < 0.01) {
             const deltaX = rect.width/100
             const deltaY = rect.height/100
-            await this.zoomToFitRect(new LocalRect(rect.x - deltaX, rect.y - deltaY, rect.width + deltaX*2, rect.height + deltaY*2), {transitionDurationInMS: transitionDurationInMS/2})
-            await this.zoomToFitRect(rect, {transitionDurationInMS: transitionDurationInMS/2})
+            await this.zoomToFitRectIntern(new LocalRect(rect.x - deltaX, rect.y - deltaY, rect.width + deltaX*2, rect.height + deltaY*2), {transitionDurationInMS: transitionDurationInMS/2})
+            await this.zoomToFitRectIntern(rect, {transitionDurationInMS: transitionDurationInMS/2})
             return
         }
 
@@ -232,7 +232,7 @@ export class SizeAndPosition {
         //if (wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*5 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*5) {
         //    if (!(wouldBeWidthInPixels > SizeAndPosition.delegateZoomToChildInPixels*10 || wouldBeHeightInPixels > SizeAndPosition.delegateZoomToChildInPixels*10)) {
                 const rectInChildCoords: LocalRect = childSite.referenceNode.transform.fromParentRect(rect)
-                return childSite.zoomToFitRect(rectInChildCoords, options)
+                return childSite.zoomToFitRectIntern(rectInChildCoords, options)
         //    } else {
         //        const delegationFactor: number = SizeAndPosition.delegateZoomToChildInPixels / Math.min(wouldBeWidthInPixels, wouldBeHeightInPixels)
         //        const widthChange: number = rect.width*delegationFactor - rect.width
@@ -253,7 +253,7 @@ export class SizeAndPosition {
         this.detached = undefined // important to unset unpinning before calling 'transform.toParentRect(rect)' because it should calculate with updated site
         const transitionDurationInMS: number|undefined = options?.transitionDurationInMS
         const rendering = this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
-        const zoomingParent = this.referenceNode.getParent().site.zoomToFitRect(this.referenceNode.transform.toParentRect(rect), options)
+        const zoomingParent = this.referenceNode.getParent().site.zoomToFitRectIntern(this.referenceNode.transform.toParentRect(rect), options)
         await (await rendering).transitionAndRerender
         await zoomingParent
         return

@@ -370,15 +370,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       scaleTool.renderInto(this),
       this.borderingLinks.setHighlightAllThatShouldBeRendered(true),
       this.tabs.renderBar(),
-      this.isFile()
-        ? renderManager.addElementTo(this.getId(), {
-            type: 'button',
-            id: this.getId()+'-openButton',
-            style: {position: 'absolute', top: '4px', right: '4px', cursor: 'pointer'},
-            onclick: () => environment.openFile(this.getSrcPath()),
-            children: 'Open'
-          })
-        : undefined
+      this.addOpenButtonIfFile(RenderPriority.RESPONSIVE)
     ])
   }
 
@@ -392,10 +384,28 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       scaleTool.unrenderFrom(this),
       this.borderingLinks.setHighlightAllThatShouldBeRendered(false),
       this.tabs.unrenderBar(),
-      this.isFile()
-        ? renderManager.remove(this.getId()+'-openButton')
-        : undefined
+      this.removeOpenButtonIfFile(RenderPriority.RESPONSIVE)
     ])
+  }
+
+  private async addOpenButtonIfFile(priority: RenderPriority): Promise<void> {
+    if (!this.isFile()) {
+      return
+    }
+    return renderManager.addElementTo(this.getId(), {
+      type: 'button',
+      id: this.getId()+'-openButton',
+      style: {position: 'absolute', top: '4px', right: '4px', cursor: 'pointer'},
+      onclick: () => environment.openFile(this.getSrcPath()),
+      children: 'Open'
+    }, priority)
+  }
+
+  private async removeOpenButtonIfFile(priority: RenderPriority): Promise<void> {
+    if (!this.isFile()) {
+      return
+    }
+    return renderManager.remove(this.getId()+'-openButton', priority)
   }
 
   public isMapDataFileExisting(): boolean {

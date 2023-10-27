@@ -19,8 +19,12 @@ export class ElectronEnvironmentAdapter implements EnvironmentAdapter {
 	}
 
 	public openFile(path: string): void {
-		shell.openPath(path)
+		shell.openPath(path) // works only for files
 		//this.runShellCommand('code '+path)
+	}
+
+	public openPath(path: string): void {
+		shell.openExternal(path) // works for files and folders
 	}
 
 }
