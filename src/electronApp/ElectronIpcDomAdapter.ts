@@ -203,7 +203,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
     private createHtmlElementJavaScriptAndAddIpcChannelListeners(element: string|RenderElement, elementJsName: string = 'element'): string {
       if (typeof element === 'string') {
-        return `const ${elementJsName} = document.createTextNode("${element}");` // TODO: escape '"'
+        return `const ${elementJsName} = document.createTextNode("${element.replaceAll('"', '\\"')}");`
       }
   
       // TODO: find way to pass object directly to renderer thread and merge attributes into domElement
