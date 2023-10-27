@@ -134,14 +134,23 @@ export class SizeAndPosition {
     }
 
     public zoomToFit(options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
-        //return this.zoomToFitRect(new LocalRect(0, 0, 100, 100), options)
-        return this.zoomToFitRect(new LocalRect(-5, -5, 110, 110), options)
+        return this.zoomToFitRectWithoutMargin(new LocalRect(-5, -5, 110, 110), options)
     }
 
-    public async zoomToFitRect(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+    public zoomToFitRect(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+        const rectWithMargin = new LocalRect(
+            rect.x - rect.width*1.05,
+            rect.y - rect.height*1.05,
+            rect.width*1.1,
+            rect.height*1.1
+        )
+        return this.zoomToFitRectWithoutMargin(rectWithMargin, options)
+    }
+
+    private async zoomToFitRectWithoutMargin(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
         if (!this.detached) {
             if (!this.referenceNode.isRoot()) {
-                return this.referenceNode.getParent().site.zoomToFitRect(this.referenceNode.transform.toParentRect(rect), options)
+                return this.referenceNode.getParent().site.zoomToFitRectWithoutMargin(this.referenceNode.transform.toParentRect(rect), options)
             }
             this.detached = {
                 shiftX: 0,
