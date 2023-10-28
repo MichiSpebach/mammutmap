@@ -80,7 +80,11 @@ class MainWidget extends Widget {
 						overflow: 'auto',
 						transition: 'background-color 0.2s'
 					}),
-					this.toggleSidebarButton.shape()
+					this.toggleSidebarButton.shape({
+						position: 'absolute', 
+						top: '0', 
+						right: '0'
+					})
 				])
 			])
 			pros.push(this.bottomBar.render())
