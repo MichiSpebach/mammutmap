@@ -5184,6 +5184,365 @@
 			"tags": [
 				"hidden"
 			]
+		},
+		{
+			"id": "6g8lsvrhtco",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 100,
+						"y": 44
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "v12f3i9e6eg",
+						"boxName": "Widget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "2orehmt1dfg",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cr2q48p1plg",
+						"boxName": "indexHtmlIds.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "dcj9pg4898o",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "l44ek296tm",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ja8vdv1t5sg",
+						"boxName": "settings",
+						"x": 18,
+						"y": 50
+					},
+					{
+						"boxId": "7b4gp3csto8",
+						"boxName": "settings.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "5pfl9cfs1v8",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 18,
+						"y": 50
+					},
+					{
+						"boxId": "l84ccd69v6g",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "uiqn7hbku1o",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "nsm4nes02ig",
+						"boxName": "shape",
+						"x": 62,
+						"y": 86
+					},
+					{
+						"boxId": "3aafpp0mpt",
+						"boxName": "ClientPosition.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "46ca06j2i28",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 18,
+						"y": 18
+					},
+					{
+						"boxId": "i20ugc3f1e8",
+						"boxName": "RenderElement.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "4nibbieg4e8",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ki9cio7k72g",
+						"boxName": "TerminalWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "tudrqhoc8mo",
+			"from": {
+				"path": [
+					{
+						"boxId": "bj8pttjq0pg",
+						"boxName": "mainWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "fejtsi5j3ro",
+						"boxName": "ToggleSidebarWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "6jn04buks88",
+			"from": {
+				"path": [
+					{
+						"boxId": "fejtsi5j3ro",
+						"boxName": "ToggleSidebarWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "bfgp74asr2",
+			"from": {
+				"path": [
+					{
+						"boxId": "fejtsi5j3ro",
+						"boxName": "ToggleSidebarWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "v12f3i9e6eg",
+						"boxName": "Widget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
+		},
+		{
+			"id": "a81gt5tbefg",
+			"from": {
+				"path": [
+					{
+						"boxId": "fejtsi5j3ro",
+						"boxName": "ToggleSidebarWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "ja8vdv1t5sg",
+						"boxName": "settings",
+						"x": 18,
+						"y": 50
+					},
+					{
+						"boxId": "7b4gp3csto8",
+						"boxName": "settings.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "m8fne05562g",
+			"from": {
+				"path": [
+					{
+						"boxId": "fejtsi5j3ro",
+						"boxName": "ToggleSidebarWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "72ker0hveuo",
+						"boxName": "util",
+						"x": 18,
+						"y": 18
+					},
+					{
+						"boxId": "i20ugc3f1e8",
+						"boxName": "RenderElement.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"hidden"
+			]
 		}
 	],
 	"nodes": [

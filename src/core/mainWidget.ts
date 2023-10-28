@@ -8,6 +8,7 @@ import { util } from './util/util'
 import { ClientPosition } from './shape/ClientPosition'
 import { Style } from './util/RenderElement'
 import { TerminalWidget } from './TerminalWidget'
+import { ToggleSidebarWidget } from './ToggleSidebarWidget'
 
 // TODO: rename to indexWidget|bodyWidget|appWidget|window(Widget)?
 
@@ -15,6 +16,7 @@ export let mainWidget: MainWidget
 
 class MainWidget extends Widget {
 	public readonly sidebar: ToolbarWidget
+	public readonly toggleSidebarButton: ToggleSidebarWidget
 	public readonly bottomBar: ToolbarWidget
 	public readonly terminal: TerminalWidget
 	private map: Map|undefined
@@ -27,6 +29,7 @@ class MainWidget extends Widget {
 		super()
 		this.map = mapWidget
 		this.sidebar = new ToolbarWidget('sidebar')
+		this.toggleSidebarButton = new ToggleSidebarWidget(`${this.getId()}-toggleSidebar`)
 		this.bottomBar = new ToolbarWidget('bottomBar', {hideHeader: true})
 		this.terminal = new TerminalWidget(this.bottomBar.getId()+'-terminal')
 		this.bottomBar.addView({
@@ -76,7 +79,8 @@ class MainWidget extends Widget {
 						backgroundColor: bottomBarBackgroundColor,
 						overflow: 'auto',
 						transition: 'background-color 0.2s'
-					})
+					}),
+					this.toggleSidebarButton.shape()
 				])
 			])
 			pros.push(this.bottomBar.render())
