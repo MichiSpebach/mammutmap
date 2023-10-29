@@ -2,6 +2,8 @@ import { WayPointData } from "../mapData/WayPointData"
 import { Link } from "./Link"
 import { Box } from "../box/Box"
 import { NodeWidget } from "../node/NodeWidget"
+import { LinkEnd } from "./LinkEnd"
+import { log } from "../logService"
 
 export class BorderingLinks {
   private readonly referenceBoxOrNode: Box|NodeWidget
@@ -23,6 +25,18 @@ export class BorderingLinks {
     return allParentLinks.filter(link => {
       return link.getData().from.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxOrNodeId)
           || link.getData().to.path.some((wayPoint: WayPointData) => wayPoint.boxId === boxOrNodeId)
+    })
+  }
+
+  public getAllEnds(): LinkEnd[] {
+    return this.getAll().map(link => {
+      if (link.from.isBoxInPath(this.referenceBoxOrNode)) {
+        return link.from
+      }
+      if (!link.to.isBoxInPath(this.referenceBoxOrNode)) {
+        log.warning(`BorderingLinks::getAllEnds() boxOrNode ${this.referenceBoxOrNode.getName()} is neither in fromEnd nor in toEnd of link ${link.getId()}.`)
+      }
+      return link.to
     })
   }
 

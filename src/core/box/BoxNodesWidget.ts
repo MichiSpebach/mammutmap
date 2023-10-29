@@ -5,6 +5,7 @@ import { NodeData } from '../mapData/NodeData'
 import { Box } from './Box'
 import { util } from '../util/util'
 import { relocationDragManager } from '../RelocationDragManager'
+import { log } from '../logService'
 
 export class BoxNodesWidget extends Widget {
     private readonly referenceBox: Box
@@ -104,6 +105,43 @@ export class BoxNodesWidget extends Widget {
     private formHtmlPlaceholderFor(node: NodeWidget): string {
       const draggableHtml: string = relocationDragManager.isUsingNativeDragEvents() ? 'draggable="true"' : ''
       return `<div id="${node.getId()}" ${draggableHtml}></div>`
+    }
+
+    public async remove(linkNode: NodeWidget, options: {mode: 'reorder bordering links'|'remove bordering links'}): Promise<void> {
+      if (linkNode.borderingLinks.getAll().length !== 0) {
+        if (options.mode === 'remove bordering links') {
+          const removingBorderingLinks: Promise<void>[] = linkNode.borderingLinks.getAll().map(async linkWidget => {
+            await linkWidget.getManagingBoxLinks().removeLink(linkWidget)
+          })
+          await Promise.all(removingBorderingLinks)
+        } else {
+          const reorderingBorderingLinks: Promise<void>[] = linkNode.borderingLinks.getAllEnds().map(async linkEndWidget => {
+            await linkEndWidget.dragAndDrop({dropTarget: linkNode.getParent(), clientPosition: (await linkNode.getClientShape()).getMidPosition()})
+          })
+          await Promise.all(reorderingBorderingLinks)
+        }
+      }
+
+      const widgetIndex: number = this.nodeWidgets.indexOf(linkNode)
+      if (widgetIndex < 0) {
+        log.warning(`BoxNodesWidget::remove(linkNode: '${linkNode.getName()}') linkNode is not in box with name '${this.referenceBox.getName()}'.`)
+        return
+      }
+      this.nodeWidgets.splice(widgetIndex, 1)
+
+      await linkNode.unrender()
+      await renderManager.remove(linkNode.getId())
+
+      const dataIndex: number = this.referenceBox.getMapNodeData().indexOf(linkNode.getMapData())
+      if (dataIndex < 0) {
+        log.warning(`BoxNodesWidget::remove(linkNode: '${linkNode.getName()}') linkNodeData is not in boxData of box with name '${this.referenceBox.getName()}'.`)
+        return
+      }
+      const removedNodeData: NodeData = this.referenceBox.getMapNodeData().splice(dataIndex, 1)[0]
+      if (linkNode.getMapData() !== removedNodeData) {
+        log.warning(`BoxNodesWidget::remove(linkNode: '${linkNode.getName()}') removed wrong node in boxData of box with name '${this.referenceBox.getName()}'.`)
+      }
+      await this.referenceBox.saveMapData()
     }
 
 }

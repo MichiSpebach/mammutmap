@@ -92,7 +92,10 @@ export function openForSourcelessBox(box: SourcelessBox, position: ClientPositio
 }
 
 export function openForNode(node: NodeWidget, position: ClientPosition): void {
-  const items: MenuItem[] = []
+  const items: MenuItem[] = [
+    //buildAddLinkItem(node), TODO
+    buildRemoveLinkNodeItem(node)
+  ]
 
   if (settings.getBoolean('developerMode')) {
     items.push(buildDetailsItem('NodeDetails', node))
@@ -132,6 +135,40 @@ function buildRemoveOutgoingLinksItem(box: Box): MenuItemFile {
 
 function buildAddNodeItem(box: Box, position: ClientPosition): MenuItemFile {
   return new MenuItemFile({label: 'add link node here', click: () => addNodeToBox(box, position)})
+}
+
+function buildRemoveLinkNodeItem(linkNode: NodeWidget): MenuItemFile {
+  return new MenuItemFile({label: 'remove link node', click: async () => {
+    if (linkNode.borderingLinks.getAll().length === 0) {
+      linkNode.getParent().nodes.remove(linkNode, {mode: 'reorder bordering links'})
+      return
+    }
+
+    const pupup: PopupWidget = await PopupWidget.newAndRender({title: 'Remove LinkNode', content: [
+      {
+        type: 'div', 
+        children: `Link node '${linkNode.getName()}' has bordering links.`
+      },
+      {
+        type: 'button',
+        style: {margin: '4px', cursor: 'pointer'},
+        children: 'reorder bordering links',
+        onclick: () => {
+          linkNode.getParent().nodes.remove(linkNode, {mode: 'reorder bordering links'})
+          pupup.unrender()
+        }
+      },
+      {
+        type: 'button',
+        style: {margin: '4px', cursor: 'pointer'},
+        children: 'remove bordering links', 
+        onclick: () => {
+          linkNode.getParent().nodes.remove(linkNode, {mode: 'remove bordering links'})
+          pupup.unrender()
+        }
+      }
+    ]})
+  }})
 }
 
 function buildTagLinkItemFolder(link: Link): MenuItemFolder {

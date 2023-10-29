@@ -91,6 +91,11 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     this.dragState = null
   }
 
+  public async dragAndDrop(options: {dropTarget: Box|NodeWidget, clientPosition: ClientPosition, snapToGrid?: boolean}): Promise<void> {
+    this.dragState = {snapToGrid: false, ...options}
+    return this.dragEnd(options.dropTarget)
+  }
+
   public async reorderMapDataPathWithoutRender(options: {
     newManagingBoxForValidation: Box
     movedWayPoint: Box|NodeWidget
