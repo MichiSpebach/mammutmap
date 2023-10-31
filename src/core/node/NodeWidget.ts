@@ -127,7 +127,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
             pros.push(relocationDragManager.addDropTarget(this))
             pros.push(relocationDragManager.addDraggable(this, priority))
             pros.push(HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut()))
-            pros.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForNode(this, new ClientPosition(clientX, clientY))))
+            pros.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLinkNode(this, new ClientPosition(clientX, clientY))))
         }
         
         await Promise.all(pros)
