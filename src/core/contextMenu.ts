@@ -91,14 +91,14 @@ export function openForSourcelessBox(box: SourcelessBox, position: ClientPositio
   contextMenuPopup.popup(items, position)
 }
 
-export function openForNode(node: NodeWidget, position: ClientPosition): void {
+export function openForLinkNode(linkNode: NodeWidget, position: ClientPosition): void {
   const items: MenuItem[] = [
-    //buildAddLinkItem(node), TODO
-    buildRemoveLinkNodeItem(node)
+    buildAddLinkItem(linkNode, position),
+    buildRemoveLinkNodeItem(linkNode)
   ]
 
   if (settings.getBoolean('developerMode')) {
-    items.push(buildDetailsItem('NodeDetails', node))
+    items.push(buildDetailsItem('NodeDetails', linkNode))
   }
 
   contextMenuPopup.popup(items, position)
@@ -123,8 +123,9 @@ function buildOpenFileInEditorItem(box: FileBox): MenuItemFile {
   }})
 }
 
-function buildAddLinkItem(box: Box, position: ClientPosition): MenuItemFile {
-  return new MenuItemFile({label: 'link from here', click: () => addLinkToBox(box, position)})
+function buildAddLinkItem(node: Box|NodeWidget, position: ClientPosition): MenuItemFile {
+  const managingBoxAtStart: Box = node instanceof Box ? node : node.getParent()
+  return new MenuItemFile({label: 'link from here', click: () => addLinkWithClickToDropMode(managingBoxAtStart, position, node)})
 }
 
 function buildRemoveOutgoingLinksItem(box: Box): MenuItemFile {
@@ -269,14 +270,14 @@ function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
 }
 
 // TODO: move into Box?
-async function addLinkToBox(box: Box, position: ClientPosition): Promise<void> {
-  const positionInBox: LocalPosition = await box.transform.clientToLocalPosition(position)
+async function addLinkWithClickToDropMode(managingBoxAtStart: Box, positionAtStart: ClientPosition, fromNode: Box|NodeWidget): Promise<void> {
+  const positionAtStartInBox: LocalPosition = await managingBoxAtStart.transform.clientToLocalPosition(positionAtStart)
 
-  const from = {node: box, positionInFromNodeCoords: positionInBox}
-  const to = {node: box, positionInToNodeCoords: positionInBox}
-  const link: Link = await box.links.add({from, to, save: false})
+  const from = {node: fromNode, positionInFromNodeCoords: positionAtStartInBox}
+  const to = {node: managingBoxAtStart, positionInToNodeCoords: positionAtStartInBox}
+  const link: Link = await managingBoxAtStart.links.add({from, to, save: false})
 
-  await relocationDragManager.startDragWithClickToDropMode(link.getTo())
+  await relocationDragManager.startDragWithClickToDropMode(link.to)
 }
 
 async function addNodeToBox(box: Box, position: ClientPosition): Promise<void> {
