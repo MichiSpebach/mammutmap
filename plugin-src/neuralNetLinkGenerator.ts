@@ -22,8 +22,8 @@ async function generateOutgoingLinksForBox(box: FileBox): Promise<void> {
     let foundLinksAlreadyExistedCount: number = 0
     await Promise.all(paths.map(async path => {
         const report = await pluginFacade.addLink(box, path, {onlyReturnWarnings: true})
-        foundLinksCount += report.link ? 1 : 0
-        foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0
+        foundLinksCount += report.linkRoute ? 1 : 0
+        foundLinksAlreadyExistedCount += report.linkRouteAlreadyExisted ? 1 : 0
     }))
 
     coreUtil.logInfo(`Found ${foundLinksCount} links for '${box.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`)

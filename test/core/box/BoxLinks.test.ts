@@ -3,18 +3,13 @@ import { FileBox } from '../../../src/core/box/FileBox'
 import { RootFolderBox } from '../../../src/core/box/RootFolderBox'
 import { Link } from '../../../src/core/link/Link'
 import * as boxFactory from './factories/boxFactory'
-import * as linkNodeFactory from '../node/factories/nodeWidgetFactory'
-import { mock } from 'jest-mock-extended'
-import { RenderManager, init as initRenderManager } from '../../../src/core/RenderManager'
-import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
 import { NodeWidget } from '../../../src/core/node/NodeWidget'
 import { NodeData } from '../../../src/core/mapData/NodeData'
 import { FolderBox } from '../../../src/core/box/FolderBox'
-import { util } from '../../../src/core/util/util'
+import * as testUtil from '../../testUtil'
 
 test('add link between Boxes', async () => {
-	initRenderManager(mock<RenderManager>()) // TODO: use init function in util
-	initBoxManager(mock<BoxManager>())
+	testUtil.initGeneralServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const from: FolderBox = boxFactory.folderOf({idOrData: 'from', parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -28,8 +23,7 @@ test('add link between Boxes', async () => {
 })
 
 test('add link between nested Boxes', async () => {
-	initRenderManager(mock<RenderManager>()) // TODO: use init function in util
-	initBoxManager(mock<BoxManager>())
+	testUtil.initGeneralServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const fromOuter: FolderBox = boxFactory.folderOf({idOrData: 'fromOuter', parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -45,8 +39,7 @@ test('add link between nested Boxes', async () => {
 })
 
 test('add link between LinkNodes', async () => {
-	initRenderManager(mock<RenderManager>()) // TODO: use init function in util
-	initBoxManager(mock<BoxManager>())
+	testUtil.initGeneralServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 
@@ -65,28 +58,26 @@ test('add link between LinkNodes', async () => {
 	expect(link.to.getRenderedPathWithoutManagingBox().map(node => node.getId())).toEqual(['to', toNode.getId()])
 })
 
-test('getLinkRouteWithEndBoxes no links exist', () => {
+test('findLinkRoute no links exist', () => {
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root'})
 	const from: FileBox = boxFactory.fileOf({idOrData: 'from', parent: root, addToParent: false})
 	const to: FileBox = boxFactory.fileOf({idOrData: 'to', parent: root, addToParent: false})
-	expect(BoxLinks.getLinkRouteWithEndBoxes(from, to)).toBe(undefined)
+	expect(BoxLinks.findLinkRoute(from, to)).toBe(undefined)
 })
 
-test('getLinkRouteWithEndBoxes directly connected', async () => {
-	initRenderManager(mock<RenderManager>()) // TODO: use init function in util
-	initBoxManager(mock<BoxManager>())
+test('findLinkRoute directly connected', async () => {
+	testUtil.initGeneralServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const from: FileBox = boxFactory.fileOf({idOrData: 'from', parent: root, addToParent: true, rendered: true})
 	const to: FileBox = boxFactory.fileOf({idOrData: 'to', parent: root, addToParent: true, rendered: true})
 
 	const link: Link = await root.links.add({from: {node: from}, to: {node: to}, save: false})
-	expect(BoxLinks.getLinkRouteWithEndBoxes(from, to)).toEqual([link])
+	expect(BoxLinks.findLinkRoute(from, to)).toEqual([link])
 })
 
-test('getLinkRouteWithEndBoxes one node between', async () => {
-	initRenderManager(mock<RenderManager>()) // TODO: use init function in util
-	initBoxManager(mock<BoxManager>())
+test('findLinkRoute one node between', async () => {
+	testUtil.initGeneralServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const fromOuter: FolderBox = boxFactory.folderOf({idOrData: 'fromOuter', parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -97,12 +88,21 @@ test('getLinkRouteWithEndBoxes one node between', async () => {
 
 	const link1: Link = await fromOuter.links.add({from: fromInner, to: node, save: false})
 	const link2: Link = await root.links.add({from: node, to, save: false})
-	expect(BoxLinks.getLinkRouteWithEndBoxes(fromInner, to)?.map(link => link.getId())).toEqual([link1.getId(), link2.getId()])
+	expect(BoxLinks.findLinkRoute(fromInner, to)?.map(link => link.getId())).toEqual([link1.getId(), link2.getId()])
 })
 
-test('getLinkRouteWithEndBoxes two nodes between', async () => {
-	initRenderManager(mock<RenderManager>()) // TODO: use init function in util
-	initBoxManager(mock<BoxManager>())
+test('findLinkRoute two nodes between', async () => {
+	const {from, to, link1, link2, link3} = await buildScenarioWithTwoNodesBetween()
+	expect(BoxLinks.findLinkRoute(from, to)?.map(link => link.getId())).toEqual([link1.getId(), link2.getId(), link3.getId()])
+})
+
+test('findLinkRoute route exists but too many hops', async () => {
+	const {from, to} = await buildScenarioWithTwoNodesBetween()
+	expect(BoxLinks.findLinkRoute(from, to, {maxHops: 1})?.map(link => link.getId())).toEqual(undefined)
+})
+
+async function buildScenarioWithTwoNodesBetween(): Promise<{from: FileBox, to: FileBox, link1: Link, link2: Link, link3: Link}> {
+	testUtil.initGeneralServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 
@@ -119,5 +119,33 @@ test('getLinkRouteWithEndBoxes two nodes between', async () => {
 	const link1: Link = await fromOuter.links.add({from: fromInner, to: fromNode, save: true})
 	const link2: Link = await root.links.add({from: fromNode, to: toNode, save: true})
 	const link3: Link = await toOuter.links.add({from: toNode, to: toInner, save: true})
-	expect(BoxLinks.getLinkRouteWithEndBoxes(fromInner, toInner)?.map(link => link.getId())).toEqual([link1.getId(), link2.getId(), link3.getId()])
+	return {from: fromInner, to: toInner, link1, link2, link3}
+}
+
+test('findLinkRoute some link exists but not connected', async () => {
+	testUtil.initGeneralServicesWithMocks()
+
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const fromOuter: FolderBox = boxFactory.folderOf({idOrData: 'fromOuter', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	await fromOuter.nodes.add(NodeData.buildNew(50, 50))
+	const node: NodeWidget = fromOuter.nodes.getNodes()[0]
+	const fromInner: FileBox = boxFactory.fileOf({idOrData: 'fromInner', parent: fromOuter, addToParent: true, rendered: true, bodyRendered: true})
+	const to: FileBox = boxFactory.fileOf({idOrData: 'to', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+
+	const link1: Link = await fromOuter.links.add({from: fromInner, to: node, save: true})
+	expect(BoxLinks.findLinkRoute(fromInner, to)?.map(link => link.getId())).toEqual(undefined)
+})
+
+test('findLinkRoute file between but no LinkNode', async () => {
+	testUtil.initGeneralServicesWithMocks()
+
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const fromOuter: FolderBox = boxFactory.folderOf({idOrData: 'fromOuter', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const fromInner: FileBox = boxFactory.fileOf({idOrData: 'fromInner', parent: fromOuter, addToParent: true, rendered: true, bodyRendered: true})
+	const fileBetween: FileBox = boxFactory.fileOf({idOrData: 'fileBetween', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const to: FileBox = boxFactory.fileOf({idOrData: 'to', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+
+	const link1: Link = await root.links.add({from: fromInner, to: fileBetween, save: true})
+	const link2: Link = await root.links.add({from: fileBetween, to, save: true})
+	expect(BoxLinks.findLinkRoute(fromInner, to)?.map(link => link.getId())).toEqual(undefined)
 })

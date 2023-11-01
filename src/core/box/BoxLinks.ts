@@ -147,6 +147,7 @@ export class BoxLinks extends Widget {
       this.rendered = false
     })}
 
+    /** @deprecated use findLinkRoute(..) instead */
     public getLinkWithEndBoxes(from: Box, to: Box): Link|undefined {
       return this.links.find((link: Link) => {
         const linkFromWayPoints: WayPointData[] = link.getData().from.path
@@ -157,9 +158,9 @@ export class BoxLinks extends Widget {
       })
     }
 
-    public static getLinkRouteWithEndBoxes(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxNodes: number} = {maxNodes: 2,}): Link[]|undefined {
+    public static findLinkRoute(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxHops: number} = {maxHops: 4}): Link[]|undefined {
       const directed: boolean = false
-      if (options.maxNodes < 0) {
+      if (options.maxHops < 0) {
         return undefined
       }
       for (const link of from.borderingLinks.getOutgoing()) {
@@ -167,12 +168,15 @@ export class BoxLinks extends Widget {
         if (node.getId() === to.getId()) {
           return [link]
         }
+        if (!(node instanceof NodeWidget)) {
+          continue
+        }
         const linkToPath: WayPointData[] = link.getData().to.path
         const linkTargetId: string = linkToPath[linkToPath.length-1].boxId
         if (linkTargetId !== node.getId()) {
           log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) linkTargetId(${linkTargetId}) does not match deepestRenderedNodeId(${node.getId()}).`)
         }
-        const route: Link[]|undefined = this.getLinkRouteWithEndBoxes(node, to, {maxNodes: options.maxNodes--})
+        const route: Link[]|undefined = this.findLinkRoute(node, to, {maxHops: options.maxHops-1})
         if (route) {
           return [link, ...route]
         }

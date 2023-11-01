@@ -7,7 +7,6 @@ import { util } from './core/util/util'
 import { ChildProcess, environment } from './core/environmentAdapter'
 import { WayPointData } from './core/mapData/WayPointData'
 import { BoxWatcher } from './core/box/BoxWatcher'
-import { LinkEndData } from './core/mapData/LinkEndData'
 import * as boxFinder from './core/pluginUtil/boxFinder'
 import { Link, LinkImplementation, override as overrideLink } from './core/link/Link'
 import { applicationMenu } from './core/applicationMenu/applicationMenu'
@@ -33,6 +32,7 @@ import { PopupWidget } from './core/PopupWidget'
 import { TextInputPopup } from './core/TextInputPopup';
 import { settings } from './core/settings/settings'
 import { log } from './core/logService'
+import { BoxLinks } from './core/box/BoxLinks'
 
 
 export { util as coreUtil }
@@ -190,8 +190,8 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   onlyReturnWarnings?: boolean
   registerBoxWatchersInsteadOfUnwatch?: boolean
 }): Promise<{
-  link: Link | undefined,
-  linkAlreadyExisted: boolean,
+  linkRoute: Link[]|undefined,
+  linkRouteAlreadyExisted: boolean,
   warnings?: string[]
 }> {
   const toReport = await findBoxBySourcePath(toFilePath, fromBox.getParent(), { ...options, registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch })
@@ -201,33 +201,33 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
       util.logWarning(message)
     }
     const warnings: string[] = toReport.warnings ? toReport.warnings.concat(message) : [message]
-    return { link: undefined, linkAlreadyExisted: false, warnings }
+    return { linkRoute: undefined, linkRouteAlreadyExisted: false, warnings }
   }
 
   const toBox: Box = await toReport.boxWatcher.get()
 
-  const { link, linkAlreadyExisted } = await addLinkBetweenBoxes(fromBox, toBox)
+  const { linkRoute, linkRouteAlreadyExisted } = await addLinkBetweenBoxes(fromBox, toBox)
 
   if (!options?.registerBoxWatchersInsteadOfUnwatch) {
     toReport.boxWatcher.unwatch()
   }
 
-  return { link, linkAlreadyExisted, warnings: toReport.warnings }
+  return { linkRoute, linkRouteAlreadyExisted, warnings: toReport.warnings }
 }
 
 export async function addLinkBetweenBoxes(fromBox: Box, toBox: Box): Promise<{
-  link: Link | undefined,
-  linkAlreadyExisted: boolean
+  linkRoute: Link[]|undefined,
+  linkRouteAlreadyExisted: boolean
 }> {
   const managingBox: Box = Box.findCommonAncestor(fromBox, toBox).commonAncestor;
 
-  let link: Link | undefined = managingBox.links.getLinkWithEndBoxes(fromBox, toBox)
-  const linkAlreadyExisted: boolean = !!link
-  if (!link) {
-    link = await managingBox.links.add({from: fromBox, to: toBox, save: true})
+  let linkRoute: Link[]|undefined = BoxLinks.findLinkRoute(fromBox, toBox)
+  const linkRouteAlreadyExisted: boolean = !!linkRoute
+  if (!linkRoute) {
+    linkRoute = [await managingBox.links.add({from: fromBox, to: toBox, save: true})]
   }
 
-  return { link, linkAlreadyExisted }
+  return { linkRoute, linkRouteAlreadyExisted }
 }
 
 async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {

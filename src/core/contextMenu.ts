@@ -2,10 +2,8 @@ import { util } from './util/util'
 import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
-import { WayPointData } from './mapData/WayPointData'
 import { Link } from './link/Link'
 import { relocationDragManager } from './RelocationDragManager'
-import { LinkEndData } from './mapData/LinkEndData'
 import { ClientPosition } from './shape/ClientPosition'
 import { LocalPosition } from './shape/LocalPosition'
 import { BoxData } from './mapData/BoxData'
@@ -39,7 +37,7 @@ export function addFileBoxMenuItem(generator: (box: FileBox) => MenuItem|undefin
 
 export function openForFileBox(box: FileBox, position: ClientPosition): void {
   const items: MenuItem[] = [
-    buildOpenFileInEditorItem(box),
+    //buildOpenFileInEditorItem(box),
     buildAddLinkItem(box, position),
     buildAddNodeItem(box, position),
     buildRenameBoxItem(box),

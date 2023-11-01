@@ -83,8 +83,8 @@ async function addLinks(fromBox: FileBox, relativeToFilePaths: string[]): Promis
     const normalizedRelativeToFilePath: string = normalizeRelativeImportPath(relativeToFilePath)
     const report = await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, {registerBoxWatchersInsteadOfUnwatch: true})
 
-    foundLinksCount += report.link ? 1 : 0
-    foundLinksAlreadyExistedCount += report.linkAlreadyExisted ? 1 : 0
+    foundLinksCount += report.linkRoute ? 1 : 0
+    foundLinksAlreadyExistedCount += report.linkRouteAlreadyExisted ? 1 : 0
   }
 
   coreUtil.logInfo(`Found ${foundLinksCount} links for '${fromBox.getName()}', ${foundLinksAlreadyExistedCount} of them already existed.`)

@@ -34,11 +34,16 @@ export async function addLinks(cycles: Cycle[], moduleNamePathDictionary: Map<st
 
             const result = await pluginFacade.addLink((await fromBox.get()) as FileBox, (await toBox.get()).getSrcPath())
             
-            if (result.link && !result.link.includesTag('part of cycle')) {
-                await result.link.addTag('part of cycle')
-                if(!result.linkAlreadyExisted) {
-                    await result.link.addTag('created and removed by pactCycleDetector') // use maintanence mechanism as soon as available
-                }
+            if (result.linkRoute) {
+                await Promise.all(result.linkRoute.map(async link => {
+                    if (link.includesTag('part of cycle')) {
+                        return
+                    }
+                    await link.addTag('part of cycle')
+                    if(!result.linkRouteAlreadyExisted) {
+                        await link.addTag('created and removed by pactCycleDetector') // use maintanence mechanism as soon as available
+                    }
+                }))
             }
 
             await Promise.all([
