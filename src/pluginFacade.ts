@@ -33,11 +33,12 @@ import { TextInputPopup } from './core/TextInputPopup';
 import { settings } from './core/settings/settings'
 import { log } from './core/logService'
 import { BoxLinks } from './core/box/BoxLinks'
+import { MenuItemFolder } from './core/applicationMenu/MenuItemFolder'
 
 
 export { util as coreUtil }
 export { environment, ChildProcess }
-export { applicationMenu, contextMenu, MenuItemFile }
+export { applicationMenu, contextMenu, MenuItemFile, MenuItemFolder }
 export { renderManager, RenderPriority, Subscribers }
 export { RenderElements, RenderElement, ElementType, Style }
 export { style }
@@ -224,7 +225,9 @@ export async function addLinkBetweenBoxes(fromBox: Box, toBox: Box): Promise<{
   let linkRoute: Link[]|undefined = BoxLinks.findLinkRoute(fromBox, toBox)
   const linkRouteAlreadyExisted: boolean = !!linkRoute
   if (!linkRoute) {
-    linkRoute = [await managingBox.links.add({from: fromBox, to: toBox, save: true})]
+    const link: Link = await managingBox.links.add({from: fromBox, to: toBox, save: true})
+    await link.addTag('autoMaintained')
+    linkRoute = [link]
   }
 
   return { linkRoute, linkRouteAlreadyExisted }
