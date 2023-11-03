@@ -1,6 +1,6 @@
 import { FolderBox } from '../dist/core/box/FolderBox'
 import * as pluginFacade from '../dist/pluginFacade'
-import { contextMenu, MenuItemFile, Box, FileBox } from '../dist/pluginFacade'
+import { contextMenu, MenuItemFile, MenuItemFolder, Box, FileBox } from '../dist/pluginFacade'
 import { coreUtil } from '../dist/pluginFacade'
 import * as pathFinder from './neuralNetLinkGenerator/pathFinder'
 import * as typeFinder from './neuralNetLinkGenerator/typeFinder'
@@ -9,31 +9,33 @@ contextMenu.addFileBoxMenuItem((box: FileBox) => {
     return new MenuItemFile({label: 'generate outgoing links', click: () => generateOutgoingLinksForFile(box)})
 })
 contextMenu.addFolderBoxMenuItem((box: FolderBox) => {
-    return new MenuItemFile({label: 'generate outgoing links for files in this folder', click: () => generateOutgoingLinksForAllFilesInFolder(box)})
-})
-contextMenu.addFolderBoxMenuItem((box: FolderBox) => {
-    return new MenuItemFile({label: 'generate outgoing links recursively...', click: () => openDialogForGenerateOutgoingLinksRecursively(box)})
+    return new MenuItemFolder({label: 'generate outgoing links', submenu: [
+        new MenuItemFile({label: 'for files in this folder only', click: () => generateOutgoingLinksForAllFilesInFolder(box)}),
+        new MenuItemFile({label: 'recursively...', click: () => openDialogForGenerateOutgoingLinksRecursively(box)})
+    ]})
 })
 
 async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox): Promise<void> {
-    const popup: pluginFacade.PopupWidget = await pluginFacade.PopupWidget.newAndRender({title: 'generate outgoing links recursively', content: [
-        'Are you sure? Be aware of following:',
-        {type: 'div', children: '- This may take a while (depending on how many files there are)'},
-        {type: 'div', children: '- Lots of links may be added that are more confusing than helping because:'},
-        {type: 'div', children: '-- There is no linkBundler.js plugin yet'},
-        {type: 'div', children: '-- There is no boxOrderer.js plugin yet'},
-        {type: 'div', children: '-- There is no autoTagger.js plugin yet'},
+    const popup: pluginFacade.PopupWidget = await pluginFacade.PopupWidget.newAndRender({title: 'Generate Outgoing Links Recursively', content: [
+        {type: 'div', style: {marginTop: '8px'}, children: 'Are you sure?'},
         {
-            type: 'button', 
-            children: `Only generate links for files in folder '${folder.getName()}'`,
-                onclick: () => {
-                generateOutgoingLinksForAllFilesInFolder(folder)
-                popup.unrender()
-            }
+            type: 'ul',
+            children: [
+                {type: 'li', children: 'This may take a while (depending on how many files there are)'},
+                {type: 'li', children: 'Lots of links may be added that are more confusing than helping because:'},
+                {
+                    type: 'ul',
+                    children: [
+                        {type: 'li', children: 'There is no linkBundler.js plugin yet'},
+                        {type: 'li', children: 'There is no boxOrderer.js plugin yet'},
+                        {type: 'li', children: 'There is no autoTagger.js plugin yet'}
+                    ]
+                }
+            ]
         },
         {
             type: 'button', 
-            children: `Yes bring in on!`, 
+            children: `Yes, bring in on!`, 
             onclick: () => {
                 generateOutgoingLinksRecursively(folder)
                 popup.unrender()

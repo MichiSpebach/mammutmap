@@ -22,7 +22,7 @@ export type RenderElement = {
   children?: RenderElements
 }
 
-export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'pre'|'button'|'input'/*|'checkbox' TODO map to <input type="checkbox">*/|'select'|'option'
+export type ElementType = 'div'|'span'|'table'|'tr'|'td'|'ul'|'li'|'pre'|'button'|'input'/*|'checkbox' TODO map to <input type="checkbox">*/|'select'|'option'
 
 /**
  * when adding/amending Style to an Element:
