@@ -168,13 +168,14 @@ export class BoxLinks extends Widget {
         if (node.getId() === to.getId()) {
           return [link]
         }
-        if (!(node instanceof NodeWidget)) {
-          continue
-        }
         const linkToPath: WayPointData[] = link.getData().to.path
         const linkTargetId: string = linkToPath[linkToPath.length-1].boxId
         if (linkTargetId !== node.getId()) {
           log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) linkTargetId(${linkTargetId}) does not match deepestRenderedNodeId(${node.getId()}).`)
+        }
+        if (!(node instanceof NodeWidget)) {
+          // TODO this also ignores inner LinkNodes that are not rendered, improve
+          continue
         }
         const route: Link[]|undefined = this.findLinkRoute(node, to, {maxHops: options.maxHops-1})
         if (route) {

@@ -30,9 +30,14 @@ export interface ContextMenuPopup {
 }
 
 const fileBoxMenuItemGenerators: ((box: FileBox) => MenuItem|undefined)[] = []
+const folderBoxMenuItemGenerators: ((box: FolderBox) => MenuItem|undefined)[] = []
 
 export function addFileBoxMenuItem(generator: (box: FileBox) => MenuItem|undefined): void {
   fileBoxMenuItemGenerators.push(generator)
+}
+
+export function addFolderBoxMenuItem(generator: (box: FolderBox) => MenuItem|undefined): void {
+  folderBoxMenuItemGenerators.push(generator)
 }
 
 export function openForFileBox(box: FileBox, position: ClientPosition): void {
@@ -71,6 +76,13 @@ export function openForFolderBox(box: FolderBox, position: ClientPosition): void
   if (settings.getBoolean('developerMode')) {
     items.push(buildDetailsItem('FolderBoxDetails', box))
   }
+
+  folderBoxMenuItemGenerators.forEach(async generator => {
+    const menuItem: MenuItem|undefined = generator(box)
+    if (menuItem) {
+      items.push(menuItem)
+    }
+  })
 
   contextMenuPopup.popup(items, position)
 }
