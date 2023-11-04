@@ -34,6 +34,7 @@ import { settings } from './core/settings/settings'
 import { log } from './core/logService'
 import { BoxLinks } from './core/box/BoxLinks'
 import { MenuItemFolder } from './core/applicationMenu/MenuItemFolder'
+import { FileBoxDepthTreeIterator } from './core/box/FileBoxDepthTreeIterator'
 
 
 export { util as coreUtil }
@@ -54,6 +55,7 @@ export { LinkAppearanceData, LinkAppearanceMode, linkAppearanceModes }
 export { LinkTagData }
 export { WayPointData }
 export { Transform, LocalPosition }
+export { FileBoxDepthTreeIterator }
 export { BoxWatcher }
 export { Box, FileBox, RootFolderBox }
 export { BoxHeader }
@@ -62,9 +64,6 @@ export { Link, LinkImplementation, overrideLink }
 export { LinkLine, LinkLineImplementation, overrideLinkLine }
 export { NodeWidget }
 export { log }
-
-
-let boxWatchers: BoxWatcher[] = []
 
 export class Message {
   public constructor(
@@ -94,108 +93,15 @@ export function getMap(): Map | Message {
   return map
 }
 
-export class FileBoxDepthTreeIterator {
-  private readonly boxIterators: BoxIterator[]
-  private nextBox: FileBox | null
-
-  public constructor(rootBox: FolderBox) {
-    this.boxIterators = []
-    this.boxIterators.push(new BoxIterator(rootBox.getBoxes()))
-    this.nextBox = null
-  }
-
-  public async hasNext(): Promise<boolean> {
-    await this.prepareNext()
-    if (!this.nextBox) {
-      clearWatchedBoxes() // TODO: implement better solution
-    }
-    return this.nextBox !== null
-  }
-
-  public async next(): Promise<FileBox | never> {
-    await this.prepareNext()
-    if (!this.nextBox) {
-      util.logError('next() was called, but there are no FileBoxes left, call hasNext() to check if next exists')
-    }
-
-    const nextBox = this.nextBox
-    this.nextBox = null
-    return nextBox;
-  }
-
-  private async prepareNext(): Promise<void> {
-    if (this.nextBox || this.boxIterators.length === 0) {
-      return
-    }
-
-    const currentBoxIterator = this.getCurrentBoxIterator()
-    if (currentBoxIterator.hasNext()) {
-      const nextBox: Box = currentBoxIterator.next()
-      await addWatcherAndUpdateRenderFor(nextBox)
-      if (nextBox.isFile()) {
-        this.nextBox = nextBox as FileBox
-      } else if (nextBox.isFolder()) {
-        this.boxIterators.push(new BoxIterator((nextBox as FolderBox).getBoxes()))
-        await this.prepareNext()
-      } else if (nextBox.isSourceless()) {
-        await this.prepareNext()
-      } else {
-        util.logWarning('nextBox (id ' + nextBox.getId() + ') is neither FileBox nor FolderBox nor SourcelessBox')
-        await this.prepareNext()
-      }
-    } else {
-      this.boxIterators.pop()
-      await this.prepareNext()
-    }
-  }
-
-  private getCurrentBoxIterator(): BoxIterator {
-    return this.boxIterators[this.boxIterators.length - 1]
-  }
-}
-
-class BoxIterator {
-  private readonly boxes: Box[]
-  private nextIndex: number
-
-  public constructor(boxes: Box[]) {
-    this.boxes = this.sortBoxesByFilesFirst(boxes)
-    this.nextIndex = 0
-  }
-
-  private sortBoxesByFilesFirst(boxes: Box[]): Box[] {
-    const fileBoxes: Box[] = []
-    const folderBoxes: Box[] = []
-
-    for (const box of boxes) {
-      if (box.isFile()) {
-        fileBoxes.push(box)
-      } else {
-        folderBoxes.push(box)
-      }
-    }
-
-    return fileBoxes.concat(folderBoxes)
-  }
-
-  public hasNext(): boolean {
-    return this.nextIndex < this.boxes.length
-  }
-
-  public next(): Box {
-    return this.boxes[this.nextIndex++]
-  }
-}
-
 export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
   onlyReturnWarnings?: boolean
-  registerBoxWatchersInsteadOfUnwatch?: boolean
+  delayUnwatchingOfBoxesInMS?: number
 }): Promise<{
   linkRoute: Link[]|undefined,
   linkRouteAlreadyExisted: boolean,
   warnings?: string[]
 }> {
-  const toReport = await findBoxBySourcePath(toFilePath, fromBox.getParent(), { ...options, registerBoxWatcher: options?.registerBoxWatchersInsteadOfUnwatch })
+  const toReport = await findBoxBySourcePath(toFilePath, fromBox.getParent(), options)
   if (!toReport.boxWatcher) {
     const message: string = 'failed to add link because file for toFilePath "' + toFilePath + '" was not found'
     if (!options?.onlyReturnWarnings) {
@@ -209,7 +115,9 @@ export async function addLink(fromBox: FileBox, toFilePath: string, options?: {
 
   const { linkRoute, linkRouteAlreadyExisted } = await addLinkBetweenBoxes(fromBox, toBox)
 
-  if (!options?.registerBoxWatchersInsteadOfUnwatch) {
+  if (options?.delayUnwatchingOfBoxesInMS) {
+    setTimeout(() => toReport.boxWatcher!.unwatch(), options.delayUnwatchingOfBoxesInMS)
+  } else {
     toReport.boxWatcher.unwatch()
   }
 
@@ -226,41 +134,17 @@ export async function addLinkBetweenBoxes(fromBox: Box, toBox: Box): Promise<{
   const linkRouteAlreadyExisted: boolean = !!linkRoute
   if (!linkRoute) {
     const link: Link = await managingBox.links.add({from: fromBox, to: toBox, save: true})
-    await link.addTag('autoMaintained')
+    await link.setAutoMaintained(true)
     linkRoute = [link]
   }
 
   return { linkRoute, linkRouteAlreadyExisted }
 }
 
-async function addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
-  const boxWatcher = new BoxWatcher(box)
-  await box.addWatcherAndUpdateRender(boxWatcher)
-  boxWatchers.push(boxWatcher)
-}
-
 export async function findBoxBySourcePath(
   path: string,
   baseOfPath: FolderBox,
-  options?: {
-    onlyReturnWarnings?: boolean
-    registerBoxWatcher?: boolean
-  }
+  options?: {onlyReturnWarnings?: boolean}
 ): Promise<{ boxWatcher?: BoxWatcher, warnings?: string[] }> {
-  const report = await boxFinder.findBox(path, baseOfPath, options)
-
-  if (report.boxWatcher && options?.registerBoxWatcher) {
-    boxWatchers.push(report.boxWatcher)
-  }
-
-  return report
-}
-
-export async function clearWatchedBoxes(): Promise<void> {
-  while (boxWatchers.length > 0) {
-    const boxWatcher: BoxWatcher | undefined = boxWatchers.shift()
-    if (boxWatcher) {
-      await boxWatcher.unwatch()
-    }
-  }
+  return boxFinder.findBox(path, baseOfPath, options)
 }

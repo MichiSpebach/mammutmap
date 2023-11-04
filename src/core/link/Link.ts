@@ -304,6 +304,18 @@ export class Link implements Hoverable {
     }
   }
 
+  public isAutoMaintained(): boolean {
+    return this.includesTag('autoMaintained')
+  }
+
+  public setAutoMaintained(value: boolean): Promise<void> {
+    if (value) {
+      return this.addTag('autoMaintained')
+    } else {
+      return this.removeTag('autoMaintained')
+    }
+  }
+
   public getTags(): string[] {
     if (!this.data.tags) {
       return []

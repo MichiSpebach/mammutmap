@@ -74,7 +74,7 @@ async function generateOutgoingLinksForFile(box: FileBox): Promise<void> {
     let foundLinksCount: number = 0
     let foundLinksAlreadyExistedCount: number = 0
     await Promise.all(paths.map(async path => {
-        const report = await pluginFacade.addLink(box, path, {onlyReturnWarnings: true})
+        const report = await pluginFacade.addLink(box, path, {onlyReturnWarnings: true, delayUnwatchingOfBoxesInMS: 500})
         foundLinksCount += report.linkRoute ? 1 : 0
         foundLinksAlreadyExistedCount += report.linkRouteAlreadyExisted ? 1 : 0
     }))

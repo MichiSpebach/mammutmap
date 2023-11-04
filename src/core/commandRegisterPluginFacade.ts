@@ -45,7 +45,7 @@ async function printNextBox(): Promise<void> {
 }
 
 async function clearWatchedBoxes(): Promise<void> {
-  await pluginFacade.clearWatchedBoxes()
+  await iterator.clearWatchedBoxes()
   util.logInfo('watchedBoxes cleared')
 }
 

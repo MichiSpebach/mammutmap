@@ -164,14 +164,15 @@ export class BoxLinks extends Widget {
         return undefined
       }
       for (const link of from.borderingLinks.getOutgoing()) {
-        const node: AbstractNodeWidget = link.to.getDeepestRenderedWayPoint().linkable
+        const node: AbstractNodeWidget = link.to.getDeepestRenderedWayPoint().linkable // TODO? implement solution that always works and reactivate warning below
         if (node.getId() === to.getId()) {
           return [link]
         }
         const linkToPath: WayPointData[] = link.getData().to.path
         const linkTargetId: string = linkToPath[linkToPath.length-1].boxId
         if (linkTargetId !== node.getId()) {
-          log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) linkTargetId(${linkTargetId}) does not match deepestRenderedNodeId(${node.getId()}).`)
+          // deactivated warning for now because it happens too often, TODO reactivate as soon as better solution is implemented
+          //log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) linkTargetId(${linkTargetId}) does not match deepestRenderedNodeId(${node.getId()}).`)
         }
         if (!(node instanceof NodeWidget)) {
           // TODO this also ignores inner LinkNodes that are not rendered, improve

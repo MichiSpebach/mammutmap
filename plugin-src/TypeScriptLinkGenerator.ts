@@ -14,7 +14,6 @@ contextMenu.addFileBoxMenuItem((box: pluginFacade.FileBox) => {
   }
   return new MenuItemFile({label: 'generate outgoing ts links', click: async () => {
     await generateOutgoingLinksForBoxes([box])
-    await pluginFacade.clearWatchedBoxes() // TODO: potential bug, clears all boxWatchers not only the ones that were added
   }})
 })
 
@@ -81,7 +80,7 @@ async function addLinks(fromBox: FileBox, relativeToFilePaths: string[]): Promis
       continue
     }
     const normalizedRelativeToFilePath: string = normalizeRelativeImportPath(relativeToFilePath)
-    const report = await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, {registerBoxWatchersInsteadOfUnwatch: true})
+    const report = await pluginFacade.addLink(fromBox, normalizedRelativeToFilePath, {delayUnwatchingOfBoxesInMS: 500})
 
     foundLinksCount += report.linkRoute ? 1 : 0
     foundLinksAlreadyExistedCount += report.linkRouteAlreadyExisted ? 1 : 0

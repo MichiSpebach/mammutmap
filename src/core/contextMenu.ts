@@ -18,6 +18,7 @@ import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
 import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import { RenderElements } from './util/RenderElement'
 import { environment } from './environmentAdapter'
+import { FileBoxDepthTreeIterator } from './box/FileBoxDepthTreeIterator'
 
 let contextMenuPopup: ContextMenuPopup
 
@@ -46,7 +47,7 @@ export function openForFileBox(box: FileBox, position: ClientPosition): void {
     buildAddLinkItem(box, position),
     buildAddNodeItem(box, position),
     buildRenameBoxItem(box),
-    buildRemoveOutgoingLinksItem(box)
+    buildRemoveOutgoingLinksForFileItem(box)
   ]
 
   if (settings.getBoolean('developerMode')) {
@@ -70,7 +71,7 @@ export function openForFolderBox(box: FolderBox, position: ClientPosition): void
     buildRenameBoxItem(box),
     buildAddNewFileItem(box, position),
     buildAddNewFolderItem(box, position),
-    buildRemoveOutgoingLinksItem(box)
+    buildRemoveOutgoingLinksForFolderItem(box)
   ]
 
   if (settings.getBoolean('developerMode')) {
@@ -138,10 +139,63 @@ function buildAddLinkItem(node: Box|NodeWidget, position: ClientPosition): MenuI
   return new MenuItemFile({label: 'link from here', click: () => addLinkWithClickToDropMode(managingBoxAtStart, position, node)})
 }
 
-function buildRemoveOutgoingLinksItem(box: Box): MenuItemFile {
-  return new MenuItemFile({label: 'remove all outgoing links', click: () => {
-    box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
-  }})
+function buildRemoveOutgoingLinksForFileItem(box: FileBox): MenuItemFolder {
+  return new MenuItemFolder({label: 'remove outgoing links', submenu: [
+    new MenuItemFile({label: 'autoMaintained', click: () => {
+      box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
+    }}),
+    new MenuItemFile({label: 'all', click: () => {
+      box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
+    }})
+  ]})
+}
+
+function buildRemoveOutgoingLinksForFolderItem(box: FolderBox): MenuItemFolder {
+  return new MenuItemFolder({label: 'remove outgoing links', submenu: [
+    new MenuItemFile({label: 'autoMaintained of this folder', click: () => {
+      box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
+    }}),
+    new MenuItemFile({label: 'all of this folder', click: () => {
+      box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
+    }}),
+    new MenuItemFile({label: 'autoMaintained recursively...', click: () => {
+      openDialogForRemoveOutgoingLinksRecursively(box, 'AutoMaintained')
+    }}),
+    new MenuItemFile({label: 'all recursively...', click: () => {
+      openDialogForRemoveOutgoingLinksRecursively(box, 'All')
+    }})
+  ]})
+}
+
+async function openDialogForRemoveOutgoingLinksRecursively(folder: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
+  const popup: PopupWidget = await PopupWidget.newAndRender({title: `Remove ${mode} Outgoing Links Recursively`, content: [
+      {type: 'div', style: {marginTop: '8px'}, children: 'Are you sure? This may take a while (depending on how many files there are).'},
+      {
+          type: 'button', 
+          children: 'Yes', 
+          onclick: () => {
+            removeOutgoingLinksRecursively(folder, mode)
+            popup.unrender()
+          }
+      }
+  ]})
+}
+
+async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
+  const fileBoxIterator = new FileBoxDepthTreeIterator(box)
+  const pros: Promise<void>[] = []
+
+  while(await fileBoxIterator.hasNext()) {
+    const fileBox: FileBox = await fileBoxIterator.next()
+    let links: Link[] = fileBox.borderingLinks.getOutgoing()
+    if (mode === 'AutoMaintained') {
+      links = links.filter(link => link.isAutoMaintained())
+    }
+    pros.push(...links.map(link => link.getManagingBoxLinks().removeLink(link)))
+  }
+  
+  await Promise.all(pros)
+  await fileBoxIterator.clearWatchedBoxes()
 }
 
 function buildAddNodeItem(box: Box, position: ClientPosition): MenuItemFile {
