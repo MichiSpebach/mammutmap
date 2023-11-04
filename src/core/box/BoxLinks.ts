@@ -91,6 +91,7 @@ export class BoxLinks extends Widget {
         return
       }
 
+      await Promise.all(link.getTags().map(tag => link.removeTag(tag)))
       await link.unrender()
       await this.removePlaceholderFor(link)
 

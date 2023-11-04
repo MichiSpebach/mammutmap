@@ -169,10 +169,13 @@ function buildRemoveOutgoingLinksForFolderItem(box: FolderBox): MenuItemFolder {
 
 async function openDialogForRemoveOutgoingLinksRecursively(folder: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
   const popup: PopupWidget = await PopupWidget.newAndRender({title: `Remove ${mode} Outgoing Links Recursively`, content: [
-      {type: 'div', style: {marginTop: '8px'}, children: 'Are you sure? This may take a while (depending on how many files there are).'},
       {
-          type: 'button', 
-          children: 'Yes', 
+        type: 'div',
+        style: {marginTop: '4px', marginBottom: '4px'},
+        children: 'Are you sure? This may take a while (depending on how many files there are).'},
+      {
+          type: 'button',
+          children: 'Yes',
           onclick: () => {
             removeOutgoingLinksRecursively(folder, mode)
             popup.unrender()
