@@ -1,7 +1,6 @@
 import { FolderBox } from '../dist/core/box/FolderBox'
 import * as pluginFacade from '../dist/pluginFacade'
-import { contextMenu, MenuItemFile, MenuItemFolder, Box, FileBox } from '../dist/pluginFacade'
-import { coreUtil } from '../dist/pluginFacade'
+import { coreUtil, contextMenu, MenuItemFile, MenuItemFolder, Box, FileBox, renderManager, Link } from '../dist/pluginFacade'
 import * as pathFinder from './neuralNetLinkGenerator/pathFinder'
 import * as typeFinder from './neuralNetLinkGenerator/typeFinder'
 
@@ -45,10 +44,44 @@ async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox):
 }
 
 async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void> {
+    console.log(`Start generating outgoing links recursively of '${folder.getSrcPath()}'`)
     const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder)
+    const id: string = coreUtil.generateId()
+    renderManager.addElementTo('body', {
+        type: 'div',
+        id,
+        style: {
+            position: 'fixed', 
+            bottom: 'calc(15% + 8px)', 
+            left: '50%', 
+            transform: 'translateX(-50%)',
+            backgroundColor: '#0808',
+            padding: '4px',
+            borderRadius: '4px'
+        }
+    })
+    let fileCount: number = 0
+    let foundLinksCount: number = 0
+    let foundLinksAlreadyExistedCount: number = 0
     while (await iterator.hasNext()) {
         const box: FileBox = await iterator.next()
-        await generateOutgoingLinksForFile(box)
+        fileCount++
+        renderProgress()
+        await generateOutgoingLinksForFile(box, {onLinkAdded: (report) => {
+            foundLinksCount += report.linkRoute ? 1 : 0
+            foundLinksAlreadyExistedCount += report.linkRouteAlreadyExisted ? 1 : 0
+            renderProgress()
+        }})
+    }
+    await renderManager.remove(id)
+    console.log(`Finished ${buildProgressText()}`)
+
+    function renderProgress(): Promise<void> {
+        return renderManager.setElementsTo(id, buildProgressText())
+    }
+
+    function buildProgressText(): string {
+        return `generating outgoing links recursively: analyzed ${fileCount} files, found ${foundLinksCount} links, ${foundLinksAlreadyExistedCount} of them already existed.`
     }
 }
 
@@ -61,7 +94,9 @@ async function generateOutgoingLinksForAllFilesInFolder(folder: FolderBox): Prom
     }
 }
 
-async function generateOutgoingLinksForFile(box: FileBox): Promise<void> {
+async function generateOutgoingLinksForFile(box: FileBox, options?: {
+    onLinkAdded?: (report: {linkRoute: Link[]|undefined, linkRouteAlreadyExisted: boolean, warnings?: string[]}) => void
+}): Promise<void> {
     const fileContent: string = await box.getBody().getFileContent()
 
     let paths: string[] = pathFinder.findPaths(fileContent)
@@ -75,6 +110,9 @@ async function generateOutgoingLinksForFile(box: FileBox): Promise<void> {
     let foundLinksAlreadyExistedCount: number = 0
     await Promise.all(paths.map(async path => {
         const report = await pluginFacade.addLink(box, path, {onlyReturnWarnings: true, delayUnwatchingOfBoxesInMS: 500})
+        if (options?.onLinkAdded) {
+            options.onLinkAdded(report)
+        }
         foundLinksCount += report.linkRoute ? 1 : 0
         foundLinksAlreadyExistedCount += report.linkRouteAlreadyExisted ? 1 : 0
     }))
