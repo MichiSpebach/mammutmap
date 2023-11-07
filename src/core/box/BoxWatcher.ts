@@ -14,7 +14,7 @@ export class BoxWatcher {
     return watcher
   }
 
-  constructor(box: Box) {
+  private constructor(box: Box) {
     this.box = box
     this.boxId = box.getId()
     this.boxSrcPath = box.getSrcPath()

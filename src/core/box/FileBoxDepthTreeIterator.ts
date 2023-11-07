@@ -11,7 +11,7 @@ export class FileBoxDepthTreeIterator {
 
 	public constructor(rootBox: FolderBox) {
 		this.boxIterators = []
-		this.boxIterators.push(new BoxIterator(rootBox.getBoxes()))
+		this.boxIterators.push(new BoxIterator([rootBox]))
 		this.nextBox = null
 	}
 
@@ -41,7 +41,7 @@ export class FileBoxDepthTreeIterator {
 		const currentBoxIterator = this.getCurrentBoxIterator()
 		if (currentBoxIterator.hasNext()) {
 			const nextBox: Box = currentBoxIterator.next()
-			await this.addWatcherAndUpdateRenderFor(nextBox)
+			await this.addWatcherFor(nextBox)
 			if (nextBox.isFile()) {
 				this.nextBox = nextBox as FileBox
 			} else if (nextBox.isFolder()) {
@@ -63,9 +63,8 @@ export class FileBoxDepthTreeIterator {
 		return this.boxIterators[this.boxIterators.length-1]
 	}
 
-	private async addWatcherAndUpdateRenderFor(box: Box): Promise<void> {
-		const boxWatcher = new BoxWatcher(box)
-		await box.addWatcherAndUpdateRender(boxWatcher)
+	private async addWatcherFor(box: Box): Promise<void> {
+		const boxWatcher: BoxWatcher = await BoxWatcher.newAndWatch(box)
 		this.boxWatchers.push(boxWatcher)
 	}
 

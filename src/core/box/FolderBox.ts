@@ -108,8 +108,7 @@ export class FolderBox extends Box {
       return this.warn('path '+path+' must start with name of box '+this.getName(), options)
     }
 
-    const temporaryBoxWatcher: BoxWatcher = new BoxWatcher(this)
-    await this.addWatcherAndUpdateRender(temporaryBoxWatcher)
+    const temporaryBoxWatcher: BoxWatcher = await BoxWatcher.newAndWatch(this)
 
     const resultBoxWatcherWithWarnings: {
       boxWatcher?: BoxWatcher, warnings?: string[]
@@ -130,8 +129,7 @@ export class FolderBox extends Box {
         if (options?.foreachBoxInPath) {
           options.foreachBoxInPath(box)
         }
-        const boxWatcher: BoxWatcher = new BoxWatcher(box)
-        await box.addWatcherAndUpdateRender(boxWatcher)
+        const boxWatcher: BoxWatcher = await BoxWatcher.newAndWatch(box)
         return {boxWatcher}
       }
       if (util.getElementsOfPath(remainingPath)[0] === box.getName()) {
