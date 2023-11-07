@@ -19,6 +19,7 @@ import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import { RenderElements } from './util/RenderElement'
 import { environment } from './environmentAdapter'
 import { FileBoxDepthTreeIterator } from './box/FileBoxDepthTreeIterator'
+import { ProgressBarWidget } from './util/ProgressBarWidget'
 
 let contextMenuPopup: ContextMenuPopup
 
@@ -185,20 +186,38 @@ async function openDialogForRemoveOutgoingLinksRecursively(folder: FolderBox, mo
 }
 
 async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
+  console.log(`Start removing ${mode} outgoing links recursively of '${box.getSrcPath()}'...`)
+  const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
   const fileBoxIterator = new FileBoxDepthTreeIterator(box)
+  let fileCount: number = 0
+  let foundLinksCount: number = 0
+  let removedLinksCount: number = 0
   const pros: Promise<void>[] = []
 
   while(await fileBoxIterator.hasNext()) {
     const fileBox: FileBox = await fileBoxIterator.next()
+    fileCount++
     let links: Link[] = fileBox.borderingLinks.getOutgoing()
+    foundLinksCount += links.length
+    progressBar.setDescription(buildProgressText())
     if (mode === 'AutoMaintained') {
       links = links.filter(link => link.isAutoMaintained())
     }
-    pros.push(...links.map(link => link.getManagingBoxLinks().removeLink(link)))
+    pros.push(...links.map(async link => {
+      await link.getManagingBoxLinks().removeLink(link)
+      removedLinksCount++
+      progressBar.setDescription(buildProgressText())
+    }))
   }
   
   await Promise.all(pros)
   await fileBoxIterator.clearWatchedBoxes()
+  await progressBar.finishAndRemove()
+  console.log(`Finished ${buildProgressText()}.`)
+
+  function buildProgressText(): string {
+    return `removing ${mode} outgoing links recursively: analyzed ${fileCount} files, found ${foundLinksCount} links, removed ${removedLinksCount} of them`
+  }
 }
 
 function buildAddNodeItem(box: Box, position: ClientPosition): MenuItemFile {

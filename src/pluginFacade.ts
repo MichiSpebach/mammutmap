@@ -35,6 +35,7 @@ import { log } from './core/logService'
 import { BoxLinks } from './core/box/BoxLinks'
 import { MenuItemFolder } from './core/applicationMenu/MenuItemFolder'
 import { FileBoxDepthTreeIterator } from './core/box/FileBoxDepthTreeIterator'
+import { ProgressBarWidget } from './core/util/ProgressBarWidget'
 
 
 export { util as coreUtil }
@@ -44,8 +45,8 @@ export { renderManager, RenderPriority, Subscribers }
 export { RenderElements, RenderElement, ElementType, Style }
 export { style }
 export { Widget }
-export { PopupWidget }
-export { TextInputPopup };
+export { PopupWidget, TextInputPopup }
+export { ProgressBarWidget };
 export { mainWidget }
 export { ToolbarView }
 export { Map, onMapLoaded, onMapRendered, onMapUnload }
