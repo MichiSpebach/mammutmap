@@ -18,7 +18,7 @@ export function findPaths(text: string): string[] {
 }
 
 function postProcessPaths(paths: string[]): string[] {
-    paths = paths.filter(path => !path.startsWith('https://') && !path.startsWith('http://'))
+    paths = paths.filter(path => !path.startsWith('https://') && !path.startsWith('http://') && !path.startsWith('//'))
     return paths.map(path => {
         if (path.startsWith('package:')) {
             path = path.substring('package:'.length)

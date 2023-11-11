@@ -91,6 +91,27 @@ test('findPaths with mountPoints', () => {
     expect(pathFinder.findPaths('"https://path/separated/with/slashes"')).toEqual([])
 })
 
+test('findPaths special characters', () => {
+    expect(pathFinder.findPaths('/path')).toEqual(['/path'])
+    expect(pathFinder.findPaths('path/to/resource')).toEqual(['path/to/resource'])
+    expect(pathFinder.findPaths('// path/to/resource')).toEqual(['path/to/resource'])
+
+    //expect(pathFinder.findPaths('//path/to/resource')).toEqual(['path/to/resource'])?
+
+    expect(pathFinder.findPaths('//')).toEqual([])
+    expect(pathFinder.findPaths('// some comment')).toEqual([])
+    expect(pathFinder.findPaths('//some comment')).toEqual([])
+
+    expect(pathFinder.findPaths('//@path')).toEqual([])
+    //expect(pathFinder.findPaths('//@path/to/resource')).toEqual([])?
+
+    expect(pathFinder.findPaths('//#path')).toEqual([])
+    //expect(pathFinder.findPaths('//#path/to/resource')).toEqual([])?
+
+    //expect(pathFinder.findPaths('@path/to/resource')).toEqual([])?
+    //expect(pathFinder.findPaths('#path/to/resource')).toEqual([])?
+})
+
 test('findPaths multiple paths in text', () => {
     let text: string = 'path/separated/with/slashes\n'
     text += 'not a path'
