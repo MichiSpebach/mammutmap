@@ -365,13 +365,8 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       let linkable: Box|NodeWidget|undefined
       if (parentBox.getId() === wayPoint.boxId) {
         linkable = parentBox
-      } /*else {
-        linkable = parentBox.findChildById(wayPoint.boxId) TODO use this instead below
-      }*/ else if (parentBox instanceof FolderBox) {
-        linkable = parentBox.getBox(wayPoint.boxId) // TODO remove and use findChildById(..) instead
-      }
-      if (!linkable) {
-        linkable = parentBox.nodes.getNodeById(wayPoint.boxId) // TODO remove and use findChildById(..) instead
+      } else {
+        linkable = parentBox.findChildById(wayPoint.boxId)
       }
 
       if (!linkable || !linkable.isBeingRendered()) {
