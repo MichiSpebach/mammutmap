@@ -6,7 +6,7 @@ import { FolderBox } from './FolderBox'
 
 export class FileBoxDepthTreeIterator {
 	private readonly boxIterators: BoxIterator[]
-	private boxWatchers: BoxWatcher[] = []
+	private boxWatchers: BoxWatcher[] = [] // TODO: limit active boxWatchers at a time to e.g. 100
 	private nextBox: FileBox|null
 
 	public constructor(rootBox: FolderBox) {

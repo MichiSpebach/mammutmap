@@ -83,6 +83,16 @@ export class Link implements Hoverable {
     return this.data.id
   }
 
+  public describe(): string {
+    const fromPath: string[] = this.getData().from.path.map((wayPoint: WayPointData) => wayPoint.boxName)
+    const toPath: string[] = this.getData().to.path.map((wayPoint: WayPointData) => wayPoint.boxName)
+    while (fromPath[0] === toPath[0] && fromPath.length > 1 && toPath.length > 1) { // > 1 so that at least one element stays in there
+      fromPath.shift()
+      toPath.shift()
+    }
+    return `Link with id '${this.getId()}' in ${this.managingBox.getSrcPath()} (between ${fromPath.join('/')} and ${toPath.join('/')})`
+  }
+
   public getData(): LinkData {
     return this.data
   }
@@ -101,6 +111,10 @@ export class Link implements Hoverable {
 
   public getTo(): LinkEnd {
     return this.to
+  }
+
+  public shouldBeRendered(): boolean {
+    return this.getManagingBox().isBodyBeingRendered() && this.from.shouldBeRendered() && this.to.shouldBeRendered()
   }
 
   public async renderWithOptions(options: {
@@ -124,7 +138,7 @@ export class Link implements Hoverable {
 
   public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { 
     if (!this.getManagingBox().isBodyBeingRendered()) {
-      log.warning(`Link::render(..) called for Link with id '${this.getId()}' unless the body of its managingBox with name '${this.getManagingBox().getName()}' is being unrendered.`)
+      log.warning(`Link::render(..) called for ${this.describe()} unless the body of its managingBox with name '${this.getManagingBox().getName()}' is being unrendered.`)
       return
     }
     await this.renderScheduler.schedule(async () => {

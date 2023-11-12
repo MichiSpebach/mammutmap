@@ -32,6 +32,7 @@ export abstract class BoxBody {
     return this.referenceBox.getId()+'Body'
   }
 
+  /** TODO: name is confusing, does render or unrender, rename to something like 'update()'? */
   public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
     if (! await this.shouldBeRendered()) {
       if (this.renderState.isRendered() && await this.shouldBeUnrendered()) {

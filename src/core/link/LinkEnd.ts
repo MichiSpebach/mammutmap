@@ -16,6 +16,7 @@ import { FolderBox } from '../box/FolderBox'
 import * as linkUtil from './linkUtil'
 import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
+import { log } from '../logService'
 
 export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly id: string
@@ -47,6 +48,21 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public getManagingBox(): Box {
     return this.referenceLink.getManagingBox()
+  }
+  
+  public shouldBeRendered(): boolean {
+    const firstNodeInPathId: string = this.data.path[0].boxId
+    if (this.getManagingBox().getId() === firstNodeInPathId) {
+      return true
+    }
+    const firstNodeInPath: Box|NodeWidget|undefined = this.getManagingBox().findChildById(firstNodeInPathId)
+    if (!firstNodeInPath) {
+      let message = `LinkEnd::shouldBeRendered() firstNodeInPath with id '${firstNodeInPathId}' and name '${this.data.path[0].boxName}'`
+      message += ` is not included in managingBox with name '${this.getManagingBox().getName()}', defaulting to false.`
+      log.warning(message)
+      return false
+    }
+    return firstNodeInPath.isBeingRendered()
   }
 
   public isBoxInPath(box: Box|NodeWidget): boolean {
@@ -349,11 +365,13 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       let linkable: Box|NodeWidget|undefined
       if (parentBox.getId() === wayPoint.boxId) {
         linkable = parentBox
-      } else if (parentBox instanceof FolderBox) {
-        linkable = parentBox.getBox(wayPoint.boxId)
+      } /*else {
+        linkable = parentBox.findChildById(wayPoint.boxId) TODO use this instead below
+      }*/ else if (parentBox instanceof FolderBox) {
+        linkable = parentBox.getBox(wayPoint.boxId) // TODO remove and use findChildById(..) instead
       }
       if (!linkable) {
-        linkable = parentBox.nodes.getNodeById(wayPoint.boxId)
+        linkable = parentBox.nodes.getNodeById(wayPoint.boxId) // TODO remove and use findChildById(..) instead
       }
 
       if (!linkable || !linkable.isBeingRendered()) {
@@ -371,7 +389,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
     if (renderedPath.length === 0) {
       const managingBox: Box = this.getManagingBox()
-      let message = `Link with id ${this.referenceLink.getId()} in ${managingBox.getSrcPath()} has path with no rendered boxes.`
+      let message = `LinkEnd::getRenderedPath() LinkEnd with id '${this.getId()}' in ${this.referenceLink.describe()} has path with no rendered boxes.`
       if (managingBox.isBodyBeingRendered()) {
         message += ' This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn\'t.'
       } else {

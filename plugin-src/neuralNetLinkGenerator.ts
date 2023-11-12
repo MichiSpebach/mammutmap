@@ -27,7 +27,8 @@ async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox):
                     children: [
                         {type: 'li', children: 'There is no linkBundler.js plugin yet'},
                         {type: 'li', children: 'There is no boxOrderer.js plugin yet'},
-                        {type: 'li', children: 'There is no autoTagger.js plugin yet'}
+                        {type: 'li', children: 'There is no autoTagger.js plugin yet'},
+                        {type: 'li', children: `BorderingLinks with appearance mode 'renderedEnds' are not hidden while hovering box yet.`},
                     ]
                 }
             ]

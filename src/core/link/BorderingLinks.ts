@@ -53,7 +53,7 @@ export class BorderingLinks {
   }
 
   public getLinksThatShouldBeRendered(): Link[] {
-    return this.getAll().filter(link => link.getManagingBox().isBodyBeingRendered())
+    return this.getAll().filter(link => link.shouldBeRendered())
   }
 
   public getOutgoing(): Link[] {

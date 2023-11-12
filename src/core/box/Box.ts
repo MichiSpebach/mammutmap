@@ -173,6 +173,10 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return renderedChildBoxes[0]
   }
 
+  public findChildById(id: string): Box|NodeWidget|undefined { // TODO: change return type to AbstractNodeWidget as soon as available
+    return this.getChilds().find(child => child.getId() === id)
+  }
+
   public getChilds(): (Box|NodeWidget)[] { // TODO: change return type to AbstractNodeWidget as soon as available
     return this.nodes.getNodes()
   }
@@ -271,10 +275,9 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
   public async removeWatcherAndUpdateRender(watcher: BoxWatcher): Promise<void> {
     this.removeWatcher(watcher)
-
     for (let box: Box = this; !box.isRoot(); box = box.getParent()) {
-      await box.render()
-      if (box.isBodyRendered()) {
+      await box.getParent().body.render()
+      if (box.isBeingRendered()) {
         break
       }
     }

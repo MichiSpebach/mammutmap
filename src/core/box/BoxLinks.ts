@@ -78,8 +78,12 @@ export class BoxLinks extends Widget {
       if (options.save) {
         ongoing.push(this.referenceBox.saveMapData())
       }
-      await this.addPlaceholderFor(link)
-      ongoing.push(link.render())
+      if (this.referenceBox.isBodyBeingRendered()) {
+        await this.addPlaceholderFor(link)
+      }
+      if (this.referenceBox.isBodyBeingRendered()) { // recheck because of possible racecondition with (un)render(), TODO use this.renderScheduler somehow to solve racecondition
+        ongoing.push(link.render())
+      }
       await Promise.all([ongoing])
 
       return link
@@ -92,8 +96,11 @@ export class BoxLinks extends Widget {
       }
 
       await Promise.all(link.getTags().map(tag => link.removeTag(tag)))
-      await link.unrender()
-      await this.removePlaceholderFor(link)
+      
+      await link.unrender() // checks by itself if it is rendered
+      if (this.referenceBox.isBodyBeingRendered()) {
+        await this.removePlaceholderFor(link) // TODO possible racecondition with (un)render(), use this.renderScheduler somehow to solve racecondition
+      }
 
       this.links.splice(this.links.indexOf(link), 1)
       this.referenceBox.getMapLinkData().splice(this.referenceBox.getMapLinkData().indexOf(link.getData()), 1)
