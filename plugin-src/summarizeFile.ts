@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 
 
-import { Box, log, FileBox, MenuItemFile, RenderElements, contextMenu, } from "../dist/pluginFacade"
+import { Box, log, FileBox, MenuItemFile, RenderElements, contextMenu, coreUtil, } from "../dist/pluginFacade"
 
 import { SummarizerFactory } from "./summarizeFile/summarizer-factory";
 import { openaiSummaryLLMFactory } from "./summarizeFile/llms/summary-openai";
@@ -10,16 +10,23 @@ import { ConfigManager } from "./summarizeFile/config-manager";
 const SUMMARY_FIELD_NAME = 'summary';
 
 
-contextMenu.addFileBoxMenuItem((item) => new MenuItemFile({ label: "Summarize File", click: () => 
-                     summarize(item,new SummarizerFactory(openaiSummaryLLMFactory,new ConfigManager()))}));
+//contextMenu.addFileBoxMenuItem((item) => new MenuItemFile({ label: "Summarize File", click: () => 
+//                     summarize(item,new SummarizerFactory(openaiSummaryLLMFactory,new ConfigManager()))}));
 
 Box.Tabs.register({
     name: 'Summary',
     isAvailableFor: (box: Box) => box.isFile(),
-    buildWidget: (box: Box) => buildSummaryTabFor(box.getMapData().getRawField(SUMMARY_FIELD_NAME) as string)
+    buildWidget: (box: Box) => buildSummaryTab(box as FileBox)
 });
 
-function buildSummaryTabFor(summary: string): RenderElements {
+async function buildSummaryTab(box:FileBox): Promise<RenderElements> {
+
+    if(!box.getMapData().getRawField(SUMMARY_FIELD_NAME)){
+        await summarize(box,new SummarizerFactory(openaiSummaryLLMFactory,new ConfigManager()))
+    }
+  
+    const summary= box.getMapData().getRawField(SUMMARY_FIELD_NAME) as string;
+
     return {
         type: 'div',
         style: { border: '1px solid black', padding: '10px' },
@@ -34,10 +41,8 @@ function _loadBoxFileData(box: FileBox): string {
 
 async function summarize(box: FileBox,summarizerFactory: SummarizerFactory) {
 
-
     // TODO add tests
     const source = _loadBoxFileData(box);
-
 
     const summarizer = await summarizerFactory.getSummarizerFor(source);
 
