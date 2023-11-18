@@ -76,7 +76,6 @@ function getCurrentDateTime(): string {
 }
 
 async function getDiskUsage(): Promise<string> {
-    console.log('getDiskUsage()')
     const mapRootDirectory = getRootFolder().getSrcPath()
     const stats = await promises.statfs(mapRootDirectory)
     const totalSpace = stats.bsize * stats.bavail / 1024 / 1024 / 1024
