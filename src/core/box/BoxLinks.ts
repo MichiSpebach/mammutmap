@@ -78,13 +78,13 @@ export class BoxLinks extends Widget {
       if (options.save) {
         ongoing.push(this.referenceBox.saveMapData())
       }
-      if (this.referenceBox.isBodyBeingRendered()) {
+      if (this.rendered) {
         await this.addPlaceholderFor(link)
       }
-      if (this.referenceBox.isBodyBeingRendered()) { // recheck because of possible racecondition with (un)render(), TODO use this.renderScheduler somehow to solve racecondition
+      if (this.rendered) { // recheck because of possible racecondition with (un)render(), TODO use this.renderScheduler somehow to solve racecondition
         ongoing.push(link.render())
       }
-      await Promise.all([ongoing])
+      await Promise.all(ongoing)
 
       return link
     }
@@ -95,43 +95,47 @@ export class BoxLinks extends Widget {
         return
       }
 
-      await Promise.all(link.getTags().map(tag => link.removeTag(tag)))
-      
-      await link.unrender() // checks by itself if it is rendered
-      if (this.referenceBox.isBodyBeingRendered()) {
-        await this.removePlaceholderFor(link) // TODO possible racecondition with (un)render(), use this.renderScheduler somehow to solve racecondition
-      }
-
-      this.links.splice(this.links.indexOf(link), 1)
+      this.links.splice(this.links.indexOf(link), 1) // before unrender() and removePlaceholderFor(link) to prevent rerender TODO: introduce 'mounted: boolean' or 'destructed: boolean' in Link instead?
       this.referenceBox.getMapLinkData().splice(this.referenceBox.getMapLinkData().indexOf(link.getData()), 1)
-      await this.referenceBox.saveMapData()
+
+      const pros: Promise<void>[] = link.getTags().map(tag => link.removeTag(tag))
+      await link.unrender() // checks by itself if it is rendered
+      if (this.rendered) {
+        pros.push(this.removePlaceholderFor(link)) // TODO possible racecondition with (un)render(), use this.renderScheduler somehow to solve racecondition
+      }
+      pros.push(this.referenceBox.saveMapData())
+      await Promise.all(pros)
     }
 
     public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
       if (this.rendered) {
         // links that are connected to NodeWidgets need to be rerendered
         // because size of NodeWidgets is not percental // TODO: use smart css attributes to handle this
-        this.links.filter(link => {
+        this.links.filter(link => { // TODO there is no await
           return link.from.getDeepestRenderedWayPoint().linkable instanceof NodeWidget
             || link.to.getDeepestRenderedWayPoint().linkable instanceof NodeWidget
         }).forEach(link => link.render())
         return
       }
+      this.rendered = true
 
       const placeholderPros: Promise<void>[] = []
-
+      const partialRendered: boolean = this.links.length > 0
+      
       for (const linkData of this.referenceBox.getMapLinkData()) {
-        if (this.links.find(link => link.getId() === linkData.id)) {
-          continue
+        let link: Link|undefined
+        if (partialRendered) {
+          link = this.links.find(link => link.getId() === linkData.id)
         }
-        const link: Link = Link.new(linkData, this.referenceBox)
-        this.links.push(link)
+        if (!link) {
+          link = Link.new(linkData, this.referenceBox)
+          this.links.push(link)
+        }
         placeholderPros.push(this.addPlaceholderFor(link))
       }
 
       await Promise.all(placeholderPros)
       await Promise.all(this.links.map((link: Link) => link.render()))
-      this.rendered = true
     })}
 
     private async addPlaceholderFor(link: Link): Promise<void> {
@@ -146,13 +150,13 @@ export class BoxLinks extends Widget {
       if (!this.rendered) {
         return
       }
+      this.rendered = false
 
       await Promise.all(this.links.map(async (link: Link) => {
         await link.unrender()
         await this.removePlaceholderFor(link)
       }))
       this.links = []
-      this.rendered = false
     })}
 
     /** @deprecated use findLinkRoute(..) instead */

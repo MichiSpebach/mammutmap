@@ -34,7 +34,7 @@ export class RelocationDragManager {
         return this.state !== null
     }
 
-    private getState(): { dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean } | never {
+    private getState(): State | never {
         if (this.state === null) {
             util.logError("RelocationDragManager: state is null but should be set at this moment")
         }
@@ -113,20 +113,24 @@ export class RelocationDragManager {
             clickToDropMode: clickToDropMode,
             watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher.newAndWatch(elementToDrag.getManagingBox())
         })
+        await this.state?.watcherOfManagingBoxToPreventUnrenderWhileDragging
         await Promise.all([
             renderManager.addClassTo(elementToDrag.getId(), this.draggingInProgressStyleClass, RenderPriority.RESPONSIVE),
             elementToDrag.dragStart(clientX, clientY, this.getState().draggingOver, snapToGrid)
         ])
     }
 
-    private onDrag(clientX: number, clientY: number, snapToGrid: boolean): void {
-        const state: { dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean } = this.getState()
+    private async onDrag(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {
+        const state: State = this.getState()
+        await state.watcherOfManagingBoxToPreventUnrenderWhileDragging
+
         state.dragging.drag(clientX, clientY, state.draggingOver, snapToGrid)
         util.setHint(util.hintToDeactivateSnapToGrid, snapToGrid)
     }
 
-    private onDragEnd(): void {
-        const state: { dragging: Draggable<DropTarget>, draggingOver: DropTarget, clickToDropMode: boolean } = this.getState()
+    private async onDragEnd(): Promise<void> {
+        const state: State = this.getState()
+        await state.watcherOfManagingBoxToPreventUnrenderWhileDragging
 
         renderManager.removeClassFrom(state.dragging.getId(), this.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
         state.dragging.dragEnd(state.draggingOver)
