@@ -18,7 +18,7 @@ import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
 import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import { RenderElements } from './util/RenderElement'
 import { environment } from './environmentAdapter'
-import { FileBoxDepthTreeIterator } from './box/FileBoxDepthTreeIterator'
+import { BoxDepthTreeIterator } from './box/BoxDepthTreeIterator'
 import { ProgressBarWidget } from './util/ProgressBarWidget'
 
 let contextMenuPopup: ContextMenuPopup
@@ -188,16 +188,16 @@ async function openDialogForRemoveOutgoingLinksRecursively(folder: FolderBox, mo
 async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
   console.log(`Start removing ${mode} outgoing links recursively of '${box.getSrcPath()}'...`)
   const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
-  const fileBoxIterator = new FileBoxDepthTreeIterator(box)
+  const boxIterator = new BoxDepthTreeIterator(box)
   let fileCount: number = 0
   let foundLinksCount: number = 0
   let removedLinksCount: number = 0
   const pros: Promise<void>[] = []
 
-  while(await fileBoxIterator.hasNext()) {
-    const fileBox: FileBox = await fileBoxIterator.next()
+  while(await boxIterator.hasNext()) {
+    const box: Box = await boxIterator.next()
     fileCount++
-    let links: Link[] = fileBox.borderingLinks.getOutgoing()
+    let links: Link[] = box.borderingLinks.getOutgoing()
     foundLinksCount += links.length
     progressBar.setDescription(buildProgressText())
     if (mode === 'AutoMaintained') {
@@ -211,7 +211,7 @@ async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoM
   }
   
   await Promise.all(pros)
-  await fileBoxIterator.clearWatchedBoxes()
+  await boxIterator.clearWatchedBoxes()
   await progressBar.finishAndRemove()
   console.log(`Finished ${buildProgressText()}.`)
 

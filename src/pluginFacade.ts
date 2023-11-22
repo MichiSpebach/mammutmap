@@ -35,6 +35,7 @@ import { log } from './core/logService'
 import { BoxLinks } from './core/box/BoxLinks'
 import { MenuItemFolder } from './core/applicationMenu/MenuItemFolder'
 import { FileBoxDepthTreeIterator } from './core/box/FileBoxDepthTreeIterator'
+import { BoxDepthTreeIterator } from './core/box/BoxDepthTreeIterator'
 import { ProgressBarWidget } from './core/util/ProgressBarWidget'
 
 
@@ -56,7 +57,7 @@ export { LinkAppearanceData, LinkAppearanceMode, linkAppearanceModes }
 export { LinkTagData }
 export { WayPointData }
 export { Transform, LocalPosition }
-export { FileBoxDepthTreeIterator }
+export { BoxDepthTreeIterator, FileBoxDepthTreeIterator }
 export { BoxWatcher }
 export { Box, FileBox, RootFolderBox }
 export { BoxHeader }
