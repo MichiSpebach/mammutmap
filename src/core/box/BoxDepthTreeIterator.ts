@@ -4,21 +4,15 @@ import { BoxWatcher } from './BoxWatcher'
 import { FolderBox } from './FolderBox'
 
 export class BoxDepthTreeIterator {
-	private readonly boxIterators: BoxIterator[]
-	private boxWatchers: BoxWatcher[] = [] // TODO: limit active boxWatchers at a time to e.g. 100!
+	private boxIterators: ChildBoxesIterator[]|undefined
 	protected nextBox: Box|null
 
 	public constructor(rootBox: FolderBox) {
-		this.boxIterators = []
-		this.boxIterators.push(new BoxIterator([rootBox]))
-		this.nextBox = null
+		this.nextBox = rootBox
 	}
 
-	public async hasNext(): Promise<boolean> {
+	public async hasNextOrUnwatch(): Promise<boolean> {
 		await this.prepareNext()
-		if (!this.nextBox) {
-			this.clearWatchedBoxes() // TODO: implement better solution
-		}
 		return this.nextBox !== null
 	}
 
@@ -33,16 +27,21 @@ export class BoxDepthTreeIterator {
 	}
 
 	protected async prepareNext(): Promise<void> {
+		if (!this.boxIterators) {
+			if (!this.nextBox) {
+				log.errorAndThrow('FileBoxDepthTreeIterator::prepareNext() was called, but boxIterators and nextBox are not set.')
+			}
+			this.boxIterators = [await ChildBoxesIterator.new(this.nextBox as FolderBox)]
+		}
 		if (this.nextBox || this.boxIterators.length === 0) {
 			return
 		}
 
-		const currentBoxIterator = this.getCurrentBoxIterator()
-		if (currentBoxIterator.hasNext()) {
+		const currentBoxIterator = this.boxIterators[this.boxIterators.length-1]
+		if (await currentBoxIterator.hasNextOrUnwatch()) {
 			const nextBox: Box = currentBoxIterator.next()
-			await this.addWatcherFor(nextBox)
-			 if (nextBox.isFolder()) {
-				this.boxIterators.push(new BoxIterator((nextBox as FolderBox).getBoxes()))
+			if (nextBox.isFolder()) {
+				this.boxIterators.push(await ChildBoxesIterator.new(nextBox as FolderBox))
 			}
 			this.nextBox = nextBox
 		} else {
@@ -51,35 +50,35 @@ export class BoxDepthTreeIterator {
 		}
 	}
 
-	private getCurrentBoxIterator(): BoxIterator {
-		return this.boxIterators[this.boxIterators.length-1]
-	}
-
-	private async addWatcherFor(box: Box): Promise<void> {
-		const boxWatcher: BoxWatcher = await BoxWatcher.newAndWatch(box)
-		this.boxWatchers.push(boxWatcher)
-	}
-
-	public async clearWatchedBoxes(): Promise<void> {
-		while (this.boxWatchers.length > 0) {
-			const boxWatcher: BoxWatcher|undefined = this.boxWatchers.shift()
-			if (boxWatcher) {
-				await boxWatcher.unwatch()
-			}
+	public async breakAndUnwatch(): Promise<void> {
+		if (!this.boxIterators) {
+			log.warning('BoxDepthTreeIterator::breakAndUnwatch() not initialized or breakAndUnwatch() was already called.')
+		} else {
+			await Promise.all(this.boxIterators.map(async iterator => await iterator.breakAndUnwatch()))
+			this.boxIterators = undefined
 		}
 	}
 }
 
-class BoxIterator {
-	private readonly boxes: Box[]
+class ChildBoxesIterator {
+	private readonly parent: BoxWatcher
+	private readonly childs: Box[]
 	private nextIndex: number
 
-	public constructor(boxes: Box[]) {
-		this.boxes = this.sortBoxesByFilesFirst(boxes)
+	public static async new(parent: FolderBox): Promise<ChildBoxesIterator> {
+		return new ChildBoxesIterator(
+			await BoxWatcher.newAndWatch(parent),
+			this.sortBoxesByFilesFirst(parent.getBoxes())
+		)
+	}
+
+	private constructor(parent: BoxWatcher, childs: Box[]) {
+		this.parent = parent
+		this.childs = childs
 		this.nextIndex = 0
 	}
 
-	private sortBoxesByFilesFirst(boxes: Box[]): Box[] {
+	private static sortBoxesByFilesFirst(boxes: Box[]): Box[] {
 		const fileBoxes: Box[] = []
 		const folderBoxes: Box[] = []
 
@@ -94,11 +93,19 @@ class BoxIterator {
 		return fileBoxes.concat(folderBoxes)
 	}
 
-	public hasNext(): boolean {
-		return this.nextIndex < this.boxes.length
+	public async hasNextOrUnwatch(): Promise<boolean> {
+		const hasNext: boolean = this.nextIndex < this.childs.length
+		if (!hasNext) {
+			await this.parent.unwatch()
+		}
+		return hasNext
 	}
 
 	public next(): Box {
-		return this.boxes[this.nextIndex++]
+		return this.childs[this.nextIndex++]
+	}
+
+	public async breakAndUnwatch(): Promise<void> {
+		await this.parent.unwatch()
 	}
 }

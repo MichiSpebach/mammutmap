@@ -194,7 +194,7 @@ async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoM
   let removedLinksCount: number = 0
   const pros: Promise<void>[] = []
 
-  while(await boxIterator.hasNext()) {
+  while(await boxIterator.hasNextOrUnwatch()) {
     const box: Box = await boxIterator.next()
     fileCount++
     let links: Link[] = box.borderingLinks.getOutgoing()
@@ -211,7 +211,6 @@ async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoM
   }
   
   await Promise.all(pros)
-  await boxIterator.clearWatchedBoxes()
   await progressBar.finishAndRemove()
   console.log(`Finished ${buildProgressText()}.`)
 

@@ -52,7 +52,7 @@ async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void
     let foundLinksCount: number = 0
     let foundLinksAlreadyExistedCount: number = 0
 
-    while (await iterator.hasNext()) {
+    while (await iterator.hasNextOrUnwatch()) {
         const box: FileBox = await iterator.next()
         fileCount++
         progressBar.setDescription(buildProgressText())

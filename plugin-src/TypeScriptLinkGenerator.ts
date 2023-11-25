@@ -22,7 +22,7 @@ async function generateLinks(): Promise<void> {
 
   const boxes: FileBoxDepthTreeIterator = pluginFacade.getFileBoxIterator()
   let boxChunk: FileBox[] = [] // calling ts.createProgram(..) with many files is magnitude faster than calling many times with one file
-  while (await boxes.hasNext()) {
+  while (await boxes.hasNextOrUnwatch()) {
     const box = await boxes.next()
     if (box.getSrcPath().endsWith('.ts')) {
       boxChunk.push(box)

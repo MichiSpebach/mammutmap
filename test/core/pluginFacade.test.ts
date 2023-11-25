@@ -11,11 +11,11 @@ test('getFileBoxIterator', async () => {
   setupScenario()
 
   const fileBoxes: FileBoxDepthTreeIterator = pluginFacade.getFileBoxIterator()
-  expect(await fileBoxes.hasNext()).toEqual(true)
+  expect(await fileBoxes.hasNextOrUnwatch()).toEqual(true)
   expect((await fileBoxes.next()).getId()).toEqual('flatFile')
-  expect(await fileBoxes.hasNext()).toEqual(true)
+  expect(await fileBoxes.hasNextOrUnwatch()).toEqual(true)
   expect((await fileBoxes.next()).getId()).toEqual('deepFile')
-  expect(await fileBoxes.hasNext()).toEqual(false)
+  expect(await fileBoxes.hasNextOrUnwatch()).toEqual(false)
 })
 
 function setupScenario(): void {
