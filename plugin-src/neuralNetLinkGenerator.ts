@@ -47,11 +47,15 @@ async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox):
 async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void> {
     console.log(`Start generating outgoing links recursively of '${folder.getSrcPath()}'...`)
     const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
-    const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder)
+    let totalFileCountingFinished: boolean = false
+    let totalFileCount: number = 0
     let fileCount: number = 0
     let foundLinksCount: number = 0
     let foundLinksAlreadyExistedCount: number = 0
-
+    
+    const countingFiles: Promise<void> = countFiles()
+    
+    const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder)
     while (await iterator.hasNextOrUnwatch()) {
         const box: FileBox = await iterator.next()
         fileCount++
@@ -63,11 +67,23 @@ async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void
         }})
     }
 
+    await countingFiles
     await progressBar.finishAndRemove()
     console.log(`Finished ${buildProgressText()}.`)
 
+    async function countFiles(): Promise<void> {
+        for (const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder); await iterator.hasNextOrUnwatch(); await iterator.next()) {
+            totalFileCount++
+            progressBar.setDescription(buildProgressText())
+        }
+        totalFileCountingFinished = true
+    }
+
     function buildProgressText(): string {
-        return `generating outgoing links recursively: analyzed ${fileCount} files, found ${foundLinksCount} links, ${foundLinksAlreadyExistedCount} of them already existed`
+        let text: string = `generating outgoing links recursively: analyzed ${fileCount} of ${totalFileCount} files`
+        text += `, found ${foundLinksCount} links, ${foundLinksAlreadyExistedCount} of them already existed`
+        const percentText: string = totalFileCountingFinished ? ` (${Math.round(fileCount/totalFileCount * 100)}%)` : ''
+        return text+percentText
     }
 }
 
