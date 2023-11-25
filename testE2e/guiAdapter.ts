@@ -23,13 +23,16 @@ export async function startApp(): Promise<void> {
   await runInMainThread(`async () => {
     const {relocationDragManager} = await importRelativeToSrc('./core/RelocationDragManager')
     const {mouseDownDragManager} = await importRelativeToSrc('./core/mouseDownDragManager')
-    const {settings} = await importRelativeToSrc('./core/Settings')
+    const {settings} = await importRelativeToSrc('./core/settings/settings')
 
-    relocationDragManager.dragManager = mouseDownDragManager // TODO: remove as soon as mouseDownDragManager is standard
     settings.setBoolean('boxesDraggableIntoOtherBoxes', true)
     settings.setBoolean('notRethrowUnhandledErrors', true)
     settings.setBoolean('transparentBottomBar', false)
     settings.setBoolean('positionMapOnTopLeft', true)
+
+    const {Box} = await importRelativeToSrc('./core/box/Box')
+    Box.prototype.addOpenButtonIfFile = () => {}
+    Box.prototype.removeOpenButtonIfFile = () => {}
   }`)
 }
 
@@ -190,7 +193,7 @@ export async function unwatchBox(sourcePath: string): Promise<void> {
 }
 
 async function command(command: string): Promise<void> {
-  await type('commandLine', command+'\n')
+  await type('bottomBar-terminal-commandLine', command+'\n')
   await removeFocus()
 }
 
@@ -298,7 +301,7 @@ export async function getLogs(): Promise<string[]> {
 }
 
 async function getLogElement(): Promise<puppeteer.ElementHandle<Element>> {
-  const logElement: puppeteer.ElementHandle<Element>|null = await findElement('log')
+  const logElement: puppeteer.ElementHandle<Element>|null = await findElement('bottomBar-terminal-log')
   if (!logElement) {
     throw new Error('Failed to get log.')
   }
