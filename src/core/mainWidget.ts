@@ -4,11 +4,11 @@ import { Map, map as mapWidget } from './Map'
 import { ToolbarWidget } from './toolbars/ToolbarWidget'
 import { renderManager } from './RenderManager'
 import { settings } from './settings/settings'
-import { util } from './util/util'
 import { ClientPosition } from './shape/ClientPosition'
-import { Style } from './util/RenderElement'
+import { RenderElement, Style } from './util/RenderElement'
 import { TerminalWidget } from './TerminalWidget'
 import { ToggleSidebarWidget } from './ToggleSidebarWidget'
+import { log } from './logService'
 
 // TODO: rename to indexWidget|bodyWidget|appWidget|window(Widget)?
 
@@ -19,6 +19,7 @@ class MainWidget extends Widget {
 	public readonly toggleSidebarButton: ToggleSidebarWidget
 	public readonly bottomBar: ToolbarWidget
 	public readonly terminal: TerminalWidget
+	private footer: {elementOrWidget: RenderElement/*|Widget TODO*/, heightInPixel: number, rendered: boolean} | undefined
 	private map: Map|undefined
 	private hovered: boolean = false
 	private devStatsInterval: NodeJS.Timer|undefined
@@ -42,15 +43,25 @@ class MainWidget extends Widget {
 		return indexHtmlIds.bodyId
 	}
 
+	public async setFooter(elementOrWidget: RenderElement/*|Widget TODO*/, heightInPixel: number): Promise<void> {
+		if (this.footer) {
+			log.warning('footer already set')
+		}
+		this.footer = {elementOrWidget, heightInPixel, rendered: false}
+		await this.render()
+	}
+
 	public async render(): Promise<void> {
 		const pros: Promise<void>[] = []
 
 		const sidebarEnabled: boolean = settings.getBoolean('sidebar')
 		const transparentBottomBar: boolean = settings.getBoolean('transparentBottomBar')
 		const sidebarDisplay: Style['display'] = sidebarEnabled ? null : 'none'
+		const sidebarHeight: Style['height'] = this.footer ? `calc(100% - ${this.footer.heightInPixel}px)` : '100%'
 		const contentWidth: Style['width'] = sidebarEnabled ? '80%' : '100%'
 		const contentHeight: Style['height'] = transparentBottomBar ? '100%' : '85%'
 		const bottomBarWidth: Style['width'] = sidebarEnabled ? '80%' : '100%'
+		const bottomBarHeight: Style['height'] = this.footer ? `calc(15% - ${this.footer.heightInPixel}px)` : '15%'
 		const bottomBarBackgroundColor: Style['backgroundColor'] = transparentBottomBar && !this.hovered ? null : '#202428'
 		
 		if (!this.renderedOrInProgress) {
@@ -68,14 +79,14 @@ class MainWidget extends Widget {
 						top: '0',
 						right: '0',
 						width:'20%',
-						height: '100%',
+						height: sidebarHeight,
 						backgroundColor: '#303438'
 					}),
 					this.bottomBar.shapeOuter({
 						position: 'absolute',
 						bottom: '0',
 						width: bottomBarWidth,
-						height: '15%',
+						height: bottomBarHeight,
 						backgroundColor: bottomBarBackgroundColor,
 						overflow: 'auto',
 						transition: 'background-color 0.2s'
@@ -98,8 +109,8 @@ class MainWidget extends Widget {
 			}))
 		} else {
 			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth, height: contentHeight}))
-			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth, backgroundColor: bottomBarBackgroundColor}))
-			pros.push(renderManager.addStyleTo(this.sidebar.getId(), {display: sidebarDisplay}))
+			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth, height: bottomBarHeight, backgroundColor: bottomBarBackgroundColor}))
+			pros.push(renderManager.addStyleTo(this.sidebar.getId(), {display: sidebarDisplay, height: sidebarHeight}))
 		}
 		
 		if (sidebarEnabled) {
@@ -108,11 +119,21 @@ class MainWidget extends Widget {
 			pros.push(this.sidebar.unrender())
 		}
 
+		if (this.footer && !this.footer.rendered) {
+			this.footer.elementOrWidget.style = {
+				...this.footer.elementOrWidget.style,
+				position: 'absolute',
+				bottom: '0px'
+			}
+			pros.push(renderManager.addElementTo(this.getId(), this.footer.elementOrWidget))
+			this.footer.rendered = true
+		}
+
 		await Promise.all(pros)
 	}
 
 	public async unrender(): Promise<void> {
-		util.logWarning('expected MainWidget::unrender not to be called') // TODO: add default implementation in super class?
+		log.warning('expected MainWidget::unrender not to be called') // TODO: add default implementation in super class?
 	}
 
 	private async updateDevStats(): Promise<void> {
