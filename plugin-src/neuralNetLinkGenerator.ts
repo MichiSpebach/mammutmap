@@ -59,11 +59,11 @@ async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void
     while (await iterator.hasNextOrUnwatch()) {
         const box: FileBox = await iterator.next()
         fileCount++
-        progressBar.setDescription(buildProgressText())
+        updateProgressBar()
         await generateOutgoingLinksForFile(box, {onLinkAdded: (report) => {
             foundLinksCount += report.linkRoute ? 1 : 0
             foundLinksAlreadyExistedCount += report.linkRouteAlreadyExisted ? 1 : 0
-            progressBar.setDescription(buildProgressText())
+            updateProgressBar()
         }})
     }
 
@@ -74,16 +74,21 @@ async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void
     async function countFiles(): Promise<void> {
         for (const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder); await iterator.hasNextOrUnwatch(); await iterator.next()) {
             totalFileCount++
-            progressBar.setDescription(buildProgressText())
+            updateProgressBar()
         }
         totalFileCountingFinished = true
+    }
+
+    async function updateProgressBar(): Promise<void> {
+        const percent: number|undefined = totalFileCountingFinished ? fileCount/totalFileCount * 100 : undefined
+        const percentText: string = percent ? ` (${Math.round(percent*100)/100}%)` : ''
+        await progressBar.set({text: buildProgressText()+percentText, percent})
     }
 
     function buildProgressText(): string {
         let text: string = `generating outgoing links recursively: analyzed ${fileCount} of ${totalFileCount} files`
         text += `, found ${foundLinksCount} links, ${foundLinksAlreadyExistedCount} of them already existed`
-        const percentText: string = totalFileCountingFinished ? ` (${Math.round(fileCount/totalFileCount * 100)}%)` : ''
-        return text+percentText
+        return text
     }
 }
 

@@ -36,8 +36,31 @@ export class ProgressBarWidget /*extends Widget*/ {
 		}
 	}
 
-	public async setDescription(text: string): Promise<void> {
-		return renderManager.setElementsTo(this.id, text)
+	public async set(options: {text: string, percent?: number}): Promise<void> {
+		if (options.percent) {
+			const textElement: RenderElement = {
+				type: 'span',
+				children: options.text,
+				style: {
+					position: 'relative'
+				}
+			}
+			const percentElement: RenderElement = {
+				type: 'div',
+				style: {
+					position: 'absolute',
+					width: options.percent+'%',
+					height: '100%',
+					backgroundColor: 'steelBlue',
+					top: '0px',
+					left: '0px',
+					borderRadius: '4px',
+				}
+			}
+			return renderManager.setElementsTo(this.id, [percentElement, textElement])
+		} else {
+			return renderManager.setElementsTo(this.id, options.text)
+		}
 	}
 
 }

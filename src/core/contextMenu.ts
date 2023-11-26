@@ -199,14 +199,14 @@ async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoM
     fileCount++
     let links: Link[] = box.borderingLinks.getOutgoing()
     foundLinksCount += links.length
-    progressBar.setDescription(buildProgressText())
+    progressBar.set({text: buildProgressText()})
     if (mode === 'AutoMaintained') {
       links = links.filter(link => link.isAutoMaintained())
     }
     pros.push(...links.map(async link => {
       await link.getManagingBoxLinks().removeLink(link)
       removedLinksCount++
-      progressBar.setDescription(buildProgressText())
+      progressBar.set({text: buildProgressText()})
     }))
   }
   
