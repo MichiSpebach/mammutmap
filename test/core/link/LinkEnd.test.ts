@@ -66,7 +66,7 @@ test('reorderMapDataPathWithoutRender misplaced managingBox', async () => {
 
     expect(logWarning).toBeCalledWith('newManagingBox should already be set to referenceLink when calling reorderMapDataPathWithoutRender(..), this will likely lead to further problems')
     expect(logWarning).toBeCalledWith('did not find managingBox while reorderMapDataPathWithoutRender(..) of LinkEnd with id linkEndId, this could happen when reorderMapDataPathWithoutRender(..) is called before the new managingBox is set')
-    expect(logWarning).toBeCalledWith('Link with id linkId in fakeProjectSettingsFilePath/fakeSrcRootPath has path with no rendered boxes. Reason is most likely that the managingBox of the link is (being) unrendered. Defaulting LinkEnd to center of managingBox.')
+    expect(logWarning).toBeCalledWith(`LinkEnd::getRenderedPath() LinkEnd with id 'linkEndId' in Link with id 'linkId' in fakeProjectSettingsFilePath/fakeSrcRootPath (between  and ) has path with no rendered boxes. Reason is most likely that the managingBox of the link is (being) unrendered. Defaulting LinkEnd to center of managingBox.`)
     expect(logWarning).toBeCalledTimes(3)
 })
 
