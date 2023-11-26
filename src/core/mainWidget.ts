@@ -62,6 +62,7 @@ class MainWidget extends Widget {
 		const contentHeight: Style['height'] = transparentBottomBar ? '100%' : '85%'
 		const bottomBarWidth: Style['width'] = sidebarEnabled ? '80%' : '100%'
 		const bottomBarHeight: Style['height'] = this.footer ? `calc(15% - ${this.footer.heightInPixel}px)` : '15%'
+		const bottomBarBottom: Style['bottom'] = this.footer ? `${this.footer.heightInPixel}px` : '0'
 		const bottomBarBackgroundColor: Style['backgroundColor'] = transparentBottomBar && !this.hovered ? null : '#202428'
 		
 		if (!this.renderedOrInProgress) {
@@ -84,7 +85,7 @@ class MainWidget extends Widget {
 					}),
 					this.bottomBar.shapeOuter({
 						position: 'absolute',
-						bottom: '0',
+						bottom: bottomBarBottom,
 						width: bottomBarWidth,
 						height: bottomBarHeight,
 						backgroundColor: bottomBarBackgroundColor,
@@ -109,7 +110,7 @@ class MainWidget extends Widget {
 			}))
 		} else {
 			pros.push(renderManager.addStyleTo(indexHtmlIds.contentId, {width: contentWidth, height: contentHeight}))
-			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth, height: bottomBarHeight, backgroundColor: bottomBarBackgroundColor}))
+			pros.push(renderManager.addStyleTo(this.bottomBar.getId(), {width: bottomBarWidth, height: bottomBarHeight, bottom: bottomBarBottom, backgroundColor: bottomBarBackgroundColor}))
 			pros.push(renderManager.addStyleTo(this.sidebar.getId(), {display: sidebarDisplay, height: sidebarHeight}))
 		}
 		
