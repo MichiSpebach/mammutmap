@@ -82,7 +82,7 @@ function setupSimpleScenario(): {
 
   Object.defineProperty(managingBox, 'transform', {value: new Transform(managingBox)})
   managingBox.getClientRect = () => Promise.resolve(new ClientRect(0, 0, 100, 100))
-  managingBox.getBox = (id: string) => {
+  managingBox.findChildById = (id: string) => {
     if (id === 'fromBox') {
       return fromBox
     }
