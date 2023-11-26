@@ -1,4 +1,4 @@
-import { MockProxy, mock } from 'jest-mock-extended';
+import { mock } from 'jest-mock-extended';
 import { RootFolderBox } from '../../src/core/box/RootFolderBox'
 import { FolderBox } from '../../src/core/box/FolderBox'
 import { FileBox } from '../../src/core/box/FileBox'
@@ -6,6 +6,8 @@ import { Map } from '../../src/core/Map'
 import * as map from '../../src/core/Map'
 import { FileBoxDepthTreeIterator } from '../../src/pluginFacade'
 import * as pluginFacade from '../../src/pluginFacade'
+import * as boxFactory from './box/factories/boxFactory'
+import * as testUtil from '../testUtil'
 
 test('getFileBoxIterator', async () => {
   setupScenario()
@@ -19,6 +21,8 @@ test('getFileBoxIterator', async () => {
 })
 
 function setupScenario(): void {
+  testUtil.initGeneralServicesWithMocks()
+  
   const rootFolder = buildFolderTree()
   const mapMock = mock<Map>()
   mapMock.getRootFolder.mockReturnValue(rootFolder)
@@ -26,37 +30,20 @@ function setupScenario(): void {
 }
 
 function buildFolderTree(): RootFolderBox {
-  const file1 = mockFileBox()
-  file1.getId.mockReturnValue('deepFile')
-  const folder1 = mockFolderBox()
-  folder1.getBoxes.mockReturnValue([file1])
+  const rootFolder = boxFactory.rootFolderOf({idOrSettings: 'rootFolder'})
+  rootFolder.render = () => Promise.resolve()
+  rootFolder.body.render = () => Promise.resolve()
 
-  const file2 = mockFileBox()
-  file2.getId.mockReturnValue('flatFile')
+  const folder1: FolderBox = boxFactory.folderOf({idOrData: 'folder1', parent: rootFolder, addToParent: true})
+  folder1.render = () => Promise.resolve()
+  folder1.body.render = () => Promise.resolve()
+  const deepFile: FileBox = boxFactory.fileOf({idOrData: 'deepFile', parent: folder1, addToParent: true})
 
-  const folder2 = mockFolderBox()
-  folder2.getBoxes.mockReturnValue([])
+  const flatFile: FileBox = boxFactory.fileOf({idOrData: 'flatFile', parent: rootFolder, addToParent: true})
 
-  const rootFolder = mockRootFolderBox()
-  rootFolder.getBoxes.mockReturnValue([folder1, file2, folder2])
+  const folder2: FolderBox = boxFactory.folderOf({idOrData: 'folder2', parent: rootFolder, addToParent: true})
+  folder2.render = () => Promise.resolve()
+  folder2.body.render = () => Promise.resolve()
 
   return rootFolder
-}
-
-function mockFileBox(): MockProxy<FileBox> {
-  const file: MockProxy<FileBox> = mock<FileBox>()
-  file.isFolder.mockReturnValue(false)
-  file.isFile.mockReturnValue(true)
-  return file
-}
-
-function mockFolderBox(): MockProxy<FolderBox> {
-  const file: MockProxy<FolderBox> = mock<FolderBox>()
-  file.isFolder.mockReturnValue(true)
-  file.isFile.mockReturnValue(false)
-  return file
-}
-
-function mockRootFolderBox(): MockProxy<RootFolderBox> {
-  return mockFolderBox() as MockProxy<RootFolderBox>
 }
