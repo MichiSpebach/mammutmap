@@ -64,7 +64,7 @@ export class HoverManager { // rename to FocusManager as it describes better tha
 
     if (this.state !== null && this.state.hovering === hoverable) {
       if (callOnHoverOutIfHovered) {
-        this.state.onHoverOut()
+        this.state.onHoverOut() // TODO: this should return a promise
       }
       this.state = null
     }
