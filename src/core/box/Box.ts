@@ -56,6 +56,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
+  private focusElementsAdded: boolean = false
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context?: BoxContext) {
     super()
@@ -350,10 +351,9 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     await Promise.all([
       relocationDragManager.removeDropTarget(this),
       HoverManager.removeHoverable(this, false),
-      this.removeSidebar({priority: RenderPriority.NORMAL, slideAnimation: false}), // TODO: call removeHover|FocusElements() instead
+      this.removeFocusElements({priority: RenderPriority.NORMAL, awaitAnimations: false}),
       this.detachGrid(),
       this.header.unrender(),
-      scaleTool.unrenderFrom(this),
       this.unrenderAdditional(),
       this.borderingLinks.renderAllThatShouldBe() // otherwise borderingLinks would not float back to border of parent
     ])
@@ -370,13 +370,13 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     if (scaleTool.isScalingInProgress() || this.renderState.isBeingUnrendered()) {
       return
     }
+    if (this.focusElementsAdded) {
+      log.warning(`Box::onHoverOver() called although box '${this.getName()}' is already focused.`)
+    }
 
     await Promise.all([
-      scaleTool.renderInto(this),
-      this.borderingLinks.setHighlightAllThatShouldBeRendered(true),
-      this.tabs.renderBar(),
-      this.addOpenButtonIfFile(RenderPriority.RESPONSIVE),
-      this.addSidebar(RenderPriority.RESPONSIVE)
+      this.addFocusElements({priority: RenderPriority.RESPONSIVE, awaitAnimations: true}),
+      this.borderingLinks.setHighlightAllThatShouldBeRendered(true)
     ])
   }
 
@@ -385,13 +385,39 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     if (scaleTool.isScalingInProgress()) {
       return
     }
+    if (!this.focusElementsAdded) {
+      log.warning(`Box::onHoverOut() called although box '${this.getName()}' is not focused.`)
+    }
 
     await Promise.all([
+      this.removeFocusElements({priority: RenderPriority.RESPONSIVE, awaitAnimations: true}),
+      this.borderingLinks.setHighlightAllThatShouldBeRendered(false)
+    ])
+  }
+
+  private async addFocusElements(options: {priority: RenderPriority, awaitAnimations: boolean}): Promise<void> {
+    if (this.focusElementsAdded) {
+      return
+    }
+    this.focusElementsAdded = true
+    await Promise.all([
+      scaleTool.renderInto(this),
+      this.tabs.renderBar(),
+      this.addOpenButtonIfFile(options.priority),
+      this.addSidebar(options.priority)
+    ])
+  }
+
+  private async removeFocusElements(options: {priority: RenderPriority, awaitAnimations: boolean}): Promise<void> {
+    if (!this.focusElementsAdded) {
+      return
+    }
+    this.focusElementsAdded = false
+    await Promise.all([
       scaleTool.unrenderFrom(this),
-      this.borderingLinks.setHighlightAllThatShouldBeRendered(false),
       this.tabs.unrenderBar(),
-      this.removeOpenButtonIfFile(RenderPriority.RESPONSIVE),
-      this.removeSidebar({priority: RenderPriority.RESPONSIVE, slideAnimation: true})
+      this.removeOpenButtonIfFile(options.priority),
+      this.removeSidebar({priority: options.priority, slideAnimation: options.awaitAnimations})
     ])
   }
 
@@ -418,8 +444,11 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   private async addSidebar(priority: RenderPriority): Promise<void> {
     if (this.sidebar) {
       log.warning('Box::addSidebar() called although sidebar is already set.')
+      return
     }
+
     this.sidebar = new BoxSidebar(this.getId()+'-sidebar')
+    this.sidebar.mounted = true
     await renderManager.addElementTo(this.getId(), this.sidebar.shape({
       position: 'absolute',
       zIndex: '1',
@@ -427,11 +456,10 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       height: '100%'
     }), priority)
     await util.wait(50) // TODO: otherwise slideAnimation would not always work, renderManager.addElementTo(..) seems to return too early, fix this
-    if (!this.sidebar) {
-      // was removed in meantime
-      return
+
+    if (this.sidebar && this.sidebar.mounted) {
+      await this.sidebar.renderWithSlide(priority)
     }
-    await this.sidebar.renderWithSlide(priority)
   }
 
   private async removeSidebar(options: {priority: RenderPriority, slideAnimation: boolean}): Promise<void> {
@@ -446,8 +474,11 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     } else {
       await sidebar.unrender()
     }
-    // TODO: not safe if not already removed
-    await renderManager.remove(sidebar.id, options.priority)
+
+    if (sidebar.mounted) {
+      sidebar.mounted = false
+      await renderManager.remove(sidebar.id, options.priority)
+    }
   }
 
   public isMapDataFileExisting(): boolean {

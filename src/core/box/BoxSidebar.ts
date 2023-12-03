@@ -4,6 +4,7 @@ import { RenderElement, Style } from '../util/RenderElement'
 import { util } from '../util/util'
 
 export class BoxSidebar {
+	public mounted: boolean = false
 	private readonly toolbar: ToolbarWidget
 
 	public constructor(
