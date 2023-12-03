@@ -34,6 +34,7 @@ import { BoxContext } from './BoxContext'
 import { BoxTabs } from './tabs/BoxTabs'
 import { environment } from '../environmentAdapter'
 import { BoxSidebar } from './BoxSidebar'
+import { settings } from '../settings/settings'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   public static readonly Tabs: typeof BoxTabs = BoxTabs
@@ -57,6 +58,9 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
   private focusElementsAdded: boolean = false
+  private focusState: { // TODO: move sidebar and focusElementsAdded in here or introduce BoxFocusManager|BoxHoverManager
+    onBoxSidebarSettingChange: (newValue: boolean) => Promise<void>
+  } | undefined
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context?: BoxContext) {
     super()
@@ -400,23 +404,44 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       return
     }
     this.focusElementsAdded = true
+    this.focusState = {
+      onBoxSidebarSettingChange: async (newValue: boolean) => {
+        if (!this.focusState) {
+          log.warning(`Box::addFocusElements()::onBoxSidebarSettingChange() called although not focused.`)
+          return
+        }
+        const pros: Promise<void>[] = []
+        if (newValue) {
+          pros.push(this.addSidebar(RenderPriority.RESPONSIVE))
+        } else {
+          pros.push(this.removeSidebar({priority: RenderPriority.RESPONSIVE, slideAnimation: true}))
+        }
+        pros.push(renderManager.setElementsTo(this.getId()+'-toggleSidebarButton', newValue ? '<' : '>'))
+        await Promise.all(pros)
+      }
+    }
+    settings.subscribeBoolean('boxSidebar', this.focusState.onBoxSidebarSettingChange)
     await Promise.all([
       scaleTool.renderInto(this),
       this.tabs.renderBar(),
       this.addOpenButtonIfFile(options.priority),
+      this.addToggleBoxSidebarButton(options.priority),
       this.addSidebar(options.priority)
     ])
   }
 
   private async removeFocusElements(options: {priority: RenderPriority, awaitAnimations: boolean}): Promise<void> {
-    if (!this.focusElementsAdded) {
+    if (!this.focusElementsAdded || !this.focusState) {
       return
     }
     this.focusElementsAdded = false
+    settings.unsubscribeBoolean('boxSidebar', this.focusState.onBoxSidebarSettingChange)
+    this.focusState = undefined
     await Promise.all([
       scaleTool.unrenderFrom(this),
       this.tabs.unrenderBar(),
       this.removeOpenButtonIfFile(options.priority),
+      this.removeToggleBoxSidebarButton(options.priority),
       this.removeSidebar({priority: options.priority, slideAnimation: options.awaitAnimations})
     ])
   }
@@ -441,7 +466,24 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return renderManager.remove(this.getId()+'-openButton', priority)
   }
 
+  private async addToggleBoxSidebarButton(priority: RenderPriority): Promise<void> {
+    return renderManager.addElementTo(this.getId(), {
+      type: 'button',
+      id: this.getId()+'-toggleSidebarButton',
+      style: {position: 'absolute', top: '28px', right: '4px', cursor: 'pointer'},
+      onclick: () => settings.setBoolean('boxSidebar', !settings.getBoolean('boxSidebar')),
+      children: settings.getBoolean('boxSidebar') ? '<' : '>'
+    }, priority)
+  }
+
+  private async removeToggleBoxSidebarButton(priority: RenderPriority): Promise<void> {
+    return renderManager.remove(this.getId()+'-toggleSidebarButton', priority)
+  }
+
   private async addSidebar(priority: RenderPriority): Promise<void> {
+    if (!settings.getBoolean('boxSidebar')) {
+      return
+    }
     if (this.sidebar) {
       log.warning('Box::addSidebar() called although sidebar is already set.')
       return

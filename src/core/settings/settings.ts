@@ -3,7 +3,9 @@ import { fileSystem } from '../fileSystemAdapter'
 import { log } from '../logService'
 
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
-export type BooleanSetting = 'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|'htmlApplicationMenu'|'sidebar'|'transparentBottomBar'|'positionMapOnTopLeft'
+export type BooleanSetting = 
+  'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|
+  'htmlApplicationMenu'|'sidebar'|'boxSidebar'|'transparentBottomBar'|'positionMapOnTopLeft'
 
 export let settings: Settings
 
@@ -33,6 +35,7 @@ class Settings {
     zoomSpeed: 3,
     boxMinSizeToRenderInPixels: 200,
     sidebar: true,
+    boxSidebar: true,
     transparentBottomBar: true
   }
 
@@ -44,6 +47,7 @@ class Settings {
   private experimentalFeatures: boolean|undefined = undefined
   private htmlApplicationMenu: boolean|undefined = undefined
   private sidebar: boolean = Settings.defaults.sidebar
+  private boxSidebar: boolean = Settings.defaults.boxSidebar
   private transparentBottomBar: boolean = Settings.defaults.transparentBottomBar
   private positionMapOnTopLeft: boolean|undefined = undefined // only needed for old e2e tests, TODO: update e2e tests and remove this option
 
@@ -166,8 +170,26 @@ class Settings {
     )
   }
 
-  public async subscribeBoolean(setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>) {
+  public subscribeBoolean(setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>): void {
+    if (this.findIndexOfBooleanSubscriber(setting, onSet)) {
+      log.warning(`Settings::subscribeBoolean(${setting}, ${onSet}) already added.`)
+      return
+    }
     this.booleanSubscribers.push({setting, onSet})
+  }
+
+  public unsubscribeBoolean(setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>): void {
+    const index: number|undefined = this.findIndexOfBooleanSubscriber(setting, onSet)
+    if (!index) {
+      log.warning(`Settings::unsubscribeBoolean(${setting}, ${onSet}) not found.`)
+      return
+    }
+    this.booleanSubscribers.splice(index, 1)
+  }
+
+  private findIndexOfBooleanSubscriber(setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>): number|undefined {
+    const index: number = this.booleanSubscribers.findIndex(subscriber => subscriber.setting === setting && subscriber.onSet === onSet)
+    return index < 0 ? undefined : index
   }
 
 }
