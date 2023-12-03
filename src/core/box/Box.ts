@@ -447,7 +447,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       return
     }
 
-    this.sidebar = new BoxSidebar(this.getId()+'-sidebar')
+    this.sidebar = new BoxSidebar(this.getId()+'-sidebar'+util.generateId()) // additional util.generateId() prevents possible collision with old sidebar that is about to be removed TODO: find better solution
     this.sidebar.mounted = true
     await renderManager.addElementTo(this.getId(), this.sidebar.shape({
       position: 'absolute',
