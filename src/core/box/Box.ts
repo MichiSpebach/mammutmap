@@ -38,6 +38,7 @@ import { settings } from '../settings/settings'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   public static readonly Tabs: typeof BoxTabs = BoxTabs
+  public static readonly Sidebar: typeof BoxSidebar = BoxSidebar
   private name: string
   private parent: FolderBox|null
   private mapData: BoxData
@@ -57,8 +58,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
-  private focusElementsAdded: boolean = false
-  private focusState: { // TODO: move sidebar and focusElementsAdded in here or introduce BoxFocusManager|BoxHoverManager
+  private focusState: { // TODO: move sidebar in here or introduce BoxFocusManager|BoxHoverManager
     onBoxSidebarSettingChange: (newValue: boolean) => Promise<void>
   } | undefined
 
@@ -374,7 +374,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     if (scaleTool.isScalingInProgress() || this.renderState.isBeingUnrendered()) {
       return
     }
-    if (this.focusElementsAdded) {
+    if (this.focusState) {
       log.warning(`Box::onHoverOver() called although box '${this.getName()}' is already focused.`)
     }
 
@@ -389,7 +389,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     if (scaleTool.isScalingInProgress()) {
       return
     }
-    if (!this.focusElementsAdded) {
+    if (!this.focusState) {
       log.warning(`Box::onHoverOut() called although box '${this.getName()}' is not focused.`)
     }
 
@@ -400,10 +400,9 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   }
 
   private async addFocusElements(options: {priority: RenderPriority, awaitAnimations: boolean}): Promise<void> {
-    if (this.focusElementsAdded) {
+    if (this.focusState) {
       return
     }
-    this.focusElementsAdded = true
     this.focusState = {
       onBoxSidebarSettingChange: async (newValue: boolean) => {
         if (!this.focusState) {
@@ -414,7 +413,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
         if (newValue) {
           pros.push(this.addSidebar(RenderPriority.RESPONSIVE))
         } else {
-          pros.push(this.removeSidebar({priority: RenderPriority.RESPONSIVE, slideAnimation: true}))
+          pros.push(this.removeSidebar({priority: RenderPriority.RESPONSIVE, awaitSlideAnimation: true}))
         }
         pros.push(renderManager.setElementsTo(this.getId()+'-toggleSidebarButton', newValue ? '<' : '>'))
         await Promise.all(pros)
@@ -431,10 +430,9 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   }
 
   private async removeFocusElements(options: {priority: RenderPriority, awaitAnimations: boolean}): Promise<void> {
-    if (!this.focusElementsAdded || !this.focusState) {
+    if (!this.focusState) {
       return
     }
-    this.focusElementsAdded = false
     settings.unsubscribeBoolean('boxSidebar', this.focusState.onBoxSidebarSettingChange)
     this.focusState = undefined
     await Promise.all([
@@ -442,7 +440,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       this.tabs.unrenderBar(),
       this.removeOpenButtonIfFile(options.priority),
       this.removeToggleBoxSidebarButton(options.priority),
-      this.removeSidebar({priority: options.priority, slideAnimation: options.awaitAnimations})
+      this.removeSidebar({priority: options.priority, awaitSlideAnimation: options.awaitAnimations})
     ])
   }
 
@@ -497,25 +495,21 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       left: '100%',
       height: '100%'
     }), priority)
-    await util.wait(50) // TODO: otherwise slideAnimation would not always work, renderManager.addElementTo(..) seems to return too early, fix this
+    await util.wait(50) // TODO: otherwise slideAnimation would not always work, renderManager.addElementTo(..) seems to return too early, fix this (maybe by using styleClass)
 
     if (this.sidebar && this.sidebar.mounted) {
-      await this.sidebar.renderWithSlide(priority)
+      await this.sidebar.render({priority, awaitSlideAnimation: true})
     }
   }
 
-  private async removeSidebar(options: {priority: RenderPriority, slideAnimation: boolean}): Promise<void> {
+  private async removeSidebar(options: {priority: RenderPriority, awaitSlideAnimation: boolean}): Promise<void> {
     if (!this.sidebar) {
       return
     }
 
     const sidebar: BoxSidebar = this.sidebar
     this.sidebar = undefined
-    if (options.slideAnimation) {
-      await sidebar.unrenderWithSlide(options.priority)
-    } else {
-      await sidebar.unrender()
-    }
+    await sidebar.unrender(options)
 
     if (sidebar.mounted) {
       sidebar.mounted = false

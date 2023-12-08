@@ -2,15 +2,19 @@ import { RenderPriority, renderManager } from '../RenderManager'
 import { ToolbarWidget } from '../toolbars/ToolbarWidget'
 import { RenderElement, Style } from '../util/RenderElement'
 import { util } from '../util/util'
+import { log } from '../logService'
+//import { BoxToolkitWidget } from './BoxToolkitWidget'
 
 export class BoxSidebar {
-	public mounted: boolean = false
 	private readonly toolbar: ToolbarWidget
+	public mounted: boolean = false
+	private rendered: boolean = false
 
 	public constructor(
 		public readonly id: string
 	) {
 		this.toolbar = new ToolbarWidget(this.id+'-toolbar')
+		//this.toolbar.addView({getName: () => 'Box Toolkit', getWidget: () => new BoxToolkitWidget(this.id+'-boxToolkit')})
 	}
 
 	public shape(additionalStyle?: Style): RenderElement {
@@ -37,24 +41,38 @@ export class BoxSidebar {
 		}
 	}
 
-	public async renderWithSlide(priority: RenderPriority): Promise<void> {
-		await Promise.all([
-			this.render(),
-			renderManager.addStyleTo(this.toolbar.id, {transform: 'translateX(0%)', transitionDuration: '200ms'}, priority)
-		])
+	public async render(options: {priority: RenderPriority, awaitSlideAnimation: boolean}): Promise<void> {
+		if (!this.mounted) {
+			log.warning(`BoxSidebar::render() called although widget is not mounted.`)
+			return
+		}
+
+		this.rendered = true
+		const pros: Promise<void>[] = []
+		if (options.awaitSlideAnimation) {
+			pros.push(renderManager.addStyleTo(this.toolbar.id, {transform: 'translateX(0%)', transitionDuration: '200ms'}, options.priority))
+		}
+		pros.push(this.toolbar.render())
+		await Promise.all(pros)
 	}
 
-	public async unrenderWithSlide(priority: RenderPriority): Promise<void> {
-		await renderManager.addStyleTo(this.toolbar.id, {transform: 'translateX(-100%)', transitionDuration: '200ms'}, priority)
-		await util.wait(200)
-		await this.unrender()
-	}
+	public async unrender(options: {priority: RenderPriority, awaitSlideAnimation: boolean}): Promise<void> {
+		if (!this.mounted) {
+			log.warning(`BoxSidebar::unrender() called although widget is not mounted.`)
+			return
+		}
 
-	public render(): Promise<void> {
-		return this.toolbar.render()
-	}
-
-	public unrender(): Promise<void> {
-		return this.toolbar.unrender()
+		if (options.awaitSlideAnimation) {
+			if (!this.rendered) {
+				return
+			}
+			await renderManager.addStyleTo(this.toolbar.id, {transform: 'translateX(-100%)', transitionDuration: '200ms'}, options.priority)
+			await util.wait(200)
+		}
+		if (!this.rendered) {
+			return
+		}
+		this.rendered = false
+		await this.toolbar.unrender()
 	}
 }
