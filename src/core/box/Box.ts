@@ -487,12 +487,13 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       return
     }
 
-    this.sidebar = new BoxSidebar(this.getId()+'-sidebar'+util.generateId()) // additional util.generateId() prevents possible collision with old sidebar that is about to be removed TODO: find better solution
+    this.sidebar = new BoxSidebar(this)
     this.sidebar.mounted = true
     await renderManager.addElementTo(this.getId(), this.sidebar.shape({
       position: 'absolute',
       zIndex: '1',
       left: '100%',
+      width: 'max-content',
       height: '100%'
     }), priority)
     await util.wait(50) // TODO: otherwise slideAnimation would not always work, renderManager.addElementTo(..) seems to return too early, fix this (maybe by using styleClass)
@@ -513,7 +514,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
     if (sidebar.mounted) {
       sidebar.mounted = false
-      await renderManager.remove(sidebar.id, options.priority)
+      await renderManager.remove(sidebar.getId(), options.priority)
     }
   }
 

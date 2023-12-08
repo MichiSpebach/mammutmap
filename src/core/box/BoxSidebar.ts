@@ -3,24 +3,31 @@ import { ToolbarWidget } from '../toolbars/ToolbarWidget'
 import { RenderElement, Style } from '../util/RenderElement'
 import { util } from '../util/util'
 import { log } from '../logService'
-//import { BoxToolkitWidget } from './BoxToolkitWidget'
+import { BoxToolkitWidget } from './BoxToolkitWidget'
+import { Box } from './Box'
 
 export class BoxSidebar {
+	private readonly referenceBox: Box
+	private readonly id: string
 	private readonly toolbar: ToolbarWidget
 	public mounted: boolean = false
 	private rendered: boolean = false
 
-	public constructor(
-		public readonly id: string
-	) {
-		this.toolbar = new ToolbarWidget(this.id+'-toolbar')
-		//this.toolbar.addView({getName: () => 'Box Toolkit', getWidget: () => new BoxToolkitWidget(this.id+'-boxToolkit')})
+	public constructor(referenceBox: Box) {
+		this.referenceBox = referenceBox
+		this.id = referenceBox.getId()+'-sidebar'+util.generateId() // additional util.generateId() prevents possible collision with old sidebar that is about to be removed TODO: find better solution
+		this.toolbar = new ToolbarWidget(this.getId()+'-toolbar')
+		this.toolbar.addView({getName: () => 'Box Toolkit', getWidget: () => new BoxToolkitWidget(this.referenceBox)})
+	}
+
+	public getId(): string {
+		return this.id
 	}
 
 	public shape(additionalStyle?: Style): RenderElement {
 		return {
 			type: 'div',
-			id: this.id,
+			id: this.getId(),
 			style: {
 				overflow: 'hidden',
 				...additionalStyle

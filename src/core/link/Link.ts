@@ -136,15 +136,14 @@ export class Link implements Hoverable {
     return this.render(options.priority)
   }
 
-  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { 
-    if (!this.getManagingBox().isBodyBeingRendered()) {
-      log.warning(`Link::render(..) called for ${this.describe()} unless the body of its managingBox with name '${this.getManagingBox().getName()}' is being unrendered.`)
+  public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRendered()) {
+      log.warning(`Link::render(..) called for ${this.describe()} while it should not be rendered. ${this.getManagingBox().isBodyBeingRendered()} ${this.from.shouldBeRendered()} ${this.to.shouldBeRendered()}`)
       return
     }
     await this.renderScheduler.schedule(async () => {
-    if (!this.getManagingBox().isBodyBeingRendered()) {
-      // no warning here as this is hard to prevent
-      //log.warning(`Link::render(..) called for Link with id '${this.getId()}' unless the body of its managingBox with name '${this.getManagingBox().getName()}' is being unrendered. (rescheduled)`)
+    if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRendered()) { // can happen while Box::onHoverOut() and zooming out at the same time (when there are lots of links)
+      log.warning(`Link::render(..) called for Link with id '${this.getId()}' while it should not be rendered. (rescheduled)`)
       return
     }
     this.renderState.setRenderStarted()
@@ -163,9 +162,21 @@ export class Link implements Hoverable {
       const toHtml: string = `<div id="${this.to.getId()}" ${draggableHtml} class="${style.getHighlightTransitionClass()}"></div>`
       const lineStyle: string = 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'
       const lineHtml: string = `<svg id="${this.line.getId()}" style="${lineStyle}">${lineInnerHtml}</svg>`
+      if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRendered()) { // can happen while Box::onHoverOut() and zooming out at the same time (when there are lots of links)
+        log.warning(`######################## 0 Link::render(..) called for ${this.describe()} while it should not be rendered. ${this.getManagingBox().isBodyBeingRendered()} ${this.from.shouldBeRendered()} ${this.to.shouldBeRendered()}`)
+        return
+      }
       await renderManager.setContentTo(this.getId(), lineHtml+fromHtml+toHtml, priority)
+      if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRendered()) { // can happen while Box::onHoverOut() and zooming out at the same time (when there are lots of links)
+        log.warning(`######################## 1 Link::render(..) called for ${this.describe()} while it should not be rendered. ${this.getManagingBox().isBodyBeingRendered()} ${this.from.shouldBeRendered()} ${this.to.shouldBeRendered()}`)
+        return
+      }
       proms.push(this.addEventListeners())
     } else {
+      if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRendered()) { // can happen while Box::onHoverOut() and zooming out at the same time (when there are lots of links)
+        log.warning(`######################## 2 Link::render(..) called for ${this.describe()} while it should not be rendered. ${this.getManagingBox().isBodyBeingRendered()} ${this.from.shouldBeRendered()} ${this.to.shouldBeRendered()}`)
+        return
+      }
       proms.push(renderManager.setContentTo(this.line.getId(), lineInnerHtml, priority))
     }
 
@@ -175,7 +186,15 @@ export class Link implements Hoverable {
     const distanceX: number = toClientPosition.x-fromClientPosition.x
     const distanceY: number = toClientPosition.y-fromClientPosition.y
     const angleInRadians: number = Math.atan2(distanceY, distanceX)
+    if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRendered()) { // can happen while Box::onHoverOut() and zooming out at the same time (when there are lots of links)
+      log.warning(`######################## 3 Link::render(..) called for ${this.describe()} while it should not be rendered. ${this.getManagingBox().isBodyBeingRendered()} ${this.from.shouldBeRendered()} ${this.to.shouldBeRendered()}`)
+      return
+    }
     proms.push(this.from.render(fromInManagingBoxCoords, angleInRadians))
+    if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRendered()) { // can happen while Box::onHoverOut() and zooming out at the same time (when there are lots of links)
+      log.warning(`######################## 4 Link::render(..) called for ${this.describe()} while it should not be rendered. ${this.getManagingBox().isBodyBeingRendered()} ${this.from.shouldBeRendered()} ${this.to.shouldBeRendered()}`)
+      return
+    }
     proms.push(this.to.render(toInManagingBoxCoords, angleInRadians))
 
     await Promise.all(proms)

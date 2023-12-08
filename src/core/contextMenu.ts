@@ -3,7 +3,6 @@ import { Box } from './box/Box'
 import { FileBox } from './box/FileBox'
 import { FolderBox } from './box/FolderBox'
 import { Link } from './link/Link'
-import { relocationDragManager } from './RelocationDragManager'
 import { ClientPosition } from './shape/ClientPosition'
 import { LocalPosition } from './shape/LocalPosition'
 import { BoxData } from './mapData/BoxData'
@@ -137,7 +136,11 @@ function buildOpenFileInEditorItem(box: FileBox): MenuItemFile {
 
 function buildAddLinkItem(node: Box|NodeWidget, position: ClientPosition): MenuItemFile {
   const managingBoxAtStart: Box = node instanceof Box ? node : node.getParent()
-  return new MenuItemFile({label: 'link from here', click: () => addLinkWithClickToDropMode(managingBoxAtStart, position, node)})
+  return new MenuItemFile({label: 'link from here', click: () => managingBoxAtStart.links.addWithClickToDropMode({
+    fromNode: node,
+    fromPosition: position,
+    toPositionAtStart: position
+  })})
 }
 
 function buildRemoveOutgoingLinksForFileItem(box: FileBox): MenuItemFolder {
@@ -352,17 +355,6 @@ function buildDetailsPopupWidget(title: string, object: any): PopupWidget {
       }
     }
   }
-}
-
-// TODO: move into Box?
-async function addLinkWithClickToDropMode(managingBoxAtStart: Box, positionAtStart: ClientPosition, fromNode: Box|NodeWidget): Promise<void> {
-  const positionAtStartInBox: LocalPosition = await managingBoxAtStart.transform.clientToLocalPosition(positionAtStart)
-
-  const from = {node: fromNode, positionInFromNodeCoords: positionAtStartInBox}
-  const to = {node: managingBoxAtStart, positionInToNodeCoords: positionAtStartInBox}
-  const link: Link = await managingBoxAtStart.links.add({from, to, save: false})
-
-  await relocationDragManager.startDragWithClickToDropMode(link.to)
 }
 
 async function addNodeToBox(box: Box, position: ClientPosition): Promise<void> {

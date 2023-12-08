@@ -11,6 +11,7 @@ import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { log } from '../logService'
 import { LocalPosition } from '../shape/LocalPosition'
+import { ClientPosition } from '../shape/ClientPosition'
 
 export class BoxLinks extends Widget {
     private readonly referenceBox: Box
@@ -49,6 +50,29 @@ export class BoxLinks extends Widget {
       proms.push(oldManagingBox.saveMapData())
 
       await Promise.all(proms)
+    }
+
+    public async addWithClickToDropMode(options?: {
+      fromNode?: Box|NodeWidget,
+      fromPosition?: LocalPosition|ClientPosition,
+      toPositionAtStart?: LocalPosition|ClientPosition,
+    }): Promise<void> {
+      const fromNode: Box|NodeWidget = options?.fromNode ?? this.referenceBox
+      let fromPosition: LocalPosition|ClientPosition = options?.fromPosition ?? new LocalPosition(50, 50)
+      let toPositionAtStart: LocalPosition|ClientPosition = options?.toPositionAtStart ?? renderManager.getCursorClientPosition()
+
+      if (fromPosition instanceof ClientPosition) {
+        fromPosition = await this.referenceBox.transform.clientToLocalPosition(fromPosition)
+      }
+      if (toPositionAtStart instanceof ClientPosition) {
+        toPositionAtStart = await this.referenceBox.transform.clientToLocalPosition(toPositionAtStart)
+      }
+    
+      const from = {node: fromNode, positionInFromNodeCoords: fromPosition}
+      const to = {node: this.referenceBox, positionInToNodeCoords: toPositionAtStart}
+      const link: Link = await this.add({from, to, save: false})
+    
+      await link.to.startDragWithClickToDropMode()
     }
 
     public async add(options: {
