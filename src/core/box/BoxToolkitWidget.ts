@@ -16,34 +16,35 @@ export class BoxToolkitWidget extends UltimateWidget {
 		box => this.buildButton('Link from this box', () => box.links.addWithClickToDropMode())
 	]
 
-	public static addGroup(options: {title: string, color?: string, elementsBuilder: (box: Box) => (string|RenderElement)[]}): void {
-		const color: string = options.color ?? 'gray'
-
-		this.elementBuilders.push((box: Box) => {
-			return {
-				type: 'div',
-				style: {
-					marginTop: '8px',
-					marginBottom: '8px',
-					border: `${color} 1px solid`,
-					borderRadius: '6px'
-				},
-				children: [
-					options.title,
-					...options.elementsBuilder(box)
-					//...[options.elementsBuilder(box)].flatMap(element => element) // for general RenderElements that are not always arrays, but looks complicated and not needed
-				]
-			}
-		})
-	}
-
-	public static addElements(elementsBuilder: (box: Box) => RenderElements): void {
+	public static addElements(elementsBuilder: (box: Box) => RenderElements|undefined): void {
 		this.elementBuilders.push(elementsBuilder)
 	}
 
 	// TODO: useful? why not always use addElements?
-	public static addElement(elementBuilder: (box: Box) => RenderElement): void {
+	public static addElement(elementBuilder: (box: Box) => RenderElement|undefined): void {
 		this.elementBuilders.push(elementBuilder)
+	}
+
+	public static addGroup(options: {title: string, color?: string, elementsBuilder: (box: Box) => (string|RenderElement)[]}): void {
+		this.elementBuilders.push((box: Box) => this.buildGroup({...options, elements: options.elementsBuilder(box)}))
+	}
+
+	public static buildGroup(options: {title: string, color?: string, elements: (string|RenderElement)[]}): RenderElement {
+		const color: string = options.color ?? 'gray'
+		return {
+			type: 'div',
+			style: {
+				marginTop: '8px',
+				marginBottom: '8px',
+				border: `${color} 1px solid`,
+				borderRadius: '6px'
+			},
+			children: [
+				options.title,
+				...options.elements,
+				//...[options.elements].flatMap(element => element) // for general RenderElements that are not always arrays, but looks complicated and not needed
+			]
+		}
 	}
 
 	public static buildButton(text: string, onclick: () => void): RenderElement {
