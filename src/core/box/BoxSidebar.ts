@@ -7,6 +7,7 @@ import { BoxToolkitWidget } from './BoxToolkitWidget'
 import { Box } from './Box'
 
 export class BoxSidebar {
+	public static readonly BasicToolkit: typeof BoxToolkitWidget = BoxToolkitWidget
 	private readonly referenceBox: Box
 	private readonly id: string
 	private readonly toolbar: ToolbarWidget

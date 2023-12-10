@@ -1,12 +1,62 @@
-import { RenderElements } from '../util/RenderElement'
+import { RenderElement, RenderElements, Style } from '../util/RenderElement'
 import { RenderElementWithId, UltimateWidget } from '../Widget'
 import { renderManager } from '../RenderManager'
 import { Box } from './Box'
 
+export class ToolkitTemplate {
+	// TODO: implement general ToolkitTemplate to have common appearance for all toolkits
+}
+
 export class BoxToolkitWidget extends UltimateWidget {
 
+	// TODO: move all static methods related to template into ToolkitTemplate
+	public static elementBuilders: ((box: Box) => RenderElements|undefined)[] = [
+	//public static template: ToolkitTemplate = new ToolkitTemplate([
+		box => this.buildButton('Rename', () => box.openRenamePopupAndAwaitResolve()),
+		box => this.buildButton('Link from this box', () => box.links.addWithClickToDropMode())
+	]
+
+	public static addGroup(options: {title: string, color?: string, elementsBuilder: (box: Box) => (string|RenderElement)[]}): void {
+		const color: string = options.color ?? 'gray'
+
+		this.elementBuilders.push((box: Box) => {
+			return {
+				type: 'div',
+				style: {
+					marginTop: '8px',
+					marginBottom: '8px',
+					border: `${color} 1px solid`,
+					borderRadius: '6px'
+				},
+				children: [
+					options.title,
+					...options.elementsBuilder(box)
+					//...[options.elementsBuilder(box)].flatMap(element => element) // for general RenderElements that are not always arrays, but looks complicated and not needed
+				]
+			}
+		})
+	}
+
+	public static addElements(elementsBuilder: (box: Box) => RenderElements): void {
+		this.elementBuilders.push(elementsBuilder)
+	}
+
+	// TODO: useful? why not always use addElements?
+	public static addElement(elementBuilder: (box: Box) => RenderElement): void {
+		this.elementBuilders.push(elementBuilder)
+	}
+
+	public static buildButton(text: string, onclick: () => void): RenderElement {
+		return {
+			type: 'button',
+			style: {display: 'block', margin: '4px', cursor: 'pointer'},
+			onclick,
+			children: text
+		}
+	}
+
 	public constructor(
-        public readonly referenceBox: Box
+		public readonly referenceBox: Box
 	) {
 		super()
 	}
@@ -25,13 +75,8 @@ export class BoxToolkitWidget extends UltimateWidget {
 	}
 
 	private shapeInner(): RenderElements {
-		return [
-			{
-				type: 'button',
-                onclick: () => this.referenceBox.links.addWithClickToDropMode(),
-				children: 'Link from this box'
-			}
-		]
+		return BoxToolkitWidget.elementBuilders.flatMap(builder => builder(this.referenceBox) ?? []) // flatMap instead of map to filter out unset elements
+		//return BoxToolkitWidget.elementBuilders.map(builder => builder(this.referenceBox)).filter((element): element is RenderElement => !!element) // this would also be possible
 	}
 
 	public override async render(): Promise<void> {

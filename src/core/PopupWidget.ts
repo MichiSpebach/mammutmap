@@ -42,7 +42,10 @@ export abstract class PopupWidget extends Widget {
         const closeButton: RenderElement = {
             type: 'button',
             id: this.id+'Close',
-            style: {float: 'right'},
+            style: {
+                float: 'right',
+                marginLeft: '8px'
+            },
             onclick: () => {
                 if (this.onClose) {
                     this.onClose()

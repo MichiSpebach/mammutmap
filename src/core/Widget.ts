@@ -1,4 +1,4 @@
-import { renderManager } from './RenderManager'
+import { SchedulablePromise, renderManager } from './RenderManager'
 import { ElementType, RenderElement, RenderElements, Style } from './util/RenderElement'
 
 export type RenderElementWithId = RenderElement & {id: string} // TODO: required at all?
@@ -6,7 +6,9 @@ export type RenderElementWithId = RenderElement & {id: string} // TODO: required
 // TODO move into util folder
 // TODO rename to RenderingWidget and introduce (Simple)Widget with formHtml() method that does not need to know renderManager
 // TODO all gui components should inherit this (Box, BoxHeader, BoxBody, Link, LinkEnd, ...)
-export abstract class Widget {
+export type LegacyWidget = Widget
+/** @deprecated use LegacyWidget*/
+export abstract class Widget { // TODO rename to OldWidget|LegacyWidget
 	//public abstract readonly id: string // TODO: required at all?
 	public abstract getId(): string // TODO: remove
 	public abstract render(): Promise<void> // TODO for some gui components render needs arguments
@@ -65,7 +67,17 @@ export abstract class AdvancedWidget extends Widget {
 	protected abstract shapeInner(): Promise<{elements: RenderElements, rendering: Promise<void>}>
 }
 
+/** @deprecated is not fun, too complicated*/
 export abstract class UltimateWidget extends Widget { // leads to problems if shape() is called again, then inner rendering finishes first and is overridden by parent rendering
 	public abstract shape(): {element: RenderElementWithId, rendering?: Promise<void>}
 	//public override abstract render(): {element: RenderElementWithId, rendering?: Promise<void>} // TODO: simply fuse shape and render into one?
+}
+
+/** @deprecated possibility to await mounting, also too complicated, can be achieved simpler*/
+export abstract class SuperWidget extends Widget {
+	public abstract shape(): RenderElement & {onMount: SchedulablePromise<Promise<void>>}
+}
+
+export abstract class ShapeWidget { // TODO: rename to Widget
+	public abstract shape(): RenderElement & {onMount?: () => void}
 }

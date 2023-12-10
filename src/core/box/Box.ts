@@ -35,6 +35,7 @@ import { BoxTabs } from './tabs/BoxTabs'
 import { environment } from '../environmentAdapter'
 import { BoxSidebar } from './BoxSidebar'
 import { settings } from '../settings/settings'
+import { TextInputPopup } from '../TextInputPopup'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   public static readonly Tabs: typeof BoxTabs = BoxTabs
@@ -229,6 +230,14 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     await this.renameAndMoveOnFileSystem(oldSrcPath, newSrcPath, oldMapDataFilePath, newMapDataFilePath)
     await this.saveMapData()
     await Promise.all(borderingLinksToReorder.map(link => link.reorderAndSaveAndRender({movedWayPoint: this})))
+  }
+
+  // TODO: extract this into another class?
+  public async openRenamePopupAndAwaitResolve(): Promise<void> {
+    const newName: string|undefined = await TextInputPopup.buildAndRenderAndAwaitResolve(`Rename Box '${this.getName()}'`, this.getName())
+    if (newName) {
+      await this.rename(newName)
+    }
   }
 
   public async rename(newName: string): Promise<void> {

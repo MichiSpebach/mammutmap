@@ -24,6 +24,7 @@ let contextMenuPopup: ContextMenuPopup
 
 export function init(popupImpl: ContextMenuPopup): void {
   contextMenuPopup = popupImpl
+  addElementsToBoxToolkit()
 }
 
 export interface ContextMenuPopup {
@@ -171,6 +172,29 @@ function buildRemoveOutgoingLinksForFolderItem(box: FolderBox): MenuItemFolder {
   ]})
 }
 
+// TODO: move into removeLinks plugin
+function addElementsToBoxToolkit(): void {
+  Box.Sidebar.BasicToolkit.addGroup({
+    title: 'Remove Outgoing Links',
+    color: 'red',
+    elementsBuilder: (box: Box) => {
+      const suffixIfFolder: string = box instanceof FolderBox ? ' of this folder' : ''
+      const elements: RenderElements = []
+      elements.push(Box.Sidebar.BasicToolkit.buildButton('autoMaintained'+suffixIfFolder, 
+        () => box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
+      ))
+      elements.push(Box.Sidebar.BasicToolkit.buildButton('all'+suffixIfFolder, 
+        () => box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
+      ))
+      if (box instanceof FolderBox) {
+        elements.push(Box.Sidebar.BasicToolkit.buildButton('autoMaintained recursively...', () => openDialogForRemoveOutgoingLinksRecursively(box, 'AutoMaintained')))
+        elements.push(Box.Sidebar.BasicToolkit.buildButton('all recursively...', () => openDialogForRemoveOutgoingLinksRecursively(box, 'All')))
+      }
+      return elements
+    }
+  })
+}
+
 async function openDialogForRemoveOutgoingLinksRecursively(folder: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
   const popup: PopupWidget = await PopupWidget.newAndRender({title: `Remove ${mode} Outgoing Links Recursively`, content: [
       {
@@ -303,12 +327,7 @@ function buildRemoveLinkItem(link: Link): MenuItemFile {
 }
 
 function buildRenameBoxItem(box: Box): MenuItemFile {
-  return new MenuItemFile({label: 'rename', click: async () => {
-    const newName: string|undefined = await TextInputPopup.buildAndRenderAndAwaitResolve('Rename Box', box.getName())
-    if (newName) {
-      await box.rename(newName)
-    }
-  }})
+  return new MenuItemFile({label: 'rename', click: () => box.openRenamePopupAndAwaitResolve()})
 }
 
 function buildAddNewFileItem(box: FolderBox, position: ClientPosition): MenuItemFile {
