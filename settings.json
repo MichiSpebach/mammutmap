@@ -2,5 +2,6 @@
 	"zoomSpeed": 3,
 	"boxMinSizeToRender": 200,
 	"sidebar": true,
-	"transparentBottomBar": true
+	"transparentBottomBar": true,
+	"boxSidebar": true
 }
