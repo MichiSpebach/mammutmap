@@ -37,11 +37,12 @@ import { MenuItemFolder } from './core/applicationMenu/MenuItemFolder'
 import { FileBoxDepthTreeIterator } from './core/box/FileBoxDepthTreeIterator'
 import { BoxDepthTreeIterator } from './core/box/BoxDepthTreeIterator'
 import { ProgressBarWidget } from './core/util/ProgressBarWidget'
+import { MenuItem } from './core/applicationMenu/MenuItem'
 
 
 export { util as coreUtil }
 export { environment, ChildProcess }
-export { applicationMenu, contextMenu, MenuItemFile, MenuItemFolder }
+export { applicationMenu, contextMenu, MenuItem, MenuItemFile, MenuItemFolder }
 export { renderManager, RenderPriority, Subscribers }
 export { RenderElements, RenderElement, ElementType, Style }
 export { style }
@@ -59,7 +60,7 @@ export { WayPointData }
 export { Transform, LocalPosition }
 export { BoxDepthTreeIterator, FileBoxDepthTreeIterator }
 export { BoxWatcher }
-export { Box, FileBox, RootFolderBox }
+export { Box, FileBox, FolderBox, RootFolderBox }
 export { BoxHeader }
 export { BorderingLinks }
 export { Link, LinkImplementation, overrideLink }

@@ -17,14 +17,11 @@ import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
 import { MenuItemFile } from './applicationMenu/MenuItemFile'
 import { RenderElements } from './util/RenderElement'
 import { environment } from './environmentAdapter'
-import { BoxDepthTreeIterator } from './box/BoxDepthTreeIterator'
-import { ProgressBarWidget } from './util/ProgressBarWidget'
 
 let contextMenuPopup: ContextMenuPopup
 
 export function init(popupImpl: ContextMenuPopup): void {
   contextMenuPopup = popupImpl
-  addElementsToBoxToolkit()
 }
 
 export interface ContextMenuPopup {
@@ -33,6 +30,7 @@ export interface ContextMenuPopup {
 
 const fileBoxMenuItemGenerators: ((box: FileBox) => MenuItem|undefined)[] = []
 const folderBoxMenuItemGenerators: ((box: FolderBox) => MenuItem|undefined)[] = []
+const sourcelessBoxMenuItemGenerators: ((box: SourcelessBox) => MenuItem|undefined)[] = []
 
 export function addFileBoxMenuItem(generator: (box: FileBox) => MenuItem|undefined): void {
   fileBoxMenuItemGenerators.push(generator)
@@ -42,13 +40,16 @@ export function addFolderBoxMenuItem(generator: (box: FolderBox) => MenuItem|und
   folderBoxMenuItemGenerators.push(generator)
 }
 
+export function addSourcelessBoxMenuItem(generator: (box: SourcelessBox) => MenuItem|undefined): void {
+  sourcelessBoxMenuItemGenerators.push(generator)
+}
+
 export function openForFileBox(box: FileBox, position: ClientPosition): void {
   const items: MenuItem[] = [
     //buildOpenFileInEditorItem(box),
     buildAddLinkItem(box, position),
     buildAddNodeItem(box, position),
-    buildRenameBoxItem(box),
-    buildRemoveOutgoingLinksForFileItem(box)
+    buildRenameBoxItem(box)
   ]
 
   if (settings.getBoolean('developerMode')) {
@@ -71,8 +72,7 @@ export function openForFolderBox(box: FolderBox, position: ClientPosition): void
     buildAddNodeItem(box, position),
     buildRenameBoxItem(box),
     buildAddNewFileItem(box, position),
-    buildAddNewFolderItem(box, position),
-    buildRemoveOutgoingLinksForFolderItem(box)
+    buildAddNewFolderItem(box, position)
   ]
 
   if (settings.getBoolean('developerMode')) {
@@ -99,6 +99,13 @@ export function openForSourcelessBox(box: SourcelessBox, position: ClientPositio
   if (settings.getBoolean('developerMode')) {
     items.push(buildDetailsItem('SourcelessBoxDetails', box))
   }
+
+  sourcelessBoxMenuItemGenerators.forEach(async generator => {
+    const menuItem: MenuItem|undefined = generator(box)
+    if (menuItem) {
+      items.push(menuItem)
+    }
+  })
 
   contextMenuPopup.popup(items, position)
 }
@@ -142,108 +149,6 @@ function buildAddLinkItem(node: Box|NodeWidget, position: ClientPosition): MenuI
     fromPosition: position,
     toPositionAtStart: position
   })})
-}
-
-function buildRemoveOutgoingLinksForFileItem(box: FileBox): MenuItemFolder {
-  return new MenuItemFolder({label: 'remove outgoing links', submenu: [
-    new MenuItemFile({label: 'autoMaintained', click: () => {
-      box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
-    }}),
-    new MenuItemFile({label: 'all', click: () => {
-      box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
-    }})
-  ]})
-}
-
-function buildRemoveOutgoingLinksForFolderItem(box: FolderBox): MenuItemFolder {
-  return new MenuItemFolder({label: 'remove outgoing links', submenu: [
-    new MenuItemFile({label: 'autoMaintained of this folder', click: () => {
-      box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
-    }}),
-    new MenuItemFile({label: 'all of this folder', click: () => {
-      box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
-    }}),
-    new MenuItemFile({label: 'autoMaintained recursively...', click: () => {
-      openDialogForRemoveOutgoingLinksRecursively(box, 'AutoMaintained')
-    }}),
-    new MenuItemFile({label: 'all recursively...', click: () => {
-      openDialogForRemoveOutgoingLinksRecursively(box, 'All')
-    }})
-  ]})
-}
-
-// TODO: move into removeLinks plugin
-function addElementsToBoxToolkit(): void {
-  Box.Sidebar.BasicToolkit.addGroup({
-    title: 'Remove Outgoing Links',
-    color: 'red',
-    elementsBuilder: (box: Box) => {
-      const suffixIfFolder: string = box instanceof FolderBox ? ' of this folder' : ''
-      const elements: RenderElements = []
-      elements.push(Box.Sidebar.BasicToolkit.buildButton('autoMaintained'+suffixIfFolder, 
-        () => box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
-      ))
-      elements.push(Box.Sidebar.BasicToolkit.buildButton('all'+suffixIfFolder, 
-        () => box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
-      ))
-      if (box instanceof FolderBox) {
-        elements.push(Box.Sidebar.BasicToolkit.buildButton('autoMaintained recursively...', () => openDialogForRemoveOutgoingLinksRecursively(box, 'AutoMaintained')))
-        elements.push(Box.Sidebar.BasicToolkit.buildButton('all recursively...', () => openDialogForRemoveOutgoingLinksRecursively(box, 'All')))
-      }
-      return elements
-    }
-  })
-}
-
-async function openDialogForRemoveOutgoingLinksRecursively(folder: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
-  const popup: PopupWidget = await PopupWidget.newAndRender({title: `Remove ${mode} Outgoing Links Recursively`, content: [
-      {
-        type: 'div',
-        style: {marginTop: '4px', marginBottom: '4px'},
-        children: 'Are you sure? This may take a while (depending on how many files there are).'},
-      {
-          type: 'button',
-          children: 'Yes',
-          onclick: () => {
-            removeOutgoingLinksRecursively(folder, mode)
-            popup.unrender()
-          }
-      }
-  ]})
-}
-
-async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
-  console.log(`Start removing ${mode} outgoing links recursively of '${box.getSrcPath()}'...`)
-  const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
-  const boxIterator = new BoxDepthTreeIterator(box)
-  let fileCount: number = 0
-  let foundLinksCount: number = 0
-  let removedLinksCount: number = 0
-  const pros: Promise<void>[] = []
-
-  while(await boxIterator.hasNextOrUnwatch()) {
-    const box: Box = await boxIterator.next()
-    fileCount++
-    let links: Link[] = box.borderingLinks.getOutgoing()
-    foundLinksCount += links.length
-    progressBar.set({text: buildProgressText()})
-    if (mode === 'AutoMaintained') {
-      links = links.filter(link => link.isAutoMaintained())
-    }
-    pros.push(...links.map(async link => {
-      await link.getManagingBoxLinks().removeLink(link)
-      removedLinksCount++
-      progressBar.set({text: buildProgressText()})
-    }))
-  }
-  
-  await Promise.all(pros)
-  await progressBar.finishAndRemove()
-  console.log(`Finished ${buildProgressText()}.`)
-
-  function buildProgressText(): string {
-    return `removing ${mode} outgoing links recursively: analyzed ${fileCount} files, found ${foundLinksCount} links, removed ${removedLinksCount} of them`
-  }
 }
 
 function buildAddNodeItem(box: Box, position: ClientPosition): MenuItemFile {
