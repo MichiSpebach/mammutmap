@@ -7,7 +7,11 @@ contextMenu.addSourcelessBoxMenuItem(buildItemsForContextMenu)
 Box.Sidebar.BasicToolkit.addGroup({
 	title: 'Remove Outgoing Links',
 	color: 'red',
-	elementsBuilder: buildElementsForBoxSidebar
+	item: {
+		topic: 'links',
+		indexWithinTopic: 2,
+		build: buildElementsForBoxSidebar
+	}
 })
 
 function buildItemsForContextMenu(box: Box): MenuItemFolder {

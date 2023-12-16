@@ -34,7 +34,10 @@ export class BoxSidebar {
 				...additionalStyle
 			},
 			children: this.toolbar.shapeOuter({
+				//display: 'flex',
+				//flexDirection: 'column-reverse',
 				height: '100%',
+				overflow: 'auto',
 				boxSizing: 'border-box',
 				paddingLeft: '4px',
 				paddingRight: '4px',

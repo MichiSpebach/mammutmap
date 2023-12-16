@@ -15,25 +15,29 @@ contextMenu.addFolderBoxMenuItem((box: FolderBox) => {
 	]})
 })
 
-Box.Sidebar.BasicToolkit.addElement((box: Box) => {
-	if (box instanceof FileBox) {
-		return Box.Sidebar.BasicToolkit.buildButton('generate outgoing links', () => generateOutgoingLinksForFile(box))
-	}
-	if (box instanceof FolderBox) {
-		return Box.Sidebar.BasicToolkit.buildGroup({
-			title: 'Generate Outgoing Links',
-			color: 'lime',
-			elements: [
-				Box.Sidebar.BasicToolkit.buildButton('for files in this folder only', () => generateOutgoingLinksForAllFilesInFolder(box)),
-				Box.Sidebar.BasicToolkit.buildButton('recursively...', () => openDialogForGenerateOutgoingLinksRecursively(box))
-			]
-		})
-	}
-	if (box instanceof SourcelessBox) {
+Box.Sidebar.BasicToolkit.add({
+	topic: 'links',
+	indexWithinTopic: 1,
+	build: (box: Box) => {
+		if (box instanceof FileBox) {
+			return Box.Sidebar.BasicToolkit.buildButton('generate outgoing links', () => generateOutgoingLinksForFile(box))
+		}
+		if (box instanceof FolderBox) {
+			return Box.Sidebar.BasicToolkit.buildGroup({
+				title: 'Generate Outgoing Links',
+				color: 'lime',
+				elements: [
+					Box.Sidebar.BasicToolkit.buildButton('for files in this folder only', () => generateOutgoingLinksForAllFilesInFolder(box)),
+					Box.Sidebar.BasicToolkit.buildButton('recursively...', () => openDialogForGenerateOutgoingLinksRecursively(box))
+				]
+			})
+		}
+		if (box instanceof SourcelessBox) {
+			return undefined
+		}
+		console.warn(`neuralNetLinkGenerator::Box.Sidebar.BasicToolkit.addElement not implemented for BoxType ${box.constructor.name}.`)
 		return undefined
 	}
-	console.warn(`neuralNetLinkGenerator::Box.Sidebar.BasicToolkit.addElement not implemented for BoxType ${box.constructor.name}.`)
-	return undefined
 })
 
 async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox): Promise<void> {
