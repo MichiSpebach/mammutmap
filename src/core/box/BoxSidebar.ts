@@ -17,7 +17,7 @@ export class BoxSidebar {
 	public constructor(referenceBox: Box) {
 		this.referenceBox = referenceBox
 		this.id = referenceBox.getId()+'-sidebar'+util.generateId() // additional util.generateId() prevents possible collision with old sidebar that is about to be removed TODO: find better solution
-		this.toolbar = new ToolbarWidget(this.getId()+'-toolbar')
+		this.toolbar = new ToolbarWidget(this.getId()+'-toolbar', {hideHeader: 'auto'})
 		this.toolbar.addView({getName: () => 'Box Toolkit', getWidget: () => new BoxToolkitWidget(this.referenceBox)})
 	}
 
@@ -35,7 +35,7 @@ export class BoxSidebar {
 			},
 			children: this.toolbar.shapeOuter({
 				//display: 'flex',
-				//flexDirection: 'column-reverse',
+				//flexDirection: 'column-reverse', // scrollFromButton would fit better to zooming
 				height: '100%',
 				overflow: 'auto',
 				boxSizing: 'border-box',

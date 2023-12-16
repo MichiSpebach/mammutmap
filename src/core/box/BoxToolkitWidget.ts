@@ -8,13 +8,9 @@ export class ToolkitTemplate {
 }
 
 type ToolkitTemplateItem = {
-	topic?: 'links', // TODO: use ToolkitTemplateItemGroup instead
+	topic?: 'links', // TODO: allow raw strings as topic and warn if not found
 	indexWithinTopic?: number,
 	build: ((box: Box) => RenderElements|undefined)
-}
-
-class ToolkitTemplateItemGroup {
-	
 }
 
 export class BoxToolkitWidget extends UltimateWidget {

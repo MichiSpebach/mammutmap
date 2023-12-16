@@ -6,11 +6,11 @@ import { ToolbarView } from './ToolbarView'
 export class ToolbarWidget extends Widget {
 	public readonly id: string
 	private readonly views: ToolbarView[] = []
-	private readonly hideHeader: boolean
+	private readonly hideHeader: boolean|'auto'
 	private selectedView: ToolbarView|undefined
 	private beingRendered: boolean = false
 
-	public constructor(id: string, options?: {hideHeader?: boolean}) {
+	public constructor(id: string, options?: {hideHeader?: boolean|'auto'}) {
 		super()
 		this.id = id
 		this.hideHeader = options?.hideHeader ?? false
@@ -62,7 +62,7 @@ export class ToolbarWidget extends Widget {
 	}
 
 	private shapeInner(): RenderElements {
-		const elements: RenderElements = this.hideHeader
+		const elements: RenderElements = this.hideHeader === true || this.hideHeader === 'auto' && this.views.length < 2
 			? []
 			: this.shapeHeader()
 

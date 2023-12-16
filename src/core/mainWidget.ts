@@ -31,7 +31,7 @@ class MainWidget extends Widget {
 		this.map = mapWidget
 		this.sidebar = new ToolbarWidget('sidebar')
 		this.toggleSidebarButton = new ToggleSidebarWidget(`${this.getId()}-toggleSidebar`)
-		this.bottomBar = new ToolbarWidget('bottomBar', {hideHeader: true})
+		this.bottomBar = new ToolbarWidget('bottomBar', {hideHeader: 'auto'})
 		this.terminal = new TerminalWidget(this.bottomBar.getId()+'-terminal')
 		this.bottomBar.addView({
 			getName: () => 'Terminal',
