@@ -19,6 +19,8 @@ test('findPaths', () => {
     
     expect(pathFinder.findPaths('import path.separated.with.dots')).toEqual(['path/separated/with/dots'])
     expect(pathFinder.findPaths('import complete.folder.*')).toEqual(['complete/folder/'])
+    expect(pathFinder.findPaths('from path.separated.with.dots')).toEqual(['path/separated/with/dots'])
+    expect(pathFinder.findPaths('from complete.folder.*')).toEqual(['complete/folder/'])
     expect(pathFinder.findPaths('object.field.method')).toEqual([])
     
     expect(pathFinder.findPaths('path/separated/with/slashes.fileEnding')).toEqual(['path/separated/with/slashes.fileEnding'])
@@ -49,9 +51,22 @@ test('findPaths with surroundings', () => {
     expect(pathFinder.findPaths('other stuff path\\separated\\with\\backslashes other stuff')).toEqual(['path/separated/with/backslashes'])
 
     expect(pathFinder.findPaths('other stuff import path.separated.with.dots other stuff')).toEqual(['path/separated/with/dots'])
-    expect(pathFinder.findPaths('other stuff text.separated.with.dots other stuff')).toEqual([])
     expect(pathFinder.findPaths('other stuff import complete.folder.* other stuff')).toEqual(['complete/folder/'])
     expect(pathFinder.findPaths('other stuff import complete.folder.*; other stuff')).toEqual(['complete/folder/'])
+    expect(pathFinder.findPaths('other stuff from path.separated.with.dots other stuff')).toEqual(['path/separated/with/dots'])
+    expect(pathFinder.findPaths('other stuff from complete.folder.* other stuff')).toEqual(['complete/folder/'])
+    expect(pathFinder.findPaths('other stuff from complete.folder.*; other stuff')).toEqual(['complete/folder/'])
+    expect(pathFinder.findPaths('other stuff text.separated.with.dots other stuff')).toEqual([])
+    
+    expect(pathFinder.findPaths('(path/in/parentheses)')).toEqual(['path/in/parentheses'])
+    expect(pathFinder.findPaths('[path/in/square/brackets]')).toEqual(['path/in/square/brackets'])
+    expect(pathFinder.findPaths('{path/in/curly/brackets}')).toEqual(['path/in/curly/brackets'])
+    expect(pathFinder.findPaths('no space before(path/in/parentheses)no space after')).toEqual(['path/in/parentheses'])
+    expect(pathFinder.findPaths('no space before[path/in/square/brackets]no space after')).toEqual(['path/in/square/brackets'])
+    expect(pathFinder.findPaths('no space before{path/in/curly/brackets}no space after')).toEqual(['path/in/curly/brackets'])
+    expect(pathFinder.findPaths('space before (path/in/parentheses) space after')).toEqual(['path/in/parentheses'])
+    expect(pathFinder.findPaths('space before [path/in/square/brackets] space after')).toEqual(['path/in/square/brackets'])
+    expect(pathFinder.findPaths('space before {path/in/curly/brackets} space after')).toEqual(['path/in/curly/brackets'])
 })
 
 test('findPaths with mountPoints', () => {
@@ -130,6 +145,14 @@ test('findPaths multiple unquoted paths in text', () => {
     expect(pathFinder.findPaths(text)).toEqual([
         'path/separated/with/slashes',
         'other/path/separated/with/slashes'
+    ])
+})
+
+test('findPaths multiple paths in same line', () => {
+    let text: string = 'path/1 path/2 path/3 path/4 path/5 path/6 path/7 path/8'
+
+    expect(pathFinder.findPaths(text)).toEqual([
+        'path/1', 'path/2', 'path/3', 'path/4', 'path/5', 'path/6', 'path/7', 'path/8'
     ])
 })
 

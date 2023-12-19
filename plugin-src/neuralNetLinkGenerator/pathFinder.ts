@@ -1,19 +1,10 @@
 
 export function findPaths(text: string): string[] {
     let paths: string[] = []
-
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '^', '/', '\\s;')))
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '\\s', '/', '\\s;').map(path => path.trim())))
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, "'", '/', '', "'")))
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkers(text, '"', '/', '', '"')))
-
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '^', '\\', '\\s;')))
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '\\s', '\\','\\s;').map(path => path.trim())))
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, "'", '\\', '', "'")))
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, '"', '\\', '', '"')))
-
-    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, 'import ', '.', '\\s\\*;')))
-
+    const brackets: string = '()\\[\\]{}'
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, `(?:^|[${brackets}\\s])`, '/\\\\', `${brackets}\\s;`)))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, `['"]`, '/\\\\', '', `['"]`)))
+    concatToPathsIfNotIncluded(paths, postProcessPaths(findPathsWithMarkersAndNormalize(text, 'import |from ', '.', '\\s\\*;')))
     return paths
 }
 
@@ -36,7 +27,7 @@ function concatToPathsIfNotIncluded(paths: string[], otherPaths: string[]): void
 }
 
 function findPathsWithMarkersAndNormalize(text: string, start: string, separator: string, additionalForbiddings?: string, end?: string): string[] {
-    return findPathsWithMarkers(text, start, separator, additionalForbiddings, end).map(path => path.replaceAll(separator, '/'))
+    return findPathsWithMarkers(text, start, separator, additionalForbiddings, end).map(path => path.replaceAll(new RegExp(`[${separator}]`, 'g'), '/'))
 }
 
 function findPathsWithMarkers(text: string, start: string, separator: string, additionalForbiddings: string = '', end?: string): string[] {
@@ -44,24 +35,32 @@ function findPathsWithMarkers(text: string, start: string, separator: string, ad
     const paths: string[] = []
 
     const forbiddings: string = `'"/\\\\\n${additionalForbiddings}`
-    const pathElement: string = `[^${forbiddings}]*[\\${separator}][^${forbiddings}]*`
-    const suffixCaptor: string = '(.|\\s|$)' // using capturing group that matches everything to avoid catastrophic backtracking
-    const pathMatches: IterableIterator<RegExpMatchArray> = text.matchAll(new RegExp(`${start}(?:${pathElement})+${suffixCaptor}`, 'g'))
+    const pathElement: string = `[^${forbiddings}]*[${separator}][^${forbiddings}]*`
+    const suffixCaptor: string = '(?<suffix>.|\\s|$)' // using capturing group that matches everything to avoid catastrophic backtracking
+    const pathMatches: IterableIterator<RegExpMatchArray> = text.matchAll(new RegExp(`(?<path>(?<=${start})(?:${pathElement})+${suffixCaptor})`, 'g'))
     for (const pathMatch of pathMatches) {
-        let path: string = pathMatch[0]
-        let suffix: string = pathMatch[1]
-        if (end && end !== suffix) {
+        if (!pathMatch.groups) {
+            console.warn(`pathFinder.findPathsWithMarkers(..) pathMatch has no groups`)
             continue
         }
-        if (path.startsWith(start)) {
-            path = path.substring(start.length)
+        let path: string = pathMatch.groups.path
+        const suffix: string = pathMatch.groups.suffix
+        if (!path || path.length < 1 || suffix === undefined) {
+            console.warn(`pathFinder.findPathsWithMarkers(..) path '${path}' or suffix '${suffix}' is not set`)
+            continue
         }
-        if (path.endsWith(suffix)) {
-            path = path.substring(0, path.length-suffix.length)
+        if (end && !suffix.match(end)) {
+            continue
         }
-        if (path.length > 1) {
-            paths.push(path)
+        if (!path.endsWith(suffix)) {
+            console.warn(`pathFinder.findPathsWithMarkers(..) path '${path}' does not end with suffix '${suffix}'`)
+            continue
         }
+        path = path.substring(0, path.length-suffix.length)
+        if (path.length < 2) {
+            continue
+        }
+        paths.push(path)
     }
 
     return paths
