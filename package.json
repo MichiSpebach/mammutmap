@@ -74,10 +74,11 @@
     "sharp": "^0.32.1",
     "ts-jest": "^28.0.8",
     "typescript": "^5.2.2",
-    "yarn": "^1.22.19"
+    "yarn": "^1.22.21"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
-    "json5": "^2.2.3"
+    "json5": "^2.2.3",
+    "simple-git": "^3.21.0"
   }
 }

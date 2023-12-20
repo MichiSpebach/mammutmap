@@ -1,0 +1,17 @@
+{
+    "name": "gitvisualization",
+    "version": "0.0.1",
+    "description": "",
+    "main": "gitVisualization",
+    "scripts": {
+        "test": "jest"
+    },
+    "keywords": [
+        "git",
+        "change visualization",
+        "software review",
+        "witchcraft"
+    ],
+    "author": "",
+    "license": "ISC"
+}
