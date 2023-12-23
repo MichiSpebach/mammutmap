@@ -1,9 +1,7 @@
-import { coreUtil, Box, renderManager, getRootFolder } from '../../dist/pluginFacade'
-import { isSubPathOrEqual } from './pathUtil'
+import { Box, renderManager } from '../../dist/pluginFacade';
+import { isSubPathOrEqual } from './pathUtil';
 
 export async function highlightBoxes(filePaths: string[], forceRestyle: boolean): Promise<void> {
-    const rootFolderPath: string = getRootFolder().getSrcPath()
-    filePaths = filePaths.map(path => coreUtil.concatPaths(rootFolderPath, path))
     const renderBackup = Box.prototype.render
     Box.prototype.render = async function () {
         await renderBackup.call(this)
@@ -11,10 +9,9 @@ export async function highlightBoxes(filePaths: string[], forceRestyle: boolean)
             highlightBox(this)
         }
     }
-    await getRootFolder().render()
 }
 
-function shouldBoxBeHighlighted(box: Box, filePaths: string[], forceRestyle): boolean {
+function shouldBoxBeHighlighted(box: Box, filePaths: string[], forceRestyle: boolean): boolean {
     const isRendered: boolean = box.isRendered()
     return (!isRendered || forceRestyle) &&
         (filePaths.find(path => isSubPathOrEqual(path, box.getSrcPath())) != undefined)

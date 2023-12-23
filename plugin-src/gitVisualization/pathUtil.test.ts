@@ -19,7 +19,7 @@ test('isSubPathOrEqual other path is sub-path of path', async () => {
 })
 
 test('isSubPathOrEqual paths are equal', async () => {
-    const path: string = "/home/plugin-src/git/new"
+    const path: string = "/home/plugin-src/git/"
     const otherPath: string = "/home/plugin-src/git"
     expect(isSubPathOrEqual(path, otherPath)).toBe(true)
 })

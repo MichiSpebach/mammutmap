@@ -9,8 +9,8 @@ export class GitClient {
 
     private readonly git: SimpleGit
 
-    public constructor() {
-        this.git = simpleGit('./')
+    public constructor(baseDir : string) {
+        this.git = simpleGit(baseDir)
     }
 
     public async getMostRecentCommit(): Promise<Commit> {
