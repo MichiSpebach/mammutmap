@@ -86,8 +86,8 @@ async function bundleLink(link: Link): Promise<void> {
 
 	let bundleFromLinkNode: NodeWidget
 	let bundleLinkNodePosition: ClientPosition
-	if (otherFrom instanceof NodeWidget) {
-		bundleFromLinkNode = otherFrom
+	if (otherFrom.node instanceof NodeWidget) {
+		bundleFromLinkNode = otherFrom.node
 		bundleLinkNodePosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
 	} else {
 		const newLinkNodeId = coreUtil.generateId()
