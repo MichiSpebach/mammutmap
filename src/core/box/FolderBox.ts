@@ -154,7 +154,7 @@ export class FolderBox extends Box {
     return {warnings: [message]}
   }
 
-  // TODO: 'getLoadedBoxesInPath' would be more exact, rename?
+  /** TODO: 'getLoadedBoxesInPath' would be more exact, rename? */
   public getRenderedBoxesInPath(path: string): Box[] {
     const remainingPath: string = util.removeStartFromPath(this.getName(), path)
     if (remainingPath === '' || !this.isBodyBeingRendered()) {

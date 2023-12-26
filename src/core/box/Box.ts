@@ -188,6 +188,30 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return this.nodes.getNodes()
   }
 
+  // TODO: introduce NodeWatcher or Watcher<AbsctractNodeWidget> and join node & watcher
+  public async getDescendantByPathAndRenderIfNecessary(path: {id: string}[]): Promise<{node: Box|NodeWidget, watcher: BoxWatcher}> {
+    if (path.length < 1) {
+      log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) path is empty, defaulting to this.`)
+      return {node: this, watcher: await BoxWatcher.newAndWatch(this)}
+    }
+    const child: Box|NodeWidget|undefined = this.findChildById(path[0].id)
+    if (!child) {
+      log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) failed to find child with id '${path[0].id}' defaulting to this.`)
+      return {node: this, watcher: await BoxWatcher.newAndWatch(this)}
+    }
+    if (path.length === 1) {
+      return {node: child, watcher: await BoxWatcher.newAndWatch(this)}
+    }
+    if (!(child instanceof Box)) {
+      log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) child is not instanceof Box although it is not the last element in path.`)
+      return {node: child, watcher: await BoxWatcher.newAndWatch(this)}
+    }
+    const temporaryBoxWatcher: BoxWatcher = await BoxWatcher.newAndWatch(this)
+    const descendant: {node: Box|NodeWidget, watcher: BoxWatcher} = await child.getDescendantByPathAndRenderIfNecessary(path.slice(1))
+    temporaryBoxWatcher.unwatch()
+    return descendant
+  }
+
   public isRendered(): boolean {
     return this.renderState.isRendered()
   }

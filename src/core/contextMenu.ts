@@ -31,6 +31,8 @@ export interface ContextMenuPopup {
 const fileBoxMenuItemGenerators: ((box: FileBox) => MenuItem|undefined)[] = []
 const folderBoxMenuItemGenerators: ((box: FolderBox) => MenuItem|undefined)[] = []
 const sourcelessBoxMenuItemGenerators: ((box: SourcelessBox) => MenuItem|undefined)[] = []
+const linkNodeMenuItemGenerators: ((linkNode: NodeWidget) => MenuItem|undefined)[] = []
+const linkMenuItemGenerators: ((link: Link) => MenuItem|undefined)[] = []
 
 export function addFileBoxMenuItem(generator: (box: FileBox) => MenuItem|undefined): void {
   fileBoxMenuItemGenerators.push(generator)
@@ -42,6 +44,14 @@ export function addFolderBoxMenuItem(generator: (box: FolderBox) => MenuItem|und
 
 export function addSourcelessBoxMenuItem(generator: (box: SourcelessBox) => MenuItem|undefined): void {
   sourcelessBoxMenuItemGenerators.push(generator)
+}
+
+export function addLinkNodeMenuItem(generator: (linkNode: NodeWidget) => MenuItem|undefined): void {
+  linkNodeMenuItemGenerators.push(generator)
+}
+
+export function addLinkMenuItem(generator: (link: Link) => MenuItem|undefined): void {
+  linkMenuItemGenerators.push(generator)
 }
 
 export function openForFileBox(box: FileBox, position: ClientPosition): void {
@@ -120,6 +130,13 @@ export function openForLinkNode(linkNode: NodeWidget, position: ClientPosition):
     items.push(buildDetailsItem('NodeDetails', linkNode))
   }
 
+  linkNodeMenuItemGenerators.forEach(async generator => {
+    const menuItem: MenuItem|undefined = generator(linkNode)
+    if (menuItem) {
+      items.push(menuItem)
+    }
+  })
+
   contextMenuPopup.popup(items, position)
 }
 
@@ -132,6 +149,13 @@ export function openForLink(link: Link, position: ClientPosition): void {
   if (settings.getBoolean('developerMode')) {
     items.push(buildDetailsItem('LinkDetails', link))
   }
+
+  linkMenuItemGenerators.forEach(async generator => {
+    const menuItem: MenuItem|undefined = generator(link)
+    if (menuItem) {
+      items.push(menuItem)
+    }
+  })
 
   contextMenuPopup.popup(items, position)
 }

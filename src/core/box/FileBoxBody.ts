@@ -57,8 +57,9 @@ export class FileBoxBody extends BoxBody {
     if (fileStats.size/1000 > maxFileSizeInKiloBytes) {
       const tooLargeHint: string = 'File is too large to be displayed as textfile'
       const sizeHint: string = `(${fileStats.size/1000} kilobytes, maximum is ${maxFileSizeInKiloBytes} kilobytes)`
-      const pluginHint: string = 'Install or write a plugin to display it.' // TODO: add hyperlink to plugin tutorial
-      return this.formHtmlContentForError(`${tooLargeHint} ${sizeHint}.<br>${pluginHint}`)
+      const pluginHint: string = 'Install or write a plugin to display it.'
+      const pluginTutorial: string = 'Here is a tutorial to write plugins: '+util.createWebLinkHtml(util.pluginTutorialAddress)
+      return this.formHtmlContentForError(`${tooLargeHint} ${sizeHint}.<br>${pluginHint} ${pluginTutorial}`)
     }
 
     const data: string = await this.getFileContent()
