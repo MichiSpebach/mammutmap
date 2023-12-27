@@ -1,5 +1,6 @@
 import { renderManager } from '../RenderManager'
 import { Widget } from '../Widget'
+import { log } from '../logService'
 import { RenderElement, RenderElements, Style } from '../util/RenderElement'
 import { ToolbarView } from './ToolbarView'
 
@@ -29,6 +30,20 @@ export class ToolbarWidget extends Widget {
 
 		if (this.beingRendered) {
 			await renderManager.setElementsTo(this.getId(), this.shapeInner())
+		}
+	}
+
+	public async selectView(view: ToolbarView): Promise<void> {
+		if (!this.views.includes(view)) {
+			log.warning(`ToolbarWidget::selectView(view: ${view.getName()}) view not included, call addView(view) first.`)
+		}
+		const selectedViewBefore: ToolbarView|undefined = this.selectedView
+		this.selectedView = view
+		if (this.beingRendered) {
+			await Promise.all([
+				selectedViewBefore?.getWidget().unrender(),
+				renderManager.setElementsTo(this.getId(), this.shapeInner())
+			])
 		}
 	}
 
@@ -83,8 +98,12 @@ export class ToolbarWidget extends Widget {
 		for (const view of this.views) {
 			const selected: boolean = view === this.selectedView
 			elements.push({
-				type: 'span',
-				style: {fontWeight: selected ? 'bold' : undefined},
+				type: 'button',
+				style: {
+					fontWeight: selected ? 'bold' : undefined,
+					cursor: 'pointer'
+				},
+				onclick: () => this.selectView(view),
 				children: view.getName()
 			})
 		}

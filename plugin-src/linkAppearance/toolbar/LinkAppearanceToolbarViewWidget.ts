@@ -52,9 +52,9 @@ export class LinkAppearanceToolbarViewWidget extends UltimateWidget {
     }
 
     public async render(): Promise<void> {
+        await util.wait(0) // TODO implement 'await this.mounting' or more likely RenderElement::onMount: () => void instead
+        //await this.mounting TODO implement and use instead of 'await util.wait(0)'
         if (!this.renderedOrInProgress) {
-            await util.wait(0) // TODO implement 'await this.mounting' instead
-            //await this.mounting TODO implement and use instead of 'await util.wait(0)'
             linkAppearanceSettings.linkTags.subscribe(this.linkTagsSubscriber)
             this.renderedOrInProgress = true
         }
