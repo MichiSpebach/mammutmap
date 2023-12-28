@@ -42,7 +42,7 @@ function buildElementsForBoxSidebar(box: Box): (string|RenderElement)[] {
 		() => box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
 	))
 	elements.push(Box.Sidebar.BasicToolkit.buildButton('all'+suffixIfFolder, 
-		() => box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
+		() => box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
 	))
 	if (box instanceof FolderBox) {
 		elements.push(Box.Sidebar.BasicToolkit.buildButton('autoMaintained recursively...', () => openDialogForRemoveOutgoingLinksRecursively(box, 'AutoMaintained')))
