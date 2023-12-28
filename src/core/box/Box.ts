@@ -180,6 +180,17 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return renderedChildBoxes[0]
   }
 
+  // TODO: introduce NodeWatcher or Watcher<AbsctractNodeWidget> and join node & watcher, but then node needs to be watched, not the parent of node?
+  public async findChildByIdAndRenderIfNecessary(id: string): Promise<{node: Box|NodeWidget, watcher: BoxWatcher}|undefined>  {
+    const watcher: BoxWatcher = await BoxWatcher.newAndWatch(this)
+    const node: Box|NodeWidget|undefined = this.findChildById(id)
+    if (!node) {
+      watcher.unwatch()
+      return undefined
+    }
+    return {node, watcher}
+  }
+
   public findChildById(id: string): Box|NodeWidget|undefined { // TODO: change return type to AbstractNodeWidget as soon as available
     return this.getChilds().find(child => child.getId() === id)
   }
@@ -188,27 +199,26 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return this.nodes.getNodes()
   }
 
-  // TODO: introduce NodeWatcher or Watcher<AbsctractNodeWidget> and join node & watcher
+  // TODO: introduce NodeWatcher or Watcher<AbsctractNodeWidget> and join node & watcher, but then node needs to be watched, not the parent of node?
   public async getDescendantByPathAndRenderIfNecessary(path: {id: string}[]): Promise<{node: Box|NodeWidget, watcher: BoxWatcher}> {
     if (path.length < 1) {
       log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) path is empty, defaulting to this.`)
       return {node: this, watcher: await BoxWatcher.newAndWatch(this)}
     }
-    const child: Box|NodeWidget|undefined = this.findChildById(path[0].id)
+    const child: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = await this.findChildByIdAndRenderIfNecessary(path[0].id)
     if (!child) {
       log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) failed to find child with id '${path[0].id}' defaulting to this.`)
       return {node: this, watcher: await BoxWatcher.newAndWatch(this)}
     }
     if (path.length === 1) {
-      return {node: child, watcher: await BoxWatcher.newAndWatch(this)}
+      return child
     }
-    if (!(child instanceof Box)) {
-      log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) child is not instanceof Box although it is not the last element in path.`)
-      return {node: child, watcher: await BoxWatcher.newAndWatch(this)}
+    if (!(child.node instanceof Box)) {
+      log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) child.node is not instanceof Box although it is not the last element in path.`)
+      return child
     }
-    const temporaryBoxWatcher: BoxWatcher = await BoxWatcher.newAndWatch(this)
-    const descendant: {node: Box|NodeWidget, watcher: BoxWatcher} = await child.getDescendantByPathAndRenderIfNecessary(path.slice(1))
-    temporaryBoxWatcher.unwatch()
+    const descendant: {node: Box|NodeWidget, watcher: BoxWatcher} = await child.node.getDescendantByPathAndRenderIfNecessary(path.slice(1))
+    child.watcher.unwatch()
     return descendant
   }
 

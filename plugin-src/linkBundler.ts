@@ -2,7 +2,7 @@ import { AbstractNodeWidget } from '../dist/core/AbstractNodeWidget'
 import { BoxLinks } from '../dist/core/box/BoxLinks'
 import { NodeData } from '../dist/core/mapData/NodeData'
 import { ClientPosition } from '../dist/core/shape/ClientPosition'
-import { Box, FolderBox, Link, MenuItemFile, NodeWidget, WayPointData, contextMenu, coreUtil, renderManager } from '../dist/pluginFacade'
+import { Box, BoxWatcher, FolderBox, Link, MenuItemFile, NodeWidget, WayPointData, contextMenu, coreUtil, renderManager } from '../dist/pluginFacade'
 import * as pluginFacade from '../dist/pluginFacade'
 
 contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: 'bundle', click: () => bundleLink(link)}))
@@ -36,29 +36,35 @@ async function bundleLink(link: Link): Promise<void> {
 	const fromPath: WayPointData[] = getNormalizedPath(link.getData().from.path)
 	const toPath: WayPointData[] = getNormalizedPath(link.getData().to.path)
 	
-	let node: Box|NodeWidget|undefined = referenceBox
+	let child: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = {node: referenceBox, watcher: await BoxWatcher.newAndWatch(referenceBox)}
 	for (const wayPoint of fromPath) {
-		node = node.findChildById(wayPoint.boxId)
-		if (!node) {
-			console.warn(`bundleLink(link: ${link.describe}): node not found for wayPoint with name '${wayPoint.boxName}'`)
+		if (!(child.node instanceof Box)) {
+			console.warn(`bundleLink(link: ${link.describe()}): child.node is not instanceof Box, this should never happen`)
 			break
 		}
-		if (node instanceof NodeWidget) {
+		const newChild: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = await child.node.findChildByIdAndRenderIfNecessary(wayPoint.boxId)
+		child.watcher.unwatch()
+		child = newChild
+		if (!child) {
+			console.warn(`bundleLink(link: ${link.describe()}): child not found for wayPoint with name '${wayPoint.boxName}'`)
 			break
 		}
-		for (const outgoingNodeLink of node.borderingLinks.getOutgoing()) {
+		if (child.node instanceof NodeWidget) {
+			break
+		}
+		for (const outgoingNodeLink of child.node.borderingLinks.getOutgoing()) {
 			if (outgoingNodeLink === link) {
 				continue
 			}
-			const parallelRoutePart = parallelRouteParts.find(part => part.from.link.from.isBoxInPath(node!) || part.from.link.to.isBoxInPath(node!))
+			const parallelRoutePart = parallelRouteParts.find(part => part.from.link.from.isBoxInPath(child!.node) || part.from.link.to.isBoxInPath(child!.node))
 			if (parallelRoutePart) {
 				console.log(`parallelRoutePart: ${parallelRoutePart.from.link.getId()} ${parallelRoutePart.from.node.getId()} ${parallelRoutePart.length}`)
-				parallelRoutePart.from = {link: outgoingNodeLink, node}
+				parallelRoutePart.from = {link: outgoingNodeLink, node: child.node}
 				parallelRoutePart.length++
 			} else {
 				parallelRouteParts.push({
-					from: {link: outgoingNodeLink, node},
-					to: {link: outgoingNodeLink, node},
+					from: {link: outgoingNodeLink, node: child.node},
+					to: {link: outgoingNodeLink, node: child.node},
 					length: 0
 				})
 			}
@@ -86,7 +92,7 @@ async function bundleLink(link: Link): Promise<void> {
 
 	let bundleFromLinkNode: NodeWidget
 	let bundleLinkNodePosition: ClientPosition
-	if (otherFrom.node instanceof NodeWidget) {
+	if (otherFrom.node instanceof NodeWidget && otherFrom.node.getParent() === child!.node) {
 		bundleFromLinkNode = otherFrom.node
 		bundleLinkNodePosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
 	} else {
@@ -98,6 +104,10 @@ async function bundleLink(link: Link): Promise<void> {
 		await longestParallelRoutePart.from.link.from.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
 	}
 	await link.to.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
+	await Promise.all([
+		otherFrom.watcher.unwatch(),
+		child!.watcher.unwatch()
+	])
 
 	function getNormalizedPath(path: WayPointData[]) {
 		if (path[0].boxId === referenceBox.getId()) {
