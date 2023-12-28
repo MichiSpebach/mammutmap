@@ -12,18 +12,18 @@ class TutorialToolkit extends UltimateWidget implements ToolbarView {
 	) {
 		super()
 	}
+	
+	public getName(): string {
+		return 'TutorialToolkit'
+	}
+	
+	public getWidget(): UltimateWidget {
+		return this
+	}
 
 	/**@deprecated simply use use id field as it is readonly */
 	public override getId(): string {
 		return this.id
-	}
-
-	public getName(): string {
-		return 'TutorialToolkit'
-	}
-
-	public getWidget(): UltimateWidget {
-		return this
 	}
 
 	public override shape(): { element: RenderElementWithId; rendering?: Promise<void> | undefined } {

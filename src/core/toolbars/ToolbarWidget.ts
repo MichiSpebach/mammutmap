@@ -11,6 +11,28 @@ export class ToolbarWidget extends Widget {
 	private selectedView: ToolbarView|undefined
 	private beingRendered: boolean = false
 
+	public static shapeHeaderButton(selected: boolean, additional: Omit<RenderElement, 'type'>): RenderElement {
+		return {
+			type: 'button',
+			...additional,
+			style: this.getHeaderButtonStyle(selected, additional.style),
+		}
+	}
+
+	public static getHeaderButtonStyle(selected: boolean, additionalStyle?: Style): Style {
+		return {
+			padding: '4px 8px',
+			fontSize: 'inherit',
+			color: 'inherit',
+			backgroundColor: selected ? 'transparent' : '#222',
+			border: 'none',
+			borderRight: '1px solid gray',
+			borderBottom: selected ? 'none' : '1px solid gray',
+			cursor: 'pointer',
+			...additionalStyle
+		}
+	}
+
 	public constructor(id: string, options?: {hideHeader?: boolean|'auto'}) {
 		super()
 		this.id = id
@@ -97,15 +119,10 @@ export class ToolbarWidget extends Widget {
 
 		for (const view of this.views) {
 			const selected: boolean = view === this.selectedView
-			elements.push({
-				type: 'button',
-				style: {
-					fontWeight: selected ? 'bold' : undefined,
-					cursor: 'pointer'
-				},
+			elements.push(ToolbarWidget.shapeHeaderButton(selected, {
 				onclick: () => this.selectView(view),
 				children: view.getName()
-			})
+			}))
 		}
 
 		return elements

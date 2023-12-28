@@ -4,6 +4,7 @@ import { log } from '../../logService';
 import { RenderElement, Style } from '../../util/RenderElement';
 import { BoxTabs } from './BoxTabs';
 import { BoxTab } from './BoxTab';
+import { ToolbarWidget } from '../../toolbars/ToolbarWidget';
 
 export class BoxTabBarWidget extends Widget {
 	private someTabRendered: boolean = false;
@@ -79,26 +80,9 @@ export class BoxTabBarWidget extends Widget {
 	}
 
 	private getTabStyle(tab: 'map' | BoxTab): Style {
-		let style: Style = {
-			padding: '4px 8px',
-			fontSize: 'inherit',
-			color: 'inherit',
-			backgroundColor: '#222',
-			border: 'none',
-			borderRight: '1px solid gray',
-			borderBottom: '1px solid gray',
-			cursor: 'pointer',
-			visibility: null // reset visibility in case it is 'hidden'
-		};
-		if (this.selectedTab === tab) {
-			style = {
-				...style,
-				backgroundColor: 'transparent',
-				borderBottom: 'none',
-				visibility: tab === 'map' ? 'hidden' : null
-			};
-		}
-		return style;
+		return ToolbarWidget.getHeaderButtonStyle(this.selectedTab === tab, {
+			visibility: (tab === 'map' && this.selectedTab === tab) ? 'hidden' : null // reset visibility with null in case it is 'hidden'
+		});
 	}
 
 	private async select(tab: 'map' | BoxTab): Promise<void> {
