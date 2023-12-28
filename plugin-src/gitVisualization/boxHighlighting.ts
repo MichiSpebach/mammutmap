@@ -1,10 +1,11 @@
-import { Box, renderManager } from '../../dist/pluginFacade';
-import { isSubPathOrEqual } from './pathUtil';
+import { Box, renderManager } from '../../dist/pluginFacade'
+import { isSubPathOrEqual } from './pathUtil'
 
 export async function highlightBoxes(filePaths: string[], forceRestyle: boolean): Promise<void> {
     const renderBackup = Box.prototype.render
     Box.prototype.render = async function () {
         await renderBackup.call(this)
+        removeCurrentHighlighting(this)
         if (shouldBoxBeHighlighted(this, filePaths, forceRestyle)) {
             highlightBox(this)
         }
@@ -27,4 +28,11 @@ async function highlightBox(box: Box): Promise<void> {
     //     children: '+-+-+-+-+-+-+-'.repeat(420),
     //     style: { color: 'green' }
     // })
+}
+
+async function removeCurrentHighlighting(box: Box): Promise<void> {
+    await renderManager.addStyleTo(`${box.getId()}Border`, {
+        borderColor: 'black',
+        borderWidth: '1px'
+    })
 }

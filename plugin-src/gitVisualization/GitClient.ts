@@ -9,14 +9,29 @@ export class GitClient {
 
     private readonly git: SimpleGit
 
-    public constructor(baseDir : string) {
+    public constructor(baseDir: string) {
         this.git = simpleGit(baseDir)
     }
 
     public async getMostRecentCommit(): Promise<Commit> {
-        const log: LogResult<DefaultLogFields> = await this.git.log()
-        const logEntry: (DefaultLogFields & ListLogLine) | null = log.latest;
-        const diff: string = await this.git.diff(['--name-only', 'HEAD^', 'HEAD'])
-        return { ...logEntry, changedFilePaths: diff.split("\n").filter(nonEmptyFilePath => nonEmptyFilePath) }
+        return (await this.getCommits('HEAD^', 'HEAD'))[0]
+    }
+
+    public async getCommits(from: string, to: string): Promise<Commit[]> {
+        const log: LogResult<DefaultLogFields> = await this.git.log({ 'from': from, 'to': to })
+        const logEntries: readonly (DefaultLogFields & ListLogLine)[] = log.all
+        let commits: Commit[] = []
+        for (let logEntry of logEntries) {
+            commits.push({
+                ...logEntry,
+                changedFilePaths: await this.getChangedFilePaths(`${logEntry.hash}^`, logEntry.hash)
+            })
+        }
+        return commits
+    }
+
+    public async getChangedFilePaths(from: string, to: string): Promise<string[]> {
+        const diff: string = await this.git.diff(['--name-only', from, to])
+        return diff.split('\n').filter(nonEmptyFilePath => nonEmptyFilePath)
     }
 }
