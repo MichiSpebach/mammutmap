@@ -22,15 +22,10 @@ async function bundleLink(link: Link): Promise<void> {
 		return
 	}
 
-	const parallelRoutes: {
-		fromInsertionPoint: {link?: Link, node?: AbstractNodeWidget}
-		toInsertionPoint: {link?: Link, node?: AbstractNodeWidget}
-		commonFromPath: {nodeId: string}[]
-		commonToPath: {nodeId: string}[]
-	}[] = []
+//function findLongestParallelRoutePart(TODO)
 	const parallelRouteParts: {
-		from: {node: AbstractNodeWidget, link: Link} // TODO: node is always a Box?
-		to: {node: AbstractNodeWidget, link: Link} // TODO: node is always a Box?
+		from: {node: AbstractNodeWidget, link: Link}
+		to: {node: AbstractNodeWidget, link: Link}
 		length: number
 	}[] = []
 	const fromPath: WayPointData[] = getNormalizedPath(link.getData().from.path)
@@ -47,9 +42,6 @@ async function bundleLink(link: Link): Promise<void> {
 		child = newChild
 		if (!child) {
 			console.warn(`bundleLink(link: ${link.describe()}): child not found for wayPoint with name '${wayPoint.boxName}'`)
-			break
-		}
-		if (child.node instanceof NodeWidget) {
 			break
 		}
 		for (const outgoingNodeLink of child.node.borderingLinks.getOutgoing()) {
@@ -78,12 +70,26 @@ async function bundleLink(link: Link): Promise<void> {
 		}
 	}
 	console.log(`longestParallelRoutePart: ${longestParallelRoutePart.from.link.getId()} ${longestParallelRoutePart.from.node.getId()} ${longestParallelRoutePart.length}`)
-
-	if (longestParallelRoutePart.length < 1) {
-		return
+	if (longestParallelRoutePart.length > 0) {
+		await bundleLinkIntoParallelRoutePart(link, longestParallelRoutePart)
 	}
+
+	await child?.watcher.unwatch()
+
+	function getNormalizedPath(path: WayPointData[]) {
+		if (path[0].boxId === referenceBox.getId()) {
+			return path.slice(1)
+		}
+		return path
+	}
+}
+
+async function bundleLinkIntoParallelRoutePart(link: Link, longestParallelRoutePart: {
+	from: {node: AbstractNodeWidget, link: Link}
+	to: {node: AbstractNodeWidget, link: Link}
+}): Promise<void> {
 	if (!(longestParallelRoutePart.from.node instanceof Box)) {
-		console.warn(`longestParallelRoutePart.from.node is instanceof LinkNodeWidget`) // TODO: this can normally happen, this means from is equal and link that is bundled can be removed
+		console.warn(`longestParallelRoutePart.from.node is instanceof LinkNodeWidget, case not implemented yet`) // TODO: this can normally happen, this means from is equal and link that is bundled can be removed
 		return
 	}
 	const otherFrom = await longestParallelRoutePart.from.link.getManagingBox().getDescendantByPathAndRenderIfNecessary(longestParallelRoutePart.from.link.getData().from.path.map(wayPoint => {
@@ -92,7 +98,7 @@ async function bundleLink(link: Link): Promise<void> {
 
 	let bundleFromLinkNode: NodeWidget
 	let bundleLinkNodePosition: ClientPosition
-	if (otherFrom.node instanceof NodeWidget && otherFrom.node.getParent() === child!.node) {
+	if (otherFrom.node instanceof NodeWidget && otherFrom.node.getParent() === longestParallelRoutePart.from.node) {
 		bundleFromLinkNode = otherFrom.node
 		bundleLinkNodePosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
 	} else {
@@ -104,17 +110,7 @@ async function bundleLink(link: Link): Promise<void> {
 		await longestParallelRoutePart.from.link.from.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
 	}
 	await link.to.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
-	await Promise.all([
-		otherFrom.watcher.unwatch(),
-		child!.watcher.unwatch()
-	])
-
-	function getNormalizedPath(path: WayPointData[]) {
-		if (path[0].boxId === referenceBox.getId()) {
-			return path.slice(1)
-		}
-		return path
-	}
+	await otherFrom.watcher.unwatch()
 }
 
 function getCommonStart(path: readonly WayPointData[], otherPath: readonly WayPointData[]): {id: string}[] {
