@@ -1,6 +1,6 @@
 import { MenuItemFile, TextInputPopup, applicationMenu, mainWidget } from '../dist/pluginFacade'
 import { GitVisualizationToolbarView } from './gitVisualization/GitVisualizationToolbarView'
-import { visualizeCommitsByRef, visualizeLastCommit } from './gitVisualization/gitWitchcraft'
+import { visualizeCommitByRef, visualizeLastCommit } from './gitVisualization/gitWitchcraft'
 
 const commitByRefMenuItem: MenuItemFile = new MenuItemFile({
 	label: 'visualize commit by reference',
@@ -16,7 +16,7 @@ applicationMenu.addMenuItemTo('gitVisualization.js', lastCommitMenuItem)
 async function promptForGitRef(): Promise<void> {
 	const ref: string | undefined = await TextInputPopup.buildAndRenderAndAwaitResolve('Git Ref', 'HEAD')
 	if (ref) {
-		await visualizeCommitsByRef(ref)
+		await visualizeCommitByRef(ref)
 	}
 }
 

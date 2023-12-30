@@ -1,7 +1,6 @@
-import { RenderManager } from '../../dist/core/RenderManager'
 import { RenderElementWithId, UltimateWidget } from '../../dist/core/Widget'
-import { RenderElements, ToolbarView, renderManager } from '../../dist/pluginFacade'
-import { visualizeCommitsByRef } from './gitWitchcraft'
+import { RenderElement, RenderElements, ToolbarView, renderManager } from '../../dist/pluginFacade'
+import { visualizeChanges } from './gitWitchcraft'
 
 export class GitVisualizationToolbarView extends UltimateWidget implements ToolbarView {
 
@@ -29,7 +28,6 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             element: {
                 type: 'div',
                 id: this.id,
-                innerHTML: 'Git Ref: ',
                 children: this.shapeInner()
             }
         }
@@ -37,19 +35,36 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
 
     private shapeInner(): RenderElements {
         return [
-            {
-                type: 'input',
-                value: 'HEAD',
-                id: 'git-ref-input'
-            },
+            this.shapeInputField('git-ref-input-from', 'HEAD^', 'Ref from: '),
+            this.shapeInputField('git-ref-input-to', 'HEAD', 'Ref to: '),
             {
                 type: 'button',
                 innerHTML: 'View Changes &#129668;',
                 async onclick() {
-                    visualizeCommitsByRef(await renderManager.getValueOf('git-ref-input'))
+                    const fromRef = await renderManager.getValueOf('git-ref-input-from')
+                    const toRef = await renderManager.getValueOf('git-ref-input-to')
+                    visualizeChanges(fromRef, toRef)
                 }
             }
         ]
+    }
+
+    private shapeInputField(id: string, value: string, label: string): RenderElement {
+        return {
+            type: 'div',
+            style: { display: 'block' },
+            children: [
+                {
+                    type: 'span',
+                    innerHTML: label
+                },
+                {
+                    type: 'input',
+                    value: value,
+                    id: id
+                }
+            ]
+        }
     }
 
     public override async render(): Promise<void> {

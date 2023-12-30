@@ -1,8 +1,12 @@
 import { DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit } from 'simple-git'
 
 export type Commit = {
-    changedFilePaths: string[]
+    changedFiles: ChangedFile[],
     message?: string
+}
+
+export type ChangedFile = {
+    path: string
 }
 
 export class GitClient {
@@ -29,14 +33,17 @@ export class GitClient {
         for (let logEntry of logEntries) {
             commits.push({
                 ...logEntry,
-                changedFilePaths: await this.getChangedFilePaths(`${logEntry.hash}^`, logEntry.hash)
+                changedFiles: await this.getChangedFiles(`${logEntry.hash}^`, logEntry.hash)
             })
         }
         return commits
     }
 
-    public async getChangedFilePaths(from: string, to: string): Promise<string[]> {
+    public async getChangedFiles(from: string, to: string): Promise<ChangedFile[]> {
         const diff: string = await this.git.diff(['--name-only', from, to])
-        return diff.split('\n').filter(nonEmptyFilePath => nonEmptyFilePath)
+        let changedFiles: ChangedFile[] = []
+        diff.split('\n').filter(nonEmptyFilePath => nonEmptyFilePath).map(
+            path => changedFiles.push({ path: path }))
+        return changedFiles
     }
 }
