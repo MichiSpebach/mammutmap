@@ -32,7 +32,7 @@ async function highlightBox(box: Box): Promise<void> {
 
 async function removeCurrentHighlighting(box: Box): Promise<void> {
     await renderManager.addStyleTo(`${box.getId()}Border`, {
-        borderColor: 'black',
-        borderWidth: '1px'
+        borderColor: null,
+        borderWidth: null
     })
 }

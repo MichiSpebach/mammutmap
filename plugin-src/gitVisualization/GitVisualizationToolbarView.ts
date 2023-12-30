@@ -1,5 +1,6 @@
+import { RenderManager } from '../../dist/core/RenderManager'
 import { RenderElementWithId, UltimateWidget } from '../../dist/core/Widget'
-import { ToolbarView, renderManager } from '../../dist/pluginFacade'
+import { RenderElements, ToolbarView, renderManager } from '../../dist/pluginFacade'
 import { visualizeCommitsByRef } from './gitWitchcraft'
 
 export class GitVisualizationToolbarView extends UltimateWidget implements ToolbarView {
@@ -28,16 +29,31 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             element: {
                 type: 'div',
                 id: this.id,
-                innerHTML: 'Git Ref: <input type="input" placeholder="HEAD">',
-                onchangeValue(ref: string) {
-                    visualizeCommitsByRef(ref)
-                }
+                innerHTML: 'Git Ref: ',
+                children: this.shapeInner()
             }
         }
     }
 
-    public override render(): Promise<void> {
-        throw new Error('Method not implemented.')
+    private shapeInner(): RenderElements {
+        return [
+            {
+                type: 'input',
+                value: 'HEAD',
+                id: 'git-ref-input'
+            },
+            {
+                type: 'button',
+                innerHTML: 'View Changes &#129668;',
+                async onclick() {
+                    visualizeCommitsByRef(await renderManager.getValueOf('git-ref-input'))
+                }
+            }
+        ]
+    }
+
+    public override async render(): Promise<void> {
+        await renderManager.setElementsTo(this.id, this.shapeInner())
     }
 
     public override async unrender(): Promise<void> {
