@@ -15,43 +15,68 @@ BoxLinks.prototype.add = async function (options) {
 }
 
 async function bundleLink(link: Link): Promise<void> {
-	console.log('bundling')
-	const referenceBox = link.getManagingBox()
-	if (!(referenceBox instanceof FolderBox)) {
-		console.warn(`linkBundler can not bundle links which managingBox is instanceof '${referenceBox?.constructor?.name}'`)
-		return
-	}
-
-//function findLongestParallelRoutePart(TODO)
 	const parallelRouteParts: {
 		from: {node: AbstractNodeWidget, link: Link}
 		to: {node: AbstractNodeWidget, link: Link}
 		length: number
 	}[] = []
-	const fromPath: WayPointData[] = getNormalizedPath(link.getData().from.path)
-	const toPath: WayPointData[] = getNormalizedPath(link.getData().to.path)
 	
-	let child: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = {node: referenceBox, watcher: await BoxWatcher.newAndWatch(referenceBox)}
-	for (const wayPoint of fromPath) {
+	const deepestBoxInFromPath: BoxWatcher = (await findAndExtendParallelRouteParts(link, 'from', parallelRouteParts)).deepestBoxInPath
+	const deepestBoxInToPath: BoxWatcher = (await findAndExtendParallelRouteParts(link, 'to', parallelRouteParts)).deepestBoxInPath
+	
+	let longestParallelRoutePart = parallelRouteParts[0]
+	for (const parallelRoutePart of parallelRouteParts) {
+		if (parallelRoutePart.length > longestParallelRoutePart.length) {
+			longestParallelRoutePart = parallelRoutePart
+		}
+	}
+	console.log(`longestParallelRoutePart: ${longestParallelRoutePart.from.link.getId()} ${longestParallelRoutePart.from.node.getId()} ${longestParallelRoutePart.length}`)
+	
+	if (longestParallelRoutePart.length > 0) {
+		await bundleLinkIntoParallelRoutePart(link, longestParallelRoutePart)
+	}
+
+	await Promise.all([
+		deepestBoxInFromPath.unwatch(),
+		deepestBoxInToPath.unwatch()
+	])
+}
+
+async function findAndExtendParallelRouteParts(
+	link: Link,
+	end: 'from'|'to',
+	parallelRouteParts: {
+		from: {node: AbstractNodeWidget, link: Link}
+		to: {node: AbstractNodeWidget, link: Link}
+		length: number
+	}[]
+): Promise<{deepestBoxInPath: BoxWatcher}> {
+	const managingBox = link.getManagingBox()
+	let path: WayPointData[] = link.getData()[end].path
+	if (path[0].boxId === managingBox.getId()) {
+		path = path.slice(1)
+	}
+	let child: {node: Box|NodeWidget, watcher: BoxWatcher} = {node: managingBox, watcher: await BoxWatcher.newAndWatch(managingBox)}
+	for (const wayPoint of path) {
 		if (!(child.node instanceof Box)) {
 			console.warn(`bundleLink(link: ${link.describe()}): child.node is not instanceof Box, this should never happen`)
 			break
 		}
 		const newChild: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = await child.node.findChildByIdAndRenderIfNecessary(wayPoint.boxId)
-		child.watcher.unwatch()
-		child = newChild
-		if (!child) {
+		if (!newChild) {
 			console.warn(`bundleLink(link: ${link.describe()}): child not found for wayPoint with name '${wayPoint.boxName}'`)
 			break
 		}
+		child.watcher.unwatch()
+		child = newChild
 		for (const outgoingNodeLink of child.node.borderingLinks.getOutgoing()) {
 			if (outgoingNodeLink === link) {
 				continue
 			}
-			const parallelRoutePart = parallelRouteParts.find(part => part.from.link.from.isBoxInPath(child!.node) || part.from.link.to.isBoxInPath(child!.node))
+			const parallelRoutePart = parallelRouteParts.find(part => part[end].link.from.isBoxInPath(child!.node) || part[end].link.to.isBoxInPath(child!.node))
 			if (parallelRoutePart) {
-				console.log(`parallelRoutePart: ${parallelRoutePart.from.link.getId()} ${parallelRoutePart.from.node.getId()} ${parallelRoutePart.length}`)
-				parallelRoutePart.from = {link: outgoingNodeLink, node: child.node}
+				console.log(`parallelRoutePart: ${parallelRoutePart[end].link.getId()} ${parallelRoutePart[end].node.getId()} ${parallelRoutePart.length}`)
+				parallelRoutePart[end] = {link: outgoingNodeLink, node: child.node}
 				parallelRoutePart.length++
 			} else {
 				parallelRouteParts.push({
@@ -62,26 +87,7 @@ async function bundleLink(link: Link): Promise<void> {
 			}
 		}
 	}
-
-	let longestParallelRoutePart = parallelRouteParts[0]
-	for (const parallelRoutePart of parallelRouteParts) {
-		if (parallelRoutePart.length > longestParallelRoutePart.length) {
-			longestParallelRoutePart = parallelRoutePart
-		}
-	}
-	console.log(`longestParallelRoutePart: ${longestParallelRoutePart.from.link.getId()} ${longestParallelRoutePart.from.node.getId()} ${longestParallelRoutePart.length}`)
-	if (longestParallelRoutePart.length > 0) {
-		await bundleLinkIntoParallelRoutePart(link, longestParallelRoutePart)
-	}
-
-	await child?.watcher.unwatch()
-
-	function getNormalizedPath(path: WayPointData[]) {
-		if (path[0].boxId === referenceBox.getId()) {
-			return path.slice(1)
-		}
-		return path
-	}
+	return {deepestBoxInPath: child.watcher}
 }
 
 async function bundleLinkIntoParallelRoutePart(link: Link, longestParallelRoutePart: {
@@ -111,15 +117,4 @@ async function bundleLinkIntoParallelRoutePart(link: Link, longestParallelRouteP
 	}
 	await link.to.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
 	await otherFrom.watcher.unwatch()
-}
-
-function getCommonStart(path: readonly WayPointData[], otherPath: readonly WayPointData[]): {id: string}[] {
-	const commonStart: {id: string}[] = []
-	for (let i = 0; i < path.length && i < otherPath.length; i++) {
-		if (path[i].boxId !== otherPath[i].boxId) {
-			break
-		}
-		commonStart.push({id: path[i].boxId})
-	}
-	return commonStart
 }
