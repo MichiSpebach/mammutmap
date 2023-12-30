@@ -54,7 +54,7 @@ export class Link implements Hoverable {
     
     const fromWayPoint: WayPointData = WayPointData.new(from.node.getId(), from.node.getName(), from.positionInFromNodeCoords)
     const toWayPoint: WayPointData = WayPointData.new(to.node.getId(), to.node.getName(), to.positionInToNodeCoords)
-    const linkData = new LinkData(util.generateId(), new LinkEndData([fromWayPoint]), new LinkEndData([toWayPoint]))
+    const linkData = new LinkData('link'+util.generateId(), new LinkEndData([fromWayPoint]), new LinkEndData([toWayPoint]))
     const link: Link = Link.new(linkData, options.managingBox)
 
     if (from.node !== options.managingBox) {

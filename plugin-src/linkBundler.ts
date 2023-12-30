@@ -1,5 +1,6 @@
 import { AbstractNodeWidget } from '../dist/core/AbstractNodeWidget'
 import { BoxLinks } from '../dist/core/box/BoxLinks'
+import { LinkEnd } from '../dist/core/link/LinkEnd'
 import { NodeData } from '../dist/core/mapData/NodeData'
 import { ClientPosition } from '../dist/core/shape/ClientPosition'
 import { Box, BoxWatcher, FolderBox, Link, MenuItemFile, NodeWidget, WayPointData, contextMenu, coreUtil, renderManager } from '../dist/pluginFacade'
@@ -56,65 +57,98 @@ async function findAndExtendParallelRouteParts(
 	if (path[0].boxId === managingBox.getId()) {
 		path = path.slice(1)
 	}
-	let child: {node: Box|NodeWidget, watcher: BoxWatcher} = {node: managingBox, watcher: await BoxWatcher.newAndWatch(managingBox)}
-	for (const wayPoint of path) {
-		if (!(child.node instanceof Box)) {
-			console.warn(`bundleLink(link: ${link.describe()}): child.node is not instanceof Box, this should never happen`)
+	let waypoint: {node: Box|NodeWidget, watcher: BoxWatcher} = {node: managingBox, watcher: await BoxWatcher.newAndWatch(managingBox)}
+	for (const waypointData of path) {
+		if (!(waypoint.node instanceof Box)) {
+			console.warn(`bundleLink(link: ${link.describe()}): waypoint.node is not instanceof Box, this should never happen`)
 			break
 		}
-		const newChild: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = await child.node.findChildByIdAndRenderIfNecessary(wayPoint.boxId)
-		if (!newChild) {
-			console.warn(`bundleLink(link: ${link.describe()}): child not found for wayPoint with name '${wayPoint.boxName}'`)
+		const newWaypoint: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = await waypoint.node.findChildByIdAndRenderIfNecessary(waypointData.boxId)
+		if (!newWaypoint) {
+			console.warn(`bundleLink(link: ${link.describe()}): nodeWidget not found for waypointData with name '${waypointData.boxName}'`)
 			break
 		}
-		child.watcher.unwatch()
-		child = newChild
-		for (const outgoingNodeLink of child.node.borderingLinks.getOutgoing()) {
-			if (outgoingNodeLink === link) {
+		waypoint.watcher.unwatch()
+		waypoint = newWaypoint
+		const borderingLinks: Link[] = end === 'from'
+			? waypoint.node.borderingLinks.getOutgoing()
+			: waypoint.node.borderingLinks.getIngoing()
+		for (const borderingLink of borderingLinks) {
+			if (borderingLink === link) {
 				continue
 			}
-			const parallelRoutePart = parallelRouteParts.find(part => part[end].link.from.isBoxInPath(child!.node) || part[end].link.to.isBoxInPath(child!.node))
+			const parallelRoutePart = parallelRouteParts.find(part => part[end].link.from.isBoxInPath(waypoint.node) || part[end].link.to.isBoxInPath(waypoint.node))
 			if (parallelRoutePart) {
 				console.log(`parallelRoutePart: ${parallelRoutePart[end].link.getId()} ${parallelRoutePart[end].node.getId()} ${parallelRoutePart.length}`)
-				parallelRoutePart[end] = {link: outgoingNodeLink, node: child.node}
+				parallelRoutePart[end] = {link: borderingLink, node: waypoint.node}
 				parallelRoutePart.length++
 			} else {
 				parallelRouteParts.push({
-					from: {link: outgoingNodeLink, node: child.node},
-					to: {link: outgoingNodeLink, node: child.node},
+					from: {link: borderingLink, node: waypoint.node},
+					to: {link: borderingLink, node: waypoint.node},
 					length: 0
 				})
 			}
 		}
 	}
-	return {deepestBoxInPath: child.watcher}
+	return {deepestBoxInPath: waypoint.watcher}
 }
 
-async function bundleLinkIntoParallelRoutePart(link: Link, longestParallelRoutePart: {
+async function bundleLinkIntoParallelRoutePart(link: Link, commonRoute: {
 	from: {node: AbstractNodeWidget, link: Link}
 	to: {node: AbstractNodeWidget, link: Link}
 }): Promise<void> {
-	if (!(longestParallelRoutePart.from.node instanceof Box)) {
-		console.warn(`longestParallelRoutePart.from.node is instanceof LinkNodeWidget, case not implemented yet`) // TODO: this can normally happen, this means from is equal and link that is bundled can be removed
+	const bundleFromPart: boolean = link.getData().from.path.at(-1)?.boxId !== commonRoute.from.link.getData().from.path.at(-1)?.boxId
+	const bundleToPart: boolean = link.getData().to.path.at(-1)?.boxId !== commonRoute.to.link.getData().to.path.at(-1)?.boxId
+	let fromLink: Link = link
+	let toLink: Link = link
+	if (bundleFromPart && bundleToPart) {
+		toLink = await link.getManagingBoxLinks().addCopy(link)
+	}
+	if (bundleFromPart) {
+		await bundleLinkEndIntoCommonRoutePart(fromLink.to, 'from', commonRoute.from)
+	}
+	if (bundleToPart) {
+		await bundleLinkEndIntoCommonRoutePart(toLink.from, 'to', commonRoute.to)
+	}
+	if (!bundleFromPart && !bundleToPart) {
+		console.warn(`linkBundler.bundleLinkIntoParallelRoutePart(link: ${link.describe()}, ..) detected duplicate link`)
+	}
+}
+
+async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'to', commonRoutePart: {node: AbstractNodeWidget, link: Link}): Promise<void> {
+	if (!(commonRoutePart.node instanceof Box)) {
+		console.warn(`commonRoutePart.node is instanceof LinkNodeWidget, case not implemented yet`) // TODO: this can normally happen, this means from is equal and link that is bundled can be removed
 		return
 	}
-	const otherFrom = await longestParallelRoutePart.from.link.getManagingBox().getDescendantByPathAndRenderIfNecessary(longestParallelRoutePart.from.link.getData().from.path.map(wayPoint => {
-		return {id: wayPoint.boxId}
-	}))
+	const commonRouteEnd = await getLinkEndNode(commonRoutePart.link, end)
 
 	let bundleFromLinkNode: NodeWidget
 	let bundleLinkNodePosition: ClientPosition
-	if (otherFrom.node instanceof NodeWidget && otherFrom.node.getParent() === longestParallelRoutePart.from.node) {
-		bundleFromLinkNode = otherFrom.node
+	if (commonRouteEnd.node instanceof NodeWidget && commonRouteEnd.node.getParent() === commonRoutePart.node) {
+		bundleFromLinkNode = commonRouteEnd.node
 		bundleLinkNodePosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
 	} else {
 		const newLinkNodeId = coreUtil.generateId()
-		await longestParallelRoutePart.from.node.nodes.add(new NodeData(newLinkNodeId, 50, 50)) // TODO: calculate average intersection position with node
-		bundleFromLinkNode = longestParallelRoutePart.from.node.nodes.getNodeById(newLinkNodeId)! // TODO: make BoxNodesWidget::add(..) return added LinkNodeWidget
+		await commonRoutePart.node.nodes.add(new NodeData(newLinkNodeId, 50, 50)) // TODO: calculate average intersection position with node
+		bundleFromLinkNode = commonRoutePart.node.nodes.getNodeById(newLinkNodeId)! // TODO: make BoxNodesWidget::add(..) return added LinkNodeWidget
 		bundleLinkNodePosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
-		await longestParallelRoutePart.from.node.links.add({from: otherFrom.node, to: bundleFromLinkNode, save: true})
-		await longestParallelRoutePart.from.link.from.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
+		if (end === 'from') {
+			await commonRoutePart.node.links.add({from: commonRouteEnd.node, to: bundleFromLinkNode, save: true}) // TODO: position
+		} else {
+			await commonRoutePart.node.links.add({from: bundleFromLinkNode, to: commonRouteEnd.node, save: true}) // TODO: position
+		}
+		await commonRoutePart.link[end].dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
 	}
-	await link.to.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
-	await otherFrom.watcher.unwatch()
+	await linkEnd.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
+	await commonRouteEnd.watcher.unwatch()
+}
+
+async function getLinkEndNode(link: Link, end: 'from'|'to'): Promise<{
+    node: Box | NodeWidget;
+    watcher: BoxWatcher;
+}> {
+	return link.getManagingBox().getDescendantByPathAndRenderIfNecessary(link.getData()[end].path.map(wayPoint => {
+		return {id: wayPoint.boxId}
+	}))
 }

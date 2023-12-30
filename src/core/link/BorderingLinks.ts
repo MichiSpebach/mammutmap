@@ -60,4 +60,8 @@ export class BorderingLinks {
     return this.getAll().filter(link => link.from.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
   }
 
+  public getIngoing(): Link[] {
+    return this.getAll().filter(link => link.to.getRenderedPathWithoutManagingBox().includes(this.referenceBoxOrNode))
+  }
+
 }

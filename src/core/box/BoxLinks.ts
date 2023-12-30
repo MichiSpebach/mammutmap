@@ -95,6 +95,23 @@ export class BoxLinks extends Widget {
       }
       
       const link: Link = await Link.newOfEnds({from: options.from, to: options.to, managingBox: this.referenceBox})
+      await this.addNewLink(link, options)
+      return link
+    }
+
+    public async addCopy(link: Link): Promise<Link> { // TODO: move into Link?
+      if(link.getManagingBox() !== this.referenceBox) {
+        log.warning(`BoxLinks::addCopy(link: ${link.describe()}) link.getManagingBox() should be same as this.referenceBox.`)
+      }
+
+      const linkDataCopy: any = JSON.parse(JSON.stringify(link.getData()))
+      linkDataCopy.id = 'link'+util.generateId()
+      const newLink: Link = Link.new(LinkData.buildFromRawObject(linkDataCopy), this.referenceBox)
+      await this.addNewLink(newLink, {save: true})
+      return newLink
+    }
+
+    private async addNewLink(link: Link, options: {save: boolean}): Promise<void> {
       this.referenceBox.getMapLinkData().push(link.getData()) // TODO: move into Link?
       this.links.push(link)
 
@@ -109,8 +126,6 @@ export class BoxLinks extends Widget {
         ongoing.push(link.render())
       }
       await Promise.all(ongoing)
-
-      return link
     }
 
     public async removeLink(link: Link): Promise<void> {
