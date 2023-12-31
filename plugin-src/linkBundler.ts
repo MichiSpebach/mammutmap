@@ -21,17 +21,17 @@ async function bundleLink(link: Link): Promise<void> {
 		to: {node: AbstractNodeWidget, link: Link}
 		length: number
 	}[] = []
-	
+
 	const deepestBoxInFromPath: BoxWatcher = (await findAndExtendCommonRoutes(link, 'from', commonRoutes)).deepestBoxInPath
 	const deepestBoxInToPath: BoxWatcher = (await findAndExtendCommonRoutes(link, 'to', commonRoutes)).deepestBoxInPath
-	
+
 	let longestCommonRoute = commonRoutes[0]
 	for (const commonRoute of commonRoutes) {
 		if (commonRoute.length > longestCommonRoute.length) {
 			longestCommonRoute = commonRoute
 		}
 	}
-	
+
 	if (longestCommonRoute.length > 0) {
 		await bundleLinkIntoCommonRoute(link, longestCommonRoute)
 	}
@@ -125,22 +125,15 @@ async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'t
 	if (commonRouteEnd.node instanceof NodeWidget && commonRouteEnd.node.getParent() === commonRoutePart.node) {
 		bundleFromLinkNode = commonRouteEnd.node
 	} else {
-		bundleFromLinkNode = await insertNodeIntoCommonRoutePart(end, {node: commonRoutePart.node, link: commonRoutePart.link})
+		bundleFromLinkNode = (await commonRoutePart.link.getManagingBoxLinks().insertNodeIntoLink(
+			commonRoutePart.link,
+			commonRoutePart.node,
+			(await commonRoutePart.node.getClientRect()).getMidPosition() // TODO: calculate average intersection position with node
+		)).insertedNode
 	}
 	let bundleLinkNodePosition: ClientPosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
 	await linkEnd.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
 	await commonRouteEnd.watcher.unwatch()
-}
-
-/** TODO move this into Link */
-async function insertNodeIntoCommonRoutePart(end: 'from'|'to', commonRoutePart: {node: Box, link: Link}): Promise<NodeWidget> {
-	const newLinkNodeId = coreUtil.generateId()
-	const insertedNode: NodeWidget = await commonRoutePart.node.nodes.add(new NodeData(newLinkNodeId, 50, 50)) // TODO: calculate average intersection position with node
-	const insertedNodePosition: ClientPosition = (await insertedNode.getClientShape()).getMidPosition()
-	const newLink: Link = await commonRoutePart.link.getManagingBoxLinks().addCopy(commonRoutePart.link)
-	await newLink[end === 'from' ? 'to' : 'from'].dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
-	await commonRoutePart.link[end].dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
-	return insertedNode
 }
 
 async function getLinkEndNode(link: Link, end: 'from'|'to'): Promise<{

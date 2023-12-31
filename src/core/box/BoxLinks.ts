@@ -12,6 +12,7 @@ import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { log } from '../logService'
 import { LocalPosition } from '../shape/LocalPosition'
 import { ClientPosition } from '../shape/ClientPosition'
+import { NodeData } from '../mapData/NodeData'
 
 export class BoxLinks extends Widget {
     private readonly referenceBox: Box
@@ -67,11 +68,11 @@ export class BoxLinks extends Widget {
       if (toPositionAtStart instanceof ClientPosition) {
         toPositionAtStart = await this.referenceBox.transform.clientToLocalPosition(toPositionAtStart)
       }
-    
+
       const from = {node: fromNode, positionInFromNodeCoords: fromPosition}
       const to = {node: this.referenceBox, positionInToNodeCoords: toPositionAtStart}
       const link: Link = await this.add({from, to, save: false})
-    
+
       await link.to.startDragWithClickToDropMode()
     }
 
@@ -93,7 +94,7 @@ export class BoxLinks extends Widget {
       if (this.referenceBox !== toNode && !this.referenceBox.isAncestorOf(toNode)) {
         log.warning(`BoxLinks::add(from: ${fromNode.getName()}, to: ${toNode.getName()}) to is not an descendant of referred box (${this.referenceBox.getName()}).`)
       }
-      
+
       const link: Link = await Link.newOfEnds({from: options.from, to: options.to, managingBox: this.referenceBox})
       await this.addNewLink(link, options)
       return link
@@ -128,6 +129,19 @@ export class BoxLinks extends Widget {
       await Promise.all(ongoing)
     }
 
+    /** TODO: move into Link? */
+    public async insertNodeIntoLink(link: Link, waypoint: Box, position: ClientPosition): Promise<{insertedNode: NodeWidget, addedLink: Link}> {
+      const newLinkNodeId = util.generateId()
+      const positionInWaypoint: LocalPosition = await waypoint.transform.clientToLocalPosition(position)
+      const insertedNode: NodeWidget = await waypoint.nodes.add(new NodeData(newLinkNodeId, positionInWaypoint.percentX, positionInWaypoint.percentY))
+      const insertedNodePosition: ClientPosition = (await insertedNode.getClientShape()).getMidPosition()
+    	const newLink: Link = await link.getManagingBoxLinks().addCopy(link)
+      // TODO: always change inner part
+    	await newLink.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
+    	await link.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
+      return {insertedNode, addedLink: newLink}
+    }
+
     public async removeLink(link: Link): Promise<void> {
       if (!this.links.includes(link)) {
         util.logWarning('trying to remove link from box "'+this.referenceBox.getName()+'" that is not managed by that box')
@@ -160,7 +174,7 @@ export class BoxLinks extends Widget {
 
       const placeholderPros: Promise<void>[] = []
       const partialRendered: boolean = this.links.length > 0
-      
+
       for (const linkData of this.referenceBox.getMapLinkData()) {
         let link: Link|undefined
         if (partialRendered) {
