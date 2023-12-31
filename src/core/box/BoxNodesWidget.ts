@@ -91,7 +91,7 @@ export class BoxNodesWidget extends Widget {
       await Promise.all(proms)
     }
 
-    public async add(data: NodeData): Promise<void> {
+    public async add(data: NodeData): Promise<NodeWidget> {
       this.referenceBox.getMapNodeData().push(data)
 
       const nodeWidget: NodeWidget = new NodeWidget(data, this.referenceBox)
@@ -100,6 +100,7 @@ export class BoxNodesWidget extends Widget {
       await nodeWidget.render()
 
       await this.referenceBox.saveMapData()
+      return nodeWidget
     }
 
     private formHtmlPlaceholderFor(node: NodeWidget): string {

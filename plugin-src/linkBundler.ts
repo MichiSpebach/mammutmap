@@ -135,8 +135,7 @@ async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'t
 /** TODO move this into Link */
 async function insertNodeIntoCommonRoutePart(end: 'from'|'to', commonRoutePart: {node: Box, link: Link}): Promise<NodeWidget> {
 	const newLinkNodeId = coreUtil.generateId()
-	await commonRoutePart.node.nodes.add(new NodeData(newLinkNodeId, 50, 50)) // TODO: calculate average intersection position with node
-	const insertedNode: NodeWidget = commonRoutePart.node.nodes.getNodeById(newLinkNodeId)! // TODO: make BoxNodesWidget::add(..) return added LinkNodeWidget
+	const insertedNode: NodeWidget = await commonRoutePart.node.nodes.add(new NodeData(newLinkNodeId, 50, 50)) // TODO: calculate average intersection position with node
 	const insertedNodePosition: ClientPosition = (await insertedNode.getClientShape()).getMidPosition()
 	const newLink: Link = await commonRoutePart.link.getManagingBoxLinks().addCopy(commonRoutePart.link)
 	await newLink[end === 'from' ? 'to' : 'from'].dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
