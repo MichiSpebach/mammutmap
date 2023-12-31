@@ -16,24 +16,24 @@ BoxLinks.prototype.add = async function (options) {
 }
 
 async function bundleLink(link: Link): Promise<void> {
-	const commonRouteParts: {
+	const commonRoutes: {
 		from: {node: AbstractNodeWidget, link: Link}
 		to: {node: AbstractNodeWidget, link: Link}
 		length: number
 	}[] = []
 	
-	const deepestBoxInFromPath: BoxWatcher = (await findAndExtendCommonRouteParts(link, 'from', commonRouteParts)).deepestBoxInPath
-	const deepestBoxInToPath: BoxWatcher = (await findAndExtendCommonRouteParts(link, 'to', commonRouteParts)).deepestBoxInPath
+	const deepestBoxInFromPath: BoxWatcher = (await findAndExtendCommonRoutes(link, 'from', commonRoutes)).deepestBoxInPath
+	const deepestBoxInToPath: BoxWatcher = (await findAndExtendCommonRoutes(link, 'to', commonRoutes)).deepestBoxInPath
 	
-	let longestCommonRoutePart = commonRouteParts[0]
-	for (const commonRoutePart of commonRouteParts) {
-		if (commonRoutePart.length > longestCommonRoutePart.length) {
-			longestCommonRoutePart = commonRoutePart
+	let longestCommonRoute = commonRoutes[0]
+	for (const commonRoute of commonRoutes) {
+		if (commonRoute.length > longestCommonRoute.length) {
+			longestCommonRoute = commonRoute
 		}
 	}
 	
-	if (longestCommonRoutePart.length > 0) {
-		await bundleLinkIntoCommonRoute(link, longestCommonRoutePart)
+	if (longestCommonRoute.length > 0) {
+		await bundleLinkIntoCommonRoute(link, longestCommonRoute)
 	}
 
 	await Promise.all([
@@ -42,10 +42,10 @@ async function bundleLink(link: Link): Promise<void> {
 	])
 }
 
-async function findAndExtendCommonRouteParts(
+async function findAndExtendCommonRoutes(
 	link: Link,
 	end: 'from'|'to',
-	commonRouteParts: {
+	commonRoutes: {
 		from: {node: AbstractNodeWidget, link: Link}
 		to: {node: AbstractNodeWidget, link: Link}
 		length: number
@@ -76,12 +76,12 @@ async function findAndExtendCommonRouteParts(
 			if (borderingLink === link) {
 				continue
 			}
-			const commonRoutePart = commonRouteParts.find(part => part[end].link.from.isBoxInPath(waypoint.node) || part[end].link.to.isBoxInPath(waypoint.node))
-			if (commonRoutePart) {
-				commonRoutePart[end] = {link: borderingLink, node: waypoint.node}
-				commonRoutePart.length++
+			const commonRoute = commonRoutes.find(commonRoute => commonRoute[end].link.from.isBoxInPath(waypoint.node) || commonRoute[end].link.to.isBoxInPath(waypoint.node))
+			if (commonRoute) {
+				commonRoute[end] = {link: borderingLink, node: waypoint.node}
+				commonRoute.length++
 			} else {
-				commonRouteParts.push({
+				commonRoutes.push({
 					from: {link: borderingLink, node: waypoint.node},
 					to: {link: borderingLink, node: waypoint.node},
 					length: 0
