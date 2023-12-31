@@ -1,4 +1,4 @@
-import { RootFolderBox, coreUtil, getRootFolder } from '../../dist/pluginFacade'
+import { Box, Map, RootFolderBox, coreUtil, getMapOrError, getRootFolder } from '../../dist/pluginFacade'
 import { ChangedFile, Commit, GitClient } from './GitClient'
 import { highlightBoxes } from './boxHighlighting'
 
@@ -19,8 +19,17 @@ export async function visualizeChanges(from: string, to: string): Promise<void> 
         coreUtil.concatPaths(rootFolderPath, file.path))
 
     await highlightBoxes(absoluteFilePaths, forceRestyle)
+    await zoomToChanges(absoluteFilePaths)
     await rootFolder.render()
     forceRestyle = false
+}
+
+async function zoomToChanges(absoluteFilePaths: string[]) {
+    const rootFolder: RootFolderBox = getRootFolder()
+    const changedFileBoxesRendered: Box[] = absoluteFilePaths.map(path =>
+        rootFolder.getRenderedBoxesInPath(path).at(-1)).filter(box => box) as Box[]
+    const map: Map = getMapOrError()
+    map.zoomToFitBoxes(changedFileBoxesRendered)
 }
 
 export async function visualizeCommitByRef(ref: string): Promise<void> {
