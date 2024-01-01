@@ -125,11 +125,15 @@ async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'t
 	if (commonRouteEnd.node instanceof NodeWidget && commonRouteEnd.node.getParent() === commonRoutePart.node) {
 		bundleFromLinkNode = commonRouteEnd.node
 	} else {
+		const linkManagingBoxBefore: Box = commonRoutePart.link.getManagingBox()
 		bundleFromLinkNode = (await commonRoutePart.link.getManagingBoxLinks().insertNodeIntoLink(
 			commonRoutePart.link,
 			commonRoutePart.node,
 			(await commonRoutePart.node.getClientRect()).getMidPosition() // TODO: calculate average intersection position with node
 		)).insertedNode
+		if (linkManagingBoxBefore !== commonRoutePart.link.getManagingBox()) {
+			console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
+		}
 	}
 	let bundleLinkNodePosition: ClientPosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
 	await linkEnd.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})

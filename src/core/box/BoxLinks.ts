@@ -131,15 +131,24 @@ export class BoxLinks extends Widget {
 
     /** TODO: move into Link? */
     public async insertNodeIntoLink(link: Link, waypoint: Box, position: ClientPosition): Promise<{insertedNode: NodeWidget, addedLink: Link}> {
-      const newLinkNodeId = util.generateId()
       const positionInWaypoint: LocalPosition = await waypoint.transform.clientToLocalPosition(position)
-      const insertedNode: NodeWidget = await waypoint.nodes.add(new NodeData(newLinkNodeId, positionInWaypoint.percentX, positionInWaypoint.percentY))
+      const insertedNode: NodeWidget = await waypoint.nodes.add(new NodeData('node'+util.generateId(), positionInWaypoint.percentX, positionInWaypoint.percentY))
       const insertedNodePosition: ClientPosition = (await insertedNode.getClientShape()).getMidPosition()
-    	const newLink: Link = await link.getManagingBoxLinks().addCopy(link)
-      // TODO: always change inner part
-    	await newLink.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
-    	await link.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
-      return {insertedNode, addedLink: newLink}
+    	const addedLink: Link = await link.getManagingBoxLinks().addCopy(link)
+
+      if (link.to.isBoxInPath(waypoint)) { // ensures that managingBox of link gets heavier part and is not changed
+        await Promise.all([
+          link.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition}),
+          addedLink.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
+        ])
+      } else {
+        await Promise.all([
+          link.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition}),
+          addedLink.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
+        ])
+      }
+
+      return {insertedNode, addedLink}
     }
 
     public async removeLink(link: Link): Promise<void> {
