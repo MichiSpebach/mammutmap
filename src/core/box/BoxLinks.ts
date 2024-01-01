@@ -4,7 +4,6 @@ import { Box } from './Box'
 import { Link } from '../link/Link'
 import { LinkData } from '../mapData/LinkData'
 import { WayPointData } from '../mapData/WayPointData'
-import { LinkEndData } from '../mapData/LinkEndData'
 import { NodeWidget } from '../node/NodeWidget'
 import { Widget } from '../Widget'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
@@ -136,18 +135,21 @@ export class BoxLinks extends Widget {
       const insertedNodePosition: ClientPosition = (await insertedNode.getClientShape()).getMidPosition()
     	const addedLink: Link = await link.getManagingBoxLinks().addCopy(link)
 
+      if (link.from.isBoxInPath(waypoint)) { // ensures that managingBox of link gets heavier part and is not changed
+        await Promise.all([
+          link.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition}),
+          addedLink.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
+        ])
+        return {insertedNode, addedLink}
+      }
       if (link.to.isBoxInPath(waypoint)) { // ensures that managingBox of link gets heavier part and is not changed
         await Promise.all([
           link.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition}),
           addedLink.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
         ])
-      } else {
-        await Promise.all([
-          link.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition}),
-          addedLink.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
-        ])
+        return {insertedNode, addedLink}
       }
-
+      log.warning(`BoxLinks::insertNodeIntoLink(link, waypoint, ..) waypoint is not in link.`)
       return {insertedNode, addedLink}
     }
 

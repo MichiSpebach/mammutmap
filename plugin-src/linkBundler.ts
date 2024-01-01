@@ -51,6 +51,7 @@ async function findAndExtendCommonRoutes(
 		length: number
 	}[]
 ): Promise<{deepestBoxInPath: BoxWatcher}> {
+	// TODO: refactor this method
 	const managingBox = link.getManagingBox()
 	let path: WayPointData[] = link.getData()[end].path
 	if (path[0].boxId === managingBox.getId()) {
@@ -76,7 +77,14 @@ async function findAndExtendCommonRoutes(
 			if (borderingLink === link) {
 				continue
 			}
-			const commonRoute = commonRoutes.find(commonRoute => commonRoute[end].link.from.isBoxInPath(waypoint.node) || commonRoute[end].link.to.isBoxInPath(waypoint.node))
+			const commonRoute = commonRoutes.find(commonRoute => {
+				const from: LinkEnd = commonRoute[end].link.from
+				const to: LinkEnd = commonRoute[end].link.to
+				return from.getManagingBox() === waypoint.node.getParent()
+					|| to.getManagingBox() === waypoint.node.getParent()
+					|| from.isBoxInPath(waypoint.node)
+					|| to.isBoxInPath(waypoint.node)
+			})
 			if (commonRoute) {
 				commonRoute[end] = {link: borderingLink, node: waypoint.node}
 				commonRoute.length++
