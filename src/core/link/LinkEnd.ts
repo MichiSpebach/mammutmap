@@ -281,24 +281,25 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private async calculateFloatToBorderPositionRegardingClientShape(shapeInClientCoords: Promise<Shape<ClientPosition>>): Promise<ClientPosition|undefined> {
     const line: {from: ClientPosition, to: ClientPosition} = await this.referenceLink.getLineInClientCoords()
     const intersectionsWithShape: ClientPosition[] = (await shapeInClientCoords).calculateIntersectionsWithLine(line)
+    let targetPositionOfOtherLinkEnd: ClientPosition
+    if (this === this.referenceLink.from) {
+      targetPositionOfOtherLinkEnd = line.to
+    } else {
+      targetPositionOfOtherLinkEnd = line.from
+    }
 
-    if (intersectionsWithShape.length < 1) {
+    let nearestIntersection: {position: ClientPosition, distance: number}|undefined = undefined
+    for (let i = 0; i < intersectionsWithShape.length; i++) {
+      const distance: number = targetPositionOfOtherLinkEnd.calculateDistanceTo(intersectionsWithShape[i])
+      if (!nearestIntersection || distance < nearestIntersection.distance) {
+        nearestIntersection = {position: intersectionsWithShape[i], distance}
+      }
+    }
+
+    if (!nearestIntersection || nearestIntersection.distance === 0) { // distance 0 means link would have length 0, happens if target is managingBox or would be managingBox while dragging
       return undefined
     }
-
-    let nearestIntersection: ClientPosition = intersectionsWithShape[0]
-    for (let i = 1; i < intersectionsWithShape.length; i++) {
-      let targetPositionOfOtherLinkEnd: ClientPosition
-      if (this === this.referenceLink.from) {
-        targetPositionOfOtherLinkEnd = line.to
-      } else {
-        targetPositionOfOtherLinkEnd = line.from
-      }
-      if (targetPositionOfOtherLinkEnd.calculateDistanceTo(intersectionsWithShape[i]) < targetPositionOfOtherLinkEnd.calculateDistanceTo(nearestIntersection)) {
-        nearestIntersection = intersectionsWithShape[i]
-      }
-    }
-    return nearestIntersection
+    return nearestIntersection.position
   }
 
   public async getTargetPositionInManagingBoxCoords(): Promise<LocalPosition> {
