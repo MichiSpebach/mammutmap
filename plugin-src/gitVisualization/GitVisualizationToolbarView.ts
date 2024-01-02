@@ -4,6 +4,8 @@ import { visualizeChanges } from './gitWitchcraft'
 
 export class GitVisualizationToolbarView extends UltimateWidget implements ToolbarView {
 
+    static isZoomingEnabled: boolean = true
+
     public constructor(
         public readonly id: string
     ) {
@@ -37,13 +39,14 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         return [
             this.shapeInputField('git-ref-input-from', 'HEAD^', 'Ref from: '),
             this.shapeInputField('git-ref-input-to', 'HEAD', 'Ref to: '),
+            this.shapeToggle(),
             {
                 type: 'button',
                 innerHTML: 'View Changes &#129668;',
                 async onclick() {
-                    const fromRef = await renderManager.getValueOf('git-ref-input-from')
-                    const toRef = await renderManager.getValueOf('git-ref-input-to')
-                    visualizeChanges(fromRef, toRef)
+                    const fromRef: string = await renderManager.getValueOf('git-ref-input-from')
+                    const toRef: string = await renderManager.getValueOf('git-ref-input-to')
+                    visualizeChanges(fromRef, toRef, GitVisualizationToolbarView.isZoomingEnabled)
                 }
             }
         ]
@@ -62,6 +65,27 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                     type: 'input',
                     value: value,
                     id: id
+                }
+            ]
+        }
+    }
+
+    private shapeToggle(): RenderElement {
+        return {
+            type: 'div',
+            style: { display: 'block' },
+            children: [
+                {
+                    type: 'span',
+                    innerHTML: 'Zoom To Changes?'
+                },
+                {
+                    type: 'div',
+                    style: { display: 'inline' },
+                    innerHTML: '<input type="checkbox" checked>',
+                    onchangeChecked: (value: boolean) => {
+                        GitVisualizationToolbarView.isZoomingEnabled = value
+                    }
                 }
             ]
         }
