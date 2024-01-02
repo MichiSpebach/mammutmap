@@ -132,25 +132,11 @@ async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'t
 	if (commonRouteEnd.node instanceof NodeWidget && commonRouteEnd.node.getParent() === commonRoutePart.node) {
 		bundleFromLinkNode = commonRouteEnd.node
 	} else {
-		const nodeRect: ClientRect = await commonRoutePart.node.getClientRect()
-		nodeRect.calculateIntersectionsWithLine(await linkEnd.getReferenceLink().getLineInClientCoords())
-		const commonRouteIntersections: ClientPosition[] = nodeRect.calculateIntersectionsWithLine(await commonRoutePart.link.getLineInClientCoords())
-		if (commonRouteIntersections.length !== 1) {
-			console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one commonRouteIntersection but are ${commonRouteIntersections.length}`)
-		}
-		const linkToBundleIntersections: ClientPosition[] = nodeRect.calculateIntersectionsWithLine(await linkEnd.getReferenceLink().getLineInClientCoords())
-		if (linkToBundleIntersections.length !== 1) {
-			console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one linkToBundleIntersection but are ${linkToBundleIntersections.length}`)
-		}
-		const commonRouteIntersection: ClientPosition = commonRouteIntersections.at(0) ?? (await commonRoutePart.node.getClientRect()).getMidPosition()
-		const linkToBundleIntersection: ClientPosition = linkToBundleIntersections.at(0) ?? (await commonRoutePart.node.getClientRect()).getMidPosition()
-		const averagePosition = new ClientPosition((commonRouteIntersection.x+linkToBundleIntersection.x) / 2, (commonRouteIntersection.y+linkToBundleIntersection.y) / 2)
-
 		const linkManagingBoxBefore: Box = commonRoutePart.link.getManagingBox()
 		bundleFromLinkNode = (await commonRoutePart.link.getManagingBoxLinks().insertNodeIntoLink(
 			commonRoutePart.link,
 			commonRoutePart.node,
-			averagePosition
+			await calculateBundleNodePosition(linkEnd, {node: commonRoutePart.node, link: commonRoutePart.link})
 		)).insertedNode
 		if (linkManagingBoxBefore !== commonRoutePart.link.getManagingBox()) {
 			console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
@@ -159,6 +145,22 @@ async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'t
 	let bundleLinkNodePosition: ClientPosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
 	await linkEnd.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
 	await commonRouteEnd.watcher.unwatch()
+}
+
+async function calculateBundleNodePosition(linkEnd: LinkEnd, commonRoutePart: {node: Box, link: Link}): Promise<ClientPosition> {
+	const commonRouteLine: {from: ClientPosition, to: ClientPosition} = await commonRoutePart.link.getLineInClientCoords()
+	const linkToBundleLine: {from: ClientPosition, to: ClientPosition} = await linkEnd.getReferenceLink().getLineInClientCoords()
+	const averageLine = { // TODO: include weights
+		from: new ClientPosition((commonRouteLine.from.x+linkToBundleLine.from.x) / 2, (commonRouteLine.from.y+linkToBundleLine.from.y) / 2),
+		to: new ClientPosition((commonRouteLine.to.x+linkToBundleLine.to.x) / 2, (commonRouteLine.to.y+linkToBundleLine.to.y) / 2)
+	}
+	const nodeRect: ClientRect = await commonRoutePart.node.getClientRect()
+
+	const intersections: ClientPosition[] = nodeRect.calculateIntersectionsWithLine(averageLine)
+	if (intersections.length !== 1) {
+		console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are ${intersections.length}`)
+	}
+	return intersections.at(0) ?? (await commonRoutePart.node.getClientRect()).getMidPosition()
 }
 
 async function getLinkEndNode(link: Link, end: 'from'|'to'): Promise<{
