@@ -1,10 +1,9 @@
 import { AbstractNodeWidget } from '../dist/core/AbstractNodeWidget'
+import { ClientRect } from '../dist/core/ClientRect'
 import { BoxLinks } from '../dist/core/box/BoxLinks'
 import { LinkEnd } from '../dist/core/link/LinkEnd'
-import { NodeData } from '../dist/core/mapData/NodeData'
 import { ClientPosition } from '../dist/core/shape/ClientPosition'
-import { Box, BoxWatcher, FolderBox, Link, MenuItemFile, NodeWidget, WayPointData, contextMenu, coreUtil, renderManager } from '../dist/pluginFacade'
-import * as pluginFacade from '../dist/pluginFacade'
+import { Box, BoxWatcher, Link, MenuItemFile, NodeWidget, WayPointData, contextMenu, coreUtil, renderManager } from '../dist/pluginFacade'
 
 contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: 'bundle', click: () => bundleLink(link)}))
 
@@ -133,11 +132,25 @@ async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'t
 	if (commonRouteEnd.node instanceof NodeWidget && commonRouteEnd.node.getParent() === commonRoutePart.node) {
 		bundleFromLinkNode = commonRouteEnd.node
 	} else {
+		const nodeRect: ClientRect = await commonRoutePart.node.getClientRect()
+		nodeRect.calculateIntersectionsWithLine(await linkEnd.getReferenceLink().getLineInClientCoords())
+		const commonRouteIntersections: ClientPosition[] = nodeRect.calculateIntersectionsWithLine(await commonRoutePart.link.getLineInClientCoords())
+		if (commonRouteIntersections.length !== 1) {
+			console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one commonRouteIntersection but are ${commonRouteIntersections.length}`)
+		}
+		const linkToBundleIntersections: ClientPosition[] = nodeRect.calculateIntersectionsWithLine(await linkEnd.getReferenceLink().getLineInClientCoords())
+		if (linkToBundleIntersections.length !== 1) {
+			console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one linkToBundleIntersection but are ${linkToBundleIntersections.length}`)
+		}
+		const commonRouteIntersection: ClientPosition = commonRouteIntersections.at(0) ?? (await commonRoutePart.node.getClientRect()).getMidPosition()
+		const linkToBundleIntersection: ClientPosition = linkToBundleIntersections.at(0) ?? (await commonRoutePart.node.getClientRect()).getMidPosition()
+		const averagePosition = new ClientPosition((commonRouteIntersection.x+linkToBundleIntersection.x) / 2, (commonRouteIntersection.y+linkToBundleIntersection.y) / 2)
+
 		const linkManagingBoxBefore: Box = commonRoutePart.link.getManagingBox()
 		bundleFromLinkNode = (await commonRoutePart.link.getManagingBoxLinks().insertNodeIntoLink(
 			commonRoutePart.link,
 			commonRoutePart.node,
-			(await commonRoutePart.node.getClientRect()).getMidPosition() // TODO: calculate average intersection position with node
+			averagePosition
 		)).insertedNode
 		if (linkManagingBoxBefore !== commonRoutePart.link.getManagingBox()) {
 			console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
