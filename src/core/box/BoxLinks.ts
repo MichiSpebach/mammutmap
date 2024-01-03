@@ -129,6 +129,7 @@ export class BoxLinks extends Widget {
     }
 
     /** TODO: move into Link? */
+    /** TODO: offer insertNodeIntoLink(..) in LocalPositions because ClientPositions may not work well when zoomed far away */
     public async insertNodeIntoLink(link: Link, waypoint: Box, position: ClientPosition): Promise<{insertedNode: NodeWidget, addedLink: Link}> {
       const positionInWaypoint: LocalPosition = await waypoint.transform.clientToLocalPosition(position)
       const insertedNode: NodeWidget = await waypoint.nodes.add(new NodeData('node'+util.generateId(), positionInWaypoint.percentX, positionInWaypoint.percentY))

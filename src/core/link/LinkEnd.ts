@@ -111,6 +111,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     this.dragState = null
   }
 
+  /** TODO: offer dragAndDrop(..) in LocalPositions because ClientPositions may not work well when zoomed far away */
   public async dragAndDrop(options: {dropTarget: Box|NodeWidget, clientPosition: ClientPosition, snapToGrid?: boolean}): Promise<void> {
     this.dragState = {snapToGrid: false, ...options}
     return this.dragEnd(options.dropTarget)

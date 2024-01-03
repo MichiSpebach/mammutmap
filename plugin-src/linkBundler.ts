@@ -3,15 +3,50 @@ import { ClientRect } from '../dist/core/ClientRect'
 import { BoxLinks } from '../dist/core/box/BoxLinks'
 import { LinkEnd } from '../dist/core/link/LinkEnd'
 import { ClientPosition } from '../dist/core/shape/ClientPosition'
-import { Box, BoxWatcher, Link, MenuItemFile, NodeWidget, WayPointData, contextMenu, coreUtil, renderManager } from '../dist/pluginFacade'
+import { Box, BoxWatcher, Link, MenuItemFile, NodeWidget, WayPointData, applicationMenu, contextMenu } from '../dist/pluginFacade'
 
 contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: 'bundle', click: () => bundleLink(link)}))
 
-const addBackup = BoxLinks.prototype.add
-BoxLinks.prototype.add = async function (options) {
-	const link: Link = await addBackup.call(this, options)
-	//await bundleLink(link) TODO
-	return link
+let bundleNewLinksActivated: boolean = false
+let addLinkBackup: ((options: any) => Promise<Link>) = BoxLinks.prototype.add
+
+const activateBundleNewLinksItem = new MenuItemFile({label: 'activate bundle new links', enabled: !bundleNewLinksActivated, click() {
+	applicationMenu.setMenuItemEnabled(activateBundleNewLinksItem, false)
+	applicationMenu.setMenuItemEnabled(deactivateBundleNewLinksItem, true)
+	activateBundleNewLinks()
+}})
+const deactivateBundleNewLinksItem = new MenuItemFile({label: 'deactivate bundle new links', enabled: bundleNewLinksActivated, click() {
+	applicationMenu.setMenuItemEnabled(activateBundleNewLinksItem, true)
+	applicationMenu.setMenuItemEnabled(deactivateBundleNewLinksItem, false)
+	deactivateBundleNewLinks()
+}})
+
+applicationMenu.addMenuItemTo('linkBundler.js', activateBundleNewLinksItem)
+applicationMenu.addMenuItemTo('linkBundler.js', deactivateBundleNewLinksItem)
+
+function activateBundleNewLinks(): void {
+	if (bundleNewLinksActivated) {
+		console.warn(`bundleNewLinks is already activated`)
+		return
+	}
+	bundleNewLinksActivated = true
+	addLinkBackup = BoxLinks.prototype.add
+	BoxLinks.prototype.add = async function (options) {
+		const link: Link = await addLinkBackup.call(this, options)
+		await bundleLink(link)
+		return link
+	}
+	console.info(`bundleNewLinks activated`)
+}
+
+function deactivateBundleNewLinks(): void {
+	if (!bundleNewLinksActivated) {
+		console.warn(`bundleNewLinks is already deactivated`)
+		return
+	}
+	bundleNewLinksActivated = false
+	BoxLinks.prototype.add = addLinkBackup
+	console.info(`bundleNewLinks deactivated`)
 }
 
 async function bundleLink(link: Link): Promise<void> {
@@ -24,14 +59,8 @@ async function bundleLink(link: Link): Promise<void> {
 	const deepestBoxInFromPath: BoxWatcher = (await findAndExtendCommonRoutes(link, 'from', commonRoutes)).deepestBoxInPath
 	const deepestBoxInToPath: BoxWatcher = (await findAndExtendCommonRoutes(link, 'to', commonRoutes)).deepestBoxInPath
 
-	let longestCommonRoute = commonRoutes[0]
-	for (const commonRoute of commonRoutes) {
-		if (commonRoute.length > longestCommonRoute.length) {
-			longestCommonRoute = commonRoute
-		}
-	}
-
-	if (longestCommonRoute.length > 0) {
+	const longestCommonRoute = getLongestCommonRoute(commonRoutes)
+	if (longestCommonRoute && longestCommonRoute.length > 0) {
 		await bundleLinkIntoCommonRoute(link, longestCommonRoute)
 	}
 
@@ -99,6 +128,28 @@ async function findAndExtendCommonRoutes(
 	return {deepestBoxInPath: waypoint.watcher}
 }
 
+function getLongestCommonRoute(commonRoutes: {
+	from: {node: AbstractNodeWidget, link: Link}
+	to: {node: AbstractNodeWidget, link: Link}
+	length: number
+}[]): {
+	from: {node: AbstractNodeWidget, link: Link}
+	to: {node: AbstractNodeWidget, link: Link}
+	length: number
+} | undefined {
+	if (commonRoutes.length < 1) {
+		return undefined
+	}
+
+	let longestCommonRoute = commonRoutes[0]
+	for (const commonRoute of commonRoutes) {
+		if (commonRoute.length > longestCommonRoute.length) {
+			longestCommonRoute = commonRoute
+		}
+	}
+	return longestCommonRoute
+}
+
 async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 	from: {node: AbstractNodeWidget, link: Link}
 	to: {node: AbstractNodeWidget, link: Link}
@@ -143,7 +194,7 @@ async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'t
 		}
 	}
 	let bundleLinkNodePosition: ClientPosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
-	await linkEnd.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition})
+	await linkEnd.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition}) // TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away
 	await commonRouteEnd.watcher.unwatch()
 }
 
