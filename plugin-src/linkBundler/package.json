@@ -1,0 +1,15 @@
+{
+  "name": "linkbundler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "linkBundler",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "link",
+    "bundler"
+  ],
+  "author": "",
+  "license": "ISC"
+}
