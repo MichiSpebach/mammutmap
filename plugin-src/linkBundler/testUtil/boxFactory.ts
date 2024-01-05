@@ -1,3 +1,8 @@
+/**
+ * copied from '../../../test/core/box/factories/boxFactory'
+ * importing from 'test' would lead to imports from 'src' and not from 'dist' which would result in other modules
+ * TODO: find better solution
+ * */
 import { BoxData } from '../../../dist/core/mapData/BoxData'
 import { FolderBox } from '../../../dist/core/box/FolderBox'
 import { RootFolderBox } from '../../../dist/core/box/RootFolderBox'

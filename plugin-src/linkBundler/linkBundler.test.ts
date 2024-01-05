@@ -20,8 +20,9 @@ test('bundleLink, nothing to bundle', async () => {
 	const fileA = boxFactory.fileOf({idOrData: 'fileA', parent: root, addToParent: true, rendered: true})
 	const fileB = boxFactory.fileOf({idOrData: 'fileB', parent: root, addToParent: true, rendered: true})
 	const link = await root.links.add({from: fileA, to: fileB, save: true})
+	
 	await linkBundler.bundleLink(link)
-	//linkBundler.findAndExtendCommonRoutes(link as any, 'from', [])
+
 	expect(link.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['fileA'])
 	expect(link.getData().to.path.map(waypoint => waypoint.boxId)).toEqual(['fileB'])
 })
@@ -35,8 +36,9 @@ test('bundleLink, insert one node', async () => {
 	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
 	const leftFolderBottomFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
 	
-	const topLink = await root.links.add({from: leftFolderTopFile, to: rightFile, save: true})
-	const bottomLink = await root.links.add({from: leftFolderBottomFile, to: rightFile, save: true})
+	const topLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFile, save: true})
+	const bottomLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFile, save: true})
+	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
 	
 	await linkBundler.bundleLink(topLink)
 	//await linkBundler.findAndExtendCommonRoutes(link as any, 'from', [])
@@ -53,6 +55,10 @@ test('bundleLink, insert one node', async () => {
 	expect(topLink.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['leftFolderTopFile'])
 	expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual([expect.stringContaining('node')])
 	//expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual(expect.arrayContaining(['rightFile', expect.anything()]))
+
+	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
+	expect(console.warn).toBeCalledTimes(1)
+	consoleWarn.mockRestore()
 })
 
 test('bundleLink, insert two nodes', async () => {
@@ -68,6 +74,7 @@ test('bundleLink, insert two nodes', async () => {
 	
 	const topLink = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
 	const bottomLink = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
+	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
 
 	await linkBundler.bundleLink(topLink)
 	
@@ -79,6 +86,10 @@ test('bundleLink, insert two nodes', async () => {
 	const bottomLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)!
 	expect(bottomLinkRoute.length).toBe(3)
 	expect(bottomLinkRoute[1].getId()).toBe(bottomLink.getId())
+	
+	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
+	expect(console.warn).toBeCalledTimes(2)
+	consoleWarn.mockRestore()
 })
 
 async function initServicesWithMocks(): Promise<{
