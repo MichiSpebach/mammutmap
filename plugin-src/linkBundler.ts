@@ -3,7 +3,20 @@ import { ClientRect } from '../dist/core/ClientRect'
 import { BoxLinks } from '../dist/core/box/BoxLinks'
 import { LinkEnd } from '../dist/core/link/LinkEnd'
 import { ClientPosition } from '../dist/core/shape/ClientPosition'
-import { Box, BoxWatcher, Link, MenuItemFile, NodeWidget, WayPointData, applicationMenu, contextMenu } from '../dist/pluginFacade'
+import { Box } from '../dist/core/box/Box'
+import { BoxWatcher } from '../dist/core/box/BoxWatcher'
+import { Link } from '../dist/core/link/Link'
+import { WayPointData } from '../dist/core/mapData/WayPointData'
+import { NodeWidget } from '../dist/core/node/NodeWidget'
+import * as contextMenu from '../dist/core/contextMenu'
+import { applicationMenu } from '../dist/core/applicationMenu/applicationMenu'
+import { MenuItemFile } from '../dist/core/applicationMenu/MenuItemFile'
+/**
+ * pluginFacade not used in imports because
+ * some imports could not be resolved when importing from '../dist/pluginFacade' and cause:
+ * "TypeError: Class extends value undefined is not a constructor or null"
+ * TODO fix this!
+ */
 
 contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: 'bundle', click: () => bundleLink(link)}))
 
@@ -21,8 +34,9 @@ const deactivateBundleNewLinksItem = new MenuItemFile({label: 'deactivate bundle
 	deactivateBundleNewLinks()
 }})
 
-applicationMenu.addMenuItemTo('linkBundler.js', activateBundleNewLinksItem)
-applicationMenu.addMenuItemTo('linkBundler.js', deactivateBundleNewLinksItem)
+// ?. because applicationMenu is not initialized for unit tests
+applicationMenu?.addMenuItemTo('linkBundler.js', activateBundleNewLinksItem)
+applicationMenu?.addMenuItemTo('linkBundler.js', deactivateBundleNewLinksItem)
 
 function activateBundleNewLinks(): void {
 	if (bundleNewLinksActivated) {
@@ -49,7 +63,9 @@ function deactivateBundleNewLinks(): void {
 	console.info(`bundleNewLinks deactivated`)
 }
 
-async function bundleLink(link: Link): Promise<void> {
+
+/** exported for unit tests */
+export async function bundleLink(link: Link): Promise<void> {
 	const commonRoutes: {
 		from: {node: AbstractNodeWidget, link: Link}
 		to: {node: AbstractNodeWidget, link: Link}
@@ -70,7 +86,8 @@ async function bundleLink(link: Link): Promise<void> {
 	])
 }
 
-async function findAndExtendCommonRoutes(
+/** exported for unit tests */
+export async function findAndExtendCommonRoutes(
 	link: Link,
 	end: 'from'|'to',
 	commonRoutes: {
