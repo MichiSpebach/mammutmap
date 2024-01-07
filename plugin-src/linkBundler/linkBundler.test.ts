@@ -121,6 +121,78 @@ test('findAndExtendCommonRoutes', async () => {
 	})
 })
 
+test('findAndExtendCommonRoutes, different managingBoxes of links', async () => {
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const leftDeepDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepDeepFolder', parent: leftDeepFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const leftDeepDeepFile = boxFactory.fileOf({idOrData: 'leftDeepDeepFile', parent: leftDeepDeepFolder, addToParent: true, rendered: true})
+	const leftFileUnrenderSpy = jest.spyOn(leftDeepDeepFile, 'unrenderIfPossible').mockReturnValue(Promise.resolve({rendered: true})) // leads otherwise to undefined error
+	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	rightFile.body.render = () => Promise.resolve() // leads otherwise to undefined error
+
+	const longLinkToRight: Link = await root.links.add({from: leftDeepDeepFile, to: rightFile, save: true})
+	const shortLinkToRight: Link = await leftFolder.links.add({from: leftDeepDeepFolder, to: leftFolder, save: true})
+	const longLinkToLeft: Link = await root.links.add({from: rightFile, to: leftDeepDeepFile, save: true})
+	const shortLinkToLeft: Link = await leftFolder.links.add({from: leftFolder, to: leftDeepDeepFolder, save: true})
+
+	expect(extractIds(await findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
+		from: {node: leftDeepDeepFolder, link: shortLinkToRight},
+		to: {node: leftDeepFolder, link: shortLinkToRight},
+		length: 1
+	}))
+	expect(extractIds(await findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
+		from: {node: leftDeepDeepFolder, link: longLinkToRight},
+		to: {node: leftDeepFolder, link: longLinkToRight},
+		length: 1
+	}))
+	expect(extractIds(await findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
+		from: {node: leftDeepFolder, link: shortLinkToLeft},
+		to: {node: leftDeepDeepFolder, link: shortLinkToLeft},
+		length: 1
+	}))
+	expect(extractIds(await findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
+		from: {node: leftDeepFolder, link: longLinkToLeft},
+		to: {node: leftDeepDeepFolder, link: longLinkToLeft},
+		length: 1
+	}))
+	expect(leftFileUnrenderSpy).toBeCalledTimes(4)
+})
+
+function extractIds(commonRoute: {
+	from: {node: AbstractNodeWidget, link: Link}
+	to: {node: AbstractNodeWidget, link: Link}
+	length: number
+} | undefined): {
+	from: {nodeId: string, linkId: string}
+	to: {nodeId: string, linkId: string}
+	length: number
+} | undefined {
+	if (!commonRoute) {
+		return undefined
+	}
+	return {
+		from: {nodeId: commonRoute.from.node.getId(), linkId: commonRoute.from.link.getId()},
+		to: {nodeId: commonRoute.to.node.getId(), linkId: commonRoute.to.link.getId()},
+		length: commonRoute.length
+	}
+}
+
+async function findLongestCommonRoute(link: Link): Promise<{
+	from: {node: AbstractNodeWidget, link: Link}
+	to: {node: AbstractNodeWidget, link: Link}
+	length: number
+} | undefined> {
+	const commonRoutes: {
+		from: {node: AbstractNodeWidget, link: Link}
+		to: {node: AbstractNodeWidget, link: Link}
+		length: number
+	}[] = []
+	await linkBundler.findAndExtendCommonRoutes(link, 'from', commonRoutes)
+	await linkBundler.findAndExtendCommonRoutes(link, 'to', commonRoutes)
+	return linkBundler.getLongestCommonRoute(commonRoutes)
+}
+
 async function initServicesWithMocks(): Promise<{
 	renderManager: MockProxy<RenderManager>
 	boxManager: MockProxy<BoxManager>
