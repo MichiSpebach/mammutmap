@@ -123,6 +123,9 @@ export async function findAndExtendCommonRoutes(
 				continue
 			}
 			const commonRoute = commonRoutes.find(commonRoute => {
+				if (commonRoute[end].link !== borderingLink) {
+					return false
+				}
 				const from: LinkEnd = commonRoute[end].link.from
 				const to: LinkEnd = commonRoute[end].link.to
 				return from.getManagingBox() === waypoint.node.getParent()
@@ -131,8 +134,11 @@ export async function findAndExtendCommonRoutes(
 					|| to.isBoxInPath(waypoint.node)
 			})
 			if (commonRoute) {
-				commonRoute[end] = {link: borderingLink, node: waypoint.node}
-				commonRoute.length++
+				commonRoutes.push({
+					...commonRoute,
+					[end]: {link: borderingLink, node: waypoint.node},
+					length: commonRoute.length + 1
+				})
 			} else {
 				commonRoutes.push({
 					from: {link: borderingLink, node: waypoint.node},
@@ -145,7 +151,8 @@ export async function findAndExtendCommonRoutes(
 	return {deepestBoxInPath: waypoint.watcher}
 }
 
-function getLongestCommonRoute(commonRoutes: {
+/** exported for unit tests */
+export function getLongestCommonRoute(commonRoutes: {
 	from: {node: AbstractNodeWidget, link: Link}
 	to: {node: AbstractNodeWidget, link: Link}
 	length: number

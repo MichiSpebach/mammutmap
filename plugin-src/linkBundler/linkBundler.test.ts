@@ -12,6 +12,7 @@ import * as coreUtil from '../../dist/core/util/util'
 import { RenderManager } from '../../dist/core/RenderManager'
 import { BoxLinks } from '../../dist/core/box/BoxLinks'
 import { Link } from '../../dist/core/link/Link'
+import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
 
 test('bundleLink, nothing to bundle', async () => {
 	await initServicesWithMocks()
@@ -20,7 +21,7 @@ test('bundleLink, nothing to bundle', async () => {
 	const fileA = boxFactory.fileOf({idOrData: 'fileA', parent: root, addToParent: true, rendered: true})
 	const fileB = boxFactory.fileOf({idOrData: 'fileB', parent: root, addToParent: true, rendered: true})
 	const link = await root.links.add({from: fileA, to: fileB, save: true})
-	
+
 	await linkBundler.bundleLink(link)
 
 	expect(link.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['fileA'])
@@ -41,7 +42,6 @@ test('bundleLink, insert one node', async () => {
 	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
 	
 	await linkBundler.bundleLink(topLink)
-	//await linkBundler.findAndExtendCommonRoutes(link as any, 'from', [])
 
 	const topLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderTopFile, rightFile)!
 	expect(topLinkRoute.length).toBe(2)
@@ -90,6 +90,35 @@ test('bundleLink, insert two nodes', async () => {
 	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
 	expect(console.warn).toBeCalledTimes(2)
 	consoleWarn.mockRestore()
+})
+
+test('findAndExtendCommonRoutes', async () => {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
+	const rightTopFile = boxFactory.fileOf({idOrData: 'rightTopFile', parent: root, addToParent: true, rendered: true})
+	const rightBottomFile = boxFactory.fileOf({idOrData: 'rightBottomFile', parent: root, addToParent: true, rendered: true})
+
+	const topLink: Link = await root.links.add({from: leftFolderTopFile, to: rightTopFile, save: true})
+	const unaffectedBottomLink: Link = await root.links.add({from: leftFolder, to: rightBottomFile, save: true})
+	const bottomLeftToTopRightLink: Link = await root.links.add({from: leftFolder, to: rightTopFile, save: true})
+
+	const commonRoutes: {
+		from: {node: AbstractNodeWidget, link: Link}
+		to: {node: AbstractNodeWidget, link: Link}
+		length: number
+	}[] = []
+	await linkBundler.findAndExtendCommonRoutes(topLink, 'from', commonRoutes)
+	await linkBundler.findAndExtendCommonRoutes(topLink, 'to', commonRoutes)
+	const longestCommonRoute = linkBundler.getLongestCommonRoute(commonRoutes)
+
+	expect(longestCommonRoute).toEqual({
+		from: {node: leftFolder, link: bottomLeftToTopRightLink},
+		to: {node: rightTopFile, link: bottomLeftToTopRightLink},
+		length: 1
+	})
 })
 
 async function initServicesWithMocks(): Promise<{
