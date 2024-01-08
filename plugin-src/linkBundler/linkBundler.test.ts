@@ -92,6 +92,38 @@ test('bundleLink, insert two nodes', async () => {
 	consoleWarn.mockRestore()
 })
 
+test('bundleLink, insert two nodes, both inserts in from part', async () => {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftInnerFolder = boxFactory.folderOf({idOrData: 'leftInnerFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFile = boxFactory.fileOf({idOrData: 'leftFile', parent: leftInnerFolder, addToParent: true, rendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+
+	const longLink: Link = await root.links.add({from: leftFile, to: rightFile, save: true})
+	const shortLink: Link = await root.links.add({from: leftInnerFolder, to: root, save: true})
+	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
+
+	await linkBundler.bundleLink(longLink)
+	
+	const longRoute: Link[] = BoxLinks.findLinkRoute(leftFile, rightFile)!
+	expect(longRoute.length).toBe(3)
+	expect(longRoute[2].getId()).toBe(longLink.getId())
+
+	let shortRoute: Link[] = BoxLinks.findLinkRoute(leftInnerFolder, root)!
+	expect(shortRoute.length).toBe(2) // two because start link is not in there because following link also starts from leftInnerFolder
+	const shortRouteStartLink: Link = leftInnerFolder.links.getLinks().find(link => link !== longRoute[0])!
+	expect(shortRouteStartLink).toBeDefined()
+	shortRoute = [shortRouteStartLink, ...shortRoute]
+	expect(shortRoute[2].getId()).toBe(shortLink.getId())
+
+	expect(longRoute[1].getId()).toBe(shortRoute[1].getId())
+	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
+	expect(console.warn).toBeCalledTimes(2)
+	consoleWarn.mockRestore()
+})
+
 test('findAndExtendCommonRoutes', async () => {
 	await initServicesWithMocks()
 

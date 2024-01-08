@@ -183,7 +183,14 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 	let fromLink: Link = link
 	let toLink: Link = link
 	if (bundleFromPart && bundleToPart) {
-		toLink = await link.getManagingBoxLinks().addCopy(link)
+		if (link.to.isBoxInPath(commonRoute.to.node)) {
+			toLink = await link.getManagingBoxLinks().addCopy(link)
+		} else if (link.from.isBoxInPath(commonRoute.from.node)) {
+			fromLink = await link.getManagingBoxLinks().addCopy(link)
+		} else {
+			console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) failed to decide weather commonRoute.from or commonRoute.to is heavier`)
+			return
+		}
 	}
 	if (bundleFromPart) {
 		await bundleLinkEndIntoCommonRoutePart(fromLink.to, 'from', commonRoute.from)
@@ -242,7 +249,11 @@ async function getLinkEndNode(link: Link, end: 'from'|'to'): Promise<{
 	node: Box | NodeWidget;
 	watcher: BoxWatcher;
 }> {
-	return link.getManagingBox().getDescendantByPathAndRenderIfNecessary(link.getData()[end].path.map(wayPoint => {
+	const linkEndPath: WayPointData[] = link.getData()[end].path
+	if (linkEndPath.length === 1 && linkEndPath[0].boxId === link.getManagingBox().getId()) {
+		return {node: link.getManagingBox(), watcher: await BoxWatcher.newAndWatch(link.getManagingBox())}
+	}
+	return link.getManagingBox().getDescendantByPathAndRenderIfNecessary(linkEndPath.map(wayPoint => {
 		return {id: wayPoint.boxId}
 	}))
 }

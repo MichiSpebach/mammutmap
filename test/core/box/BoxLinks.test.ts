@@ -7,6 +7,7 @@ import { NodeWidget } from '../../../src/core/node/NodeWidget'
 import { NodeData } from '../../../src/core/mapData/NodeData'
 import { FolderBox } from '../../../src/core/box/FolderBox'
 import * as testUtil from '../../testUtil'
+import { ClientPosition } from '../../../src/core/shape/ClientPosition'
 
 test('add link between Boxes', async () => {
 	testUtil.initGeneralServicesWithMocks()
@@ -56,6 +57,36 @@ test('add link between LinkNodes', async () => {
 	expect(link.getData().to.path.map(wayPoint => wayPoint.boxId)).toEqual(['to', toNode.getId()])
 	expect(link.from.getRenderedPathWithoutManagingBox().map(node => node.getId())).toEqual(['from', fromNode.getId()])
 	expect(link.to.getRenderedPathWithoutManagingBox().map(node => node.getId())).toEqual(['to', toNode.getId()])
+})
+
+test('insertNodeIntoLink from part is heavier', async () => {
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const folder = boxFactory.folderOf({idOrData: 'folder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const deepFile = boxFactory.fileOf({idOrData: 'deepFile', parent: folder, addToParent: true, rendered: true})
+	const link: Link = await root.links.add({from: root, to: deepFile, save: true})
+
+	const {insertedNode, addedLink} = await link.getManagingBoxLinks().insertNodeIntoLink(link, folder, new ClientPosition(0, 0))
+	
+	expect(link.getManagingBox()).toBe(root)
+	expect(addedLink.getManagingBox()).toBe(folder)
+	expect(insertedNode.getParent()).toBe(folder)
+	expect(insertedNode.borderingLinks.getIngoing()).toEqual([link])
+	expect(insertedNode.borderingLinks.getOutgoing()).toEqual([addedLink])
+})
+
+test('insertNodeIntoLink to part is heavier', async () => {
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const folder = boxFactory.folderOf({idOrData: 'folder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const deepFile = boxFactory.fileOf({idOrData: 'deepFile', parent: folder, addToParent: true, rendered: true})
+	const link: Link = await root.links.add({from: deepFile, to: root, save: true})
+
+	const {insertedNode, addedLink} = await link.getManagingBoxLinks().insertNodeIntoLink(link, folder, new ClientPosition(0, 0))
+	
+	expect(link.getManagingBox()).toBe(root)
+	expect(addedLink.getManagingBox()).toBe(folder)
+	expect(insertedNode.getParent()).toBe(folder)
+	expect(insertedNode.borderingLinks.getOutgoing()).toEqual([link])
+	expect(insertedNode.borderingLinks.getIngoing()).toEqual([addedLink])
 })
 
 test('findLinkRoute no links exist', () => {

@@ -12,11 +12,11 @@ import { WayPointData } from '../mapData/WayPointData'
 import { LinkEndData } from '../mapData/LinkEndData'
 import { NodeWidget } from '../node/NodeWidget'
 import { Shape } from '../shape/Shape'
-import { FolderBox } from '../box/FolderBox'
 import * as linkUtil from './linkUtil'
 import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { log } from '../logService'
+import { AbstractNodeWidget } from '../AbstractNodeWidget'
 
 export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly id: string
@@ -65,7 +65,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return firstNodeInPath.isBeingRendered()
   }
 
-  public isBoxInPath(box: Box|NodeWidget): boolean {
+  public isBoxInPath(box: AbstractNodeWidget): boolean {
     return this.data.path.some(wayPoint => wayPoint.boxId === box.getId())
   }
 
