@@ -92,7 +92,15 @@ test('bundleLink, insert two nodes', async () => {
 	consoleWarn.mockRestore()
 })
 
-test('bundleLink, insert two nodes, both inserts in from part', async () => {
+test('bundleLink, insert two nodes, both inserts in from part, bundling longLink', async () => {
+	await testBundleLinkBothInsertsInFromPart('longLink')
+})
+
+test('bundleLink, insert two nodes, both inserts in from part, bundling shortLink', async () => {
+	await testBundleLinkBothInsertsInFromPart('shortLink')
+})
+
+async function testBundleLinkBothInsertsInFromPart(linkToBundle: 'longLink'|'shortLink'): Promise<void> {
 	await initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -105,7 +113,7 @@ test('bundleLink, insert two nodes, both inserts in from part', async () => {
 	const shortLink: Link = await root.links.add({from: leftInnerFolder, to: root, save: true})
 	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
 
-	await linkBundler.bundleLink(longLink)
+	await linkBundler.bundleLink({longLink, shortLink}[linkToBundle])
 	
 	const longRoute: Link[] = BoxLinks.findLinkRoute(leftFile, rightFile)!
 	expect(longRoute.length).toBe(3)
@@ -122,7 +130,7 @@ test('bundleLink, insert two nodes, both inserts in from part', async () => {
 	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
 	expect(console.warn).toBeCalledTimes(2)
 	consoleWarn.mockRestore()
-})
+}
 
 test('findAndExtendCommonRoutes', async () => {
 	await initServicesWithMocks()
