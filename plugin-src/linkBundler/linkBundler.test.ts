@@ -119,11 +119,8 @@ async function testBundleLinkBothInsertsInFromPart(linkToBundle: 'longLink'|'sho
 	expect(longRoute.length).toBe(3)
 	expect(longRoute[2].getId()).toBe(longLink.getId())
 
-	let shortRoute: Link[] = BoxLinks.findLinkRoute(leftInnerFolder, root)!
-	expect(shortRoute.length).toBe(2) // two because start link is not in there because following link also starts from leftInnerFolder
-	const shortRouteStartLink: Link = leftInnerFolder.links.getLinks().find(link => link !== longRoute[0])!
-	expect(shortRouteStartLink).toBeDefined()
-	shortRoute = [shortRouteStartLink, ...shortRoute]
+	const shortRoute: Link[] = BoxLinks.findLinkRoute(leftInnerFolder, root)!
+	expect(shortRoute.length).toBe(3)
 	expect(shortRoute[2].getId()).toBe(shortLink.getId())
 
 	expect(longRoute[1].getId()).toBe(shortRoute[1].getId())
@@ -161,11 +158,8 @@ async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'short
 	expect(longRoute.length).toBe(3)
 	expect(longRoute[0].getId()).toBe(longLink.getId())
 
-	let shortRoute: Link[] = BoxLinks.findLinkRoute(root, leftInnerFolder)!
-	expect(shortRoute.length).toBe(2) // two because start link is not in there because following link also starts from leftInnerFolder
-	const shortRouteStartLink: Link = leftInnerFolder.links.getLinks().find(link => link !== longRoute[0])!
-	expect(shortRouteStartLink).toBeDefined()
-	shortRoute = [shortRouteStartLink, ...shortRoute]
+	const shortRoute: Link[] = BoxLinks.findLinkRoute(root, leftInnerFolder)!
+	expect(shortRoute.length).toBe(3)
 	expect(shortRoute[0].getId()).toBe(shortLink.getId())
 
 	expect(longRoute[1].getId()).toBe(shortRoute[1].getId())
