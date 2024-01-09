@@ -3,6 +3,7 @@ import { isSubPathOrEqual } from './pathUtil'
 
 let isInitialized: boolean = false
 let currentFilePaths: string[] = []
+let lastFilePaths: string[] = []
 let forceRestyle: boolean = false
 
 function initializeBoxHighlighting(): void {
@@ -14,7 +15,7 @@ function initializeBoxHighlighting(): void {
     Box.prototype.render = async function () {
         const isRendered: boolean = this.isRendered() // store if rendered, because renderBackup.call sets it true
         await renderBackup.call(this)
-        if (forceRestyle) {
+        if (shouldBoxBeReset(this)) {
             await removeCurrentHighlighting(this)
         }
         if (shouldBoxBeHighlighted(this, isRendered)) {
@@ -28,12 +29,20 @@ export async function highlightBoxes(filePaths: string[]): Promise<void> {
     initializeBoxHighlighting()
     forceRestyle = true
     await getRootFolder().render()
-    forceRestyle = true
+    forceRestyle = false
+    lastFilePaths = currentFilePaths
 }
 
 function shouldBoxBeHighlighted(box: Box, isRendered: boolean): boolean {
-    return (!isRendered || forceRestyle) &&
-        (currentFilePaths.find(path => isSubPathOrEqual(path, box.getSrcPath())) != undefined)
+    return (!isRendered || forceRestyle) && isBoxPathInPaths(box, currentFilePaths)
+}
+
+function shouldBoxBeReset(box: Box): boolean {
+    return forceRestyle && isBoxPathInPaths(box, lastFilePaths)
+}
+
+function isBoxPathInPaths(box: Box, paths: string[]): boolean {
+    return paths.find(path => isSubPathOrEqual(path, box.getSrcPath())) != undefined
 }
 
 async function highlightBox(box: Box): Promise<void> {
