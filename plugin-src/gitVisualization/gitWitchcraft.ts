@@ -3,8 +3,6 @@ import { ChangedFile, Commit, GitClient } from './GitClient'
 import { highlightBoxes } from './boxHighlighting'
 
 export async function visualizeChanges(from: string, to: string, isZoomingEnabled: boolean): Promise<void> {
-    let forceRestyle: boolean = true
-
     const rootFolder: RootFolderBox = getRootFolder()
     const rootFolderPath: string = rootFolder.getSrcPath()
 
@@ -18,12 +16,10 @@ export async function visualizeChanges(from: string, to: string, isZoomingEnable
     const absoluteFilePaths: string[] = changedFiles.map(file =>
         coreUtil.concatPaths(rootFolderPath, file.path))
 
-    await highlightBoxes(absoluteFilePaths, forceRestyle)
+    await highlightBoxes(absoluteFilePaths)
     if (isZoomingEnabled) {
         await zoomToChanges(absoluteFilePaths)
     }
-    await rootFolder.render()
-    forceRestyle = false
 }
 
 async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {

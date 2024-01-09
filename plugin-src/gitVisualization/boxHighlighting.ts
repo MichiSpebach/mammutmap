@@ -1,21 +1,39 @@
-import { Box, renderManager } from '../../dist/pluginFacade'
+import { Box, getRootFolder, renderManager } from '../../dist/pluginFacade'
 import { isSubPathOrEqual } from './pathUtil'
 
-export async function highlightBoxes(filePaths: string[], forceRestyle: boolean): Promise<void> {
+let isInitialized: boolean = false
+let currentFilePaths: string[] = []
+let forceRestyle: boolean = false
+
+function initializeBoxHighlighting(): void {
+    if (isInitialized) {
+        return
+    }
+    isInitialized = true
     const renderBackup = Box.prototype.render
     Box.prototype.render = async function () {
+        const isRendered: boolean = this.isRendered() // store if rendered, because renderBackup.call sets it true
         await renderBackup.call(this)
-        removeCurrentHighlighting(this)
-        if (shouldBoxBeHighlighted(this, filePaths, forceRestyle)) {
-            highlightBox(this)
+        if (forceRestyle) {
+            await removeCurrentHighlighting(this)
+        }
+        if (shouldBoxBeHighlighted(this, isRendered)) {
+            await highlightBox(this)
         }
     }
 }
 
-function shouldBoxBeHighlighted(box: Box, filePaths: string[], forceRestyle: boolean): boolean {
-    const isRendered: boolean = box.isRendered()
+export async function highlightBoxes(filePaths: string[]): Promise<void> {
+    currentFilePaths = filePaths
+    initializeBoxHighlighting()
+    forceRestyle = true
+    await getRootFolder().render()
+    forceRestyle = true
+}
+
+function shouldBoxBeHighlighted(box: Box, isRendered: boolean): boolean {
     return (!isRendered || forceRestyle) &&
-        (filePaths.find(path => isSubPathOrEqual(path, box.getSrcPath())) != undefined)
+        (currentFilePaths.find(path => isSubPathOrEqual(path, box.getSrcPath())) != undefined)
 }
 
 async function highlightBox(box: Box): Promise<void> {
