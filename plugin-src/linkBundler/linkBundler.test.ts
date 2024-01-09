@@ -132,6 +132,48 @@ async function testBundleLinkBothInsertsInFromPart(linkToBundle: 'longLink'|'sho
 	consoleWarn.mockRestore()
 }
 
+test('bundleLink, insert two nodes, both inserts in to part, bundling longLink', async () => {
+	await testBundleLinkBothInsertsInToPart('longLink')
+})
+
+test('bundleLink, insert two nodes, both inserts in to part, bundling shortLink', async () => {
+	await testBundleLinkBothInsertsInToPart('shortLink')
+})
+
+async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'shortLink'): Promise<void> {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftInnerFolder = boxFactory.folderOf({idOrData: 'leftInnerFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFile = boxFactory.fileOf({idOrData: 'leftFile', parent: leftInnerFolder, addToParent: true, rendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+
+	const longLink: Link = await root.links.add({from: rightFile, to: leftFile, save: true})
+	const shortLink: Link = await root.links.add({from: root, to: leftInnerFolder, save: true})
+	let shortRouteTest: Link[] = BoxLinks.findLinkRoute(root, leftInnerFolder)!
+	expect(shortRouteTest.length).toBe(1) // two because start link is not in there because following link also starts from leftInnerFolder
+	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
+
+	await linkBundler.bundleLink({longLink, shortLink}[linkToBundle])
+	
+	const longRoute: Link[] = BoxLinks.findLinkRoute(rightFile, leftFile)!
+	expect(longRoute.length).toBe(3)
+	expect(longRoute[0].getId()).toBe(longLink.getId())
+
+	let shortRoute: Link[] = BoxLinks.findLinkRoute(root, leftInnerFolder)!
+	expect(shortRoute.length).toBe(2) // two because start link is not in there because following link also starts from leftInnerFolder
+	const shortRouteStartLink: Link = leftInnerFolder.links.getLinks().find(link => link !== longRoute[0])!
+	expect(shortRouteStartLink).toBeDefined()
+	shortRoute = [shortRouteStartLink, ...shortRoute]
+	expect(shortRoute[0].getId()).toBe(shortLink.getId())
+
+	expect(longRoute[1].getId()).toBe(shortRoute[1].getId())
+	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
+	expect(console.warn).toBeCalledTimes(2)
+	consoleWarn.mockRestore()
+}
+
 test('findAndExtendCommonRoutes', async () => {
 	await initServicesWithMocks()
 

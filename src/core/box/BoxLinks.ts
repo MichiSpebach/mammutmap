@@ -235,12 +235,18 @@ export class BoxLinks extends Widget {
       })
     }
 
+    /** TODO: use implementation of linkBundler.findAndExtendCommonRoutes(..), is directed and more efficient */
     public static findLinkRoute(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxHops: number} = {maxHops: 4}): Link[]|undefined {
       const directed: boolean = false
       if (options.maxHops < 0) {
         return undefined
       }
-      for (const link of from.borderingLinks.getOutgoing()) {
+
+      let links = from.borderingLinks.getOutgoing()
+      if (from instanceof Box) {
+        links = from.links.getManagedStartingLinks().concat(links) // has only be done in first iteration
+      }
+      for (const link of links) {
         const node: AbstractNodeWidget = link.to.getDeepestRenderedWayPoint().linkable // TODO? implement solution that always works and reactivate warning below
         if (node.getId() === to.getId()) {
           return [link]
@@ -261,6 +267,26 @@ export class BoxLinks extends Widget {
         }
       }
       return undefined
+    }
+
+    private getManagedStartingLinks(): Link[] {
+      return this.getLinks().filter(link => {
+        const fromPath: WayPointData[] = link.getData().from.path
+        const fromEnd: WayPointData|undefined = fromPath.at(0)
+        if (!fromEnd) {
+          log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) fromEnd of link "${link.describe()}" is undefined.`)
+          return false
+        }
+
+        if (!(fromEnd.boxId === this.referenceBox.getId())) {
+          return false
+        }
+        if (fromPath.length !== 1) {
+          log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) fromPath of link "${link.describe()}" is not required to start with managingBox.`)
+          return false
+        }
+        return true
+      })
     }
 
     public getLinks(): Link[] {

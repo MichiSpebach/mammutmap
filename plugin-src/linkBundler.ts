@@ -193,7 +193,10 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 		}
 	}
 	if (bundleFromPart) {
-		await bundleLinkEndIntoCommonRoutePart(fromLink.to, 'from', commonRoute.from)
+		const insertion = await bundleLinkEndIntoCommonRoutePart(fromLink.to, 'from', commonRoute.from)
+		if (insertion && insertion.addedLink.getData().from.path.at(-1)?.boxId === insertion.insertedNode.getId()) {
+			commonRoute.to.link = insertion.addedLink
+		}
 	}
 	if (bundleToPart) {
 		await bundleLinkEndIntoCommonRoutePart(toLink.from, 'to', commonRoute.to)
@@ -203,23 +206,28 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 	}
 }
 
-async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'to', commonRoutePart: {node: AbstractNodeWidget, link: Link}): Promise<void> {
+async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'to', commonRoutePart: {node: AbstractNodeWidget, link: Link}): Promise<{
+	insertedNode: NodeWidget, addedLink: Link
+} | undefined> {
 	if (!(commonRoutePart.node instanceof Box)) {
 		console.warn(`commonRoutePart.node is instanceof LinkNodeWidget, case not implemented yet`) // TODO: this can normally happen, this means from is equal and link that is bundled can be removed
 		return
 	}
 	const commonRouteEnd = await getLinkEndNode(commonRoutePart.link, end)
 
+	let insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
 	let bundleFromLinkNode: NodeWidget
 	if (commonRouteEnd.node instanceof NodeWidget && commonRouteEnd.node.getParent() === commonRoutePart.node) {
 		bundleFromLinkNode = commonRouteEnd.node
 	} else {
 		const linkManagingBoxBefore: Box = commonRoutePart.link.getManagingBox()
-		bundleFromLinkNode = (await commonRoutePart.link.getManagingBoxLinks().insertNodeIntoLink(
+		
+		insertion = (await commonRoutePart.link.getManagingBoxLinks().insertNodeIntoLink(
 			commonRoutePart.link,
 			commonRoutePart.node,
 			await calculateBundleNodePosition(linkEnd, {node: commonRoutePart.node, link: commonRoutePart.link})
-		)).insertedNode
+		))
+		bundleFromLinkNode = insertion.insertedNode
 		if (linkManagingBoxBefore !== commonRoutePart.link.getManagingBox()) {
 			console.warn(`linkBundler.bundleLinkEndIntoCommonRoutePart(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
 		}
@@ -227,6 +235,7 @@ async function bundleLinkEndIntoCommonRoutePart(linkEnd: LinkEnd, end: 'from'|'t
 	let bundleLinkNodePosition: ClientPosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
 	await linkEnd.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition}) // TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away
 	await commonRouteEnd.watcher.unwatch()
+	return insertion
 }
 
 async function calculateBundleNodePosition(linkEnd: LinkEnd, commonRoutePart: {node: Box, link: Link}): Promise<ClientPosition> {

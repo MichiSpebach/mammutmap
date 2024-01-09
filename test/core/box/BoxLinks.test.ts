@@ -180,3 +180,26 @@ test('findLinkRoute file between but no LinkNode', async () => {
 	const link2: Link = await root.links.add({from: fileBetween, to, save: true})
 	expect(BoxLinks.findLinkRoute(fromInner, to)?.map(link => link.getId())).toEqual(undefined)
 })
+
+test('findLinkRoute starting from root', async () => {
+	testUtil.initGeneralServicesWithMocks()
+
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const to: FileBox = boxFactory.fileOf({idOrData: 'to', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+
+	const link: Link = await root.links.add({from: root, to, save: true})
+
+	expect(BoxLinks.findLinkRoute(root, to)?.map(link => link.getId())).toEqual([link.getId()])
+})
+
+test('findLinkRoute starting from root, link is managed by root but not starting at root', async () => {
+	testUtil.initGeneralServicesWithMocks()
+
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const from: FileBox = boxFactory.fileOf({idOrData: 'from', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const to: FileBox = boxFactory.fileOf({idOrData: 'to', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+
+	const link: Link = await root.links.add({from, to, save: true})
+
+	expect(BoxLinks.findLinkRoute(root, to)?.map(link => link.getId())).toEqual(undefined)
+})
