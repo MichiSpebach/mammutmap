@@ -122,30 +122,27 @@ export async function findAndExtendCommonRoutes(
 			if (borderingLink === link) {
 				continue
 			}
-			const commonRoute = commonRoutes.find(commonRoute => {
+			let commonRoute = commonRoutes.find(commonRoute => {
 				if (commonRoute[end].link !== borderingLink) {
 					return false
 				}
-				const from: LinkEnd = commonRoute[end].link.from
-				const to: LinkEnd = commonRoute[end].link.to
-				return from.getManagingBox() === waypoint.node.getParent()
-					|| to.getManagingBox() === waypoint.node.getParent()
-					|| from.isBoxInPath(waypoint.node)
-					|| to.isBoxInPath(waypoint.node)
+				const commonFrom: LinkEnd = commonRoute[end].link.from
+				const commonTo: LinkEnd = commonRoute[end].link.to
+				return commonFrom.isBoxInPath(waypoint.node)
+					|| commonTo.isBoxInPath(waypoint.node)
 			})
-			if (commonRoute) {
-				commonRoutes.push({
-					...commonRoute,
-					[end]: {link: borderingLink, node: waypoint.node},
-					length: commonRoute.length + 1
-				})
-			} else {
-				commonRoutes.push({
+			if (!commonRoute) {
+				commonRoute = {
 					from: {link: borderingLink, node: waypoint.node},
 					to: {link: borderingLink, node: waypoint.node},
-					length: 0
-				})
+					length: -1
+				}
 			}
+			commonRoutes.unshift({
+				...commonRoute,
+				[end]: {link: borderingLink, node: waypoint.node},
+				length: commonRoute.length + 1
+			})
 		}
 	}
 	return {deepestBoxInPath: waypoint.watcher}

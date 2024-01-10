@@ -198,6 +198,8 @@ test('findAndExtendCommonRoutes', async () => {
 })
 
 test('findAndExtendCommonRoutes, different managingBoxes of links', async () => {
+	await initServicesWithMocks()
+
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
@@ -231,6 +233,46 @@ test('findAndExtendCommonRoutes, different managingBoxes of links', async () => 
 		from: {node: leftDeepFolder, link: longLinkToLeft},
 		to: {node: leftDeepDeepFolder, link: longLinkToLeft},
 		length: 1
+	}))
+	expect(leftFileUnrenderSpy).toBeCalledTimes(4)
+})
+
+test('findAndExtendCommonRoutes, longer commonRoute', async () => {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const leftDeepDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepDeepFolder', parent: leftDeepFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const leftDeepDeepFile = boxFactory.fileOf({idOrData: 'leftDeepDeepFile', parent: leftDeepDeepFolder, addToParent: true, rendered: true})
+	const leftFileUnrenderSpy = jest.spyOn(leftDeepDeepFile, 'unrenderIfPossible').mockReturnValue(Promise.resolve({rendered: true})) // leads otherwise to undefined error
+	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	rightFile.body.render = () => Promise.resolve() // leads otherwise to undefined error
+
+	const longLinkToRight: Link = await root.links.add({from: leftDeepDeepFile, to: rightFile, save: true})
+	const shortLinkToRight: Link = await root.links.add({from: leftDeepDeepFolder, to: root, save: true})
+	const longLinkToLeft: Link = await root.links.add({from: rightFile, to: leftDeepDeepFile, save: true})
+	const shortLinkToLeft: Link = await root.links.add({from: root, to: leftDeepDeepFolder, save: true})
+
+	expect(extractIds(await findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
+		from: {node: leftDeepDeepFolder, link: shortLinkToRight},
+		to: {node: leftFolder, link: shortLinkToRight},
+		length: 2
+	}))
+	expect(extractIds(await findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
+		from: {node: leftDeepDeepFolder, link: longLinkToRight},
+		to: {node: leftFolder, link: longLinkToRight},
+		length: 2
+	}))
+	expect(extractIds(await findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
+		from: {node: leftFolder, link: shortLinkToLeft},
+		to: {node: leftDeepDeepFolder, link: shortLinkToLeft},
+		length: 2
+	}))
+	expect(extractIds(await findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
+		from: {node: leftFolder, link: longLinkToLeft},
+		to: {node: leftDeepDeepFolder, link: longLinkToLeft},
+		length: 2
 	}))
 	expect(leftFileUnrenderSpy).toBeCalledTimes(4)
 })
