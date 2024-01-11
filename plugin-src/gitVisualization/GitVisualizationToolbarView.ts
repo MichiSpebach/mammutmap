@@ -12,7 +12,10 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         public readonly id: string
     ) {
         super()
-        onMapLoaded.subscribe(async () => await this.render())
+        onMapLoaded.subscribe(async () => {
+            this.selectedCommits = []
+            await this.render()
+        })
     }
 
     public getName(): string {
