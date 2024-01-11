@@ -277,6 +277,10 @@ export class Map {
   }
 
   public async zoomToFitBoxes(boxes: Box[], options?: {transitionDurationInMS?: number}): Promise<void> {
+    if (boxes.length < 1) {
+      log.warning('boxes are empty')
+      return
+    }
     const rectsToFit: LocalRect[] = boxes.map(box => this.rootFolder.transform.innerRectRecursiveToLocal(box, new LocalRect(0, 0, 100, 100)))
     return this.rootFolder.site.zoomToFitRect(LocalRect.createEnclosing(rectsToFit), options)
   }
