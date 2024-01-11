@@ -14,6 +14,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         super()
         onMapLoaded.subscribe(async () => {
             this.selectedCommits = []
+            this.isZoomingEnabled = true
             await this.render()
         })
     }
