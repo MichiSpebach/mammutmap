@@ -17,8 +17,12 @@ export async function visualizeChangesByCommits(commits: Commit[], isZoomingEnab
     const rootFolderPath: string = rootFolder.getSrcPath()
 
     const gitClient = new GitClient(rootFolderPath)
-    const refs: string[] = commits.map(commit => `${commit.hash}`)
-    if (refs.length === 1) {
+    let refs: string[] = commits.map(commit => `${commit.hash}`)
+    if (refs.length > 1) {
+        const lastRef = refs.pop()
+        const firstRef = refs[0]
+        refs = [firstRef, `${lastRef}^`]
+    } else if (refs.length === 1) {
         refs.push(`${refs[0]}^`)
     }
     const changedFiles: ChangedFile[] = await gitClient.getChangedFiles(refs)

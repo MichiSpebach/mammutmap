@@ -77,6 +77,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                                     this.selectedCommits.filter(selectedCommit =>
                                         selectedCommit !== commit)
                             }
+                            this.selectedCommits.sort(GitClient.compareCommitsByDate)
                             visualizeChangesByCommits(this.selectedCommits, this.isZoomingEnabled)
                         }
                     },

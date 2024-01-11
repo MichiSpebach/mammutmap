@@ -1,9 +1,10 @@
 import { DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit } from 'simple-git'
 
 export type Commit = {
-    changedFiles: ChangedFile[],
+    changedFiles: ChangedFile[]
     message?: string
     hash: string
+    date: string
 }
 
 export type ChangedFile = {
@@ -47,5 +48,11 @@ export class GitClient {
         diff.split('\n').filter(nonEmptyFilePath => nonEmptyFilePath).map(
             path => changedFiles.push({ path: path }))
         return changedFiles
+    }
+
+    public static compareCommitsByDate(commitOne: Commit, commitTwo: Commit) {
+        if (commitOne.date < commitTwo.date) return 1
+        if (commitOne.date > commitTwo.date) return -1
+        return 0
     }
 }
