@@ -14,7 +14,6 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         super()
         onMapLoaded.subscribe(async () => {
             this.selectedCommits = []
-            this.isZoomingEnabled = true
             await this.render()
         })
     }
@@ -51,7 +50,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             this.shapeInputField('git-ref-input-from', 'HEAD^', 'Ref from: '),
             this.shapeInputField('git-ref-input-to', 'HEAD', 'Ref to: '),
             this.shapeButton(),
-            this.shapeEnableZoomToggle(),
+            this.shapeZoomToggle(),
             await this.shapeCommits(map)
         ]
     }
@@ -125,7 +124,9 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         }
     }
 
-    private shapeEnableZoomToggle(): RenderElement {
+    private shapeZoomToggle(): RenderElement {
+        const checkedOrNot: string = this.isZoomingEnabled ? ' checked' : ''
+        const checkbox: string = '<input type="checkbox" ' + checkedOrNot + '>'
         return {
             type: 'div',
             style: { display: 'block' },
@@ -137,7 +138,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                 {
                     type: 'div',
                     style: { display: 'inline' },
-                    innerHTML: '<input type="checkbox" checked>',
+                    innerHTML: checkbox,
                     onchangeChecked: (value: boolean) => {
                         this.isZoomingEnabled = value
                     }
