@@ -47,8 +47,13 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             return map.message
         }
         return [
-            this.shapeInputField('git-ref-input-from', 'HEAD^', 'Ref from: '),
-            this.shapeInputField('git-ref-input-to', 'HEAD', 'Ref to: '),
+            {
+                type: 'table',
+                children: [
+                    this.shapeInputField('git-ref-input-from', 'HEAD^', 'Ref from: '),
+                    this.shapeInputField('git-ref-input-to', 'HEAD', 'Ref to: ')
+                ]
+            },
             this.shapeButton(),
             this.shapeZoomToggle(),
             await this.shapeCommits(map)
@@ -125,17 +130,19 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
 
     private shapeInputField(id: string, value: string, label: string): RenderElement {
         return {
-            type: 'div',
-            style: { display: 'block' },
+            type: 'tr',
             children: [
                 {
-                    type: 'span',
+                    type: 'td',
                     innerHTML: label
                 },
                 {
-                    type: 'input',
-                    value: value,
-                    id: id
+                    type: 'td',
+                    children: [{
+                        type: 'input',
+                        value: value,
+                        id: id
+                    }]
                 }
             ]
         }
