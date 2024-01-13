@@ -73,7 +73,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         return {
             type: 'div',
             children: [{
-                type: 'div',
+                type: 'table',
                 id: 'commit-list',
                 children: toggles
             }, moreCommitsButton]
@@ -83,12 +83,11 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     private commitsToToggles(commits: Commit[]): RenderElement[] {
         return commits.map(commit => {
             return {
-                type: 'div',
+                type: 'tr',
                 id: commit.hash,
-                style: { display: 'block' },
                 children: [
                     {
-                        type: 'div',
+                        type: 'td',
                         style: { display: 'inline' },
                         innerHTML: '<input type="checkbox">',
                         onchangeChecked: (value: boolean) => {
@@ -104,7 +103,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                         }
                     },
                     {
-                        type: 'span',
+                        type: 'td',
                         innerHTML: commit.message
                     }
                 ]
