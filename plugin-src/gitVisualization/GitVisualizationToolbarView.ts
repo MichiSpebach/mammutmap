@@ -87,6 +87,10 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
 
     private commitsToToggles(commits: Commit[]): RenderElement[] {
         return commits.map(commit => {
+            const checkedOrNot: string = this.selectedCommits.find(selectedCommit =>
+                selectedCommit.hash === commit.hash) !== undefined ? ' checked' : ''
+            // TODO: Fix that switching to LinkAppearance toolbar view freezes commit selection
+            const checkbox: string = '<input type="checkbox" ' + checkedOrNot + '>'
             return {
                 type: 'tr',
                 id: commit.hash,
@@ -94,7 +98,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                     {
                         type: 'td',
                         style: { display: 'inline' },
-                        innerHTML: '<input type="checkbox">',
+                        innerHTML: checkbox,
                         onchangeChecked: (value: boolean) => {
                             if (value === true) {
                                 this.selectedCommits.push(commit)
