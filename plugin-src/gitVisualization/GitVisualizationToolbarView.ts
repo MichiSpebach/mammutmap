@@ -56,10 +56,32 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     }
 
     private async shapeCommits(map: Map): Promise<RenderElement> {
+        let numberOfCommits: number = 10
         const rootFolderPath: string = map.getRootFolder().getSrcPath()
         const gitClient = new GitClient(rootFolderPath)
-        const commits: Commit[] = await gitClient.getCommits("HEAD~10", "HEAD")
-        const toggles: RenderElement[] = commits.map(commit => {
+        const commits: Commit[] = await gitClient.getCommits(`HEAD~${numberOfCommits}`, 'HEAD')
+        const toggles: RenderElement[] = this.commitsToToggles(commits)
+        const moreCommitsButton: RenderElement = {
+            type: 'button',
+            innerHTML: 'More Commits &#10133;',
+            onclick: async () => {
+                const moreCommits: Commit[] = await gitClient.getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`)
+                numberOfCommits += 10
+                renderManager.addElementsTo('commit-list', this.commitsToToggles(moreCommits))
+            }
+        }
+        return {
+            type: 'div',
+            children: [{
+                type: 'div',
+                id: 'commit-list',
+                children: toggles
+            }, moreCommitsButton]
+        }
+    }
+
+    private commitsToToggles(commits: Commit[]): RenderElement[] {
+        return commits.map(commit => {
             return {
                 type: 'div',
                 id: commit.hash,
@@ -88,10 +110,6 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                 ]
             }
         })
-        return {
-            type: 'div',
-            children: toggles
-        }
     }
 
     private shapeButton(): RenderElement {
