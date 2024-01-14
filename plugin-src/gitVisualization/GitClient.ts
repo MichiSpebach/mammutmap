@@ -43,6 +43,9 @@ export class GitClient {
     }
 
     public async getChangedFiles(refs: string[]): Promise<ChangedFile[]> {
+        if (refs.length === 0) {
+            return []
+        }
         const diff: string = await this.git.diff(['--name-only', ...refs])
         let changedFiles: ChangedFile[] = []
         diff.split('\n').filter(nonEmptyFilePath => nonEmptyFilePath).map(

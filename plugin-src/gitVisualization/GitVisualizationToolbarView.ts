@@ -1,7 +1,7 @@
 import { RenderElementWithId, UltimateWidget } from '../../dist/core/Widget'
 import { Map, Message, RenderElement, RenderElements, ToolbarView, getMap, onMapLoaded, renderManager } from '../../dist/pluginFacade'
-import { Commit, GitClient } from './GitClient'
-import { visualizeChanges, visualizeChangesByCommits } from './gitWitchcraft'
+import { ChangedFile, Commit, GitClient } from './GitClient'
+import { visualizeChangedFiles, visualizeChanges, visualizeChangesByCommits } from './gitWitchcraft'
 
 export class GitVisualizationToolbarView extends UltimateWidget implements ToolbarView {
 
@@ -10,6 +10,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     private commits: Commit[] = []
     private refFrom: string = 'HEAD^'
     private refTo: string = 'HEAD'
+    private isUncommittedChangesShown = false
 
     public constructor(
         public readonly id: string
@@ -65,20 +66,20 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     }
 
     private async shapeCommits(map: Map): Promise<RenderElement> {
-        // TODO: Create toggle for (un)staged changes
-        let numberOfCommits: number = 10
         const rootFolderPath: string = map.getRootFolder().getSrcPath()
         const gitClient = new GitClient(rootFolderPath)
+        const uncommittedChanges: ChangedFile[] = await gitClient.getChangedFiles(['HEAD'])
+        const uncommittedChangesToggle: RenderElement = this.shapeChangesToggle(uncommittedChanges)
         if (this.commits.length === 0) {
-            this.commits = await gitClient.getCommits(`HEAD~${numberOfCommits}`, 'HEAD')
+            this.commits = await gitClient.getCommits('HEAD~10', 'HEAD')
         }
-        const toggles: RenderElement[] = this.commitsToToggles(this.commits)
+        const toggles: RenderElement[] = [uncommittedChangesToggle, ...this.commitsToToggles(this.commits)]
         const moreCommitsButton: RenderElement = {
             type: 'button',
             innerHTML: 'More Commits &#10133;',
             onclick: async () => {
+                const numberOfCommits = this.commits.length
                 this.commits.push(...await gitClient.getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`))
-                numberOfCommits += 10
                 this.render()
             }
         }
@@ -89,6 +90,33 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                 id: 'commit-list',
                 children: toggles
             }, moreCommitsButton]
+        }
+    }
+
+    private shapeChangesToggle(uncommittedChanges: ChangedFile[]): RenderElement {
+        const checkedOrNot: string = this.isUncommittedChangesShown ? 'checked' : ''
+        const checkbox: string = '<input type="checkbox" ' + checkedOrNot + '>'
+        return {
+            type: 'tr',
+            children: [
+                {
+                    type: 'td',
+                    style: { display: 'inline' },
+                    innerHTML: checkbox,
+                    onchangeChecked: (value: boolean) => {
+                        if (value === true) {
+                            visualizeChangedFiles(uncommittedChanges, this.isZoomingEnabled)
+                        } else {
+                            visualizeChangedFiles([], this.isZoomingEnabled)
+                        }
+                        this.isUncommittedChangesShown = value
+                    }
+                },
+                {
+                    type: 'td',
+                    innerHTML: '&#129668; Uncommitted changes'
+                }
+            ]
         }
     }
 
