@@ -7,6 +7,9 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
 
     private isZoomingEnabled: boolean = true
     private selectedCommits: Commit[] = []
+    private commits: Commit[] = []
+    private refFrom: string = 'HEAD^'
+    private refTo: string = 'HEAD'
 
     public constructor(
         public readonly id: string
@@ -14,6 +17,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         super()
         onMapLoaded.subscribe(async () => {
             this.selectedCommits = []
+            this.commits = []
             await this.render()
         })
     }
@@ -50,8 +54,8 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             {
                 type: 'table',
                 children: [
-                    this.shapeInputField('git-ref-input-from', 'HEAD^', 'Ref from: '),
-                    this.shapeInputField('git-ref-input-to', 'HEAD', 'Ref to: ')
+                    this.shapeInputField('git-ref-input-from', this.refFrom, 'Ref from: '),
+                    this.shapeInputField('git-ref-input-to', this.refTo, 'Ref to: ')
                 ]
             },
             this.shapeButton(),
@@ -61,18 +65,21 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     }
 
     private async shapeCommits(map: Map): Promise<RenderElement> {
+        // TODO: Create toggle for (un)staged changes
         let numberOfCommits: number = 10
         const rootFolderPath: string = map.getRootFolder().getSrcPath()
         const gitClient = new GitClient(rootFolderPath)
-        const commits: Commit[] = await gitClient.getCommits(`HEAD~${numberOfCommits}`, 'HEAD')
-        const toggles: RenderElement[] = this.commitsToToggles(commits)
+        if (this.commits.length === 0) {
+            this.commits = await gitClient.getCommits(`HEAD~${numberOfCommits}`, 'HEAD')
+        }
+        const toggles: RenderElement[] = this.commitsToToggles(this.commits)
         const moreCommitsButton: RenderElement = {
             type: 'button',
             innerHTML: 'More Commits &#10133;',
             onclick: async () => {
-                const moreCommits: Commit[] = await gitClient.getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`)
+                this.commits.push(...await gitClient.getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`))
                 numberOfCommits += 10
-                renderManager.addElementsTo('commit-list', this.commitsToToggles(moreCommits))
+                this.render()
             }
         }
         return {
@@ -89,7 +96,6 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         return commits.map(commit => {
             const checkedOrNot: string = this.selectedCommits.find(selectedCommit =>
                 selectedCommit.hash === commit.hash) !== undefined ? ' checked' : ''
-            // TODO: Fix that switching to LinkAppearance toolbar view freezes commit selection
             const checkbox: string = '<input type="checkbox" ' + checkedOrNot + '>'
             return {
                 type: 'tr',
@@ -105,7 +111,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                             } else {
                                 this.selectedCommits =
                                     this.selectedCommits.filter(selectedCommit =>
-                                        selectedCommit !== commit)
+                                        selectedCommit.hash !== commit.hash)
                             }
                             this.selectedCommits.sort(GitClient.compareCommitsByDate)
                             visualizeChangesByCommits(this.selectedCommits, this.isZoomingEnabled)
@@ -125,9 +131,9 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             type: 'button',
             innerHTML: 'View Changes between Refs &#129668;',
             onclick: async () => {
-                const fromRef: string = await renderManager.getValueOf('git-ref-input-from')
-                const toRef: string = await renderManager.getValueOf('git-ref-input-to')
-                visualizeChanges(fromRef, toRef, this.isZoomingEnabled)
+                this.refFrom = await renderManager.getValueOf('git-ref-input-from')
+                this.refTo = await renderManager.getValueOf('git-ref-input-to')
+                visualizeChanges(this.refFrom, this.refTo, this.isZoomingEnabled)
             }
         }
     }
