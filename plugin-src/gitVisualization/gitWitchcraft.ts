@@ -9,11 +9,10 @@ export async function visualizeChanges(from: string, to: string, isZoomingEnable
     const gitClient = new GitClient(rootFolderPath)
     const commits: Commit[] = await gitClient.getCommits(from, to)
 
-    visualizeChangesByCommits(commits, isZoomingEnabled)
+    visualizeCommits(commits, isZoomingEnabled)
 }
 
-export async function visualizeChangesByCommits(commits: Commit[], isZoomingEnabled: boolean): Promise<void> {
-    const gitClient = new GitClient(getRootFolder().getSrcPath())
+export async function visualizeCommits(commits: Commit[], isZoomingEnabled: boolean): Promise<void> {
     let refs: string[] = commits.map(commit => `${commit.hash}`)
     if (refs.length > 1) {
         const lastRef = refs.pop()
@@ -22,7 +21,7 @@ export async function visualizeChangesByCommits(commits: Commit[], isZoomingEnab
     } else if (refs.length === 1) {
         refs.push(`${refs[0]}^`)
     }
-    const changedFiles: ChangedFile[] = await gitClient.getChangedFiles(refs)
+    const changedFiles: ChangedFile[] = commits.flatMap(commit => commit.changedFiles)
 
     coreUtil.logInfo(`Commit message(s): ${commits.map(commit => commit.message)}`)
     coreUtil.logInfo(`Changed file paths: ${changedFiles.map(file => file.path)}`)

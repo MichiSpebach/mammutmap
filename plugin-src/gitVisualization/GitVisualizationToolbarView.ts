@@ -1,7 +1,7 @@
 import { RenderElementWithId, UltimateWidget } from '../../dist/core/Widget'
 import { Map, Message, RenderElement, RenderElements, ToolbarView, getMap, onMapLoaded, renderManager } from '../../dist/pluginFacade'
 import { ChangedFile, Commit, GitClient } from './GitClient'
-import { visualizeChangedFiles, visualizeChanges, visualizeChangesByCommits } from './gitWitchcraft'
+import { visualizeChangedFiles, visualizeChanges, visualizeCommits } from './gitWitchcraft'
 
 export class GitVisualizationToolbarView extends UltimateWidget implements ToolbarView {
 
@@ -142,7 +142,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                                         selectedCommit.hash !== commit.hash)
                             }
                             this.selectedCommits.sort(GitClient.compareCommitsByDate)
-                            visualizeChangesByCommits(this.selectedCommits, this.isZoomingEnabled)
+                            visualizeCommits(this.selectedCommits, this.isZoomingEnabled)
                         }
                     },
                     {
