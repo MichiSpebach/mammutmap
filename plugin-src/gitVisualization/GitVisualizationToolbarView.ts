@@ -1,7 +1,7 @@
 import { RenderElementWithId, UltimateWidget } from '../../dist/core/Widget'
 import { Map, Message, RenderElement, RenderElements, ToolbarView, getMap, onMapLoaded, renderManager } from '../../dist/pluginFacade'
 import { ChangedFile, Commit, GitClient } from './GitClient'
-import { visualizeChangedFiles, visualizeChanges, visualizeCommits } from './gitWitchcraft'
+import { visualizeChanges } from './gitWitchcraft'
 
 export class GitVisualizationToolbarView extends UltimateWidget implements ToolbarView {
 
@@ -11,6 +11,8 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     private refFrom: string = 'HEAD^'
     private refTo: string = 'HEAD'
     private isUncommittedChangesShown = false
+    private uncommittedChanges: ChangedFile[] = []
+    private gitClient: GitClient = new GitClient('.')
 
     public constructor(
         public readonly id: string
@@ -51,6 +53,8 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         if (map instanceof Message) {
             return map.message
         }
+        const rootFolderPath: string = map.getRootFolder().getSrcPath()
+        this.gitClient = new GitClient(rootFolderPath)
         return [
             {
                 type: 'table',
@@ -61,25 +65,23 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             },
             this.shapeButton(),
             this.shapeZoomToggle(),
-            await this.shapeCommits(map)
+            await this.shapeCommitToggles()
         ]
     }
 
-    private async shapeCommits(map: Map): Promise<RenderElement> {
-        const rootFolderPath: string = map.getRootFolder().getSrcPath()
-        const gitClient = new GitClient(rootFolderPath)
-        const uncommittedChanges: ChangedFile[] = await gitClient.getChangedFiles(['HEAD'])
-        const uncommittedChangesToggle: RenderElement = this.shapeChangesToggle(uncommittedChanges)
+    private async shapeCommitToggles(): Promise<RenderElement> {
+        this.uncommittedChanges = await this.gitClient.getChangedFiles(['HEAD'])
+        const uncommittedChangesToggle: RenderElement = this.shapeUncommittedChangesToggle(this.uncommittedChanges)
         if (this.commits.length === 0) {
-            this.commits = await gitClient.getCommits('HEAD~10', 'HEAD')
+            this.commits = await this.gitClient.getCommits('HEAD~10', 'HEAD')
         }
-        const toggles: RenderElement[] = [uncommittedChangesToggle, ...this.commitsToToggles(this.commits)]
+        const toggles: RenderElement[] = [uncommittedChangesToggle, ...this.convertCommitsToToggles(this.commits)]
         const moreCommitsButton: RenderElement = {
             type: 'button',
             innerHTML: 'More Commits &#10133;',
             onclick: async () => {
                 const numberOfCommits = this.commits.length
-                this.commits.push(...await gitClient.getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`))
+                this.commits.push(...await this.gitClient.getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`))
                 this.render()
             }
         }
@@ -93,7 +95,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         }
     }
 
-    private shapeChangesToggle(uncommittedChanges: ChangedFile[]): RenderElement {
+    private shapeUncommittedChangesToggle(uncommittedChanges: ChangedFile[]): RenderElement {
         const checkedOrNot: string = this.isUncommittedChangesShown ? 'checked' : ''
         const checkbox: string = '<input type="checkbox" ' + checkedOrNot + '>'
         return {
@@ -104,12 +106,8 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                     style: { display: 'inline' },
                     innerHTML: checkbox,
                     onchangeChecked: (value: boolean) => {
-                        if (value === true) {
-                            visualizeChangedFiles(uncommittedChanges, this.isZoomingEnabled)
-                        } else {
-                            visualizeChangedFiles([], this.isZoomingEnabled)
-                        }
                         this.isUncommittedChangesShown = value
+                        this.render()
                     }
                 },
                 {
@@ -120,7 +118,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         }
     }
 
-    private commitsToToggles(commits: Commit[]): RenderElement[] {
+    private convertCommitsToToggles(commits: Commit[]): RenderElement[] {
         return commits.map(commit => {
             const checkedOrNot: string = this.selectedCommits.find(selectedCommit =>
                 selectedCommit.hash === commit.hash) !== undefined ? ' checked' : ''
@@ -142,7 +140,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                                         selectedCommit.hash !== commit.hash)
                             }
                             this.selectedCommits.sort(GitClient.compareCommitsByDate)
-                            visualizeCommits(this.selectedCommits, this.isZoomingEnabled)
+                            this.render()
                         }
                     },
                     {
@@ -161,7 +159,8 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             onclick: async () => {
                 this.refFrom = await renderManager.getValueOf('git-ref-input-from')
                 this.refTo = await renderManager.getValueOf('git-ref-input-to')
-                visualizeChanges(this.refFrom, this.refTo, this.isZoomingEnabled)
+                this.selectedCommits = await this.gitClient.getCommits(this.refFrom, this.refTo)
+                this.render()
             }
         }
     }
@@ -211,6 +210,15 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
 
     public override async render(): Promise<void> {
         await renderManager.setElementsTo(this.id, await this.shapeInner())
+        const map: Map | Message = getMap()
+        if (map instanceof Message || (this.selectedCommits.length === 0 && !this.isUncommittedChangesShown)) {
+            return
+        }
+        if (this.isUncommittedChangesShown) {
+            await visualizeChanges(this.selectedCommits, this.uncommittedChanges, this.isZoomingEnabled)
+        } else {
+            await visualizeChanges(this.selectedCommits, [], this.isZoomingEnabled)
+        }
     }
 
     public override async unrender(): Promise<void> {
