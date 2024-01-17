@@ -13,6 +13,11 @@ import { RenderManager } from '../../dist/core/RenderManager'
 import { BoxLinks } from '../../dist/core/box/BoxLinks'
 import { Link } from '../../dist/core/link/Link'
 import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
+import { NodeData } from '../../dist/core/mapData/NodeData'
+import { NodeWidget } from '../../dist/core/node/NodeWidget'
+import { RootFolderBox } from '../../dist/core/box/RootFolderBox'
+import { FolderBox } from '../../dist/core/box/FolderBox'
+import { FileBox } from '../../dist/core/box/FileBox'
 
 test('bundleLink, nothing to bundle', async () => {
 	await initServicesWithMocks()
@@ -181,16 +186,10 @@ test('findAndExtendCommonRoutes', async () => {
 	const unaffectedBottomLink: Link = await root.links.add({from: leftFolder, to: rightBottomFile, save: true})
 	const bottomLeftToTopRightLink: Link = await root.links.add({from: leftFolder, to: rightTopFile, save: true})
 
-	const commonRoutes: {
-		from: {node: AbstractNodeWidget, link: Link}
-		to: {node: AbstractNodeWidget, link: Link}
-		length: number
-	}[] = []
-	await linkBundler.findAndExtendCommonRoutes(topLink, 'from', commonRoutes)
-	await linkBundler.findAndExtendCommonRoutes(topLink, 'to', commonRoutes)
-	const longestCommonRoute = linkBundler.getLongestCommonRoute(commonRoutes)
+	const longestCommonRoute = await linkBundler.findLongestCommonRoute(topLink)
 
 	expect(longestCommonRoute).toEqual({
+		links: [bottomLeftToTopRightLink],
 		from: {node: leftFolder, link: bottomLeftToTopRightLink},
 		to: {node: rightTopFile, link: bottomLeftToTopRightLink},
 		length: 1
@@ -214,22 +213,26 @@ test('findAndExtendCommonRoutes, different managingBoxes of links', async () => 
 	const longLinkToLeft: Link = await root.links.add({from: rightFile, to: leftDeepDeepFile, save: true})
 	const shortLinkToLeft: Link = await leftFolder.links.add({from: leftFolder, to: leftDeepDeepFolder, save: true})
 
-	expect(extractIds(await findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
+	expect(extractIds(await linkBundler.findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
+		links: [shortLinkToRight],
 		from: {node: leftDeepDeepFolder, link: shortLinkToRight},
 		to: {node: leftDeepFolder, link: shortLinkToRight},
 		length: 1
 	}))
-	expect(extractIds(await findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
+	expect(extractIds(await linkBundler.findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
+		links: [longLinkToRight],
 		from: {node: leftDeepDeepFolder, link: longLinkToRight},
 		to: {node: leftDeepFolder, link: longLinkToRight},
 		length: 1
 	}))
-	expect(extractIds(await findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
+	expect(extractIds(await linkBundler.findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
+		links: [shortLinkToLeft],
 		from: {node: leftDeepFolder, link: shortLinkToLeft},
 		to: {node: leftDeepDeepFolder, link: shortLinkToLeft},
 		length: 1
 	}))
-	expect(extractIds(await findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
+	expect(extractIds(await linkBundler.findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
+		links: [longLinkToLeft],
 		from: {node: leftDeepFolder, link: longLinkToLeft},
 		to: {node: leftDeepDeepFolder, link: longLinkToLeft},
 		length: 1
@@ -254,22 +257,26 @@ test('findAndExtendCommonRoutes, longer commonRoute', async () => {
 	const longLinkToLeft: Link = await root.links.add({from: rightFile, to: leftDeepDeepFile, save: true})
 	const shortLinkToLeft: Link = await root.links.add({from: root, to: leftDeepDeepFolder, save: true})
 
-	expect(extractIds(await findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
+	expect(extractIds(await linkBundler.findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
+		links: [shortLinkToRight],
 		from: {node: leftDeepDeepFolder, link: shortLinkToRight},
 		to: {node: leftFolder, link: shortLinkToRight},
 		length: 2
 	}))
-	expect(extractIds(await findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
+	expect(extractIds(await linkBundler.findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
+		links: [longLinkToRight],
 		from: {node: leftDeepDeepFolder, link: longLinkToRight},
 		to: {node: leftFolder, link: longLinkToRight},
 		length: 2
 	}))
-	expect(extractIds(await findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
+	expect(extractIds(await linkBundler.findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
+		links: [shortLinkToLeft],
 		from: {node: leftFolder, link: shortLinkToLeft},
 		to: {node: leftDeepDeepFolder, link: shortLinkToLeft},
 		length: 2
 	}))
-	expect(extractIds(await findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
+	expect(extractIds(await linkBundler.findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
+		links: [longLinkToLeft],
 		from: {node: leftFolder, link: longLinkToLeft},
 		to: {node: leftDeepDeepFolder, link: longLinkToLeft},
 		length: 2
@@ -277,11 +284,37 @@ test('findAndExtendCommonRoutes, longer commonRoute', async () => {
 	expect(leftFileUnrenderSpy).toBeCalledTimes(4)
 })
 
+test('findAndExtendCommonRoutes, node in commonRoute', async () => {
+	await initServicesWithMocks()
+
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder: FolderBox = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
+	const leftInnerFolder: FolderBox = boxFactory.folderOf({idOrData: 'leftInnerFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const leftDeepFile: FileBox = boxFactory.fileOf({idOrData: 'leftDeepFile', parent: leftInnerFolder, addToParent: true, rendered: true})
+	const rightFile: FileBox = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+
+	const routeToRight: Link[] = [
+		await leftFolder.links.add({from: leftDeepFile, to: leftFolderKnot, save: true}),
+		await root.links.add({from: leftFolderKnot, to: rightFile, save: true})
+	]
+	const linkToRight: Link = await root.links.add({from: leftInnerFolder, to: root, save: true})
+
+	expect(extractIds((await linkBundler.findLongestCommonRoute(linkToRight)))).toEqual(extractIds({
+		links: [routeToRight[0]],
+		from: {node: leftInnerFolder, link: routeToRight[0]},
+		to: {node: leftFolderKnot, link: routeToRight[1]}, // TODO: remove link field and flatten
+		length: 1
+	}))
+})
+
 function extractIds(commonRoute: {
+	links: Link[]
 	from: {node: AbstractNodeWidget, link: Link}
 	to: {node: AbstractNodeWidget, link: Link}
 	length: number
 } | undefined): {
+	links: string[]
 	from: {nodeId: string, linkId: string}
 	to: {nodeId: string, linkId: string}
 	length: number
@@ -290,25 +323,11 @@ function extractIds(commonRoute: {
 		return undefined
 	}
 	return {
+		links: commonRoute.links.map(link => link.getId()),
 		from: {nodeId: commonRoute.from.node.getId(), linkId: commonRoute.from.link.getId()},
 		to: {nodeId: commonRoute.to.node.getId(), linkId: commonRoute.to.link.getId()},
 		length: commonRoute.length
 	}
-}
-
-async function findLongestCommonRoute(link: Link): Promise<{
-	from: {node: AbstractNodeWidget, link: Link}
-	to: {node: AbstractNodeWidget, link: Link}
-	length: number
-} | undefined> {
-	const commonRoutes: {
-		from: {node: AbstractNodeWidget, link: Link}
-		to: {node: AbstractNodeWidget, link: Link}
-		length: number
-	}[] = []
-	await linkBundler.findAndExtendCommonRoutes(link, 'from', commonRoutes)
-	await linkBundler.findAndExtendCommonRoutes(link, 'to', commonRoutes)
-	return linkBundler.getLongestCommonRoute(commonRoutes)
 }
 
 async function initServicesWithMocks(): Promise<{
