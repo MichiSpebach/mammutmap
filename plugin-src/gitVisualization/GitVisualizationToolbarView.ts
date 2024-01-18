@@ -84,7 +84,8 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         if (this.commits.length === 0) {
             this.commits = await this.gitClient.getCommits('HEAD~10', 'HEAD')
         }
-        const toggles: RenderElement[] = [uncommittedChangesToggle, ...this.commits.map(commit => this.shapeCommitToggle(commit))]
+        const commitToggles: RenderElement[] = this.commits.map(commit => this.shapeCommitToggle(commit))
+        const toggles: RenderElement[] = [uncommittedChangesToggle, ...commitToggles]
         const moreCommitsButton: RenderElement = {
             type: 'button',
             innerHTML: 'More Commits &#10133;',
@@ -105,29 +106,13 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     }
 
     private shapeUncommittedChangesToggle(): RenderElement {
-        return this.shapeTableToggle(this.isUncommittedChangesShown, '&#127381; Uncommitted changes', (value: boolean) => {
+        return this.shapeToggle(this.isUncommittedChangesShown, '&#127381; Uncommitted changes', (value: boolean) => {
             this.isUncommittedChangesShown = value
             this.render()
         })
     }
 
-    private shapeCommitToggle(commit: Commit): RenderElement {
-        const isChecked: boolean = this.selectedCommits.find(selectedCommit =>
-            selectedCommit.hash === commit.hash) !== undefined
-        return this.shapeTableToggle(isChecked, commit.message, (value: boolean) => {
-            if (value === true) {
-                this.selectedCommits.push(commit)
-            } else {
-                this.selectedCommits =
-                    this.selectedCommits.filter(selectedCommit =>
-                        selectedCommit.hash !== commit.hash)
-            }
-            this.selectedCommits.sort(GitClient.compareCommitsByDate)
-            this.render()
-        })
-    }
-
-    private shapeTableToggle(isChecked: boolean, label: string | undefined, onchangeChecked: (checked: boolean) => void): RenderElement {
+    private shapeToggle(isChecked: boolean, label: string | undefined, onchangeChecked: (checked: boolean) => void): RenderElement {
         const checkedOrNot: string = isChecked ? ' checked' : ''
         const checkbox: string = '<input type="checkbox" ' + checkedOrNot + '>'
         return {
@@ -145,6 +130,22 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
                 }
             ]
         }
+    }
+
+    private shapeCommitToggle(commit: Commit): RenderElement {
+        const isChecked: boolean = this.selectedCommits.find(selectedCommit =>
+            selectedCommit.hash === commit.hash) !== undefined
+        return this.shapeToggle(isChecked, commit.message, (value: boolean) => {
+            if (value === true) {
+                this.selectedCommits.push(commit)
+            } else {
+                this.selectedCommits =
+                    this.selectedCommits.filter(selectedCommit =>
+                        selectedCommit.hash !== commit.hash)
+            }
+            this.selectedCommits.sort(GitClient.compareCommitsByDate)
+            this.render()
+        })
     }
 
     private shapeButton(): RenderElement {
@@ -181,7 +182,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     }
 
     private shapeZoomToggle(): RenderElement {
-        return this.shapeTableToggle(this.isZoomingEnabled, '&#128269; Zoom to changes?', (value: boolean) => {
+        return this.shapeToggle(this.isZoomingEnabled, '&#128269; Zoom to changes?', (value: boolean) => {
             this.isZoomingEnabled = value
         })
     }
