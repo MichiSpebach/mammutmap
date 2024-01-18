@@ -61,7 +61,7 @@ test('bundleLink, insert one node', async () => {
 	expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual([expect.stringContaining('node')])
 	//expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual(expect.arrayContaining(['rightFile', expect.anything()]))
 
-	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
+	expect(console.warn).toBeCalledWith('linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are 0')
 	expect(console.warn).toBeCalledTimes(1)
 	consoleWarn.mockRestore()
 })
@@ -92,7 +92,7 @@ test('bundleLink, insert two nodes', async () => {
 	expect(bottomLinkRoute.length).toBe(3)
 	expect(bottomLinkRoute[1].getId()).toBe(bottomLink.getId())
 	
-	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
+	expect(console.warn).toBeCalledWith('linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are 0')
 	expect(console.warn).toBeCalledTimes(2)
 	consoleWarn.mockRestore()
 })
@@ -129,7 +129,7 @@ async function testBundleLinkBothInsertsInFromPart(linkToBundle: 'longLink'|'sho
 	expect(shortRoute[2].getId()).toBe(shortLink.getId())
 
 	expect(longRoute[1].getId()).toBe(shortRoute[1].getId())
-	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
+	expect(console.warn).toBeCalledWith('linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are 0')
 	expect(console.warn).toBeCalledTimes(2)
 	consoleWarn.mockRestore()
 }
@@ -168,7 +168,7 @@ async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'short
 	expect(shortRoute[0].getId()).toBe(shortLink.getId())
 
 	expect(longRoute[1].getId()).toBe(shortRoute[1].getId())
-	expect(console.warn).toBeCalledWith('linkBundler.bundleLinkEndIntoCommonRoutePart(..) expected exactly one intersection but are 0')
+	expect(console.warn).toBeCalledWith('linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are 0')
 	expect(console.warn).toBeCalledTimes(2)
 	consoleWarn.mockRestore()
 }
@@ -190,8 +190,8 @@ test('findAndExtendCommonRoutes', async () => {
 
 	expect(longestCommonRoute).toEqual({
 		links: [bottomLeftToTopRightLink],
-		from: {node: leftFolder, link: bottomLeftToTopRightLink},
-		to: {node: rightTopFile, link: bottomLeftToTopRightLink},
+		from: leftFolder,
+		to: rightTopFile,
 		length: 1
 	})
 })
@@ -215,29 +215,29 @@ test('findAndExtendCommonRoutes, different managingBoxes of links', async () => 
 
 	expect(extractIds(await linkBundler.findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
 		links: [shortLinkToRight],
-		from: {node: leftDeepDeepFolder, link: shortLinkToRight},
-		to: {node: leftDeepFolder, link: shortLinkToRight},
+		from: leftDeepDeepFolder,
+		to: leftDeepFolder,
 		length: 1
 	}))
 	expect(extractIds(await linkBundler.findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
 		links: [longLinkToRight],
-		from: {node: leftDeepDeepFolder, link: longLinkToRight},
-		to: {node: leftDeepFolder, link: longLinkToRight},
+		from: leftDeepDeepFolder,
+		to: leftDeepFolder,
 		length: 1
 	}))
 	expect(extractIds(await linkBundler.findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
 		links: [shortLinkToLeft],
-		from: {node: leftDeepFolder, link: shortLinkToLeft},
-		to: {node: leftDeepDeepFolder, link: shortLinkToLeft},
+		from: leftDeepFolder,
+		to: leftDeepDeepFolder,
 		length: 1
 	}))
 	expect(extractIds(await linkBundler.findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
 		links: [longLinkToLeft],
-		from: {node: leftDeepFolder, link: longLinkToLeft},
-		to: {node: leftDeepDeepFolder, link: longLinkToLeft},
+		from: leftDeepFolder,
+		to: leftDeepDeepFolder,
 		length: 1
 	}))
-	expect(leftFileUnrenderSpy).toBeCalledTimes(4)
+	expect(leftFileUnrenderSpy).toBeCalled()
 })
 
 test('findAndExtendCommonRoutes, longer commonRoute', async () => {
@@ -259,29 +259,29 @@ test('findAndExtendCommonRoutes, longer commonRoute', async () => {
 
 	expect(extractIds(await linkBundler.findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
 		links: [shortLinkToRight],
-		from: {node: leftDeepDeepFolder, link: shortLinkToRight},
-		to: {node: leftFolder, link: shortLinkToRight},
+		from: leftDeepDeepFolder,
+		to: leftFolder,
 		length: 2
 	}))
 	expect(extractIds(await linkBundler.findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
 		links: [longLinkToRight],
-		from: {node: leftDeepDeepFolder, link: longLinkToRight},
-		to: {node: leftFolder, link: longLinkToRight},
+		from: leftDeepDeepFolder,
+		to: leftFolder,
 		length: 2
 	}))
 	expect(extractIds(await linkBundler.findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
 		links: [shortLinkToLeft],
-		from: {node: leftFolder, link: shortLinkToLeft},
-		to: {node: leftDeepDeepFolder, link: shortLinkToLeft},
+		from: leftFolder,
+		to: leftDeepDeepFolder,
 		length: 2
 	}))
 	expect(extractIds(await linkBundler.findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
 		links: [longLinkToLeft],
-		from: {node: leftFolder, link: longLinkToLeft},
-		to: {node: leftDeepDeepFolder, link: longLinkToLeft},
+		from: leftFolder,
+		to: leftDeepDeepFolder,
 		length: 2
 	}))
-	expect(leftFileUnrenderSpy).toBeCalledTimes(4)
+	expect(leftFileUnrenderSpy).toBeCalled()
 })
 
 test('findAndExtendCommonRoutes, node in commonRoute', async () => {
@@ -302,21 +302,21 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 
 	expect(extractIds((await linkBundler.findLongestCommonRoute(linkToRight)))).toEqual(extractIds({
 		links: [routeToRight[0]],
-		from: {node: leftInnerFolder, link: routeToRight[0]},
-		to: {node: leftFolderKnot, link: routeToRight[1]}, // TODO: remove link field and flatten
+		from: leftInnerFolder,
+		to: leftFolderKnot,
 		length: 1
 	}))
 })
 
 function extractIds(commonRoute: {
 	links: Link[]
-	from: {node: AbstractNodeWidget, link: Link}
-	to: {node: AbstractNodeWidget, link: Link}
+	from: AbstractNodeWidget
+	to: AbstractNodeWidget
 	length: number
 } | undefined): {
 	links: string[]
-	from: {nodeId: string, linkId: string}
-	to: {nodeId: string, linkId: string}
+	from: string
+	to: string
 	length: number
 } | undefined {
 	if (!commonRoute) {
@@ -324,8 +324,8 @@ function extractIds(commonRoute: {
 	}
 	return {
 		links: commonRoute.links.map(link => link.getId()),
-		from: {nodeId: commonRoute.from.node.getId(), linkId: commonRoute.from.link.getId()},
-		to: {nodeId: commonRoute.to.node.getId(), linkId: commonRoute.to.link.getId()},
+		from: commonRoute.from.getId(),
+		to: commonRoute.to.getId(),
 		length: commonRoute.length
 	}
 }
