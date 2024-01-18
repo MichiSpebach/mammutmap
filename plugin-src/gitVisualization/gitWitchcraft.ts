@@ -26,5 +26,5 @@ async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
     const changedFileBoxesRendered: Box[] = absoluteFilePaths.map(path =>
         rootFolder.getRenderedBoxesInPath(path).at(-1)).filter(box => box) as Box[]
     const map: Map = getMapOrError()
-    map.zoomToFitBoxes(changedFileBoxesRendered)
+    await map.zoomToFitBoxes(changedFileBoxesRendered)
 }
