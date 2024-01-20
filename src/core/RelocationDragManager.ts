@@ -10,6 +10,10 @@ import { mouseDownDragManager } from './mouseDownDragManager'
 
 export let relocationDragManager: RelocationDragManager // = new RelocationDragManager() // initialized at end of file
 
+export function init(object: RelocationDragManager): void {
+    relocationDragManager = object
+  }
+
 type State = {
     dragging: Draggable<DropTarget>
     draggingOver: DropTarget
