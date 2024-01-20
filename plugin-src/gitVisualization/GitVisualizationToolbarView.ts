@@ -31,6 +31,11 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             this.isUncommittedChangesShown = false
             this.uncommittedChanges = []
 
+            if (this.gitClient instanceof GitClient) {
+                this.commits = await this.gitClient.getCommits('HEAD~10', 'HEAD')
+                this.uncommittedChanges = await this.gitClient.getChangedFiles(['HEAD'])
+            }
+
             await this.render()
         })
     }
@@ -92,11 +97,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     }
 
     private async shapeCommitToggles(): Promise<RenderElement> {
-        this.uncommittedChanges = await this.getGitClient().getChangedFiles(['HEAD'])
         const uncommittedChangesToggle: RenderElement = this.shapeUncommittedChangesToggle()
-        if (this.commits.length === 0) {
-            this.commits = await this.getGitClient().getCommits('HEAD~10', 'HEAD')
-        }
         const commitToggles: RenderElement[] = this.commits.map(commit => this.shapeCommitToggle(commit))
         const toggles: RenderElement[] = [uncommittedChangesToggle, ...commitToggles]
         const moreCommitsButton: RenderElement = {
