@@ -18,6 +18,9 @@ import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { RootFolderBox } from '../../dist/core/box/RootFolderBox'
 import { FolderBox } from '../../dist/core/box/FolderBox'
 import { FileBox } from '../../dist/core/box/FileBox'
+import { HoverManager } from '../../dist/core/HoverManager'
+import { RelocationDragManager } from '../../dist/core/RelocationDragManager'
+import * as relocationDragManager from '../../dist/core/RelocationDragManager'
 
 test('bundleLink, nothing to bundle', async () => {
 	await initServicesWithMocks()
@@ -173,6 +176,37 @@ async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'short
 	consoleWarn.mockRestore()
 }
 
+test('bundleLink, reuse existing node', async () => {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
+	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
+
+	const linkRoute: Link[] = [
+		await leftFolder.links.add({from: leftFolderFile, to: leftFolderKnot, save: true}),
+		await root.links.add({from: leftFolderKnot, to: rightFile, save: true})
+	]
+	const link: Link = await root.links.add({from: leftFolder, to: rightFile, save: true})
+
+	await linkBundler.bundleLink(link)
+	
+	const linkRouteFromLeftFolderFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile, rightFile)
+	expect(linkRouteFromLeftFolderFile).toEqual(linkRoute)
+	const linkRouteFromLeftFolder: Link[]|undefined = BoxLinks.findLinkRoute(leftFolder, rightFile)
+	expect(linkRouteFromLeftFolder?.length).toBe(2)
+	expect(linkRouteFromLeftFolder?.at(0)).toBe(link)
+	expect(linkRouteFromLeftFolder?.at(1)).toBe(linkRoute.at(1))
+	expect(linkRouteFromLeftFolder?.at(0)?.getData().from.path.at(-1)?.boxId).toBe('leftFolder')
+	expect(linkRouteFromLeftFolder?.at(0)?.getData().to.path.at(-1)?.boxId).toBe('leftFolderKnot')
+	expect(linkRouteFromLeftFolder?.at(1)?.getData().from.path.at(-1)?.boxId).toBe('leftFolderKnot')
+	expect(linkRouteFromLeftFolder?.at(1)?.getData().to.path.at(-1)?.boxId).toBe('rightFile')
+
+	HoverManager.removeHoverable(leftFolderKnot)
+})
+
 test('findAndExtendCommonRoutes', async () => {
 	await initServicesWithMocks()
 
@@ -299,6 +333,11 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 		await root.links.add({from: leftFolderKnot, to: rightFile, save: true})
 	]
 	const linkToRight: Link = await root.links.add({from: leftInnerFolder, to: root, save: true})
+	const routeToLeft: Link[] = [
+		await root.links.add({from: rightFile, to: leftFolderKnot, save: true}),
+		await leftFolder.links.add({from: leftFolderKnot, to: leftDeepFile, save: true})
+	]
+	const linkToLeft: Link = await root.links.add({from: root, to: leftInnerFolder, save: true})
 
 	expect(extractIds((await linkBundler.findLongestCommonRoute(linkToRight)))).toEqual(extractIds({
 		links: [routeToRight[0]],
@@ -306,6 +345,14 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 		to: leftFolderKnot,
 		length: 1
 	}))
+	expect(extractIds((await linkBundler.findLongestCommonRoute(linkToLeft)))).toEqual(extractIds({
+		links: [routeToLeft[1]],
+		from: leftFolderKnot,
+		to: leftInnerFolder,
+		length: 1
+	}))
+
+	HoverManager.removeHoverable(leftFolderKnot)
 })
 
 function extractIds(commonRoute: {
@@ -333,10 +380,14 @@ function extractIds(commonRoute: {
 async function initServicesWithMocks(): Promise<{
 	renderManager: MockProxy<RenderManager>
 	boxManager: MockProxy<BoxManager>
+	relocationDragManager: MockProxy<RelocationDragManager>
 	fileSystem: MockProxy<FileSystemAdapter>
 }> {
 	const generalMocks = testUtil.initGeneralServicesWithMocks()
 	generalMocks.renderManager.getClientSize.mockReturnValue({width: 1600, height: 800})
+
+	const relocationDragManagerMock: MockProxy<RelocationDragManager> = mock<RelocationDragManager>()
+	relocationDragManager.init(relocationDragManagerMock)
 
 	const fileSystemMock: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
 	fileSystem.init(fileSystemMock)
@@ -345,8 +396,11 @@ async function initServicesWithMocks(): Promise<{
 	fileSystemMock.readFile.calledWith('./settings.json').mockReturnValue(Promise.resolve('{"zoomSpeed": 3,"boxMinSizeToRender": 200,"sidebar": true}'))
 	await settings.init()
 
+	jest.spyOn(console, 'log').mockImplementation()
+
 	return {
 		...generalMocks,
+		relocationDragManager: relocationDragManagerMock,
 		fileSystem: fileSystemMock
 	}
 }
