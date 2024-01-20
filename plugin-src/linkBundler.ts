@@ -309,10 +309,6 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 	insertedNode: NodeWidget, addedLink: Link
 } | undefined> {
 	const commonEndNode: AbstractNodeWidget = commonRoute[end]
-	if (!(commonEndNode instanceof Box)) {
-		console.warn(`commonRoutePart.node is instanceof LinkNodeWidget, case not implemented yet`) // TODO: this can normally happen, this means from is equal and link that is bundled can be removed
-		return undefined
-	}
 	const commonEndLink: Link|undefined = end === 'from'
 		? commonRoute.links.at(0)
 		: commonRoute.links.at(-1)
@@ -323,9 +319,11 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 	const commonEndLinkEnd: {node: Box|NodeWidget, watcher: BoxWatcher} = await getLinkEndNode(commonEndLink, end)
 
 	let insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
-	let bundleFromLinkNode: NodeWidget
-	if (commonEndLinkEnd.node instanceof NodeWidget && commonEndLinkEnd.node.getParent() === commonEndNode) {
-		bundleFromLinkNode = commonEndLinkEnd.node
+	let bundleKnot: NodeWidget
+	if (!(commonEndNode instanceof Box)) {
+		bundleKnot = commonEndNode as NodeWidget // TODO remove this case?
+	} else if (commonEndLinkEnd.node instanceof NodeWidget && commonEndLinkEnd.node.getParent() === commonEndNode) {
+		bundleKnot = commonEndLinkEnd.node
 	} else {
 		const linkManagingBoxBefore: Box = commonEndLink.getManagingBox()
 		
@@ -334,13 +332,13 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 			commonEndNode,
 			await calculateBundleNodePosition(linkEnd.getReferenceLink(), commonEndLink, commonEndNode)
 		))
-		bundleFromLinkNode = insertion.insertedNode
+		bundleKnot = insertion.insertedNode
 		if (linkManagingBoxBefore !== commonEndLink.getManagingBox()) {
 			console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
 		}
 	}
-	let bundleLinkNodePosition: ClientPosition = (await bundleFromLinkNode.getClientShape()).getMidPosition()
-	await linkEnd.dragAndDrop({dropTarget: bundleFromLinkNode, clientPosition: bundleLinkNodePosition}) // TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away
+	let bundleLinkNodePosition: ClientPosition = (await bundleKnot.getClientShape()).getMidPosition()
+	await linkEnd.dragAndDrop({dropTarget: bundleKnot, clientPosition: bundleLinkNodePosition}) // TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away
 	await commonEndLinkEnd.watcher.unwatch()
 	return insertion
 }

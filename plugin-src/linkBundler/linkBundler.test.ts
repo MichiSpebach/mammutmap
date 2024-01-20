@@ -176,14 +176,14 @@ async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'short
 	consoleWarn.mockRestore()
 }
 
-test('bundleLink, reuse existing node in from part', async () => {
+test('bundleLink, commonRoute startLink starts at LinkNode', async () => {
 	await initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
-	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
+	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderFile', parent: leftFolder, addToParent: true, rendered: true})
 
 	const linkRoute: Link[] = [
 		await leftFolder.links.add({from: leftFolderFile, to: leftFolderKnot, save: true}),
@@ -207,14 +207,14 @@ test('bundleLink, reuse existing node in from part', async () => {
 	HoverManager.removeHoverable(leftFolderKnot)
 })
 
-test('bundleLink, reuse existing node in to part', async () => {
+test('bundleLink, commonRoute endLink ends at LinkNode', async () => {
 	await initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
-	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
+	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderFile', parent: leftFolder, addToParent: true, rendered: true})
 
 	const linkRoute: Link[] = [
 		await root.links.add({from: rightFile, to: leftFolderKnot, save: true}),
@@ -234,6 +234,68 @@ test('bundleLink, reuse existing node in to part', async () => {
 	expect(linkRouteToLeftFolder?.at(0)?.getData().to.path.at(-1)?.boxId).toBe('leftFolderKnot')
 	expect(linkRouteToLeftFolder?.at(1)?.getData().from.path.at(-1)?.boxId).toBe('leftFolderKnot')
 	expect(linkRouteToLeftFolder?.at(1)?.getData().to.path.at(-1)?.boxId).toBe('leftFolder')
+
+	HoverManager.removeHoverable(leftFolderKnot)
+})
+
+test('bundleLink, commonRoute starts with LinkNode', async () => {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
+	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderFile', parent: leftFolder, addToParent: true, rendered: true})
+
+	const linkRoute: Link[] = [
+		await leftFolder.links.add({from: leftFolderFile, to: leftFolderKnot, save: true}),
+		await root.links.add({from: leftFolderKnot, to: rightFile, save: true})
+	]
+	const link: Link = await root.links.add({from: leftFolderFile, to: root, save: true})
+
+	await linkBundler.bundleLink(link)
+	
+	const linkRouteToRightFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile, rightFile)
+	expect(linkRouteToRightFile).toEqual(linkRoute)
+	const linkRouteToRoot: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile, root)
+	expect(linkRouteToRoot?.length).toBe(2)
+	expect(linkRouteToRoot?.at(0)).toBe(linkRoute.at(0))
+	expect(linkRouteToRoot?.at(1)).toBe(link)
+	expect(linkRouteToRoot?.at(0)?.getData().from.path.at(-1)?.boxId).toBe('leftFolderFile')
+	expect(linkRouteToRoot?.at(0)?.getData().to.path.at(-1)?.boxId).toBe('leftFolderKnot')
+	expect(linkRouteToRoot?.at(1)?.getData().from.path.at(-1)?.boxId).toBe('leftFolderKnot')
+	expect(linkRouteToRoot?.at(1)?.getData().to.path.at(-1)?.boxId).toBe('root')
+
+	HoverManager.removeHoverable(leftFolderKnot)
+})
+
+test('bundleLink, commonRoute ends with LinkNode', async () => {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
+	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderFile', parent: leftFolder, addToParent: true, rendered: true})
+
+	const linkRoute: Link[] = [
+		await root.links.add({from: rightFile, to: leftFolderKnot, save: true}),
+		await leftFolder.links.add({from: leftFolderKnot, to: leftFolderFile, save: true})
+	]
+	const link: Link = await root.links.add({from: root, to: leftFolderFile, save: true})
+
+	await linkBundler.bundleLink(link)
+	
+	const linkRouteFromRightFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFile, leftFolderFile)
+	expect(linkRouteFromRightFile).toEqual(linkRoute)
+	const linkRouteFromRoot: Link[]|undefined = BoxLinks.findLinkRoute(root, leftFolderFile)
+	expect(linkRouteFromRoot?.length).toBe(2)
+	expect(linkRouteFromRoot?.at(0)).toBe(link)
+	expect(linkRouteFromRoot?.at(1)).toBe(linkRoute.at(1))
+	expect(linkRouteFromRoot?.at(0)?.getData().from.path.at(-1)?.boxId).toBe('root')
+	expect(linkRouteFromRoot?.at(0)?.getData().to.path.at(-1)?.boxId).toBe('leftFolderKnot')
+	expect(linkRouteFromRoot?.at(1)?.getData().from.path.at(-1)?.boxId).toBe('leftFolderKnot')
+	expect(linkRouteFromRoot?.at(1)?.getData().to.path.at(-1)?.boxId).toBe('leftFolderFile')
 
 	HoverManager.removeHoverable(leftFolderKnot)
 })
