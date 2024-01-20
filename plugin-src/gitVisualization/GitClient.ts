@@ -1,4 +1,5 @@
 import { DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit } from 'simple-git'
+import { Message } from '../../dist/pluginFacade'
 
 export type Commit = {
     changedFiles: ChangedFile[]
@@ -15,7 +16,17 @@ export class GitClient {
 
     private readonly git: SimpleGit
 
-    public constructor(baseDir: string) {
+    public static async new(baseDir: string): Promise<GitClient | Message> {
+        const gitClient = new GitClient(baseDir)
+        try {
+            await gitClient.git.status()
+        } catch (error) {
+            return new Message('No git repository found.')
+        }
+        return gitClient
+    }
+
+    private constructor(baseDir: string) {
         this.git = simpleGit(baseDir)
     }
 

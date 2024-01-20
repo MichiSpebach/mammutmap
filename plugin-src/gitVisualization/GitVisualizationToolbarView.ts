@@ -1,34 +1,37 @@
 import { RenderElementWithId, UltimateWidget } from '../../dist/core/Widget'
-import { Map, Message, RenderElement, RenderElements, ToolbarView, getMap, onMapLoaded, renderManager } from '../../dist/pluginFacade'
+import { Map, Message, RenderElement, RenderElements, ToolbarView, getMap, onMapRendered, renderManager } from '../../dist/pluginFacade'
 import { ChangedFile, Commit, GitClient } from './GitClient'
 import { visualizeChanges } from './gitWitchcraft'
 
 export class GitVisualizationToolbarView extends UltimateWidget implements ToolbarView {
 
     private isZoomingEnabled: boolean = true
-    private selectedCommits: Commit[] = []
+
+    private gitClient: GitClient | Message = new Message('GitClient not initialized.')
     private commits: Commit[] = []
+    private selectedCommits: Commit[] = []
+
     private refFrom: string = 'HEAD^'
     private refTo: string = 'HEAD'
+
     private isUncommittedChangesShown = false
     private uncommittedChanges: ChangedFile[] = []
-    private gitClient: GitClient = new GitClient('.')
-    private isProjectLoaded: boolean = false
 
     public constructor(
         public readonly id: string
     ) {
         super()
-        onMapLoaded.subscribe(async (map) => {
-            this.isProjectLoaded = false
-            this.selectedCommits = []
-            this.commits = []
-            this.uncommittedChanges = []
-            this.isUncommittedChangesShown = false
+        onMapRendered.subscribe(async (map) => {
             const rootFolderPath: string = map.getRootFolder().getSrcPath()
-            this.gitClient = new GitClient(rootFolderPath)
+            this.gitClient = await GitClient.new(rootFolderPath)
+
+            this.commits = []
+            this.selectedCommits = []
+
+            this.isUncommittedChangesShown = false
+            this.uncommittedChanges = []
+
             await this.render()
-            this.isProjectLoaded = true
         })
     }
 
@@ -45,6 +48,13 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         return this.id
     }
 
+    private getGitClient(): GitClient | never {
+        if (this.gitClient instanceof Message) {
+            throw new Error(this.gitClient.message)
+        }
+        return this.gitClient
+    }
+
     public override shape(): { element: RenderElementWithId; rendering?: Promise<void> | undefined } {
         setTimeout(() => this.render(), 42)
         return {
@@ -59,6 +69,9 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
         const map: Map | Message = getMap()
         if (map instanceof Message) {
             return map.message
+        }
+        if (this.gitClient instanceof Message) {
+            return this.gitClient.message
         }
         return [
             {
@@ -79,10 +92,10 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     }
 
     private async shapeCommitToggles(): Promise<RenderElement> {
-        this.uncommittedChanges = await this.gitClient.getChangedFiles(['HEAD'])
+        this.uncommittedChanges = await this.getGitClient().getChangedFiles(['HEAD'])
         const uncommittedChangesToggle: RenderElement = this.shapeUncommittedChangesToggle()
         if (this.commits.length === 0) {
-            this.commits = await this.gitClient.getCommits('HEAD~10', 'HEAD')
+            this.commits = await this.getGitClient().getCommits('HEAD~10', 'HEAD')
         }
         const commitToggles: RenderElement[] = this.commits.map(commit => this.shapeCommitToggle(commit))
         const toggles: RenderElement[] = [uncommittedChangesToggle, ...commitToggles]
@@ -91,7 +104,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             innerHTML: 'More Commits &#10133;',
             onclick: async () => {
                 const numberOfCommits = this.commits.length
-                this.commits.push(...await this.gitClient.getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`))
+                this.commits.push(...await this.getGitClient().getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`))
                 this.render()
             }
         }
@@ -155,7 +168,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             onclick: async () => {
                 this.refFrom = await renderManager.getValueOf('git-ref-input-from')
                 this.refTo = await renderManager.getValueOf('git-ref-input-to')
-                this.selectedCommits = await this.gitClient.getCommits(this.refFrom, this.refTo)
+                this.selectedCommits = await this.getGitClient().getCommits(this.refFrom, this.refTo)
                 this.render()
             }
         }
@@ -189,8 +202,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
 
     public override async render(): Promise<void> {
         await renderManager.setElementsTo(this.id, await this.shapeInner())
-        const map: Map | Message = getMap()
-        if (map instanceof Message || !this.isProjectLoaded) {
+        if (this.gitClient instanceof Message) {
             return
         }
         if (this.isUncommittedChangesShown) {
