@@ -16,15 +16,15 @@ export async function visualizeChangedFiles(changedFiles: ChangedFile[], isZoomi
     const absoluteFilePaths: string[] = changedFiles.map(file =>
         coreUtil.concatPaths(getRootFolder().getSrcPath(), file.path))
     await highlightBoxes(absoluteFilePaths)
-    if (isZoomingEnabled) {
+    if (isZoomingEnabled && absoluteFilePaths.length > 0) {
         await zoomToChanges(absoluteFilePaths)
     }
 }
 
 async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
     const rootFolder: RootFolderBox = getRootFolder()
-    const changedFileBoxesRendered: Box[] = absoluteFilePaths.map(path =>
+    const renderedBoxes: Box[] = absoluteFilePaths.map(path =>
         rootFolder.getRenderedBoxesInPath(path).at(-1)).filter(box => box) as Box[]
     const map: Map = getMapOrError()
-    await map.zoomToFitBoxes(changedFileBoxesRendered)
+    await map.zoomToFitBoxes(renderedBoxes)
 }
