@@ -306,6 +306,7 @@ export class SizeAndPosition {
 
         await this.referenceNode.renderStyle(RenderPriority.RESPONSIVE)
         await this.referenceNode.render()
+        await this.referenceNode.borderingLinks.renderAllThatShouldBe()
     }
 
     private async delegateZoomToChild(factor: number, positionInParentCoords: LocalPosition, childSiteToDelegateZoom?: SizeAndPosition): Promise<void> {
@@ -355,6 +356,7 @@ export class SizeAndPosition {
             this.referenceNode.renderStyle(RenderPriority.RESPONSIVE),
             this.referenceNode.getParent().site.zoom(factor, this.referenceNode.transform.toParentPosition(position))
         ])
+        await this.referenceNode.borderingLinks.renderAllThatShouldBe()
     }
 
     private async findDetachedChildSite(): Promise<SizeAndPosition | undefined> {
