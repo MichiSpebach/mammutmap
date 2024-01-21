@@ -5,10 +5,6 @@ import { highlightBoxes } from './boxHighlighting'
 export async function visualizeChanges(commits: Commit[], uncommittedChanges: ChangedFile[], isZoomingEnabled: boolean): Promise<void> {
     const changedFiles: ChangedFile[] = commits.flatMap(commit => commit.changedFiles)
     changedFiles.push(...uncommittedChanges)
-
-    coreUtil.logInfo(`Commit message(s): ${commits.map(commit => commit.message)}`)
-    coreUtil.logInfo(`Changed file paths: ${changedFiles.map(file => file.path)}`)
-
     await visualizeChangedFiles(changedFiles, isZoomingEnabled)
 }
 

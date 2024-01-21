@@ -17,6 +17,8 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
     private isUncommittedChangesShown = false
     private uncommittedChanges: ChangedFile[] = []
 
+    private readonly numberOfCommitParents: number = 10
+
     public constructor(
         public readonly id: string
     ) {
@@ -32,7 +34,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             this.uncommittedChanges = []
 
             if (this.gitClient instanceof GitClient) {
-                this.commits = await this.gitClient.getCommits('HEAD~10', 'HEAD')
+                this.commits = await this.gitClient.getCommits(`HEAD~${this.numberOfCommitParents}`, 'HEAD')
                 this.uncommittedChanges = await this.gitClient.getChangedFiles(['HEAD'])
             }
 
@@ -105,7 +107,7 @@ export class GitVisualizationToolbarView extends UltimateWidget implements Toolb
             innerHTML: 'More Commits &#10133;',
             onclick: async () => {
                 const numberOfCommits = this.commits.length
-                this.commits.push(...await this.getGitClient().getCommits(`HEAD~${numberOfCommits + 10}`, `HEAD~${numberOfCommits}`))
+                this.commits.push(...await this.getGitClient().getCommits(`HEAD~${numberOfCommits + this.numberOfCommitParents}`, `HEAD~${numberOfCommits}`))
                 this.render()
             }
         }
