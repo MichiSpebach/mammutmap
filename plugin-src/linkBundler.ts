@@ -120,41 +120,11 @@ async function findLongestCommonRouteWithWatchers(link: Link): Promise<{
 			longestCommonRoute = commonRoute
 		}
 	}
-	
-	if (longestCommonRoute) {
-		extendCommonRoutePartWithKnot('from', longestCommonRoute)
-		extendCommonRoutePartWithKnot('to', longestCommonRoute)
-	}
+
 	return {
 		route: longestCommonRoute,
 		deepestBoxInFromPath,
 		deepestBoxInToPath
-	}
-}
-
-function extendCommonRoutePartWithKnot(end: 'from'|'to', commonRoute: {
-	links: Link[]
-	from: AbstractNodeWidget
-	to: AbstractNodeWidget
-	length: number
-}): void {
-	const commonRouteEndNode: AbstractNodeWidget = commonRoute[end]
-	if (!(commonRouteEndNode instanceof Box)) {
-		return
-	}
-	const linkEndNodeId: string|undefined = end === 'to'
-		? commonRoute.links.at(-1)?.getData().from.path.at(-1)?.boxId
-		: commonRoute.links.at(0)?.getData().to.path.at(-1)?.boxId
-	if (!linkEndNodeId) {
-		console.warn(`TODO`)
-		return
-	}
-	const knot: NodeWidget|undefined = commonRouteEndNode.nodes.getNodeById(linkEndNodeId)
-	if (knot) {
-		end === 'to'
-			? commonRoute.links.pop()
-			: commonRoute.links.shift()
-		commonRoute[end] = knot
 	}
 }
 
@@ -169,7 +139,6 @@ async function findAndExtendCommonRoutes(
 	}[]
 ): Promise<{deepestBoxInPath: BoxWatcher}> {
 	// TODO: refactor this method
-	const otherEnd = end === 'from' ? 'to' : 'from'
 	const managingBox = link.getManagingBox()
 	let path: WayPointData[] = link.getData()[end].path
 	if (path[0].boxId === managingBox.getId()) {
@@ -242,30 +211,26 @@ async function findAndExtendCommonRoutes(
 	return {deepestBoxInPath: waypoint.watcher}
 }
 
-function isKnotBetweenLinks(link: Link, otherLink: Link, knotParent: Box): NodeWidget|undefined {
-	const knot = isKnotBetweenLinksDirected(link, otherLink, knotParent)
-	if (knot) {
-		return knot
-	}
-	return isKnotBetweenLinksDirected(otherLink, link, knotParent)
+function isKnotBetweenLinks(link: Link, otherLink: Link, knotParent: Box): boolean {
+	return isKnotBetweenLinksDirected(link, otherLink, knotParent)
+		|| isKnotBetweenLinksDirected(otherLink, link, knotParent)
 }
 
-function isKnotBetweenLinksDirected(link: Link, followUpLink: Link, knotParent: Box): NodeWidget|undefined {
+function isKnotBetweenLinksDirected(link: Link, followUpLink: Link, knotParent: Box): boolean {
 	const linkToEndNodeId: string|undefined = link.getData().to.path.at(-1)?.boxId
 	if (!linkToEndNodeId) {
-		console.warn(`TODO`)
-		return undefined
+		console.warn(`linkBundler.isKnotBetweenLinksDirected(link: ${link.describe()}, ..): link.getData().to.path is empty`)
+		return false
 	}
 	const folloUpLinkFromEndNodeId: string|undefined = followUpLink.getData().from.path.at(-1)?.boxId
 	if (!folloUpLinkFromEndNodeId) {
-		console.warn(`TODO`)
-		return undefined
+		console.warn(`linkBundler.isKnotBetweenLinksDirected(.., followUpLink: ${followUpLink.describe()}, ..): followUpLink.getData().from.path is empty`)
+		return false
 	}
 	if (linkToEndNodeId !== folloUpLinkFromEndNodeId) {
-		return undefined
+		return false
 	}
-	const knot: NodeWidget|undefined = knotParent.nodes.getNodeById(linkToEndNodeId)
-	return knot instanceof NodeWidget ? knot : undefined
+	return !!knotParent.nodes.getNodeById(linkToEndNodeId)
 }
 
 async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
@@ -309,6 +274,15 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 	insertedNode: NodeWidget, addedLink: Link
 } | undefined> {
 	const commonEndNode: AbstractNodeWidget = commonRoute[end]
+	if (commonEndNode instanceof NodeWidget) {
+		await dragAndDropLinkEnd(linkEnd, commonEndNode)
+		return undefined
+	}
+	
+	if (!(commonEndNode instanceof Box)) {
+		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) not implemented for commonEndNode instanceof ${commonEndNode.constructor.name}`)
+		return undefined
+	}
 	const commonEndLink: Link|undefined = end === 'from'
 		? commonRoute.links.at(0)
 		: commonRoute.links.at(-1)
@@ -316,31 +290,43 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) commonRoute.links is empty`)
 		return undefined
 	}
-	const commonEndLinkEnd: {node: Box|NodeWidget, watcher: BoxWatcher} = await getLinkEndNode(commonEndLink, end)
 
-	let insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
-	let bundleKnot: NodeWidget
-	if (!(commonEndNode instanceof Box)) {
-		bundleKnot = commonEndNode as NodeWidget // TODO remove this case?
-	} else if (commonEndLinkEnd.node instanceof NodeWidget && commonEndLinkEnd.node.getParent() === commonEndNode) {
-		bundleKnot = commonEndLinkEnd.node
-	} else {
-		const linkManagingBoxBefore: Box = commonEndLink.getManagingBox()
-		
-		insertion = (await commonEndLink.getManagingBoxLinks().insertNodeIntoLink(
-			commonEndLink,
-			commonEndNode,
-			await calculateBundleNodePosition(linkEnd.getReferenceLink(), commonEndLink, commonEndNode)
-		))
-		bundleKnot = insertion.insertedNode
-		if (linkManagingBoxBefore !== commonEndLink.getManagingBox()) {
-			console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
-		}
+	const bundleKnot: NodeWidget|undefined = getKnotIfLinkConnected(commonEndLink, commonEndNode)
+	if (bundleKnot) {
+		await dragAndDropLinkEnd(linkEnd, bundleKnot)
+		return undefined
 	}
-	let bundleLinkNodePosition: ClientPosition = (await bundleKnot.getClientShape()).getMidPosition()
-	await linkEnd.dragAndDrop({dropTarget: bundleKnot, clientPosition: bundleLinkNodePosition}) // TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away
-	await commonEndLinkEnd.watcher.unwatch()
+	
+	const linkManagingBoxBefore: Box = commonEndLink.getManagingBox()
+	const insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined = await commonEndLink.getManagingBoxLinks().insertNodeIntoLink(
+		commonEndLink,
+		commonEndNode,
+		await calculateBundleNodePosition(linkEnd.getReferenceLink(), commonEndLink, commonEndNode)
+	)
+	if (linkManagingBoxBefore !== commonEndLink.getManagingBox()) {
+		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
+	}
+	await dragAndDropLinkEnd(linkEnd, insertion.insertedNode)
 	return insertion
+}
+
+async function dragAndDropLinkEnd(linkEnd: LinkEnd, dropTarget: NodeWidget): Promise<void> {
+	const bundleLinkNodePosition: ClientPosition = (await dropTarget.getClientShape()).getMidPosition()
+	await linkEnd.dragAndDrop({dropTarget: dropTarget, clientPosition: bundleLinkNodePosition}) // TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away
+}
+
+function getKnotIfLinkConnected(link: Link, knotParent: Box): NodeWidget|undefined {
+	return getKnotIfLinkEndConnected(link, 'from', knotParent)
+		?? getKnotIfLinkEndConnected(link, 'to', knotParent)
+}
+
+function getKnotIfLinkEndConnected(link: Link, end: 'from'|'to', knotParent: Box): NodeWidget|undefined {
+	const targetWaypoint: WayPointData|undefined = link.getData()[end].path.at(-1)
+	if (!targetWaypoint) {
+		console.warn(`linkBundler.getKnotIfLinkEndConnected(link: ${link.describe()}, ..) link.getData().${end}.path is empty`)
+		return undefined
+	}
+	return knotParent.nodes.getNodeById(targetWaypoint.boxId)
 }
 
 async function calculateBundleNodePosition(link: Link, otherLink: Link, box: Box): Promise<ClientPosition> {
@@ -359,6 +345,7 @@ async function calculateBundleNodePosition(link: Link, otherLink: Link, box: Box
 	return intersections.at(0) ?? boxRect.getMidPosition()
 }
 
+// TODO add a method like this to LinkEnd::getTargetAndRenderIfNecessary()?
 async function getLinkEndNode(link: Link, end: 'from'|'to'): Promise<{
 	node: Box|NodeWidget
 	watcher: BoxWatcher

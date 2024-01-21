@@ -433,14 +433,14 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 	const linkToLeft: Link = await root.links.add({from: root, to: leftInnerFolder, save: true})
 
 	expect(extractIds((await linkBundler.findLongestCommonRoute(linkToRight)))).toEqual(extractIds({
-		links: [routeToRight[0]],
+		links: routeToRight,
 		from: leftInnerFolder,
-		to: leftFolderKnot,
+		to: leftFolder,
 		length: 1
 	}))
 	expect(extractIds((await linkBundler.findLongestCommonRoute(linkToLeft)))).toEqual(extractIds({
-		links: [routeToLeft[1]],
-		from: leftFolderKnot,
+		links: routeToLeft,
+		from: leftFolder,
 		to: leftInnerFolder,
 		length: 1
 	}))
