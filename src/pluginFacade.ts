@@ -5,6 +5,7 @@ import { RootFolderBox } from './core/box/RootFolderBox'
 import { Map, map, onMapLoaded, onMapRendered, onMapUnload } from './core/Map'
 import { util } from './core/util/util'
 import { ChildProcess, environment } from './core/environmentAdapter'
+import { fileSystem } from './core/fileSystemAdapter'
 import { WayPointData } from './core/mapData/WayPointData'
 import { BoxWatcher } from './core/box/BoxWatcher'
 import * as boxFinder from './core/pluginUtil/boxFinder'
@@ -42,6 +43,7 @@ import { MenuItem } from './core/applicationMenu/MenuItem'
 
 export { util as coreUtil }
 export { environment, ChildProcess }
+export { fileSystem }
 export { applicationMenu, contextMenu, MenuItem, MenuItemFile, MenuItemFolder }
 export { renderManager, RenderPriority, Subscribers }
 export { RenderElements, RenderElement, ElementType, Style }
