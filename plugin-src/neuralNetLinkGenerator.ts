@@ -130,7 +130,7 @@ async function generateOutgoingLinksRecursively(folder: FolderBox, options: {
 		const box: FileBox = await iterator.next()
 		fileCount++
 		updateProgressBar()
-		if ((await fileSystem.getDirentStatsOrThrow(box.getSrcPath())).size*1000 > options.maxFilesizeInKB) {
+		if ((await fileSystem.getDirentStatsOrThrow(box.getSrcPath())).size > options.maxFilesizeInKB*1000) {
 			continue
 		}
 		await generateOutgoingLinksForFile(box, {onLinkAdded: (report) => {
