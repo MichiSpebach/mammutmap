@@ -300,6 +300,44 @@ test('bundleLink, commonRoute ends with LinkNode', async () => {
 	HoverManager.removeHoverable(leftFolderKnot)
 })
 
+test('bundleLink, linkToRootKnot', async () => {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const rootKnot: NodeWidget = await root.nodes.add(new NodeData('rootKnot', 50, 50))
+	const file = boxFactory.fileOf({idOrData: 'file', parent: root, addToParent: true, rendered: true})
+	const fileKnot: NodeWidget = await file.nodes.add(new NodeData('fileKnot', 50, 50))
+
+	const linkBetweenKnots: Link = await root.links.add({from: fileKnot, to: rootKnot, save: true})
+	const linkToRootKnot: Link = await root.links.add({from: file, to: rootKnot, save: true})
+
+	await linkBundler.bundleLink(linkToRootKnot)
+ 
+	expect(BoxLinks.findLinkRoute(file, rootKnot)).toEqual([linkToRootKnot, linkBetweenKnots])
+
+	HoverManager.removeHoverable(rootKnot)
+	HoverManager.removeHoverable(fileKnot)
+})
+
+test('bundleLink, linkFromRootKnot', async () => {
+	await initServicesWithMocks()
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const rootKnot: NodeWidget = await root.nodes.add(new NodeData('rootKnot', 50, 50))
+	const file = boxFactory.fileOf({idOrData: 'file', parent: root, addToParent: true, rendered: true})
+	const fileKnot: NodeWidget = await file.nodes.add(new NodeData('fileKnot', 50, 50))
+
+	const linkBetweenKnots: Link = await root.links.add({from: rootKnot, to: fileKnot, save: true})
+	const linkFromRootKnot: Link = await root.links.add({from: rootKnot, to: file, save: true})
+
+	await linkBundler.bundleLink(linkFromRootKnot)
+ 
+	expect(BoxLinks.findLinkRoute(rootKnot, file)).toEqual([linkBetweenKnots, linkFromRootKnot])
+
+	HoverManager.removeHoverable(rootKnot)
+	HoverManager.removeHoverable(fileKnot)
+})
+
 test('findAndExtendCommonRoutes', async () => {
 	await initServicesWithMocks()
 

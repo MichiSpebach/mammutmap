@@ -4,10 +4,12 @@ import { BoxWatcher } from './BoxWatcher'
 import { FolderBox } from './FolderBox'
 
 export class BoxDepthTreeIterator {
+	private readonly srcPathsToIgnore: string[]
 	private boxIterators: ChildBoxesIterator[]|undefined
 	protected nextBox: Box|null
 
-	public constructor(rootBox: FolderBox) {
+	public constructor(rootBox: FolderBox, options?: {srcPathsToIgnore?: string[]}) {
+		this.srcPathsToIgnore = options?.srcPathsToIgnore ?? []
 		this.nextBox = rootBox
 	}
 
@@ -27,6 +29,10 @@ export class BoxDepthTreeIterator {
 	}
 
 	protected async prepareNext(): Promise<void> {
+		await this.prepareNextRecursive()
+	}
+
+	private async prepareNextRecursive(): Promise<void> { // extra method because prepareNext() is overriden by subclass and would lead to unnecessary calls
 		if (!this.boxIterators) {
 			if (!this.nextBox) {
 				log.errorAndThrow('FileBoxDepthTreeIterator::prepareNext() was called, but boxIterators and nextBox are not set.')
@@ -37,17 +43,24 @@ export class BoxDepthTreeIterator {
 			return
 		}
 
-		const currentBoxIterator = this.boxIterators[this.boxIterators.length-1]
-		if (await currentBoxIterator.hasNextOrUnwatch()) {
-			const nextBox: Box = currentBoxIterator.next()
-			if (nextBox.isFolder()) {
-				this.boxIterators.push(await ChildBoxesIterator.new(nextBox as FolderBox))
-			}
-			this.nextBox = nextBox
-		} else {
+		const currentBoxIterator: ChildBoxesIterator = this.boxIterators[this.boxIterators.length-1]
+		if (!(await currentBoxIterator.hasNextOrUnwatch())) {
 			this.boxIterators.pop()
-			await this.prepareNext()
+			await this.prepareNextRecursive()
+			return
 		}
+
+		const nextBox: Box = currentBoxIterator.next()
+		if (this.srcPathsToIgnore.includes(nextBox.getSrcPath())) {
+			this.nextBox = null
+			await this.prepareNextRecursive()
+			return
+		}
+
+		if (nextBox instanceof FolderBox) {
+			this.boxIterators.push(await ChildBoxesIterator.new(nextBox))
+		}
+		this.nextBox = nextBox
 	}
 
 	public async breakAndUnwatch(): Promise<void> {

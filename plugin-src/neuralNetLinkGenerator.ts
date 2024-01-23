@@ -1,7 +1,7 @@
 import { FolderBox } from '../dist/core/box/FolderBox'
 import { SourcelessBox } from '../dist/core/box/SourcelessBox'
 import * as pluginFacade from '../dist/pluginFacade'
-import { coreUtil, contextMenu, MenuItemFile, MenuItemFolder, Box, FileBox, Link, ProgressBarWidget } from '../dist/pluginFacade'
+import { fileSystem, renderManager, coreUtil, contextMenu, MenuItemFile, MenuItemFolder, Box, FileBox, Link, ProgressBarWidget } from '../dist/pluginFacade'
 import * as pathFinder from './neuralNetLinkGenerator/pathFinder'
 import * as typeFinder from './neuralNetLinkGenerator/typeFinder'
 
@@ -41,6 +41,9 @@ Box.Sidebar.BasicToolkit.add({
 })
 
 async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox): Promise<void> {
+	const dialogId = 'generateLinksDialog'+coreUtil.generateId()
+	const maxFilesizeInputId = dialogId+'-maxFilesizeInput'
+	const pathsToIgnoreInputId = dialogId+'-pathsToIgnoreInput'
 	const popup: pluginFacade.PopupWidget = await pluginFacade.PopupWidget.newAndRender({title: 'Generate Outgoing Links Recursively', content: [
 		{type: 'div', style: {marginTop: '8px'}, children: 'Are you sure?'},
 		{
@@ -60,18 +63,59 @@ async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox):
 			]
 		},
 		{
+			type: 'div',
+			children: [
+				{
+					type: 'span',
+					children: 'Max filesize in kB: '
+				},
+				{
+					type: 'input',
+					id: maxFilesizeInputId,
+					value: '100'
+				}
+			]
+		},
+		{
+			type: 'div',
+			children: [
+				{
+					type: 'span',
+					children: 'Paths to ignore: '
+				},
+				{
+					type: 'input',
+					id: pathsToIgnoreInputId,
+					value: 'map, .git, node_modules, venv, .venv, .mvn, target, dist, out'
+				}
+			]
+		},
+		{
 			type: 'button', 
 			children: `Yes, bring in on!`, 
-			onclick: () => {
-				generateOutgoingLinksRecursively(folder)
+			style: {marginTop: '8px'},
+			onclick: async () => {
+				const maxFilesizeInKB: number = Number(await renderManager.getValueOf(maxFilesizeInputId))
+				if (!(maxFilesizeInKB >= 0)) { // < 0 would be false for NaN
+					throw new Error('maxFilesizeInKB has to be >= 0 but is '+maxFilesizeInKB)
+				}
+				const pathsToIgnore: string[] = (await renderManager.getValueOf(pathsToIgnoreInputId)).split(',')
+				const rootPath: string = pluginFacade.getRootFolder().getSrcPath()
+				generateOutgoingLinksRecursively(folder, {
+					maxFilesizeInKB,
+					srcPathsToIgnore: pathsToIgnore.map(path => coreUtil.concatPaths(rootPath, path.trim()))
+				})
 				popup.unrender()
 			}
 		}
 	]})
 }
 
-async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void> {
-	console.log(`Start generating outgoing links recursively of '${folder.getSrcPath()}'...`)
+async function generateOutgoingLinksRecursively(folder: FolderBox, options: {
+	maxFilesizeInKB: number
+	srcPathsToIgnore: string[]
+}): Promise<void> {
+	console.log(`Start generating outgoing links recursively of '${folder.getSrcPath()}' with options '${JSON.stringify(options)}'...`)
 	const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
 	let totalFileCountingFinished: boolean = false
 	let totalFileCount: number = 0
@@ -81,11 +125,14 @@ async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void
 	
 	const countingFiles: Promise<void> = countFiles()
 	
-	const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder)
+	const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder, options)
 	while (await iterator.hasNextOrUnwatch()) {
 		const box: FileBox = await iterator.next()
 		fileCount++
 		updateProgressBar()
+		if ((await fileSystem.getDirentStatsOrThrow(box.getSrcPath())).size*1000 > options.maxFilesizeInKB) {
+			continue
+		}
 		await generateOutgoingLinksForFile(box, {onLinkAdded: (report) => {
 			foundLinksCount += report.linkRoute ? 1 : 0
 			foundLinksAlreadyExistedCount += report.linkRouteAlreadyExisted ? 1 : 0
@@ -98,7 +145,7 @@ async function generateOutgoingLinksRecursively(folder: FolderBox): Promise<void
 	console.log(`Finished ${buildProgressText()}.`)
 
 	async function countFiles(): Promise<void> {
-		for (const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder); await iterator.hasNextOrUnwatch(); await iterator.next()) {
+		for (const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder, options); await iterator.hasNextOrUnwatch(); await iterator.next()) {
 			totalFileCount++
 			updateProgressBar()
 		}
