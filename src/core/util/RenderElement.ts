@@ -13,6 +13,7 @@ export type RenderElement = {
   className?: string,
   selected?: boolean,
   innerHTML?: string,
+  title?: string,
   onclick?: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
   onmouseenter?: (clientX: number, clientY: number, ctrlPressed: boolean) => void,
   onmouseleave?: (clientX: number, clientY: number, ctrlPressed: boolean) => void,

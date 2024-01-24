@@ -27,8 +27,8 @@ test('getChangedFiles for no commit', async () => {
 })
 
 test('compareCommitsByDate', async () => {
-    const commitOne: Commit = { date: '2024-01-02T18:20:07+01:00', hash: '42a', changedFiles: [] }
-    const commitTwo: Commit = { date: '2024-01-02T18:20:06+01:00', hash: '42b', changedFiles: [] }
+    const commitOne: Commit = { date: '2024-01-02T18:20:07+01:00', hash: '42a', author_name: 'Satoshi', changedFiles: [] }
+    const commitTwo: Commit = { date: '2024-01-02T18:20:06+01:00', hash: '42b', author_name: 'Satoshi', changedFiles: [] }
     expect(GitClient.compareCommitsByDate(commitOne, commitTwo)).toBe(-1)
     expect(GitClient.compareCommitsByDate(commitTwo, commitOne)).toBe(1)
     expect(GitClient.compareCommitsByDate(commitOne, commitOne)).toBe(0)

@@ -5,6 +5,7 @@ export type Commit = {
     changedFiles: ChangedFile[]
     message?: string
     hash: string
+    author_name: string
     date: string
 }
 

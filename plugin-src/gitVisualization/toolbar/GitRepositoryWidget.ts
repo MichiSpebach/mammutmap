@@ -111,17 +111,18 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private shapeUncommittedChangesToggle(): RenderElement {
-        return this.shapeToggle(this.isUncommittedChangesShown, '&#127381; Uncommitted changes', (value: boolean) => {
+        return this.shapeToggle(this.isUncommittedChangesShown, '&#127381; Uncommitted changes', 'Staged and un(staged) changes\\nsince last commit', (value: boolean) => {
             this.isUncommittedChangesShown = value
             this.render()
         })
     }
 
-    private shapeToggle(isChecked: boolean, label: string | undefined, onchangeChecked: (checked: boolean) => void): RenderElement {
+    private shapeToggle(isChecked: boolean, label: string | undefined, title: string | undefined, onchangeChecked: (checked: boolean) => void): RenderElement {
         const checkedOrNot: string = isChecked ? ' checked' : ''
         const checkbox: string = '<input type="checkbox" ' + checkedOrNot + '>'
         return {
             type: 'tr',
+            title: title,
             children: [
                 {
                     type: 'td',
@@ -140,7 +141,8 @@ export class GitRepositoryWidget extends UltimateWidget {
     private shapeCommitToggle(commit: Commit): RenderElement {
         const isChecked: boolean = this.selectedCommits.find(selectedCommit =>
             selectedCommit.hash === commit.hash) !== undefined
-        return this.shapeToggle(isChecked, commit.message, (value: boolean) => {
+        const title: string = commit.author_name + '\\n' + commit.date + '\\n' + commit.hash.substring(0,8) 
+        return this.shapeToggle(isChecked, commit.message, title, (value: boolean) => {
             if (value === true) {
                 this.selectedCommits.push(commit)
             } else {
@@ -187,7 +189,7 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private shapeZoomToggle(): RenderElement {
-        return this.shapeToggle(this.isZoomingEnabled, '&#128269; Zoom to changes?', (value: boolean) => {
+        return this.shapeToggle(this.isZoomingEnabled, '&#128269; Zoom to changes?', '', (value: boolean) => {
             this.isZoomingEnabled = value
         })
     }
