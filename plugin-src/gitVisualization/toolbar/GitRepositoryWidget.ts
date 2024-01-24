@@ -60,7 +60,6 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private async initialize() {
-        // TODO: Can the initialization be done in the constructor?
         this.commits = await this.gitClient.getCommits(`HEAD~${this.numberOfCommitParents}`, 'HEAD')
         this.selectedCommits = []
 

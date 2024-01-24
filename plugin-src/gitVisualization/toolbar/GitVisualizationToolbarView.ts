@@ -6,14 +6,19 @@ import { GitRepositoryWidget } from './GitRepositoryWidget'
 
 export class GitVisualizationToolbarView implements ToolbarView {
 
-    private gitClient: GitClient | Message = new Message('GitClient not initialized.')
+    private widget: UltimateWidget = new GitRepositoryNotFoundWidget(this.id, '')
 
     public constructor(
         public readonly id: string
     ) {
         onMapRendered.subscribe(async (map) => {
-            const rootFolderPath: string = map.getRootFolder().getSrcPath()
-            this.gitClient = await GitClient.new(rootFolderPath)
+            const rootFolderPath: string = map.getRootFolder().getSrcPath()            
+            const gitClient: GitClient | Message = await GitClient.new(rootFolderPath)
+            if (gitClient instanceof Message) {
+                this.widget = new GitRepositoryNotFoundWidget(this.id, gitClient.message)
+            } else {
+                this.widget = new GitRepositoryWidget(this.id, gitClient)
+            }
             await this.getWidget().render()
         })
     }
@@ -25,11 +30,8 @@ export class GitVisualizationToolbarView implements ToolbarView {
     public getWidget(): UltimateWidget {
         const map: Map | Message = getMap()
         if (map instanceof Message) {
-            return new GitRepositoryNotFoundWidget(this.id, map.message)
+            this.widget = new GitRepositoryNotFoundWidget(this.id, map.message)
         }
-        if (this.gitClient instanceof Message) {
-            return new GitRepositoryNotFoundWidget(this.id, this.gitClient.message)
-        }
-        return new GitRepositoryWidget(this.id, this.gitClient)
+        return this.widget
     }
 }
