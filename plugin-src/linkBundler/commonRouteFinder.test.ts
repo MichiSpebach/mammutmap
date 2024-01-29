@@ -11,15 +11,17 @@ import { RootFolderBox } from '../../dist/core/box/RootFolderBox'
 import { FolderBox } from '../../dist/core/box/FolderBox'
 import { FileBox } from '../../dist/core/box/FileBox'
 import { HoverManager } from '../../dist/core/HoverManager'
+import { BoxData } from '../../dist/core/mapData/BoxData'
+import { LocalPosition } from '../../dist/core/shape/LocalPosition'
 
 test('findAndExtendCommonRoutes', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
-	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
-	const rightTopFile = boxFactory.fileOf({idOrData: 'rightTopFile', parent: root, addToParent: true, rendered: true})
-	const rightBottomFile = boxFactory.fileOf({idOrData: 'rightBottomFile', parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderTopFile = boxFactory.fileOf({idOrData: new BoxData('leftFolderTopFile', 20, 10, 60, 20, [], []), parent: leftFolder, addToParent: true, rendered: true})
+	const rightTopFile = boxFactory.fileOf({idOrData: new BoxData('rightTopFile', 60, 20, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
+	const rightBottomFile = boxFactory.fileOf({idOrData: new BoxData('rightBottomFile', 60, 60, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
 
 	const topLink: Link = await root.links.add({from: leftFolderTopFile, to: rightTopFile, save: true})
 	const unaffectedBottomLink: Link = await root.links.add({from: leftFolder, to: rightBottomFile, save: true})
@@ -39,18 +41,18 @@ test('findAndExtendCommonRoutes, different managingBoxes of links', async () => 
 	await testUtil.initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const leftDeepDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepDeepFolder', parent: leftDeepFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const leftDeepDeepFile = boxFactory.fileOf({idOrData: 'leftDeepDeepFile', parent: leftDeepDeepFolder, addToParent: true, rendered: true})
 	const leftFileUnrenderSpy = jest.spyOn(leftDeepDeepFile, 'unrenderIfPossible').mockReturnValue(Promise.resolve({rendered: true})) // leads otherwise to undefined error
-	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
 	rightFile.body.render = () => Promise.resolve() // leads otherwise to undefined error
 
 	const longLinkToRight: Link = await root.links.add({from: leftDeepDeepFile, to: rightFile, save: true})
-	const shortLinkToRight: Link = await leftFolder.links.add({from: leftDeepDeepFolder, to: leftFolder, save: true})
+	const shortLinkToRight: Link = await leftFolder.links.add({from: leftDeepDeepFolder, to: {node: leftFolder, positionInToNodeCoords: new LocalPosition(90, 50)}, save: true})
 	const longLinkToLeft: Link = await root.links.add({from: rightFile, to: leftDeepDeepFile, save: true})
-	const shortLinkToLeft: Link = await leftFolder.links.add({from: leftFolder, to: leftDeepDeepFolder, save: true})
+	const shortLinkToLeft: Link = await leftFolder.links.add({from: {node: leftFolder, positionInFromNodeCoords: new LocalPosition(90, 50)}, to: leftDeepDeepFolder, save: true})
 
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
 		links: [shortLinkToRight],
@@ -83,12 +85,12 @@ test('findAndExtendCommonRoutes, longer commonRoute', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const leftDeepDeepFolder = boxFactory.folderOf({idOrData: 'leftDeepDeepFolder', parent: leftDeepFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const leftDeepDeepFile = boxFactory.fileOf({idOrData: 'leftDeepDeepFile', parent: leftDeepDeepFolder, addToParent: true, rendered: true})
 	const leftFileUnrenderSpy = jest.spyOn(leftDeepDeepFile, 'unrenderIfPossible').mockReturnValue(Promise.resolve({rendered: true})) // leads otherwise to undefined error
-	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
 	rightFile.body.render = () => Promise.resolve() // leads otherwise to undefined error
 
 	const longLinkToRight: Link = await root.links.add({from: leftDeepDeepFile, to: rightFile, save: true})
@@ -127,11 +129,11 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const leftFolder: FolderBox = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
 	const leftInnerFolder: FolderBox = boxFactory.folderOf({idOrData: 'leftInnerFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const leftDeepFile: FileBox = boxFactory.fileOf({idOrData: 'leftDeepFile', parent: leftInnerFolder, addToParent: true, rendered: true})
-	const rightFile: FileBox = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	const rightFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
 
 	const routeToRight: Link[] = [
 		await leftFolder.links.add({from: leftDeepFile, to: leftFolderKnot, save: true}),
@@ -158,6 +160,85 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 	}))
 
 	HoverManager.removeHoverable(leftFolderKnot)
+})
+
+test('findAndExtendCommonRoutes, links are on different sides, other link is on top side', async () => {
+	await testFindAndExtendCommonRoutesLinksAreOnDifferentSides(new LocalPosition(45, 20))
+})
+
+test('findAndExtendCommonRoutes, links are on different sides, other link is on right side', async () => {
+	await testFindAndExtendCommonRoutesLinksAreOnDifferentSides(new LocalPosition(80, 45))
+})
+
+test('findAndExtendCommonRoutes, links are on different sides, other link is on bottom side', async () => {
+	await testFindAndExtendCommonRoutesLinksAreOnDifferentSides(new LocalPosition(45, 80))
+})
+
+async function testFindAndExtendCommonRoutesLinksAreOnDifferentSides(otherFilePosition: LocalPosition): Promise<void> {
+	await testUtil.initServicesWithMocks()
+	
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 45, 10, 10, [], []), parent: root, addToParent: true, rendered: true})
+	const centerFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('centerFolder', 30, 30, 40, 40, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const centerFolderFile: FileBox = boxFactory.fileOf({idOrData: 'centerFolderFile', parent: centerFolder, addToParent: true, rendered: true})
+	const otherFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('otherFile', otherFilePosition.percentX, otherFilePosition.percentY, 10, 10, [], []), parent: root, addToParent: true, rendered: true})
+	
+	const linkFromLeftFile: Link = await root.links.add({from: leftFile, to: centerFolderFile, save: true})
+	const linkFromOtherFile: Link = await root.links.add({from: otherFile, to: centerFolderFile, save: true})
+	const linkToLeftFile: Link = await root.links.add({from: centerFolderFile, to: leftFile, save: true})
+	const linkToOtherFile: Link = await root.links.add({from: centerFolderFile, to: otherFile, save: true})
+	
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(linkFromLeftFile))).toBe(undefined)
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(linkFromOtherFile))).toBe(undefined)
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(linkToLeftFile))).toBe(undefined)
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(linkToOtherFile))).toBe(undefined)
+}
+
+test('findAndExtendCommonRoutes, longLink on other side, shortLink on same side', async () => {
+	await testUtil.initServicesWithMocks()
+
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 45, 10, 10, [], []), parent: root, addToParent: true, rendered: true})
+	const centerFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('centerFolder', 30, 30, 40, 40, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const centerInnerFolder: FolderBox = boxFactory.folderOf({idOrData: 'centerInnerFolder', parent: centerFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const centerInnerFolderFile: FileBox = boxFactory.fileOf({idOrData: 'centerInnerFolderFile', parent: centerInnerFolder, addToParent: true, rendered: true})
+	const rightFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('rightFile', 80, 45, 10, 10, [], []), parent: root, addToParent: true, rendered: true})
+
+	const longLinkFromLeft: Link = await root.links.add({from: leftFile, to: centerInnerFolderFile, save: true})
+	const shortLinkFromLeft: Link = await centerFolder.links.add({from: {node: centerFolder, positionInFromNodeCoords: new LocalPosition(10, 50)}, to: centerInnerFolderFile, save: true})
+	const longLinkFromRight: Link = await root.links.add({from: rightFile, to: centerInnerFolderFile, save: true})
+
+	const longLinkToLeft: Link = await root.links.add({from: centerInnerFolderFile, to: leftFile, save: true})
+	const shortLinkToLeft: Link = await centerFolder.links.add({from: centerInnerFolderFile, to: {node: centerFolder, positionInToNodeCoords: new LocalPosition(10, 50)}, save: true})
+	const longLinkToRight: Link = await root.links.add({from: centerInnerFolderFile, to: rightFile, save: true})
+
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkFromLeft))).toEqual(extractIds({
+		links: [shortLinkFromLeft],
+		from: centerInnerFolder,
+		to: centerInnerFolderFile,
+		length: 1
+	}))
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(shortLinkFromLeft))).toEqual(extractIds({
+		links: [longLinkFromLeft],
+		from: centerInnerFolder,
+		to: centerInnerFolderFile,
+		length: 1
+	}))
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkFromRight))).toBe(undefined)
+
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
+		links: [shortLinkToLeft],
+		from: centerInnerFolderFile,
+		to: centerInnerFolder,
+		length: 1
+	}))
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
+		links: [longLinkToLeft],
+		from: centerInnerFolderFile,
+		to: centerInnerFolder,
+		length: 1
+	}))
+	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToRight))).toBe(undefined)
 })
 
 function extractIds(commonRoute: {

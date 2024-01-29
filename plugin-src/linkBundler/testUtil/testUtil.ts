@@ -12,6 +12,8 @@ import { FileSystemAdapter } from '../../../dist/core/fileSystemAdapter'
 import { RelocationDragManager } from '../../../dist/core/RelocationDragManager'
 import * as relocationDragManager from '../../../dist/core/RelocationDragManager'
 
+const consoleLogBackup = console.log
+
 export async function initServicesWithMocks(options?: {hideConsoleLog?: boolean}): Promise<{
 	renderManager: MockProxy<RenderManager>
 	boxManager: MockProxy<BoxManager>
@@ -33,6 +35,8 @@ export async function initServicesWithMocks(options?: {hideConsoleLog?: boolean}
 
 	if (options?.hideConsoleLog) {
 		jest.spyOn(console, 'log').mockImplementation()
+	} else {
+		console.log = consoleLogBackup
 	}
 
 	return {

@@ -7,13 +7,9 @@ import { NodeWidget } from '../dist/core/node/NodeWidget'
 import * as contextMenu from '../dist/core/contextMenu'
 import { applicationMenu } from '../dist/core/applicationMenu/applicationMenu'
 import { MenuItemFile } from '../dist/core/applicationMenu/MenuItemFile'
-/**
- * pluginFacade not used in imports because
- * some imports could not be resolved when importing from '../dist/pluginFacade' and cause:
- * "TypeError: Class extends value undefined is not a constructor or null"
- * TODO fix this!
- */
 import * as bundler from './linkBundler/bundler'
+import * as pluginFacade from '../dist/pluginFacade'
+import { coreUtil } from '../dist/pluginFacade'
 
 contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: 'bundle', click: () => bundler.bundleLink(link)}))
 
@@ -44,7 +40,7 @@ function activateBundleNewLinks(): void {
 	addLinkBackup = BoxLinks.prototype.add
 	BoxLinks.prototype.add = async function (options) {
 		const link: Link = await addLinkBackup.call(this, options)
-		await bundler.bundleLink(link)
+		scheduleBundleLink(link)
 		return link
 	}
 	console.info(`bundleNewLinks activated`)
@@ -72,4 +68,74 @@ async function getLinkEndNode(link: Link, end: 'from'|'to'): Promise<{
 	return link.getManagingBox().getDescendantByPathAndRenderIfNecessary(linkEndPath.map(wayPoint => {
 		return {id: wayPoint.boxId}
 	}))
+}
+
+const queue: {linkId: string, managingBoxSrcPath: string}[] = []
+let processing: boolean = false
+
+function scheduleBundleLink(link: Link): void {
+	queue.push({linkId: link.getId(), managingBoxSrcPath: link.getManagingBox().getSrcPath()})
+	processQueue()
+}
+
+async function processQueue(): Promise<void> {
+	if (processing) {
+		return
+	}
+	processing = true
+	updateProgressBar()
+	
+	for (let element = queue.pop(); element; element = queue.pop()) {
+		const {boxWatcher: managingBox} = await pluginFacade.getRootFolder().getBoxBySourcePathAndRenderIfNecessary(element.managingBoxSrcPath)
+		if (!managingBox) {
+			console.warn(`linkBundler.processQueue() failed to getBoxBySourcePathAndRenderIfNecessary('${element.managingBoxSrcPath}')`)
+			continue
+		}
+		const link: Link|undefined = (await managingBox.get()).links.getLinks().find(link => link.getId() === element!.linkId)
+		if (!link) {
+			console.warn(`linkBundler.processQueue() managingBox '${element.managingBoxSrcPath}' does not contain link with id '${element.linkId}'`)
+			continue
+		}
+		await bundler.bundleLink(link)
+		
+		managingBox.unwatch()
+		updateProgressBar()
+	}
+
+	processing = false
+}
+
+const progressBarId: string = 'linkBundlerProgressBar'+coreUtil.generateId()
+let progressBarMounted: boolean = false
+
+async function updateProgressBar(): Promise<void> {
+	if (queue.length === 0) {
+		await removeProgressBar()
+		return
+	}
+	const innerShape: pluginFacade.RenderElements = `scheduled ${queue.length} links to bundle`
+	if (!progressBarMounted) {
+		progressBarMounted = true
+		await pluginFacade.renderManager.addElementTo(pluginFacade.mainWidget.getId(), {
+			type: 'div',
+			id: progressBarId,
+			style: {
+				position: 'absolute',
+				right: '20%',
+				bottom: '15%',
+				margin: '8px'
+			},
+			children: innerShape
+		})
+	} else {
+		await pluginFacade.renderManager.setElementsTo(progressBarId, innerShape)
+	}
+}
+
+async function removeProgressBar(): Promise<void> {
+	if (!progressBarMounted) {
+		return
+	}
+	progressBarMounted = false
+	await pluginFacade.renderManager.remove(progressBarId)
 }

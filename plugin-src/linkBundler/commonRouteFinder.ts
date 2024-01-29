@@ -5,11 +5,13 @@
  * TODO fix this!
  */
 import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
+import { ClientRect } from '../../dist/core/ClientRect'
 import { Box } from '../../dist/core/box/Box'
 import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link } from '../../dist/core/link/Link'
 import { WayPointData } from '../../dist/core/mapData/WayPointData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
+import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 
 export async function findLongestCommonRoute(link: Link): Promise<{
 	links: Link[]
@@ -71,7 +73,8 @@ async function findAndExtendCommonRoutes(
 	}[]
 ): Promise<{deepestBoxInPath: BoxWatcher}> {
 	// TODO: refactor this method
-	const managingBox = link.getManagingBox()
+	const managingBox: Box = link.getManagingBox()
+	const linkLine: {from: ClientPosition, to: ClientPosition} = await link.getLineInClientCoords()
 	let path: WayPointData[] = link.getData()[end].path
 	if (path[0].boxId === managingBox.getId()) {
 		path = path.slice(1)
@@ -89,11 +92,15 @@ async function findAndExtendCommonRoutes(
 		}
 		waypoint.watcher.unwatch()
 		waypoint = newWaypoint
+		const waypointRect: ClientRect = await waypoint.node.getClientShape()
 		const borderingLinks: Link[] = end === 'from'
 			? waypoint.node.borderingLinks.getOutgoing()
 			: waypoint.node.borderingLinks.getIngoing()
 		for (const borderingLink of borderingLinks) {
 			if (borderingLink === link) {
+				continue
+			}
+			if (!canLinksBeBundled(linkLine, await borderingLink.getLineInClientCoords(), waypointRect)) {
 				continue
 			}
 			let newWaypointNode: Box|NodeWidget = waypoint.node
@@ -141,6 +148,57 @@ async function findAndExtendCommonRoutes(
 		}
 	}
 	return {deepestBoxInPath: waypoint.watcher}
+}
+
+/** TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away */
+function canLinksBeBundled(
+	linkLine: {from: ClientPosition, to: ClientPosition},
+	otherLinkLine: {from: ClientPosition, to: ClientPosition},
+	intersectionRect: ClientRect
+): boolean {
+	const intersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLine)
+	if (intersections.length === 0) {
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) intersections.length === 0, returning false`)
+		return false
+	}
+	if (intersections.length !== 1) {
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with linkLine, but are ${intersectionRect}`)
+	}
+	const otherIntersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(otherLinkLine)
+	if (otherIntersections.length === 0) {
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) otherIntersections.length === 0, returning false`)
+		return false
+	}
+	if (otherIntersections.length !== 1) {
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with otherLinkLine, but are ${otherIntersections}`)
+	}
+	const intersection: ClientPosition = intersections[0]
+	const otherIntersection: ClientPosition = otherIntersections[0]
+	const horizontalEpsilon: number = intersectionRect.width/100
+	const verticalEpsilon: number = intersectionRect.height/100
+	if (areNearlyEqual([intersectionRect.x, intersection.x, otherIntersection.x], horizontalEpsilon)) {
+		return true
+	}
+	if (areNearlyEqual([intersectionRect.getRightX(), intersection.x, otherIntersection.x], horizontalEpsilon)) {
+		return true
+	}
+	if (areNearlyEqual([intersectionRect.y, intersection.y, otherIntersection.y], verticalEpsilon)) {
+		return true
+	}
+	if (areNearlyEqual([intersectionRect.getBottomY(), intersection.y, otherIntersection.y], verticalEpsilon)) {
+		return true
+	}
+	return false
+}
+
+function areNearlyEqual(values: number[], epsilon: number): boolean {
+	const value: number = values[0]
+	for (let i = 1; i < values.length; i++) {
+		if (Math.abs(value - values[i]) > epsilon) {
+			return false
+		}
+	}
+	return true
 }
 
 function isKnotBetweenLinks(link: Link, otherLink: Link, knotParent: Box): boolean {

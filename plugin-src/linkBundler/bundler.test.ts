@@ -8,6 +8,7 @@ import { Link } from '../../dist/core/link/Link'
 import { NodeData } from '../../dist/core/mapData/NodeData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { HoverManager } from '../../dist/core/HoverManager'
+import { BoxData } from '../../dist/core/mapData/BoxData'
 
 test('bundleLink, nothing to bundle', async () => {
 	await testUtil.initServicesWithMocks()
@@ -27,14 +28,13 @@ test('bundleLink, insert one node', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const rightFile = boxFactory.fileOf({idOrData: 'rootFolderFile', parent: root, addToParent: true, rendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rootFolderFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
 	const leftFolderBottomFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
 	
 	const topLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFile, save: true})
 	const bottomLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFile, save: true})
-	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
 	
 	await linkBundler.bundleLink(topLink)
 
@@ -50,18 +50,14 @@ test('bundleLink, insert one node', async () => {
 	expect(topLink.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['leftFolderTopFile'])
 	expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual([expect.stringContaining('node')])
 	//expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual(expect.arrayContaining(['rightFile', expect.anything()]))
-
-	expect(console.warn).toBeCalledWith('linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are 0')
-	expect(console.warn).toBeCalledTimes(1)
-	consoleWarn.mockRestore()
 })
 
 test('bundleLink, insert two nodes', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
-	const rightFolder = boxFactory.folderOf({idOrData: 'rightFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFolder = boxFactory.folderOf({idOrData: new BoxData('rightFolder', 60, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
 	const leftFolderBottomFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
 	const rightFolderTopFile = boxFactory.fileOf({idOrData: 'rightFolderTopFile', parent: rightFolder, addToParent: true, rendered: true})
@@ -69,7 +65,6 @@ test('bundleLink, insert two nodes', async () => {
 	
 	const topLink = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
 	const bottomLink = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
-	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
 
 	await linkBundler.bundleLink(topLink)
 	
@@ -81,10 +76,6 @@ test('bundleLink, insert two nodes', async () => {
 	const bottomLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)!
 	expect(bottomLinkRoute.length).toBe(3)
 	expect(bottomLinkRoute[1].getId()).toBe(bottomLink.getId())
-	
-	expect(console.warn).toBeCalledWith('linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are 0')
-	expect(console.warn).toBeCalledTimes(2)
-	consoleWarn.mockRestore()
 })
 
 test('bundleLink, insert two nodes, both inserts in from part, bundling longLink', async () => {
@@ -99,14 +90,13 @@ async function testBundleLinkBothInsertsInFromPart(linkToBundle: 'longLink'|'sho
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftInnerFolder = boxFactory.folderOf({idOrData: 'leftInnerFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFile = boxFactory.fileOf({idOrData: 'leftFile', parent: leftInnerFolder, addToParent: true, rendered: true})
-	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
 
 	const longLink: Link = await root.links.add({from: leftFile, to: rightFile, save: true})
 	const shortLink: Link = await root.links.add({from: leftInnerFolder, to: root, save: true})
-	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
 
 	await linkBundler.bundleLink({longLink, shortLink}[linkToBundle])
 	
@@ -119,9 +109,6 @@ async function testBundleLinkBothInsertsInFromPart(linkToBundle: 'longLink'|'sho
 	expect(shortRoute[2].getId()).toBe(shortLink.getId())
 
 	expect(longRoute[1].getId()).toBe(shortRoute[1].getId())
-	expect(console.warn).toBeCalledWith('linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are 0')
-	expect(console.warn).toBeCalledTimes(2)
-	consoleWarn.mockRestore()
 }
 
 test('bundleLink, insert two nodes, both inserts in to part, bundling longLink', async () => {
@@ -136,16 +123,15 @@ async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'short
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftInnerFolder = boxFactory.folderOf({idOrData: 'leftInnerFolder', parent: leftFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFile = boxFactory.fileOf({idOrData: 'leftFile', parent: leftInnerFolder, addToParent: true, rendered: true})
-	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
 
 	const longLink: Link = await root.links.add({from: rightFile, to: leftFile, save: true})
 	const shortLink: Link = await root.links.add({from: root, to: leftInnerFolder, save: true})
 	let shortRouteTest: Link[] = BoxLinks.findLinkRoute(root, leftInnerFolder)!
 	expect(shortRouteTest.length).toBe(1) // two because start link is not in there because following link also starts from leftInnerFolder
-	const consoleWarn: jest.SpyInstance = jest.spyOn(console, 'warn').mockImplementation()
 
 	await linkBundler.bundleLink({longLink, shortLink}[linkToBundle])
 	
@@ -158,17 +144,14 @@ async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'short
 	expect(shortRoute[0].getId()).toBe(shortLink.getId())
 
 	expect(longRoute[1].getId()).toBe(shortRoute[1].getId())
-	expect(console.warn).toBeCalledWith('linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are 0')
-	expect(console.warn).toBeCalledTimes(2)
-	consoleWarn.mockRestore()
 }
 
 test('bundleLink, commonRoute startLink starts at LinkNode', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
 	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderFile', parent: leftFolder, addToParent: true, rendered: true})
 
@@ -198,8 +181,8 @@ test('bundleLink, commonRoute endLink ends at LinkNode', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
 	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderFile', parent: leftFolder, addToParent: true, rendered: true})
 
@@ -229,8 +212,8 @@ test('bundleLink, commonRoute starts with LinkNode', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
 	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderFile', parent: leftFolder, addToParent: true, rendered: true})
 
@@ -260,8 +243,8 @@ test('bundleLink, commonRoute ends with LinkNode', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const rightFile = boxFactory.fileOf({idOrData: 'rightFile', parent: root, addToParent: true, rendered: true})
-	const leftFolder = boxFactory.folderOf({idOrData: 'leftFolder', parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
 	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
 	const leftFolderFile = boxFactory.fileOf({idOrData: 'leftFolderFile', parent: leftFolder, addToParent: true, rendered: true})
 
@@ -291,16 +274,16 @@ test('bundleLink, linkToRootKnot', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const rootKnot: NodeWidget = await root.nodes.add(new NodeData('rootKnot', 50, 50))
-	const file = boxFactory.fileOf({idOrData: 'file', parent: root, addToParent: true, rendered: true})
+	const file = boxFactory.fileOf({idOrData: new BoxData('file', 10, 40, 40, 20, [], []), parent: root, addToParent: true, rendered: true})
 	const fileKnot: NodeWidget = await file.nodes.add(new NodeData('fileKnot', 50, 50))
+	const rootKnot: NodeWidget = await root.nodes.add(new NodeData('rootKnot', 60, 50))
 
 	const linkBetweenKnots: Link = await root.links.add({from: fileKnot, to: rootKnot, save: true})
 	const linkToRootKnot: Link = await root.links.add({from: file, to: rootKnot, save: true})
 
 	await linkBundler.bundleLink(linkToRootKnot)
  
-	expect(BoxLinks.findLinkRoute(file, rootKnot)).toEqual([linkToRootKnot, linkBetweenKnots])
+	expect(BoxLinks.findLinkRoute(file, rootKnot)?.map(node => node.getId())).toEqual([linkToRootKnot, linkBetweenKnots].map(node => node.getId()))
 
 	HoverManager.removeHoverable(rootKnot)
 	HoverManager.removeHoverable(fileKnot)
@@ -310,16 +293,16 @@ test('bundleLink, linkFromRootKnot', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
-	const rootKnot: NodeWidget = await root.nodes.add(new NodeData('rootKnot', 50, 50))
-	const file = boxFactory.fileOf({idOrData: 'file', parent: root, addToParent: true, rendered: true})
+	const file = boxFactory.fileOf({idOrData: new BoxData('file', 10, 40, 40, 20, [], []), parent: root, addToParent: true, rendered: true})
 	const fileKnot: NodeWidget = await file.nodes.add(new NodeData('fileKnot', 50, 50))
+	const rootKnot: NodeWidget = await root.nodes.add(new NodeData('rootKnot', 60, 50))
 
 	const linkBetweenKnots: Link = await root.links.add({from: rootKnot, to: fileKnot, save: true})
 	const linkFromRootKnot: Link = await root.links.add({from: rootKnot, to: file, save: true})
 
 	await linkBundler.bundleLink(linkFromRootKnot)
  
-	expect(BoxLinks.findLinkRoute(rootKnot, file)).toEqual([linkBetweenKnots, linkFromRootKnot])
+	expect(BoxLinks.findLinkRoute(rootKnot, file)?.map(node => node.getId())).toEqual([linkBetweenKnots, linkFromRootKnot].map(node => node.getId()))
 
 	HoverManager.removeHoverable(rootKnot)
 	HoverManager.removeHoverable(fileKnot)

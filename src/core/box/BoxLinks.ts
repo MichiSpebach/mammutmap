@@ -87,11 +87,8 @@ export class BoxLinks extends Widget {
         ? options.to
         : options.to.node
 
-      if (this.referenceBox !== fromNode && !this.referenceBox.isAncestorOf(fromNode)) {
-        log.warning(`BoxLinks::add(from: ${fromNode.getName()}, to: ${toNode.getName()}) from is not an descendant of referred box (${this.referenceBox.getName()}).`)
-      }
-      if (this.referenceBox !== toNode && !this.referenceBox.isAncestorOf(toNode)) {
-        log.warning(`BoxLinks::add(from: ${fromNode.getName()}, to: ${toNode.getName()}) to is not an descendant of referred box (${this.referenceBox.getName()}).`)
+      if (Box.findCommonAncestor(fromNode, toNode).commonAncestor !== this.referenceBox) {
+        log.warning(`BoxLinks::add(from: ${fromNode.getName()}, to: ${toNode.getName()}) commonAncestor ('${Box.findCommonAncestor(fromNode, toNode).commonAncestor.getName()}') of from and to is not referred box ('${this.referenceBox.getName()}').`)
       }
 
       const link: Link = await Link.newOfEnds({from: options.from, to: options.to, managingBox: this.referenceBox})
