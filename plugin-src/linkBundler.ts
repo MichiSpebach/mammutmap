@@ -86,7 +86,7 @@ async function processQueue(): Promise<void> {
 	updateProgressBar()
 	
 	for (let element = queue.pop(); element; element = queue.pop()) {
-		const {boxWatcher: managingBox} = await pluginFacade.getRootFolder().getBoxBySourcePathAndRenderIfNecessary(element.managingBoxSrcPath)
+		const {boxWatcher: managingBox} = await pluginFacade.getMapOrError().getBoxBySourcePathAndRenderIfNecessary(element.managingBoxSrcPath)
 		if (!managingBox) {
 			console.warn(`linkBundler.processQueue() failed to getBoxBySourcePathAndRenderIfNecessary('${element.managingBoxSrcPath}')`)
 			continue
@@ -96,7 +96,7 @@ async function processQueue(): Promise<void> {
 			console.warn(`linkBundler.processQueue() managingBox '${element.managingBoxSrcPath}' does not contain link with id '${element.linkId}'`)
 			continue
 		}
-		await bundler.bundleLink(link)
+		await bundler.bundleLink(link, {unwatchDelayInMs: 500})
 		
 		managingBox.unwatch()
 		updateProgressBar()

@@ -14,7 +14,9 @@ import { WayPointData } from '../../dist/core/mapData/WayPointData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import * as commonRouteFinder from './commonRouteFinder'
 
-export async function bundleLink(link: Link): Promise<void> {
+export async function bundleLink(link: Link, options?: {
+	unwatchDelayInMs?: number
+}): Promise<void> {
 	const {route: longestCommonRoute, deepestBoxInFromPath, deepestBoxInToPath} = await commonRouteFinder.findLongestCommonRouteWithWatchers(link)
 
 	if (longestCommonRoute && longestCommonRoute.length > 0) {
@@ -22,10 +24,17 @@ export async function bundleLink(link: Link): Promise<void> {
 		await bundleLinkIntoCommonRoute(link, longestCommonRoute)
 	}
 
-	await Promise.all([
-		deepestBoxInFromPath.unwatch(),
-		deepestBoxInToPath.unwatch()
-	])
+	if (options?.unwatchDelayInMs) {
+		setTimeout(() => {
+			deepestBoxInFromPath.unwatch()
+			deepestBoxInToPath.unwatch()
+		}, options.unwatchDelayInMs)
+	} else {
+		await Promise.all([
+			deepestBoxInFromPath.unwatch(),
+			deepestBoxInToPath.unwatch()
+		])
+	}
 }
 
 async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {

@@ -156,13 +156,14 @@ function canLinksBeBundled(
 	otherLinkLine: {from: ClientPosition, to: ClientPosition},
 	intersectionRect: ClientRect
 ): boolean {
+	// TODO elongate lines by epsilon, otherwise intersections are missed sometimes at edge cases
 	const intersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLine)
 	if (intersections.length === 0) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) intersections.length === 0, returning false`)
 		return false
 	}
 	if (intersections.length !== 1) {
-		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with linkLine, but are ${intersectionRect}`)
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with linkLine, but are ${intersections.length}`)
 	}
 	const otherIntersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(otherLinkLine)
 	if (otherIntersections.length === 0) {
@@ -170,7 +171,7 @@ function canLinksBeBundled(
 		return false
 	}
 	if (otherIntersections.length !== 1) {
-		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with otherLinkLine, but are ${otherIntersections}`)
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with otherLinkLine, but are ${otherIntersections.length}`)
 	}
 	const intersection: ClientPosition = intersections[0]
 	const otherIntersection: ClientPosition = otherIntersections[0]

@@ -210,6 +210,16 @@ export class Map {
     return this.rootFolder
   }
 
+  public async getBoxBySourcePathAndRenderIfNecessary(
+    path: string, 
+    options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean, foreachBoxInPath?: (box: Box) => void}
+  ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
+    if (path === this.rootFolder.getSrcPath()) {
+      return {boxWatcher: await BoxWatcher.newAndWatch(this.rootFolder)}
+    }
+    return this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, options)
+  }
+
   private async getMapClientRect(): Promise<ClientRect> {
     if (!this.cachedMapClientRect) {
       this.cachedMapClientRect = await renderManager.getClientRectOf(this.mapId, RenderPriority.RESPONSIVE)
@@ -245,7 +255,7 @@ export class Map {
       zoomingOut = util.wait(transitionDurationInMS*0.9) // looks more fluent to not stop while flying to await until everything is rendered
     }
 
-    const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
+    const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
       await zoomingOut
       if (!zoomedInPath.includes(box)) {
         latestZoomTo = {box, promise: box.site.zoomToFit({transitionDurationInMS})}
