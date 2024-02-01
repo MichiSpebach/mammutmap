@@ -39,10 +39,6 @@ export class Line<POSITION extends Position<POSITION>> {
 		return Math.sqrt(width*width + height*height)
 	}
 
-	public getDirectedSlope(): number {
-		return this.getHeightCoordinateWise() / Math.abs(this.getWidthCoordinateWise())
-	}
-
 	public getWidthCoordinateWise(): number {
 		return this.to.getX() - this.from.getX()
 	}
