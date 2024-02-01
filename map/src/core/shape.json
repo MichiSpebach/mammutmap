@@ -204,6 +204,32 @@
 				],
 				"floatToBorder": true
 			}
+		},
+		{
+			"id": "ps9ehaspil",
+			"from": {
+				"path": [
+					{
+						"boxId": "g3f2sse0jv",
+						"boxName": "Line.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rof59v11638",
+						"boxName": "Position.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
 		}
 	],
 	"nodes": [

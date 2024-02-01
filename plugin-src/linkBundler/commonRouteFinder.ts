@@ -12,6 +12,7 @@ import { Link } from '../../dist/core/link/Link'
 import { WayPointData } from '../../dist/core/mapData/WayPointData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
+import { Line } from '../../dist/core/shape/Line'
 
 export async function findLongestCommonRoute(link: Link): Promise<{
 	links: Link[]
@@ -156,7 +157,10 @@ function canLinksBeBundled(
 	otherLinkLine: {from: ClientPosition, to: ClientPosition},
 	intersectionRect: ClientRect
 ): boolean {
-	// TODO elongate lines by epsilon, otherwise intersections are missed sometimes at edge cases
+	const elongationEpsilon: number = Math.sqrt(intersectionRect.width*intersectionRect.width + intersectionRect.height*intersectionRect.height) / 100
+	linkLine = new Line(linkLine.from, linkLine.to).elongate(elongationEpsilon)
+	otherLinkLine = new Line(otherLinkLine.from, otherLinkLine.to).elongate(elongationEpsilon)
+	
 	const intersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLine)
 	if (intersections.length === 0) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) intersections.length === 0, returning false`)

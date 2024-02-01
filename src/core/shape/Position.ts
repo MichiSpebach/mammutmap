@@ -1,5 +1,15 @@
 export abstract class Position<POSITION extends Position<POSITION>> {
 
+    protected /*static*/ abstract new(x: number, y: number): POSITION
+
+    public newMovedBy(vector: {x: number, y: number}): POSITION {
+        return this.new(this.getX() + vector.x, this.getY() + vector.y)
+    }
+
+    public newRounded(significantDigits: number): POSITION {
+        return this.new(Number(this.getX().toPrecision(significantDigits)), Number(this.getY().toPrecision(significantDigits)))
+    }
+
     public abstract getX(): number
 
     public abstract getY(): number

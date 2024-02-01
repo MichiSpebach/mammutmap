@@ -65,6 +65,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return firstNodeInPath.isBeingRendered()
   }
 
+  /** TODO: rename to isNodeInPath(..) */
   public isBoxInPath(box: AbstractNodeWidget): boolean {
     return this.data.path.some(wayPoint => wayPoint.boxId === box.getId())
   }
