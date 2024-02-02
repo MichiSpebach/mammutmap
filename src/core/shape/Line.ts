@@ -1,7 +1,7 @@
 import { log } from '../logService'
 import { Position } from './Position'
 
-/** TODO: rename to DirectedLine or Vector? */
+/** TODO: rename to DirectedLine or DirectedLineSegment? */
 export class Line<POSITION extends Position<POSITION>> {
 
 	public constructor(public readonly from: POSITION, public readonly to: POSITION) {}

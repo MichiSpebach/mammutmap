@@ -162,6 +162,29 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 	HoverManager.removeHoverable(leftFolderKnot)
 })
 
+test('findAndExtendCommonRoutes, two commonRoutes with same length, one ends already with a knot', async () => {
+	await testUtil.initServicesWithMocks()
+
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 40, 30, 20, [], []), parent: root, addToParent: true, rendered: true})
+	const rightFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('rightFolder', 60, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFolderTopFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('rightFolderTopFile', 20, 10, 60, 30, [], []), parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderBottomFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('rightFolderBottomFile', 20, 60, 60, 30, [], []), parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderKnot: NodeWidget = await rightFolder.nodes.add(new NodeData('rightFolderKnot', 0, 50))
+
+	const toFolder: Link = await root.links.add({from: leftFile, to: rightFolder, save: true})
+	const toKnot: Link = await root.links.add({from: leftFile, to: rightFolderKnot, save: true})
+	const toBottom: Link = await root.links.add({from: leftFile, to: rightFolderBottomFile, save: true})
+	const toTop: Link = await root.links.add({from: leftFile, to: rightFolderTopFile, save: true})
+
+	expect(extractIds((await commonRouteFinder.findLongestCommonRoute(toTop)))).toEqual(extractIds({
+		links: [toKnot],
+		from: leftFile,
+		to: rightFolderKnot,
+		length: 1
+	}))
+})
+
 test('findAndExtendCommonRoutes, links are on different sides, other link is on top side', async () => {
 	await testFindAndExtendCommonRoutesLinksAreOnDifferentSides(new LocalPosition(45, 20))
 })

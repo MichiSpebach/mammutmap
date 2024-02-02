@@ -10,9 +10,9 @@ import { LinkEnd } from '../../dist/core/link/LinkEnd'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import { Box } from '../../dist/core/box/Box'
 import { Link } from '../../dist/core/link/Link'
-import { WayPointData } from '../../dist/core/mapData/WayPointData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import * as commonRouteFinder from './commonRouteFinder'
+import * as knotMerger from './knotMerger'
 
 export async function bundleLink(link: Link, options?: {
 	unwatchDelayInMs?: number
@@ -47,9 +47,11 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 	let fromLink: Link = link
 	let toLink: Link = link
 	if (bundleFromPart && bundleToPart) {
-		if (link.to.isBoxInPath(commonRoute.to)) {
+		const commonRouteToBox = commonRoute.to instanceof Box ? commonRoute.to : commonRoute.to.getParent() // TODO: introduce class 'CommonRoute' with method 'getEndBox(end: 'from'|'to'): Box'
+		const commonRouteFromBox = commonRoute.from instanceof Box ? commonRoute.from : commonRoute.from.getParent()
+		if (link.to.isBoxInPath(commonRouteToBox)) {
 			toLink = await link.getManagingBoxLinks().addCopy(link)
-		} else if (link.from.isBoxInPath(commonRoute.from)) {
+		} else if (link.from.isBoxInPath(commonRouteFromBox)) {
 			fromLink = await link.getManagingBoxLinks().addCopy(link)
 		} else {
 			console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) failed to decide weather commonRoute.from or commonRoute.to is heavier`)
@@ -61,9 +63,15 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 		if (insertion && insertion.addedLink.getData().from.path.at(-1)?.boxId === insertion.insertedNode.getId()) {
 			commonRoute.links.push(insertion.addedLink)
 		}
+		if (insertion) {
+			//await knotMerger.mergeKnot(insertion.insertedNode) TODO test
+		}
 	}
 	if (bundleToPart) {
-		await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
+		const insertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
+		if (insertion) {
+			//await knotMerger.mergeKnot(insertion.insertedNode) TODO test
+		}
 	}
 	if (!bundleFromPart && !bundleToPart) {
 		console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) detected duplicate link`)
@@ -80,6 +88,7 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 	const commonEndNode: AbstractNodeWidget = commonRoute[end]
 	if (commonEndNode instanceof NodeWidget) {
 		await dragAndDropLinkEnd(linkEnd, commonEndNode)
+		//await knotMerger.mergeKnot(commonEndNode) TODO test
 		return undefined
 	}
 	
@@ -87,19 +96,7 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) not implemented for commonEndNode instanceof ${commonEndNode.constructor.name}`)
 		return undefined
 	}
-	const commonEndLink: Link|undefined = end === 'from'
-		? commonRoute.links.at(0)
-		: commonRoute.links.at(-1)
-	if (!commonEndLink) {
-		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) commonRoute.links is empty`)
-		return undefined
-	}
-
-	const bundleKnot: NodeWidget|undefined = getKnotIfLinkConnected(commonEndLink, commonEndNode)
-	if (bundleKnot) {
-		await dragAndDropLinkEnd(linkEnd, bundleKnot)
-		return undefined
-	}
+	const commonEndLink: Link = commonRouteFinder.getEndLinkOfCommonRoute(commonRoute, end)
 	
 	const linkManagingBoxBefore: Box = commonEndLink.getManagingBox()
 	const insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined = await commonEndLink.getManagingBoxLinks().insertNodeIntoLink(
@@ -117,20 +114,6 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 async function dragAndDropLinkEnd(linkEnd: LinkEnd, dropTarget: NodeWidget): Promise<void> {
 	const bundleLinkNodePosition: ClientPosition = (await dropTarget.getClientShape()).getMidPosition()
 	await linkEnd.dragAndDrop({dropTarget: dropTarget, clientPosition: bundleLinkNodePosition}) // TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away
-}
-
-function getKnotIfLinkConnected(link: Link, knotParent: Box): NodeWidget|undefined {
-	return getKnotIfLinkEndConnected(link, 'from', knotParent)
-		?? getKnotIfLinkEndConnected(link, 'to', knotParent)
-}
-
-function getKnotIfLinkEndConnected(link: Link, end: 'from'|'to', knotParent: Box): NodeWidget|undefined {
-	const targetWaypoint: WayPointData|undefined = link.getData()[end].path.at(-1)
-	if (!targetWaypoint) {
-		console.warn(`linkBundler.getKnotIfLinkEndConnected(link: ${link.describe()}, ..) link.getData().${end}.path is empty`)
-		return undefined
-	}
-	return knotParent.nodes.getNodeById(targetWaypoint.boxId)
 }
 
 async function calculateBundleNodePosition(link: Link, otherLink: Link, box: Box): Promise<ClientPosition> {
