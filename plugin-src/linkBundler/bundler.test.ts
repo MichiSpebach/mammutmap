@@ -164,7 +164,7 @@ test('bundleLink, commonRoute startLink starts at LinkNode', async () => {
 	await linkBundler.bundleLink(link)
 	
 	const linkRouteFromLeftFolderFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile, rightFile)
-	expect(linkRouteFromLeftFolderFile).toEqual(linkRoute)
+	expect(linkRouteFromLeftFolderFile?.map(link => link.getId())).toEqual(linkRoute.map(link => link.getId()))
 	const linkRouteFromLeftFolder: Link[]|undefined = BoxLinks.findLinkRoute(leftFolder, rightFile)
 	expect(linkRouteFromLeftFolder?.length).toBe(2)
 	expect(linkRouteFromLeftFolder?.at(0)).toBe(link)
@@ -195,7 +195,7 @@ test('bundleLink, commonRoute endLink ends at LinkNode', async () => {
 	await linkBundler.bundleLink(link)
 	
 	const linkRouteToLeftFolderFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFile, leftFolderFile)
-	expect(linkRouteToLeftFolderFile).toEqual(linkRoute)
+	expect(linkRouteToLeftFolderFile?.map(link => link.getId())).toEqual(linkRoute.map(link => link.getId()))
 	const linkRouteToLeftFolder: Link[]|undefined = BoxLinks.findLinkRoute(rightFile, leftFolder)
 	expect(linkRouteToLeftFolder?.length).toBe(2)
 	expect(linkRouteToLeftFolder?.at(0)).toBe(linkRoute.at(0))
@@ -226,7 +226,7 @@ test('bundleLink, commonRoute starts with LinkNode', async () => {
 	await linkBundler.bundleLink(link)
 	
 	const linkRouteToRightFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile, rightFile)
-	expect(linkRouteToRightFile).toEqual(linkRoute)
+	expect(linkRouteToRightFile?.map(link => link.getId())).toEqual(linkRoute.map(link => link.getId()))
 	const linkRouteToRoot: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile, root)
 	expect(linkRouteToRoot?.length).toBe(2)
 	expect(linkRouteToRoot?.at(0)).toBe(linkRoute.at(0))
@@ -257,7 +257,7 @@ test('bundleLink, commonRoute ends with LinkNode', async () => {
 	await linkBundler.bundleLink(link)
 	
 	const linkRouteFromRightFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFile, leftFolderFile)
-	expect(linkRouteFromRightFile).toEqual(linkRoute)
+	expect(linkRouteFromRightFile?.map(link => link.getId())).toEqual(linkRoute.map(link => link.getId()))
 	const linkRouteFromRoot: Link[]|undefined = BoxLinks.findLinkRoute(root, leftFolderFile)
 	expect(linkRouteFromRoot?.length).toBe(2)
 	expect(linkRouteFromRoot?.at(0)).toBe(link)
