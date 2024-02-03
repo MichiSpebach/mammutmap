@@ -269,7 +269,7 @@ export function getEndLinkOfCommonRoute(route: {
 	return endLink!
 }
 
-function getKnotIfLinkEndConnected(link: Link, end: 'from'|'to', knotParent: Box): NodeWidget|undefined {
+export function getKnotIfLinkEndConnected(link: Link, end: 'from'|'to', knotParent: Box): NodeWidget|undefined {
 	const targetWaypoint: WayPointData|undefined = link.getData()[end].path.at(-1)
 	if (!targetWaypoint) {
 		console.warn(`linkBundler.getKnotIfLinkEndConnected(link: ${link.describe()}, ..) link.getData().${end}.path is empty`)

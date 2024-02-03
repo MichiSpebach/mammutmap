@@ -97,6 +97,13 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 		return undefined
 	}
 	const commonEndLink: Link = commonRouteFinder.getEndLinkOfCommonRoute(commonRoute, end)
+	const otherEnd: 'from'|'to' = end === 'from' ? 'to' : 'from'
+	const bundleKnot: NodeWidget|undefined = commonRouteFinder.getKnotIfLinkEndConnected(commonEndLink, otherEnd, commonEndNode)
+	if (bundleKnot) {
+		await dragAndDropLinkEnd(linkEnd, bundleKnot)
+		//await knotMerger.mergeKnot(commonEndNode) TODO test
+		return undefined
+	}
 	
 	const linkManagingBoxBefore: Box = commonEndLink.getManagingBox()
 	const insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined = await commonEndLink.getManagingBoxLinks().insertNodeIntoLink(
