@@ -50,6 +50,10 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     return this.referenceLink.getManagingBox()
   }
   
+  public getOtherEnd(): LinkEnd {
+    return this.referenceLink.from === this ? this.referenceLink.to : this.referenceLink.from
+  }
+
   public shouldBeRendered(): boolean {
     const firstNodeInPathId: string = this.data.path[0].boxId
     if (this.getManagingBox().getId() === firstNodeInPathId) {
@@ -403,6 +407,15 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     }
 
     return renderedPath
+  }
+
+  public getTargetNodeId(): string {
+    const target: WayPointData|undefined = this.data.path.at(-1)
+    if (!target) {
+      log.warning(`LinkEnd::getTargetNodeId() data.path is empty for LinkEnd with id '${this.getId()}' in ${this.referenceLink.describe()}. This only happens when mapData is corrupted, returning empty string.`)
+      return ''
+    }
+    return target.boxId
   }
 
 }

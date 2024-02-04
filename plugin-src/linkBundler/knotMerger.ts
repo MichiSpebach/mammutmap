@@ -12,15 +12,17 @@ import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 export async function mergeKnot(knot: NodeWidget): Promise<void> {
 	const otherKnots: NodeWidget[] = knot.getParent().nodes.getNodes()
 	const mergeIntoKnot: NodeWidget|undefined = otherKnots.find(otherKnot => knot !== otherKnot && canKnotsBeMerged(knot, otherKnot))
-	if (!mergeIntoKnot) {
-		//console.warn(`failed to merge knot '${knot.getName()}'`)
-		return
+	if (mergeIntoKnot) {
+		mergeKnotInto(knot, mergeIntoKnot)
 	}
+}
 
+export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget): Promise<void> {
 	const newPosition: ClientPosition = (await mergeIntoKnot.getClientShape()).getMidPosition()
 	const pros: Promise<void>[] = knot.borderingLinks.getAllEnds().map((end: LinkEnd) => {
 		const link: Link = end.getReferenceLink()
-		if (isLinkConnectedToKnot(link, mergeIntoKnot)) {
+		const otherEnd: 'from'|'to' = link.from === end ? 'to' : 'from'
+		if (isKnotConnectedToTarget(mergeIntoKnot, end.getOtherEnd().getTargetNodeId(), otherEnd)) {
 			return link.getManagingBoxLinks().removeLink(link)
 		} else {
 			return end.dragAndDrop({dropTarget: mergeIntoKnot, clientPosition: newPosition})
@@ -32,12 +34,11 @@ export async function mergeKnot(knot: NodeWidget): Promise<void> {
 
 function canKnotsBeMerged(knot: NodeWidget, otherKnot: NodeWidget): boolean {
 	return knot.borderingLinks.getAll().some((link: Link) => 
-		link.getData().from.path.at(-1)?.boxId === otherKnot.getId() ||
-		link.getData().to.path.at(-1)?.boxId === otherKnot.getId()
+		link.from.getTargetNodeId() === otherKnot.getId() ||
+		link.to.getTargetNodeId() === otherKnot.getId()
 	)
 }
 
-function isLinkConnectedToKnot(link: Link, knot: NodeWidget): boolean {
-	return link.getData().from.path.at(-1)?.boxId === knot.getId()
-		|| link.getData().to.path.at(-1)?.boxId === knot.getId()
+function isKnotConnectedToTarget(knot: NodeWidget, targetNodeId: string, linkEnd: 'from'|'to'): boolean {
+	return knot.borderingLinks.getAll().some((link: Link) => link[linkEnd].getTargetNodeId() === targetNodeId)
 }
