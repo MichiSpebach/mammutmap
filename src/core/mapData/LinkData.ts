@@ -7,24 +7,23 @@ export class LinkData {
   public tags: string[]|undefined
 
   public static buildFromRawObject(object: any): LinkData {
-    let from: LinkEndData
-    let to: LinkEndData
+    const linkData: LinkData = Object.setPrototypeOf(object, LinkData.prototype)
 
-    if (object.from) {
-      from = LinkEndData.buildFromRawObject(object.from) // raw object would have no methods
+    if (linkData.from) {
+      linkData.from = LinkEndData.buildFromRawObject(object.from) // raw object would have no methods
     } else {
       // backwards compatibility, old files have wayPoints array field instead
-      from = LinkEndData.buildFromRawObject(new LinkEndData(object.fromWayPoints)) // raw object would have no methods
+      linkData.from = LinkEndData.buildFromRawObject(new LinkEndData(object.fromWayPoints))
     }
 
-    if (object.to) {
-      to = LinkEndData.buildFromRawObject(object.to) // raw object would have no methods
+    if (linkData.to) {
+      linkData.to = LinkEndData.buildFromRawObject(object.to) // raw object would have no methods
     } else {
       // backwards compatibility, old files have wayPoints array field instead
-      to = LinkEndData.buildFromRawObject(new LinkEndData(object.toWayPoints)) // raw object would have no methods
+      linkData.to = LinkEndData.buildFromRawObject(new LinkEndData(object.toWayPoints))
     }
 
-    return new LinkData(object.id, from, to, object.tags)
+    return linkData
   }
 
   public constructor(id: string, from: LinkEndData, to: LinkEndData, tags?: string[]) {

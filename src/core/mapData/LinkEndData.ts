@@ -5,8 +5,9 @@ export class LinkEndData {
   public floatToBorder: boolean|undefined
 
   public static buildFromRawObject(object: any): LinkEndData {
-    const path: WayPointData[] = object.path.map(WayPointData.buildFromRawObject) // raw path objects would have no methods
-    return new LinkEndData(path, object.floatToBorder)
+    const linkEndData: LinkEndData = Object.setPrototypeOf(object, LinkEndData.prototype)
+    linkEndData.path = object.path.map(WayPointData.buildFromRawObject) // raw path objects would have no methods
+    return linkEndData
   }
 
   public constructor(path: WayPointData[], floatToBorder?: boolean) {
