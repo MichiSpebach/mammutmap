@@ -6,7 +6,7 @@ export class LinkEndData {
 
   public static buildFromRawObject(object: any): LinkEndData {
     const linkEndData: LinkEndData = Object.setPrototypeOf(object, LinkEndData.prototype)
-    linkEndData.path = object.path.map(WayPointData.buildFromRawObject) // raw path objects would have no methods
+    linkEndData.path = linkEndData.path.map(WayPointData.buildFromRawObject) // raw path objects would have no methods
     return linkEndData
   }
 

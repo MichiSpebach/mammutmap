@@ -5,12 +5,15 @@ import { LocalPosition } from '../shape/LocalPosition'
 export class Grid {
 
   public static getStepSizeOfLayer(layer: number): number {
-    return 8 / Math.pow(2, layer)
+    return 4 / Math.pow(2, layer)
   }
 
-  private static readonly layer1Lines: number[] = [
+  private static readonly layer0Lines: number[] = [
     4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 50, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96
   ]
+  private static readonly layer1Lines: number[] = Grid.layer0Lines.concat([
+    2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 54, 58, 62, 66, 70, 74, 78, 82, 86, 90, 94, 98
+  ])
 
   private readonly id: string = 'grid'
   private readonly idLayer1Columns: string = this.id+'Layer1Columns'

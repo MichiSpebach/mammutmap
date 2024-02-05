@@ -10,14 +10,14 @@ export class LinkData {
     const linkData: LinkData = Object.setPrototypeOf(object, LinkData.prototype)
 
     if (linkData.from) {
-      linkData.from = LinkEndData.buildFromRawObject(object.from) // raw object would have no methods
+      linkData.from = LinkEndData.buildFromRawObject(linkData.from) // raw object would have no methods
     } else {
       // backwards compatibility, old files have wayPoints array field instead
       linkData.from = LinkEndData.buildFromRawObject(new LinkEndData(object.fromWayPoints))
     }
 
     if (linkData.to) {
-      linkData.to = LinkEndData.buildFromRawObject(object.to) // raw object would have no methods
+      linkData.to = LinkEndData.buildFromRawObject(linkData.to) // raw object would have no methods
     } else {
       // backwards compatibility, old files have wayPoints array field instead
       linkData.to = LinkEndData.buildFromRawObject(new LinkEndData(object.toWayPoints))
