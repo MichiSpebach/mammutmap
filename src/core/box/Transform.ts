@@ -109,14 +109,14 @@ export class Transform {
 
     public async getNearestGridPositionInClientCoords(position: ClientPosition): Promise<ClientPosition> {
         const localPosition: LocalPosition = await this.clientToLocalPosition(position)
-        const localPositionSnappedToGrid: LocalPosition = this.getNearestGridPositionOf(localPosition)
+        const localPositionSnappedToGrid: LocalPosition = this.roundToGridPosition(localPosition)
         return await this.localToClientPosition(localPositionSnappedToGrid)
     }
 
     // remove? not really practical
     public async getNearestGridPositionIfNearbyOrIdentity(position: ClientPosition): Promise<LocalPosition> {
         const localPosition: LocalPosition = await this.clientToLocalPosition(position)
-        const localPositionSnappedToGrid: LocalPosition = this.getNearestGridPositionOf(localPosition)
+        const localPositionSnappedToGrid: LocalPosition = this.roundToGridPosition(localPosition)
         const clientPositionSnappedToGrid: ClientPosition = await this.localToClientPosition(localPositionSnappedToGrid)
 
         let localX: number = localPosition.percentX
@@ -130,12 +130,12 @@ export class Transform {
         return new LocalPosition(localX, localY)
     }
 
-    public getNearestGridPositionOf(position: LocalPosition): LocalPosition {
-        return new LocalPosition(this.roundToGridPosition(position.percentX), this.roundToGridPosition(position.percentY))
+    public roundToGridPosition(position: LocalPosition): LocalPosition {
+        return grid.roundToGridPosition(position)
     }
 
-    public roundToGridPosition(position: number): number {
-        return grid.roundToGridPosition(position)
+    public roundToGridScalar(position: number): number {
+        return grid.roundToGridScalar(position)
     }
 
 }

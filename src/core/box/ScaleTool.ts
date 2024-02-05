@@ -86,9 +86,9 @@ export class ScaleTool {
   public roundToParentGridPosition(localPosition: number): number {
     const boxRenderedInto: Box = this.getBoxRenderedIntoOrFail()
     if (boxRenderedInto.isRoot()) {
-      return boxRenderedInto.transform.roundToGridPosition(localPosition)
+      return boxRenderedInto.transform.roundToGridScalar(localPosition)
     }
-    return boxRenderedInto.getParent().transform.roundToGridPosition(localPosition)
+    return boxRenderedInto.getParent().transform.roundToGridScalar(localPosition)
   }
 
   public async scaleStart(): Promise<void> {

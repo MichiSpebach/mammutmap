@@ -11,13 +11,13 @@ export class Grid {
   private static readonly layer0Lines: number[] = [
     4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 50, 52, 56, 60, 64, 68, 72, 76, 80, 84, 88, 92, 96
   ]
-  private static readonly layer1Lines: number[] = Grid.layer0Lines.concat([
+  private static readonly layer1Lines: number[] = [
     2, 6, 10, 14, 18, 22, 26, 30, 34, 38, 42, 46, 54, 58, 62, 66, 70, 74, 78, 82, 86, 90, 94, 98
-  ])
+  ]
 
   private readonly id: string = 'grid'
-  private readonly idLayer1Columns: string = this.id+'Layer1Columns'
-  private readonly idLayer1Rows: string = this.id+'Layer1Rows'
+  private readonly idLayer0: string = this.id+'Layer0'
+  private readonly idLayer1: string = this.id+'Layer1'
 
   private idRenderedInto: string|null = null
   //private layer2ColumnsRendered: boolean = false // TODO: implement depending on current clientRectSize
@@ -27,7 +27,9 @@ export class Grid {
     if (!this.idRenderedInto) {
       this.idRenderedInto = idToRenderInto
       const style: string = 'position:absolute;width:100%;height:100%;'
-      const html: string = '<div id="'+this.id+'" style="'+style+'">'+this.formLayer1Columns()+this.formLayer1Rows()+'</div>'
+      const layer0Html: string = this.formLayer(this.idLayer0, Grid.layer0Lines, '#8888')
+      const layer1Html: string = this.formLayer(this.idLayer1, Grid.layer1Lines, '#8882')
+      const html: string = '<div id="'+this.id+'" style="'+style+'">'+layer0Html+layer1Html+'</div>'
       await renderManager.setContentTo(idToRenderInto, html, priority)
     } else if (this.idRenderedInto !== idToRenderInto) {
       this.idRenderedInto = idToRenderInto
@@ -43,34 +45,29 @@ export class Grid {
     await renderManager.appendChildTo(indexHtmlIds.unplacedElementsId, this.id, priority)
   }
 
-  private formLayer1Columns(): string {
-    return this.formLayerLines(this.idLayer1Columns, Grid.layer1Lines, 'left', 'width:1px;height:100%;')
+  private formLayer(layerId: string, layerLines: number[], color: string): string {
+    const columns: string = this.formLayerLines(layerLines, 'left', 'width:0.5px;height:100%;', color)
+    const rows: string = this.formLayerLines(layerLines, 'top', 'width:100%;height:0.5px;', color)
+    return '<div id="'+layerId+'" style="position:absolute;width:100%;height:100%">'+columns+rows+'</div>'
   }
 
-  private formLayer1Rows(): string {
-    return this.formLayerLines(this.idLayer1Rows, Grid.layer1Lines, 'top', 'width:100%;height:1px;')
-  }
-
-  private formLayerLines(id: string, steps: number[], startingEdge: 'left'|'top', sizeStyle: string): string {
+  private formLayerLines(steps: number[], startingEdge: 'left'|'top', sizeStyle: string, color: string): string {
     let lines: string = ''
     for (const step of steps) {
-      if (step === 0 || step === 100) {
-        continue
-      }
-      lines += `<div style="position:absolute;${startingEdge}:${step}%;${sizeStyle}background-color:#aaa8;"></div>`
+      lines += `<div style="position:absolute;${startingEdge}:${step}%;${sizeStyle}background-color:${color};"></div>`
     }
-    return '<div id="'+id+'" style="position:absolute;width:100%;height:100%">'+lines+'</div>'
+    return lines
   }
 
-  public roundToGridPosition(position: number): number { // TODO: change signature to (position: LocalPosition): LocalPosition
-    return Grid.roundToLayer1GridScalar(position)
-  }
-
-  public static roundToLayer1GridPosition(position: LocalPosition): LocalPosition {
+  public roundToGridPosition(position: LocalPosition): LocalPosition {
     return new LocalPosition(
-      this.roundToLayer1GridScalar(position.percentX),
-      this.roundToLayer1GridScalar(position.percentY)
+      this.roundToGridScalar(position.percentX),
+      this.roundToGridScalar(position.percentY)
     )
+  }
+
+  public roundToGridScalar(position: number): number {
+    return Grid.roundToLayer1GridScalar(position)
   }
 
   private static roundToLayer1GridScalar(position: number): number {
