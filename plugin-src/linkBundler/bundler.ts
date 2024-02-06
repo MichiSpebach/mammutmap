@@ -13,6 +13,7 @@ import { Link } from '../../dist/core/link/Link'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import * as commonRouteFinder from './commonRouteFinder'
 import * as knotMerger from './knotMerger'
+import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 
 export async function bundleLink(link: Link, options?: {
 	unwatchDelayInMs?: number
@@ -69,22 +70,58 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 			console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) failed to decide weather commonRoute.from or commonRoute.to is heavier`)
 			return
 		}
+		HighlightPropagatingLink.addBundledWith(fromLink, [toLink])
+		HighlightPropagatingLink.addBundledWith(toLink, [fromLink])
 	}
 
+	let fromInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
+	let toInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
 	if (bundleOrMergeFromPart) {
-		const insertion = await bundleLinkEndIntoCommonRoute(fromLink.to, 'from', commonRoute)
-		if (insertion && insertion.addedLink.from.getTargetNodeId() === insertion.insertedNode.getId()) {
-			commonRoute.links.push(insertion.addedLink)
+		fromInsertion = await bundleLinkEndIntoCommonRoute(fromLink.to, 'from', commonRoute)
+		if (fromInsertion && fromInsertion.addedLink.from.getTargetNodeId() === fromInsertion.insertedNode.getId()) {
+			commonRoute.links.push(fromInsertion.addedLink)
 		}
-		if (insertion) {
-			await knotMerger.mergeKnot(insertion.insertedNode)
+		if (fromInsertion) {
+			await knotMerger.mergeKnot(fromInsertion.insertedNode)
 		}
 	}
 	if (bundleOrMergeToPart) {
-		const insertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
-		if (insertion) {
-			await knotMerger.mergeKnot(insertion.insertedNode)
+		toInsertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
+		if (toInsertion) {
+			await knotMerger.mergeKnot(toInsertion.insertedNode)
 		}
+	}
+	
+	if (bundleOrMergeFromPart && bundleOrMergeToPart) {
+		let fromBundleLinks: Link[]
+		if (fromInsertion) {
+			fromBundleLinks = [fromInsertion.addedLink]
+		} else if (commonRoute.from instanceof NodeWidget) {
+			fromBundleLinks = commonRoute.from.borderingLinks.getIngoing().filter(link => link !== fromLink)
+		} else {
+			console.warn('bundler.bundleLinkIntoCommonRoute(..) fromBundleLinks is undefined')
+			return
+		}
+		let toBundleLinks: Link[]
+		if (toInsertion) {
+			toBundleLinks = [toInsertion.addedLink]
+		} else if (commonRoute.to instanceof NodeWidget) {
+			toBundleLinks = commonRoute.to.borderingLinks.getOutgoing().filter(link => link !== toLink)
+		} else {
+			console.warn('bundler.bundleLinkIntoCommonRoute(..) toBundleLinks is undefined')
+			return
+		}
+		
+		const fromPros: Promise<void>[] = fromBundleLinks.map(async link => {
+			HighlightPropagatingLink.addBundledWith(link, toBundleLinks)
+			await link.getManagingBox().saveMapData()
+		})
+		const toPros: Promise<void>[] = toBundleLinks.map(async link => {
+			HighlightPropagatingLink.addBundledWith(link, fromBundleLinks)
+			await link.getManagingBox().saveMapData()
+		})
+		await Promise.all(fromPros)
+		await Promise.all(toPros)
 	}
 }
 

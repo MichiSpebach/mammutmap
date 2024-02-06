@@ -9,6 +9,7 @@ import { NodeData } from '../../dist/core/mapData/NodeData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { HoverManager } from '../../dist/core/HoverManager'
 import { BoxData } from '../../dist/core/mapData/BoxData'
+import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 
 test('bundleLink, nothing to bundle', async () => {
 	await testUtil.initServicesWithMocks()
@@ -42,14 +43,15 @@ test('bundleLink, insert one node', async () => {
 	expect(topLinkRoute.length).toBe(2)
 	expect(topLinkRoute[0].getId()).toBe(topLink.getId())
 	expect(topLinkRoute[1].getId()).toBe(bottomLink.getId())
+	expect(topLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
 
 	const bottomLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFile)!
 	expect(bottomLinkRoute.length).toBe(2)
 	expect(bottomLinkRoute[1].getId()).toBe(bottomLink.getId())
+	expect(bottomLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
 	
 	expect(topLink.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['leftFolderTopFile'])
 	expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual([expect.stringContaining('node')])
-	//expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual(expect.arrayContaining(['rightFile', expect.anything()]))
 })
 
 test('bundleLink, insert two nodes', async () => {
@@ -72,10 +74,12 @@ test('bundleLink, insert two nodes', async () => {
 	expect(topLinkRoute.length).toBe(3)
 	expect(topLinkRoute[0].getId()).toBe(topLink.getId())
 	expect(topLinkRoute[1].getId()).toBe(bottomLink.getId())
+	expect(topLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything()], [], [topLink.getId()]])
 
 	const bottomLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)!
 	expect(bottomLinkRoute.length).toBe(3)
 	expect(bottomLinkRoute[1].getId()).toBe(bottomLink.getId())
+	expect(bottomLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything()], [], [expect.anything()]])
 })
 
 test('bundleLink, insert two nodes, both inserts in from part, bundling longLink', async () => {

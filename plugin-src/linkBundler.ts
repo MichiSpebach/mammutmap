@@ -9,11 +9,14 @@ import { applicationMenu } from '../dist/core/applicationMenu/applicationMenu'
 import { MenuItemFile } from '../dist/core/applicationMenu/MenuItemFile'
 import * as bundler from './linkBundler/bundler'
 import * as pluginFacade from '../dist/pluginFacade'
-import { coreUtil } from '../dist/pluginFacade'
+import { ProgressBarWidget, coreUtil } from '../dist/pluginFacade'
 import * as knotMerger from './linkBundler/knotMerger'
+import { HighlightPropagatingLink } from './linkBundler/HighlightPropagatingLink'
 
 contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: 'try to bundle', click: () => bundler.bundleLink(link)}))
 contextMenu.addLinkNodeMenuItem((node: NodeWidget) => new MenuItemFile({label: 'try to merge', click: () => knotMerger.mergeKnot(node)}))
+
+pluginFacade.overrideLink(HighlightPropagatingLink)
 
 let bundleNewLinksActivated: boolean = false
 let addLinkBackup: ((options: any) => Promise<Link>) = BoxLinks.prototype.add
@@ -108,6 +111,7 @@ async function processQueue(): Promise<void> {
 }
 
 const progressBarId: string = 'linkBundlerProgressBar'+coreUtil.generateId()
+//const progressBar = new ProgressBarWidget(progressBarId) // TODO
 let progressBarMounted: boolean = false
 
 async function updateProgressBar(): Promise<void> {

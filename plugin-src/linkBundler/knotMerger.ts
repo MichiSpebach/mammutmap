@@ -23,6 +23,7 @@ export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget)
 		const link: Link = end.getReferenceLink()
 		const otherEnd: 'from'|'to' = link.from === end ? 'to' : 'from'
 		if (isKnotConnectedToTarget(mergeIntoKnot, end.getOtherEnd().getTargetNodeId(), otherEnd)) {
+			// TODO add attributes to mergedInto link
 			return link.getManagingBoxLinks().removeLink(link)
 		} else {
 			return end.dragAndDrop({dropTarget: mergeIntoKnot, clientPosition: newPosition})
