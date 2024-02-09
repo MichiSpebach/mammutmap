@@ -1,5 +1,6 @@
 import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { Link, LinkImplementation, NodeWidget, RenderPriority } from '../../dist/pluginFacade'
+import { LinkEnd } from '../../dist/core/link/LinkEnd'
+import { BoxWatcher, Link, LinkImplementation, NodeWidget, RenderPriority } from '../../dist/pluginFacade'
 
 export class HighlightPropagatingLink extends LinkImplementation {
 
@@ -8,12 +9,75 @@ export class HighlightPropagatingLink extends LinkImplementation {
 	}
 
 	public static addBundledWith(link: Link, bundledWith: Link[]): void {
+		this.addBundledWithIds(link, bundledWith.map(link => link.getId()))
+	}
+
+	public static addBundledWithIds(link: Link, bundledWithIds: string[]): void {
 		if (!link.getData()['bundledWith']) {
-			link.getData()['bundledWith'] = bundledWith.map(link => link.getId())
+			link.getData()['bundledWith'] = bundledWithIds
 		} else {
-			(link.getData()['bundledWith'] as string[]).push(...bundledWith.map(link => link.getId()))
+			(link.getData()['bundledWith'] as string[]).push(...bundledWithIds)
 		}
 	}
+
+	public static removeBundledWithId(link: Link, bundledWithId: string): void {
+		const bundledWithIds: string[] = this.getBundledWithIds(link)
+		const index: number = bundledWithIds.indexOf(bundledWithId)
+		if (index < 0) {
+			console.warn(`HighlightPropagatingLink.removeBundledWithId(link: '${link.describe()}', bundledWithId: '${bundledWithId}) bundledWithIds does not contain bundledWithId`)
+			return
+		}
+		bundledWithIds.splice(index, 1)
+	}
+
+	public static async getEntangledLinks(link: Link, searchDirection: 'from'|'to'): Promise<Link[]> {
+		if (!(link instanceof HighlightPropagatingLink)) {
+			console.warn(`HighlightPropagatingLink.getEntangledLinks(link: '${link.describe()}', ..) link is not instanceof HighlightPropagatingLink`)
+			return []
+		}
+		const entangledLinkIds: string[] = this.getBundledWithIds(link)
+		if (entangledLinkIds.length < 1) {
+			return [link] // TODO does not work if route is splittet with simple knots
+		}
+
+		const entangledLinks: Link[] = []
+		const followUpLinks: Link[] = await link.getFollowUpLinks(searchDirection)
+		/*const linksToFollow: Link[] = []
+		for (const followUpLink of followUpLinks) {
+			if (entangledLinkIds.includes(followUpLink.getId())) {
+				entangledLinks.push(followUpLink)
+			} else {
+				linksToFollow.push(followUpLink)
+			}
+		}*/
+		await Promise.all(followUpLinks.map(async (followUpLink: Link) => {
+			const followUpLinkEntangledLinks: Link[] = await this.getEntangledLinks(followUpLink, searchDirection)
+			await Promise.all(followUpLinkEntangledLinks.map(async followUpLinkEntangledLink => {
+				if (!(followUpLinkEntangledLink instanceof HighlightPropagatingLink)) {
+					console.warn(`HighlightPropagatingLink.getEntangledLinks(...) followUpLinkEntangledLink is not instanceof HighlightPropagatingLink`)
+					return
+				}
+				const entangledLinkCandidates: Link[] = await followUpLinkEntangledLink.getFollowUpLinks(searchDirection)
+				entangledLinks.push(...entangledLinkCandidates.filter(link => entangledLinkIds.includes(link.getId())))
+			}))
+		}))
+
+		if (entangledLinkIds.length !== entangledLinks.length) {
+			console.warn(`HighlightPropagatingLink.getEntangledLinks(...) entangledLinkIds.length !== entangledLinks.length`)
+		}
+		return entangledLinks
+	}
+
+	private async getFollowUpLinks(direction: 'from'|'to'): Promise<Link[]> {
+		const target: {node: AbstractNodeWidget, watcher: BoxWatcher} = await this[direction].getTargetAndRenderIfNecessary()
+		return direction === 'to'
+			? target.node.borderingLinks.getOutgoing()
+			: target.node.borderingLinks.getIngoing()
+	}
+
+	/*public static async getBundleRouteTree(link: Link, searchDirection: 'from'|'to'): RouteTree {
+		// TODO
+	}*/
 
 	/*protected override async handleHoverOver(): Promise<void> {
 		await Promise.all([
@@ -43,8 +107,9 @@ export class HighlightPropagatingLink extends LinkImplementation {
 		const pros: Promise<void>[] = []
 		pros.push(super.renderWithOptions(options))
 
-		if (options.highlight !== undefined) {
-			//this['highlight'] = options.highlight
+		if (options.propagationStep && options.propagationStep > 8) {
+			console.warn(`HighlightPropagatingLink::renderWithOptions(...) max propagationStep of 8 exceeded`)
+		} else if (options.highlight !== undefined) {
 			if (!options.propagationDirection || options.propagationDirection === 'from') {
 				pros.push(this.propagateHighlight({...options, propagationDirection: 'from', highlight: options.highlight}))
 			}

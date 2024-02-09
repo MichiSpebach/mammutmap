@@ -92,37 +92,31 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 		}
 	}
 	
-	if (bundleOrMergeFromPart && bundleOrMergeToPart) {
-		let fromBundleLinks: Link[]
-		if (fromInsertion) {
-			fromBundleLinks = [fromInsertion.addedLink]
-		} else if (commonRoute.from instanceof NodeWidget) {
-			fromBundleLinks = commonRoute.from.borderingLinks.getIngoing().filter(link => link !== fromLink)
-		} else {
-			console.warn('bundler.bundleLinkIntoCommonRoute(..) fromBundleLinks is undefined')
+	//if (bundleOrMergeFromPart && bundleOrMergeToPart) { TODO cleanup
+		const fromKnot: NodeWidget|undefined = fromInsertion?.insertedNode//?? commonRoute.from TODO cleanup
+		if (!fromKnot) {
+			//console.warn('bundler.bundleLinkIntoCommonRoute(..) fromKnot is not instanceof NodeWidget') TODO cleanup
 			return
 		}
-		let toBundleLinks: Link[]
-		if (toInsertion) {
-			toBundleLinks = [toInsertion.addedLink]
-		} else if (commonRoute.to instanceof NodeWidget) {
-			toBundleLinks = commonRoute.to.borderingLinks.getOutgoing().filter(link => link !== toLink)
-		} else {
-			console.warn('bundler.bundleLinkIntoCommonRoute(..) toBundleLinks is undefined')
+		const toKnot: NodeWidget|undefined = toInsertion?.insertedNode//?? commonRoute.to TODO cleanup
+		if (!toKnot) {
+			//console.warn('bundler.bundleLinkIntoCommonRoute(..) toKnot is not instanceof NodeWidget') TODO cleanup
 			return
 		}
-		
-		const fromPros: Promise<void>[] = fromBundleLinks.map(async link => {
-			HighlightPropagatingLink.addBundledWith(link, toBundleLinks)
-			await link.getManagingBox().saveMapData()
-		})
-		const toPros: Promise<void>[] = toBundleLinks.map(async link => {
-			HighlightPropagatingLink.addBundledWith(link, fromBundleLinks)
-			await link.getManagingBox().saveMapData()
-		})
-		await Promise.all(fromPros)
-		await Promise.all(toPros)
-	}
+		const fromBundleLinks: Link[] = fromKnot.borderingLinks.getIngoing().filter(link => link !== fromLink)
+		const toBundleLinks: Link[] = toKnot.borderingLinks.getOutgoing().filter(link => link !== toLink)
+
+		await Promise.all([
+			...fromBundleLinks.map(async link => {
+				HighlightPropagatingLink.addBundledWith(link, toBundleLinks)
+				await link.getManagingBox().saveMapData()
+			}),
+			...toBundleLinks.map(async link => {
+				HighlightPropagatingLink.addBundledWith(link, fromBundleLinks)
+				await link.getManagingBox().saveMapData()
+			})
+		])
+	//}
 }
 
 async function tryToMergeKnotInto(knotId: string, mergeIntoKnot: NodeWidget): Promise<boolean> {

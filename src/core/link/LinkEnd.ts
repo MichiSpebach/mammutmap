@@ -17,6 +17,7 @@ import { RenderState } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { log } from '../logService'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
+import { BoxWatcher } from '../box/BoxWatcher'
 
 export class LinkEnd implements Draggable<Box|NodeWidget> {
   private readonly id: string
@@ -416,6 +417,15 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
       return ''
     }
     return target.boxId
+  }
+
+  public async getTargetAndRenderIfNecessary(): Promise<{node: AbstractNodeWidget, watcher: BoxWatcher}> {
+    const link: Link = this.referenceLink
+    const path: WayPointData[] = this.data.path
+    if (path.length === 1 && path[0].boxId === link.getManagingBox().getId()) {
+      return {node: link.getManagingBox(), watcher: await BoxWatcher.newAndWatch(link.getManagingBox())}
+    }
+    return link.getManagingBox().getDescendantByPathAndRenderIfNecessary(path.map(wayPoint => ({id: wayPoint.boxId})))
   }
 
 }
