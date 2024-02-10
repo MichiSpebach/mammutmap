@@ -11,6 +11,8 @@ import * as fileSystem from '../../../dist/core/fileSystemAdapter'
 import { FileSystemAdapter } from '../../../dist/core/fileSystemAdapter'
 import { RelocationDragManager } from '../../../dist/core/RelocationDragManager'
 import * as relocationDragManager from '../../../dist/core/RelocationDragManager'
+import { override as overrideLink } from '../../../dist/core/link/Link'
+import { HighlightPropagatingLink } from '../HighlightPropagatingLink'
 
 const consoleLogBackup = console.log
 
@@ -38,6 +40,8 @@ export async function initServicesWithMocks(options?: {hideConsoleLog?: boolean}
 	} else {
 		console.log = consoleLogBackup
 	}
+
+	overrideLink(HighlightPropagatingLink)
 
 	return {
 		...generalMocks,

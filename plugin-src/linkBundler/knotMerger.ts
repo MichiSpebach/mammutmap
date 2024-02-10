@@ -20,15 +20,19 @@ export async function mergeKnot(knot: NodeWidget): Promise<void> {
 
 export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget): Promise<void> {
 	const linkBetweenKnots: Link|undefined = getLinkBetween(knot, mergeIntoKnot)
-	if (linkBetweenKnots) {
-		const entangledLinks: Link[] = await HighlightPropagatingLink.getEntangledLinks(linkBetweenKnots, linkBetweenKnots.from.getTargetNodeId() === mergeIntoKnot.getId() ? 'from' : 'to')
-		await pushEntanglementsOfLinkInDirection(linkBetweenKnots, entangledLinks, knot)
-		entangledLinks.map(async (entangledLink: Link) => {
-			HighlightPropagatingLink.removeBundledWithId(entangledLink, linkBetweenKnots.getId())
-			await entangledLink.getManagingBox().saveMapData()
-		})
-		await linkBetweenKnots.getManagingBoxLinks().removeLink(linkBetweenKnots)
+	if (!linkBetweenKnots) {
+		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot}') there is no link between knot and mergeIntoKnot`)
+		return
 	}
+
+	const entangledLinks: Link[] = await HighlightPropagatingLink.getEntangledLinks(linkBetweenKnots, linkBetweenKnots.from.getTargetNodeId() === mergeIntoKnot.getId() ? 'from' : 'to')
+	await pushEntanglementsOfLinkInDirection(linkBetweenKnots, entangledLinks, knot)
+	entangledLinks.map(async (entangledLink: Link) => {
+		HighlightPropagatingLink.removeBundledWithId(entangledLink, linkBetweenKnots.getId())
+		await entangledLink.getManagingBox().saveMapData()
+	})
+	await linkBetweenKnots.getManagingBoxLinks().removeLink(linkBetweenKnots)
+
 	const newPosition: ClientPosition = (await mergeIntoKnot.getClientShape()).getMidPosition()
 	const pros: Promise<void>[] = knot.borderingLinks.getAllEnds().map(async (end: LinkEnd) => {
 		const link: Link = end.getReferenceLink()

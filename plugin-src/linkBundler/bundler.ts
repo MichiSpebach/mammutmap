@@ -14,6 +14,7 @@ import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import * as commonRouteFinder from './commonRouteFinder'
 import * as knotMerger from './knotMerger'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
+import { CommonRoute } from './CommonRoute'
 
 export async function bundleLink(link: Link, options?: {
 	unwatchDelayInMs?: number
@@ -22,7 +23,7 @@ export async function bundleLink(link: Link, options?: {
 
 	if (longestCommonRoute && longestCommonRoute.length > 0) {
 		console.log(`bundle ${link.describe()} between ${longestCommonRoute.from.getName()} and ${longestCommonRoute.to.getName()}.`)
-		await bundleLinkIntoCommonRoute(link, longestCommonRoute)
+		await bundleLinkIntoCommonRoute(link, new CommonRoute(longestCommonRoute.links, longestCommonRoute.from, longestCommonRoute.to))
 	}
 
 	if (options?.unwatchDelayInMs) {
@@ -38,33 +39,24 @@ export async function bundleLink(link: Link, options?: {
 	}
 }
 
-async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
-	links: Link[]
-	from: AbstractNodeWidget
-	to: AbstractNodeWidget
-}): Promise<void> {
-	let bundleOrMergeFromPart: boolean = link.from.getTargetNodeId() !== commonRoute.links.at(0)?.from.getTargetNodeId()
-	let bundleOrMergeToPart: boolean = link.to.getTargetNodeId() !== commonRoute.links.at(-1)?.to.getTargetNodeId()
-	if (!bundleOrMergeFromPart && !bundleOrMergeToPart) {
+async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): Promise<void> {
+	const bundleFromPart: boolean = link.from.getTargetNodeId() !== commonRoute.links.at(0)?.from.getTargetNodeId()
+	const bundleToPart: boolean = link.to.getTargetNodeId() !== commonRoute.links.at(-1)?.to.getTargetNodeId()
+	if (!bundleFromPart && !bundleToPart) {
 		console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) detected duplicate link`)
 		return
 	}
 
-	if (bundleOrMergeFromPart && commonRoute.from instanceof NodeWidget && await tryToMergeKnotInto(link.from.getTargetNodeId(), commonRoute.from)) {
-		bundleOrMergeFromPart = false
-	}
-	if (bundleOrMergeToPart && commonRoute.to instanceof NodeWidget && await tryToMergeKnotInto(link.to.getTargetNodeId(), commonRoute.to)) {
-		bundleOrMergeToPart = false
-	}
-
 	let fromLink: Link = link
 	let toLink: Link = link
-	if (bundleOrMergeFromPart && bundleOrMergeToPart) {
-		const commonRouteToBox = commonRoute.to instanceof Box ? commonRoute.to : commonRoute.to.getParent() // TODO: introduce class 'CommonRoute' with method 'getEndBox(end: 'from'|'to'): Box'
-		const commonRouteFromBox = commonRoute.from instanceof Box ? commonRoute.from : commonRoute.from.getParent()
-		if (link.to.isBoxInPath(commonRouteToBox)) {
+	if (bundleFromPart && bundleToPart) {
+		if (isKnotTemporaryAndWillBeMergedInto(link.to.getTargetNodeId(), commonRoute.to)) {
 			toLink = await link.getManagingBoxLinks().addCopy(link)
-		} else if (link.from.isBoxInPath(commonRouteFromBox)) {
+		} else if (isKnotTemporaryAndWillBeMergedInto(link.from.getTargetNodeId(), commonRoute.from)) {
+			fromLink = await link.getManagingBoxLinks().addCopy(link)
+		} else if (link.to.isBoxInPath(commonRoute.getEndBox('to'))) {
+			toLink = await link.getManagingBoxLinks().addCopy(link)
+		} else if (link.from.isBoxInPath(commonRoute.getEndBox('from'))) {
 			fromLink = await link.getManagingBoxLinks().addCopy(link)
 		} else {
 			console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) failed to decide weather commonRoute.from or commonRoute.to is heavier`)
@@ -76,56 +68,70 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: {
 
 	let fromInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
 	let toInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
-	if (bundleOrMergeFromPart) {
+	if (bundleFromPart) {
 		fromInsertion = await bundleLinkEndIntoCommonRoute(fromLink.to, 'from', commonRoute)
 		if (fromInsertion && fromInsertion.addedLink.from.getTargetNodeId() === fromInsertion.insertedNode.getId()) {
 			commonRoute.links.push(fromInsertion.addedLink)
 		}
-		if (fromInsertion) {
-			await knotMerger.mergeKnot(fromInsertion.insertedNode)
-		}
 	}
-	if (bundleOrMergeToPart) {
+	if (bundleToPart) {
 		toInsertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
-		if (toInsertion) {
-			await knotMerger.mergeKnot(toInsertion.insertedNode)
-		}
 	}
 	
-	//if (bundleOrMergeFromPart && bundleOrMergeToPart) { TODO cleanup
-		const fromKnot: NodeWidget|undefined = fromInsertion?.insertedNode//?? commonRoute.from TODO cleanup
-		if (!fromKnot) {
-			//console.warn('bundler.bundleLinkIntoCommonRoute(..) fromKnot is not instanceof NodeWidget') TODO cleanup
-			return
+	if (bundleFromPart && bundleToPart) {
+		const fromNode: AbstractNodeWidget = fromInsertion?.insertedNode?? commonRoute.from
+		if (!(fromNode instanceof NodeWidget)) {
+			console.warn('bundler.bundleLinkIntoCommonRoute(..) fromKnot is not instanceof NodeWidget')
 		}
-		const toKnot: NodeWidget|undefined = toInsertion?.insertedNode//?? commonRoute.to TODO cleanup
-		if (!toKnot) {
-			//console.warn('bundler.bundleLinkIntoCommonRoute(..) toKnot is not instanceof NodeWidget') TODO cleanup
-			return
+		const toNode: AbstractNodeWidget = toInsertion?.insertedNode?? commonRoute.to
+		if (!(toNode instanceof NodeWidget)) {
+			console.warn('bundler.bundleLinkIntoCommonRoute(..) toKnot is not instanceof NodeWidget')
 		}
-		const fromBundleLinks: Link[] = fromKnot.borderingLinks.getIngoing().filter(link => link !== fromLink)
-		const toBundleLinks: Link[] = toKnot.borderingLinks.getOutgoing().filter(link => link !== toLink)
+		const fromBundleLinks: Link[] = fromNode.borderingLinks.getIngoing().filter(link => link !== fromLink)
+		const toBundleLinks: Link[] = toNode.borderingLinks.getOutgoing().filter(link => link !== toLink)
 
 		await Promise.all([
 			...fromBundleLinks.map(async link => {
+				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) {
+					return
+				}
 				HighlightPropagatingLink.addBundledWith(link, toBundleLinks)
 				await link.getManagingBox().saveMapData()
 			}),
 			...toBundleLinks.map(async link => {
+				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) {
+					return
+				}
 				HighlightPropagatingLink.addBundledWith(link, fromBundleLinks)
 				await link.getManagingBox().saveMapData()
 			})
 		])
-	//}
+	}
+
+	const fromKnotIdToMerge: string = fromInsertion?.insertedNode.getId()?? fromLink.from.getTargetNodeId()
+	const toKnotIdToMerge: string = toInsertion?.insertedNode.getId()?? toLink.to.getTargetNodeId()
+	const fromMergeIntoKnotId: string = fromInsertion ? fromLink.from.getTargetNodeId() : commonRoute.from.getId()
+	const toMergeIntoKnotId: string = toInsertion ? toLink.to.getTargetNodeId() : commonRoute.to.getId()
+	//await Promise.all([
+		await mergeKnotIntoIfPossible(fromKnotIdToMerge, fromMergeIntoKnotId, commonRoute.getEndBox('from'))//,
+		await mergeKnotIntoIfPossible(toKnotIdToMerge, toMergeIntoKnotId, commonRoute.getEndBox('to'))
+	//])
 }
 
-async function tryToMergeKnotInto(knotId: string, mergeIntoKnot: NodeWidget): Promise<boolean> {
-	const knotToMerge: NodeWidget|undefined = mergeIntoKnot.getParent().nodes.getNodeById(knotId)
-	if (!knotToMerge) {
-		return false
+function isKnotTemporaryAndWillBeMergedInto(knotId: string, mergeIntoKnot: AbstractNodeWidget): boolean {
+	return mergeIntoKnot instanceof NodeWidget && !!mergeIntoKnot.getParent().nodes.getNodeById(knotId)
+}
+
+async function mergeKnotIntoIfPossible(knotId: string, mergeIntoKnotId: string, parent: Box): Promise<void> {
+	const knot: NodeWidget|undefined = parent.nodes.getNodeById(knotId)
+	if (!knot) {
+		return
 	}
-	await knotMerger.mergeKnotInto(knotToMerge, mergeIntoKnot)
-	return true
+	const mergeIntoKnot: NodeWidget|undefined = parent.nodes.getNodeById(mergeIntoKnotId)
+	if (!mergeIntoKnot) {
+		return
+	}
+	await knotMerger.mergeKnotInto(knot, mergeIntoKnot)
 }
 
 async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', commonRoute: {

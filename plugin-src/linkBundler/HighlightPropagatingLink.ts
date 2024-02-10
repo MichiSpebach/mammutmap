@@ -1,6 +1,14 @@
+/**
+ * pluginFacade not used in imports because
+ * some imports could not be resolved when importing from '../dist/pluginFacade' and cause:
+ * "TypeError: Class extends value undefined is not a constructor or null"
+ * TODO fix this!
+ */
 import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { LinkEnd } from '../../dist/core/link/LinkEnd'
-import { BoxWatcher, Link, LinkImplementation, NodeWidget, RenderPriority } from '../../dist/pluginFacade'
+import { RenderPriority } from '../../dist/core/RenderManager'
+import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
+import { Link, LinkImplementation } from '../../dist/core/link/Link'
+import { NodeWidget } from '../../dist/core/node/NodeWidget'
 
 export class HighlightPropagatingLink extends LinkImplementation {
 
