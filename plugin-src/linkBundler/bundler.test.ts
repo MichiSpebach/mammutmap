@@ -342,31 +342,83 @@ test('bundleLink, commonRoute and linkToBundle start with knots', async () => {
 	const knotToRightTopFile: Link = await root.links.add({from: leftFolderKnot, to: rightFolderTopFile, save: true})
 	const topToOtherKnot: Link = await leftFolder.links.add({from: leftFolderTopFile, to: otherLeftFolderKnot, save: true})
 	const bottomToOtherKnot: Link = await leftFolder.links.add({from: leftFolderBottomFile, to: otherLeftFolderKnot, save: true})
-	const otherKnotToRightBottomfile: Link = await root.links.add({from: otherLeftFolderKnot, to: rightFolderBottomFile, save: true})
+	const otherKnotToRightBottomFile: Link = await root.links.add({from: otherLeftFolderKnot, to: rightFolderBottomFile, save: true})
 	
-	await linkBundler.bundleLink(otherKnotToRightBottomfile)
+	await linkBundler.bundleLink(otherKnotToRightBottomFile)
 
 	expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(1)
 	expect(leftFolderBottomFile.borderingLinks.getAll().length).toBe(1)
 	expect(rightFolderTopFile.borderingLinks.getAll().length).toBe(1)
 	expect(rightFolderBottomFile.borderingLinks.getAll().length).toBe(1)
+	expect(leftFolder.nodes.getNodes().map(knot => knot.getId())).toEqual([leftFolderKnot.getId()])
 
 	const linkRouteFromTopToTop: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
 	const linkRouteFromTopToBottom: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderBottomFile)
 	const linkRouteFromBottomToTop: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
 	const linkRouteFromBottomToBottom: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)
 	expect(linkRouteFromTopToTop?.map(node => node.getId())).toEqual([topToKnot.getId(), knotToRightTopFile.getId(), expect.anything()])
-	expect(linkRouteFromTopToBottom?.map(node => node.getId())).toEqual([topToKnot.getId(), knotToRightTopFile.getId(), expect.anything()])
+	expect(linkRouteFromTopToBottom?.map(node => node.getId())).toEqual([topToKnot.getId(), knotToRightTopFile.getId(), otherKnotToRightBottomFile.getId()])
 	expect(linkRouteFromBottomToTop?.map(node => node.getId())).toEqual([bottomToKnot.getId(), knotToRightTopFile.getId(), expect.anything()])
-	expect(linkRouteFromBottomToBottom?.map(node => node.getId())).toEqual([bottomToKnot.getId(), knotToRightTopFile.getId(), expect.anything()])
-	// TODO: test bundledWith
-	//expect(linkRouteFromTopToTop?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything(), expect.anything()], [], [topToKnot.getId(), bottomToKnot.getId()]])
-	//expect(linkRouteFromTopToBottom?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything(), expect.anything()], [], [topToKnot.getId(), bottomToKnot.getId()]])
+	expect(linkRouteFromBottomToBottom?.map(node => node.getId())).toEqual([bottomToKnot.getId(), knotToRightTopFile.getId(), otherKnotToRightBottomFile.getId()])
+	const linkToTopId: string|undefined = linkRouteFromTopToTop?.at(2)?.getId()
+	expect(linkRouteFromBottomToTop?.at(2)?.getId()).toBe(linkToTopId)
+	const linkToBottomId: string = otherKnotToRightBottomFile.getId()
+	expect(linkRouteFromTopToTop?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[linkToTopId, linkToBottomId], [], [topToKnot.getId(), bottomToKnot.getId()]])
+	expect(linkRouteFromTopToBottom?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[linkToTopId, linkToBottomId], [], [topToKnot.getId(), bottomToKnot.getId()]])
+	expect(linkRouteFromBottomToTop?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[linkToTopId, linkToBottomId], [], [topToKnot.getId(), bottomToKnot.getId()]])
+	expect(linkRouteFromBottomToBottom?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[linkToTopId, linkToBottomId], [], [topToKnot.getId(), bottomToKnot.getId()]])
 
 	HoverManager.removeHoverable(leftFolderKnot)
 })
 
-test('bundleLink, linkToBundle is connected to knot, commonRoute is not', async () => {
+test('bundleLink, commonRoute and linkToBundle end with knots', async () => {
+	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFolder = boxFactory.folderOf({idOrData: new BoxData('rightFolder', 60, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 40))
+	const otherLeftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('otherLeftFolderKnot', 100, 60))
+	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
+	const leftFolderBottomFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
+	const rightFolderTopFile = boxFactory.fileOf({idOrData: 'rightFolderTopFile', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderBottomFile = boxFactory.fileOf({idOrData: 'rightFolderBottomFile', parent: rightFolder, addToParent: true, rendered: true})
+
+	const rightTopFileToKnot: Link = await root.links.add({from: rightFolderTopFile, to: leftFolderKnot, save: true})
+	const knotToTop: Link = await leftFolder.links.add({from: leftFolderKnot, to: leftFolderTopFile, save: true})
+	const knotToBottom: Link = await leftFolder.links.add({from: leftFolderKnot, to: leftFolderBottomFile, save: true})
+	const rightBottomFileToOtherKnot: Link = await root.links.add({from: rightFolderBottomFile, to: otherLeftFolderKnot, save: true})
+	const otherKnotToTop: Link = await leftFolder.links.add({from: otherLeftFolderKnot, to: leftFolderTopFile, save: true})
+	const otherKnotToBottom: Link = await leftFolder.links.add({from: otherLeftFolderKnot, to: leftFolderBottomFile, save: true})
+	
+	await linkBundler.bundleLink(rightBottomFileToOtherKnot)
+
+	expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(1)
+	expect(leftFolderBottomFile.borderingLinks.getAll().length).toBe(1)
+	expect(rightFolderTopFile.borderingLinks.getAll().length).toBe(1)
+	expect(rightFolderBottomFile.borderingLinks.getAll().length).toBe(1)
+	expect(leftFolder.nodes.getNodes().map(knot => knot.getId())).toEqual([leftFolderKnot.getId()])
+
+	const linkRouteFromTopToTop: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderTopFile, leftFolderTopFile)
+	const linkRouteFromTopToBottom: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderTopFile, leftFolderBottomFile)
+	const linkRouteFromBottomToTop: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderBottomFile, leftFolderTopFile)
+	const linkRouteFromBottomToBottom: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderBottomFile, leftFolderBottomFile)
+	expect(linkRouteFromTopToTop?.map(node => node.getId())).toEqual([expect.anything(), rightTopFileToKnot.getId(), knotToTop.getId()])
+	expect(linkRouteFromTopToBottom?.map(node => node.getId())).toEqual([expect.anything(), rightTopFileToKnot.getId(), knotToBottom.getId()])
+	expect(linkRouteFromBottomToTop?.map(node => node.getId())).toEqual([rightBottomFileToOtherKnot.getId(), rightTopFileToKnot.getId(), knotToTop.getId()])
+	expect(linkRouteFromBottomToBottom?.map(node => node.getId())).toEqual([rightBottomFileToOtherKnot.getId(), rightTopFileToKnot.getId(), knotToBottom.getId()])
+	const linkFromTopId: string|undefined = linkRouteFromTopToTop?.at(0)?.getId()
+	expect(linkRouteFromTopToBottom?.at(0)?.getId()).toBe(linkFromTopId)
+	const linkFromBottomId: string = rightBottomFileToOtherKnot.getId()
+	expect(linkRouteFromTopToTop?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[knotToTop.getId(), knotToBottom.getId()], [], [linkFromTopId, linkFromBottomId]])
+	expect(linkRouteFromTopToBottom?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[knotToTop.getId(), knotToBottom.getId()], [], [linkFromTopId, linkFromBottomId]])
+	expect(linkRouteFromBottomToTop?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[knotToTop.getId(), knotToBottom.getId()], [], [linkFromTopId, linkFromBottomId]])
+	expect(linkRouteFromBottomToBottom?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[knotToTop.getId(), knotToBottom.getId()], [], [linkFromTopId, linkFromBottomId]])
+
+	HoverManager.removeHoverable(leftFolderKnot)
+})
+
+test('bundleLink, linkToBundle is connected to knot on toSide, commonRoute is not', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -384,11 +436,48 @@ test('bundleLink, linkToBundle is connected to knot, commonRoute is not', async 
 
 	await linkBundler.bundleLink(leftToRightFolderKnot)
 
-	expect(BoxLinks.findLinkRoute(leftFile, rightFolderTopFile)?.map(node => node.getId())).toEqual([leftToRightFolderBottomFile.getId(), rightFolderKnotToTopFile.getId()])
-	expect(BoxLinks.findLinkRoute(leftFile, rightFolderMidFile)?.map(node => node.getId())).toEqual([leftToRightFolderBottomFile.getId(), rightFolderKnotToMidFile.getId()])
-	expect(BoxLinks.findLinkRoute(leftFile, rightFolderBottomFile)?.map(node => node.getId())).toEqual([leftToRightFolderBottomFile.getId(), expect.anything()])
+	const routeToTopFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFile, rightFolderTopFile)
+	const routeToMidFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFile, rightFolderMidFile)
+	const routeToBottomFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFile, rightFolderBottomFile)
+	expect(routeToTopFile?.map(node => node.getId())).toEqual([leftToRightFolderBottomFile.getId(), rightFolderKnotToTopFile.getId()])
+	expect(routeToMidFile?.map(node => node.getId())).toEqual([leftToRightFolderBottomFile.getId(), rightFolderKnotToMidFile.getId()])
+	expect(routeToBottomFile?.map(node => node.getId())).toEqual([leftToRightFolderBottomFile.getId(), expect.anything()])
 	expect(rightFolder.nodes.getNodes().map(node => node.getId())).toEqual([rightFolderKnot.getId()])
-	// TODO: test bundledWith
+	expect(routeToTopFile?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	expect(routeToMidFile?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	expect(routeToBottomFile?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+
+	HoverManager.removeHoverable(rightFolderKnot)
+})
+
+test('bundleLink, linkToBundle is connected to knot on fromSide, commonRoute is not', async () => {
+	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFile = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 40, 30, 20, [], []), parent: root, addToParent: true, rendered: true})
+	const rightFolder = boxFactory.folderOf({idOrData: new BoxData('rightFolder', 60, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFolderKnot: NodeWidget = await rightFolder.nodes.add(new NodeData('rightFolderKnot', 0, 50))
+	const rightFolderTopFile = boxFactory.fileOf({idOrData: 'rightFolderTopFile', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderMidFile = boxFactory.fileOf({idOrData: 'rightFolderMidFile', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderBottomFile = boxFactory.fileOf({idOrData: 'rightFolderBottomFile', parent: rightFolder, addToParent: true, rendered: true})
+
+	const topFileToKnot: Link = await rightFolder.links.add({from: rightFolderTopFile, to: rightFolderKnot, save: true})
+	const midFileToKnot: Link = await rightFolder.links.add({from: rightFolderMidFile, to: rightFolderKnot, save: true})
+	const knotToLeftFile: Link = await root.links.add({from: rightFolderKnot, to: leftFile, save: true})
+	const bottomFileToLeftFile: Link = await root.links.add({from: rightFolderBottomFile, to: leftFile, save: true})
+
+	await linkBundler.bundleLink(knotToLeftFile)
+
+	const routeFromTopFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderTopFile, leftFile)
+	const routeFromMidFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderMidFile, leftFile)
+	const routeFromBottomFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderBottomFile, leftFile)
+	expect(routeFromTopFile?.map(node => node.getId())).toEqual([topFileToKnot.getId(), bottomFileToLeftFile.getId()])
+	expect(routeFromMidFile?.map(node => node.getId())).toEqual([midFileToKnot.getId(), bottomFileToLeftFile.getId()])
+	expect(routeFromBottomFile?.map(node => node.getId())).toEqual([expect.anything(), bottomFileToLeftFile.getId()])
+	expect(rightFolder.nodes.getNodes().map(node => node.getId())).toEqual([rightFolderKnot.getId()])
+	expect(routeFromTopFile?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	expect(routeFromMidFile?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	expect(routeFromBottomFile?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
 
 	HoverManager.removeHoverable(rightFolderKnot)
 })
@@ -514,8 +603,32 @@ test('bundleLink, knots on both sides need to be merged', async () => {
 	const leftFolderFile2 = boxFactory.fileOf({idOrData: 'leftFolderFile2', parent: leftFolder, addToParent: true, rendered: true})
 	const leftFolderFile3 = boxFactory.fileOf({idOrData: 'leftFolderFile3', parent: leftFolder, addToParent: true, rendered: true})
 	const leftFolderFile4 = boxFactory.fileOf({idOrData: 'leftFolderFile4', parent: leftFolder, addToParent: true, rendered: true})
-	const rightFolderTopFile = boxFactory.fileOf({idOrData: 'rightFolderTopFile', parent: rightFolder, addToParent: true, rendered: true})
-	const rightFolderBottomFile = boxFactory.fileOf({idOrData: 'rightFolderBottomFile', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderFile1 = boxFactory.fileOf({idOrData: 'rightFolderFile1', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderFile2 = boxFactory.fileOf({idOrData: 'rightFolderFile2', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderFile3 = boxFactory.fileOf({idOrData: 'rightFolderFile3', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderFile4 = boxFactory.fileOf({idOrData: 'rightFolderFile4', parent: rightFolder, addToParent: true, rendered: true})
 
+	const link1: Link = await root.links.add({from: leftFolderFile1, to: rightFolderFile1, save: true})
+	const link2: Link = await root.links.add({from: leftFolderFile2, to: rightFolderFile2, save: true})
+	await linkBundler.bundleLink(link1)
+	
+	const link3: Link = await root.links.add({from: leftFolderFile3, to: rightFolderFile3, save: true})
+	const link4: Link = await root.links.add({from: leftFolderFile4, to: rightFolderFile3, save: true})
+	await linkBundler.bundleLink(link3)
+
+	expect(BoxLinks.findLinkRoute(leftFolderFile1, rightFolderFile1)?.at(1)?.getId()).toBe(link2.getId())
+	expect(BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)?.at(1)?.getId()).toBe(link4.getId())
+	
+	const link5: Link = await root.links.add({from: leftFolderFile4, to: rightFolderFile4, save: true})
+	await linkBundler.bundleLink(link5)
+	const temporaryRoute3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)
+	const temporaryRoute4: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile4, rightFolderFile3)
+	const temporaryRoute5: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile4, rightFolderFile4)
+	expect(temporaryRoute3?.map(link => link.getId())).toEqual([link3.getId(), link4.getId(), expect.anything()])
+	expect(temporaryRoute4?.map(link => link.getId())).toEqual([expect.anything(), link4.getId(), expect.anything()])
+	expect(temporaryRoute5?.map(link => link.getId())).toEqual([expect.anything(), link4.getId(), link5.getId()])
+	//expect(BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile4)?.map(link => link.getId())).toBe(undefined) TODO should not find route between these files
+	//expect(temporaryRoute3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[temporaryRoute3?.at(2)?.getId()], [], [temporaryRoute4?.at(0)?.getId(), link3.getId()]])
+	//expect(temporaryRoute4?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[temporaryRoute4?.at(2)?.getId()], [], [temporaryRoute4?.at(0)?.getId(), link3.getId()]])
 	// TODO
 })

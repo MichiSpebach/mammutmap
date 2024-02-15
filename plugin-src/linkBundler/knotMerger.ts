@@ -9,6 +9,7 @@ import { LinkEnd } from '../../dist/core/link/LinkEnd'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
+import { RouteTree } from './RouteTree'
 
 export async function mergeKnot(knot: NodeWidget): Promise<void> {
 	const otherKnots: NodeWidget[] = knot.getParent().nodes.getNodes()
@@ -24,30 +25,26 @@ export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget)
 		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot}') there is no link between knot and mergeIntoKnot`)
 		return
 	}
+	const direction: 'from'|'to' = linkBetweenKnots.from.getTargetNodeId() === mergeIntoKnot.getId() ? 'from' : 'to'
 
-	const entangledLinks: Link[] = await HighlightPropagatingLink.getEntangledLinks(linkBetweenKnots, linkBetweenKnots.from.getTargetNodeId() === mergeIntoKnot.getId() ? 'from' : 'to')
-	await pushEntanglementsOfLinkInDirection(linkBetweenKnots, entangledLinks, knot)
-	entangledLinks.map(async (entangledLink: Link) => {
-		HighlightPropagatingLink.removeBundledWithId(entangledLink, linkBetweenKnots.getId())
-		await entangledLink.getManagingBox().saveMapData()
-	})
-	await linkBetweenKnots.getManagingBoxLinks().removeLink(linkBetweenKnots)
+	await moveEntanglementsOfLinkInDirection(linkBetweenKnots, direction, knot)
 
 	const newPosition: ClientPosition = (await mergeIntoKnot.getClientShape()).getMidPosition()
-	const pros: Promise<void>[] = knot.borderingLinks.getAllEnds().map(async (end: LinkEnd) => {
+	await Promise.all(knot.borderingLinks.getAllEnds().map(async (end: LinkEnd) => {
 		const link: Link = end.getReferenceLink()
+		if (link === linkBetweenKnots) {
+			return
+		}
 		const otherEnd: 'from'|'to' = link.from === end ? 'to' : 'from'
 		const mergeIntoLink: Link|undefined = getLinkBetweenDirected(mergeIntoKnot, end.getOtherEnd().getTargetNodeId(), otherEnd)
 		if (mergeIntoLink) {
-			await Promise.all([
-				mergeLinkInto(link, mergeIntoLink),
-				link.getManagingBoxLinks().removeLink(link)
-			])
+			await mergeLinkIntoAndRemove(link, direction, mergeIntoLink)
 		} else {
 			await end.dragAndDrop({dropTarget: mergeIntoKnot, clientPosition: newPosition})
 		}
-	})
-	await Promise.all(pros)
+	}))
+
+	await linkBetweenKnots.getManagingBoxLinks().removeLink(linkBetweenKnots)
 	await knot.getParent().nodes.remove(knot, {mode: 'reorder bordering links'})
 }
 
@@ -70,26 +67,51 @@ function getLinkBetweenDirected(knot: NodeWidget, targetNodeId: string, linkEnd:
 	return knot.borderingLinks.getAll().find((link: Link) => link[linkEnd].getTargetNodeId() === targetNodeId)
 }
 
-async function pushEntanglementsOfLinkInDirection(link: Link, linkEntanglements: Link[], knotInDirection: NodeWidget): Promise<void> {
+async function moveEntanglementsOfLinkInDirection(link: Link, direction: 'from'|'to', knotInDirection: NodeWidget): Promise<void> {
+	const entangledLinks: Link[] = await new RouteTree(link, direction).getEntangledLinks()
+	await copyEntanglementsOfLinkInDirection(link, entangledLinks, knotInDirection)
+	await Promise.all(entangledLinks.map(async (entangledLink: Link) => {
+		HighlightPropagatingLink.removeBundledWithId(entangledLink, link.getId())
+		HighlightPropagatingLink.removeBundledWithId(link, entangledLink.getId())
+		await entangledLink.getManagingBox().saveMapData()
+	}))
+	await link.getManagingBox().saveMapData()
+}
+
+async function copyEntanglementsOfLinkInDirection(link: Link, linkEntanglements: Link[], knotInDirection: NodeWidget): Promise<void> {
 	if (link.from.getTargetNodeId() === knotInDirection.getId()) {
-		await Promise.all(knotInDirection.borderingLinks.getIngoing().map(mergeIntoLink => pushEntanglementsOfLinkIntoOtherLink({link, linkEntanglements, otherLink: mergeIntoLink})))
+		await Promise.all(knotInDirection.borderingLinks.getIngoing().map((copyInto: Link) => copyEntanglementsOfLinkInto({link, linkEntanglements, copyInto})))
 		return
 	}
 	if (link.to.getTargetNodeId() === knotInDirection.getId()) {
-		await Promise.all(knotInDirection.borderingLinks.getOutgoing().map((mergeIntoLink: Link) => pushEntanglementsOfLinkIntoOtherLink({link, linkEntanglements, otherLink: mergeIntoLink})))
+		await Promise.all(knotInDirection.borderingLinks.getOutgoing().map((copyInto: Link) => copyEntanglementsOfLinkInto({link, linkEntanglements, copyInto})))
 		return
 	}
-	console.warn(`knotMerger.pushEntanglementsOfLinkInDirection(..) link does not end with knotInDirection`)
+	console.warn(`knotMerger.copyEntanglementsOfLinkInDirection(..) link does not end with knotInDirection`)
 }
 
-async function pushEntanglementsOfLinkIntoOtherLink(options: {link: Link, linkEntanglements: Link[], otherLink: Link}): Promise<void> {
+async function copyEntanglementsOfLinkInto(options: {link: Link, linkEntanglements: Link[], copyInto: Link}): Promise<void> {
+	HighlightPropagatingLink.addBundledWithIds(options.copyInto, HighlightPropagatingLink.getBundledWithIds(options.link))
 	await Promise.all([
-		mergeLinkInto(options.link, options.otherLink),
-		options.linkEntanglements.map((linkEntanglement: Link) => HighlightPropagatingLink.addBundledWithIds(linkEntanglement, [options.otherLink.getId()]))
+		options.linkEntanglements.map((entangledLink: Link) => {
+			HighlightPropagatingLink.addBundledWithIds(entangledLink, [options.copyInto.getId()])
+			entangledLink.getManagingBox().saveMapData() // entangledLink is saved anyway in moveEntanglementsOfLinkInDirection(..) but is cleaner and more stable if surrounding implementation is changed or method is reused
+		}),
+		options.copyInto.getManagingBox().saveMapData()
 	])
 }
 
-async function mergeLinkInto(link: Link, mergeIntoLink: Link): Promise<void> {
+async function mergeLinkIntoAndRemove(link: Link, routeTreeSearchDirection: 'from'|'to', mergeIntoLink: Link): Promise<void> {
+	const entangledLinks: Link[] = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
 	HighlightPropagatingLink.addBundledWithIds(mergeIntoLink, HighlightPropagatingLink.getBundledWithIds(link))
-	await mergeIntoLink.getManagingBox().saveMapData()
+	await Promise.all([
+		entangledLinks.map(async entangledLink => {
+			HighlightPropagatingLink.addBundledWith(entangledLink, [mergeIntoLink])
+			HighlightPropagatingLink.removeBundledWithId(entangledLink, link.getId())
+			//HighlightPropagatingLink.replaceBundledWithId(link.getEntanglements) // TODO?
+			await entangledLink.getManagingBox().saveMapData()
+		}),
+		mergeIntoLink.getManagingBox().saveMapData(),
+		link.getManagingBoxLinks().removeLink(link)
+	])
 }

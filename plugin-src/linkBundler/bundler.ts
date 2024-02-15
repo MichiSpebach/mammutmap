@@ -62,8 +62,10 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 			console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) failed to decide weather commonRoute.from or commonRoute.to is heavier`)
 			return
 		}
-		HighlightPropagatingLink.addBundledWith(fromLink, [toLink])
-		HighlightPropagatingLink.addBundledWith(toLink, [fromLink])
+	} else if (bundleFromPart) {
+		toLink = commonRoute.links.at(-1)! // TODO
+	} else {
+		fromLink = commonRoute.links.at(0)! // TODO
 	}
 
 	let fromInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
@@ -92,29 +94,29 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 
 		await Promise.all([
 			...fromBundleLinks.map(async link => {
-				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) {
+				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) { // TODO: move into function
 					return
 				}
 				HighlightPropagatingLink.addBundledWith(link, toBundleLinks)
 				await link.getManagingBox().saveMapData()
 			}),
 			...toBundleLinks.map(async link => {
-				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) {
+				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) { // TODO: move into function
 					return
 				}
 				HighlightPropagatingLink.addBundledWith(link, fromBundleLinks)
 				await link.getManagingBox().saveMapData()
-			})
+			}),
+			HighlightPropagatingLink.addBundledWith(fromLink, [toLink]),
+			await fromLink.getManagingBox().saveMapData(),
+			HighlightPropagatingLink.addBundledWith(toLink, [fromLink]),
+			await toLink.getManagingBox().saveMapData()
 		])
 	}
 
-	const fromKnotIdToMerge: string = fromInsertion?.insertedNode.getId()?? fromLink.from.getTargetNodeId()
-	const toKnotIdToMerge: string = toInsertion?.insertedNode.getId()?? toLink.to.getTargetNodeId()
-	const fromMergeIntoKnotId: string = fromInsertion ? fromLink.from.getTargetNodeId() : commonRoute.from.getId()
-	const toMergeIntoKnotId: string = toInsertion ? toLink.to.getTargetNodeId() : commonRoute.to.getId()
 	//await Promise.all([
-		await mergeKnotIntoIfPossible(fromKnotIdToMerge, fromMergeIntoKnotId, commonRoute.getEndBox('from'))//,
-		await mergeKnotIntoIfPossible(toKnotIdToMerge, toMergeIntoKnotId, commonRoute.getEndBox('to'))
+		await mergeIfKnotsAndIfPossible(commonRoute.from, fromLink.from, fromInsertion?.insertedNode)
+		await mergeIfKnotsAndIfPossible(commonRoute.to, toLink.to, toInsertion?.insertedNode)
 	//])
 }
 
@@ -122,16 +124,28 @@ function isKnotTemporaryAndWillBeMergedInto(knotId: string, mergeIntoKnot: Abstr
 	return mergeIntoKnot instanceof NodeWidget && !!mergeIntoKnot.getParent().nodes.getNodeById(knotId)
 }
 
-async function mergeKnotIntoIfPossible(knotId: string, mergeIntoKnotId: string, parent: Box): Promise<void> {
-	const knot: NodeWidget|undefined = parent.nodes.getNodeById(knotId)
-	if (!knot) {
+async function mergeIfKnotsAndIfPossible(commonRouteEnd: AbstractNodeWidget, linkEnd: LinkEnd, insertedNode: NodeWidget|undefined): Promise<void> {
+	if (commonRouteEnd.getId() === linkEnd.getTargetNodeId()) {
 		return
 	}
-	const mergeIntoKnot: NodeWidget|undefined = parent.nodes.getNodeById(mergeIntoKnotId)
-	if (!mergeIntoKnot) {
+	const commonRouteEndBox: Box = commonRouteEnd instanceof Box
+		? commonRouteEnd
+		: commonRouteEnd.getParent() as Box
+	if (!(commonRouteEndBox instanceof Box)) {
+		console.warn(`bundler.mergeIfKnotsAndIfPossible(...) commonRouteEndBox is not instanceof Box`)
+	}
+	const linkEndKnot: NodeWidget|undefined = commonRouteEndBox.nodes.getNodeById(linkEnd.getTargetNodeId())
+	if (!linkEndKnot) {
 		return
 	}
-	await knotMerger.mergeKnotInto(knot, mergeIntoKnot)
+
+	if (insertedNode) {
+		await knotMerger.mergeKnotInto(insertedNode, linkEndKnot)
+		return
+	}
+	if (commonRouteEnd instanceof NodeWidget) {
+		await knotMerger.mergeKnotInto(linkEndKnot, commonRouteEnd)
+	}
 }
 
 async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', commonRoute: {

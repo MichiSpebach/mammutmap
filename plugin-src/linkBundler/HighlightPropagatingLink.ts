@@ -22,10 +22,9 @@ export class HighlightPropagatingLink extends LinkImplementation {
 
 	public static addBundledWithIds(link: Link, bundledWithIds: string[]): void {
 		if (!link.getData()['bundledWith']) {
-			link.getData()['bundledWith'] = bundledWithIds
-		} else {
-			(link.getData()['bundledWith'] as string[]).push(...bundledWithIds)
+			link.getData()['bundledWith'] = []
 		}
+		(link.getData()['bundledWith'] as string[]).push(...bundledWithIds)
 	}
 
 	public static removeBundledWithId(link: Link, bundledWithId: string): void {
