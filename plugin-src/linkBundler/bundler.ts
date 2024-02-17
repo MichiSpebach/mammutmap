@@ -15,6 +15,7 @@ import * as commonRouteFinder from './commonRouteFinder'
 import * as knotMerger from './knotMerger'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 import { CommonRoute } from './CommonRoute'
+import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 
 export async function bundleLink(link: Link, options?: {
 	unwatchDelayInMs?: number
@@ -80,31 +81,44 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 		toInsertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
 	}
 	
-	if (bundleFromPart && bundleToPart) {
-		const fromNode: AbstractNodeWidget = fromInsertion?.insertedNode?? commonRoute.from
-		if (!(fromNode instanceof NodeWidget)) {
-			console.warn('bundler.bundleLinkIntoCommonRoute(..) fromKnot is not instanceof NodeWidget')
-		}
-		const toNode: AbstractNodeWidget = toInsertion?.insertedNode?? commonRoute.to
-		if (!(toNode instanceof NodeWidget)) {
-			console.warn('bundler.bundleLinkIntoCommonRoute(..) toKnot is not instanceof NodeWidget')
-		}
-		const fromBundleLinks: Link[] = fromNode.borderingLinks.getIngoing().filter(link => link !== fromLink)
-		const toBundleLinks: Link[] = toNode.borderingLinks.getOutgoing().filter(link => link !== toLink)
-
+	let fromForkingKnot: AbstractNodeWidget
+	if (bundleFromPart) {
+		fromForkingKnot = fromInsertion?.insertedNode?? commonRoute.from
+	} else {
+		const fromForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await fromLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
+		fromForkingKnot = fromForkingKnotWithWatcher.node
+	}
+	if (!(fromForkingKnot instanceof NodeWidget)) {
+		console.warn('bundler.bundleLinkIntoCommonRoute(..) fromForkingKnot is not instanceof NodeWidget')
+	}
+	let toForkingKnot: AbstractNodeWidget
+	if (bundleToPart) {
+		toForkingKnot = toInsertion?.insertedNode?? commonRoute.to
+	} else {
+		const toForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await fromLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
+		toForkingKnot = toForkingKnotWithWatcher.node
+	}
+	if (!(toForkingKnot instanceof NodeWidget)) {
+		console.warn('bundler.bundleLinkIntoCommonRoute(..) toForkingKnot is not instanceof NodeWidget')
+	}
+	const fromLinks: Link[] = fromForkingKnot.borderingLinks.getIngoing()
+	const fromLinksExistedBefore: Link[] = bundleFromPart ? fromLinks.filter(link => link !== fromLink) : fromLinks
+	const toLinks: Link[] = toForkingKnot.borderingLinks.getOutgoing()
+	const toLinksExistedBefore: Link[] = bundleToPart ? toLinks.filter(link => link !== toLink) : toLinks
+	if (bundleFromPart && toLinks.length > 1 || bundleToPart && fromLinks.length > 1) {
 		await Promise.all([
-			...fromBundleLinks.map(async link => {
+			...fromLinksExistedBefore.map(async link => {
 				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) { // TODO: move into function
 					return
 				}
-				HighlightPropagatingLink.addBundledWith(link, toBundleLinks)
+				HighlightPropagatingLink.addBundledWith(link, toLinksExistedBefore)
 				await link.getManagingBox().saveMapData()
 			}),
-			...toBundleLinks.map(async link => {
+			...toLinksExistedBefore.map(async link => {
 				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) { // TODO: move into function
 					return
 				}
-				HighlightPropagatingLink.addBundledWith(link, fromBundleLinks)
+				HighlightPropagatingLink.addBundledWith(link, fromLinksExistedBefore)
 				await link.getManagingBox().saveMapData()
 			}),
 			HighlightPropagatingLink.addBundledWith(fromLink, [toLink]),

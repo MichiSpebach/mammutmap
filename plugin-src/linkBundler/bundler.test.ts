@@ -628,7 +628,13 @@ test('bundleLink, knots on both sides need to be merged', async () => {
 	expect(temporaryRoute4?.map(link => link.getId())).toEqual([expect.anything(), link4.getId(), expect.anything()])
 	expect(temporaryRoute5?.map(link => link.getId())).toEqual([expect.anything(), link4.getId(), link5.getId()])
 	//expect(BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile4)?.map(link => link.getId())).toBe(undefined) TODO should not find route between these files
-	//expect(temporaryRoute3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[temporaryRoute3?.at(2)?.getId()], [], [temporaryRoute4?.at(0)?.getId(), link3.getId()]])
-	//expect(temporaryRoute4?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[temporaryRoute4?.at(2)?.getId()], [], [temporaryRoute4?.at(0)?.getId(), link3.getId()]])
-	// TODO
+	expect(temporaryRoute3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([
+		[temporaryRoute3?.at(2)?.getId()], [], [temporaryRoute4?.at(0)?.getId(), link3.getId()]
+	])
+	expect(temporaryRoute4?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([
+		[temporaryRoute4?.at(2)?.getId(), link5.getId()], [], [temporaryRoute4?.at(0)?.getId(), link3.getId()]
+	])
+	expect(temporaryRoute5?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([
+		[temporaryRoute4?.at(2)?.getId(), link5.getId()], [], [temporaryRoute4?.at(0)?.getId()]
+	])
 })
