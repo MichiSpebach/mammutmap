@@ -513,6 +513,36 @@ test('bundleLink, commonRoute with knots already exist', async () => {
 	expect(bottomRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything()], [], [bottomLink.getId()]])
 })
 
+test('bundleLink, linkToBundle starts with knot, knot on toSide needs to be inserted', async () => {
+	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFolder = boxFactory.folderOf({idOrData: new BoxData('rightFolder', 60, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
+	const leftFolderBottomFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
+	const rightFolderTopFile = boxFactory.fileOf({idOrData: 'rightFolderTopFile', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderBottomFile = boxFactory.fileOf({idOrData: 'rightFolderBottomFile', parent: rightFolder, addToParent: true, rendered: true})
+
+	const topToTopLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
+	const bottomToTopLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFolderTopFile, save: true})
+	await linkBundler.bundleLink(topToTopLink)
+
+	expect(BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)?.at(1)?.getId()).toBe(bottomToTopLink.getId())
+
+	const bottomToBottomLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
+	await linkBundler.bundleLink(bottomToTopLink)
+
+	const topToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
+	const bottomToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
+	const bottomToBottomRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)
+	expect(topToTopRoute?.map(node => node.getId())).toEqual([topToTopLink.getId(), bottomToBottomLink.getId(), bottomToTopLink.getId()])
+	expect(bottomToTopRoute?.map(node => node.getId())).toEqual([expect.anything(), bottomToBottomLink.getId(), bottomToTopLink.getId()])
+	expect(bottomToBottomRoute?.map(node => node.getId())).toEqual([expect.anything(), bottomToBottomLink.getId(), expect.anything()])
+	// TODO
+	//expect(bottomToBottomRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything()], [], [bottomLink.getId()]])
+})
+
 test('bundleLink, knots on from side need to be merged', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 

@@ -51,9 +51,9 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 	let fromLink: Link = link
 	let toLink: Link = link
 	if (bundleFromPart && bundleToPart) {
-		if (isKnotTemporaryAndWillBeMergedInto(link.to.getTargetNodeId(), commonRoute.to)) {
+		if (isLinkEndKnotTemporaryAndWillBeMerged(link.to, commonRoute, 'to')) {
 			toLink = await link.getManagingBoxLinks().addCopy(link)
-		} else if (isKnotTemporaryAndWillBeMergedInto(link.from.getTargetNodeId(), commonRoute.from)) {
+		} else if (isLinkEndKnotTemporaryAndWillBeMerged(link.from, commonRoute, 'from')) {
 			fromLink = await link.getManagingBoxLinks().addCopy(link)
 		} else if (link.to.isBoxInPath(commonRoute.getEndBox('to'))) {
 			toLink = await link.getManagingBoxLinks().addCopy(link)
@@ -134,8 +134,19 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 	//])
 }
 
-function isKnotTemporaryAndWillBeMergedInto(knotId: string, mergeIntoKnot: AbstractNodeWidget): boolean {
-	return mergeIntoKnot instanceof NodeWidget && !!mergeIntoKnot.getParent().nodes.getNodeById(knotId)
+function isLinkEndKnotTemporaryAndWillBeMerged(linkEnd: LinkEnd, commonRoute: CommonRoute, commonRouteEnd: 'from'|'to'): boolean {
+	/*if (getBundleKnot(commonRoute, commonRouteEnd)) { TODO: write test case that needs this
+		return true
+	}*/
+	const commonEndNode: AbstractNodeWidget = commonRoute[commonRouteEnd]
+	if (commonEndNode instanceof NodeWidget) { // TODO: remove when getBundleKnot(commonRoute, commonRouteEnd) is used instead
+		return true
+	}
+	if (!(commonEndNode instanceof Box)) {
+		console.warn(`bundler.isLinkEndKnotTemporaryAndWillBeMerged(...) not implemented for commonEndNode instanceof ${commonEndNode.constructor.name}`)
+		return false
+	}
+	return !!commonEndNode.nodes.getNodeById(linkEnd.getTargetNodeId())
 }
 
 async function mergeIfKnotsAndIfPossible(commonRouteEnd: AbstractNodeWidget, linkEnd: LinkEnd, insertedNode: NodeWidget|undefined): Promise<void> {
@@ -162,31 +173,21 @@ async function mergeIfKnotsAndIfPossible(commonRouteEnd: AbstractNodeWidget, lin
 	}
 }
 
-async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', commonRoute: {
-	links: Link[]
-	from: AbstractNodeWidget
-	to: AbstractNodeWidget
-}): Promise<{
+async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', commonRoute: CommonRoute): Promise<{
 	insertedNode: NodeWidget, addedLink: Link
 } | undefined> {
-	const commonEndNode: AbstractNodeWidget = commonRoute[end]
-	if (commonEndNode instanceof NodeWidget) {
-		await dragAndDropLinkEnd(linkEnd, commonEndNode)
-		return undefined
-	}
-	
-	if (!(commonEndNode instanceof Box)) {
-		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) not implemented for commonEndNode instanceof ${commonEndNode.constructor.name}`)
-		return undefined
-	}
-	const commonEndLink: Link = commonRouteFinder.getEndLinkOfCommonRoute(commonRoute, end)
-	const otherEnd: 'from'|'to' = end === 'from' ? 'to' : 'from'
-	const bundleKnot: NodeWidget|undefined = commonRouteFinder.getKnotIfLinkEndConnected(commonEndLink, otherEnd, commonEndNode)
+	const bundleKnot: NodeWidget|undefined = getBundleKnot(commonRoute, end)
 	if (bundleKnot) {
 		await dragAndDropLinkEnd(linkEnd, bundleKnot)
 		return undefined
 	}
 	
+	const commonEndNode: AbstractNodeWidget = commonRoute[end]
+	if (!(commonEndNode instanceof Box)) {
+		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) not implemented for commonEndNode instanceof ${commonEndNode.constructor.name}`)
+		return undefined
+	}
+	const commonEndLink: Link = commonRouteFinder.getEndLinkOfCommonRoute(commonRoute, end)
 	const linkManagingBoxBefore: Box = commonEndLink.getManagingBox()
 	const insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined = await commonEndLink.getManagingBoxLinks().insertNodeIntoLink(
 		commonEndLink,
@@ -198,6 +199,20 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 	}
 	await dragAndDropLinkEnd(linkEnd, insertion.insertedNode)
 	return insertion
+}
+
+function getBundleKnot(commonRoute: CommonRoute, end: 'from'|'to'): NodeWidget|undefined {
+	const commonEndNode: AbstractNodeWidget = commonRoute[end]
+	if (commonEndNode instanceof NodeWidget) {
+		return commonEndNode
+	}
+	if (!(commonEndNode instanceof Box)) {
+		console.warn(`bundler.getBundleKnot(...) not implemented for commonEndNode instanceof ${commonEndNode.constructor.name}`)
+		return undefined
+	}
+	const commonEndLink: Link = commonRouteFinder.getEndLinkOfCommonRoute(commonRoute, end)
+	const otherEnd: 'from'|'to' = end === 'from' ? 'to' : 'from'
+	return commonRouteFinder.getKnotIfLinkEndConnected(commonEndLink, otherEnd, commonEndNode)
 }
 
 async function dragAndDropLinkEnd(linkEnd: LinkEnd, dropTarget: NodeWidget): Promise<void> {
