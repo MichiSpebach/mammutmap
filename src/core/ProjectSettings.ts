@@ -83,7 +83,7 @@ export class ProjectSettings { // TODO: rename to MapSettings?
 
   public async addMapFolderToGitignore(): Promise<void> {
     const mapFolderPath: string = this.getAbsoluteMapRootPath()
-    const mapFolderName: string|undefined = util.getElementsOfPath(mapFolderPath).pop()
+    const mapFolderName: string|undefined = '/'+util.getElementsOfPath(mapFolderPath).pop() // prefix '/' important, otherwise would ignore all "map" folders
     if (!mapFolderName) {
       log.warning(`ProjectSettings::addMapFolderToGitignore() mapFolderPath '${mapFolderPath}' seems to be empty.`)
       return
