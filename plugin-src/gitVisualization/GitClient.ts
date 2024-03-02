@@ -24,6 +24,11 @@ export class GitClient {
         } catch (error) {
             return new Message('No git repository found.')
         }
+        try {
+            await gitClient.getMostRecentCommit()
+        } catch (error) {
+            return new Message('Git repo is bare.')
+        }
         return gitClient
     }
 
