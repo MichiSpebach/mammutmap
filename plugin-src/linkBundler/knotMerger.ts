@@ -25,24 +25,30 @@ export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget)
 		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot}') there is no link between knot and mergeIntoKnot`)
 		return
 	}
-	const direction: 'from'|'to' = linkBetweenKnots.from.getTargetNodeId() === mergeIntoKnot.getId() ? 'from' : 'to'
-
-	await moveEntanglementsOfLinkInDirection(linkBetweenKnots, direction, knot)
+	
+	const directions: {knotAwayFromCenter: NodeWidget, knotTowardsCenter: NodeWidget, linkTowardsCenter: Link} | undefined = getDirectionsRegardingRouteTree(knot, mergeIntoKnot)
+	if (!directions) {
+		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot}') failed to chooseKnotAwayFromCenter(knot, mergeIntoKnot)`)
+		return
+	}
+	const routeTreeSearchDirection: 'from'|'to' = linkBetweenKnots.from.getTargetNodeId() === directions.knotTowardsCenter.getId() ? 'from' : 'to'
+	await moveEntanglementsOfLinkInDirection(linkBetweenKnots, routeTreeSearchDirection, directions.knotAwayFromCenter)
 
 	const newPosition: ClientPosition = (await mergeIntoKnot.getClientShape()).getMidPosition()
 	await Promise.all(knot.borderingLinks.getAllEnds().map(async (end: LinkEnd) => {
 		const link: Link = end.getReferenceLink()
-		if (link === linkBetweenKnots) {
+		if (link === linkBetweenKnots || link === directions.linkTowardsCenter) {
 			return
 		}
 		const otherEnd: 'from'|'to' = link.from === end ? 'to' : 'from'
 		const mergeIntoLink: Link|undefined = getLinkBetweenDirected(mergeIntoKnot, end.getOtherEnd().getTargetNodeId(), otherEnd)
 		if (mergeIntoLink) {
-			await mergeLinkIntoAndRemove(link, direction, mergeIntoLink)
+			await mergeLinkIntoAndRemove(link, routeTreeSearchDirection, mergeIntoLink)
 		} else {
 			await end.dragAndDrop({dropTarget: mergeIntoKnot, clientPosition: newPosition})
 		}
 	}))
+	await directions.linkTowardsCenter[routeTreeSearchDirection === 'from' ? 'to' : 'from'].dragAndDrop({dropTarget: mergeIntoKnot, clientPosition: newPosition})
 
 	await linkBetweenKnots.getManagingBoxLinks().removeLink(linkBetweenKnots)
 	await knot.getParent().nodes.remove(knot, {mode: 'reorder bordering links'})
@@ -67,8 +73,56 @@ function getLinkBetweenDirected(knot: NodeWidget, targetNodeId: string, linkEnd:
 	return knot.borderingLinks.getAll().find((link: Link) => link[linkEnd].getTargetNodeId() === targetNodeId)
 }
 
-async function moveEntanglementsOfLinkInDirection(link: Link, direction: 'from'|'to', knotInDirection: NodeWidget): Promise<void> {
-	const entangledLinks: Link[] = await new RouteTree(link, direction).getEntangledLinks()
+/** TODO: does not work for all cases, add direction mapping to NodeWidget, Link or LinkEnd */
+function getDirectionsRegardingRouteTree(knot: NodeWidget, otherKnot: NodeWidget): {
+	knotAwayFromCenter: NodeWidget, knotTowardsCenter: NodeWidget, linkTowardsCenter: Link
+} | undefined {
+	const linkTowardsCenter: Link|undefined = getLinkTowardsCenter(knot)
+	const otherLinkTowardsCenter: Link|undefined = getLinkTowardsCenter(otherKnot)
+	if (!linkTowardsCenter ||!otherLinkTowardsCenter) {
+		return undefined
+	}
+	const linkManagingBoxPathLength: number = linkTowardsCenter.getManagingBox().getSrcPath().length
+	const otherLinkManagingBoxPathLength: number = otherLinkTowardsCenter.getManagingBox().getSrcPath().length
+	if (linkManagingBoxPathLength === otherLinkManagingBoxPathLength) {
+		return undefined
+	}
+	return linkManagingBoxPathLength > otherLinkManagingBoxPathLength
+		? {knotAwayFromCenter: knot, knotTowardsCenter: otherKnot, linkTowardsCenter: otherLinkTowardsCenter}
+		: {knotAwayFromCenter: otherKnot, knotTowardsCenter: knot, linkTowardsCenter}
+}
+
+function getLinkTowardsCenter(knot: NodeWidget): Link|undefined {
+	let linkTowardsCenter: Link|undefined
+	let minManagingBoxPathLength: number = Number.MAX_VALUE
+	for (const link of knot.borderingLinks.getAll()) {
+		if (link.getManagingBox().getSrcPath().length < minManagingBoxPathLength) {
+			linkTowardsCenter = link
+			minManagingBoxPathLength = link.getManagingBox().getSrcPath().length
+		}
+	}
+	if (!linkTowardsCenter) {
+		console.warn(`knotMerger::getLinkTowardsCenter(knot: '${knot.getName()}') knot has no bordering links.`)
+	}
+	return linkTowardsCenter
+}
+
+async function prepareRemoveLink(link: Link, routeTreeSearchDirection: 'from'|'to', knotAwayFromCenter: NodeWidget): Promise<void> {
+	const linksAwayFromCenter: Link[] = knotAwayFromCenter.borderingLinks.getAll().filter(borderingLink => borderingLink !== link)
+	const entangledLinks: Link[] = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
+	await Promise.all(entangledLinks.map(async entangledLink => {
+		if (HighlightPropagatingLink.getBundledWithIds(entangledLink).includes(link.getId())) {
+			HighlightPropagatingLink.addBundledWith(entangledLink, linksAwayFromCenter)
+		}
+		HighlightPropagatingLink.removeBundledWithId(entangledLink, link.getId())
+		HighlightPropagatingLink.removeBundledWithId(link, entangledLink.getId())
+		await entangledLink.getManagingBox().saveMapData()
+	}))
+	await link.getManagingBox().saveMapData()
+}
+
+async function moveEntanglementsOfLinkInDirection(link: Link, routeTreeSearchDirection: 'from'|'to', knotInDirection: NodeWidget): Promise<void> {
+	const entangledLinks: Link[] = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
 	await copyEntanglementsOfLinkInDirection(link, entangledLinks, knotInDirection)
 	await Promise.all(entangledLinks.map(async (entangledLink: Link) => {
 		HighlightPropagatingLink.removeBundledWithId(entangledLink, link.getId())
@@ -91,6 +145,9 @@ async function copyEntanglementsOfLinkInDirection(link: Link, linkEntanglements:
 }
 
 async function copyEntanglementsOfLinkInto(options: {link: Link, linkEntanglements: Link[], copyInto: Link}): Promise<void> {
+	if (HighlightPropagatingLink.getBundledWithIds(options.copyInto).length > 0) {
+		return
+	}
 	HighlightPropagatingLink.addBundledWithIds(options.copyInto, HighlightPropagatingLink.getBundledWithIds(options.link))
 	await Promise.all([
 		options.linkEntanglements.map((entangledLink: Link) => {

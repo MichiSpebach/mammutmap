@@ -1,6 +1,7 @@
 import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
 import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link } from '../../dist/core/link/Link'
+import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 
 export class RouteTree {
@@ -13,7 +14,11 @@ export class RouteTree {
 	private readonly watchers: BoxWatcher[] = []
 
 	public async getEntangledLinks(): Promise<Link[]> {
-		return this.followLinkRecursively(this.start, [])
+		const entangledLinks: Link[] = await this.followLinkRecursively(this.start, [])
+		if (entangledLinks.length !== this.getLinksToFindIds().length) {
+			console.warn(`RouteTree::getEntangledLinks() found only ${entangledLinks.length} of ${this.getLinksToFindIds().length} entangledLinks for ${this.start.describe()}.`)
+		}
+		return entangledLinks
 	}
 	
 	private async followLinkRecursively(link: Link, linksToFollowIds: string[]): Promise<Link[]> {
@@ -38,7 +43,7 @@ export class RouteTree {
 	}
 
 	private async getFollowUpLinks(link: Link): Promise<Link[]> {
-		const target: {node: AbstractNodeWidget, watcher: BoxWatcher} = await link[this.direction].getTargetAndRenderIfNecessary()
+		const target: {node: AbstractNodeWidget, watcher: BoxWatcher} = await link[this.direction].getTargetAndRenderIfNecessary() // TODO: unwatch
 		return this.direction === 'to'
 			? target.node.borderingLinks.getOutgoing()
 			: target.node.borderingLinks.getIngoing()

@@ -24,7 +24,12 @@ export class HighlightPropagatingLink extends LinkImplementation {
 		if (!link.getData()['bundledWith']) {
 			link.getData()['bundledWith'] = []
 		}
-		(link.getData()['bundledWith'] as string[]).push(...bundledWithIds)
+		const bundledWithData: string[] = link.getData()['bundledWith'] as string[]
+		for (const bundledWithId of bundledWithIds) {
+			if (!bundledWithData.includes(bundledWithId)) {
+				bundledWithData.push(bundledWithId)
+			}
+		}
 	}
 
 	public static removeBundledWithId(link: Link, bundledWithId: string): void {
