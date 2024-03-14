@@ -142,6 +142,8 @@ class MainWidget extends Widget {
 
 		if (!settings.getBoolean('developerMode')) {
 			if (this.devStatsInterval) {
+				// @ts-ignore
+				// TODO Fix that no overload matches this call
 				clearInterval(this.devStatsInterval)
 				this.devStatsInterval = undefined
 				await renderManager.remove(devStatsId)

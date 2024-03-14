@@ -119,7 +119,7 @@ export class GitRepositoryWidget extends UltimateWidget {
     private shapeToggle(isChecked: boolean, label: string | undefined, title: string | undefined, onchangeChecked: (checked: boolean) => void): RenderElement {
         const id: string = coreUtil.generateId()
         const checkedOrNot: string = isChecked ? ' checked' : ''
-        const checkbox: string = `<input type="checkbox" ${checkedOrNot} id="${id}">`
+        const checkbox: string = `<input type=checkbox ${checkedOrNot} id=${id}>`
         return {
             type: 'tr',
             title: title,
@@ -132,7 +132,7 @@ export class GitRepositoryWidget extends UltimateWidget {
                 },
                 {
                     type: 'td',
-                    innerHTML: `<label for="${id}">${label}</label>`
+                    innerHTML: `<label for=${id}>${label}</label>`
                 }
             ]
         }
