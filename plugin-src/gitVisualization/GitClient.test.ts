@@ -17,6 +17,11 @@ test('getChangedFiles for one commit', async () => {
     const refs: string[] = ['HEAD^', 'HEAD']
     const files: ChangedFile[] = await gitClient.getChangedFiles(refs)
     expect(files.length).toBeGreaterThan(0)
+
+    const file: ChangedFile = files[0]
+    expect(file.path).toBeTruthy()
+    expect(file.numberOfAddedLines).toBeGreaterThanOrEqual(0)
+    expect(file.numberOfDeletedLines).toBeGreaterThanOrEqual(0)
 })
 
 test('getChangedFiles for no commit', async () => {

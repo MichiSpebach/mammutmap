@@ -1,5 +1,14 @@
-import { DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit } from 'simple-git'
-import { Message } from '../../dist/pluginFacade'
+import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit} from 'simple-git'
+
+//import { Message } from '../../dist/pluginFacade'
+
+export class Message {
+    public constructor(
+        public message: string
+    ) {
+    }
+}
+
 
 export type Commit = {
     changedFiles: ChangedFile[]
@@ -11,6 +20,8 @@ export type Commit = {
 
 export type ChangedFile = {
     path: string
+    numberOfAddedLines?: number
+    numberOfDeletedLines?: number
 }
 
 export class GitClient {
@@ -43,13 +54,13 @@ export class GitClient {
     public async getCommits(from: string, to: string): Promise<Commit[]> {
         let log: LogResult<DefaultLogFields>
         try {
-            log = await this.git.log({ 'from': from, 'to': to })
+            log = await this.git.log({'from': from, 'to': to})
         } catch (error) {
-            log = await this.git.log({ 'from': 'HEAD^', 'to': 'HEAD' })
+            log = await this.git.log({'from': 'HEAD^', 'to': 'HEAD'})
         }
         const logEntries: readonly (DefaultLogFields & ListLogLine)[] = log.all
-        let commits: Commit[] = []
-        for (let logEntry of logEntries) {
+        const commits: Commit[] = []
+        for (const logEntry of logEntries) {
             const refs: string[] = [`${logEntry.hash}^`, logEntry.hash]
             commits.push({
                 ...logEntry,
@@ -63,10 +74,19 @@ export class GitClient {
         if (refs.length === 0) {
             return []
         }
-        const diff: string = await this.git.diff(['--name-only', ...refs])
-        let changedFiles: ChangedFile[] = []
-        diff.split('\n').filter(nonEmptyFilePath => nonEmptyFilePath).map(
-            path => changedFiles.push({ path: path }))
+        const diff: string = await this.git.diff(['--numstat', ...refs])
+        const changedFiles: ChangedFile[] = []
+        diff.split('\n')
+            .filter(nonEmptyFilePath => nonEmptyFilePath)
+            .map(line => {
+                const diffForFile: string[] = line.split('\t')
+                const path: string = diffForFile[2]
+                changedFiles.push({
+                    path: path,
+                    numberOfAddedLines: parseInt(diffForFile[0]),
+                    numberOfDeletedLines: parseInt(diffForFile[1])
+                })
+            })
         return changedFiles
     }
 
