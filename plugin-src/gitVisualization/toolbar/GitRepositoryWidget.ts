@@ -1,5 +1,5 @@
 import { RenderElementWithId, UltimateWidget } from '../../../dist/core/Widget'
-import { Message, RenderElement, RenderElements, renderManager } from '../../../dist/pluginFacade'
+import { Message, RenderElement, RenderElements, coreUtil, renderManager } from '../../../dist/pluginFacade'
 import { ChangedFile, Commit, GitClient } from '../GitClient'
 import { visualizeChanges } from '../gitWitchcraft'
 
@@ -117,8 +117,9 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private shapeToggle(isChecked: boolean, label: string | undefined, title: string | undefined, onchangeChecked: (checked: boolean) => void): RenderElement {
+        const id: string = coreUtil.generateId()
         const checkedOrNot: string = isChecked ? ' checked' : ''
-        const checkbox: string = '<input type="checkbox" ' + checkedOrNot + '>'
+        const checkbox: string = `<input type="checkbox" ${checkedOrNot} id="${id}">`
         return {
             type: 'tr',
             title: title,
@@ -131,7 +132,7 @@ export class GitRepositoryWidget extends UltimateWidget {
                 },
                 {
                     type: 'td',
-                    innerHTML: label
+                    innerHTML: `<label for="${id}">${label}</label>`
                 }
             ]
         }
@@ -140,7 +141,7 @@ export class GitRepositoryWidget extends UltimateWidget {
     private shapeCommitToggle(commit: Commit): RenderElement {
         const isChecked: boolean = this.selectedCommits.find(selectedCommit =>
             selectedCommit.hash === commit.hash) !== undefined
-        const title: string = commit.author_name + '\\n' + commit.date + '\\n' + commit.hash.substring(0,8) 
+        const title: string = commit.author_name + '\\n' + commit.date + '\\n' + commit.hash.substring(0, 8)
         return this.shapeToggle(isChecked, commit.message, title, (value: boolean) => {
             if (value === true) {
                 this.selectedCommits.push(commit)
