@@ -49,9 +49,6 @@ export class GitRepositoryWidget extends UltimateWidget {
             this.isInitialized = true
         }
         await renderManager.setElementsTo(this.id, await this.shapeInner())
-        if (this.gitClient instanceof Message) {
-            return
-        }
         if (this.isUncommittedChangesShown) {
             await visualizeChanges(this.selectedCommits, this.uncommittedChanges, this.isZoomingEnabled)
         } else {
@@ -143,7 +140,7 @@ export class GitRepositoryWidget extends UltimateWidget {
             selectedCommit.hash === commit.hash) !== undefined
         const title: string = commit.author_name + '\\n' + commit.date + '\\n' + commit.hash.substring(0, 8)
         return this.shapeToggle(isChecked, commit.message, title, (value: boolean) => {
-            if (value === true) {
+            if (value) {
                 this.selectedCommits.push(commit)
             } else {
                 this.selectedCommits =

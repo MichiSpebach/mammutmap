@@ -1,14 +1,6 @@
-import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit} from 'simple-git'
+import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit, StatusResult} from 'simple-git'
 
-//import { Message } from '../../dist/pluginFacade'
-
-export class Message {
-    public constructor(
-        public message: string
-    ) {
-    }
-}
-
+import {Message} from '../../dist/pluginFacade'
 
 export type Commit = {
     changedFiles: ChangedFile[]
@@ -31,14 +23,9 @@ export class GitClient {
     public static async new(baseDir: string): Promise<GitClient | Message> {
         const gitClient = new GitClient(baseDir)
         try {
-            await gitClient.git.status()
+            await gitClient.git.log()
         } catch (error) {
-            return new Message('No git repository found.')
-        }
-        try {
-            await gitClient.getMostRecentCommit()
-        } catch (error) {
-            return new Message('Git repo is bare.')
+            return new Message('No git commits found.')
         }
         return gitClient
     }
