@@ -42,7 +42,7 @@ export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void>
 }
 
 async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
-    const borderColor = changedFile.numberOfAddedLines > changedFile.numberOfDeletedLines ? 'green' : 'yellow'
+    const borderColor = decideBorderColor(changedFile)
     await renderManager.addStyleTo(`${box.getId()}Border`, {
         borderColor: borderColor,
         borderWidth: '4.2px'
@@ -52,6 +52,17 @@ async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
     //     children: '+-+-+-+-+-+-+-'.repeat(420),
     //     style: { color: 'green' }
     // })
+}
+
+function decideBorderColor(changedFile: ChangedFile): string {
+    const diffCount: number = changedFile.numberOfAddedLines - changedFile.numberOfDeletedLines
+    const borderColorThreshold = 42;
+    if (diffCount > borderColorThreshold) {
+        return 'green'
+    } else if (diffCount < -borderColorThreshold) {
+        return 'red'
+    }
+    return 'yellow'
 }
 
 async function removeCurrentHighlighting(box: Box): Promise<void> {
