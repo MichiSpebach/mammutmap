@@ -1,7 +1,7 @@
-import { RenderElementWithId, UltimateWidget } from '../../../dist/core/Widget'
-import { Message, RenderElement, RenderElements, coreUtil, renderManager } from '../../../dist/pluginFacade'
-import { ChangedFile, Commit, GitClient } from '../GitClient'
-import { visualizeChanges } from '../gitWitchcraft'
+import {RenderElementWithId, UltimateWidget} from '../../../dist/core/Widget'
+import {coreUtil, RenderElement, RenderElements, renderManager} from '../../../dist/pluginFacade'
+import {ChangedFile, Commit, GitClient} from '../GitClient'
+import {visualizeChanges} from '../gitWitchcraft'
 
 export class GitRepositoryWidget extends UltimateWidget {
 
@@ -107,14 +107,21 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private shapeUncommittedChangesToggle(): RenderElement {
-        return this.shapeToggle(this.isUncommittedChangesShown, '&#127381; Uncommitted changes', 'Staged and un(staged) changes\\nsince last commit', (value: boolean) => {
-            this.isUncommittedChangesShown = value
-            this.render()
-        })
+        return this.shapeToggle(coreUtil.generateId(),
+            this.isUncommittedChangesShown,
+            '&#127381; Uncommitted changes',
+            'Staged and un(staged) changes\\nsince last commit',
+            (value: boolean) => {
+                this.isUncommittedChangesShown = value
+                this.render()
+            })
     }
 
-    private shapeToggle(isChecked: boolean, label: string | undefined, title: string | undefined, onchangeChecked: (checked: boolean) => void): RenderElement {
-        const id: string = coreUtil.generateId()
+    private shapeToggle(id: string,
+                        isChecked: boolean,
+                        label: string | undefined,
+                        title: string | undefined,
+                        onchangeChecked: (checked: boolean) => void): RenderElement {
         const checkedOrNot: string = isChecked ? ' checked' : ''
         const checkbox: string = `<input type=checkbox ${checkedOrNot} id=${id}>`
         return {
@@ -123,7 +130,7 @@ export class GitRepositoryWidget extends UltimateWidget {
             children: [
                 {
                     type: 'td',
-                    style: { display: 'inline' },
+                    style: {display: 'inline'},
                     innerHTML: checkbox,
                     onchangeChecked: onchangeChecked
                 },
@@ -139,7 +146,7 @@ export class GitRepositoryWidget extends UltimateWidget {
         const isChecked: boolean = this.selectedCommits.find(selectedCommit =>
             selectedCommit.hash === commit.hash) !== undefined
         const title: string = commit.author_name + '\\n' + commit.date + '\\n' + commit.hash.substring(0, 8)
-        return this.shapeToggle(isChecked, commit.message, title, (value: boolean) => {
+        return this.shapeToggle(commit.hash, isChecked, commit.message, title, (value: boolean) => {
             if (value) {
                 this.selectedCommits.push(commit)
             } else {
@@ -186,9 +193,14 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private shapeZoomToggle(): RenderElement {
-        return this.shapeToggle(this.isZoomingEnabled, '&#128269; Zoom to changes?', '', (value: boolean) => {
-            this.isZoomingEnabled = value
-        })
+        return this.shapeToggle(
+            coreUtil.generateId(),
+            this.isZoomingEnabled,
+            '&#128269; Zoom to changes?',
+            '',
+            (value: boolean) => {
+                this.isZoomingEnabled = value
+            })
     }
 
     public override async unrender(): Promise<void> {

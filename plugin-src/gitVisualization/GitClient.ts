@@ -1,4 +1,4 @@
-import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit, StatusResult} from 'simple-git'
+import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit} from 'simple-git'
 
 import {Message} from '../../dist/pluginFacade'
 
