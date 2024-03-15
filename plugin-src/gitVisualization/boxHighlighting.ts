@@ -7,6 +7,9 @@ let currentFiles: ChangedFile[] = []
 let lastFiles: ChangedFile[] = []
 let forceRestyle: boolean = false
 
+const ADDITION_COLOR = 'darkgreen'
+const DELETION_COLOR = 'darkred'
+
 function getFileForBox(box: Box, files: ChangedFile[]): ChangedFile | undefined {
     return files.find(file =>
         isSubPathOrEqual(file.absolutePath, box.getSrcPath()));
@@ -47,20 +50,29 @@ async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
         borderColor: borderColor,
         borderWidth: '4.2px'
     })
-    // renderManager.addElementTo(`${box.getId()}Border`, {
-    //     type: 'div',
-    //     children: '+-+-+-+-+-+-+-'.repeat(420),
-    //     style: { color: 'green' }
-    // })
+    await renderManager.addElementTo(`${box.getId()}Border`, {
+        id: `${box.getId()}BorderContent`,
+        type: 'div',
+        children: [{
+            type: 'span',
+            innerHTML: `<strong>${changedFile.numberOfAddedLines}+</strong> `,
+            style: {color: ADDITION_COLOR}
+        }, {
+            type: 'span',
+            innerHTML: `<strong>${changedFile.numberOfDeletedLines}-</strong> `,
+            style: {color: DELETION_COLOR}
+        }],
+        style: {float: 'right'}
+    })
 }
 
 function decideBorderColor(changedFile: ChangedFile): string {
     const diffCount: number = changedFile.numberOfAddedLines - changedFile.numberOfDeletedLines
     const borderColorThreshold = 42;
     if (diffCount > borderColorThreshold) {
-        return 'green'
+        return ADDITION_COLOR
     } else if (diffCount < -borderColorThreshold) {
-        return 'red'
+        return DELETION_COLOR
     }
     return 'yellow'
 }
@@ -70,4 +82,5 @@ async function removeCurrentHighlighting(box: Box): Promise<void> {
         borderColor: null,
         borderWidth: null
     })
+    await renderManager.remove(`${box.getId()}BorderContent`)
 }
