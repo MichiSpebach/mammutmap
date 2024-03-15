@@ -1,9 +1,10 @@
-import { Box, getRootFolder, renderManager } from '../../dist/pluginFacade'
-import { isSubPathOrEqual } from './pathUtil'
+import {Box, getRootFolder, renderManager} from '../../dist/pluginFacade'
+import {isSubPathOrEqual} from './pathUtil'
+import {ChangedFile} from './GitClient'
 
 let isInitialized: boolean = false
-let currentFilePaths: string[] = []
-let lastFilePaths: string[] = []
+let currentFiles: ChangedFile[] = []
+let lastFiles: ChangedFile[] = []
 let forceRestyle: boolean = false
 
 function initializeBoxHighlighting(): void {
@@ -24,25 +25,26 @@ function initializeBoxHighlighting(): void {
     }
 }
 
-export async function highlightBoxes(filePaths: string[]): Promise<void> {
-    currentFilePaths = filePaths
+export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void> {
+    currentFiles = changedFiles
     initializeBoxHighlighting()
     forceRestyle = true
     await getRootFolder().render()
     forceRestyle = false
-    lastFilePaths = currentFilePaths
+    lastFiles = currentFiles
 }
 
 function shouldBoxBeHighlighted(box: Box, isRendered: boolean): boolean {
-    return (!isRendered || forceRestyle) && isBoxPathInPaths(box, currentFilePaths)
+    return (!isRendered || forceRestyle) && isBoxPathInPaths(box, currentFiles)
 }
 
 function shouldBoxBeReset(box: Box): boolean {
-    return forceRestyle && isBoxPathInPaths(box, lastFilePaths)
+    return forceRestyle && isBoxPathInPaths(box, lastFiles)
 }
 
-function isBoxPathInPaths(box: Box, paths: string[]): boolean {
-    return paths.find(path => isSubPathOrEqual(path, box.getSrcPath())) != undefined
+function isBoxPathInPaths(box: Box, files: ChangedFile[]): boolean {
+    return files.map(file => file.absolutePath)
+        .find(path => isSubPathOrEqual(path, box.getSrcPath())) != undefined
 }
 
 async function highlightBox(box: Box): Promise<void> {

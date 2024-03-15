@@ -1,6 +1,5 @@
 import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit} from 'simple-git'
-
-import {Message} from '../../dist/pluginFacade'
+import {coreUtil, getRootFolder, Message} from '../../dist/pluginFacade'
 
 export type Commit = {
     changedFiles: ChangedFile[]
@@ -11,7 +10,7 @@ export type Commit = {
 }
 
 export type ChangedFile = {
-    path: string
+    absolutePath: string
     numberOfAddedLines?: number
     numberOfDeletedLines?: number
 }
@@ -67,9 +66,10 @@ export class GitClient {
             .filter(nonEmptyFilePath => nonEmptyFilePath)
             .map(line => {
                 const diffForFile: string[] = line.split('\t')
-                const path: string = diffForFile[2]
+                const relativePath: string = diffForFile[2]
+                const absolutePath: string = coreUtil.concatPaths(getRootFolder().getSrcPath(), relativePath)
                 changedFiles.push({
-                    path: path,
+                    absolutePath: absolutePath,
                     numberOfAddedLines: parseInt(diffForFile[0]),
                     numberOfDeletedLines: parseInt(diffForFile[1])
                 })

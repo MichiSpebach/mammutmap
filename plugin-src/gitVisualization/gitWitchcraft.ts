@@ -1,6 +1,7 @@
-import { Box, Map, RootFolderBox, coreUtil, getMapOrError, getRootFolder } from '../../dist/pluginFacade'
-import { ChangedFile, Commit } from './GitClient'
-import { highlightBoxes } from './boxHighlighting'
+import {Box, getMapOrError, getRootFolder, Map, RootFolderBox} from '../../dist/pluginFacade'
+import {ChangedFile, Commit} from './GitClient'
+import {highlightBoxes} from './boxHighlighting'
+import {existsSync} from 'fs'
 
 export async function visualizeChanges(commits: Commit[], uncommittedChanges: ChangedFile[], isZoomingEnabled: boolean): Promise<void> {
     const changedFiles: ChangedFile[] = commits.flatMap(commit => commit.changedFiles)
@@ -9,18 +10,19 @@ export async function visualizeChanges(commits: Commit[], uncommittedChanges: Ch
 }
 
 export async function visualizeChangedFiles(changedFiles: ChangedFile[], isZoomingEnabled: boolean) {
-    const absoluteFilePaths: string[] = changedFiles.map(file =>
-        coreUtil.concatPaths(getRootFolder().getSrcPath(), file.path))
-    await highlightBoxes(absoluteFilePaths)
-    if (isZoomingEnabled && absoluteFilePaths.length > 0) {
-        await zoomToChanges(absoluteFilePaths)
+    await highlightBoxes(changedFiles)
+    if (isZoomingEnabled && changedFiles.length > 0) {
+        await zoomToChanges(changedFiles.map(file => file.absolutePath))
     }
 }
 
 async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
     const rootFolder: RootFolderBox = getRootFolder()
-    const renderedBoxes: Box[] = absoluteFilePaths.map(path =>
-        rootFolder.getRenderedBoxesInPath(path).at(-1)).filter(box => box) as Box[]
+    const renderedBoxes: Box[] = absoluteFilePaths.map(path => {
+        if (existsSync(path)) {
+            return rootFolder.getRenderedBoxesInPath(path).at(-1)
+        }
+    }).filter(box => box) as Box[]
     const map: Map = getMapOrError()
     await map.zoomToFitBoxes(renderedBoxes)
 }
