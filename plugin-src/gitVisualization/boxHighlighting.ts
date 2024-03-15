@@ -7,6 +7,11 @@ let currentFiles: ChangedFile[] = []
 let lastFiles: ChangedFile[] = []
 let forceRestyle: boolean = false
 
+function getFileForBox(box: Box, files: ChangedFile[]): ChangedFile | undefined {
+    return files.find(file =>
+        isSubPathOrEqual(file.absolutePath, box.getSrcPath()));
+}
+
 function initializeBoxHighlighting(): void {
     if (isInitialized) {
         return
@@ -16,11 +21,13 @@ function initializeBoxHighlighting(): void {
     Box.prototype.render = async function () {
         const isRendered: boolean = this.isRendered() // store if rendered, because renderBackup.call sets it true
         await renderBackup.call(this)
-        if (shouldBoxBeReset(this)) {
+        const lastFile: ChangedFile | undefined = getFileForBox(this, lastFiles)
+        if (lastFile !== undefined && forceRestyle) {
             await removeCurrentHighlighting(this)
         }
-        if (shouldBoxBeHighlighted(this, isRendered)) {
-            await highlightBox(this)
+        const currentFile: ChangedFile | undefined = getFileForBox(this, currentFiles)
+        if (currentFile !== undefined && (!isRendered || forceRestyle)) {
+            await highlightBox(this, currentFile)
         }
     }
 }
@@ -34,22 +41,10 @@ export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void>
     lastFiles = currentFiles
 }
 
-function shouldBoxBeHighlighted(box: Box, isRendered: boolean): boolean {
-    return (!isRendered || forceRestyle) && isBoxPathInPaths(box, currentFiles)
-}
-
-function shouldBoxBeReset(box: Box): boolean {
-    return forceRestyle && isBoxPathInPaths(box, lastFiles)
-}
-
-function isBoxPathInPaths(box: Box, files: ChangedFile[]): boolean {
-    return files.map(file => file.absolutePath)
-        .find(path => isSubPathOrEqual(path, box.getSrcPath())) != undefined
-}
-
-async function highlightBox(box: Box): Promise<void> {
+async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
+    const borderColor = changedFile.numberOfAddedLines > changedFile.numberOfDeletedLines ? 'green' : 'yellow'
     await renderManager.addStyleTo(`${box.getId()}Border`, {
-        borderColor: 'yellow',
+        borderColor: borderColor,
         borderWidth: '4.2px'
     })
     // renderManager.addElementTo(`${box.getId()}Border`, {

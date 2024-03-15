@@ -11,8 +11,8 @@ export type Commit = {
 
 export type ChangedFile = {
     absolutePath: string
-    numberOfAddedLines?: number
-    numberOfDeletedLines?: number
+    numberOfAddedLines: number
+    numberOfDeletedLines: number
 }
 
 export class GitClient {
