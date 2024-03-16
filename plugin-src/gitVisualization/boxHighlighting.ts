@@ -11,8 +11,7 @@ const ADDITION_COLOR = 'darkgreen'
 const DELETION_COLOR = 'darkred'
 
 function getFileForBox(box: Box, files: ChangedFile[]): ChangedFile | undefined {
-    return files.find(file =>
-        isSubPathOrEqual(file.absolutePath, box.getSrcPath()));
+    return files.find(file => isSubPathOrEqual(file.absolutePath, box.getSrcPath()))
 }
 
 function initializeBoxHighlighting(): void {
@@ -30,7 +29,23 @@ function initializeBoxHighlighting(): void {
         }
         const currentFile: ChangedFile | undefined = getFileForBox(this, currentFiles)
         if (currentFile !== undefined && (!isRendered || forceRestyle)) {
-            await highlightBox(this, currentFile)
+            if (this.isFolder()) {
+                let numberOfAddedLines: number = 0
+                let numberOfDeletedLines: number = 0
+                const children: ChangedFile[] = currentFiles.filter(file =>
+                    isSubPathOrEqual(file.absolutePath, this.getSrcPath()))
+                for (const child of children) {
+                    numberOfAddedLines += child.numberOfAddedLines
+                    numberOfDeletedLines += child.numberOfDeletedLines
+                }
+                await highlightBox(this, {
+                    absolutePath: this.getSrcPath(),
+                    numberOfAddedLines: numberOfAddedLines,
+                    numberOfDeletedLines: numberOfDeletedLines
+                })
+            } else {
+                await highlightBox(this, currentFile)
+            }
         }
     }
 }
@@ -50,10 +65,6 @@ async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
         borderColor: borderColor,
         borderWidth: '4.2px'
     })
-    if (box.getSrcPath() !== changedFile.absolutePath) {
-        // TODO Folder boxes need to show sum of changes of all files
-        return
-    }
     await renderManager.addElementTo(borderId(box), {
         id: `${borderId(box)}Content`,
         type: 'div',
@@ -86,10 +97,6 @@ async function removeCurrentHighlighting(box: Box, changedFile: ChangedFile): Pr
         borderColor: null,
         borderWidth: null
     })
-    if (box.getSrcPath() !== changedFile.absolutePath) {
-        // TODO Folder boxes need to show sum of changes of all files
-        return
-    }
     await renderManager.remove(`${borderId(box)}Content`)
 }
 
