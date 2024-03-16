@@ -26,7 +26,7 @@ function initializeBoxHighlighting(): void {
         await renderBackup.call(this)
         const lastFile: ChangedFile | undefined = getFileForBox(this, lastFiles)
         if (lastFile !== undefined && forceRestyle) {
-            await removeCurrentHighlighting(this)
+            await removeCurrentHighlighting(this, lastFile)
         }
         const currentFile: ChangedFile | undefined = getFileForBox(this, currentFiles)
         if (currentFile !== undefined && (!isRendered || forceRestyle)) {
@@ -50,6 +50,10 @@ async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
         borderColor: borderColor,
         borderWidth: '4.2px'
     })
+    if (box.getSrcPath() !== changedFile.absolutePath) {
+        // TODO Folder boxes need to show sum of changes of all files
+        return
+    }
     await renderManager.addElementTo(borderId(box), {
         id: `${borderId(box)}Content`,
         type: 'div',
@@ -77,14 +81,18 @@ function decideBorderColor(changedFile: ChangedFile): string {
     return 'yellow'
 }
 
-async function removeCurrentHighlighting(box: Box): Promise<void> {
+async function removeCurrentHighlighting(box: Box, changedFile: ChangedFile): Promise<void> {
     await renderManager.addStyleTo(borderId(box), {
         borderColor: null,
         borderWidth: null
     })
+    if (box.getSrcPath() !== changedFile.absolutePath) {
+        // TODO Folder boxes need to show sum of changes of all files
+        return
+    }
     await renderManager.remove(`${borderId(box)}Content`)
 }
 
-function borderId(box: Box) {
+function borderId(box: Box): string {
     return `${box.getId()}Border`;
 }
