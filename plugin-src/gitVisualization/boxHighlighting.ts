@@ -10,8 +10,8 @@ let forceRestyle: boolean = false
 const ADDITION_COLOR = 'darkgreen'
 const DELETION_COLOR = 'darkred'
 
-function getFileForBox(box: Box, files: ChangedFile[]): ChangedFile | undefined {
-    return files.find(file => isSubPathOrEqual(file.absolutePath, box.getSrcPath()))
+function getFilesForBox(box: Box, files: ChangedFile[]): ChangedFile[] {
+    return files.filter(file => isSubPathOrEqual(file.absolutePath, box.getSrcPath()))
 }
 
 function initializeBoxHighlighting(): void {
@@ -23,31 +23,33 @@ function initializeBoxHighlighting(): void {
     Box.prototype.render = async function () {
         const isRendered: boolean = this.isRendered() // store if rendered, because renderBackup.call sets it true
         await renderBackup.call(this)
-        const lastFile: ChangedFile | undefined = getFileForBox(this, lastFiles)
-        if (lastFile !== undefined && forceRestyle) {
-            await removeCurrentHighlighting(this, lastFile)
+        const lastFilesForBox: ChangedFile[] = getFilesForBox(this, lastFiles)
+        if (lastFilesForBox.length > 0 && forceRestyle) {
+            await removeCurrentHighlighting(this)
         }
-        const currentFile: ChangedFile | undefined = getFileForBox(this, currentFiles)
-        if (currentFile !== undefined && (!isRendered || forceRestyle)) {
+        const changedFilesForBox: ChangedFile[] = getFilesForBox(this, currentFiles)
+        if (changedFilesForBox.length > 0 && (!isRendered || forceRestyle)) {
             if (this.isFolder()) {
-                let numberOfAddedLines: number = 0
-                let numberOfDeletedLines: number = 0
-                const children: ChangedFile[] = currentFiles.filter(file =>
-                    isSubPathOrEqual(file.absolutePath, this.getSrcPath()))
-                for (const child of children) {
-                    numberOfAddedLines += child.numberOfAddedLines
-                    numberOfDeletedLines += child.numberOfDeletedLines
-                }
-                await highlightBox(this, {
-                    absolutePath: this.getSrcPath(),
-                    numberOfAddedLines: numberOfAddedLines,
-                    numberOfDeletedLines: numberOfDeletedLines
-                })
+                await highlightFolderBox(this, changedFilesForBox)
             } else {
-                await highlightBox(this, currentFile)
+                await highlightBox(this, changedFilesForBox[0])
             }
         }
     }
+}
+
+async function highlightFolderBox(box: Box, changedFilesInFolder: ChangedFile[]) {
+    let numberOfAddedLines: number = 0
+    let numberOfDeletedLines: number = 0
+    for (const changedFile of changedFilesInFolder) {
+        numberOfAddedLines += changedFile.numberOfAddedLines
+        numberOfDeletedLines += changedFile.numberOfDeletedLines
+    }
+    await highlightBox(box, {
+        absolutePath: box.getSrcPath(),
+        numberOfAddedLines: numberOfAddedLines,
+        numberOfDeletedLines: numberOfDeletedLines
+    })
 }
 
 export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void> {
@@ -59,8 +61,8 @@ export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void>
     lastFiles = currentFiles
 }
 
-async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
-    const borderColor = decideBorderColor(changedFile)
+async function highlightBox(box: Box, changedFileOrFolder: ChangedFile): Promise<void> {
+    const borderColor = decideBorderColor(changedFileOrFolder)
     await renderManager.addStyleTo(borderId(box), {
         borderColor: borderColor,
         borderWidth: '4.2px'
@@ -70,11 +72,11 @@ async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
         type: 'div',
         children: [{
             type: 'span',
-            innerHTML: `<strong>${changedFile.numberOfAddedLines}+</strong> `,
+            innerHTML: `<strong>${changedFileOrFolder.numberOfAddedLines}+</strong> `,
             style: {color: ADDITION_COLOR}
         }, {
             type: 'span',
-            innerHTML: `<strong>${changedFile.numberOfDeletedLines}-</strong> `,
+            innerHTML: `<strong>${changedFileOrFolder.numberOfDeletedLines}-</strong> `,
             style: {color: DELETION_COLOR}
         }],
         style: {float: 'right'}
@@ -92,7 +94,7 @@ function decideBorderColor(changedFile: ChangedFile): string {
     return 'yellow'
 }
 
-async function removeCurrentHighlighting(box: Box, changedFile: ChangedFile): Promise<void> {
+async function removeCurrentHighlighting(box: Box): Promise<void> {
     await renderManager.addStyleTo(borderId(box), {
         borderColor: null,
         borderWidth: null
