@@ -61,30 +61,19 @@ export class GitClient {
             return []
         }
         const diff: string = await this.git.diff(['--numstat', ...refs])
-        let changedFiles: ChangedFile[] = []
+        const changedFiles: ChangedFile[] = []
         diff.split('\n')
-            .filter(nonEmptyFilePath => nonEmptyFilePath)
+            .filter(nonEmptyLine => nonEmptyLine)
             .map(line => {
                 const diffForFile: string[] = line.split('\t')
                 const relativePath: string = diffForFile[2]
                 const absolutePath: string = coreUtil.concatPaths(getRootFolder().getSrcPath(), relativePath)
-                changedFiles = GitClient.addOrUpdateChangedFiles(changedFiles, {
+                changedFiles.push({
                     absolutePath: absolutePath,
                     numberOfAddedLines: parseInt(diffForFile[0]),
                     numberOfDeletedLines: parseInt(diffForFile[1])
                 })
             })
-        return changedFiles
-    }
-
-    public static addOrUpdateChangedFiles(changedFiles: ChangedFile[], newFile: ChangedFile): ChangedFile[] {
-        const index: number = changedFiles.findIndex(file => file.absolutePath === newFile.absolutePath)
-        if (index !== -1) {
-            changedFiles[index].numberOfAddedLines += newFile.numberOfAddedLines
-            changedFiles[index].numberOfDeletedLines += newFile.numberOfDeletedLines
-        } else {
-            changedFiles.push(newFile)
-        }
         return changedFiles
     }
 

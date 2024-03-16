@@ -46,12 +46,12 @@ export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void>
 
 async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
     const borderColor = decideBorderColor(changedFile)
-    await renderManager.addStyleTo(`${box.getId()}Border`, {
+    await renderManager.addStyleTo(borderId(box), {
         borderColor: borderColor,
         borderWidth: '4.2px'
     })
-    await renderManager.addElementTo(`${box.getId()}Border`, {
-        id: `${box.getId()}BorderContent`,
+    await renderManager.addElementTo(borderId(box), {
+        id: `${borderId(box)}Content`,
         type: 'div',
         children: [{
             type: 'span',
@@ -68,7 +68,7 @@ async function highlightBox(box: Box, changedFile: ChangedFile): Promise<void> {
 
 function decideBorderColor(changedFile: ChangedFile): string {
     const diffCount: number = changedFile.numberOfAddedLines - changedFile.numberOfDeletedLines
-    const borderColorThreshold = 42;
+    const borderColorThreshold = 42
     if (diffCount > borderColorThreshold) {
         return ADDITION_COLOR
     } else if (diffCount < -borderColorThreshold) {
@@ -78,9 +78,13 @@ function decideBorderColor(changedFile: ChangedFile): string {
 }
 
 async function removeCurrentHighlighting(box: Box): Promise<void> {
-    await renderManager.addStyleTo(`${box.getId()}Border`, {
+    await renderManager.addStyleTo(borderId(box), {
         borderColor: null,
         borderWidth: null
     })
-    await renderManager.remove(`${box.getId()}BorderContent`)
+    await renderManager.remove(`${borderId(box)}Content`)
+}
+
+function borderId(box: Box) {
+    return `${box.getId()}Border`;
 }

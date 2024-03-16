@@ -6,7 +6,23 @@ import {existsSync} from 'fs'
 export async function visualizeChanges(commits: Commit[], uncommittedChanges: ChangedFile[], isZoomingEnabled: boolean): Promise<void> {
     const changedFiles: ChangedFile[] = commits.flatMap(commit => commit.changedFiles)
     changedFiles.push(...uncommittedChanges)
-    await visualizeChangedFiles(changedFiles, isZoomingEnabled)
+    const changedFilesJoined: ChangedFile[] = join(changedFiles)
+    await visualizeChangedFiles(changedFilesJoined, isZoomingEnabled)
+}
+
+function join(changedFiles: ChangedFile[]): ChangedFile[] {
+    const changedFilesJoined: ChangedFile[] = []
+    changedFiles.forEach(changedFile => {
+        const existingFile = changedFilesJoined.find(file =>
+            file.absolutePath === changedFile.absolutePath)
+        if (existingFile) {
+            existingFile.numberOfAddedLines += changedFile.numberOfAddedLines
+            existingFile.numberOfDeletedLines += changedFile.numberOfDeletedLines
+        } else {
+            changedFilesJoined.push({...changedFile})
+        }
+    })
+    return changedFilesJoined
 }
 
 export async function visualizeChangedFiles(changedFiles: ChangedFile[], isZoomingEnabled: boolean) {
