@@ -7,8 +7,8 @@ let currentFiles: ChangedFile[] = []
 let lastFiles: ChangedFile[] = []
 let forceRestyle: boolean = false
 
-const ADDITION_COLOR = 'darkgreen'
-const DELETION_COLOR = 'darkred'
+const ADDITION_COLOR = '#36680b'
+const DELETION_COLOR = '#a1190b'
 
 function getFilesForBox(box: Box, files: ChangedFile[]): ChangedFile[] {
     return files.filter(file => isSubPathOrEqual(file.absolutePath, box.getSrcPath()))
@@ -62,10 +62,11 @@ export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void>
 }
 
 async function highlightBox(box: Box, changedFileOrFolder: ChangedFile): Promise<void> {
-    const borderColor = decideBorderColor(changedFileOrFolder)
+    const borderGradient: string = createBorderGradient(changedFileOrFolder)
     await renderManager.addStyleTo(borderId(box), {
-        borderColor: borderColor,
-        borderWidth: '4.2px'
+        borderWidth: '4.2px',
+        borderImageSlice: '1',
+        borderImageSource: borderGradient
     })
     await renderManager.addElementTo(borderId(box), {
         id: `${borderId(box)}Content`,
@@ -83,15 +84,11 @@ async function highlightBox(box: Box, changedFileOrFolder: ChangedFile): Promise
     })
 }
 
-function decideBorderColor(changedFile: ChangedFile): string {
-    const diffCount: number = changedFile.numberOfAddedLines - changedFile.numberOfDeletedLines
-    const borderColorThreshold = 42
-    if (diffCount > borderColorThreshold) {
-        return ADDITION_COLOR
-    } else if (diffCount < -borderColorThreshold) {
-        return DELETION_COLOR
-    }
-    return 'yellow'
+function createBorderGradient(changedFile: ChangedFile): string {
+    const numberOfChanges: number = changedFile.numberOfAddedLines + changedFile.numberOfDeletedLines
+    const percentageOfAdditions: number = changedFile.numberOfAddedLines / numberOfChanges * 100
+    return `linear-gradient(45deg, ${ADDITION_COLOR} ${percentageOfAdditions}%, `
+        + `${DELETION_COLOR} ${100 - percentageOfAdditions}%)`
 }
 
 async function removeCurrentHighlighting(box: Box): Promise<void> {
