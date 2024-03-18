@@ -93,7 +93,8 @@ function createBorderGradient(changedFile: ChangedFile): string {
 
 async function removeCurrentHighlighting(box: Box): Promise<void> {
     await renderManager.addStyleTo(borderId(box), {
-        borderColor: null,
+        borderImageSlice: '0',
+        borderImageSource: 'none',
         borderWidth: null
     })
     await renderManager.remove(`${borderId(box)}Content`)
