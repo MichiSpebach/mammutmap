@@ -1,5 +1,6 @@
 import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit} from 'simple-git'
-import {coreUtil, getRootFolder, Message} from '../../dist/pluginFacade'
+import {util as coreUtil} from '../../dist/core/util/util'
+import {Message} from '../../dist/pluginFacade'
 
 export type Commit = {
     changedFiles: ChangedFile[]
@@ -18,9 +19,10 @@ export type ChangedFile = {
 export class GitClient {
 
     private readonly git: SimpleGit
+    private readonly rootFolderSrcPath: string
 
-    public static async new(baseDir: string): Promise<GitClient | Message> {
-        const gitClient = new GitClient(baseDir)
+    public static async new(rootFolderSrcPath: string): Promise<GitClient | Message> {
+        const gitClient = new GitClient(rootFolderSrcPath)
         try {
             await gitClient.git.log()
         } catch (error) {
@@ -29,8 +31,9 @@ export class GitClient {
         return gitClient
     }
 
-    private constructor(baseDir: string) {
-        this.git = simpleGit(baseDir)
+    private constructor(rootFolderSrcPath: string) {
+        this.rootFolderSrcPath = rootFolderSrcPath
+        this.git = simpleGit(rootFolderSrcPath)
     }
 
     public async getMostRecentCommit(): Promise<Commit> {
@@ -67,7 +70,7 @@ export class GitClient {
             .map(line => {
                 const diffForFile: string[] = line.split('\t')
                 const relativePath: string = diffForFile[2]
-                const absolutePath: string = coreUtil.concatPaths(getRootFolder().getSrcPath(), relativePath)
+                const absolutePath: string = coreUtil.concatPaths(this.rootFolderSrcPath, relativePath)
                 changedFiles.push({
                     absolutePath: absolutePath,
                     numberOfAddedLines: parseInt(diffForFile[0]),

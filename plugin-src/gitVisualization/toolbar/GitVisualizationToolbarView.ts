@@ -12,8 +12,8 @@ export class GitVisualizationToolbarView implements ToolbarView {
         public readonly id: string
     ) {
         onMapRendered.subscribe(async (map) => {
-            const rootFolderPath: string = map.getRootFolder().getSrcPath()            
-            const gitClient: GitClient | Message = await GitClient.new(rootFolderPath)
+            const rootFolderSrcPath: string = map.getRootFolder().getSrcPath()
+            const gitClient: GitClient | Message = await GitClient.new(rootFolderSrcPath)
             if (gitClient instanceof Message) {
                 this.widget = new GitRepositoryNotFoundWidget(this.id, gitClient.message)
             } else {
