@@ -142,7 +142,7 @@ class MainWidget extends Widget {
 
 		if (!settings.getBoolean('developerMode')) {
 			if (this.devStatsInterval) {
-				clearInterval(this.devStatsInterval)
+				clearInterval(Number(this.devStatsInterval))
 				this.devStatsInterval = undefined
 				await renderManager.remove(devStatsId)
 			}
