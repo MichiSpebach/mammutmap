@@ -24,7 +24,7 @@ export class ToolbarWidget extends Widget {
 			padding: '4px 8px',
 			fontSize: 'inherit',
 			color: 'inherit',
-			backgroundColor: selected ? 'transparent' : '#222',
+			backgroundColor: selected ? 'inherit' : '#222',
 			border: 'none',
 			borderRight: '1px solid gray',
 			borderBottom: selected ? 'none' : '1px solid gray',
@@ -94,14 +94,17 @@ export class ToolbarWidget extends Widget {
 		return {
 			type: 'div',
 			id: this.id,
-			style: additionalStyle
+			style: {
+				overflow: 'auto',
+				...additionalStyle
+			}
 		}
 	}
 
 	private shapeInner(): RenderElements {
 		const elements: RenderElements = this.hideHeader === true || this.hideHeader === 'auto' && this.views.length < 2
 			? []
-			: this.shapeHeader()
+			: [this.shapeHeader()]
 
 		if (this.views.length === 0) {
 			elements.push('no ToolbarViews added')
@@ -114,7 +117,7 @@ export class ToolbarWidget extends Widget {
 		return elements
 	}
 
-	private shapeHeader(): RenderElement[] {
+	private shapeHeader(): RenderElement {
 		const elements: RenderElement[] = []
 
 		for (const view of this.views) {
@@ -125,7 +128,11 @@ export class ToolbarWidget extends Widget {
 			}))
 		}
 
-		return elements
+		return {
+			type: 'div',
+			style: {position: 'sticky', top: '0', backgroundColor: 'inherit'},
+			children: elements
+		}
 	}
 
 }

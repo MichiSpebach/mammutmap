@@ -37,7 +37,6 @@ export class BoxSidebar {
 				//display: 'flex',
 				//flexDirection: 'column-reverse', // scrollFromButton would fit better to zooming
 				height: '100%',
-				overflow: 'auto',
 				boxSizing: 'border-box',
 				paddingLeft: '4px',
 				paddingRight: '4px',

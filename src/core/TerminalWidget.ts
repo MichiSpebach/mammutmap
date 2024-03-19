@@ -55,7 +55,6 @@ export class TerminalWidget extends UltimateWidget {
 				{
 					type: 'div',
 					id: this.getLogId(),
-					style: {marginBottom: '15px'},
 					children: [
 						{
 							type: 'button',
@@ -70,8 +69,7 @@ export class TerminalWidget extends UltimateWidget {
 				{
 					type: 'input',
 					id: this.getCommandLineId(),
-					className: 'commandLine',
-					style: {width: '100%'}
+					className: 'commandLine'
 				}
 			],
 			rendering: this.render()

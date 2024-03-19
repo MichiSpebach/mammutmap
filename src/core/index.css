@@ -44,9 +44,9 @@ pre {
 }
 
 .commandLine {
-  position: fixed;
+  position: sticky;
   bottom: 0px;
-  width: inherit;
+  width: 100%;
   padding: 0px;
   border-style: none;
   outline: none;

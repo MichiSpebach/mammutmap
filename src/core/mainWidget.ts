@@ -89,7 +89,6 @@ class MainWidget extends Widget {
 						width: bottomBarWidth,
 						height: bottomBarHeight,
 						backgroundColor: bottomBarBackgroundColor,
-						overflow: 'auto',
 						transition: 'background-color 0.2s'
 					}),
 					this.toggleSidebarButton.shape({
