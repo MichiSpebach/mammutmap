@@ -108,11 +108,12 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private shapeSelectAllToggle(): RenderElement {
-        const selectAllToggle = this.shapeToggle(coreUtil.generateId(),
-            this.selectedCommits.length === this.commits.length,
-            '&#9989; Select all',
-            'Selects or unselects all changes\\nin the current list',
-            async (value: boolean) => {
+        const selectAllToggle = this.shapeToggle({
+            id: coreUtil.generateId(),
+            isChecked: this.selectedCommits.length === this.commits.length,
+            label: '&#9989; Select all',
+            title: 'Selects or unselects all changes\\nin the current list',
+            onchangeChecked: async (value: boolean) => {
                 if (value) {
                     this.selectedCommits = this.commits
                 } else {
@@ -120,42 +121,47 @@ export class GitRepositoryWidget extends UltimateWidget {
                 }
                 this.isUncommittedChangesShown = value
                 await this.render()
-            })
+            }
+        })
         selectAllToggle.style = {backgroundColor: 'grey'}
         return selectAllToggle
     }
 
     private shapeUncommittedChangesToggle(): RenderElement {
-        return this.shapeToggle(coreUtil.generateId(),
-            this.isUncommittedChangesShown,
-            '&#127381; Uncommitted changes',
-            'Staged and un(staged) changes\\nsince last commit',
-            async (value: boolean) => {
+        return this.shapeToggle({
+            id: coreUtil.generateId(),
+            isChecked: this.isUncommittedChangesShown,
+            label: '&#127381; Uncommitted changes',
+            title: 'Staged and un(staged) changes\\nsince last commit',
+            onchangeChecked: async (value: boolean) => {
                 this.isUncommittedChangesShown = value
                 await this.render()
-            })
+            }
+        })
     }
 
-    private shapeToggle(id: string,
-                        isChecked: boolean,
-                        label: string | undefined,
-                        title: string | undefined,
-                        onchangeChecked: (checked: boolean) => void): RenderElement {
-        const checkedOrNot: string = isChecked ? ' checked' : ''
-        const checkbox: string = `<input type=checkbox ${checkedOrNot} id=${id}>`
+    private shapeToggle(options: {
+        id: string,
+        isChecked: boolean,
+        label?: string,
+        title?: string,
+        onchangeChecked: (checked: boolean) => void;
+    }): RenderElement {
+        const checkedOrNot: string = options.isChecked ? ' checked' : ''
+        const checkbox: string = `<input type=checkbox ${checkedOrNot} id=${options.id}>`
         return {
             type: 'tr',
-            title: title,
+            title: options.title,
             children: [
                 {
                     type: 'td',
                     style: {display: 'inline'},
                     innerHTML: checkbox,
-                    onchangeChecked: onchangeChecked
+                    onchangeChecked: options.onchangeChecked
                 },
                 {
                     type: 'td',
-                    innerHTML: `<label for=${id}>${label}</label>`
+                    innerHTML: `<label for=${options.id}>${options.label}</label>`
                 }
             ]
         }
@@ -165,16 +171,22 @@ export class GitRepositoryWidget extends UltimateWidget {
         const isChecked: boolean = this.selectedCommits.find(selectedCommit =>
             selectedCommit.hash === commit.hash) !== undefined
         const title: string = commit.author_name + '\\n' + commit.date + '\\n' + commit.hash.substring(0, 8)
-        return this.shapeToggle(commit.hash, isChecked, commit.message, title, (value: boolean) => {
-            if (value) {
-                this.selectedCommits.push(commit)
-            } else {
-                this.selectedCommits =
-                    this.selectedCommits.filter(selectedCommit =>
-                        selectedCommit.hash !== commit.hash)
+        return this.shapeToggle({
+            id: commit.hash,
+            isChecked: isChecked,
+            label: commit.message,
+            title: title,
+            onchangeChecked: async (value: boolean) => {
+                if (value) {
+                    this.selectedCommits.push(commit)
+                } else {
+                    this.selectedCommits =
+                        this.selectedCommits.filter(selectedCommit =>
+                            selectedCommit.hash !== commit.hash)
+                }
+                this.selectedCommits.sort(GitClient.compareCommitsByDate)
+                await this.render()
             }
-            this.selectedCommits.sort(GitClient.compareCommitsByDate)
-            this.render()
         })
     }
 
@@ -212,14 +224,14 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private shapeZoomToggle(): RenderElement {
-        return this.shapeToggle(
-            coreUtil.generateId(),
-            this.isZoomingEnabled,
-            '&#128269; Zoom to changes?',
-            '',
-            (value: boolean) => {
+        return this.shapeToggle({
+            id: coreUtil.generateId(),
+            isChecked: this.isZoomingEnabled,
+            label: '&#128269; Zoom to changes?',
+            onchangeChecked: (value: boolean) => {
                 this.isZoomingEnabled = value
-            })
+            }
+        })
     }
 
     public override async unrender(): Promise<void> {
