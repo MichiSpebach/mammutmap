@@ -7,8 +7,8 @@ let currentFiles: ChangedFile[] = []
 let lastFiles: ChangedFile[] = []
 let forceRestyle: boolean = false
 
-const ADDITION_COLOR = '#36680b'
-const DELETION_COLOR = '#a1190b'
+const ADDITION_COLOR = 'lime'
+const DELETION_COLOR = 'red'
 
 function getFilesForBox(box: Box, files: ChangedFile[]): ChangedFile[] {
     return files.filter(file => isSubPathOrEqual(file.absolutePath, box.getSrcPath()))
@@ -63,43 +63,38 @@ export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void>
 
 async function highlightBox(box: Box, changedFileOrFolder: ChangedFile): Promise<void> {
     const borderGradient: string = createBorderGradient(changedFileOrFolder)
-    await renderManager.addStyleTo(borderId(box), {
+    await renderManager.addStyleTo(`${box.getId()}Border`, {
         borderWidth: '4.2px',
         borderImageSlice: '1',
         borderImageSource: borderGradient
     })
-    await renderManager.addElementTo(borderId(box), {
-        id: `${borderId(box)}Content`,
+    await renderManager.addElementTo(`${box.header.getId()}Inner`, {
+        id: `${box.header.getId()}InnerGitDiff`,
         type: 'div',
         children: [{
             type: 'span',
-            innerHTML: `<strong>${changedFileOrFolder.numberOfAddedLines}+</strong> `,
+            innerHTML: `${changedFileOrFolder.numberOfAddedLines}+&nbsp;`,
             style: {color: ADDITION_COLOR}
         }, {
             type: 'span',
-            innerHTML: `<strong>${changedFileOrFolder.numberOfDeletedLines}-</strong> `,
+            innerHTML: `${changedFileOrFolder.numberOfDeletedLines}-&nbsp;`,
             style: {color: DELETION_COLOR}
         }],
-        style: {float: 'right'}
+        style: {float: 'right', fontWeight: 'bold'}
     })
 }
 
 function createBorderGradient(changedFile: ChangedFile): string {
     const numberOfChanges: number = changedFile.numberOfAddedLines + changedFile.numberOfDeletedLines
     const percentageOfAdditions: number = changedFile.numberOfAddedLines / numberOfChanges * 100
-    return `linear-gradient(45deg, ${ADDITION_COLOR} ${percentageOfAdditions}%, `
-        + `${DELETION_COLOR} ${100 - percentageOfAdditions}%)`
+    return `linear-gradient(45deg, ${ADDITION_COLOR}, ${percentageOfAdditions}%, ${DELETION_COLOR})`
 }
 
 async function removeCurrentHighlighting(box: Box): Promise<void> {
-    await renderManager.addStyleTo(borderId(box), {
+    await renderManager.addStyleTo(`${box.getId()}Border`, {
         borderImageSlice: '0',
         borderImageSource: 'none',
         borderWidth: null
     })
-    await renderManager.remove(`${borderId(box)}Content`)
-}
-
-function borderId(box: Box): string {
-    return `${box.getId()}Border`;
+    await renderManager.remove(`${box.header.getId()}InnerGitDiff`)
 }
