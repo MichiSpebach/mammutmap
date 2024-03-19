@@ -80,7 +80,7 @@ async function highlightBox(box: Box, changedFileOrFolder: ChangedFile): Promise
             innerHTML: `${changedFileOrFolder.numberOfDeletedLines}-&nbsp;`,
             style: {color: DELETION_COLOR}
         }],
-        style: {float: 'right', fontWeight: 'bold'}
+        style: {float: 'right'}
     })
 }
 

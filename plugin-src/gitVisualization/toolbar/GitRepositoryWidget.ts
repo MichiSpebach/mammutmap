@@ -84,16 +84,17 @@ export class GitRepositoryWidget extends UltimateWidget {
     }
 
     private async shapeCommitToggles(): Promise<RenderElement> {
+        const selectAllToggle: RenderElement = this.shapeSelectAllToggle()
         const uncommittedChangesToggle: RenderElement = this.shapeUncommittedChangesToggle()
         const commitToggles: RenderElement[] = this.commits.map(commit => this.shapeCommitToggle(commit))
-        const toggles: RenderElement[] = [uncommittedChangesToggle, ...commitToggles]
+        const toggles: RenderElement[] = [selectAllToggle, uncommittedChangesToggle, ...commitToggles]
         const moreCommitsButton: RenderElement = {
             type: 'button',
             innerHTML: 'More Commits &#10133;',
             onclick: async () => {
                 const numberOfCommits = this.commits.length
                 this.commits.push(...await this.gitClient.getCommits(`HEAD~${numberOfCommits + this.numberOfCommitParents}`, `HEAD~${numberOfCommits}`))
-                this.render()
+                await this.render()
             }
         }
         return {
@@ -106,14 +107,32 @@ export class GitRepositoryWidget extends UltimateWidget {
         }
     }
 
+    private shapeSelectAllToggle(): RenderElement {
+        const selectAllToggle = this.shapeToggle(coreUtil.generateId(),
+            this.selectedCommits.length === this.commits.length,
+            '&#9989; Select all',
+            'Selects or unselects all changes\\nin the current list',
+            async (value: boolean) => {
+                if (value) {
+                    this.selectedCommits = this.commits
+                } else {
+                    this.selectedCommits = []
+                }
+                this.isUncommittedChangesShown = value
+                await this.render()
+            })
+        selectAllToggle.style = {backgroundColor: 'grey'}
+        return selectAllToggle
+    }
+
     private shapeUncommittedChangesToggle(): RenderElement {
         return this.shapeToggle(coreUtil.generateId(),
             this.isUncommittedChangesShown,
             '&#127381; Uncommitted changes',
             'Staged and un(staged) changes\\nsince last commit',
-            (value: boolean) => {
+            async (value: boolean) => {
                 this.isUncommittedChangesShown = value
-                this.render()
+                await this.render()
             })
     }
 
@@ -167,7 +186,7 @@ export class GitRepositoryWidget extends UltimateWidget {
                 this.refFrom = await renderManager.getValueOf('git-ref-input-from')
                 this.refTo = await renderManager.getValueOf('git-ref-input-to')
                 this.selectedCommits = await this.gitClient.getCommits(this.refFrom, this.refTo)
-                this.render()
+                await this.render()
             }
         }
     }
