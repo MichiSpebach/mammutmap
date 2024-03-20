@@ -134,8 +134,12 @@ export class Transform {
         return grid.roundToGridPosition(position)
     }
 
-    public roundToGridScalar(position: number): number {
-        return grid.roundToGridScalar(position)
+    public roundToGridPositionX(positionX: number): number {
+        return grid.roundToGridPositionX(positionX)
+    }
+
+    public roundToGridPositionY(positionY: number): number {
+        return grid.roundToGridPositionY(positionY)
     }
 
 }

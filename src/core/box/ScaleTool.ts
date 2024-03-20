@@ -83,12 +83,20 @@ export class ScaleTool {
     return this.getBoxRenderedIntoOrFail().getParentClientRect()
   }
 
-  public roundToParentGridPosition(localPosition: number): number {
+  public roundToParentGridPositionX(localPositionX: number): number {
     const boxRenderedInto: Box = this.getBoxRenderedIntoOrFail()
     if (boxRenderedInto.isRoot()) {
-      return boxRenderedInto.transform.roundToGridScalar(localPosition)
+      return boxRenderedInto.transform.roundToGridPositionX(localPositionX)
     }
-    return boxRenderedInto.getParent().transform.roundToGridScalar(localPosition)
+    return boxRenderedInto.getParent().transform.roundToGridPositionX(localPositionX)
+  }
+
+  public roundToParentGridPositionY(localPositionY: number): number {
+    const boxRenderedInto: Box = this.getBoxRenderedIntoOrFail()
+    if (boxRenderedInto.isRoot()) {
+      return boxRenderedInto.transform.roundToGridPositionY(localPositionY)
+    }
+    return boxRenderedInto.getParent().transform.roundToGridPositionY(localPositionY)
   }
 
   public async scaleStart(): Promise<void> {

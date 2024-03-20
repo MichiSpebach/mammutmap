@@ -15,10 +15,11 @@ import * as linkEndFactory from './factories/linkEndFactory'
 import { LinkData } from '../../../src/core/mapData/LinkData'
 import { ClientRect } from '../../../src/core/ClientRect'
 import { HoverManager } from '../../../src/core/HoverManager'
+import { grid } from '../../../src/core/box/Grid'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 
-beforeAll(() => {
+beforeAll(async () => {
     const domAdapterMock: DocumentObjectModelAdapter = {} as DocumentObjectModelAdapter
     domAdapterMock.appendChildTo = () => Promise.resolve()
     domAdapterMock.addContentTo = () => Promise.resolve()
@@ -30,6 +31,8 @@ beforeAll(() => {
     domAdapterMock.addEventListenerTo = () => Promise.resolve()
     domAdapterMock.addEventListenerAdvancedTo = () => Promise.resolve()
     initDocumentObjectModelAdapter(domAdapterMock)
+
+    await grid.setActiveLayers({columns: 0, rows: 0})
 })
 
 beforeEach(() => {

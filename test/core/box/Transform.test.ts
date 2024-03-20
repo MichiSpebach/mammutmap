@@ -8,6 +8,11 @@ import { RootFolderBox } from '../../../src/core/box/RootFolderBox'
 import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
 import { LocalRect } from '../../../src/core/LocalRect'
 import * as testUtil from '../../testUtil'
+import { grid } from '../../../src/core/box/Grid'
+
+beforeAll(async () => {
+  await grid.setActiveLayers({columns: 0, rows: 0})
+})
 
 test('localToClientPosition', async () => {
   const result: ClientPosition = await setupScenario().transform.localToClientPosition(new LocalPosition(50, 50))
@@ -44,7 +49,7 @@ test('getNearestGridPositionOfOtherTransform', async () => {
 })
 
 test('getNearestGridPositionOf rounds to multiple of 4', () => {
-  const result: LocalPosition = setupScenario().transform.getNearestGridPositionOf(new LocalPosition(3, 78.1))
+  const result: LocalPosition = setupScenario().transform.roundToGridPosition(new LocalPosition(3, 78.1))
   expect(result.percentX).toBe(4)
   expect(result.percentY).toBe(80)
 })

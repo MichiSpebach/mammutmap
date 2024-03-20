@@ -110,7 +110,7 @@ export class ScaleManager {
     let newWidthInPercent: number = newWidthInPixel / startParentClientRect.width * 100
     if (snapToGrid) {
       const leftBorderPositionInPercent: number = (startClientRect.x-startParentClientRect.x) / startParentClientRect.width * 100
-      const newRightBorderPositionInPercent: number = this.state.scaling.roundToParentGridPosition(leftBorderPositionInPercent+newWidthInPercent)
+      const newRightBorderPositionInPercent: number = this.state.scaling.roundToParentGridPositionX(leftBorderPositionInPercent+newWidthInPercent)
       newWidthInPercent = newRightBorderPositionInPercent-leftBorderPositionInPercent
     }
 
@@ -130,7 +130,7 @@ export class ScaleManager {
     let newHeightInPercent: number = newHeightInPixel / startParentClientRect.height * 100
     if (snapToGrid) {
       const topBorderPositionInPercent: number = (startClientRect.y-startParentClientRect.y) / startParentClientRect.height * 100
-      const newBottomBorderPositionInPercent: number = this.state.scaling.roundToParentGridPosition(topBorderPositionInPercent+newHeightInPercent)
+      const newBottomBorderPositionInPercent: number = this.state.scaling.roundToParentGridPositionY(topBorderPositionInPercent+newHeightInPercent)
       newHeightInPercent = newBottomBorderPositionInPercent-topBorderPositionInPercent
     }
 
@@ -153,7 +153,7 @@ export class ScaleManager {
     let newYInPercent: number = newYInPixel / startParentClientRect.height * 100
     let newHeightInPercent: number = newHeightInPixel / startParentClientRect.height * 100
     if (snapToGrid) {
-      const snapToGridDelta: number = this.state.scaling.roundToParentGridPosition(newYInPercent)-newYInPercent
+      const snapToGridDelta: number = this.state.scaling.roundToParentGridPositionY(newYInPercent)-newYInPercent
       newYInPercent += snapToGridDelta
       newHeightInPercent -= snapToGridDelta
     }
@@ -177,7 +177,7 @@ export class ScaleManager {
     let newXInPercent: number = newXInPixel / startParentClientRect.width * 100
     let newWidthInPercent: number = newWidthInPixel / startParentClientRect.width * 100
     if (snapToGrid) {
-      const snapToGridDelta: number = this.state.scaling.roundToParentGridPosition(newXInPercent)-newXInPercent
+      const snapToGridDelta: number = this.state.scaling.roundToParentGridPositionX(newXInPercent)-newXInPercent
       newXInPercent += snapToGridDelta
       newWidthInPercent -= snapToGridDelta
     }

@@ -12,7 +12,7 @@ export class EmptySpaceFinder {
   }
 
   public findEmptySpaces(count: number): LocalRect[] {
-    return this.findEmptySpacesWithStartLayer(count, 1)
+    return this.findEmptySpacesWithStartLayer(count, 0)
   }
 
   private findEmptySpacesWithStartLayer(
@@ -71,11 +71,11 @@ export class EmptySpaceFinder {
     if (rects.length < count) {
       let nextLayer = layer+1
       if (nextLayer > EmptySpaceFinder.maxLayerToFollowNiceRules && !ignoreLeftAndRightMargins) {
-        nextLayer = 1
-        occupiedSpacesMultiplier = 4*nextLayer
+        nextLayer = 0
+        occupiedSpacesMultiplier = 4*(nextLayer+1)
         ignoreLeftAndRightMargins = true
       } else if (nextLayer > EmptySpaceFinder.maxLayerToFollowNiceRules && !ignoreExistingBoxes) {
-        nextLayer = 1
+        nextLayer = 0
         ignoreExistingBoxes = true
       }
       return this.findEmptySpacesWithStartLayer(count, nextLayer, occupiedSpacesMultiplier, ignoreLeftAndRightMargins, ignoreExistingBoxes)
