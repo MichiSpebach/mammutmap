@@ -1,3 +1,4 @@
+[![Continuous integration](https://github.com/MichiSpebach/mammutmap/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/MichiSpebach/mammutmap/actions/workflows/continuous_integration.yml)
 
 ### About
 Visualize the source code of your entire project.\
