@@ -1,4 +1,6 @@
-[![Continuous integration](https://github.com/MichiSpebach/mammutmap/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/MichiSpebach/mammutmap/actions/workflows/continuous_integration.yml)
+[![Continuous Integration](https://github.com/MichiSpebach/mammutmap/actions/workflows/continuous_integration.yml/badge.svg)](https://github.com/MichiSpebach/mammutmap/actions/workflows/continuous_integration.yml) 
+[![VSCode Extension](https://vsmarketplacebadges.dev/version-short/mammutmap.mammutmap.svg)](https://marketplace.visualstudio.com/items?itemName=mammutmap.mammutmap)
+[![GitHub Contributors](https://img.shields.io/github/contributors/MichiSpebach/mammutmap.svg)](https://github.com/MichiSpebach/mammutmap/graphs/contributors)
 
 ### About
 Visualize the source code of your entire project.\
