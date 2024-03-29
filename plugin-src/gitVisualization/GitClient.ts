@@ -1,6 +1,15 @@
 import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit} from 'simple-git'
 import {util as coreUtil} from '../../dist/core/util/util'
-import {Message} from '../../dist/pluginFacade'
+
+//import {Message} from '../../dist/pluginFacade'
+
+export class Message {
+    public constructor(
+        public message: string
+    ) {
+    }
+}
+
 
 export type Commit = {
     changedFiles: ChangedFile[]
@@ -14,6 +23,7 @@ export type ChangedFile = {
     absolutePath: string
     numberOfAddedLines: number
     numberOfDeletedLines: number
+    changes?: string
 }
 
 export class GitClient {
@@ -63,21 +73,41 @@ export class GitClient {
         if (refs.length === 0) {
             return []
         }
-        const diff: string = await this.git.diff(['--numstat', ...refs])
+        const diffSummary: string = await this.git.diff(['--numstat', ...refs])
+        //const diffDetails: string = await this.git.diff([...refs])
         const changedFiles: ChangedFile[] = []
-        diff.split('\n')
+        diffSummary.split('\n')
             .filter(nonEmptyLine => nonEmptyLine)
-            .map(line => {
+            .map(async line => {
                 const diffForFile: string[] = line.split('\t')
                 const relativePath: string = diffForFile[2]
                 const absolutePath: string = coreUtil.concatPaths(this.rootFolderSrcPath, relativePath)
+                //const changes: string = GitClient.parseChangesForFile(relativePath, diffDetails)
+                const changes: string = await this.getDiffForFile(relativePath, refs)
                 changedFiles.push({
                     absolutePath: absolutePath,
                     numberOfAddedLines: parseInt(diffForFile[0]),
-                    numberOfDeletedLines: parseInt(diffForFile[1])
+                    numberOfDeletedLines: parseInt(diffForFile[1]),
+                    changes: changes
                 })
             })
         return changedFiles
+    }
+
+    public static parseChangesForFile(filePath: string, diff: string): string {
+        const diffLines: string[] = diff.split('\n')
+        const startLine: number = diffLines
+            .findIndex(line => line.endsWith(filePath))
+        const numberOfLines: number = diffLines.slice(startLine + 1)
+            .findIndex(line => line.startsWith('diff --git')) + 1
+        const changes: string = diffLines.slice(startLine, startLine + numberOfLines)
+            .join('\n') + '\n'
+        return changes
+    }
+
+    public async getDiffForFile(filePath: string,
+                                refs: string[]): Promise<string> {
+        return this.git.diff([...refs, '--', filePath]);
     }
 
     public static compareCommitsByDate(commitOne: Commit, commitTwo: Commit) {

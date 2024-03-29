@@ -1,4 +1,4 @@
-import {Box, getRootFolder, renderManager} from '../../dist/pluginFacade'
+import {Box, FileBox, getRootFolder, renderManager, RenderPriority} from '../../dist/pluginFacade'
 import {isSubPathOrEqual} from './pathUtil'
 import {ChangedFile} from './GitClient'
 
@@ -9,6 +9,7 @@ let forceRestyle: boolean = false
 
 const ADDITION_COLOR = 'lime'
 const DELETION_COLOR = 'red'
+const BORDER_WIDTH = '4.2px'
 
 function getFilesForBox(box: Box, files: ChangedFile[]): ChangedFile[] {
     return files.filter(file => isSubPathOrEqual(file.absolutePath, box.getSrcPath()))
@@ -33,7 +34,7 @@ function initializeBoxHighlighting(): void {
                 await highlightFolderBox(this, changedFilesForBox)
             } else {
                 await highlightBox(this, changedFilesForBox[0])
-                await addOpenChangesButton(this)
+                await addShowChangesButton(this as FileBox, changedFilesForBox[0])
             }
         }
     }
@@ -65,7 +66,7 @@ export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void>
 async function highlightBox(box: Box, changedFileOrFolder: ChangedFile): Promise<void> {
     const borderGradient: string = createBorderGradient(changedFileOrFolder)
     await renderManager.addStyleTo(`${box.getId()}Border`, {
-        borderWidth: '4.2px',
+        borderWidth: BORDER_WIDTH,
         borderImageSlice: '1',
         borderImageSource: borderGradient
     })
@@ -100,12 +101,20 @@ async function removeCurrentHighlighting(box: Box): Promise<void> {
     await renderManager.remove(`${box.header.getId()}Inner-gitDiff`)
 }
 
-async function addOpenChangesButton(box: Box): Promise<void> {
+async function addShowChangesButton(box: FileBox, changedFile: ChangedFile): Promise<void> {
     await renderManager.addElementTo(`${box.header.getId()}Inner`, {
         type: 'button',
-        children: 'Open Changes',
+        children: 'Show Changes',
         id: box.getId() + '-openChangesButton',
         style: {float: 'right', marginRight: '5px'},
-        onclick: () => console.log("openChangesButton clicked")
+        onclick: () => {
+            showChangesInBox(box, changedFile)
+        }
     })
+}
+
+async function showChangesInBox(box: FileBox, changedFile: ChangedFile): Promise<void> {
+    const content: string = `<pre id="${box.body.getId() + 'Content'}"}">${changedFile.changes}</pre>`
+    console.log(content)
+    //await renderManager.setContentTo(`${(box.body.getId())}`, content, RenderPriority.RESPONSIVE)
 }
