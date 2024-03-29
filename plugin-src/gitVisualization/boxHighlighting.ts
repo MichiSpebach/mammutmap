@@ -33,6 +33,7 @@ function initializeBoxHighlighting(): void {
                 await highlightFolderBox(this, changedFilesForBox)
             } else {
                 await highlightBox(this, changedFilesForBox[0])
+                await addOpenChangesButton(this)
             }
         }
     }
@@ -69,7 +70,7 @@ async function highlightBox(box: Box, changedFileOrFolder: ChangedFile): Promise
         borderImageSource: borderGradient
     })
     await renderManager.addElementTo(`${box.header.getId()}Inner`, {
-        id: `${box.header.getId()}InnerGitDiff`,
+        id: `${box.header.getId()}Inner-gitDiff`,
         type: 'div',
         children: [{
             type: 'span',
@@ -96,5 +97,15 @@ async function removeCurrentHighlighting(box: Box): Promise<void> {
         borderImageSource: 'none',
         borderWidth: null
     })
-    await renderManager.remove(`${box.header.getId()}InnerGitDiff`)
+    await renderManager.remove(`${box.header.getId()}Inner-gitDiff`)
+}
+
+async function addOpenChangesButton(box: Box): Promise<void> {
+    await renderManager.addElementTo(`${box.header.getId()}Inner`, {
+        type: 'button',
+        children: 'Open Changes',
+        id: box.getId() + '-openChangesButton',
+        style: {float: 'right', marginRight: '5px'},
+        onclick: () => console.log("openChangesButton clicked")
+    })
 }
