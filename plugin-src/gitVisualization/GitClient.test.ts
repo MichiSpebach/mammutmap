@@ -1,5 +1,4 @@
 import {ChangedFile, Commit, GitClient} from './GitClient'
-import {DiffResult, Response} from "simple-git";
 
 test('getMostRecentCommit', async () => {
     const gitClient = await GitClient.new('./') as GitClient
@@ -39,26 +38,6 @@ test('compareCommitsByDate', async () => {
     expect(GitClient.compareCommitsByDate(commitOne, commitTwo)).toBe(-1)
     expect(GitClient.compareCommitsByDate(commitTwo, commitOne)).toBe(1)
     expect(GitClient.compareCommitsByDate(commitOne, commitOne)).toBe(0)
-})
-
-test('parseChangesForFile', async () => {
-    const diffOfFirstFile = 'diff --git a/src/pluginFacade.ts b/src/pluginFacade.ts\n' +
-        'index 5b3b7b1..e2e4b9a 100644\n' +
-        '--- a/src/pluginFacade.ts\n' +
-        '+++ b/src/pluginFacade.ts\n' +
-        '@@ -1,4 +1,4 @@\n' +
-        ' }\n' +
-        ' \n' +
-        '-export async function addLink(fromBox: FileBox, toFilePath: string, options?: {\n' +
-        '+export async function addLink(fromBox: FileBox, toFilePath: string, options?: {\n' +
-        '   onlyReturnWarnings?: boolean\n' +
-        '   delayUnwatchingOfBoxesInMS?: number\n' +
-        ' }): Promise<{\n'
-    const diffOfSecondFile = 'diff --git a/plugin-src/gitVisualization/GitClient.test.ts b/plugin-src/gitVisualization/GitClient.test.ts\n' +
-        'index 042f205..b6b7086 100644\n'
-    const changes: string = GitClient.parseChangesForFile('src/pluginFacade.ts',
-        diffOfFirstFile + diffOfSecondFile)
-    expect(changes).toEqual(diffOfFirstFile)
 })
 
 test('getDiffForFile', async () => {
