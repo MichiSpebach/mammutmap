@@ -1,4 +1,4 @@
-import {Box, FileBox, getRootFolder, renderManager} from '../../dist/pluginFacade'
+import {Box, FileBox, getRootFolder, PopupWidget, renderManager} from '../../dist/pluginFacade'
 import {isSubPathOrEqual} from './pathUtil'
 import {ChangedFile} from './GitClient'
 
@@ -109,7 +109,7 @@ async function addShowChangesButton(box: FileBox, changedFile: ChangedFile): Pro
         id: box.getId() + '-openChangesButton',
         style: {float: 'right', marginRight: '5px', marginTop: '2px'},
         onclick: () => {
-            showChangesInBox(box, changedFile)
+            showChanges(changedFile)
         }
     })
 }
@@ -121,8 +121,10 @@ async function removeShowChangesButton(box: Box): Promise<void> {
     await renderManager.remove(`${box.getId()}-openChangesButton`)
 }
 
-async function showChangesInBox(box: FileBox, changedFile: ChangedFile): Promise<void> {
-    const content: string = `<pre id="${box.body.getId() + 'Content'}"}">${changedFile.changes}</pre>`
-    console.log(content)
-    //await renderManager.setContentTo(`${(box.body.getId())}`, content, RenderPriority.RESPONSIVE)
+async function showChanges(changedFile: ChangedFile): Promise<void> {
+    await PopupWidget.buildAndRender(`Changes in ${changedFile.absolutePath}`,
+        {
+            type: 'div',
+            innerHTML: `<pre>${changedFile.changes?.replace(/\n/g, '<br>')}</pre>`
+        })
 }
