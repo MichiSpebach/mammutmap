@@ -1,4 +1,4 @@
-import {Box, FileBox, getRootFolder, renderManager, RenderPriority} from '../../dist/pluginFacade'
+import {Box, FileBox, getRootFolder, renderManager} from '../../dist/pluginFacade'
 import {isSubPathOrEqual} from './pathUtil'
 import {ChangedFile} from './GitClient'
 
@@ -27,6 +27,7 @@ function initializeBoxHighlighting(): void {
         const lastFilesForBox: ChangedFile[] = getFilesForBox(this, lastFiles)
         if (lastFilesForBox.length > 0 && forceRestyle) {
             await removeCurrentHighlighting(this)
+            await removeShowChangesButton(this)
         }
         const changedFilesForBox: ChangedFile[] = getFilesForBox(this, currentFiles)
         if (changedFilesForBox.length > 0 && (!isRendered || forceRestyle)) {
@@ -106,11 +107,18 @@ async function addShowChangesButton(box: FileBox, changedFile: ChangedFile): Pro
         type: 'button',
         children: 'Show Changes',
         id: box.getId() + '-openChangesButton',
-        style: {float: 'right', marginRight: '5px'},
+        style: {float: 'right', marginRight: '5px', marginTop: '2px'},
         onclick: () => {
             showChangesInBox(box, changedFile)
         }
     })
+}
+
+async function removeShowChangesButton(box: Box): Promise<void> {
+    if (box.isFolder()) {
+        return
+    }
+    await renderManager.remove(`${box.getId()}-openChangesButton`)
 }
 
 async function showChangesInBox(box: FileBox, changedFile: ChangedFile): Promise<void> {
