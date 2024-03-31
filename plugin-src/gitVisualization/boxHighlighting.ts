@@ -125,6 +125,25 @@ async function showChanges(changedFile: ChangedFile): Promise<void> {
     await PopupWidget.buildAndRender(`Changes in ${changedFile.absolutePath}`,
         {
             type: 'div',
-            innerHTML: `<pre>${changedFile.changes?.replace(/\n/g, '<br>')}</pre>`
+            innerHTML: `<pre>${escapeHTML(changedFile.changes!)                
+                .replace(/\n/g, '<br>')
+            }</pre>`
         })
 }
+
+export enum HTMLEscapeChars {
+    "&" = "&amp;",
+    "<" = "&lt;",
+    ">" = "&gt;",
+    "'" = "&#39;",
+    '"' = "&quot;",
+    "`" = "&#96;"
+}
+
+const htmlEscapeReg = new RegExp(`[${Object.keys(HTMLEscapeChars)}]`, "g");
+
+const escapeHTML = (str: string) =>
+    str.replace(
+        htmlEscapeReg,
+        (tag: string) => (HTMLEscapeChars)[tag] || tag
+    )
