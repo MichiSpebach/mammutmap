@@ -1,6 +1,6 @@
 import {Box, FileBox, getRootFolder, PopupWidget, renderManager} from '../../dist/pluginFacade'
 import {isSubPathOrEqual} from './pathUtil'
-import {ChangedFile} from './GitClient'
+import {ChangedFile, GitClient} from './GitClient'
 
 let isInitialized: boolean = false
 let currentFiles: ChangedFile[] = []
@@ -125,7 +125,7 @@ async function showChanges(changedFile: ChangedFile): Promise<void> {
     await PopupWidget.buildAndRender(`Changes in ${changedFile.absolutePath}`,
         {
             type: 'div',
-            innerHTML: `<pre>${escapeHTML(changedFile.changes!)                
+            innerHTML: `<pre>${escapeHTML(changedFile.changes!)
                 .replace(/\n/g, '<br>')
             }</pre>`
         })
@@ -140,10 +140,6 @@ export enum HTMLEscapeChars {
     "`" = "&#96;"
 }
 
-const htmlEscapeReg = new RegExp(`[${Object.keys(HTMLEscapeChars)}]`, "g");
+const htmlEscapeRegExp: RegExp = new RegExp(`[${Object.keys(HTMLEscapeChars)}]`, "g");
 
-const escapeHTML = (str: string) =>
-    str.replace(
-        htmlEscapeReg,
-        (tag: string) => (HTMLEscapeChars)[tag] || tag
-    )
+const escapeHTML = (str: string) => str.replace(htmlEscapeRegExp, (tag: string) => (HTMLEscapeChars)[tag] || tag)

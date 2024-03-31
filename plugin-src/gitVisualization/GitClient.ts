@@ -74,7 +74,6 @@ export class GitClient {
             return []
         }
         const diffSummary: string = await this.git.diff(['--numstat', ...refs])
-        //const diffDetails: string = await this.git.diff([...refs])
         const changedFiles: ChangedFile[] = []
         diffSummary.split('\n')
             .filter(nonEmptyLine => nonEmptyLine)
@@ -82,8 +81,7 @@ export class GitClient {
                 const diffForFile: string[] = line.split('\t')
                 const relativePath: string = diffForFile[2]
                 const absolutePath: string = coreUtil.concatPaths(this.rootFolderSrcPath, relativePath)
-                //const changes: string = GitClient.parseChangesForFile(relativePath, diffDetails)
-                const changes: string = await this.getDiffForFile(relativePath, refs)
+                const changes: string = await this.getDiffForFile(absolutePath, refs)
                 changedFiles.push({
                     absolutePath: absolutePath,
                     numberOfAddedLines: parseInt(diffForFile[0]),
@@ -94,19 +92,7 @@ export class GitClient {
         return changedFiles
     }
 
-    public static parseChangesForFile(filePath: string, diff: string): string {
-        const diffLines: string[] = diff.split('\n')
-        const startLine: number = diffLines
-            .findIndex(line => line.endsWith(filePath))
-        const numberOfLines: number = diffLines.slice(startLine + 1)
-            .findIndex(line => line.startsWith('diff --git')) + 1
-        const changes: string = diffLines.slice(startLine, startLine + numberOfLines)
-            .join('\n') + '\n'
-        return changes
-    }
-
-    public async getDiffForFile(filePath: string,
-                                refs: string[]): Promise<string> {
+    public async getDiffForFile(filePath: string, refs: string[]): Promise<string> {
         return this.git.diff([...refs, '--', filePath]);
     }
 
