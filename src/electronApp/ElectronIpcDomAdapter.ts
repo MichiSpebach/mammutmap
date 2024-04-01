@@ -382,6 +382,14 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     public setValueTo(id: string, value: string): Promise<void> {
       return this.executeJsOnElementSuppressingErrors(id, "value='"+value+"'")
     }
+
+    public getCheckedOf(id: string): Promise<boolean> {
+      return this.executeJsOnElement(id, "checked")
+    }
+  
+    public setCheckedTo(id: string, checked: boolean): Promise<void> {
+      return this.executeJsOnElementSuppressingErrors(id, "checked='"+checked+"'")
+    }
   
     public scrollToBottom(id: string): Promise<void> {
       return this.executeJsOnElementSuppressingErrors(id, "scrollTop = Number.MAX_SAFE_INTEGER")
