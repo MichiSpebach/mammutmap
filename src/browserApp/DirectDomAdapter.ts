@@ -415,6 +415,24 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         (element as any).value = value // TODO: cast to any because value does not exist on all types of HTMLElement, find better solution
     }
 
+    public async getCheckedOf(id: string): Promise<boolean> {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::getCheckedOf(..) failed to get element with id '${id}', defaulting to false.`)
+            return false
+        }
+        return (element as any).checked // TODO: cast to any because checked does not exist on all types of HTMLElement, find better solution
+    }
+
+    public async setCheckedTo(id: string, checked: boolean): Promise<void> {
+        const element: HTMLElement|null = this.getElement(id)
+        if (!element) {
+            util.logWarning(`DirectDomAdapter::setCheckedTo(..) failed to get element with id '${id}'.`)
+            return
+        }
+        (element as any).checked = checked // TODO: cast to any because checked does not exist on all types of HTMLElement, find better solution
+    }
+
     public async scrollToBottom(id: string): Promise<void> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {

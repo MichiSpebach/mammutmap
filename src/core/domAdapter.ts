@@ -66,6 +66,8 @@ export interface DocumentObjectModelAdapter {
 
   getValueOf(id: string): Promise<string>
   setValueTo(id: string, value: string): Promise<void>
+  getCheckedOf(id: string): Promise<boolean>
+  setCheckedTo(id: string, checked: boolean): Promise<void>
 
   scrollToBottom(id: string): Promise<void>
 

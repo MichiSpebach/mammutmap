@@ -67,6 +67,22 @@ export class RenderManager {
     }))
   }
 
+  public getCheckedOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<boolean> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'getCheckedOf'+id,
+      command: () => dom.getCheckedOf(id)
+    }))
+  }
+
+  public setCheckedTo(id: string, checked: boolean, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    return this.runOrSchedule(new Command({
+      priority: priority,
+      squashableWith: 'setCheckedTo'+id,
+      command: () => dom.setCheckedTo(id, checked)
+    }))
+  }
+
   public appendChildTo(parentId: string, childId: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
