@@ -15,14 +15,14 @@ test('getCommits', async () => {
 test('getChangedFiles for one commit', async () => {
     const gitClient = await GitClient.new('./') as GitClient
     const refs: string[] = ['HEAD^', 'HEAD']
-    const files: ChangedFile[] = await gitClient.getChangedFiles(refs)
-    expect(files.length).toBeGreaterThan(0)
+    const changedFiles: ChangedFile[] = await gitClient.getChangedFiles(refs)
+    expect(changedFiles.length).toBeGreaterThan(0)
 
-    const file: ChangedFile = files[0]
-    expect(file.absolutePath).toBeTruthy()
-    expect(file.numberOfAddedLines).toBeGreaterThanOrEqual(0)
-    expect(file.numberOfDeletedLines).toBeGreaterThanOrEqual(0)
-    expect(file.changes).toBeTruthy()
+    const changedFile: ChangedFile = changedFiles[0]
+    expect(changedFile.absolutePath).toBeTruthy()
+    expect(changedFile.numberOfAddedLines).toBeGreaterThanOrEqual(0)
+    expect(changedFile.numberOfDeletedLines).toBeGreaterThanOrEqual(0)
+    expect(changedFile.refs!.length).toBe(2)
 })
 
 test('getChangedFiles for no commit', async () => {
@@ -38,15 +38,4 @@ test('compareCommitsByDate', async () => {
     expect(GitClient.compareCommitsByDate(commitOne, commitTwo)).toBe(-1)
     expect(GitClient.compareCommitsByDate(commitTwo, commitOne)).toBe(1)
     expect(GitClient.compareCommitsByDate(commitOne, commitOne)).toBe(0)
-})
-
-test('getDiffForFile', async () => {
-    const gitClient = await GitClient.new('./') as GitClient
-    const refs: string[] = ['HEAD', 'HEAD^']
-    const files: ChangedFile[] = await gitClient.getChangedFiles(refs)
-    const filePath: string = files[0].absolutePath
-    const diff: string = await gitClient.getDiffForFile(filePath, refs)
-
-    expect(diff).toBeTruthy()
-    expect(diff).toContain('diff --git')
 })

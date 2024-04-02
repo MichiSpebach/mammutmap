@@ -1,15 +1,6 @@
 import {DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit} from 'simple-git'
 import {util as coreUtil} from '../../dist/core/util/util'
-
-//import {Message} from '../../dist/pluginFacade'
-
-export class Message {
-    public constructor(
-        public message: string
-    ) {
-    }
-}
-
+import {Message} from '../../dist/pluginFacade'
 
 export type Commit = {
     changedFiles: ChangedFile[]
@@ -23,7 +14,7 @@ export type ChangedFile = {
     absolutePath: string
     numberOfAddedLines: number
     numberOfDeletedLines: number
-    changes?: string
+    refs?: string[]
 }
 
 export class GitClient {
@@ -81,19 +72,14 @@ export class GitClient {
                 const diffForFile: string[] = line.split('\t')
                 const relativePath: string = diffForFile[2]
                 const absolutePath: string = coreUtil.concatPaths(this.rootFolderSrcPath, relativePath)
-                const changes: string = await this.getDiffForFile(absolutePath, refs)
                 changedFiles.push({
                     absolutePath: absolutePath,
                     numberOfAddedLines: parseInt(diffForFile[0]),
                     numberOfDeletedLines: parseInt(diffForFile[1]),
-                    changes: changes
+                    refs: refs
                 })
             })
         return changedFiles
-    }
-
-    public async getDiffForFile(filePath: string, refs: string[]): Promise<string> {
-        return this.git.diff([...refs, '--', filePath]);
     }
 
     public static compareCommitsByDate(commitOne: Commit, commitTwo: Commit) {

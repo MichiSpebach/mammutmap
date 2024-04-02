@@ -1,6 +1,6 @@
-import {Box, FileBox, getRootFolder, PopupWidget, renderManager} from '../../dist/pluginFacade'
+import {Box, environment, FileBox, getRootFolder, renderManager} from '../../dist/pluginFacade'
 import {isSubPathOrEqual} from './pathUtil'
-import {ChangedFile, GitClient} from './GitClient'
+import {ChangedFile} from './GitClient'
 
 let isInitialized: boolean = false
 let currentFiles: ChangedFile[] = []
@@ -107,6 +107,12 @@ async function addShowChangesButton(box: FileBox, changedFile: ChangedFile): Pro
         type: 'button',
         children: 'Show Changes',
         id: box.getId() + '-openChangesButton',
+        title: 'Uses git difftool: https://git-scm.com/docs/git-difftool\\n' +
+            'Make sure you have it configured, e.g. for VSCode:\\n' +
+            '[diff]\\n' +
+            '    tool = default-difftool\\n' +
+            '[difftool \\"default-difftool\\"]\\n' +
+            '    cmd = code --wait --diff \\$LOCAL \\$REMOTE',
         style: {float: 'right', marginRight: '5px', marginTop: '2px'},
         onclick: () => {
             showChanges(changedFile)
@@ -122,24 +128,5 @@ async function removeShowChangesButton(box: Box): Promise<void> {
 }
 
 async function showChanges(changedFile: ChangedFile): Promise<void> {
-    await PopupWidget.buildAndRender(`Changes in ${changedFile.absolutePath}`,
-        {
-            type: 'div',
-            innerHTML: `<pre>${escapeHTML(changedFile.changes!)
-                .replace(/\n/g, '<br>')
-            }</pre>`
-        })
+    environment.runShellCommand(`git difftool ${changedFile.refs?.at(-1)} --no-prompt -- ${changedFile.absolutePath}`)
 }
-
-export enum HTMLEscapeChars {
-    "&" = "&amp;",
-    "<" = "&lt;",
-    ">" = "&gt;",
-    "'" = "&#39;",
-    '"' = "&quot;",
-    "`" = "&#96;"
-}
-
-const htmlEscapeRegExp: RegExp = new RegExp(`[${Object.keys(HTMLEscapeChars)}]`, "g");
-
-const escapeHTML = (str: string) => str.replace(htmlEscapeRegExp, (tag: string) => (HTMLEscapeChars)[tag] || tag)
