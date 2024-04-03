@@ -1,0 +1,292 @@
+{
+	"id": "cgmrha6h8uo",
+	"x": 56,
+	"y": 50,
+	"width": 14,
+	"height": 14,
+	"links": [
+		{
+			"id": "link5mn27uvlf4",
+			"from": {
+				"path": [
+					{
+						"boxId": "foet9f30jag",
+						"boxName": "dialog.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "jdsip4d7c5g",
+						"boxName": "boxIterator.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "linkovtgjgfchgg",
+			"from": {
+				"path": [
+					{
+						"boxId": "jdsip4d7c5g",
+						"boxName": "boxIterator.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "k0kt9mhkd5g",
+						"boxName": "bundler.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "linkia70vvfhbh",
+			"from": {
+				"path": [
+					{
+						"boxId": "oobu0evk7rg",
+						"boxName": "scheduler.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "k0kt9mhkd5g",
+						"boxName": "bundler.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "linkjfgk3k7pkg",
+			"from": {
+				"path": [
+					{
+						"boxId": "nodeq89e4d5rmio",
+						"boxName": "nodenodeq89e4d5rmio",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "oobu0evk7rg",
+						"boxName": "scheduler.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "link5nnk9n5580o",
+			"from": {
+				"path": [
+					{
+						"boxId": "nodeq89e4d5rmio",
+						"boxName": "nodenodeq89e4d5rmio",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "foet9f30jag",
+						"boxName": "dialog.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "linkrvtfkk72i2",
+			"from": {
+				"path": [
+					{
+						"boxId": "k0kt9mhkd5g",
+						"boxName": "bundler.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "a93aqi2ba7o",
+						"boxName": "CommonRoute.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "link76rjr6ausdo",
+			"from": {
+				"path": [
+					{
+						"boxId": "k0kt9mhkd5g",
+						"boxName": "bundler.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "g6npjhjd8lg",
+						"boxName": "knotMerger.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "linkaa2ba99gp2g",
+			"from": {
+				"path": [
+					{
+						"boxId": "g6npjhjd8lg",
+						"boxName": "knotMerger.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "3tdm5d44ae",
+						"boxName": "RouteTree.ts",
+						"x": 50,
+						"y": 52
+					}
+				]
+			}
+		},
+		{
+			"id": "linkqng1kal1vg8",
+			"from": {
+				"path": [
+					{
+						"boxId": "2jegcqj78o8",
+						"boxName": "bundler.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "k0kt9mhkd5g",
+						"boxName": "bundler.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "link10nd676l8l",
+			"from": {
+				"path": [
+					{
+						"boxId": "k0kt9mhkd5g",
+						"boxName": "bundler.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "08n9106vv88",
+						"boxName": "commonRouteFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "linkrf2jef1qvpg",
+			"from": {
+				"path": [
+					{
+						"boxId": "nodeq89e4d5rmio",
+						"boxName": "nodenodeq89e4d5rmio",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "702hlou58ho",
+						"boxName": "HighlightPropagatingLink.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "link0ek2gfbrfc",
+			"from": {
+				"path": [
+					{
+						"boxId": "9f4gpb9suk8",
+						"boxName": "commonRouteFinder.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "08n9106vv88",
+						"boxName": "commonRouteFinder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		}
+	],
+	"nodes": [
+		{
+			"id": "nodeq89e4d5rmio",
+			"x": 100,
+			"y": 45.655657975400835
+		}
+	]
+}
