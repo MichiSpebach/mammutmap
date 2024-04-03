@@ -80,53 +80,8 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 	if (bundleToPart) {
 		toInsertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
 	}
-	
-	let fromForkingKnot: AbstractNodeWidget
-	if (bundleFromPart) {
-		fromForkingKnot = fromInsertion?.insertedNode?? commonRoute.from
-	} else {
-		const fromForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await fromLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
-		fromForkingKnot = fromForkingKnotWithWatcher.node
-	}
-	if (!(fromForkingKnot instanceof NodeWidget)) {
-		console.warn('bundler.bundleLinkIntoCommonRoute(..) fromForkingKnot is not instanceof NodeWidget')
-	}
-	let toForkingKnot: AbstractNodeWidget
-	if (bundleToPart) {
-		toForkingKnot = toInsertion?.insertedNode?? commonRoute.to
-	} else {
-		const toForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await fromLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
-		toForkingKnot = toForkingKnotWithWatcher.node
-	}
-	if (!(toForkingKnot instanceof NodeWidget)) {
-		console.warn('bundler.bundleLinkIntoCommonRoute(..) toForkingKnot is not instanceof NodeWidget')
-	}
-	const fromLinks: Link[] = fromForkingKnot.borderingLinks.getIngoing()
-	const fromLinksExistedBefore: Link[] = bundleFromPart ? fromLinks.filter(link => link !== fromLink) : fromLinks
-	const toLinks: Link[] = toForkingKnot.borderingLinks.getOutgoing()
-	const toLinksExistedBefore: Link[] = bundleToPart ? toLinks.filter(link => link !== toLink) : toLinks
-	if (bundleFromPart && toLinks.length > 1 || bundleToPart && fromLinks.length > 1) {
-		await Promise.all([
-			...fromLinksExistedBefore.map(async link => {
-				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) { // TODO: move into function
-					return
-				}
-				HighlightPropagatingLink.addBundledWith(link, toLinksExistedBefore)
-				await link.getManagingBox().saveMapData()
-			}),
-			...toLinksExistedBefore.map(async link => {
-				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) { // TODO: move into function
-					return
-				}
-				HighlightPropagatingLink.addBundledWith(link, fromLinksExistedBefore)
-				await link.getManagingBox().saveMapData()
-			}),
-			HighlightPropagatingLink.addBundledWith(fromLink, [toLink]),
-			await fromLink.getManagingBox().saveMapData(),
-			HighlightPropagatingLink.addBundledWith(toLink, [fromLink]),
-			await toLink.getManagingBox().saveMapData()
-		])
-	}
+
+	await updateEntangledLinks(bundleFromPart, bundleToPart, fromInsertion, toInsertion, commonRoute, fromLink, toLink)
 
 	//await Promise.all([
 		await mergeIfKnotsAndIfPossible(commonRoute.from, fromLink.from, fromInsertion?.insertedNode)
@@ -135,7 +90,7 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 }
 
 function isLinkEndKnotTemporaryAndWillBeMerged(linkEnd: LinkEnd, commonRoute: CommonRoute, commonRouteEnd: 'from'|'to'): boolean {
-	/*if (getBundleKnot(commonRoute, commonRouteEnd)) { TODO: write test case that needs this
+	/*if (getBundleKnot(commonRoute, commonRouteEnd)) { TODO: write test case that needs this, does not exist
 		return true
 	}*/
 	const commonEndNode: AbstractNodeWidget = commonRoute[commonRouteEnd]
@@ -234,4 +189,61 @@ async function calculateBundleNodePosition(link: Link, otherLink: Link, box: Box
 		console.warn(`linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are ${intersections.length}`)
 	}
 	return intersections.at(0) ?? boxRect.getMidPosition()
+}
+
+async function updateEntangledLinks(
+	bundleFromPart: boolean,
+	bundleToPart: boolean,
+	fromInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined,
+	toInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined,
+	commonRoute: CommonRoute,
+	fromLink: Link,
+	toLink: Link
+) {
+	let fromForkingKnot: AbstractNodeWidget
+	if (bundleFromPart) {
+		fromForkingKnot = fromInsertion?.insertedNode?? commonRoute.from
+	} else {
+		const fromForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await fromLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
+		fromForkingKnot = fromForkingKnotWithWatcher.node
+	}
+	if (!(fromForkingKnot instanceof NodeWidget)) {
+		console.warn('bundler.bundleLinkIntoCommonRoute(..) fromForkingKnot is not instanceof NodeWidget')
+	}
+	let toForkingKnot: AbstractNodeWidget
+	if (bundleToPart) {
+		toForkingKnot = toInsertion?.insertedNode?? commonRoute.to
+	} else {
+		const toForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await toLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
+		toForkingKnot = toForkingKnotWithWatcher.node
+	}
+	if (!(toForkingKnot instanceof NodeWidget)) {
+		console.warn('bundler.bundleLinkIntoCommonRoute(..) toForkingKnot is not instanceof NodeWidget')
+	}
+	const fromLinks: Link[] = fromForkingKnot.borderingLinks.getIngoing()
+	const fromLinksExistedBefore: Link[] = bundleFromPart ? fromLinks.filter(link => link !== fromLink) : fromLinks
+	const toLinks: Link[] = toForkingKnot.borderingLinks.getOutgoing()
+	const toLinksExistedBefore: Link[] = bundleToPart ? toLinks.filter(link => link !== toLink) : toLinks
+	if (bundleFromPart && toLinks.length > 1 || bundleToPart && fromLinks.length > 1) {
+		await Promise.all([
+			...fromLinksExistedBefore.map(async link => {
+				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) { // TODO: move into function
+					return
+				}
+				HighlightPropagatingLink.addBundledWith(link, toLinksExistedBefore)
+				await link.getManagingBox().saveMapData()
+			}),
+			...toLinksExistedBefore.map(async link => {
+				if (HighlightPropagatingLink.getBundledWithIds(link).length > 0) { // TODO: move into function
+					return
+				}
+				HighlightPropagatingLink.addBundledWith(link, fromLinksExistedBefore)
+				await link.getManagingBox().saveMapData()
+			}),
+			HighlightPropagatingLink.addBundledWith(fromLink, [toLink]),
+			await fromLink.getManagingBox().saveMapData(),
+			HighlightPropagatingLink.addBundledWith(toLink, [fromLink]),
+			await toLink.getManagingBox().saveMapData()
+		])
+	}
 }
