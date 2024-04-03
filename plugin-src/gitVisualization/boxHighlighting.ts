@@ -1,6 +1,7 @@
-import {Box, environment, FileBox, getRootFolder, renderManager} from '../../dist/pluginFacade'
+import {Box, FileBox, getRootFolder, renderManager} from '../../dist/pluginFacade'
 import {isSubPathOrEqual} from './pathUtil'
 import {ChangedFile} from './GitClient'
+import {openChanges} from "./gitWitchcraft";
 
 let isInitialized: boolean = false
 let currentFiles: ChangedFile[] = []
@@ -27,7 +28,7 @@ function initializeBoxHighlighting(): void {
         const lastFilesForBox: ChangedFile[] = getFilesForBox(this, lastFiles)
         if (lastFilesForBox.length > 0 && forceRestyle) {
             await removeCurrentHighlighting(this)
-            await removeShowChangesButton(this)
+            await removeOpenChangesButton(this)
         }
         const changedFilesForBox: ChangedFile[] = getFilesForBox(this, currentFiles)
         if (changedFilesForBox.length > 0 && (!isRendered || forceRestyle)) {
@@ -35,7 +36,7 @@ function initializeBoxHighlighting(): void {
                 await highlightFolderBox(this, changedFilesForBox)
             } else {
                 await highlightBox(this, changedFilesForBox[0])
-                await addShowChangesButton(this as FileBox, changedFilesForBox[0])
+                await addOpenChangesButton(this as FileBox, changedFilesForBox[0])
             }
         }
     }
@@ -102,10 +103,10 @@ async function removeCurrentHighlighting(box: Box): Promise<void> {
     await renderManager.remove(`${box.header.getId()}Inner-gitDiff`)
 }
 
-async function addShowChangesButton(box: FileBox, changedFile: ChangedFile): Promise<void> {
+async function addOpenChangesButton(box: FileBox, changedFile: ChangedFile): Promise<void> {
     await renderManager.addElementTo(`${box.header.getId()}Inner`, {
         type: 'button',
-        children: 'Show Changes',
+        children: 'Open Changes',
         id: box.getId() + '-openChangesButton',
         title: 'Uses git difftool: https://git-scm.com/docs/git-difftool\\n' +
             'Make sure you have it configured, e.g. for VSCode:\\n' +
@@ -115,18 +116,14 @@ async function addShowChangesButton(box: FileBox, changedFile: ChangedFile): Pro
             '    cmd = code --wait --diff \\$LOCAL \\$REMOTE',
         style: {float: 'right', marginRight: '5px', marginTop: '2px'},
         onclick: () => {
-            showChanges(changedFile)
+            openChanges(changedFile)
         }
     })
 }
 
-async function removeShowChangesButton(box: Box): Promise<void> {
+async function removeOpenChangesButton(box: Box): Promise<void> {
     if (box.isFolder()) {
         return
     }
     await renderManager.remove(`${box.getId()}-openChangesButton`)
-}
-
-async function showChanges(changedFile: ChangedFile): Promise<void> {
-    environment.runShellCommand(`git difftool ${changedFile.refs?.at(-1)} --no-prompt -- ${changedFile.absolutePath}`)
 }
