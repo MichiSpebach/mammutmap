@@ -112,11 +112,11 @@ async function bundleLinksRecursively(box: Box, options: {
 	console.info(`Start bundling links of '${box.getSrcPath()}' with options '${JSON.stringify(options)}'...`)
 	const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
 	let countingFinished: boolean = false
-	let fileCount: number = 1
+	let boxCount: number = 1
 	let linkCount: number = 0
-	let processedFileCount: number = 0
+	let processedBoxCount: number = 0
 	let processedLinkCount: number = 0
-	let skippedLinkCount: number = 0
+	let currentBox: Box|undefined = box
 	const counting: Promise<void> = count()
 
 	if (options.bordering) {
@@ -125,7 +125,7 @@ async function bundleLinksRecursively(box: Box, options: {
 	if (options.managed) {
 		await bundleLinksSequentially(box.links.getLinks())
 	}
-	processedFileCount++
+	processedBoxCount++
 	if (options.recursively && box instanceof FolderBox) {
 		const iterator = new pluginFacade.BoxDepthTreeIterator(box, {srcPathsToIgnore: options.pathsToIgnoreIfRecursively})
 		while (await iterator.hasNextOrUnwatch()) {
@@ -133,14 +133,16 @@ async function bundleLinksRecursively(box: Box, options: {
 			if (next === box) {
 				continue
 			}
+			currentBox = next
 			await bundleLinksSequentially(next.links.getLinks())
-			processedFileCount++
+			processedBoxCount++
 			updateProgressBar()
 		}
 	}
 
 	await counting
 	await progressBar.finishAndRemove()
+	currentBox = undefined
 	console.info(`Finished ${buildProgressText()}.`)
 
 	async function count(): Promise<void> {
@@ -158,7 +160,7 @@ async function bundleLinksRecursively(box: Box, options: {
 				if (next === box) {
 					continue
 				}
-				fileCount++
+				boxCount++
 				linkCount += next.links.getLinks().length
 				updateProgressBar()
 			}
@@ -179,22 +181,21 @@ async function bundleLinksRecursively(box: Box, options: {
 		}
 		if (options.mode === 'all' || link.isAutoMaintained()) {
 			await bundler.bundleLink(link, {unwatchDelayInMs: 500}).catch((reason) => console.warn(reason))
-		} else {
-			skippedLinkCount++
 		}
 		processedLinkCount++
 		updateProgressBar()
 	}
 
 	async function updateProgressBar(): Promise<void> {
-		const percent: number|undefined = countingFinished ? processedLinkCount/linkCount * 100 : undefined
+		//const linksPerBox: number = linkCount / boxCount // TODO: use and improve percentage or remove linkCount variable
+		const percent: number|undefined = countingFinished ? processedBoxCount/boxCount * 100 : undefined
 		const percentText: string = percent ? ` (${Math.round(percent*100)/100}%)` : ''
 		await progressBar.set({text: buildProgressText()+percentText, percent})
 	}
 
 	function buildProgressText(): string {
-		const skippedText = skippedLinkCount ? ` (skipped/not autoMaintained ${skippedLinkCount})`: ''
-		return `bundling links: file ${processedFileCount} of ${fileCount}, link ${processedLinkCount} of ${linkCount}${skippedText}`
+		const currentBoxText = currentBox ? `, currently '${coreUtil.removeStartFromPath(box.getSrcPath(), currentBox.getSrcPath())}'` : '' // TODO: reduce width changes of progressBar
+		return `bundling links: box ${processedBoxCount} of ${boxCount}${currentBoxText}, processed ${processedLinkCount} links`
 	}
 }
 
