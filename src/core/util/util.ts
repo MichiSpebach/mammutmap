@@ -1,4 +1,3 @@
-import { environment, ChildProcess } from '../environmentAdapter'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
@@ -10,10 +9,6 @@ class Util {
   public readonly githubProjectAddress: string = 'https://github.com/MichiSpebach/mammutmap'
   public readonly pluginTutorialAddress: string = this.githubProjectAddress+'/blob/main/pluginTutorial.md'
   public readonly vscodeMarketplaceAddress: string = 'https://marketplace.visualstudio.com/items?itemName=mammutmap.mammutmap'
-
-  public runShellCommand(command: string): ChildProcess {
-    return environment.runShellCommand(command, {})
-  }
 
   /** @deprecated use log.debug(..) instead */
   public logDebug(message: string, options?: {allowHtml?: boolean}): void {
