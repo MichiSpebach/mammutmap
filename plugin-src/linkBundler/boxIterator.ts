@@ -89,11 +89,11 @@ export async function bundleLinks(startBox: Box, options: {
 		//const linksPerBox: number = linkCount / boxCount // TODO: use and improve percentage or remove linkCount variable
 		const percent: number|undefined = countingFinished ? processedBoxCount/boxCount * 100 : undefined
 		const percentText: string = percent ? ` (${Math.round(percent*100)/100}%)` : ''
-		await progressBar.set({text: buildProgressText()+percentText, percent})
+		const details: string|undefined = currentBox ? coreUtil.removeStartFromPath(coreUtil.removeLastElementFromPath(startBox.getSrcPath()), currentBox.getSrcPath()) : undefined
+		await progressBar.set({text: buildProgressText()+percentText, percent, details})
 	}
 
 	function buildProgressText(): string {
-		const currentBoxText = currentBox ? `, currently '${coreUtil.removeStartFromPath(startBox.getSrcPath(), currentBox.getSrcPath())}'` : '' // TODO: reduce width changes of progressBar
-		return `bundling links: box ${processedBoxCount} of ${boxCount}${currentBoxText}, processed ${processedLinkCount} links`
+		return `bundling links: box ${processedBoxCount} of ${boxCount}, processed ${processedLinkCount} links`
 	}
 }

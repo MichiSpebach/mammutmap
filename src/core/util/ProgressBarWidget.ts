@@ -11,6 +11,7 @@ export class ProgressBarWidget /*extends Widget*/ {
 			bottom: 'calc(15% + 8px)', 
 			left: '50%', 
 			transform: 'translateX(-50%)',
+			width: '25%'
 		}))
 		return widget
 	}
@@ -27,25 +28,26 @@ export class ProgressBarWidget /*extends Widget*/ {
 		return {
 			type: 'div',
 			id: this.id,
-			style: {
-				backgroundColor: '#0808',
-				padding: '4px',
-				borderRadius: '4px',
-				...additionalStyle
-			}
+			style: additionalStyle
 		}
 	}
 
-	public async set(options: {text: string, percent?: number}): Promise<void> {
+	public async set(options: {text: string, percent?: number, details?: string}): Promise<void> {
+		if (options.details) {
+			return renderManager.setElementsTo(this.id, [this.shapeBar(options), {
+				type: 'div',
+				style: {fontSize: 'small'},
+				children: options.details
+			}])
+		} else {
+			return renderManager.setElementsTo(this.id, this.shapeBar(options))
+		}
+	}
+
+	private shapeBar(options: {text: string, percent?: number}): RenderElement {
+		const children: RenderElement[] = []
 		if (options.percent) {
-			const textElement: RenderElement = {
-				type: 'span',
-				children: options.text,
-				style: {
-					position: 'relative'
-				}
-			}
-			const percentElement: RenderElement = {
+			children.push({
 				type: 'div',
 				style: {
 					position: 'absolute',
@@ -54,12 +56,27 @@ export class ProgressBarWidget /*extends Widget*/ {
 					backgroundColor: 'steelBlue',
 					top: '0px',
 					left: '0px',
-					borderRadius: '4px',
+					borderRadius: '4px'
 				}
+			})
+		}
+		children.push({
+			type: 'span',
+			children: options.text,
+			style: {
+				position: 'relative'
 			}
-			return renderManager.setElementsTo(this.id, [percentElement, textElement])
-		} else {
-			return renderManager.setElementsTo(this.id, options.text)
+		})
+
+		return {
+			type: 'div',
+			style: {
+				position: 'relative',
+				backgroundColor: '#0808',
+				padding: '4px',
+				borderRadius: '4px'
+			},
+			children
 		}
 	}
 
