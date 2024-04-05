@@ -50,14 +50,13 @@ async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
 }
 
 export async function openChanges(changedFile: ChangedFile): Promise<void> {
-    let refs: string = selectedRefs.at(0)!.substring(0, 8)
+    let refs: string = `${selectedRefs.at(0)!.substring(0, 8)}`
     if (selectedRefs.length > 1) {
-        refs += ' ' + selectedRefs.at(-1)?.substring(0, 8)
-    } else {
-        refs = refs + '^ ' + refs
+        refs = `"${refs}" "${selectedRefs.at(-1)?.substring(0, 8)}~1"`
     }
-    const command: string =// `git config diff.tool default-difftool & ` +
-        // `git config difftool.default-difftool.cmd 'code --wait --diff $LOCAL $REMOTE' & ` +
+
+    const command: string = `git config diff.tool default-difftool & ` +
+        `git config difftool.default-difftool.cmd "code --wait --diff $LOCAL $REMOTE" & ` +
         `git difftool --no-prompt ${refs} -- ${changedFile.absolutePath}`
     environment.runShellCommand(command, {cwd: getRootFolder().getSrcPath()})
 }
