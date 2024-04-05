@@ -19,7 +19,7 @@ contextMenu.addLinkNodeMenuItem((node: NodeWidget) => new MenuItemFile({label: '
 
 Box.Sidebar.BasicToolkit.add({
 	topic: 'links',
-	indexWithinTopic: 1,
+	indexWithinTopic: 2,
 	build: (box: Box) => Box.Sidebar.BasicToolkit.buildButton('bundle links...', () => dialog.openDialogForBundleLinks(box))
 })
 

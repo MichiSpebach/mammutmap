@@ -1,103 +1,152 @@
-import { Box, BoxDepthTreeIterator, FolderBox, Link, MenuItem, MenuItemFile, MenuItemFolder, PopupWidget, ProgressBarWidget, RenderElement, contextMenu } from '../dist/pluginFacade'
+import { Box, BoxDepthTreeIterator, FolderBox, Link, MenuItemFile, PopupWidget, ProgressBarWidget, RenderElement, contextMenu, coreUtil, renderManager } from '../dist/pluginFacade'
 
-contextMenu.addFileBoxMenuItem(buildItemsForContextMenu)
-contextMenu.addFolderBoxMenuItem(buildItemsForContextMenu)
-contextMenu.addSourcelessBoxMenuItem(buildItemsForContextMenu)
+contextMenu.addFileBoxMenuItem(buildItemForContextMenu)
+contextMenu.addFolderBoxMenuItem(buildItemForContextMenu)
+contextMenu.addSourcelessBoxMenuItem(buildItemForContextMenu)
 
-Box.Sidebar.BasicToolkit.addGroup({
-	title: 'Remove Outgoing Links',
-	color: 'red',
-	item: {
-		topic: 'links',
-		indexWithinTopic: 2,
-		build: buildElementsForBoxSidebar
-	}
+Box.Sidebar.BasicToolkit.add({
+	topic: 'links',
+	indexWithinTopic: 3,
+	build: (box: Box) => Box.Sidebar.BasicToolkit.buildButton('remove links...', () => openDialogForRemoveLinks(box))
 })
 
-function buildItemsForContextMenu(box: Box): MenuItemFolder {
-	const suffixIfFolder: string = box instanceof FolderBox ? ' of this folder' : ''
-	const items: MenuItem[] = [
-		new MenuItemFile({label: 'autoMaintained'+suffixIfFolder, click: () => {
-			box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
-		}}),
-		new MenuItemFile({label: 'all'+suffixIfFolder, click: () => {
-			box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
-		}}),
-	]
-	if (box instanceof FolderBox) {
-		items.push(new MenuItemFile({label: 'autoMaintained recursively...', click: () => {
-			openDialogForRemoveOutgoingLinksRecursively(box, 'AutoMaintained')
-		}}))
-		items.push(new MenuItemFile({label: 'all recursively...', click: () => {
-			openDialogForRemoveOutgoingLinksRecursively(box, 'All')
-		}}))
-	}
-	return new MenuItemFolder({label: 'remove outgoing links', submenu: items})
+function buildItemForContextMenu(box: Box): MenuItemFile {
+	return new MenuItemFile({label: 'remove links...', click: () => openDialogForRemoveLinks(box)})
 }
 
-function buildElementsForBoxSidebar(box: Box): (string|RenderElement)[] {
-	const suffixIfFolder: string = box instanceof FolderBox ? ' of this folder' : ''
-	const elements: (string|RenderElement)[] = []
-	elements.push(Box.Sidebar.BasicToolkit.buildButton('autoMaintained'+suffixIfFolder, 
-		() => box.borderingLinks.getOutgoing().filter(link => link.isAutoMaintained()).forEach(link => link.getManagingBoxLinks().removeLink(link))
-	))
-	elements.push(Box.Sidebar.BasicToolkit.buildButton('all'+suffixIfFolder, 
-		() => box.borderingLinks.getOutgoing().forEach(link => link.getManagingBoxLinks().removeLink(link))
-	))
-	if (box instanceof FolderBox) {
-		elements.push(Box.Sidebar.BasicToolkit.buildButton('autoMaintained recursively...', () => openDialogForRemoveOutgoingLinksRecursively(box, 'AutoMaintained')))
-		elements.push(Box.Sidebar.BasicToolkit.buildButton('all recursively...', () => openDialogForRemoveOutgoingLinksRecursively(box, 'All')))
-	}
-	return elements
-}
-
-async function openDialogForRemoveOutgoingLinksRecursively(folder: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
-	const popup: PopupWidget = await PopupWidget.newAndRender({title: `Remove ${mode} Outgoing Links Recursively`, content: [
+async function openDialogForRemoveLinks(box: Box): Promise<void> {
+	const modeGroupId: string = coreUtil.generateId()
+	const modeAllId: string = coreUtil.generateId()
+	const modeAutoMaintainedId: string = coreUtil.generateId()
+	const managedLinksId: string = coreUtil.generateId()
+	const outgoingLinksId: string = coreUtil.generateId()
+	const recursivelyId: string = coreUtil.generateId()
+	const pathsToIgnoreId: string = coreUtil.generateId()
+	const content: RenderElement[] = [
 		{
 			type: 'div',
-			style: {marginTop: '4px', marginBottom: '4px'},
-			children: 'Are you sure? This may take a while (depending on how many files there are).'},
+			innerHTML: `<input type="radio" id="${modeAutoMaintainedId}" name="${modeGroupId}" checked><label for="${modeAutoMaintainedId}">autoMaintained</label>`
+		},
 		{
-			type: 'button',
-			children: 'Yes',
-			onclick: () => {
-				removeOutgoingLinksRecursively(folder, mode)
-				popup.unrender()
-			}
+			type: 'div',
+			innerHTML: `<input type="radio" id="${modeAllId}" name="${modeGroupId}"><label for="${modeAllId}">all</label>`
+		},
+		{
+			type: 'div',
+			innerHTML: `<input type="checkbox" id="${outgoingLinksId}" checked><label for="${outgoingLinksId}">outgoing</label>`
+		},
+		{
+			type: 'div',
+			style: {marginTop: '4px'},
+			innerHTML: `<input type="checkbox" id="${managedLinksId}" checked><label for="${managedLinksId}">managed</label>`
 		}
-	]})
+	]
+	const boxIsFolder: boolean = box instanceof FolderBox
+	if (boxIsFolder) {
+		content.push(
+			{
+				type: 'div',
+				style: {marginTop: '4px'},
+				innerHTML: `<input type="checkbox" id="${recursivelyId}"><label for="${recursivelyId}">recursively (This may take a while, depending on how many files there are)</label>`
+			},
+			{
+				type: 'div',
+				style: {display: 'flex'},
+				children: [
+					{
+						type: 'span',
+						children: 'if recursively, paths to ignore: '
+					},
+					{
+						type: 'input',
+						id: pathsToIgnoreId,
+						style: {flexGrow: '1', marginLeft: '4px'},
+						value: 'map, .git, node_modules, venv, .venv, .mvn, target, dist, out'
+					}
+				]
+			}
+		)
+	}
+	content.push({
+		type: 'button',
+		style: {marginTop: '4px'},
+		children: 'Remove',
+		onclick: async () => {
+			removeLinks(box, await promiseAllOfObject({
+				mode: renderManager.getCheckedOf(modeAllId).then(modeAllChecked => modeAllChecked ? 'all' : 'autoMaintained'), 
+				outgoing: renderManager.getCheckedOf(outgoingLinksId),
+				managed: renderManager.getCheckedOf(managedLinksId),
+				recursively: boxIsFolder ? renderManager.getCheckedOf(recursivelyId) : false,
+				pathsToIgnoreIfRecursively: boxIsFolder ? renderManager.getValueOf(pathsToIgnoreId).then(pathsToIgnore => pathsToIgnore.split(',').map(path => path.trim())) : []
+			}))
+			popup.unrender()
+		}
+	})
+	const popup: PopupWidget = await PopupWidget.newAndRender({title: `Remove Links of '${box.getName()}'`, content})
 }
 
-async function removeOutgoingLinksRecursively(box: FolderBox, mode: 'All'|'AutoMaintained'): Promise<void> {
-	console.log(`Start removing ${mode} outgoing links recursively of '${box.getSrcPath()}'...`)
+// add to coreUtil?
+export async function promiseAllOfObject<T extends Object>(obj: T): Promise<{
+	[key in keyof T]: Awaited<T[key]>
+}> {
+	const entries = Object.entries(obj).map(async ([key, value]) => [key, await value])
+	return Object.fromEntries(await Promise.all(entries))
+}
+
+async function removeLinks(startBox: Box, options: {
+	mode: 'all'|'autoMaintained'
+	outgoing: boolean
+	managed: boolean
+	recursively: boolean
+	pathsToIgnoreIfRecursively: string[]
+}): Promise<void> {
+	console.info(`Start removing links of '${startBox.getSrcPath()}' with options '${JSON.stringify(options)}'...`)
 	const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
-	const boxIterator = new BoxDepthTreeIterator(box)
-	let fileCount: number = 0
+	let processedBoxCount: number = 0
 	let foundLinksCount: number = 0
 	let removedLinksCount: number = 0
 	const pros: Promise<void>[] = []
 
-	while(await boxIterator.hasNextOrUnwatch()) {
-		const box: Box = await boxIterator.next()
-		fileCount++
-		let links: Link[] = box.borderingLinks.getOutgoing()
-		foundLinksCount += links.length
-		progressBar.set({text: buildProgressText()})
-		if (mode === 'AutoMaintained') {
-			links = links.filter(link => link.isAutoMaintained())
-		}
-		pros.push(...links.map(async link => {
-			await link.getManagingBoxLinks().removeLink(link)
-			removedLinksCount++
-			progressBar.set({text: buildProgressText()})
-		}))
+	if (options.outgoing) {
+		pros.push(removeLinksRegardingOptions(startBox.borderingLinks.getOutgoing(), 0.5))
 	}
-	
+	if (options.managed) {
+		pros.push(removeLinksRegardingOptions(startBox.links.getLinks(), 0.5))
+	}
+	if (options.recursively && startBox instanceof FolderBox) {
+		const boxIterator = new BoxDepthTreeIterator(startBox, {srcPathsToIgnore: options.pathsToIgnoreIfRecursively})
+		while(await boxIterator.hasNextOrUnwatch()) {
+			const nextBox: Box = await boxIterator.next()
+			if (nextBox === startBox) {
+				continue
+			}
+			pros.push(removeLinksRegardingOptions(nextBox.links.getLinks(), 1))
+			
+		}
+	}
+
 	await Promise.all(pros)
 	await progressBar.finishAndRemove()
 	console.log(`Finished ${buildProgressText()}.`)
 
+	async function removeLinksRegardingOptions(links: Link[], boxCount: number): Promise<void> {
+		foundLinksCount += links.length
+		progressBar.set({text: buildProgressText()})
+		await Promise.all(links.map(removeLinkRegardingOptions))
+		processedBoxCount += boxCount
+		progressBar.set({text: buildProgressText()})
+	}
+
+	async function removeLinkRegardingOptions(link: Link): Promise<void> {
+		if (options.mode !== 'all' && !link.isAutoMaintained()) {
+			return
+		}
+		await link.getManagingBoxLinks().removeLink(link)
+		removedLinksCount++
+		progressBar.set({text: buildProgressText()})
+	}
+
 	function buildProgressText(): string {
-		return `removing ${mode} outgoing links recursively: analyzed ${fileCount} files, found ${foundLinksCount} links, removed ${removedLinksCount} of them`
+		return `removing links: analyzed ${processedBoxCount} boxes, found ${foundLinksCount} links, removed ${removedLinksCount} of them`
 	}
 }

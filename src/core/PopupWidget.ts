@@ -17,7 +17,7 @@ export abstract class PopupWidget extends Widget {
     public static async newAndRender(options: {title: string, content: RenderElements, onClose?: () => void}): Promise<PopupWidget> {
         const widget: PopupWidget = new class extends PopupWidget {
             public constructor() {
-                super(options.title+util.generateId(), options.title, options.onClose)
+                super(options.title.replaceAll("'", '')+util.generateId(), options.title, options.onClose)
             }
             protected override formContent(): RenderElements {
                 return options.content

@@ -3,7 +3,7 @@ import * as boxIterator from './boxIterator'
 
 export async function openDialogForBundleLinks(box: Box): Promise<void> {
 	const modeGroupId: string = coreUtil.generateId()
-	const modeAutoMaintained: string = coreUtil.generateId()
+	const modeAutoMaintainedId: string = coreUtil.generateId()
 	const modeAllId: string = coreUtil.generateId()
 	const borderingLinksId: string = coreUtil.generateId()
 	const managedLinksId: string = coreUtil.generateId()
@@ -12,11 +12,11 @@ export async function openDialogForBundleLinks(box: Box): Promise<void> {
 	const content: RenderElement[] = [
 		{
 			type: 'div',
-			innerHTML: `<input type="radio" id="${modeAutoMaintained}" name="${modeGroupId}" checked><label for="${modeAutoMaintained}">autoMaintained</label>`
+			innerHTML: `<input type="radio" id="${modeAutoMaintainedId}" name="${modeGroupId}" checked><label for="${modeAutoMaintainedId}">autoMaintained</label>`
 		},
 		{
 			type: 'div',
-			innerHTML: `<input type="radio" id="${modeAllId}" name="${modeGroupId}" ><label for="${modeAllId}">all</label>`
+			innerHTML: `<input type="radio" id="${modeAllId}" name="${modeGroupId}"><label for="${modeAllId}">all</label>`
 		},
 		{
 			type: 'div',
@@ -69,9 +69,10 @@ export async function openDialogForBundleLinks(box: Box): Promise<void> {
 			popup.unrender()
 		}
 	})
-	const popup: PopupWidget = await PopupWidget.newAndRender({title: 'Bundle Links', content})
+	const popup: PopupWidget = await PopupWidget.newAndRender({title: `Bundle Links of '${box.getName()}'`, content})
 }
 
+// add to coreUtil?
 export async function promiseAllOfObject<T extends Object>(obj: T): Promise<{
 	[key in keyof T]: Awaited<T[key]>
 }> {
