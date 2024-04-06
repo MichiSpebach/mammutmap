@@ -132,6 +132,7 @@ async function removeLinks(startBox: Box, options: {
 	async function removeLinksRegardingOptions(links: Link[], boxCount: number): Promise<void> {
 		foundLinksCount += links.length
 		progressBar.set({text: buildProgressText()})
+		links = [...links] // copy array because concurrently removing elements while iterating over it would lead to skips (Array::map() is index based)
 		await Promise.all(links.map(removeLinkRegardingOptions))
 		processedBoxCount += boxCount
 		progressBar.set({text: buildProgressText()})
