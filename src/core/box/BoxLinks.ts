@@ -286,6 +286,7 @@ export class BoxLinks extends Widget {
       })
     }
 
+    /** @deprecated TODO: implement iterate() method instead that handles removing and adding elements */
     public getLinks(): Link[] {
       return this.links
     }

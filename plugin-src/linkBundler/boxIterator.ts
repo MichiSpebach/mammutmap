@@ -68,7 +68,7 @@ export async function bundleLinks(startBox: Box, options: {
 	}
 
 	async function bundleLinksSequentially(links: Link[]): Promise<void> {
-		for (const link of links) {
+		for (const link of [...links]) { // copy array because concurrently removing elements while iterating over it would lead to skips
 			await bundleLink(link)
 		}
 	}
