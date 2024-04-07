@@ -12,6 +12,6 @@ export interface ChildProcess { // subset of child_process.ChildProcess
 
 export interface EnvironmentAdapter {
     getEnvironmentName(): 'electron'|'browser'|'vscode'
-    runShellCommand(command: string, options: unknown): ChildProcess
+    runShellCommand(command: string, options?: { currentWorkingDirectory?: string }): ChildProcess
     openFile(path: string): void
 }

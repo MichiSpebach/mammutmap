@@ -43,7 +43,7 @@ export class WizardWidget extends PopupWidget {
         let process: NodeChildProcess
         try {
             // todo: pass cwd: getRootFolder().getSrcPath() as option?
-            process = environment.runShellCommand(command, {}) as NodeChildProcess
+            process = environment.runShellCommand(command) as NodeChildProcess
         } catch (e: any) {
             await renderManager.addContentTo(this.outputId, 'Error: '+coreUtil.escapeForHtml(e.toString()))
             return

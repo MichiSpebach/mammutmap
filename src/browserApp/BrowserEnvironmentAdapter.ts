@@ -10,7 +10,7 @@ export class BrowserEnvironmentAdapter implements EnvironmentAdapter {
 		return 'browser'
 	}
 
-	public runShellCommand(command: string, options: unknown): ChildProcess {
+	public runShellCommand(command: string, options?: { currentWorkingDirectory?: string }): ChildProcess {
 		throw new Error('Method not implemented.');
 	}
 
