@@ -142,7 +142,7 @@ async function removeLinks(startBox: Box, options: {
 		if (options.mode !== 'all' && !link.isAutoMaintained()) {
 			return
 		}
-		await link.getManagingBoxLinks().removeLink(link)
+		await link.getManagingBoxLinks().removeLink(link, 'remove')
 		removedLinksCount++
 		progressBar.set({text: buildProgressText()})
 	}

@@ -12,6 +12,7 @@ import { log } from '../logService'
 import { LocalPosition } from '../shape/LocalPosition'
 import { ClientPosition } from '../shape/ClientPosition'
 import { NodeData } from '../mapData/NodeData'
+import { BoxWatcher } from './BoxWatcher'
 
 export class BoxLinks extends Widget {
     private readonly referenceBox: Box
@@ -151,10 +152,15 @@ export class BoxLinks extends Widget {
       return {insertedNode, addedLink}
     }
 
-    public async removeLink(link: Link): Promise<void> {
+    public async removeLink(link: Link, unconnectedKnotsMode: 'remove'|'ignore' = 'ignore'): Promise<void> {
       if (!this.links.includes(link)) {
         util.logWarning('trying to remove link from box "'+this.referenceBox.getName()+'" that is not managed by that box')
         return
+      }
+      
+      let targetsToMaybeRemove: {node: AbstractNodeWidget, watcher: BoxWatcher}[] | undefined
+      if (unconnectedKnotsMode === 'remove') {
+        targetsToMaybeRemove = await Promise.all([link.from.getTargetAndRenderIfNecessary(), link.to.getTargetAndRenderIfNecessary()])
       }
 
       this.links.splice(this.links.indexOf(link), 1) // before unrender() and removePlaceholderFor(link) to prevent rerender TODO: introduce 'mounted: boolean' or 'destructed: boolean' in Link instead?
@@ -166,7 +172,22 @@ export class BoxLinks extends Widget {
         pros.push(this.removePlaceholderFor(link)) // TODO possible racecondition with (un)render(), use this.renderScheduler somehow to solve racecondition
       }
       pros.push(this.referenceBox.saveMapData())
+      
+      if (targetsToMaybeRemove) {
+        pros.push(...targetsToMaybeRemove.map(removeTargetIfKnotAndUnconnected))
+      }
       await Promise.all(pros)
+
+      async function removeTargetIfKnotAndUnconnected(target: {node: AbstractNodeWidget, watcher: BoxWatcher}): Promise<void> {
+        if (
+          target.node instanceof NodeWidget && 
+          target.node.borderingLinks.getAll().length < 1 && 
+          target.node.getParent().nodes.getNodeById(target.node.getId()) // otherwise knot was already removed in meanwhile
+        ) {
+          await target.node.getParent().nodes.remove(target.node, {mode: 'reorder bordering links'})
+        }
+        await target.watcher.unwatch()
+      }
     }
 
     public async render(): Promise<void> { await this.renderScheduler.schedule(async () => {
