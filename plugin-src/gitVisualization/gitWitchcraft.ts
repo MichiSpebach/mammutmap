@@ -65,7 +65,14 @@ export async function openChanges(changedFile: ChangedFile): Promise<void> {
         refsForGitDiffTool = `"${refsForGitDiffTool}" "${refsForGitDiffTool}^"`
     }
 
-    const cwd = getRootFolder().getSrcPath();
+    const cwd: string = getRootFolder().getSrcPath()
+    configureGitDifftoolIfNotSet(cwd)
+
+    const gitDiffCommand: string = `git difftool --no-prompt ${refsForGitDiffTool} -- ${changedFile.absolutePath}`
+    environment.runShellCommand(gitDiffCommand, {cwd: cwd})
+}
+
+function configureGitDifftoolIfNotSet(cwd: string) {
     const process: ChildProcess = environment.runShellCommand(
         `git config --includes diff.tool`, {cwd: cwd})
     process.on('exit', (code: number) => {
@@ -76,7 +83,4 @@ export async function openChanges(changedFile: ChangedFile): Promise<void> {
                 {cwd: cwd})
         }
     })
-
-    const gitDiffCommand: string = `git difftool --no-prompt ${refsForGitDiffTool} -- ${changedFile.absolutePath}`
-    environment.runShellCommand(gitDiffCommand, {cwd: cwd})
 }
