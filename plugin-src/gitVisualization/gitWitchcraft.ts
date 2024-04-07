@@ -1,7 +1,6 @@
-import {Box, environment, getMapOrError, getRootFolder, Map, RootFolderBox} from '../../dist/pluginFacade'
+import {Box, environment, getMapOrError, getRootFolder, Map, RootFolderBox, fileSystem} from '../../dist/pluginFacade'
 import {ChangedFile, Commit} from './GitClient'
 import {highlightBoxes} from './boxHighlighting'
-import {existsSync} from 'fs'
 
 let selectedRefs: string[] = []
 
@@ -40,11 +39,11 @@ export async function visualizeChangedFiles(changedFiles: ChangedFile[], isZoomi
 
 async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
     const rootFolder: RootFolderBox = getRootFolder()
-    const renderedBoxes: Box[] = absoluteFilePaths.map(path => {
-        if (existsSync(path)) {
+    const renderedBoxes: Box[] = absoluteFilePaths.map(async (path) => {
+        if (await fileSystem.doesDirentExist(path)) {
             return rootFolder.getRenderedBoxesInPath(path).at(-1)
         }
-    }).filter(box => box) as Box[]
+    }).filter(box => box) as unknown as Box[]
     const map: Map = getMapOrError()
     await map.zoomToFitBoxes(renderedBoxes)
 }
