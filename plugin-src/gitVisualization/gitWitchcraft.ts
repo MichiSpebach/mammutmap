@@ -1,11 +1,20 @@
-import {Box, environment, getMapOrError, getRootFolder, Map, RootFolderBox, fileSystem} from '../../dist/pluginFacade'
+import {
+    Box,
+    ChildProcess,
+    environment,
+    fileSystem,
+    getMapOrError,
+    getRootFolder,
+    Map,
+    RootFolderBox
+} from '../../dist/pluginFacade'
 import {ChangedFile, Commit} from './GitClient'
 import {highlightBoxes} from './boxHighlighting'
 
 let selectedRefs: string[] = []
 
 export async function visualizeChanges(commits: Commit[], uncommittedChanges: ChangedFile[], isZoomingEnabled: boolean): Promise<void> {
-    selectedRefs = commits.map(commit => commit.hash)
+    selectedRefs = commits.map(commit => commit.hash.substring(0, 8))
     if (uncommittedChanges.length > 0) {
         selectedRefs = ['HEAD', ...selectedRefs]
     }
@@ -49,15 +58,25 @@ async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
 }
 
 export async function openChanges(changedFile: ChangedFile): Promise<void> {
-    let refs: string = `${selectedRefs.at(0)!.substring(0, 8)}`
+    let refsForGitDiffTool: string = selectedRefs.at(0)!
     if (selectedRefs.length > 1) {
-        refs = `"${refs}" "${selectedRefs.at(-1)?.substring(0, 8)}^"`
-    } else if (refs !== 'HEAD') {
-        refs = `"${refs}" "${refs}^"`
+        refsForGitDiffTool = `"${refsForGitDiffTool}" "${selectedRefs.at(-1)}^"`
+    } else if (refsForGitDiffTool !== 'HEAD') {
+        refsForGitDiffTool = `"${refsForGitDiffTool}" "${refsForGitDiffTool}^"`
     }
 
-    const command: string = `git config diff.tool default-difftool & ` +
-        `git config difftool.default-difftool.cmd "code --wait --diff $LOCAL $REMOTE" & ` +
-        `git difftool --no-prompt ${refs} -- ${changedFile.absolutePath}`
-    environment.runShellCommand(command, {cwd: getRootFolder().getSrcPath()})
+    const cwd = getRootFolder().getSrcPath();
+    const process: ChildProcess = environment.runShellCommand(
+        `git config --includes diff.tool`, {cwd: cwd})
+    process.on('exit', (code: number) => {
+        if (code !== 0) {
+            console.log('Setting up VSCode as default difftool for git. You can change the difftool in .git/config.')
+            environment.runShellCommand(`git config --global diff.tool default-difftool & ` +
+                `git config --global difftool.default-difftool.cmd "code --wait --diff $LOCAL $REMOTE"`,
+                {cwd: cwd})
+        }
+    })
+
+    const gitDiffCommand: string = `git difftool --no-prompt ${refsForGitDiffTool} -- ${changedFile.absolutePath}`
+    environment.runShellCommand(gitDiffCommand, {cwd: cwd})
 }

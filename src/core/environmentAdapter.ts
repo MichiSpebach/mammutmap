@@ -6,7 +6,8 @@ export function init(implementation: EnvironmentAdapter): void {
 }
 
 export interface ChildProcess { // subset of child_process.ChildProcess
-    // TODO: add some stuff like in child_process.ChildProcess
+    on(event: 'exit', listener: (code: number) => void): this;
+    // TODO: add more stuff like in child_process.ChildProcess
 }
 
 export interface EnvironmentAdapter {
