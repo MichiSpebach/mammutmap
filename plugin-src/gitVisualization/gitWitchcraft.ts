@@ -51,7 +51,9 @@ async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
 export async function openChanges(changedFile: ChangedFile): Promise<void> {
     let refs: string = `${selectedRefs.at(0)!.substring(0, 8)}`
     if (selectedRefs.length > 1) {
-        refs = `"${refs}" "${selectedRefs.at(-1)?.substring(0, 8)}~1"`
+        refs = `"${refs}" "${selectedRefs.at(-1)?.substring(0, 8)}^"`
+    } else if (refs !== 'HEAD') {
+        refs = `"${refs}" "${refs}^"`
     }
 
     const command: string = `git config diff.tool default-difftool & ` +
