@@ -39,11 +39,11 @@ export async function visualizeChangedFiles(changedFiles: ChangedFile[], isZoomi
 
 async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
     const rootFolder: RootFolderBox = getRootFolder()
-    const renderedBoxes: Box[] = absoluteFilePaths.map(async (path) => {
-        if (await fileSystem.doesDirentExist(path)) {
-            return rootFolder.getRenderedBoxesInPath(path).at(-1)
-        }
-    }).filter(box => box) as unknown as Box[]
+    const pathsOfExistingFiles = absoluteFilePaths.filter(async path =>
+        await fileSystem.doesDirentExist(path))
+    const renderedBoxes: Box[] = pathsOfExistingFiles.map(path => {
+        return rootFolder.getRenderedBoxesInPath(path).at(-1)
+    }).filter(box => box) as Box[]
     const map: Map = getMapOrError()
     await map.zoomToFitBoxes(renderedBoxes)
 }

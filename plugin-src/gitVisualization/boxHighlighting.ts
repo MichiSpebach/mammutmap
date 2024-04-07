@@ -104,20 +104,25 @@ async function removeCurrentHighlighting(box: Box): Promise<void> {
 }
 
 async function addOpenChangesButton(box: FileBox, changedFile: ChangedFile): Promise<void> {
+    const buttonId: string = `${box.getId()}-openChangesButton`
     await renderManager.addElementTo(`${box.header.getId()}Inner`, {
         type: 'button',
         children: 'Open Changes',
-        id: box.getId() + '-openChangesButton',
+        id: buttonId,
         title: 'Uses git difftool: https://git-scm.com/docs/git-difftool\\n' +
             'Make sure you have it configured, e.g. for VSCode:\\n' +
             '[diff]\\n' +
             '    tool = default-difftool\\n' +
             '[difftool \\"default-difftool\\"]\\n' +
             '    cmd = code --wait --diff \\$LOCAL \\$REMOTE',
-        style: {float: 'right', marginRight: '5px', marginTop: '2px'},
+        style: {float: 'right', marginRight: '5px', marginTop: '2px', cursor: 'pointer'},
         onclick: () => {
             openChanges(changedFile)
         }
+    })
+    await renderManager.addEventListenerTo(buttonId, 'mousedown', () => {
+    })
+    await renderManager.addEventListenerTo(buttonId, 'mouseup', () => {
     })
 }
 
