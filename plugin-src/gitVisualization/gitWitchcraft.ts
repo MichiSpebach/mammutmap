@@ -39,8 +39,10 @@ export async function visualizeChangedFiles(changedFiles: ChangedFile[], isZoomi
 
 async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
 	const rootFolder: RootFolderBox = getRootFolder()
+	// TODO: Implement doesFileExist in fileSystem
 	const pathsOfExistingFiles = absoluteFilePaths.filter(async path =>
-		await fileSystem.doesDirentExist(path))
+		await fileSystem.doesDirentExistAndIsFile(path))
+	console.log(pathsOfExistingFiles)
 	const renderedBoxes: Box[] = pathsOfExistingFiles.map(path => {
 		return rootFolder.getRenderedBoxesInPath(path).at(-1)
 	}).filter(box => box) as Box[]
@@ -57,7 +59,8 @@ export async function openChanges(changedFile: ChangedFile): Promise<void> {
 	}
 
 	const currentWorkingDirectory: string = getRootFolder().getSrcPath()
-	// race condition between storing configuration and running gitDiffCommand might occur
+
+	// race condition between storing config and running gitDiffCommand might occur
 	configureGitDifftoolIfNotSet(currentWorkingDirectory)
 
 	const gitDiffCommand: string = `git difftool --no-prompt ${refsForGitDiffTool} -- ${changedFile.absolutePath}`

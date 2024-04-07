@@ -1,7 +1,7 @@
-import {Box, FileBox, getRootFolder, renderManager} from '../../dist/pluginFacade'
-import {isSubPathOrEqual} from './pathUtil'
-import {ChangedFile} from './GitClient'
-import {openChanges} from "./gitWitchcraft";
+import { Box, FileBox, getRootFolder, renderManager } from '../../dist/pluginFacade'
+import { isSubPathOrEqual } from './pathUtil'
+import { ChangedFile } from './GitClient'
+import { openChanges } from "./gitWitchcraft";
 
 let isInitialized: boolean = false
 let currentFiles: ChangedFile[] = []
@@ -10,7 +10,7 @@ let forceRestyle: boolean = false
 
 const ADDITION_COLOR = 'lime'
 const DELETION_COLOR = 'red'
-const BORDER_WIDTH = '4.2px'
+const BORDER_WIDTH = '5px'
 
 function getFilesForBox(box: Box, files: ChangedFile[]): ChangedFile[] {
 	return files.filter(file => isSubPathOrEqual(file.absolutePath, box.getSrcPath()))
