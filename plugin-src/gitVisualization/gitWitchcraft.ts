@@ -39,9 +39,12 @@ export async function visualizeChangedFiles(changedFiles: ChangedFile[], isZoomi
 
 async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
 	const rootFolder: RootFolderBox = getRootFolder()
-	// TODO: Implement doesFileExist in fileSystem
-	const pathsOfExistingFiles = absoluteFilePaths.filter(async path =>
-		await fileSystem.doesDirentExistAndIsFile(path))
+	const pathsOfExistingFiles: string[] = []
+	await Promise.all(absoluteFilePaths.map(async path => {
+		if (await fileSystem.doesDirentExist(path)) {
+			pathsOfExistingFiles.push(path)
+		}
+	}))
 	console.log(pathsOfExistingFiles)
 	const renderedBoxes: Box[] = pathsOfExistingFiles.map(path => {
 		return rootFolder.getRenderedBoxesInPath(path).at(-1)
