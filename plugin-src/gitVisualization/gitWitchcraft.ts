@@ -45,7 +45,6 @@ async function zoomToChanges(absoluteFilePaths: string[]): Promise<void> {
 			pathsOfExistingFiles.push(path)
 		}
 	}))
-	console.log(pathsOfExistingFiles)
 	const renderedBoxes: Box[] = pathsOfExistingFiles.map(path => {
 		return rootFolder.getRenderedBoxesInPath(path).at(-1)
 	}).filter(box => box) as Box[]
