@@ -1,4 +1,3 @@
-import { environment, ChildProcess } from '../environmentAdapter'
 import { renderManager, RenderPriority } from '../RenderManager'
 import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
@@ -10,10 +9,6 @@ class Util {
   public readonly githubProjectAddress: string = 'https://github.com/MichiSpebach/mammutmap'
   public readonly pluginTutorialAddress: string = this.githubProjectAddress+'/blob/main/pluginTutorial.md'
   public readonly vscodeMarketplaceAddress: string = 'https://marketplace.visualstudio.com/items?itemName=mammutmap.mammutmap'
-
-  public runShellCommand(command: string): ChildProcess {
-    return environment.runShellCommand(command)
-  }
 
   /** @deprecated use log.debug(..) instead */
   public logDebug(message: string, options?: {allowHtml?: boolean}): void {
@@ -129,7 +124,7 @@ class Util {
 
   public consistsOnlyOfEmptySpaceExcept(line: string, exception: string): boolean {
     let escapedException: string = ''
-    for (let char of exception) {
+    for (const char of exception) {
       if (char === '[' || char === ']') {
         escapedException += '\\'+char
       } else {
@@ -140,7 +135,7 @@ class Util {
   }
 
   public escapeForHtml(text: string): string {
-    var content: string = '';
+    let content: string = '';
     for (let i = 0; i < text.length; i++) {
       // TODO this is maybe very inefficient
       content += this.escapeCharForHtml(text[i])
@@ -313,4 +308,4 @@ class Util {
 
 }
 
-export let util: Util = new Util()
+export const util: Util = new Util()

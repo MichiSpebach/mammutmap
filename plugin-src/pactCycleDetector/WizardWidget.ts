@@ -1,6 +1,4 @@
-import { PopupWidget } from "../../dist/pluginFacade"
-import { renderManager } from "../../dist/pluginFacade"
-import { ChildProcess, coreUtil } from "../../dist/pluginFacade"
+import { environment, PopupWidget, coreUtil, renderManager } from "../../dist/pluginFacade"
 import { ChildProcess as NodeChildProcess } from "child_process"
 import { ResultsWidget } from "./ResultsWidget"
 
@@ -44,7 +42,8 @@ export class WizardWidget extends PopupWidget {
         const command: string = await renderManager.getValueOf(this.commandInputId)
         let process: NodeChildProcess
         try {
-            process = coreUtil.runShellCommand(command) as NodeChildProcess
+            // todo: pass cwd: getRootFolder().getSrcPath() as option?
+            process = environment.runShellCommand(command) as NodeChildProcess
         } catch (e: any) {
             await renderManager.addContentTo(this.outputId, 'Error: '+coreUtil.escapeForHtml(e.toString()))
             return

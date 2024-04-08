@@ -9,13 +9,14 @@ export class ElectronEnvironmentAdapter implements EnvironmentAdapter {
 		return 'electron'
 	}
 
-	public runShellCommand(command: string): ChildProcess {
+	public runShellCommand(command: string, options?: { currentWorkingDirectory?: string }): ChildProcess {
 		log.info(`executing '${command}'`)
-		return exec(command, (error: unknown|null, stdout: string, stderr: string) => {
-			if (error) {
-				log.warning(error.toString())
-			}
-		})
+		return exec(command, {cwd: options?.currentWorkingDirectory},
+			(error: unknown | null, stdout: string, stderr: string) => {
+				if (error) {
+					log.warning(error.toString())
+				}
+			})
 	}
 
 	public openFile(path: string): void {
