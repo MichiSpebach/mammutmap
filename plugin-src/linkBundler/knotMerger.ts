@@ -28,7 +28,7 @@ export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget)
 	
 	const directions: {knotAwayFromCenter: NodeWidget, knotTowardsCenter: NodeWidget, linkTowardsCenter: Link} | undefined = getDirectionsRegardingRouteTree(knot, mergeIntoKnot)
 	if (!directions) {
-		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot}') failed to chooseKnotAwayFromCenter(knot, mergeIntoKnot)`)
+		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot}') failed to getDirectionsRegardingRouteTree(knot, mergeIntoKnot)`)
 		return
 	}
 	const routeTreeSearchDirection: 'from'|'to' = linkBetweenKnots.from.getTargetNodeId() === directions.knotTowardsCenter.getId() ? 'from' : 'to'
@@ -105,20 +105,6 @@ function getLinkTowardsCenter(knot: NodeWidget): Link|undefined {
 		console.warn(`knotMerger::getLinkTowardsCenter(knot: '${knot.getName()}') knot has no bordering links.`)
 	}
 	return linkTowardsCenter
-}
-
-async function prepareRemoveLink(link: Link, routeTreeSearchDirection: 'from'|'to', knotAwayFromCenter: NodeWidget): Promise<void> {
-	const linksAwayFromCenter: Link[] = knotAwayFromCenter.borderingLinks.getAll().filter(borderingLink => borderingLink !== link)
-	const entangledLinks: Link[] = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
-	await Promise.all(entangledLinks.map(async entangledLink => {
-		if (HighlightPropagatingLink.getBundledWithIds(entangledLink).includes(link.getId())) {
-			HighlightPropagatingLink.addBundledWith(entangledLink, linksAwayFromCenter)
-		}
-		HighlightPropagatingLink.removeBundledWithId(entangledLink, link.getId())
-		HighlightPropagatingLink.removeBundledWithId(link, entangledLink.getId())
-		await entangledLink.getManagingBox().saveMapData()
-	}))
-	await link.getManagingBox().saveMapData()
 }
 
 async function moveEntanglementsOfLinkInDirection(link: Link, routeTreeSearchDirection: 'from'|'to', knotInDirection: NodeWidget): Promise<void> {

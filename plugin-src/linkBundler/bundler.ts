@@ -44,7 +44,7 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 	const bundleFromPart: boolean = link.from.getTargetNodeId() !== commonRoute.links.at(0)?.from.getTargetNodeId()
 	const bundleToPart: boolean = link.to.getTargetNodeId() !== commonRoute.links.at(-1)?.to.getTargetNodeId()
 	if (!bundleFromPart && !bundleToPart) {
-		console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) detected duplicate link`)
+		console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) detected duplicate link`) // TODO: should be fixed with new route finder (RouteTree based)
 		return
 	}
 
@@ -214,7 +214,7 @@ async function updateEntangledLinks(
 	if (bundleToPart) {
 		toForkingKnot = toInsertion?.insertedNode?? commonRoute.to
 	} else {
-		const toForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await toLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
+		const toForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await toLink.from.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
 		toForkingKnot = toForkingKnotWithWatcher.node
 	}
 	if (!(toForkingKnot instanceof NodeWidget)) {

@@ -26,6 +26,14 @@ test('bundleLink, nothing to bundle', async () => {
 })
 
 test('bundleLink, insert one node', async () => {
+	await testBundleLinkInsertOneNode({toBoxHasOutgoingLinks: false})
+})
+
+test('bundleLink, insert one node, to box has outgoing links', async () => {
+	await testBundleLinkInsertOneNode({toBoxHasOutgoingLinks: true})
+})
+
+async function testBundleLinkInsertOneNode(options: {toBoxHasOutgoingLinks: boolean}): Promise<void> {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -36,6 +44,9 @@ test('bundleLink, insert one node', async () => {
 	
 	const topLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFile, save: true})
 	const bottomLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFile, save: true})
+	const toBoxOutgoingLinks: Link[]|undefined = options.toBoxHasOutgoingLinks
+		? [await root.links.add({from: rightFile, to: root, save: true}), await root.links.add({from: rightFile, to: root, save: true})]
+		: undefined
 	
 	await linkBundler.bundleLink(topLink)
 
@@ -52,7 +63,10 @@ test('bundleLink, insert one node', async () => {
 	
 	expect(topLink.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['leftFolderTopFile'])
 	expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual([expect.stringContaining('node')])
-})
+	if (toBoxOutgoingLinks) {
+		expect(toBoxOutgoingLinks.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	}
+}
 
 test('bundleLink, insert two nodes', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})

@@ -37,9 +37,8 @@ const deactivateBundleNewLinksItem = new MenuItemFile({label: 'deactivate bundle
 	deactivateBundleNewLinks()
 }})
 
-// ?. because applicationMenu is not initialized for unit tests
-applicationMenu?.addMenuItemTo('linkBundler.js', activateBundleNewLinksItem)
-applicationMenu?.addMenuItemTo('linkBundler.js', deactivateBundleNewLinksItem)
+applicationMenu.addMenuItemTo('linkBundler.js', activateBundleNewLinksItem)
+applicationMenu.addMenuItemTo('linkBundler.js', deactivateBundleNewLinksItem)
 
 function activateBundleNewLinks(): void {
 	if (bundleNewLinksActivated) {
