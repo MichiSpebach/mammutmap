@@ -13,6 +13,7 @@ import { WayPointData } from '../../dist/core/mapData/WayPointData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import { Line } from '../../dist/core/shape/Line'
+import { CommonRoute } from './CommonRoute'
 
 export async function findLongestCommonRoute(link: Link): Promise<{
 	links: Link[]
@@ -31,21 +32,11 @@ export async function findLongestCommonRoute(link: Link): Promise<{
 }
 
 export async function findLongestCommonRouteWithWatchers(link: Link): Promise<{
-	route: {
-		links: Link[]
-		from: AbstractNodeWidget
-		to: AbstractNodeWidget
-		length: number
-	}|undefined
+	route: CommonRoute|undefined
 	deepestBoxInFromPath: BoxWatcher
 	deepestBoxInToPath: BoxWatcher
 }> {
-	const commonRoutes: {
-		links: Link[]
-		from: AbstractNodeWidget
-		to: AbstractNodeWidget
-		length: number
-	}[] = []
+	const commonRoutes: CommonRoute[] = []
 	const deepestBoxInFromPath: BoxWatcher = (await findAndExtendCommonRoutes(link, 'from', commonRoutes)).deepestBoxInPath
 	const deepestBoxInToPath: BoxWatcher = (await findAndExtendCommonRoutes(link, 'to', commonRoutes)).deepestBoxInPath
 
@@ -61,13 +52,17 @@ export async function findLongestCommonRouteWithWatchers(link: Link): Promise<{
 	for (const commonRoute of longestCommonRoutes) {
 		extendCommonRouteEndWithKnot(commonRoute, 'from')
 		extendCommonRouteEndWithKnot(commonRoute, 'to')
-		if (countEndKnotsOfRoute(commonRoute) > countEndKnotsOfRoute(longestCommonRoute)) {
+		if (countEndKnotsOfRoute(commonRoute) > countEndKnotsOfRoute(longestCommonRoute) 
+			//|| endKnotsCount equal && countEndLinkKnotsOfRoute(commonRoute) > countEndLinkKnotsOfRoute(longestCommonRoute) // TODO? would be optimization only
+		) {
 			longestCommonRoute = commonRoute
 		}
 	}
 
 	return {
-		route: longestCommonRoute,
+		route: longestCommonRoute
+			? new CommonRoute(longestCommonRoute.links, longestCommonRoute.from, longestCommonRoute.to, longestCommonRoute.length)
+			: undefined,
 		deepestBoxInFromPath,
 		deepestBoxInToPath
 	}
@@ -76,12 +71,7 @@ export async function findLongestCommonRouteWithWatchers(link: Link): Promise<{
 async function findAndExtendCommonRoutes(
 	link: Link,
 	end: 'from'|'to',
-	commonRoutes: {
-		links: Link[]
-		from: AbstractNodeWidget
-		to: AbstractNodeWidget
-		length: number
-	}[]
+	commonRoutes: CommonRoute[]
 ): Promise<{deepestBoxInPath: BoxWatcher}> {
 	// TODO: refactor this method
 	const managingBox: Box = link.getManagingBox()
@@ -138,18 +128,14 @@ async function findAndExtendCommonRoutes(
 				return false
 			})
 			if (!commonRoute) {
-				commonRoute = {
-					links: [borderingLink],
-					from: newWaypointNode,
-					to: newWaypointNode,
-					length: -1
-				}
+				commonRoute = new CommonRoute([borderingLink], newWaypointNode, newWaypointNode, -1)
 			}
-			const newCommonRoute = {
-				...commonRoute,
-				[end]: newWaypointNode,
-				length: commonRoute.length + 1
-			}
+			const newCommonRoute = new CommonRoute(
+				commonRoute.links,
+				end === 'from' ? newWaypointNode : commonRoute.from,
+				end === 'to' ? newWaypointNode : commonRoute.to,
+				commonRoute.length+1
+			)
 			if (end === 'from' && commonRoute.links.at(0) !== borderingLink) {
 				newCommonRoute.links.unshift(borderingLink)
 			} else if (end === 'to' && commonRoute.links.at(-1) !== borderingLink) {
@@ -238,35 +224,16 @@ function isKnotBetweenLinksDirected(link: Link, followUpLink: Link, knotParent: 
 	return !!knotParent.nodes.getNodeById(linkToEndNodeId)
 }
 
-function extendCommonRouteEndWithKnot(route: {
-	links: Link[]
-	from: AbstractNodeWidget
-	to: AbstractNodeWidget
-}, end: 'from'|'to'): void {
+function extendCommonRouteEndWithKnot(route: CommonRoute, end: 'from'|'to'): void {
 	const endNode: AbstractNodeWidget = route[end]
 	if (!(endNode instanceof Box)) {
 		return
 	}
-	const endLink: Link = getEndLinkOfCommonRoute(route, end)
+	const endLink: Link = route.getEndLink(end)
 	const endKnot: NodeWidget|undefined = getKnotIfLinkEndConnected(endLink, end, endNode)
 	if (endKnot) {
 		route[end] = endKnot
 	}
-}
-
-/** TODO: introduce class 'CommonRoute' with method 'getEndLink(end: 'from'|'to'): Link' */
-export function getEndLinkOfCommonRoute(route: {
-	links: Link[]
-	from: AbstractNodeWidget
-	to: AbstractNodeWidget
-}, end: 'from'|'to'): Link {
-	const endLink: Link|undefined = end === 'from'
-		? route.links.at(0)
-		: route.links.at(-1)
-	if (!endLink) {
-		console.warn(`commonRouteFinder.getEndLinkOfCommonRoute(...) route.links is empty`)
-	}
-	return endLink!
 }
 
 export function getKnotIfLinkEndConnected(link: Link, end: 'from'|'to', knotParent: Box): NodeWidget|undefined {

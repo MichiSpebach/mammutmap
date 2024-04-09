@@ -12,9 +12,20 @@ export class CommonRoute {
 
 	public constructor(
 		public readonly links: Link[],
-		public readonly from: AbstractNodeWidget,
-		public readonly to: AbstractNodeWidget
+		public from: AbstractNodeWidget,
+		public to: AbstractNodeWidget,
+		public readonly length: number
 	) {}
+
+	public getEndLink(end: 'from'|'to'): Link {
+		const endLink: Link|undefined = end === 'from'
+			? this.links.at(0)
+			: this.links.at(-1)
+		if (!endLink) {
+			console.warn(`CommonRoute::getEndLink(end: '${end}') links are empty`)
+		}
+		return endLink!
+	}
 
 	public getEndBox(end: 'from'|'to'): Box {
 		const endNode: AbstractNodeWidget = this[end]

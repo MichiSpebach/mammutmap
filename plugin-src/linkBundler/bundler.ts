@@ -24,7 +24,7 @@ export async function bundleLink(link: Link, options?: {
 
 	if (longestCommonRoute && longestCommonRoute.length > 0) {
 		console.log(`bundle ${link.describe()} between ${longestCommonRoute.from.getName()} and ${longestCommonRoute.to.getName()}.`)
-		await bundleLinkIntoCommonRoute(link, new CommonRoute(longestCommonRoute.links, longestCommonRoute.from, longestCommonRoute.to))
+		await bundleLinkIntoCommonRoute(link, longestCommonRoute)
 	}
 
 	if (options?.unwatchDelayInMs) {
@@ -142,7 +142,7 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) not implemented for commonEndNode instanceof ${commonEndNode.constructor.name}`)
 		return undefined
 	}
-	const commonEndLink: Link = commonRouteFinder.getEndLinkOfCommonRoute(commonRoute, end)
+	const commonEndLink: Link = commonRoute.getEndLink(end)
 	const linkManagingBoxBefore: Box = commonEndLink.getManagingBox()
 	const insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined = await commonEndLink.getManagingBoxLinks().insertNodeIntoLink(
 		commonEndLink,
@@ -165,7 +165,7 @@ function getBundleKnot(commonRoute: CommonRoute, end: 'from'|'to'): NodeWidget|u
 		console.warn(`bundler.getBundleKnot(...) not implemented for commonEndNode instanceof ${commonEndNode.constructor.name}`)
 		return undefined
 	}
-	const commonEndLink: Link = commonRouteFinder.getEndLinkOfCommonRoute(commonRoute, end)
+	const commonEndLink: Link = commonRoute.getEndLink(end)
 	const otherEnd: 'from'|'to' = end === 'from' ? 'to' : 'from'
 	return commonRouteFinder.getKnotIfLinkEndConnected(commonEndLink, otherEnd, commonEndNode)
 }
