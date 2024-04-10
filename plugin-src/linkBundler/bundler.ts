@@ -81,7 +81,7 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 		toInsertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
 	}
 
-	await updateEntangledLinks(bundleFromPart, bundleToPart, fromInsertion, toInsertion, commonRoute, fromLink, toLink)
+	await updateEntangledLinks(bundleFromPart, bundleToPart, commonRoute, fromLink, toLink)
 
 	//await Promise.all([
 		await mergeIfKnotsAndIfPossible(commonRoute.from, fromLink.from, fromInsertion?.insertedNode)
@@ -144,11 +144,12 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 	}
 	const commonEndLink: Link = commonRoute.getEndLink(end)
 	const linkManagingBoxBefore: Box = commonEndLink.getManagingBox()
-	const insertion: {insertedNode: NodeWidget, addedLink: Link} | undefined = await commonEndLink.getManagingBoxLinks().insertNodeIntoLink(
+	const insertion: {insertedNode: NodeWidget, addedLink: Link} = await commonEndLink.getManagingBoxLinks().insertNodeIntoLink(
 		commonEndLink,
 		commonEndNode,
 		await calculateBundleNodePosition(linkEnd.getReferenceLink(), commonEndLink, commonEndNode)
 	)
+	commonRoute[end] = insertion.insertedNode
 	if (linkManagingBoxBefore !== commonEndLink.getManagingBox()) {
 		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
 	}
@@ -194,15 +195,13 @@ async function calculateBundleNodePosition(link: Link, otherLink: Link, box: Box
 async function updateEntangledLinks(
 	bundleFromPart: boolean,
 	bundleToPart: boolean,
-	fromInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined,
-	toInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined,
 	commonRoute: CommonRoute,
 	fromLink: Link,
 	toLink: Link
 ) {
 	let fromForkingKnot: AbstractNodeWidget
 	if (bundleFromPart) {
-		fromForkingKnot = fromInsertion?.insertedNode?? commonRoute.from
+		fromForkingKnot = commonRoute.from
 	} else {
 		const fromForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await fromLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
 		fromForkingKnot = fromForkingKnotWithWatcher.node
@@ -212,7 +211,7 @@ async function updateEntangledLinks(
 	}
 	let toForkingKnot: AbstractNodeWidget
 	if (bundleToPart) {
-		toForkingKnot = toInsertion?.insertedNode?? commonRoute.to
+		toForkingKnot = commonRoute.to
 	} else {
 		const toForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await toLink.from.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
 		toForkingKnot = toForkingKnotWithWatcher.node
