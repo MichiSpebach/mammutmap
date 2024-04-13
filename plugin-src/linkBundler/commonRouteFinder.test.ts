@@ -13,6 +13,7 @@ import { FileBox } from '../../dist/core/box/FileBox'
 import { HoverManager } from '../../dist/core/HoverManager'
 import { BoxData } from '../../dist/core/mapData/BoxData'
 import { LocalPosition } from '../../dist/core/shape/LocalPosition'
+import { CommonRoute } from './CommonRoute'
 
 test('findAndExtendCommonRoutes', async () => {
 	await testUtil.initServicesWithMocks()
@@ -31,6 +32,7 @@ test('findAndExtendCommonRoutes', async () => {
 
 	expect(longestCommonRoute).toEqual({
 		links: [bottomLeftToTopRightLink],
+		knots: [],
 		from: leftFolder,
 		to: rightTopFile,
 		length: 1
@@ -56,24 +58,28 @@ test('findAndExtendCommonRoutes, different managingBoxes of links', async () => 
 
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
 		links: [shortLinkToRight],
+		knots: [],
 		from: leftDeepDeepFolder,
 		to: leftDeepFolder,
 		length: 1
 	}))
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
 		links: [longLinkToRight],
+		knots: [],
 		from: leftDeepDeepFolder,
 		to: leftDeepFolder,
 		length: 1
 	}))
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
 		links: [shortLinkToLeft],
+		knots: [],
 		from: leftDeepFolder,
 		to: leftDeepDeepFolder,
 		length: 1
 	}))
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
 		links: [longLinkToLeft],
+		knots: [],
 		from: leftDeepFolder,
 		to: leftDeepDeepFolder,
 		length: 1
@@ -100,24 +106,28 @@ test('findAndExtendCommonRoutes, longer commonRoute', async () => {
 
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToRight))).toEqual(extractIds({
 		links: [shortLinkToRight],
+		knots: [],
 		from: leftDeepDeepFolder,
 		to: leftFolder,
 		length: 2
 	}))
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(shortLinkToRight))).toEqual(extractIds({
 		links: [longLinkToRight],
+		knots: [],
 		from: leftDeepDeepFolder,
 		to: leftFolder,
 		length: 2
 	}))
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
 		links: [shortLinkToLeft],
+		knots: [],
 		from: leftFolder,
 		to: leftDeepDeepFolder,
 		length: 2
 	}))
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
 		links: [longLinkToLeft],
+		knots: [],
 		from: leftFolder,
 		to: leftDeepDeepFolder,
 		length: 2
@@ -148,12 +158,14 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 
 	expect(extractIds((await commonRouteFinder.findLongestCommonRoute(linkToRight)))).toEqual(extractIds({
 		links: routeToRight,
+		knots: [leftFolderKnot],
 		from: leftInnerFolder,
 		to: leftFolder,
 		length: 1
 	}))
 	expect(extractIds((await commonRouteFinder.findLongestCommonRoute(linkToLeft)))).toEqual(extractIds({
 		links: routeToLeft,
+		knots: [leftFolderKnot],
 		from: leftFolder,
 		to: leftInnerFolder,
 		length: 1
@@ -179,6 +191,7 @@ test('findAndExtendCommonRoutes, two commonRoutes with same length, one ends alr
 
 	expect(extractIds((await commonRouteFinder.findLongestCommonRoute(toTop)))).toEqual(extractIds({
 		links: [toKnot],
+		knots: [rightFolderKnot],
 		from: leftFile,
 		to: rightFolderKnot,
 		length: 1
@@ -237,12 +250,14 @@ test('findAndExtendCommonRoutes, longLink on other side, shortLink on same side'
 
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkFromLeft))).toEqual(extractIds({
 		links: [shortLinkFromLeft],
+		knots: [],
 		from: centerInnerFolder,
 		to: centerInnerFolderFile,
 		length: 1
 	}))
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(shortLinkFromLeft))).toEqual(extractIds({
 		links: [longLinkFromLeft],
+		knots: [],
 		from: centerInnerFolder,
 		to: centerInnerFolderFile,
 		length: 1
@@ -251,12 +266,14 @@ test('findAndExtendCommonRoutes, longLink on other side, shortLink on same side'
 
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToLeft))).toEqual(extractIds({
 		links: [shortLinkToLeft],
+		knots: [],
 		from: centerInnerFolderFile,
 		to: centerInnerFolder,
 		length: 1
 	}))
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(shortLinkToLeft))).toEqual(extractIds({
 		links: [longLinkToLeft],
+		knots: [],
 		from: centerInnerFolderFile,
 		to: centerInnerFolder,
 		length: 1
@@ -264,13 +281,17 @@ test('findAndExtendCommonRoutes, longLink on other side, shortLink on same side'
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(longLinkToRight))).toBe(undefined)
 })
 
-function extractIds(commonRoute: {
+type PlainCommonRoute = {
 	links: Link[]
+	knots: NodeWidget[]
 	from: AbstractNodeWidget
 	to: AbstractNodeWidget
 	length: number
-} | undefined): {
+}
+
+function extractIds(commonRoute: CommonRoute | PlainCommonRoute | undefined): {
 	links: string[]
+	knots: string[]
 	from: string
 	to: string
 	length: number
@@ -278,8 +299,10 @@ function extractIds(commonRoute: {
 	if (!commonRoute) {
 		return undefined
 	}
+	commonRoute = commonRoute as PlainCommonRoute // cast to access private fields
 	return {
 		links: commonRoute.links.map(link => link.getId()),
+		knots: commonRoute.knots.map(knot => knot.getId()),
 		from: commonRoute.from.getId(),
 		to: commonRoute.to.getId(),
 		length: commonRoute.length

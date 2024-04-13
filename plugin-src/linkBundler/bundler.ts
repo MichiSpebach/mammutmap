@@ -15,15 +15,14 @@ import * as commonRouteFinder from './commonRouteFinder'
 import * as knotMerger from './knotMerger'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 import { CommonRoute } from './CommonRoute'
-import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 
 export async function bundleLink(link: Link, options?: {
 	unwatchDelayInMs?: number
 }): Promise<void> {
 	const {route: longestCommonRoute, deepestBoxInFromPath, deepestBoxInToPath} = await commonRouteFinder.findLongestCommonRouteWithWatchers(link)
 
-	if (longestCommonRoute && longestCommonRoute.length > 0) {
-		console.log(`bundle ${link.describe()} between ${longestCommonRoute.from.getName()} and ${longestCommonRoute.to.getName()}.`)
+	if (longestCommonRoute && longestCommonRoute.getLength() > 0) {
+		console.log(`bundle ${link.describe()} between ${longestCommonRoute.getFrom().getName()} and ${longestCommonRoute.getTo().getName()}.`)
 		await bundleLinkIntoCommonRoute(link, longestCommonRoute)
 	}
 
@@ -41,8 +40,8 @@ export async function bundleLink(link: Link, options?: {
 }
 
 async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): Promise<void> {
-	const bundleFromPart: boolean = link.from.getTargetNodeId() !== commonRoute.links.at(0)?.from.getTargetNodeId()
-	const bundleToPart: boolean = link.to.getTargetNodeId() !== commonRoute.links.at(-1)?.to.getTargetNodeId()
+	const bundleFromPart: boolean = link.from.getTargetNodeId() !== commonRoute.getEndLink('from').from.getTargetNodeId()
+	const bundleToPart: boolean = link.to.getTargetNodeId() !== commonRoute.getEndLink('to').to.getTargetNodeId()
 	if (!bundleFromPart && !bundleToPart) {
 		console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) detected duplicate link`) // TODO: should be fixed with new route finder (RouteTree based)
 		return
@@ -64,18 +63,15 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 			return
 		}
 	} else if (bundleFromPart) {
-		toLink = commonRoute.links.at(-1)! // TODO
+		toLink = commonRoute.getEndLink('to')
 	} else {
-		fromLink = commonRoute.links.at(0)! // TODO
+		fromLink = commonRoute.getEndLink('from')
 	}
 
 	let fromInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
 	let toInsertion: {insertedNode: NodeWidget, addedLink: Link} | undefined
 	if (bundleFromPart) {
 		fromInsertion = await bundleLinkEndIntoCommonRoute(fromLink.to, 'from', commonRoute)
-		if (fromInsertion && fromInsertion.addedLink.from.getTargetNodeId() === fromInsertion.insertedNode.getId()) {
-			commonRoute.links.push(fromInsertion.addedLink)
-		}
 	}
 	if (bundleToPart) {
 		toInsertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
@@ -84,8 +80,8 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 	await updateEntangledLinks(bundleFromPart, bundleToPart, commonRoute, fromLink, toLink)
 
 	//await Promise.all([
-		await mergeIfKnotsAndIfPossible(commonRoute.from, fromLink.from, fromInsertion?.insertedNode)
-		await mergeIfKnotsAndIfPossible(commonRoute.to, toLink.to, toInsertion?.insertedNode)
+		await mergeIfKnotsAndIfPossible(commonRoute.getFrom(), fromLink.from, fromInsertion?.insertedNode)
+		await mergeIfKnotsAndIfPossible(commonRoute.getTo(), toLink.to, toInsertion?.insertedNode)
 	//])
 }
 
@@ -149,7 +145,14 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 		commonEndNode,
 		await calculateBundleNodePosition(linkEnd.getReferenceLink(), commonEndLink, commonEndNode)
 	)
-	commonRoute[end] = insertion.insertedNode
+	if (insertion.addedLink[end].getTargetNodeId() === insertion.insertedNode.getId()) {
+		if ((commonRoute as any)?.links?.length !== 1) {
+			console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) expected commonRoute to consist of exactly one link at this state, but are ${(commonRoute as any)?.links?.length}`)
+		}
+		const otherEnd: 'from'|'to' = end === 'to' ? 'from' : 'to'
+		commonRoute.addLink(otherEnd, insertion.addedLink)
+	}
+	commonRoute.elongateWithWaypoint(end, insertion.insertedNode, {noLengthIncrement: true})
 	if (linkManagingBoxBefore !== commonEndLink.getManagingBox()) {
 		console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(..) did not expect BoxLinks::insertNodeIntoLink(link, ..) to change managingBox of link`)
 	}
@@ -199,26 +202,8 @@ async function updateEntangledLinks(
 	fromLink: Link,
 	toLink: Link
 ) {
-	let fromForkingKnot: AbstractNodeWidget
-	if (bundleFromPart) {
-		fromForkingKnot = commonRoute.from
-	} else {
-		const fromForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await fromLink.to.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
-		fromForkingKnot = fromForkingKnotWithWatcher.node
-	}
-	if (!(fromForkingKnot instanceof NodeWidget)) {
-		console.warn('bundler.bundleLinkIntoCommonRoute(..) fromForkingKnot is not instanceof NodeWidget')
-	}
-	let toForkingKnot: AbstractNodeWidget
-	if (bundleToPart) {
-		toForkingKnot = commonRoute.to
-	} else {
-		const toForkingKnotWithWatcher: {node: AbstractNodeWidget, watcher: BoxWatcher} = await toLink.from.getTargetAndRenderIfNecessary() // TODO: add knots to CommonRoute
-		toForkingKnot = toForkingKnotWithWatcher.node
-	}
-	if (!(toForkingKnot instanceof NodeWidget)) {
-		console.warn('bundler.bundleLinkIntoCommonRoute(..) toForkingKnot is not instanceof NodeWidget')
-	}
+	const fromForkingKnot: NodeWidget = commonRoute.getEndKnot('from')
+	const toForkingKnot: NodeWidget = commonRoute.getEndKnot('to')
 	const fromLinks: Link[] = fromForkingKnot.borderingLinks.getIngoing()
 	const fromLinksExistedBefore: Link[] = bundleFromPart ? fromLinks.filter(link => link !== fromLink) : fromLinks
 	const toLinks: Link[] = toForkingKnot.borderingLinks.getOutgoing()

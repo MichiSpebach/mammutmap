@@ -338,6 +338,38 @@ test('bundleLink, linkFromRootKnot', async () => {
 	HoverManager.removeHoverable(fileKnot)
 })
 
+/*test('bundleLink, too short to bundle', async () => { // TODO this test should succeed
+	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFolder = boxFactory.folderOf({idOrData: new BoxData('rightFolder', 60, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderKnot: NodeWidget = await leftFolder.nodes.add(new NodeData('leftFolderKnot', 100, 50))
+	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
+	const leftFolderBottomFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
+	const rightFolderTopFile = boxFactory.fileOf({idOrData: 'rightFolderTopFile', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderBottomFile = boxFactory.fileOf({idOrData: 'rightFolderBottomFile', parent: rightFolder, addToParent: true, rendered: true})
+
+	const topToKnot: Link = await leftFolder.links.add({from: leftFolderTopFile, to: leftFolderKnot, save: true})
+	const bottomToKnot: Link = await leftFolder.links.add({from: leftFolderBottomFile, to: leftFolderKnot, save: true})
+	const knotToRightTopFile: Link = await root.links.add({from: leftFolderKnot, to: rightFolderTopFile, save: true})
+	const topToRoot: Link = await root.links.add({from: leftFolderTopFile, to: root, save: true})
+
+	await linkBundler.bundleLink(topToRoot)
+
+	const topToRightRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
+	const bottomToRightRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
+	const topToRootRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, root)
+	expect(topToRightRoute?.map(node => node.getId())).toEqual([topToKnot.getId(), knotToRightTopFile.getId()])
+	expect(bottomToRightRoute?.map(node => node.getId())).toEqual([bottomToKnot.getId(), knotToRightTopFile.getId()])
+	expect(topToRootRoute?.map(node => node.getId())).toEqual([topToRoot.getId()])
+	expect(topToRightRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	expect(bottomToRightRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	expect(topToRootRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[]])
+
+	HoverManager.removeHoverable(leftFolderKnot)
+})*/
+
 test('bundleLink, commonRoute and linkToBundle start with knots', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
 
