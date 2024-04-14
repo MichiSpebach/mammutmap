@@ -109,11 +109,11 @@ export class BoxLinks extends Widget {
       return newLink
     }
 
-    private async addNewLink(link: Link, options: {save: boolean}): Promise<void> {
+    private async addNewLink(link: Link, options: {save: boolean, returnBeforeSaveAndCountUpTags?: boolean}): Promise<void/*{savingAndCountingUpTags: Promise<void>} TODO*/> {
       this.referenceBox.getMapLinkData().push(link.getData()) // TODO: move into Link?
       this.links.push(link)
 
-      const ongoing: Promise<void>[] = []
+      const ongoing: Promise<void>[] = link.getTags().map(tag => link.getManagingBox().getProjectSettings().countUpLinkTagAndSave(tag))
       if (options.save) {
         ongoing.push(this.referenceBox.saveMapData())
       }
