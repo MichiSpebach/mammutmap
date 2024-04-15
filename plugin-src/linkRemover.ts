@@ -121,7 +121,6 @@ async function removeLinks(startBox: Box, options: {
 				continue
 			}
 			pros.push(removeLinksRegardingOptions(nextBox.links.getLinks(), 1))
-			
 		}
 	}
 

@@ -57,7 +57,7 @@ export class BoxDepthTreeIterator {
 			return
 		}
 
-		if (nextBox instanceof FolderBox) {
+		if (nextBox instanceof FolderBox) { // TODO: ensure also render of FileBoxes?
 			this.boxIterators.push(await ChildBoxesIterator.new(nextBox))
 		}
 		this.nextBox = nextBox
