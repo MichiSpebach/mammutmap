@@ -4,6 +4,7 @@
  * "TypeError: Class extends value undefined is not a constructor or null"
  * TODO fix this!
  */
+import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link } from '../../dist/core/link/Link'
 import { LinkEnd } from '../../dist/core/link/LinkEnd'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
@@ -108,14 +109,15 @@ function getLinkTowardsCenter(knot: NodeWidget): Link|undefined {
 }
 
 async function moveEntanglementsOfLinkInDirection(link: Link, routeTreeSearchDirection: 'from'|'to', knotInDirection: NodeWidget): Promise<void> {
-	const entangledLinks: Link[] = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
-	await copyEntanglementsOfLinkInDirection(link, entangledLinks, knotInDirection)
-	await Promise.all(entangledLinks.map(async (entangledLink: Link) => {
+	const entangledLinks: {links: Link[], watchers: BoxWatcher[]} = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
+	await copyEntanglementsOfLinkInDirection(link, entangledLinks.links, knotInDirection)
+	await Promise.all(entangledLinks.links.map(async (entangledLink: Link) => {
 		HighlightPropagatingLink.removeBundledWithId(entangledLink, link.getId())
 		HighlightPropagatingLink.removeBundledWithId(link, entangledLink.getId())
 		await entangledLink.getManagingBox().saveMapData()
 	}))
 	await link.getManagingBox().saveMapData()
+	entangledLinks.watchers.forEach(watcher => watcher.unwatch())
 }
 
 async function copyEntanglementsOfLinkInDirection(link: Link, linkEntanglements: Link[], knotInDirection: NodeWidget): Promise<void> {
@@ -145,10 +147,10 @@ async function copyEntanglementsOfLinkInto(options: {link: Link, linkEntanglemen
 }
 
 async function mergeLinkIntoAndRemove(link: Link, routeTreeSearchDirection: 'from'|'to', mergeIntoLink: Link): Promise<void> {
-	const entangledLinks: Link[] = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
+	const entangledLinks: {links: Link[], watchers: BoxWatcher[]} = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
 	HighlightPropagatingLink.addBundledWithIds(mergeIntoLink, HighlightPropagatingLink.getBundledWithIds(link))
 	await Promise.all([
-		entangledLinks.map(async entangledLink => {
+		entangledLinks.links.map(async entangledLink => {
 			HighlightPropagatingLink.addBundledWith(entangledLink, [mergeIntoLink])
 			HighlightPropagatingLink.removeBundledWithId(entangledLink, link.getId())
 			//HighlightPropagatingLink.replaceBundledWithId(link.getEntanglements) // TODO?
@@ -157,4 +159,5 @@ async function mergeLinkIntoAndRemove(link: Link, routeTreeSearchDirection: 'fro
 		mergeIntoLink.getManagingBox().saveMapData(),
 		link.getManagingBoxLinks().removeLink(link)
 	])
+	entangledLinks.watchers.forEach(watcher => watcher.unwatch())
 }

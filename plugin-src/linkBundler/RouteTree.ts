@@ -1,7 +1,6 @@
 import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
 import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link } from '../../dist/core/link/Link'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 
 export class RouteTree {
@@ -10,42 +9,44 @@ export class RouteTree {
 		public readonly start: Link/*End TODO?*/,
 		public readonly direction: 'from'|'to'
 	) {}
-	
-	private readonly watchers: BoxWatcher[] = []
 
-	public async getEntangledLinks(): Promise<Link[]> {
-		const entangledLinks: Link[] = await this.followLinkRecursively(this.start, [])
-		if (entangledLinks.length !== this.getLinksToFindIds().length) {
-			console.warn(`RouteTree::getEntangledLinks() found only ${entangledLinks.length} of ${this.getLinksToFindIds().length} entangledLinks for ${this.start.describe()}.`)
+	public async getEntangledLinks(): Promise<{links: Link[], watchers: BoxWatcher[]}> {
+		const entangledLinks: {links: Link[], watchers: BoxWatcher[]} = await this.followLinkRecursively(this.start, [])
+		if (entangledLinks.links.length !== this.getLinksToFindIds().length) {
+			console.warn(`RouteTree::getEntangledLinks() found only ${entangledLinks.links.length} of ${this.getLinksToFindIds().length} entangledLinks for ${this.start.describe()}.`)
 		}
 		return entangledLinks
 	}
 	
-	private async followLinkRecursively(link: Link, linksToFollowIds: string[]): Promise<Link[]> {
-		const followUpLinks: Link[] = await this.getFollowUpLinks(link)
+	private async followLinkRecursively(link: Link, linksToFollowIds: string[]): Promise<{links: Link[], watchers: BoxWatcher[]}> {
+		const followUps: {links: Link[], watcher: BoxWatcher} = await this.getFollowUpLinks(link)
 		const linksToFind: Link[] = []
-		await Promise.all(followUpLinks.map(async followUpLink => {
+		const watchers: BoxWatcher[] = [followUps.watcher]
+		await Promise.all(followUps.links.map(async followUpLink => {
 			if (this.getLinksToFindIds().includes(followUpLink.getId())) {
 				linksToFind.push(followUpLink)
 				return
 			}
 			const entangledLinkIds: string[] = HighlightPropagatingLink.getBundledWithIds(followUpLink)
 			if (entangledLinkIds.length < 1 || linksToFollowIds.includes(followUpLink.getId())) {
-				linksToFind.push(...await this.followLinkRecursively(followUpLink, linksToFollowIds.concat(entangledLinkIds)))
-				//linksToFind.push(...await new RouteTreeDirection(followUpLink, this.direction, this.linksToFollowIds.concat(entangledLinkIds), this.linksToFindIds).getEntangledLinks())
+				const recursivelyFollowUps = await this.followLinkRecursively(followUpLink, linksToFollowIds.concat(entangledLinkIds)) // TODO: handle infinite loop for cycles
+				//const recursivelyFollowUps = await new RouteTreeDirection(followUpLink, this.direction, this.linksToFollowIds.concat(entangledLinkIds), this.linksToFindIds).getEntangledLinks() // TODO: handle infinite loop for cycles
+				linksToFind.push(...recursivelyFollowUps.links)
+				watchers.push(...recursivelyFollowUps.watchers)
 			}
 		}))
-		return linksToFind
+		return {links: linksToFind, watchers}
 	}
 
 	private getLinksToFindIds(): string[] {
 		return HighlightPropagatingLink.getBundledWithIds(this.start)
 	}
 
-	private async getFollowUpLinks(link: Link): Promise<Link[]> {
-		const target: {node: AbstractNodeWidget, watcher: BoxWatcher} = await link[this.direction].getTargetAndRenderIfNecessary() // TODO: unwatch
-		return this.direction === 'to'
+	private async getFollowUpLinks(link: Link): Promise<{links: Link[], watcher: BoxWatcher}> {
+		const target: {node: AbstractNodeWidget, watcher: BoxWatcher} = await link[this.direction].getTargetAndRenderIfNecessary()
+		const links: Link[] = this.direction === 'to'
 			? target.node.borderingLinks.getOutgoing()
 			: target.node.borderingLinks.getIngoing()
+		return {links, watcher: target.watcher}
 	}
 }
