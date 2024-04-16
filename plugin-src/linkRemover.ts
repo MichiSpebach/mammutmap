@@ -77,7 +77,9 @@ async function openDialogForRemoveLinks(box: Box): Promise<void> {
 				outgoing: renderManager.getCheckedOf(outgoingLinksId),
 				managed: renderManager.getCheckedOf(managedLinksId),
 				recursively: boxIsFolder ? renderManager.getCheckedOf(recursivelyId) : false,
-				pathsToIgnoreIfRecursively: boxIsFolder ? renderManager.getValueOf(pathsToIgnoreId).then(pathsToIgnore => pathsToIgnore.split(',').map(path => path.trim())) : []
+				pathsToIgnoreIfRecursively: boxIsFolder
+					? renderManager.getValueOf(pathsToIgnoreId).then(pathsToIgnore => pathsToIgnore.split(',').map(path => coreUtil.concatPaths(box.getSrcPath(), path.trim())))
+					: []
 			}))
 			popup.unrender()
 		}
@@ -100,7 +102,7 @@ async function removeLinks(startBox: Box, options: {
 	recursively: boolean
 	pathsToIgnoreIfRecursively: string[]
 }): Promise<void> {
-	console.info(`Start removing links of '${startBox.getSrcPath()}' with options '${JSON.stringify(options)}'...`)
+	console.info(`Start removing links of '${startBox.getSrcPath()}' with options ${JSON.stringify(options, null, '\t')}...`)
 	const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
 	let processedBoxCount: number = 0
 	let foundLinksCount: number = 0

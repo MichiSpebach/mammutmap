@@ -64,7 +64,9 @@ export async function openDialogForBundleLinks(box: Box): Promise<void> {
 				bordering: renderManager.getCheckedOf(borderingLinksId),
 				managed: renderManager.getCheckedOf(managedLinksId),
 				recursively: boxIsFolder ? renderManager.getCheckedOf(recursivelyId) : false,
-				pathsToIgnoreIfRecursively: boxIsFolder ? renderManager.getValueOf(pathsToIgnoreId).then(pathsToIgnore => pathsToIgnore.split(',').map(path => path.trim())) : []
+				pathsToIgnoreIfRecursively: boxIsFolder
+					? renderManager.getValueOf(pathsToIgnoreId).then(pathsToIgnore => pathsToIgnore.split(',').map(path => coreUtil.concatPaths(box.getSrcPath(), path.trim())))
+					: []
 			}))
 			popup.unrender()
 		}

@@ -40,7 +40,7 @@ export class LogEntry {
         return {
             type: 'div',
             id: this.id,
-            style: {color: this.color},
+            style: {color: this.color, whiteSpace: 'pre'},
             innerHTML: this.toHtmlString()
         }
     }

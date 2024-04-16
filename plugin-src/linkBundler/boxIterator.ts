@@ -8,7 +8,7 @@ export async function bundleLinks(startBox: Box, options: {
 	recursively: boolean
 	pathsToIgnoreIfRecursively: string[]
 }): Promise<void> {
-	console.info(`Start bundling links of '${startBox.getSrcPath()}' with options '${JSON.stringify(options)}'...`)
+	console.info(`Start bundling links of '${startBox.getSrcPath()}' with options ${JSON.stringify(options, null, '\t')}...`)
 	const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
 	let countingFinished: boolean = false
 	let boxCount: number = 1

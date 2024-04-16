@@ -1,18 +1,15 @@
 import { FolderBox } from '../dist/core/box/FolderBox'
 import { SourcelessBox } from '../dist/core/box/SourcelessBox'
 import * as pluginFacade from '../dist/pluginFacade'
-import { fileSystem, renderManager, coreUtil, contextMenu, MenuItemFile, MenuItemFolder, Box, FileBox, Link, ProgressBarWidget } from '../dist/pluginFacade'
+import { fileSystem, renderManager, coreUtil, contextMenu, MenuItemFile, Box, FileBox, Link, ProgressBarWidget } from '../dist/pluginFacade'
 import * as pathFinder from './neuralNetLinkGenerator/pathFinder'
 import * as typeFinder from './neuralNetLinkGenerator/typeFinder'
 
 contextMenu.addFileBoxMenuItem((box: FileBox) => {
-	return new MenuItemFile({label: 'generate outgoing links', click: () => generateOutgoingLinksForFile(box)})
+	return new MenuItemFile({label: '⇉ generate outgoing links', click: () => generateOutgoingLinksForFile(box)})
 })
 contextMenu.addFolderBoxMenuItem((box: FolderBox) => {
-	return new MenuItemFolder({label: 'generate outgoing links', submenu: [
-		new MenuItemFile({label: 'for files in this folder only', click: () => generateOutgoingLinksForAllFilesInFolder(box)}),
-		new MenuItemFile({label: 'recursively...', click: () => openDialogForGenerateOutgoingLinksRecursively(box)})
-	]})
+	return new MenuItemFile({label: '⇉ generate outgoing links...', click: () => openDialogForGenerateOutgoingLinks(box)})
 })
 
 Box.Sidebar.BasicToolkit.add({
@@ -20,17 +17,10 @@ Box.Sidebar.BasicToolkit.add({
 	indexWithinTopic: 1,
 	build: (box: Box) => {
 		if (box instanceof FileBox) {
-			return Box.Sidebar.BasicToolkit.buildButton('generate outgoing links', () => generateOutgoingLinksForFile(box))
+			return Box.Sidebar.BasicToolkit.buildButton('⇉ generate outgoing links', () => generateOutgoingLinksForFile(box))
 		}
 		if (box instanceof FolderBox) {
-			return Box.Sidebar.BasicToolkit.buildGroup({
-				title: 'Generate Outgoing Links',
-				color: 'lime',
-				elements: [
-					Box.Sidebar.BasicToolkit.buildButton('for files in this folder only', () => generateOutgoingLinksForAllFilesInFolder(box)),
-					Box.Sidebar.BasicToolkit.buildButton('recursively...', () => openDialogForGenerateOutgoingLinksRecursively(box))
-				]
-			})
+			return Box.Sidebar.BasicToolkit.buildButton('⇉ generate outgoing links...', () => openDialogForGenerateOutgoingLinks(box))
 		}
 		if (box instanceof SourcelessBox) {
 			return undefined
@@ -40,11 +30,12 @@ Box.Sidebar.BasicToolkit.add({
 	}
 })
 
-async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox): Promise<void> {
+async function openDialogForGenerateOutgoingLinks(folder: FolderBox): Promise<void> {
 	const dialogId = 'generateLinksDialog'+coreUtil.generateId()
 	const maxFilesizeInputId = dialogId+'-maxFilesizeInput'
+	const recursivelyInputId = dialogId+'-recursivelyInput'
 	const pathsToIgnoreInputId = dialogId+'-pathsToIgnoreInput'
-	const popup: pluginFacade.PopupWidget = await pluginFacade.PopupWidget.newAndRender({title: 'Generate Outgoing Links Recursively', content: [
+	const popup: pluginFacade.PopupWidget = await pluginFacade.PopupWidget.newAndRender({title: `Generate Outgoing Links of '${folder.getName()}'`, content: [
 		{type: 'div', style: {marginTop: '8px'}, children: 'Are you sure?'},
 		{
 			type: 'ul',
@@ -54,7 +45,7 @@ async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox):
 				{
 					type: 'ul',
 					children: [
-						{type: 'li', children: 'There is no linkBundler.js plugin yet'},
+						{type: 'li', children: 'There is an experimental linkBundler.js plugin, you should use it by calling "bundle links..." afterwards.'},
 						{type: 'li', children: 'There is no boxOrderer.js plugin yet'},
 						{type: 'li', children: 'There is no autoTagger.js plugin yet'},
 						{type: 'li', children: `BorderingLinks with appearance mode 'renderedEnds' are not hidden while hovering box yet.`},
@@ -78,14 +69,20 @@ async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox):
 		},
 		{
 			type: 'div',
+			innerHTML: `<input type="checkbox" id="${recursivelyInputId}" checked><label for="${recursivelyInputId}">recursively</label>`
+		},
+		{
+			type: 'div',
+			style: {display: 'flex'},
 			children: [
 				{
 					type: 'span',
-					children: 'Paths to ignore: '
+					children: 'if recursively, paths to ignore: '
 				},
 				{
 					type: 'input',
 					id: pathsToIgnoreInputId,
+					style: {flexGrow: '1', marginLeft: '4px'},
 					value: 'map, .git, node_modules, venv, .venv, .mvn, target, dist, out'
 				}
 			]
@@ -99,11 +96,12 @@ async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox):
 				if (!(maxFilesizeInKB >= 0)) { // < 0 would be false for NaN
 					throw new Error('maxFilesizeInKB has to be >= 0 but is '+maxFilesizeInKB)
 				}
-				const pathsToIgnore: string[] = (await renderManager.getValueOf(pathsToIgnoreInputId)).split(',')
-				const rootPath: string = pluginFacade.getRootFolder().getSrcPath()
-				generateOutgoingLinksRecursively(folder, {
+				const recursively: boolean = await renderManager.getCheckedOf(recursivelyInputId)
+				const pathsToIgnore: string[] = (await renderManager.getValueOf(pathsToIgnoreInputId)).split(',').map(path => coreUtil.concatPaths(folder.getSrcPath(), path.trim()))
+				generateOutgoingLinks(folder, {
 					maxFilesizeInKB,
-					srcPathsToIgnore: pathsToIgnore.map(path => coreUtil.concatPaths(rootPath, path.trim()))
+					recursively,
+					pathsToIgnoreIfRecursively: pathsToIgnore
 				})
 				popup.unrender()
 			}
@@ -111,11 +109,18 @@ async function openDialogForGenerateOutgoingLinksRecursively(folder: FolderBox):
 	]})
 }
 
-async function generateOutgoingLinksRecursively(folder: FolderBox, options: {
+async function generateOutgoingLinks(folder: FolderBox, options: {
 	maxFilesizeInKB: number
-	srcPathsToIgnore: string[]
+	recursively: boolean
+	pathsToIgnoreIfRecursively: string[]
 }): Promise<void> {
-	console.log(`Start generating outgoing links recursively of '${folder.getSrcPath()}' with options '${JSON.stringify(options)}'...`)
+	console.log(`Start generating outgoing links of '${folder.getSrcPath()}' with options ${JSON.stringify(options, null, '\t')}...`)
+	if (!options.recursively) {
+		await generateOutgoingLinksForFilesInFolder(folder)
+		console.log(`Finished generating outgoing links of '${folder.getSrcPath()}'.`)
+		return
+	}
+
 	const progressBar: ProgressBarWidget = await ProgressBarWidget.newAndRenderInMainWidget()
 	let totalFileCountingFinished: boolean = false
 	let totalFileCount: number = 0
@@ -125,7 +130,7 @@ async function generateOutgoingLinksRecursively(folder: FolderBox, options: {
 	
 	const countingFiles: Promise<void> = countFiles()
 	
-	const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder, options)
+	const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder, {srcPathsToIgnore: options.pathsToIgnoreIfRecursively})
 	while (await iterator.hasNextOrUnwatch()) {
 		const box: FileBox = await iterator.next()
 		fileCount++
@@ -145,7 +150,8 @@ async function generateOutgoingLinksRecursively(folder: FolderBox, options: {
 	console.log(`Finished ${buildProgressText()}.`)
 
 	async function countFiles(): Promise<void> {
-		for (const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder, options); await iterator.hasNextOrUnwatch(); await iterator.next()) {
+		const iterator = new pluginFacade.FileBoxDepthTreeIterator(folder, {srcPathsToIgnore: options.pathsToIgnoreIfRecursively})
+		for (; await iterator.hasNextOrUnwatch(); await iterator.next()) {
 			totalFileCount++
 			updateProgressBar()
 		}
@@ -165,7 +171,7 @@ async function generateOutgoingLinksRecursively(folder: FolderBox, options: {
 	}
 }
 
-async function generateOutgoingLinksForAllFilesInFolder(folder: FolderBox): Promise<void> {
+async function generateOutgoingLinksForFilesInFolder(folder: FolderBox): Promise<void> {
 	for (const box of folder.getChilds()) {
 		if (!(box instanceof FileBox)) {
 			continue
