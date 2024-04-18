@@ -18,8 +18,8 @@ export class BoxToolkitWidget extends UltimateWidget {
 	// TODO: move all static methods related to template into ToolkitTemplate
 	public static items: ToolkitTemplateItem[] = [
 	//public static template: ToolkitTemplate = new ToolkitTemplate([
-		{build: box => this.buildButton('Rename', () => box.openRenamePopupAndAwaitResolve())},
-		{topic: 'links', indexWithinTopic: 0, build: box => this.buildButton('Link from this box', () => box.links.addWithClickToDropMode())}
+		{build: box => this.buildButton('✎ Rename', () => box.openRenamePopupAndAwaitResolve())},
+		{topic: 'links', indexWithinTopic: 0, build: box => this.buildButton('→ Link from this box', () => box.links.addWithClickToDropMode())}
 	]
 
 	private static addWithSortIn(item: ToolkitTemplateItem): void {

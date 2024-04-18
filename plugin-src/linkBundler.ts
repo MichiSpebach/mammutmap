@@ -14,13 +14,13 @@ import * as scheduler from './linkBundler/scheduler'
 
 pluginFacade.overrideLink(HighlightPropagatingLink)
 
-contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: 'try to bundle', click: () => bundler.bundleLink(link)}))
+contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: '↣ try to bundle', click: () => bundler.bundleLink(link)}))
 contextMenu.addLinkNodeMenuItem((node: NodeWidget) => new MenuItemFile({label: 'try to merge', click: () => knotMerger.mergeKnot(node)}))
 
 Box.Sidebar.BasicToolkit.add({
 	topic: 'links',
 	indexWithinTopic: 2,
-	build: (box: Box) => Box.Sidebar.BasicToolkit.buildButton('bundle links...', () => dialog.openDialogForBundleLinks(box))
+	build: (box: Box) => Box.Sidebar.BasicToolkit.buildButton('↣ bundle links...', () => dialog.openDialogForBundleLinks(box))
 })
 
 let bundleNewLinksActivated: boolean = false

@@ -7,11 +7,11 @@ contextMenu.addSourcelessBoxMenuItem(buildItemForContextMenu)
 Box.Sidebar.BasicToolkit.add({
 	topic: 'links',
 	indexWithinTopic: 3,
-	build: (box: Box) => Box.Sidebar.BasicToolkit.buildButton('remove links...', () => openDialogForRemoveLinks(box))
+	build: (box: Box) => Box.Sidebar.BasicToolkit.buildButton('⇸ remove links...', () => openDialogForRemoveLinks(box))
 })
 
 function buildItemForContextMenu(box: Box): MenuItemFile {
-	return new MenuItemFile({label: 'remove links...', click: () => openDialogForRemoveLinks(box)})
+	return new MenuItemFile({label: '⇸ remove links...', click: () => openDialogForRemoveLinks(box)})
 }
 
 async function openDialogForRemoveLinks(box: Box): Promise<void> {

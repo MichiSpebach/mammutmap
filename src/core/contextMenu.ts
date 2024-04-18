@@ -168,7 +168,7 @@ function buildOpenFileInEditorItem(box: FileBox): MenuItemFile {
 
 function buildAddLinkItem(node: Box|NodeWidget, position: ClientPosition): MenuItemFile {
   const managingBoxAtStart: Box = node instanceof Box ? node : node.getParent()
-  return new MenuItemFile({label: 'link from here', click: () => managingBoxAtStart.links.addWithClickToDropMode({
+  return new MenuItemFile({label: '→ link from here', click: () => managingBoxAtStart.links.addWithClickToDropMode({
     fromNode: node,
     fromPosition: position,
     toPositionAtStart: position
@@ -176,7 +176,7 @@ function buildAddLinkItem(node: Box|NodeWidget, position: ClientPosition): MenuI
 }
 
 function buildAddNodeItem(box: Box, position: ClientPosition): MenuItemFile {
-  return new MenuItemFile({label: 'add link node here', click: () => addNodeToBox(box, position)})
+  return new MenuItemFile({label: '⬤ add link node here', click: () => addNodeToBox(box, position)})
 }
 
 function buildRemoveLinkNodeItem(linkNode: NodeWidget): MenuItemFile {
@@ -256,11 +256,11 @@ function buildRemoveLinkItem(link: Link): MenuItemFile {
 }
 
 function buildRenameBoxItem(box: Box): MenuItemFile {
-  return new MenuItemFile({label: 'rename', click: () => box.openRenamePopupAndAwaitResolve()})
+  return new MenuItemFile({label: '✎ rename', click: () => box.openRenamePopupAndAwaitResolve()})
 }
 
 function buildAddNewFileItem(box: FolderBox, position: ClientPosition): MenuItemFile {
-  return new MenuItemFile({label: 'new file', click: async () => {
+  return new MenuItemFile({label: '🗋 new file', click: async () => {
     const mapData: BoxData = await buildMapDataForNewBox(box, position)
     await box.addNewFileAndSave(mapData.id, mapData)
     //ScaleManager.startWithClickToDropMode(newBox) // TODO: implement
@@ -268,7 +268,7 @@ function buildAddNewFileItem(box: FolderBox, position: ClientPosition): MenuItem
 }
 
 function buildAddNewFolderItem(box: FolderBox, position: ClientPosition): MenuItemFile {
-  return new MenuItemFile({label: 'new folder', click: async () => {
+  return new MenuItemFile({label: '🗀 new folder', click: async () => {
     const mapData: BoxData = await buildMapDataForNewBox(box, position)
     await box.addNewFolderAndSave(mapData.id, mapData)
     //ScaleManager.startWithClickToDropMode(newBox) // TODO: implement
