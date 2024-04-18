@@ -11,11 +11,18 @@ import * as knotMerger from './linkBundler/knotMerger'
 import { HighlightPropagatingLink } from './linkBundler/HighlightPropagatingLink'
 import * as dialog from './linkBundler/dialog'
 import * as scheduler from './linkBundler/scheduler'
+import { FileBox } from '../dist/core/box/FileBox'
+import { FolderBox } from '../dist/core/box/FolderBox'
+import { SourcelessBox } from '../dist/core/box/SourcelessBox'
 
 pluginFacade.overrideLink(HighlightPropagatingLink)
 
 contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: '↣ try to bundle', click: () => bundler.bundleLink(link)}))
 contextMenu.addLinkNodeMenuItem((node: NodeWidget) => new MenuItemFile({label: 'try to merge', click: () => knotMerger.mergeKnot(node)}))
+
+contextMenu.addFileBoxMenuItem((box: FileBox) => new MenuItemFile({label: '↣ bundle links...', click: () => dialog.openDialogForBundleLinks(box)}))
+contextMenu.addFolderBoxMenuItem((box: FolderBox) => new MenuItemFile({label: '↣ bundle links...', click: () => dialog.openDialogForBundleLinks(box)}))
+contextMenu.addSourcelessBoxMenuItem((box: SourcelessBox) => new MenuItemFile({label: '↣ bundle links...', click: () => dialog.openDialogForBundleLinks(box)}))
 
 Box.Sidebar.BasicToolkit.add({
 	topic: 'links',
