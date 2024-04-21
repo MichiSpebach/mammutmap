@@ -42,11 +42,11 @@ export class GitClient {
 	}
 
 	public async getCommits(from: string, to: string): Promise<Commit[]> {
-		let log: LogResult<DefaultLogFields>
+		let log: LogResult
 		try {
 			log = await this.git.log({'from': from, 'to': to})
 		} catch (error) {
-			log = await this.git.log({'from': 'HEAD^', 'to': 'HEAD'})
+			log = await this.git.log({'from': await this.git.firstCommit()})
 		}
 		const logEntries: readonly (DefaultLogFields & ListLogLine)[] = log.all
 		const commits: Commit[] = []
