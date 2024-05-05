@@ -214,7 +214,7 @@ export class Map {
     path: string, 
     options?: {ignoreFileEndings?: boolean, onlyReturnWarnings?: boolean, foreachBoxInPath?: (box: Box) => void}
   ): Promise<{boxWatcher?: BoxWatcher, warnings?: string[]}> {
-    if (path === this.rootFolder.getSrcPath()) {
+    if (util.normalizePath(path) === util.normalizePath(this.rootFolder.getSrcPath())) {
       return {boxWatcher: await BoxWatcher.newAndWatch(this.rootFolder)}
     }
     return this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, options)

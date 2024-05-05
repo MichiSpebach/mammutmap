@@ -242,7 +242,15 @@ class Util {
 
   public removeLastElementFromPath(path: string): string {
     path = this.replaceBackslashesWithSlashes(path)
-    return path.replace(/[/][^/]*.$/, '/')
+    return path.replace(/[/][^/]*.$/, '/') // TODO: replace with '' would be normalized?
+  }
+
+  public normalizePath(path: string): string {
+    path = this.replaceBackslashesWithSlashes(path)
+    if (path.endsWith('/')) {
+      path = path.slice(0, -1)
+    }
+    return path
   }
 
   public replaceBackslashesWithSlashes(s: string) {
