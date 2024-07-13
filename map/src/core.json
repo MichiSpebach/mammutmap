@@ -4519,37 +4519,6 @@
 			]
 		},
 		{
-			"id": "0c7sqa9ssm",
-			"from": {
-				"path": [
-					{
-						"boxId": "rm0ri411c4",
-						"boxName": "node",
-						"x": 45.029,
-						"y": 35.586
-					},
-					{
-						"boxId": "d1lkhdg6ddo",
-						"boxName": "NodeWidget.ts",
-						"x": 42.69,
-						"y": 49.138
-					}
-				],
-				"floatToBorder": true
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "tjajirvessg",
-						"boxName": "AbstractNodeWidget.ts",
-						"x": 56,
-						"y": 56
-					}
-				],
-				"floatToBorder": true
-			}
-		},
-		{
 			"id": "0ko241nq65o",
 			"from": {
 				"path": [
