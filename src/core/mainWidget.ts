@@ -30,7 +30,7 @@ class MainWidget extends Widget {
 		super()
 		this.map = mapWidget
 		this.sidebar = new ToolbarWidget('sidebar')
-		this.toggleSidebarButton = new ToggleSidebarWidget(`${this.getId()}-toggleSidebar`)
+		this.toggleSidebarButton = new ToggleSidebarWidget(`${this.getId()}-toggleSidebar`, 'sidebar')
 		this.bottomBar = new ToolbarWidget('bottomBar', {hideHeader: 'auto'})
 		this.terminal = new TerminalWidget(this.bottomBar.getId()+'-terminal')
 		this.bottomBar.addView({

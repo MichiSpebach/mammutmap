@@ -36,6 +36,7 @@ import { environment } from '../environmentAdapter'
 import { BoxSidebar } from './BoxSidebar'
 import { settings } from '../settings/settings'
 import { TextInputPopup } from '../TextInputPopup'
+import { ToggleSidebarWidget } from '../ToggleSidebarWidget'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   public static readonly Tabs: typeof BoxTabs = BoxTabs
@@ -60,6 +61,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
   private focusState: { // TODO: move sidebar in here or introduce BoxFocusManager|BoxHoverManager
+    toggleSidebarButton: ToggleSidebarWidget
     onBoxSidebarSettingChange: (newValue: boolean) => Promise<void>
   } | undefined
 
@@ -447,19 +449,17 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       return
     }
     this.focusState = {
+      toggleSidebarButton: new ToggleSidebarWidget(this.getId()+'-toggleSidebarButton', 'boxSidebar'),
       onBoxSidebarSettingChange: async (newValue: boolean) => {
         if (!this.focusState) {
           log.warning(`Box::addFocusElements()::onBoxSidebarSettingChange() called although not focused.`)
           return
         }
-        const pros: Promise<void>[] = []
         if (newValue) {
-          pros.push(this.addSidebar(RenderPriority.RESPONSIVE))
+          await this.addSidebar(RenderPriority.RESPONSIVE)
         } else {
-          pros.push(this.removeSidebar({priority: RenderPriority.RESPONSIVE, awaitSlideAnimation: true}))
+          await this.removeSidebar({priority: RenderPriority.RESPONSIVE, awaitSlideAnimation: true})
         }
-        pros.push(renderManager.setElementsTo(this.getId()+'-toggleSidebarButton', newValue ? '<' : '>'))
-        await Promise.all(pros)
       }
     }
     settings.subscribeBoolean('boxSidebar', this.focusState.onBoxSidebarSettingChange)
@@ -467,7 +467,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       scaleTool.renderInto(this),
       this.tabs.renderBar(),
       this.addOpenButtonIfFile(options.priority),
-      this.addToggleBoxSidebarButton(options.priority),
+      renderManager.addElementTo(this.getId(), this.focusState.toggleSidebarButton.shape({position: 'absolute', top: '28px', right: '4px'}), options.priority),
       this.addSidebar(options.priority)
     ])
   }
@@ -476,13 +476,17 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     if (!this.focusState) {
       return
     }
+    const toggleSidebarButton = this.focusState.toggleSidebarButton
+
     settings.unsubscribeBoolean('boxSidebar', this.focusState.onBoxSidebarSettingChange)
+    toggleSidebarButton.onUnmount()
+
     this.focusState = undefined
     await Promise.all([
       scaleTool.unrenderFrom(this),
       this.tabs.unrenderBar(),
       this.removeOpenButtonIfFile(options.priority),
-      this.removeToggleBoxSidebarButton(options.priority),
+      renderManager.remove(toggleSidebarButton.id, options.priority),
       this.removeSidebar({priority: options.priority, awaitSlideAnimation: options.awaitAnimations})
     ])
   }
@@ -505,20 +509,6 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       return
     }
     return renderManager.remove(this.getId()+'-openButton', priority)
-  }
-
-  private async addToggleBoxSidebarButton(priority: RenderPriority): Promise<void> {
-    return renderManager.addElementTo(this.getId(), {
-      type: 'button',
-      id: this.getId()+'-toggleSidebarButton',
-      style: {position: 'absolute', top: '28px', right: '4px', cursor: 'pointer'},
-      onclick: () => settings.setBoolean('boxSidebar', !settings.getBoolean('boxSidebar')),
-      children: settings.getBoolean('boxSidebar') ? '<' : '>'
-    }, priority)
-  }
-
-  private async removeToggleBoxSidebarButton(priority: RenderPriority): Promise<void> {
-    return renderManager.remove(this.getId()+'-toggleSidebarButton', priority)
   }
 
   private async addSidebar(priority: RenderPriority): Promise<void> {
