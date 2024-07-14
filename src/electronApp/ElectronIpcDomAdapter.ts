@@ -108,6 +108,9 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
   
           case 'innerHTML':
             return `document.getElementById('${command.elementId}').innerHTML='${command.value}';`// TODO: fails if innerHTML includes "'"
+          
+          case 'removeElement':
+            return `document.getElementById('${command.elementId}').remove();`
 
           case 'setStyleTo':
             if (typeof command.value === 'string') {

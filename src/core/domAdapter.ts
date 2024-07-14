@@ -25,7 +25,7 @@ export type MouseEventResultAdvanced = {
   targetPathElementIds: string[]
 }
 
-export type BatchMethod = 'appendChildTo'|'addContentTo'|'addElementsTo'|'addElementTo'|'setElementsTo'|'setElementTo'|'innerHTML'|'setStyleTo'|'addStyleTo'|'addClassTo'|'removeClassFrom'
+export type BatchMethod = 'appendChildTo'|'addContentTo'|'addElementsTo'|'addElementTo'|'setElementsTo'|'setElementTo'|'innerHTML'|'removeElement'|'setStyleTo'|'addStyleTo'|'addClassTo'|'removeClassFrom'
 
 export let dom: DocumentObjectModelAdapter
 

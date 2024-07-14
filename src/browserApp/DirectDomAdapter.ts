@@ -91,6 +91,9 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         
                 case 'innerHTML':
                     return this.setContentToSync(command.elementId, command.value as string)
+                
+                case 'removeElement':
+                    return this.removeSync(command.elementId)
 
                 case 'setStyleTo':
                     return this.setStyleToSync(command.elementId, command.value as string|Style)
@@ -306,6 +309,9 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public async remove(id: string): Promise<void> {
+        this.removeSync(id)
+    }
+    public removeSync(id: string): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
             util.logWarning(`DirectDomAdapter::remove(..) failed to get element with id '${id}'.`)

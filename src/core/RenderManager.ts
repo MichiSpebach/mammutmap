@@ -158,7 +158,8 @@ export class RenderManager {
   public remove(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     return this.runOrSchedule(new Command({
       priority: priority,
-      command: () => dom.remove(id)
+      command: () => dom.remove(id),
+      batchParameters: {elementId: id, method: 'removeElement', value: ''}
     }))
   }
 
@@ -301,7 +302,8 @@ export class RenderManager {
     }))
   }
 
-  public async runOrSchedule<T>(command: Command): Promise<T> { // only public for unit tests
+  /** only public for unit tests */
+  public async runOrSchedule<T>(command: Command): Promise<T> {
     const combinedCommand: Command|undefined = this.tryToCombineWithQueuedCommands(command)
     if (combinedCommand) {
       return combinedCommand.promise.get()
@@ -335,7 +337,8 @@ export class RenderManager {
     return command.promise.get()
   }
 
-  public addCommand(command: Command): void { // only public for unit tests
+  /** only public for unit tests */
+  public addCommand(command: Command): void {
     let i = 0
     for(; i < this.commands.length; i++) {
       const queuedCommand: Command = this.commands[i]
