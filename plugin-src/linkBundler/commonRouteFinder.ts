@@ -136,21 +136,27 @@ function canLinksBeBundled(
 	intersectionRect: LocalRect
 ): boolean {
 	const elongationEpsilon: number = Math.sqrt(intersectionRect.width*intersectionRect.width + intersectionRect.height*intersectionRect.height) / 100
-	linkLine = new Line(linkLine.from, linkLine.to).elongate(elongationEpsilon)
-	otherLinkLine = new Line(otherLinkLine.from, otherLinkLine.to).elongate(elongationEpsilon)
+	const linkLineElongated: {from: LocalPosition, to: LocalPosition} = new Line(linkLine.from, linkLine.to).elongate(elongationEpsilon)
+	const otherLinkLineElongated: {from: LocalPosition, to: LocalPosition} = new Line(otherLinkLine.from, otherLinkLine.to).elongate(elongationEpsilon)
 	
-	const intersections: LocalPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLine)
+	let intersections: LocalPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLineElongated)
 	if (intersections.length === 0) {
-		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) intersections.length === 0, returning false`)
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLineElongated)}, intersectionRect: ${JSON.stringify(intersectionRect)}) intersections.length === 0, returning false`)
 		return false
+	}
+	if (intersections.length > 1) {
+		intersections = intersections.filter(intersection => !intersection.newRounded(2).equals(linkLine.from.newRounded(2)) && !intersection.newRounded(2).equals(linkLine.to.newRounded(2)))
 	}
 	if (intersections.length !== 1) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with linkLine, but are ${intersections.length}`)
 	}
-	const otherIntersections: LocalPosition[] = intersectionRect.calculateIntersectionsWithLine(otherLinkLine)
+	let otherIntersections: LocalPosition[] = intersectionRect.calculateIntersectionsWithLine(otherLinkLineElongated)
 	if (otherIntersections.length === 0) {
-		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) otherIntersections.length === 0, returning false`)
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLineElongated)}, intersectionRect: ${JSON.stringify(intersectionRect)}) otherIntersections.length === 0, returning false`)
 		return false
+	}
+	if (otherIntersections.length > 1) {
+		otherIntersections = otherIntersections.filter(intersection => !intersection.newRounded(2).equals(otherLinkLine.from.newRounded(2)) && !intersection.newRounded(2).equals(otherLinkLine.to.newRounded(2)))
 	}
 	if (otherIntersections.length !== 1) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with otherLinkLine, but are ${otherIntersections.length}`)
