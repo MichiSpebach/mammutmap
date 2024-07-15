@@ -5,13 +5,13 @@
  * TODO fix this!
  */
 import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { ClientRect } from '../../dist/core/ClientRect'
+import { LocalRect } from '../../dist/core/LocalRect'
 import { Box } from '../../dist/core/box/Box'
 import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link } from '../../dist/core/link/Link'
 import { WayPointData } from '../../dist/core/mapData/WayPointData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { ClientPosition } from '../../dist/core/shape/ClientPosition'
+import { LocalPosition } from '../../dist/core/shape/LocalPosition'
 import { Line } from '../../dist/core/shape/Line'
 import { CommonRoute } from './CommonRoute'
 
@@ -68,7 +68,7 @@ async function findAndExtendCommonRoutes(
 ): Promise<{deepestBoxInPath: BoxWatcher}> {
 	// TODO: refactor this method
 	const managingBox: Box = link.getManagingBox()
-	const linkLine: {from: ClientPosition, to: ClientPosition} = await link.getLineInClientCoords()
+	let linkLine: {from: LocalPosition, to: LocalPosition} = await link.getLineInManagingBoxCoords()
 	let path: WayPointData[] = link.getData()[end].path
 	if (path[0].boxId === managingBox.getId()) {
 		path = path.slice(1)
@@ -86,7 +86,12 @@ async function findAndExtendCommonRoutes(
 		}
 		waypoint.watcher.unwatch()
 		waypoint = newWaypoint
-		const waypointRect: ClientRect = await waypoint.node.getClientShape()
+		if (waypoint.node instanceof Box) {
+			linkLine = {
+				from: waypoint.node.transform.fromParentPosition(linkLine.from),
+				to: waypoint.node.transform.fromParentPosition(linkLine.to)
+			}
+		}
 		const borderingLinks: Link[] = end === 'from'
 			? waypoint.node.borderingLinks.getOutgoing()
 			: waypoint.node.borderingLinks.getIngoing()
@@ -94,8 +99,15 @@ async function findAndExtendCommonRoutes(
 			if (borderingLink === link) {
 				continue
 			}
-			if (!canLinksBeBundled(linkLine, await borderingLink.getLineInClientCoords(), waypointRect)) {
-				continue
+			if (waypoint.node instanceof Box) {
+				const borderingLinkLine: {from: LocalPosition, to: LocalPosition} = await borderingLink.getLineInManagingBoxCoords()
+				const borderingLinkLineInWaypointBoxCoords = {
+					from: waypoint.node.transform.outerCoordsRecursiveToLocal(borderingLink.getManagingBox(), borderingLinkLine.from),
+					to: waypoint.node.transform.outerCoordsRecursiveToLocal(borderingLink.getManagingBox(), borderingLinkLine.to)
+				}
+				if (!canLinksBeBundled(linkLine, borderingLinkLineInWaypointBoxCoords, new LocalRect(0, 0, 100, 100))) {
+					continue
+				}
 			}
 			const routeToExtend: {commonRoute: CommonRoute, connectingKnot?: NodeWidget} | undefined = findCommonRouteToExtend(commonRoutes, end, borderingLink, waypoint.node)
 			const newCommonRoute = routeToExtend?.commonRoute
@@ -118,17 +130,16 @@ async function findAndExtendCommonRoutes(
 	return {deepestBoxInPath: waypoint.watcher}
 }
 
-/** TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away */
 function canLinksBeBundled(
-	linkLine: {from: ClientPosition, to: ClientPosition},
-	otherLinkLine: {from: ClientPosition, to: ClientPosition},
-	intersectionRect: ClientRect
+	linkLine: {from: LocalPosition, to: LocalPosition},
+	otherLinkLine: {from: LocalPosition, to: LocalPosition},
+	intersectionRect: LocalRect
 ): boolean {
 	const elongationEpsilon: number = Math.sqrt(intersectionRect.width*intersectionRect.width + intersectionRect.height*intersectionRect.height) / 100
 	linkLine = new Line(linkLine.from, linkLine.to).elongate(elongationEpsilon)
 	otherLinkLine = new Line(otherLinkLine.from, otherLinkLine.to).elongate(elongationEpsilon)
 	
-	const intersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLine)
+	const intersections: LocalPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLine)
 	if (intersections.length === 0) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) intersections.length === 0, returning false`)
 		return false
@@ -136,7 +147,7 @@ function canLinksBeBundled(
 	if (intersections.length !== 1) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with linkLine, but are ${intersections.length}`)
 	}
-	const otherIntersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(otherLinkLine)
+	const otherIntersections: LocalPosition[] = intersectionRect.calculateIntersectionsWithLine(otherLinkLine)
 	if (otherIntersections.length === 0) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) otherIntersections.length === 0, returning false`)
 		return false
@@ -144,20 +155,20 @@ function canLinksBeBundled(
 	if (otherIntersections.length !== 1) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) expected exactly one intersection with otherLinkLine, but are ${otherIntersections.length}`)
 	}
-	const intersection: ClientPosition = intersections[0]
-	const otherIntersection: ClientPosition = otherIntersections[0]
+	const intersection: LocalPosition = intersections[0]
+	const otherIntersection: LocalPosition = otherIntersections[0]
 	const horizontalEpsilon: number = intersectionRect.width/100
 	const verticalEpsilon: number = intersectionRect.height/100
-	if (areNearlyEqual([intersectionRect.x, intersection.x, otherIntersection.x], horizontalEpsilon)) {
+	if (areNearlyEqual([intersectionRect.x, intersection.percentX, otherIntersection.percentX], horizontalEpsilon)) {
 		return true
 	}
-	if (areNearlyEqual([intersectionRect.getRightX(), intersection.x, otherIntersection.x], horizontalEpsilon)) {
+	if (areNearlyEqual([intersectionRect.getRightX(), intersection.percentX, otherIntersection.percentX], horizontalEpsilon)) {
 		return true
 	}
-	if (areNearlyEqual([intersectionRect.y, intersection.y, otherIntersection.y], verticalEpsilon)) {
+	if (areNearlyEqual([intersectionRect.y, intersection.percentY, otherIntersection.percentY], verticalEpsilon)) {
 		return true
 	}
-	if (areNearlyEqual([intersectionRect.getBottomY(), intersection.y, otherIntersection.y], verticalEpsilon)) {
+	if (areNearlyEqual([intersectionRect.getBottomY(), intersection.percentY, otherIntersection.percentY], verticalEpsilon)) {
 		return true
 	}
 	return false

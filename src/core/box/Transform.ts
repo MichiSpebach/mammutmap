@@ -102,6 +102,19 @@ export class Transform {
         )
     }
 
+    public outerCoordsRecursiveToLocal(outerBox: Box, outerPosition: LocalPosition): LocalPosition {
+        const path: Box[] = [this.referenceBox]
+        while (path[0].getParent() !== outerBox) {
+            path.unshift(path[0].getParent()) // TODO: warn if called with bad arguments?
+        }
+
+        let tempPosition: LocalPosition = outerPosition
+        for (const box of path) {
+            tempPosition = box.transform.fromParentPosition(tempPosition)
+        }
+        return tempPosition
+    }
+
     public async getNearestGridPositionOfOtherTransform(position: ClientPosition, other: Transform): Promise<LocalPosition> {
         const clientPositionSnappedToGrid: ClientPosition = await other.getNearestGridPositionInClientCoords(position)
         return this.referenceBox.transform.clientToLocalPosition(clientPositionSnappedToGrid)
