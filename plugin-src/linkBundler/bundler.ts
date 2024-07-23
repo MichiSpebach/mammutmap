@@ -106,12 +106,13 @@ async function ensureRouteOfLinkHasId(link:Link): Promise<void> {
 	}
 	const routeId: string = util.generateId()
 	const pros: Promise<void>[] = []
-	for (const routeLink of HighlightPropagatingLink.getRoute(link)) {
-		if (HighlightPropagatingLink.getRouteIds(routeLink).length > 0) {
-			console.warn(`linkBundler.ensureRouteOfLinkHasId(link: ${link.describe()}) routeLink with id '${routeLink.getId()}' is already part of a route`)
+	for (const routeLink of await HighlightPropagatingLink.getRouteAndRenderIfNecessary(link)) {
+		if (HighlightPropagatingLink.getRouteIds(routeLink.link).length > 0) {
+			console.warn(`linkBundler.ensureRouteOfLinkHasId(link: ${link.describe()}) routeLink with id '${routeLink.link.getId()}' is already part of a route`)
 		}
-		HighlightPropagatingLink.addRoute(routeLink, routeId)
-		pros.push(routeLink.getManagingBox().saveMapData())
+		HighlightPropagatingLink.addRoute(routeLink.link, routeId)
+		pros.push(routeLink.link.getManagingBox().saveMapData())
+		pros.push(routeLink.watcher.unwatch())
 	}
 	await Promise.all(pros)
 }

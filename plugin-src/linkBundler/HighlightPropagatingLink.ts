@@ -70,15 +70,17 @@ export class HighlightPropagatingLink extends LinkImplementation {
 		bundledWithIds.splice(index, 1)
 	}
 
-	public static getRoute(link: Link, option?: {renderIfNecessary?: boolean}): Link[] {
-		const route: Link[] = [link]
-		this.elongateRouteToStart(route, this.getRouteIds(link))
-		this.elongateRouteToEnd(route, this.getRouteIds(link))
+	public static async getRouteAndRenderIfNecessary(link: Link): Promise<{link: Link, watcher: BoxWatcher}[]> {
+		const route: {link: Link, watcher: BoxWatcher}[] = [{link, watcher: await BoxWatcher.newAndWatch(link.getManagingBox())}]
+		await Promise.all([
+			this.elongateRouteToStart(route, this.getRouteIds(link)),
+			this.elongateRouteToEnd(route, this.getRouteIds(link))
+		])
 
 		for (const routeLink of route) {
 			for (const linkRouteId of this.getRouteIds(link)) {	
-				if (!this.getRouteIds(routeLink).includes(linkRouteId)) {
-					console.warn(`HighlightPropagatingLink.getRoute(link: "${link.describe()}") routeId '${linkRouteId}' is not included in link with id '${routeLink.getId()}'`)
+				if (!this.getRouteIds(routeLink.link).includes(linkRouteId)) {
+					console.warn(`HighlightPropagatingLink.getRouteAndRenderIfNecessary(link: "${link.describe()}") routeId '${linkRouteId}' is not included in link with id '${routeLink.link.getId()}'`)
 				}
 			}
 		}
@@ -86,53 +88,59 @@ export class HighlightPropagatingLink extends LinkImplementation {
 		return route
 	}
 
-	private static elongateRouteToStart(route: Link[], routeIds: string[]): void {
+	private static async elongateRouteToStart(route: {link: Link, watcher: BoxWatcher}[], routeIds: string[]): Promise<void> {
 		while (true) {
-			const target: AbstractNodeWidget = route[0].from.getDeepestRenderedWayPoint().linkable
-			if (!(target instanceof NodeWidget)) {
+			const target: {node: AbstractNodeWidget, watcher: BoxWatcher} = await route[0].link.from.getTargetAndRenderIfNecessary()
+			if (!(target.node instanceof NodeWidget)) {
+				await target.watcher.unwatch()
 				return
 			}
-			const precursor: Link|undefined = this.elongateRouteFilterConnectedLinks(route, routeIds, target.borderingLinks.getIngoing())
+			const precursor: Link|undefined = this.elongateRouteFilterConnectedLinks(route, routeIds, target.node.borderingLinks.getIngoing())
 			if (!precursor) {
+				await target.watcher.unwatch()
 				return
 			}
-			route.unshift(precursor)
+			route.unshift({link: precursor, watcher: target.watcher})
 		}
 	}
 
-	private static elongateRouteToEnd(route: Link[], routeIds: string[]): void {
+	private static async elongateRouteToEnd(route: {link: Link, watcher: BoxWatcher}[], routeIds: string[]): Promise<void> {
 		while (true) {
-			const target: AbstractNodeWidget = route[route.length-1].to.getDeepestRenderedWayPoint().linkable
-			if (!(target instanceof NodeWidget)) {
+			const target: {node: AbstractNodeWidget, watcher: BoxWatcher} = await route[route.length-1].link.to.getTargetAndRenderIfNecessary()
+			if (!(target.node instanceof NodeWidget)) {
+				await target.watcher.unwatch()
 				return
 			}
-			const successor: Link|undefined = this.elongateRouteFilterConnectedLinks(route, routeIds, target.borderingLinks.getOutgoing())
+			const successor: Link|undefined = this.elongateRouteFilterConnectedLinks(route, routeIds, target.node.borderingLinks.getOutgoing())
 			if (!successor) {
+				await target.watcher.unwatch()
 				return
 			}
-			route.push(successor)
+			route.push({link: successor, watcher: target.watcher})
 		}
 	}
 
-	private static elongateRouteFilterConnectedLinks(route: Link[], routeIds: string[], connectedLink: Link[]): Link|undefined {
-		if (connectedLink.length === 1) {
-			if (!this.includesAllRouteIds(connectedLink[0], routeIds)) {
-				console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].describe()}", .., "${route[route.length-1].describe()}"], ..) !this.includesAllRouteIds(connections[0], routeIds)`)
+	private static elongateRouteFilterConnectedLinks(route: {link: Link}[], routeIds: string[], connectedLinks: Link[]): Link|undefined {
+		if (connectedLinks.length === 1) {
+			if (!this.includesAllRouteIds(connectedLinks[0], routeIds)) {
+				console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].link.describe()}", .., "${route[route.length-1].link.describe()}"], ..) !this.includesAllRouteIds(connections[0], routeIds)`)
 			}
-		} else if (connectedLink.length > 1) {
-			connectedLink = connectedLink.filter((connection: Link) => this.includesAllRouteIds(connection, routeIds))
-			if (connectedLink.length > 1) {
-				console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].describe()}", .., "${route[route.length-1].describe()}"], ..) connectedLink.length > 1`)
+		} else if (connectedLinks.length > 1) {
+			connectedLinks = connectedLinks.filter((connection: Link) => this.includesAllRouteIds(connection, routeIds))
+			if (connectedLinks.length > 1) {
+				console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].link.describe()}", .., "${route[route.length-1].link.describe()}"], ..) connectedLinks.length > 1`)
 			}
 		}
-		if (connectedLink.length === 0) {
+		if (connectedLinks.length === 0) {
 			return undefined
 		}
-		if (route.includes(connectedLink[0])) {
-			console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].describe()}", .., "${route[route.length-1].describe()}"], ..) detected cyle`)
-			return undefined
+		for (const routeLink of route) {
+			if (routeLink.link === connectedLinks[0]) {
+				console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].link.describe()}", .., "${route[route.length-1].link.describe()}"], ..) detected cyle`)
+				return undefined
+			}
 		}
-		return connectedLink[0]
+		return connectedLinks[0]
 	}
 
 	private static includesAllRouteIds(link: Link, routeIds: string[]): boolean {
@@ -265,7 +273,13 @@ export class HighlightPropagatingLink extends LinkImplementation {
 			: endNode.borderingLinks.getIngoing()
 		const bundledWithLinks: Link[] = connectedLinks.filter(link => bundledWith.includes(link.getId()))
 		const entangledLinksToPropagateTo: Link[] = bundledWithLinks.length > 0 ? bundledWithLinks : connectedLinks
-		const routedLinksToPropagateTo: Link [] = connectedLinks.filter(link => options.highlightRouteIds.some(highlightRouteId => HighlightPropagatingLink.getRouteIds(link).includes(highlightRouteId)))
+		const routedLinksToPropagateTo: Link [] = connectedLinks.filter(link => {
+			const routeIds: string[] = HighlightPropagatingLink.getRouteIds(link)
+			if (routeIds.length < 1 &&  options.highlightRouteIds.length < 1) {
+				return true
+			}
+			return options.highlightRouteIds.some(highlightRouteId => routeIds.includes(highlightRouteId))
+		})
 		if (!entangledLinksToPropagateTo.every(link => routedLinksToPropagateTo.includes(link)) || !routedLinksToPropagateTo.every(link => entangledLinksToPropagateTo.includes(link))) {
 			console.warn(`entangledLinksToPropagateTo and routedLinksToPropagateTo include different links:\nentangledLinksToPropagateTo=${entangledLinksToPropagateTo.map(link => link.getId())} but\nroutedLinksToPropagateTo=${routedLinksToPropagateTo.map(link => link.getId())}`)
 		}
