@@ -22,7 +22,7 @@ export class CommonRoute {
 	}
 
 	public constructor(
-		private readonly links: Link[],
+		public readonly links: Link[],
 		private readonly knots: NodeWidget[],
 		private from: AbstractNodeWidget,
 		private to: AbstractNodeWidget,

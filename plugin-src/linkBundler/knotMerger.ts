@@ -147,6 +147,12 @@ async function copyEntanglementsOfLinkInto(options: {link: Link, linkEntanglemen
 }
 
 async function mergeLinkIntoAndRemove(link: Link, routeTreeSearchDirection: 'from'|'to', mergeIntoLink: Link): Promise<void> {
+	HighlightPropagatingLink.addRoutes(mergeIntoLink, HighlightPropagatingLink.getRouteIds(link))
+	for (const tag of link.getTags()) {
+		if (!mergeIntoLink.includesTag(tag)) {
+			mergeIntoLink.addTag(tag)
+		}
+	}
 	const entangledLinks: {links: Link[], watchers: BoxWatcher[]} = await new RouteTree(link, routeTreeSearchDirection).getEntangledLinks()
 	HighlightPropagatingLink.addBundledWithIds(mergeIntoLink, HighlightPropagatingLink.getBundledWithIds(link))
 	await Promise.all([

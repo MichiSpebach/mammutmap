@@ -12,6 +12,34 @@ import { NodeWidget } from '../../dist/core/node/NodeWidget'
 
 export class HighlightPropagatingLink extends LinkImplementation {
 
+	public static getRouteIds(link: Link): string[] {
+		return link.getData()['routes']?? []
+	}
+
+	public static addRoutes(link: Link, routeIds: string[]): void {
+		if (!link.getData()['routes']) {
+			link.getData()['routes'] = []
+		}
+		(link.getData()['routes'] as string[]).push(...routeIds)
+	}
+
+	public static addRoute(link: Link, routeId: string): void {
+		if (!link.getData()['routes']) {
+			link.getData()['routes'] = []
+		}
+		(link.getData()['routes'] as string[]).push(routeId)
+	}
+
+	public static removeRoute(link: Link, routeId: string): void {
+		const routeIds: string[] = this.getRouteIds(link)
+		const index: number = routeIds.indexOf(routeId)
+		if (index < 0) {
+			console.warn(`HighlightPropagatingLink.removeRoute(link: '${link.describe()}', routeId: '${routeId}) routeIds does not contain routeId`)
+			return
+		}
+		routeIds.splice(index, 1)
+	}
+
 	public static getBundledWithIds(link: Link): string[] {
 		return link.getData()['bundledWith']?? []
 	}
@@ -40,6 +68,82 @@ export class HighlightPropagatingLink extends LinkImplementation {
 			return
 		}
 		bundledWithIds.splice(index, 1)
+	}
+
+	public static getRoute(link: Link, option?: {renderIfNecessary?: boolean}): Link[] {
+		const route: Link[] = [link]
+		this.elongateRouteToStart(route, this.getRouteIds(link))
+		this.elongateRouteToEnd(route, this.getRouteIds(link))
+
+		for (const routeLink of route) {
+			for (const linkRouteId of this.getRouteIds(link)) {	
+				if (!this.getRouteIds(routeLink).includes(linkRouteId)) {
+					console.warn(`HighlightPropagatingLink.getRoute(link: "${link.describe()}") routeId '${linkRouteId}' is not included in link with id '${routeLink.getId()}'`)
+				}
+			}
+		}
+
+		return route
+	}
+
+	private static elongateRouteToStart(route: Link[], routeIds: string[]): void {
+		while (true) {
+			const target: AbstractNodeWidget = route[0].from.getDeepestRenderedWayPoint().linkable
+			if (!(target instanceof NodeWidget)) {
+				return
+			}
+			const precursor: Link|undefined = this.elongateRouteFilterConnectedLinks(route, routeIds, target.borderingLinks.getIngoing())
+			if (!precursor) {
+				return
+			}
+			route.unshift(precursor)
+		}
+	}
+
+	private static elongateRouteToEnd(route: Link[], routeIds: string[]): void {
+		while (true) {
+			const target: AbstractNodeWidget = route[route.length-1].to.getDeepestRenderedWayPoint().linkable
+			if (!(target instanceof NodeWidget)) {
+				return
+			}
+			const successor: Link|undefined = this.elongateRouteFilterConnectedLinks(route, routeIds, target.borderingLinks.getOutgoing())
+			if (!successor) {
+				return
+			}
+			route.push(successor)
+		}
+	}
+
+	private static elongateRouteFilterConnectedLinks(route: Link[], routeIds: string[], connectedLink: Link[]): Link|undefined {
+		if (connectedLink.length === 1) {
+			if (!this.includesAllRouteIds(connectedLink[0], routeIds)) {
+				console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].describe()}", .., "${route[route.length-1].describe()}"], ..) !this.includesAllRouteIds(connections[0], routeIds)`)
+			}
+		} else if (connectedLink.length > 1) {
+			connectedLink = connectedLink.filter((connection: Link) => this.includesAllRouteIds(connection, routeIds))
+			if (connectedLink.length > 1) {
+				console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].describe()}", .., "${route[route.length-1].describe()}"], ..) connectedLink.length > 1`)
+			}
+		}
+		if (connectedLink.length === 0) {
+			return undefined
+		}
+		if (route.includes(connectedLink[0])) {
+			console.warn(`HighlightPropagatingLink.elongateRouteFilterConnectedLinks(route: ["${route[0].describe()}", .., "${route[route.length-1].describe()}"], ..) detected cyle`)
+			return undefined
+		}
+		return connectedLink[0]
+	}
+
+	private static includesAllRouteIds(link: Link, routeIds: string[]): boolean {
+		const includedRouteIds: string[] = routeIds.filter(routeId => this.getRouteIds(link).includes(routeId))
+		if (includedRouteIds.length === routeIds.length) {
+			return true
+		}
+		if (includedRouteIds.length < 1) {
+			console.warn(`HighlightPropagatingLink.includesAllRouteIds(link: "${link.describe()}", routeIds: ${routeIds}) expected at least one routeId to be included in link`)
+		}
+		return false
 	}
 
 	public static async getEntangledLinks(link: Link, searchDirection: 'from'|'to'): Promise<Link[]> {
@@ -110,6 +214,7 @@ export class HighlightPropagatingLink extends LinkImplementation {
 	public override async renderWithOptions(options: {
 		priority?: RenderPriority|undefined
 		highlight?: boolean|undefined
+		highlightRouteIds?: string[]
 		draggingInProgress?: boolean|undefined
 		hoveringOver?: boolean|undefined
 		propagationStep?: number
@@ -122,11 +227,12 @@ export class HighlightPropagatingLink extends LinkImplementation {
 		if (options.propagationStep && options.propagationStep > 8) {
 			console.warn(`HighlightPropagatingLink::renderWithOptions(...) max propagationStep of 8 exceeded`)
 		} else if (options.highlight !== undefined) {
+			const highlightRouteIds: string[] = options.highlightRouteIds?? HighlightPropagatingLink.getRouteIds(this)
 			if (!options.propagationDirection || options.propagationDirection === 'from') {
-				pros.push(this.propagateHighlight({...options, propagationDirection: 'from', highlight: options.highlight}))
+				pros.push(this.propagateHighlight({...options, propagationDirection: 'from', highlight: options.highlight, highlightRouteIds}))
 			}
 			if (!options.propagationDirection || options.propagationDirection === 'to') {
-				pros.push(this.propagateHighlight({...options, propagationDirection: 'to', highlight: options.highlight}))
+				pros.push(this.propagateHighlight({...options, propagationDirection: 'to', highlight: options.highlight, highlightRouteIds}))
 			}
 		}
 		
@@ -134,7 +240,7 @@ export class HighlightPropagatingLink extends LinkImplementation {
 	}
 
 	public override async render(priority?: RenderPriority | undefined): Promise<void> {
-		if (this['renderState'].isUnrendered() && this.getConnectedLinks().some(link => link.isHighlight())) {
+		if (this['renderState'].isUnrendered() && this.getConnectedLinks().some(link => link.isHighlight())) { // TODO: this.getConnectedLinks() does not always return the correct links
 			this['highlight'] = true
 		}
 		await super.render(priority)
@@ -142,6 +248,7 @@ export class HighlightPropagatingLink extends LinkImplementation {
 
 	private async propagateHighlight(options: {
 		highlight: boolean
+		highlightRouteIds: string[]
 		propagationStep?: number
 		propagationDirection: 'from'|'to'
 		bundledWith?: string[]
@@ -157,9 +264,13 @@ export class HighlightPropagatingLink extends LinkImplementation {
 			? endNode.borderingLinks.getOutgoing()
 			: endNode.borderingLinks.getIngoing()
 		const bundledWithLinks: Link[] = connectedLinks.filter(link => bundledWith.includes(link.getId()))
-		const linksToPropagateTo: Link[] = bundledWithLinks.length > 0 ? bundledWithLinks : connectedLinks
+		const entangledLinksToPropagateTo: Link[] = bundledWithLinks.length > 0 ? bundledWithLinks : connectedLinks
+		const routedLinksToPropagateTo: Link [] = connectedLinks.filter(link => options.highlightRouteIds.some(highlightRouteId => HighlightPropagatingLink.getRouteIds(link).includes(highlightRouteId)))
+		if (!entangledLinksToPropagateTo.every(link => routedLinksToPropagateTo.includes(link)) || !routedLinksToPropagateTo.every(link => entangledLinksToPropagateTo.includes(link))) {
+			console.warn(`entangledLinksToPropagateTo and routedLinksToPropagateTo include different links:\nentangledLinksToPropagateTo=${entangledLinksToPropagateTo.map(link => link.getId())} but\nroutedLinksToPropagateTo=${routedLinksToPropagateTo.map(link => link.getId())}`)
+		}
 
-		await Promise.all(linksToPropagateTo.filter(link => link.shouldBeRendered()).map(async link => {
+		await Promise.all(routedLinksToPropagateTo.filter(link => link.shouldBeRendered()).map(async link => {
 			await (link as HighlightPropagatingLink).renderWithOptions({...options, propagationStep, bundledWith})
 		}))
 	}

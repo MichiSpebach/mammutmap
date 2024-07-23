@@ -15,6 +15,7 @@ import * as commonRouteFinder from './commonRouteFinder'
 import * as knotMerger from './knotMerger'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 import { CommonRoute } from './CommonRoute'
+import { util } from '../../dist/core/util/util'
 
 export async function bundleLink(link: Link, options?: {
 	unwatchDelayInMs?: number
@@ -47,6 +48,11 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 		return
 	}
 
+	await Promise.all([
+		ensureRouteOfLinkHasId(link),
+		ensureRouteOfLinkHasId(commonRoute.links[0])
+	])
+
 	let fromLink: Link = link
 	let toLink: Link = link
 	if (bundleFromPart && bundleToPart) {
@@ -77,12 +83,37 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 		toInsertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
 	}
 
+	const pros: Promise<void>[] = []
+	for (const commonRouteLink of commonRoute.links) {
+		if (commonRouteLink.from.getTargetNodeId() === link.from.getTargetNodeId() || commonRouteLink.to.getTargetNodeId() === link.to.getTargetNodeId()) {
+			continue
+		}
+		HighlightPropagatingLink.addRoutes(commonRouteLink, HighlightPropagatingLink.getRouteIds(link))
+		pros.push(commonRouteLink.getManagingBox().saveMapData())
+	}
+	await Promise.all(pros)
 	await updateEntangledLinks(bundleFromPart, bundleToPart, commonRoute, fromLink, toLink)
 
 	//await Promise.all([
 		await mergeIfKnotsAndIfPossible(commonRoute.getFrom(), fromLink.from, fromInsertion?.insertedNode)
 		await mergeIfKnotsAndIfPossible(commonRoute.getTo(), toLink.to, toInsertion?.insertedNode)
 	//])
+}
+
+async function ensureRouteOfLinkHasId(link:Link): Promise<void> {
+	if (HighlightPropagatingLink.getRouteIds(link).length > 0) {
+		return
+	}
+	const routeId: string = util.generateId()
+	const pros: Promise<void>[] = []
+	for (const routeLink of HighlightPropagatingLink.getRoute(link)) {
+		if (HighlightPropagatingLink.getRouteIds(routeLink).length > 0) {
+			console.warn(`linkBundler.ensureRouteOfLinkHasId(link: ${link.describe()}) routeLink with id '${routeLink.getId()}' is already part of a route`)
+		}
+		HighlightPropagatingLink.addRoute(routeLink, routeId)
+		pros.push(routeLink.getManagingBox().saveMapData())
+	}
+	await Promise.all(pros)
 }
 
 function isLinkEndKnotTemporaryAndWillBeMerged(linkEnd: LinkEnd, commonRoute: CommonRoute, commonRouteEnd: 'from'|'to'): boolean {
@@ -179,6 +210,7 @@ async function dragAndDropLinkEnd(linkEnd: LinkEnd, dropTarget: NodeWidget): Pro
 	await linkEnd.dragAndDrop({dropTarget: dropTarget, clientPosition: bundleLinkNodePosition}) // TODO: do this with LocalPositions because ClientPositions may not work well when zoomed far away
 }
 
+/** TODO: return Promise<LocalPosition> */
 async function calculateBundleNodePosition(link: Link, otherLink: Link, box: Box): Promise<ClientPosition> {
 	const linkLine: {from: ClientPosition, to: ClientPosition} = await link.getLineInClientCoords()
 	const otherLinkLine: {from: ClientPosition, to: ClientPosition} = await otherLink.getLineInClientCoords()
