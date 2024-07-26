@@ -723,7 +723,7 @@ test('bundleLink, linkToBundle starts with knot, knot on toSide needs to be inse
 	const bottomToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
 	const bottomToBottomRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)
 	expect(topToTopRoute?.map(node => node.getId())).toEqual([topToTopLink.getId(), bottomToBottomLink.getId(), bottomToTopLink.getId()])
-	//expect(BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderBottomFile)?.map(link => link.getId())).toBe(undefined) TODO should not find route between these files
+	expect(BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderBottomFile)?.map(link => link.getId())).toBe(undefined)
 	expect(bottomToTopRoute?.map(node => node.getId())).toEqual([expect.anything(), bottomToBottomLink.getId(), bottomToTopLink.getId()])
 	expect(bottomToBottomRoute?.map(node => node.getId())).toEqual([expect.anything(), bottomToBottomLink.getId(), expect.anything()])
 	const bottomToBottomRouteId: string = HighlightPropagatingLink.getRouteIds(bottomToBottomRoute![2])[0]
@@ -765,7 +765,7 @@ test('bundleLink, linkToBundle ends with knot, knot on fromSide needs to be inse
 	const bottomToBottomRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)
 	expect(topToTopRoute?.map(node => node.getId())).toEqual([topToBottomLink.getId(), bottomToBottomLink.getId(), topToTopLink.getId()])
 	expect(topToBottomRoute?.map(node => node.getId())).toEqual([topToBottomLink.getId(), bottomToBottomLink.getId(), expect.anything()])
-	//expect(BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)?.map(link => link.getId())).toBe(undefined) TODO should not find route between these files
+	expect(BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)?.map(link => link.getId())).toBe(undefined)
 	expect(bottomToBottomRoute?.map(node => node.getId())).toEqual([expect.anything(), bottomToBottomLink.getId(), expect.anything()])
 	const bottomToBottomRouteId: string = HighlightPropagatingLink.getRouteIds(bottomToBottomRoute![0])[0]
 	expect(topToTopRoute?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[topToBottomRouteId, topToTopRouteId], [bottomToBottomRouteId, topToBottomRouteId, topToTopRouteId], [topToTopRouteId]])
@@ -775,6 +775,86 @@ test('bundleLink, linkToBundle ends with knot, knot on fromSide needs to be inse
 	expect(topToBottomRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[topToBottomRoute?.at(2)?.getId(), topToTopLink.getId()], [], [topToBottomLink.getId(), bottomToBottomRoute?.at(0)?.getId()]])
 	expect(bottomToBottomRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[bottomToBottomRoute?.at(2)?.getId()], [], [topToBottomLink.getId(), bottomToBottomRoute?.at(0)?.getId()]])
 })
+
+test('bundleLink, boxes are already connected with links of other routes, but no route between boxes, bundle link into routeWithKnots', async () => {
+	await testBundleLinkBoxesAreConnectedWithLinksButNoRoute('simpleLink', {entangleLinks: false})
+	//await testBundleLinkBoxesAreConnectedWithLinksButNoRoute('simpleLink', {entangleLinks: true}) // TODO: implement case for entangle mechanism
+})
+
+test('bundleLink, boxes are already connected with links of other routes, but no route between boxes, bundle routeWithKnots into link', async () => {
+	await testBundleLinkBoxesAreConnectedWithLinksButNoRoute('linkPartOfRoute', {entangleLinks: false})
+	await testBundleLinkBoxesAreConnectedWithLinksButNoRoute('linkPartOfRoute', {entangleLinks: true})
+})
+
+async function testBundleLinkBoxesAreConnectedWithLinksButNoRoute(linkToBundle: 'simpleLink'|'linkPartOfRoute', options: {entangleLinks: boolean}): Promise<void> {
+	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+
+	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const rightFolder = boxFactory.folderOf({idOrData: new BoxData('rightFolder', 60, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFolderTopFile = boxFactory.fileOf({idOrData: 'leftFolderTopFile', parent: leftFolder, addToParent: true, rendered: true})
+	const leftFolderBottomFile = boxFactory.fileOf({idOrData: 'leftFolderBottomFile', parent: leftFolder, addToParent: true, rendered: true})
+	const rightFolderTopFile = boxFactory.fileOf({idOrData: 'rightFolderTopFile', parent: rightFolder, addToParent: true, rendered: true})
+	const rightFolderBottomFile = boxFactory.fileOf({idOrData: 'rightFolderBottomFile', parent: rightFolder, addToParent: true, rendered: true})
+
+	const topToTopLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
+	const topToBottomLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFolderBottomFile, save: true})
+	await linkBundler.bundleLink(topToTopLink, options)
+	
+	const tempTopToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
+	const tempTopToBottomRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderBottomFile)
+	expect(tempTopToTopRoute?.map(node => node.getId())).toEqual([topToBottomLink.getId(), topToTopLink.getId()])
+	expect(tempTopToBottomRoute?.map(node => node.getId())).toEqual([topToBottomLink.getId(), expect.anything()])
+	const topToTopRouteId: string = HighlightPropagatingLink.getRouteIds(tempTopToTopRoute![1])[0]
+	const topToBottomRouteId: string = HighlightPropagatingLink.getRouteIds(tempTopToBottomRoute![1])[0]
+
+	const bottomToTopLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFolderTopFile, save: true})
+	await linkBundler.bundleLink(bottomToTopLink, options)
+
+	const tempBottomToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
+	expect(tempBottomToTopRoute?.map(node => node.getId())).toEqual([bottomToTopLink.getId(), topToBottomLink.getId(), topToTopLink.getId()])
+	const bottomToTopRouteId: string = HighlightPropagatingLink.getRouteIds(tempBottomToTopRoute![0])[0]
+	expect(BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)).toBe(undefined)
+
+	const bottomToBottomLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
+	const bundleLink: Link = linkToBundle === 'simpleLink' ? bottomToBottomLink : topToBottomLink
+	const bundleIntoLink: Link = linkToBundle === 'simpleLink' ? topToBottomLink : bottomToBottomLink
+	await linkBundler.bundleLink(bundleLink, options)
+
+	const topToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
+	const topToBottomRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderBottomFile)
+	const bottomToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
+	const bottomToBottomRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)
+	expect(topToTopRoute?.map(node => node.getId())).toEqual([expect.anything(), bundleIntoLink.getId(), topToTopLink.getId()])
+	expect(topToBottomRoute?.map(node => node.getId())).toEqual([expect.anything(), bundleIntoLink.getId(), expect.anything()])
+	expect(bottomToTopRoute?.map(link => link.getId())).toEqual([bottomToTopLink.getId(), bundleIntoLink.getId(), topToTopLink.getId()])
+	expect(bottomToBottomRoute?.map(node => node.getId())).toEqual([bottomToTopLink.getId(), bundleIntoLink.getId(), expect.anything()])
+	expect(root.links.getLinks().length).toBe(1)
+	expect(leftFolder.links.getLinks().length).toBe(2)
+	expect(rightFolder.links.getLinks().length).toBe(2)
+	expect(leftFolderBottomFile.links.getLinks().length).toBe(0)
+	expect(rightFolderBottomFile.links.getLinks().length).toBe(0)
+	expect([leftFolder, leftFolderTopFile, leftFolderBottomFile, rightFolder, rightFolderTopFile, rightFolderBottomFile].map(box => box.borderingLinks.getAll().length)).toEqual([1, 1, 1, 1, 1, 1])
+	const bottomToBottomRouteId: string = HighlightPropagatingLink.getRouteIds(bottomToBottomRoute![0]).find(routeId => routeId !== bottomToTopRouteId)!
+	const allRouteIds: string[] = linkToBundle === 'simpleLink'
+		? [topToBottomRouteId, topToTopRouteId, bottomToTopRouteId, bottomToBottomRouteId]
+		: [bottomToBottomRouteId, topToBottomRouteId, topToTopRouteId, bottomToTopRouteId]
+	expect(topToTopRoute?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[topToBottomRouteId, topToTopRouteId], allRouteIds, [topToTopRouteId, bottomToTopRouteId]])
+	expect(topToBottomRoute?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[topToBottomRouteId, topToTopRouteId], allRouteIds, [topToBottomRouteId, bottomToBottomRouteId]])
+	expect(bottomToTopRoute?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[bottomToTopRouteId, bottomToBottomRouteId], allRouteIds, [topToTopRouteId, bottomToTopRouteId]])
+	expect(bottomToBottomRoute?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[bottomToTopRouteId, bottomToBottomRouteId], allRouteIds, [topToBottomRouteId, bottomToBottomRouteId]])
+	if (options.entangleLinks) {
+		expect(topToTopRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[topToBottomRoute?.at(2)?.getId(), topToTopLink.getId()], [], [topToTopRoute?.at(0)?.getId(), bottomToTopLink.getId()]])
+		expect(topToBottomRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[topToBottomRoute?.at(2)?.getId(), topToTopLink.getId()], [], [topToBottomRoute?.at(0)?.getId(), bottomToBottomRoute?.at(0)?.getId()]])
+		expect(bottomToTopRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[bottomToTopRoute?.at(2)?.getId(), bottomToBottomRoute?.at(2)?.getId()], [], [topToTopRoute?.at(0)?.getId(), bottomToTopLink.getId()]])
+		expect(bottomToBottomRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[bottomToTopRoute?.at(2)?.getId(), bottomToBottomRoute?.at(2)?.getId()], [], [topToBottomRoute?.at(0)?.getId(), bottomToBottomRoute?.at(0)?.getId()]])
+	} else {
+		expect(topToTopRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], [], []])
+		expect(topToBottomRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], [], []])
+		expect(bottomToTopRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], [], []])
+		expect(bottomToBottomRoute?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], [], []])
+	}
+}
 
 test('bundleLink, knots on from side need to be merged', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: true})
@@ -913,7 +993,7 @@ test('bundleLink, knots on both sides need to be merged', async () => {
 	expect(temporaryRoute3?.map(link => link.getId())).toEqual([link3.getId(), link4.getId(), expect.anything()])
 	expect(temporaryRoute4?.map(link => link.getId())).toEqual([expect.anything(), link4.getId(), expect.anything()])
 	expect(temporaryRoute5?.map(link => link.getId())).toEqual([expect.anything(), link4.getId(), link5.getId()])
-	//expect(BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile4)?.map(link => link.getId())).toBe(undefined) TODO should not find route between these files
+	expect(BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile4)?.map(link => link.getId())).toBe(undefined)
 	const route5Id: string = HighlightPropagatingLink.getRouteIds(temporaryRoute5![2])[0]
 	expect(temporaryRoute3?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route3Id], [route4Id, route3Id, route5Id], [route4Id, route3Id]])
 	expect(temporaryRoute4?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route4Id, route5Id], [route4Id, route3Id, route5Id], [route4Id, route3Id]])

@@ -19,12 +19,13 @@ import { util } from '../../dist/core/util/util'
 
 export async function bundleLink(link: Link, options?: {
 	unwatchDelayInMs?: number
+	entangleLinks?: boolean
 }): Promise<void> {
 	const {route: longestCommonRoute, deepestBoxInFromPath, deepestBoxInToPath} = await commonRouteFinder.findLongestCommonRouteWithWatchers(link)
 
 	if (longestCommonRoute && longestCommonRoute.getLength() > 0) {
 		console.log(`bundle ${link.describe()} between ${longestCommonRoute.getFrom().getName()} and ${longestCommonRoute.getTo().getName()}.`)
-		await bundleLinkIntoCommonRoute(link, longestCommonRoute)
+		await bundleLinkIntoCommonRoute(link, longestCommonRoute, options)
 	}
 
 	if (options?.unwatchDelayInMs) {
@@ -40,18 +41,25 @@ export async function bundleLink(link: Link, options?: {
 	}
 }
 
-async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): Promise<void> {
-	const bundleFromPart: boolean = link.from.getTargetNodeId() !== commonRoute.getEndLink('from').from.getTargetNodeId()
-	const bundleToPart: boolean = link.to.getTargetNodeId() !== commonRoute.getEndLink('to').to.getTargetNodeId()
-	if (!bundleFromPart && !bundleToPart) {
-		console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) detected duplicate link`) // TODO: should be fixed with new route finder (RouteTree based)
-		return
+async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute, options?: {entangleLinks?: boolean}): Promise<void> {
+	if (!options) { // TODO: remove and deactivate by default
+		options = {entangleLinks: true}
 	}
-
+	//console.warn(`linkBundler.bundleLinkIntoCommonRoute(link: ${link.describe()}, ..) detected duplicate route`) // TODO: warn for duplicate routes and cancel or continue
 	await Promise.all([
 		ensureRouteOfLinkHasId(link),
 		ensureRouteOfLinkHasId(commonRoute.links[0])
 	])
+	
+	const bundleFromPart: boolean = link.from.getTargetNodeId() !== commonRoute.getEndLink('from').from.getTargetNodeId()
+	const bundleToPart: boolean = link.to.getTargetNodeId() !== commonRoute.getEndLink('to').to.getTargetNodeId()
+	if (!bundleFromPart && !bundleToPart) {
+		await Promise.all([
+			addRouteIdsOfLinkToRoute(commonRoute.links, link),
+			link.getManagingBoxLinks().removeLink(link)
+		])
+		return
+	}
 
 	let fromLink: Link = link
 	let toLink: Link = link
@@ -83,16 +91,12 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute): 
 		toInsertion = await bundleLinkEndIntoCommonRoute(toLink.from, 'to', commonRoute)
 	}
 
-	const pros: Promise<void>[] = []
-	for (const commonRouteLink of commonRoute.links) {
-		if (commonRouteLink.from.getTargetNodeId() === link.from.getTargetNodeId() || commonRouteLink.to.getTargetNodeId() === link.to.getTargetNodeId()) {
-			continue
-		}
-		HighlightPropagatingLink.addRoutes(commonRouteLink, HighlightPropagatingLink.getRouteIds(link))
-		pros.push(commonRouteLink.getManagingBox().saveMapData())
+	const startIndex: number|undefined = commonRoute.links.at(0)?.to.getTargetNodeId() === link.to.getTargetNodeId() ? 1 : undefined
+	const endIndex: number|undefined = commonRoute.links.at(-1)?.from.getTargetNodeId() === link.from.getTargetNodeId() ? -1 : undefined
+	await addRouteIdsOfLinkToRoute(startIndex || endIndex ? commonRoute.links.slice(startIndex, endIndex) : commonRoute.links, link)
+	if (options.entangleLinks) {
+		await updateEntangledLinks(bundleFromPart, bundleToPart, commonRoute, fromLink, toLink)
 	}
-	await Promise.all(pros)
-	await updateEntangledLinks(bundleFromPart, bundleToPart, commonRoute, fromLink, toLink)
 
 	//await Promise.all([
 		await mergeIfKnotsAndIfPossible(commonRoute.getFrom(), fromLink.from, fromInsertion?.insertedNode)
@@ -113,6 +117,15 @@ async function ensureRouteOfLinkHasId(link:Link): Promise<void> {
 		HighlightPropagatingLink.addRoute(routeLink.link, routeId)
 		pros.push(routeLink.link.getManagingBox().saveMapData())
 		pros.push(routeLink.watcher.unwatch())
+	}
+	await Promise.all(pros)
+}
+
+async function addRouteIdsOfLinkToRoute(route: Link[], link: Link): Promise<void> {
+	const pros: Promise<void>[] = []
+	for (const routeLink of route) {
+		HighlightPropagatingLink.addRoutes(routeLink, HighlightPropagatingLink.getRouteIds(link))
+		pros.push(routeLink.getManagingBox().saveMapData())
 	}
 	await Promise.all(pros)
 }

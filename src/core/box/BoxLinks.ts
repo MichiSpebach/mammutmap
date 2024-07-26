@@ -104,7 +104,7 @@ export class BoxLinks extends Widget {
 
       const linkDataCopy: any = JSON.parse(JSON.stringify(link.getData()))
       linkDataCopy.id = 'link'+util.generateId()
-      const newLink: Link = Link.new(LinkData.buildFromRawObject(linkDataCopy), this.referenceBox)
+      const newLink: Link = Link.new(LinkData.buildFromRawObject(linkDataCopy), this.referenceBox) // TODO: also increment tag counters
       await this.addNewLink(newLink, {save: true})
       return newLink
     }
@@ -254,7 +254,7 @@ export class BoxLinks extends Widget {
     }
 
     /** TODO: use implementation of linkBundler.findAndExtendCommonRoutes(..), is directed and more efficient */
-    public static findLinkRoute(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxHops: number} = {maxHops: 4}): Link[]|undefined {
+    public static findLinkRoute(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxHops: number, routeIds?: string[]} = {maxHops: 4}): Link[]|undefined {
       const directed: boolean = false
       if (options.maxHops < 0) {
         return undefined
@@ -265,6 +265,11 @@ export class BoxLinks extends Widget {
         links = from.links.getManagedStartingLinks().concat(links) // has only be done in first iteration
       }
       for (const link of links) {
+        if (!options.routeIds) {
+          options.routeIds = (link.getData() as any)['routes']?? [] // TODO: add routes field to LinkData (core functionality)
+        } else if (!options.routeIds.some(routeId => ((link.getData() as any)['routes']?? []).includes(routeId))) {
+          continue
+        }
         const node: AbstractNodeWidget = link.to.getDeepestRenderedWayPoint().linkable // TODO? implement solution that always works and reactivate warning below
         if (node.getId() === to.getId()) {
           return [link]
@@ -273,13 +278,13 @@ export class BoxLinks extends Widget {
         const linkTargetId: string = linkToPath[linkToPath.length-1].boxId
         if (linkTargetId !== node.getId()) {
           // deactivated warning for now because it happens too often, TODO reactivate as soon as better solution is implemented
-          //log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) linkTargetId(${linkTargetId}) does not match deepestRenderedNodeId(${node.getId()}).`)
+          //log.warning(`BoxLinks::findLinkRoute(..) linkTargetId(${linkTargetId}) does not match deepestRenderedNodeId(${node.getId()}).`)
         }
         if (!(node instanceof NodeWidget)) {
           // TODO this also ignores inner LinkNodes that are not rendered, improve
           continue
         }
-        const route: Link[]|undefined = this.findLinkRoute(node, to, {maxHops: options.maxHops-1})
+        const route: Link[]|undefined = this.findLinkRoute(node, to, {...options, maxHops: options.maxHops-1})
         if (route) {
           return [link, ...route]
         }
@@ -292,7 +297,7 @@ export class BoxLinks extends Widget {
         const fromPath: WayPointData[] = link.getData().from.path
         const fromEnd: WayPointData|undefined = fromPath.at(0)
         if (!fromEnd) {
-          log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) fromEnd of link "${link.describe()}" is undefined.`)
+          log.warning(`BoxLinks::getManagedStartingLinks(..) fromEnd of link "${link.describe()}" is undefined.`)
           return false
         }
 
@@ -300,7 +305,7 @@ export class BoxLinks extends Widget {
           return false
         }
         if (fromPath.length !== 1) {
-          log.warning(`BoxLinks::getLinkRouteWithEndBoxes(..) fromPath of link "${link.describe()}" is not required to start with managingBox.`)
+          log.warning(`BoxLinks::getManagedStartingLinks(..) fromPath of link "${link.describe()}" is not required to start with managingBox.`)
           return false
         }
         return true
