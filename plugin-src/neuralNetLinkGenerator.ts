@@ -188,7 +188,7 @@ async function generateOutgoingLinksForFile(box: FileBox, options?: {
 	let paths: string[] = pathFinder.findPaths(fileContent)
 
 	const normalizedBoxName: string = box.getName().toLowerCase()
-	if (normalizedBoxName.endsWith('.java') || normalizedBoxName.endsWith('.py')) {
+	if (normalizedBoxName.endsWith('.java')) {
 		const otherTypesInFolder: string[] = getSiblingFileNamesWithoutEndings(box)
 		paths = paths.concat(typeFinder.findTypesInText(otherTypesInFolder, fileContent))
 	}
