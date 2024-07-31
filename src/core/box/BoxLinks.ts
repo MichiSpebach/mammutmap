@@ -255,7 +255,7 @@ export class BoxLinks extends Widget {
 
     /** TODO: use implementation of linkBundler.findAndExtendCommonRoutes(..), is directed and more efficient */
     public static findLinkRoute(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxHops?: number, routeIds?: string[]} = {}): Link[]|undefined {
-      if (!options.maxHops) {
+      if (options.maxHops === undefined) {
         options.maxHops = 4
       }
       const directed: boolean = false
@@ -268,9 +268,10 @@ export class BoxLinks extends Widget {
         links = from.links.getManagedStartingLinks().concat(links) // has only be done in first iteration
       }
       for (const link of links) {
-        if (!options.routeIds) {
-          options.routeIds = (link.getData() as any)['routes']?? [] // TODO: add routes field to LinkData (core functionality)
-        } else if (!options.routeIds.some(routeId => ((link.getData() as any)['routes']?? []).includes(routeId))) {
+        let routeIds: string[]|undefined = options.routeIds
+        if (!routeIds) {
+          routeIds = (link.getData() as any)['routes']?? [] // TODO: add routes field to LinkData (core functionality)
+        } else if (routeIds.length > 0 && !routeIds.some(routeId => ((link.getData() as any)['routes']?? []).includes(routeId))) {
           continue
         }
         const node: AbstractNodeWidget = link.to.getDeepestRenderedWayPoint().linkable // TODO? implement solution that always works and reactivate warning below
@@ -287,7 +288,7 @@ export class BoxLinks extends Widget {
           // TODO this also ignores inner LinkNodes that are not rendered, improve
           continue
         }
-        const route: Link[]|undefined = this.findLinkRoute(node, to, {...options, maxHops: options.maxHops-1})
+        const route: Link[]|undefined = this.findLinkRoute(node, to, {...options, routeIds, maxHops: options.maxHops-1})
         if (route) {
           return [link, ...route]
         }

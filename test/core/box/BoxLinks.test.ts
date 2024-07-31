@@ -107,6 +107,24 @@ test('findLinkRoute directly connected', async () => {
 	expect(BoxLinks.findLinkRoute(from, to)).toEqual([link])
 })
 
+test('findLinkRoute directly connected, other distracting links', async () => {
+	testUtil.initGeneralServicesWithMocks()
+
+	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
+	const from: FileBox = boxFactory.fileOf({idOrData: 'from', parent: root, addToParent: true, rendered: true})
+	const to: FileBox = boxFactory.fileOf({idOrData: 'to', parent: root, addToParent: true, rendered: true})
+	const otherFile: FileBox = boxFactory.fileOf({idOrData: 'otherFile', parent: root, addToParent: true, rendered: true})
+	const differentFile: FileBox = boxFactory.fileOf({idOrData: 'differentFile', parent: root, addToParent: true, rendered: true})
+
+	await root.links.add({from: {node: from}, to: {node: otherFile}, save: false})
+	await root.links.add({from: {node: to}, to: {node: from}, save: false})
+	const link: Link = await root.links.add({from: {node: from}, to: {node: to}, save: false})
+	await root.links.add({from: {node: from}, to: {node: differentFile}, save: false})
+	await root.links.add({from: {node: to}, to: {node: otherFile}, save: false})
+
+	expect(BoxLinks.findLinkRoute(from, to)?.map(link => link.getId())).toEqual([link].map(link => link.getId()))
+})
+
 test('findLinkRoute one node between', async () => {
 	testUtil.initGeneralServicesWithMocks()
 
