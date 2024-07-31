@@ -12,15 +12,15 @@ import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 import { RouteTree } from './RouteTree'
 
-export async function mergeKnot(knot: NodeWidget): Promise<void> {
+export async function mergeKnot(knot: NodeWidget): Promise<{mergedIntoLinks: Link[]}|void> {
 	const otherKnots: NodeWidget[] = knot.getParent().nodes.getNodes()
 	const mergeIntoKnot: NodeWidget|undefined = otherKnots.find(otherKnot => knot !== otherKnot && canKnotsBeMerged(knot, otherKnot))
 	if (mergeIntoKnot) {
-		await mergeKnotInto(knot, mergeIntoKnot)
+		return await mergeKnotInto(knot, mergeIntoKnot)
 	}
 }
 
-export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget): Promise<void> {
+export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget): Promise<{mergedIntoLinks: Link[]}|void> {
 	const linkBetweenKnots: Link|undefined = getLinkBetween(knot, mergeIntoKnot)
 	if (!linkBetweenKnots) {
 		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot}') there is no link between knot and mergeIntoKnot`)
@@ -36,6 +36,7 @@ export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget)
 	await moveEntanglementsOfLinkInDirection(linkBetweenKnots, routeTreeSearchDirection, directions.knotAwayFromCenter)
 
 	const newPosition: ClientPosition = (await mergeIntoKnot.getClientShape()).getMidPosition()
+	const mergedIntoLinks: Link[] = []
 	await Promise.all(knot.borderingLinks.getAllEnds().map(async (end: LinkEnd) => {
 		const link: Link = end.getReferenceLink()
 		if (link === linkBetweenKnots || link === directions.linkTowardsCenter) {
@@ -45,6 +46,7 @@ export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget)
 		const mergeIntoLink: Link|undefined = getLinkBetweenDirected(mergeIntoKnot, end.getOtherEnd().getTargetNodeId(), otherEnd)
 		if (mergeIntoLink) {
 			await mergeLinkIntoAndRemove(link, routeTreeSearchDirection, mergeIntoLink)
+			mergedIntoLinks.push(mergeIntoLink)
 		} else {
 			await end.dragAndDrop({dropTarget: mergeIntoKnot, clientPosition: newPosition})
 		}
@@ -53,6 +55,7 @@ export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget)
 
 	await linkBetweenKnots.getManagingBoxLinks().removeLink(linkBetweenKnots)
 	await knot.getParent().nodes.remove(knot, {mode: 'reorder bordering links'})
+	return {mergedIntoLinks}
 }
 
 function canKnotsBeMerged(knot: NodeWidget, otherKnot: NodeWidget): boolean {

@@ -254,7 +254,10 @@ export class BoxLinks extends Widget {
     }
 
     /** TODO: use implementation of linkBundler.findAndExtendCommonRoutes(..), is directed and more efficient */
-    public static findLinkRoute(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxHops: number, routeIds?: string[]} = {maxHops: 4}): Link[]|undefined {
+    public static findLinkRoute(from: AbstractNodeWidget, to: AbstractNodeWidget, options: {maxHops?: number, routeIds?: string[]} = {}): Link[]|undefined {
+      if (!options.maxHops) {
+        options.maxHops = 4
+      }
       const directed: boolean = false
       if (options.maxHops < 0) {
         return undefined

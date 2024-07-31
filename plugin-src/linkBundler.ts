@@ -18,7 +18,7 @@ import { SourcelessBox } from '../dist/core/box/SourcelessBox'
 pluginFacade.overrideLink(HighlightPropagatingLink)
 
 contextMenu.addLinkMenuItem((link: Link) => new MenuItemFile({label: '↣ try to bundle', click: () => bundler.bundleLink(link)}))
-contextMenu.addLinkNodeMenuItem((node: NodeWidget) => new MenuItemFile({label: 'try to merge', click: () => knotMerger.mergeKnot(node)}))
+contextMenu.addLinkNodeMenuItem((node: NodeWidget) => new MenuItemFile({label: 'try to merge', click: async () => {await knotMerger.mergeKnot(node)}}))
 
 contextMenu.addFileBoxMenuItem((box: FileBox) => new MenuItemFile({label: '↣ bundle links...', click: () => dialog.openDialogForBundleLinks(box)}))
 contextMenu.addFolderBoxMenuItem((box: FolderBox) => new MenuItemFile({label: '↣ bundle links...', click: () => dialog.openDialogForBundleLinks(box)}))

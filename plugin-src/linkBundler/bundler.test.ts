@@ -49,29 +49,57 @@ async function testBundleLinkInsertOneNode(options: {toBoxHasOutgoingLinks: bool
 		: undefined
 	
 	await linkBundler.bundleLink(topLink)
+	await verifyEndResult(bottomLink)
 
-	const topLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderTopFile, rightFile)!
-	expect(topLinkRoute.length).toBe(2)
-	expect(topLinkRoute[0].getId()).toBe(topLink.getId())
-	expect(topLinkRoute[1].getId()).toBe(bottomLink.getId())
-	expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[0]).length).toBe(1)
-	expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[1]).length).toBe(2)
-	expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[1]).includes(HighlightPropagatingLink.getRouteIds(topLinkRoute[0])[0]))
-	expect(topLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	await testBundleDuplicateLink('bundleDuplicateLink')
 
-	const bottomLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFile)!
-	expect(bottomLinkRoute.length).toBe(2)
-	expect(bottomLinkRoute[1].getId()).toBe(bottomLink.getId())
-	expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[0]).length).toBe(1)
-	expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[1]).length).toBe(2)
-	expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[1]).includes(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[0])[0]))
-	expect(bottomLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+	await testBundleDuplicateLink('bundleIntoDuplicateLink')
+
+	async function testBundleDuplicateLink(mode: 'bundleDuplicateLink'|'bundleIntoDuplicateLink'): Promise<void> {
+		const duplicateLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFile, save: true})
+		expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(2)
+		expect(rightFile.borderingLinks.getAll().length).toBe(2 + (toBoxOutgoingLinks?.length?? 0))
 	
-	expect(topLinkRoute[1].getId()).toBe(bottomLinkRoute[1].getId())
-	expect(topLink.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['leftFolderTopFile'])
-	expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual([expect.stringContaining('node')])
-	if (toBoxOutgoingLinks) {
-		expect(toBoxOutgoingLinks.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+		const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation()
+		try {
+			await linkBundler.bundleLink(mode === 'bundleDuplicateLink' ? duplicateLink : bottomLink)
+		
+			await verifyEndResult(mode === 'bundleDuplicateLink' ? bottomLink : duplicateLink)
+			expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(1)
+			expect(rightFile.borderingLinks.getAll().length).toBe(1 + (toBoxOutgoingLinks?.length?? 0))
+			const warnCalls: string[] = consoleWarnMock.mock.calls.map(call => call.join())
+			expect(warnCalls.length).toBe(1)
+			expect(warnCalls[0].startsWith(`linkBundler.ensureNoRedundantRouteIds(from: 'leftFolderTopFileName', to: 'rootFolderFileName', ..) detected redundant routeIds [${HighlightPropagatingLink.getRouteIds(topLink)}`)).toBe(true)
+			expect(warnCalls[0].endsWith(`], removing them except '${HighlightPropagatingLink.getRouteIds(topLink)[0]}'`)).toBe(true)
+		} finally {
+			consoleWarnMock.mockRestore()
+		}
+	}
+
+	async function verifyEndResult(expectedRootLink: Link): Promise<void> {
+		const topLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderTopFile, rightFile)!
+		expect(topLinkRoute.length).toBe(2)
+		expect(topLinkRoute[0].getId()).toBe(topLink.getId())
+		expect(topLinkRoute[1].getId()).toBe(expectedRootLink.getId())
+		expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[0]).length).toBe(1)
+		expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[1]).length).toBe(2)
+		expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[1]).includes(HighlightPropagatingLink.getRouteIds(topLinkRoute[0])[0]))
+		expect(topLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+		
+		const bottomLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFile)!
+		expect(bottomLinkRoute.length).toBe(2)
+		expect(bottomLinkRoute[1].getId()).toBe(expectedRootLink.getId())
+		expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[0]).length).toBe(1)
+		expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[1]).length).toBe(2)
+		expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[1]).includes(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[0])[0]))
+		expect(bottomLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+		
+		expect(topLinkRoute[1].getId()).toBe(bottomLinkRoute[1].getId())
+		expect(topLink.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['leftFolderTopFile'])
+		expect(topLink.getData().to.path.map(waypoint => waypoint.boxId)).toEqual([expect.stringContaining('node')])
+		if (toBoxOutgoingLinks) {
+			expect(toBoxOutgoingLinks.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[], []])
+		}
 	}
 }
 
@@ -90,29 +118,57 @@ test('bundleLink, insert two nodes', async () => {
 	const bottomLink = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
 
 	await linkBundler.bundleLink(topLink)
-	
-	const topLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)!
-	expect(topLinkRoute.length).toBe(3)
-	expect(topLinkRoute[0].getId()).toBe(topLink.getId())
-	expect(topLinkRoute[1].getId()).toBe(bottomLink.getId())
-	expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[0]).length).toBe(1)
-	const topRouteId: string = HighlightPropagatingLink.getRouteIds(topLinkRoute[0])[0]
-	expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[1]).length).toBe(2)
-	expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[1])).toContain(topRouteId)
-	expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[2]).length).toBe(1)
-	expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[2])).toContain(topRouteId)
-	expect(topLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything()], [], [topLink.getId()]])
+	await verifyEndResult(bottomLink)
 
-	const bottomLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)!
-	expect(bottomLinkRoute.length).toBe(3)
-	expect(bottomLinkRoute[1].getId()).toBe(bottomLink.getId())
-	expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[0]).length).toBe(1)
-	const bottomRouteId: string = HighlightPropagatingLink.getRouteIds(bottomLinkRoute[0])[0]
-	expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[1]).length).toBe(2)
-	expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[1])).toContain(bottomRouteId)
-	expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[2]).length).toBe(1)
-	expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[2])).toContain(bottomRouteId)
-	expect(bottomLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything()], [], [expect.anything()]])
+	await testBundleDuplicateLink('bundleDuplicateLink')
+
+	await testBundleDuplicateLink('bundleIntoDuplicateLink')
+
+	async function testBundleDuplicateLink(mode: 'bundleDuplicateLink'|'bundleIntoDuplicateLink'): Promise<void> {
+		const duplicateLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
+		expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(2)
+		expect(rightFolderTopFile.borderingLinks.getAll().length).toBe(2)
+	
+		const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation()
+		try {
+			await linkBundler.bundleLink(mode === 'bundleDuplicateLink' ? duplicateLink : bottomLink)
+		
+			await verifyEndResult(mode === 'bundleDuplicateLink' ? bottomLink : duplicateLink)
+			expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(1)
+			expect(rightFolderTopFile.borderingLinks.getAll().length).toBe(1)
+			const warnCalls: string[] = consoleWarnMock.mock.calls.map(call => call.join())
+			expect(warnCalls.length).toBe(1)
+			expect(warnCalls[0].startsWith(`linkBundler.ensureNoRedundantRouteIds(from: 'leftFolderTopFileName', to: 'rightFolderTopFileName', ..) detected redundant routeIds [${HighlightPropagatingLink.getRouteIds(topLink)}`)).toBe(true)
+			expect(warnCalls[0].endsWith(`], removing them except '${HighlightPropagatingLink.getRouteIds(topLink)}'`)).toBe(true)
+		} finally {
+			consoleWarnMock.mockRestore()
+		}
+	}
+
+	async function verifyEndResult(expectedRootLink: Link): Promise<void> {
+		const topLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)!
+		expect(topLinkRoute.length).toBe(3)
+		expect(topLinkRoute[0].getId()).toBe(topLink.getId())
+		expect(topLinkRoute[1].getId()).toBe(expectedRootLink.getId())
+		expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[0]).length).toBe(1)
+		const topRouteId: string = HighlightPropagatingLink.getRouteIds(topLinkRoute[0])[0]
+		expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[1]).length).toBe(2)
+		expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[1])).toContain(topRouteId)
+		expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[2]).length).toBe(1)
+		expect(HighlightPropagatingLink.getRouteIds(topLinkRoute[2])).toContain(topRouteId)
+		expect(topLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything()], [], [topLink.getId()]])
+
+		const bottomLinkRoute: Link[] = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderBottomFile)!
+		expect(bottomLinkRoute.length).toBe(3)
+		expect(bottomLinkRoute[1].getId()).toBe(expectedRootLink.getId())
+		expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[0]).length).toBe(1)
+		const bottomRouteId: string = HighlightPropagatingLink.getRouteIds(bottomLinkRoute[0])[0]
+		expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[1]).length).toBe(2)
+		expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[1])).toContain(bottomRouteId)
+		expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[2]).length).toBe(1)
+		expect(HighlightPropagatingLink.getRouteIds(bottomLinkRoute[2])).toContain(bottomRouteId)
+		expect(bottomLinkRoute.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[expect.anything()], [], [expect.anything()]])
+	}
 })
 
 test('bundleLink, insert two nodes, both inserts in from part, bundling longLink', async () => {
@@ -1053,20 +1109,28 @@ test('bundleLink, linkToBundle is part of route and ends with knots, multiple ti
 	expect(route3Step2?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route3Step2?.at(2)?.getId()], [], [route3Step2?.at(0)?.getId()]])
 
 	const link3Duplicate: Link = await root.links.add({from: leftFolderFile3, to: rightFolderFile3, save: true})
-	await linkBundler.bundleLink(link3)
-	const route1Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile1, rightFolderFile1)
-	const route2Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile2, rightFolderFile2)
-	const route3Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)
-	expect(route1Step3?.map(link => link.getId())).toEqual([link1.getId(), link3Duplicate.getId(), route1Step1?.at(2)?.getId()])
-	expect(route2Step3?.map(link => link.getId())).toEqual([route2Step1?.at(0)?.getId(), link3Duplicate.getId(), route2Step1?.at(2)?.getId()])
-	expect(route3Step3?.map(link => link.getId())).toEqual([expect.anything(), link3Duplicate.getId(), expect.anything()])
-	// TODO: clarify, should this case not just log a warning and do nothing?
-	//expect(route1Step3?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route1Id], [route3Id, route2Id, route1Id], [route1Id]])
-	//expect(route2Step3?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route2Id], [route3Id, route2Id, route1Id], [route2Id]])
-	//expect(route3Step2?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route3Id], [route3Id, route2Id, route1Id], [route3Id]])
-	expect(route1Step3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route1Step1?.at(2)?.getId()], [], [link1.getId()]])
-	expect(route2Step3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route2Step1?.at(2)?.getId()], [], [route2Step1?.at(0)?.getId()]])
-	expect(route3Step3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route3Step2?.at(2)?.getId()], [], [route3Step2?.at(0)?.getId()]])
+	const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation()
+	try {
+		await linkBundler.bundleLink(link3)
+		const route1Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile1, rightFolderFile1)
+		const route2Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile2, rightFolderFile2)
+		const route3Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)
+		expect(route1Step3?.map(link => link.getId())).toEqual([link1.getId(), link3Duplicate.getId(), route1Step1?.at(2)?.getId()])
+		expect(route2Step3?.map(link => link.getId())).toEqual([route2Step1?.at(0)?.getId(), link3Duplicate.getId(), route2Step1?.at(2)?.getId()])
+		expect(route3Step3?.map(link => link.getId())).toEqual([expect.anything(), link3Duplicate.getId(), expect.anything()])
+		expect(route1Step3?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route1Id], [route3Id, route2Id, route1Id], [route1Id]])
+		expect(route2Step3?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route2Id], [route3Id, route2Id, route1Id], [route2Id]])
+		expect(route3Step2?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route3Id], [route3Id, route2Id, route1Id], [route3Id]])
+		expect(route1Step3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route1Step1?.at(2)?.getId()], [], [link1.getId()]])
+		expect(route2Step3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route2Step1?.at(2)?.getId()], [], [route2Step1?.at(0)?.getId()]])
+		expect(route3Step3?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route3Step2?.at(2)?.getId()], [], [route3Step2?.at(0)?.getId()]])
+		const warnCalls: string[] = consoleWarnMock.mock.calls.map(call => call.join())
+		expect(warnCalls.length).toBe(1)
+		expect(warnCalls[0].startsWith(`linkBundler.ensureNoRedundantRouteIds(from: 'leftFolderFile3Name', to: 'rightFolderFile3Name', ..) detected redundant routeIds [${route3Id}`)).toBe(true)
+		expect(warnCalls[0].endsWith(`], removing them except '${route3Id}'`)).toBe(true)
+	} finally {
+		consoleWarnMock.mockRestore()
+	}
 
 	const link4: Link = await root.links.add({from: leftFolderFile4, to: rightFolderFile4, save: true})
 	await linkBundler.bundleLink(link3Duplicate)
@@ -1078,12 +1142,11 @@ test('bundleLink, linkToBundle is part of route and ends with knots, multiple ti
 	expect(route2Step4?.map(link => link.getId())).toEqual([route2Step1?.at(0)?.getId(), link4.getId(), route2Step1?.at(2)?.getId()])
 	expect(route3Step4?.map(link => link.getId())).toEqual([expect.anything(), link4.getId(), expect.anything()])
 	expect(route4Step4?.map(link => link.getId())).toEqual([expect.anything(), link4.getId(), expect.anything()])
-	// TODO: activate after link3Duplicate clarified
-	//const route4Id: string = HighlightPropagatingLink.getRouteIds(route4Step4![0])[0]
-	//expect(route1Step3?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route1Id], [route4Id, route3Id, route2Id, route1Id], [route1Id]])
-	//expect(route2Step3?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route2Id], [route4Id, route3Id, route2Id, route1Id], [route2Id]])
-	//expect(route3Step2?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route3Id], [route4Id, route3Id, route2Id, route1Id], [route3Id]])
-	//expect(route3Step2?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route4Id], [route4Id, route3Id, route2Id, route1Id], [route4Id]])
+	const route4Id: string = HighlightPropagatingLink.getRouteIds(route4Step4![0])[0]
+	expect(route1Step4?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route1Id], [route4Id, route3Id, route2Id, route1Id], [route1Id]])
+	expect(route2Step4?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route2Id], [route4Id, route3Id, route2Id, route1Id], [route2Id]])
+	expect(route3Step4?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route3Id], [route4Id, route3Id, route2Id, route1Id], [route3Id]])
+	expect(route4Step4?.map(link => HighlightPropagatingLink.getRouteIds(link))).toEqual([[route4Id], [route4Id, route3Id, route2Id, route1Id], [route4Id]])
 	expect(route1Step4?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route1Step1?.at(2)?.getId()], [], [link1.getId()]])
 	expect(route2Step4?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route2Step1?.at(2)?.getId()], [], [route2Step1?.at(0)?.getId()]])
 	expect(route3Step4?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route3Step2?.at(2)?.getId()], [], [route3Step2?.at(0)?.getId()]])
