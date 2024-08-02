@@ -16,10 +16,10 @@ export abstract class Rect<POSITION extends Position<POSITION>> extends Shape<PO
     this.height = height
   }
 
-  public isPositionInside(position: POSITION): boolean {
+  public isPositionInside(position: POSITION, epsilon: number = 0): boolean {
     const x: number = position.getX()
     const y: number = position.getY()
-    return x >= this.x && y >= this.y && x <= this.getRightX() && y <= this.getBottomY()
+    return x >= this.x-epsilon && y >= this.y-epsilon && x <= this.getRightX()+epsilon && y <= this.getBottomY()+epsilon
   }
 
   public getRightX() {

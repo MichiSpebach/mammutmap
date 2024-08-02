@@ -130,43 +130,21 @@ async function findAndExtendCommonRoutes(
 	return {deepestBoxInPath: waypoint.watcher}
 }
 
-function canLinksBeBundled(
+/** only exported for unit tests */
+export function canLinksBeBundled(
 	linkLine: {from: LocalPosition, to: LocalPosition},
 	otherLinkLine: {from: LocalPosition, to: LocalPosition},
 	intersectionRect: LocalRect
 ): boolean {
-	const elongationEpsilon: number = Math.sqrt(intersectionRect.width*intersectionRect.width + intersectionRect.height*intersectionRect.height) / 100
-	const linkLineElongated: {from: LocalPosition, to: LocalPosition} = new Line(linkLine.from, linkLine.to).elongate(elongationEpsilon)
-	const otherLinkLineElongated: {from: LocalPosition, to: LocalPosition} = new Line(otherLinkLine.from, otherLinkLine.to).elongate(elongationEpsilon)
-
-	let outsidePosition: LocalPosition|undefined
-	if (intersectionRect.isPositionInside(linkLineElongated.from)) {
-		outsidePosition = linkLine.to
-	}
-	if (intersectionRect.isPositionInside(linkLineElongated.to)) { // TODO: only use elongated line if both ends are inside or outside because it could do too much
-		if (outsidePosition) {
-			console.warn(`commonRouteFinder.canLinksBeBundled(linkLine: ${JSON.stringify(linkLine)}, .., intersectionRect: ${JSON.stringify(intersectionRect)}) both linkLine ends are inside intersectionRect, returning false`)
-			return false
-		}
-		outsidePosition = linkLine.from
-	}
+	const outsidePosition: LocalPosition|undefined = getOutsidePosition(linkLine, intersectionRect)
 	if (!outsidePosition) {
-		console.warn(`commonRouteFinder.canLinksBeBundled(linkLine: ${JSON.stringify(linkLine)}, .., intersectionRect: ${JSON.stringify(intersectionRect)}) both linkLine ends are outside intersectionRect, returning false`)
+		console.warn(`commonRouteFinder.canLinksBeBundled(linkLine: ${JSON.stringify(linkLine)}, .., intersectionRect: ${JSON.stringify(intersectionRect)}) both linkLine ends are inside intersectionRect, returning false`)
 		return false
 	}
-	let otherOutsidePosition: LocalPosition|undefined
-	if (intersectionRect.isPositionInside(otherLinkLineElongated.from)) {
-		otherOutsidePosition = otherLinkLine.to
-	}
-	if (intersectionRect.isPositionInside(otherLinkLineElongated.to)) { // TODO: only use elongated line if both ends are inside or outside because it could do too much
-		if (otherOutsidePosition) {
-			console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) both otherLinkLine ends are inside intersectionRect, returning false`)
-			return false
-		}
-		otherOutsidePosition = otherLinkLine.from
-	}
+	
+	const otherOutsidePosition: LocalPosition|undefined = getOutsidePosition(otherLinkLine, intersectionRect)
 	if (!otherOutsidePosition) {
-		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) both otherLinkLine ends are outside intersectionRect, returning false`)
+		console.warn(`commonRouteFinder.canLinksBeBundled(.., otherLinkLine: ${JSON.stringify(otherLinkLine)}, intersectionRect: ${JSON.stringify(intersectionRect)}) both otherLinkLine ends are inside intersectionRect, returning false`)
 		return false
 	}
 
@@ -186,6 +164,10 @@ function canLinksBeBundled(
 	return false
 	
 	// old implementation that compares intersection sides, TODO: remove as soon as sure that new implementation above is better
+	const elongationEpsilon: number = Math.sqrt(intersectionRect.width*intersectionRect.width + intersectionRect.height*intersectionRect.height) / 100
+	const linkLineElongated: {from: LocalPosition, to: LocalPosition} = new Line(linkLine.from, linkLine.to).elongate(elongationEpsilon)
+	const otherLinkLineElongated: {from: LocalPosition, to: LocalPosition} = new Line(otherLinkLine.from, otherLinkLine.to).elongate(elongationEpsilon)
+
 	let intersections: LocalPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLineElongated)
 	if (intersections.length === 0) {
 		console.warn(`commonRouteFinder.canLinksBeBundled(.., linkLine: ${JSON.stringify(linkLineElongated)}, intersectionRect: ${JSON.stringify(intersectionRect)}) intersections.length === 0, returning false`)
@@ -225,6 +207,18 @@ function canLinksBeBundled(
 		return true
 	}
 	return false
+}
+
+function getOutsidePosition(line: {from: LocalPosition, to: LocalPosition}, rect: LocalRect): LocalPosition|undefined {
+	let outsidePositions: LocalPosition[] = getOutsidePositions([line.from, line.to], rect)
+	if (outsidePositions.length > 1) {
+		console.warn(`commonRouteFinder.getOutsidePosition(line: ${JSON.stringify(line)}, rect: ${JSON.stringify(rect)}) both line ends are outside rect, returning from end`)
+	}
+	return outsidePositions[0]
+}
+
+function getOutsidePositions(positions: LocalPosition[], rect: LocalRect): LocalPosition[] {
+	return positions.filter(position => !rect.isPositionInside(position, 0.01))
 }
 
 function areNearlyEqual(values: number[], epsilon: number): boolean {

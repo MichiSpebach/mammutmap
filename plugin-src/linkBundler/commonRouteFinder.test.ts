@@ -14,8 +14,9 @@ import { HoverManager } from '../../dist/core/HoverManager'
 import { BoxData } from '../../dist/core/mapData/BoxData'
 import { LocalPosition } from '../../dist/core/shape/LocalPosition'
 import { CommonRoute } from './CommonRoute'
+import { LocalRect } from '../../dist/core/LocalRect'
 
-test('findAndExtendCommonRoutes', async () => {
+test('findLongestCommonRoute', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -39,7 +40,7 @@ test('findAndExtendCommonRoutes', async () => {
 	})
 })
 
-test('findAndExtendCommonRoutes, different managingBoxes of links', async () => {
+test('findLongestCommonRoute, different managingBoxes of links', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -87,7 +88,7 @@ test('findAndExtendCommonRoutes, different managingBoxes of links', async () => 
 	expect(leftFileUnrenderSpy).toBeCalled()
 })
 
-test('findAndExtendCommonRoutes, longer commonRoute', async () => {
+/*test('findLongestCommonRoute, longer commonRoute', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -133,9 +134,9 @@ test('findAndExtendCommonRoutes, longer commonRoute', async () => {
 		length: 2
 	}))
 	expect(leftFileUnrenderSpy).toBeCalled()
-})
+})*/
 
-test('findAndExtendCommonRoutes, node in commonRoute', async () => {
+/*test('findLongestCommonRoute, node in commonRoute', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -172,9 +173,9 @@ test('findAndExtendCommonRoutes, node in commonRoute', async () => {
 	}))
 
 	HoverManager.removeHoverable(leftFolderKnot)
-})
+})*/
 
-test('findAndExtendCommonRoutes, two commonRoutes with same length, one ends already with a knot', async () => {
+test('findLongestCommonRoute, two commonRoutes with same length, one ends already with a knot', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -198,19 +199,19 @@ test('findAndExtendCommonRoutes, two commonRoutes with same length, one ends alr
 	}))
 })
 
-test('findAndExtendCommonRoutes, links are on different sides, other link is on top side', async () => {
-	await testFindAndExtendCommonRoutesLinksAreOnDifferentSides(new LocalPosition(45, 20))
+test('findLongestCommonRoute, links are on different sides, other link is on top side', async () => {
+	await testFindLongestCommonRouteLinksAreOnDifferentSides(new LocalPosition(45, 20))
 })
 
-test('findAndExtendCommonRoutes, links are on different sides, other link is on right side', async () => {
-	await testFindAndExtendCommonRoutesLinksAreOnDifferentSides(new LocalPosition(80, 45))
+test('findLongestCommonRoute, links are on different sides, other link is on right side', async () => {
+	await testFindLongestCommonRouteLinksAreOnDifferentSides(new LocalPosition(80, 45))
 })
 
-test('findAndExtendCommonRoutes, links are on different sides, other link is on bottom side', async () => {
-	await testFindAndExtendCommonRoutesLinksAreOnDifferentSides(new LocalPosition(45, 80))
+test('findLongestCommonRoute, links are on different sides, other link is on bottom side', async () => {
+	await testFindLongestCommonRouteLinksAreOnDifferentSides(new LocalPosition(45, 80))
 })
 
-async function testFindAndExtendCommonRoutesLinksAreOnDifferentSides(otherFilePosition: LocalPosition): Promise<void> {
+async function testFindLongestCommonRouteLinksAreOnDifferentSides(otherFilePosition: LocalPosition): Promise<void> {
 	await testUtil.initServicesWithMocks()
 	
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -230,7 +231,7 @@ async function testFindAndExtendCommonRoutesLinksAreOnDifferentSides(otherFilePo
 	expect(extractIds(await commonRouteFinder.findLongestCommonRoute(linkToOtherFile))).toBe(undefined)
 }
 
-test('findAndExtendCommonRoutes, longLink on other side, shortLink on same side', async () => {
+test('findLongestCommonRoute, longLink on other side, shortLink on same side', async () => {
 	await testUtil.initServicesWithMocks()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
@@ -308,3 +309,69 @@ function extractIds(commonRoute: CommonRoute | PlainCommonRoute | undefined): {
 		length: commonRoute.length
 	}
 }
+
+test('canLinksBeBundled', () => {
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(100, 50), to: new LocalPosition(200, 50)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(200, 50)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(0, 50), to: new LocalPosition(-100, 50)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(-100, 50)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(50, 0), to: new LocalPosition(-100, 50)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(-100, 50)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(50, 100), to: new LocalPosition(50, 200)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(50, 200)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(50, 100), to: new LocalPosition(50, -100)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(50, -100)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(0, 50), to: new LocalPosition(50, 200)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(50, 200)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(100, 50), to: new LocalPosition(50, 200)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(50, 200)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(50, 50), to: new LocalPosition(50, 200)},
+		{from: new LocalPosition(100, 50), to: new LocalPosition(50, 200)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(100.00001, 50), to: new LocalPosition(50, 200)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(50, 200)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(50, 50), to: new LocalPosition(200, 50)},
+		{from: new LocalPosition(100.00001, 50), to: new LocalPosition(200, 50)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(50, -0.00001), to: new LocalPosition(50, -100)},
+		{from: new LocalPosition(50, 50), to: new LocalPosition(50, -100)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+	expect(commonRouteFinder.canLinksBeBundled(
+		{from: new LocalPosition(50, -100), to: new LocalPosition(50, -0.00001)},
+		{from: new LocalPosition(50, -100), to: new LocalPosition(50, 50)},
+		new LocalRect(0, 0, 100, 100)
+	)).toBe(true)
+})

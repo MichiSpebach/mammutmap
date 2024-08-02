@@ -29,7 +29,7 @@ export async function mergeKnotInto(knot: NodeWidget, mergeIntoKnot: NodeWidget)
 	
 	const directions: {knotAwayFromCenter: NodeWidget, knotTowardsCenter: NodeWidget, linkTowardsCenter: Link} | undefined = getDirectionsRegardingRouteTree(knot, mergeIntoKnot)
 	if (!directions) {
-		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot}') failed to getDirectionsRegardingRouteTree(knot, mergeIntoKnot)`)
+		console.warn(`knotMerger.mergeKnotInto(knot: '${knot.getName()}', mergeIntoKnot: '${mergeIntoKnot.getName()}') failed to getDirectionsRegardingRouteTree(knot, mergeIntoKnot)`)
 		return
 	}
 	const routeTreeSearchDirection: 'from'|'to' = linkBetweenKnots.from.getTargetNodeId() === directions.knotTowardsCenter.getId() ? 'from' : 'to'
