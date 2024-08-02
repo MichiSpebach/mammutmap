@@ -280,8 +280,10 @@ export class HighlightPropagatingLink extends LinkImplementation {
 			}
 			return options.highlightRouteIds.some(highlightRouteId => routeIds.includes(highlightRouteId))
 		})
-		if (!entangledLinksToPropagateTo.every(link => routedLinksToPropagateTo.includes(link)) || !routedLinksToPropagateTo.every(link => entangledLinksToPropagateTo.includes(link))) {
-			console.warn(`entangledLinksToPropagateTo and routedLinksToPropagateTo include different links:\nentangledLinksToPropagateTo=${entangledLinksToPropagateTo.map(link => link.getId())} but\nroutedLinksToPropagateTo=${routedLinksToPropagateTo.map(link => link.getId())}`)
+		if (bundledWithLinks.length > 0) {
+			if (!entangledLinksToPropagateTo.every(link => routedLinksToPropagateTo.includes(link)) || !routedLinksToPropagateTo.every(link => entangledLinksToPropagateTo.includes(link))) {
+				console.warn(`entangledLinksToPropagateTo and routedLinksToPropagateTo include different links:\nentangledLinksToPropagateTo=${entangledLinksToPropagateTo.map(link => link.getId())} but\nroutedLinksToPropagateTo=${routedLinksToPropagateTo.map(link => link.getId())}`)
+			}
 		}
 
 		await Promise.all(routedLinksToPropagateTo.filter(link => link.shouldBeRendered()).map(async link => {

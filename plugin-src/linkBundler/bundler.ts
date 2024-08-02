@@ -46,12 +46,6 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute, o
 	unwatchDelayInMs?: number
 	entangleLinks?: boolean
 }): Promise<void> {
-	if (!options) {
-		options = {}
-	}
-	if (options.entangleLinks === undefined) { // TODO: remove and deactivate by default
-		options.entangleLinks = true
-	}
 	const routeIds: {ids: string[], added: boolean}[] = await Promise.all([
 		ensureRouteOfLinkHasId(link, options),
 		ensureRouteOfLinkHasId(commonRoute.links[0], options)
@@ -104,13 +98,13 @@ async function bundleLinkIntoCommonRoute(link: Link, commonRoute: CommonRoute, o
 	const startIndex: number|undefined = commonRoute.links.at(0)?.to.getTargetNodeId() === link.to.getTargetNodeId() ? 1 : undefined
 	const endIndex: number|undefined = commonRoute.links.at(-1)?.from.getTargetNodeId() === link.from.getTargetNodeId() ? -1 : undefined
 	await addRouteIdsOfLinkToRoute(startIndex || endIndex ? commonRoute.links.slice(startIndex, endIndex) : commonRoute.links, link)
-	if (options.entangleLinks) {
+	if (options?.entangleLinks) {
 		await updateEntangledLinks(bundleFromPart, bundleToPart, commonRoute, fromLink, toLink)
 	}
 
 	//await Promise.all([
-		const ingoingMergedIntoLinks: Link[]|undefined = (await mergeIfKnotsAndIfPossible(commonRoute.getFrom(), fromLink.from, fromInsertion?.insertedNode))?.mergedIntoLinks
-		const outgoingMergedIntoLinks: Link[]|undefined = (await mergeIfKnotsAndIfPossible(commonRoute.getTo(), toLink.to, toInsertion?.insertedNode))?.mergedIntoLinks
+		const ingoingMergedIntoLinks: Link[]|undefined = (await mergeIfKnotsAndIfPossible(commonRoute.getFrom(), fromLink.from, fromInsertion?.insertedNode, options))?.mergedIntoLinks
+		const outgoingMergedIntoLinks: Link[]|undefined = (await mergeIfKnotsAndIfPossible(commonRoute.getTo(), toLink.to, toInsertion?.insertedNode, options))?.mergedIntoLinks
 	//])
 
 	const routesToCheckRouteIds: {from: Link, to: Link}[] = (await Promise.all([
@@ -275,7 +269,12 @@ function isLinkEndKnotTemporaryAndWillBeMerged(linkEnd: LinkEnd, commonRoute: Co
 	return !!commonEndNode.nodes.getNodeById(linkEnd.getTargetNodeId())
 }
 
-async function mergeIfKnotsAndIfPossible(commonRouteEnd: AbstractNodeWidget, linkEnd: LinkEnd, insertedNode: NodeWidget|undefined): Promise<{mergedIntoLinks: Link[]}|void> {
+async function mergeIfKnotsAndIfPossible(
+	commonRouteEnd: AbstractNodeWidget,
+	linkEnd: LinkEnd,
+	insertedNode: NodeWidget|undefined,
+	options?: {entangleLinks?: boolean}
+): Promise<{mergedIntoLinks: Link[]}|void> {
 	if (commonRouteEnd.getId() === linkEnd.getTargetNodeId()) {
 		return
 	}
@@ -291,10 +290,10 @@ async function mergeIfKnotsAndIfPossible(commonRouteEnd: AbstractNodeWidget, lin
 	}
 
 	if (insertedNode) {
-		return await knotMerger.mergeKnotInto(insertedNode, linkEndKnot)
+		return await knotMerger.mergeKnotInto(insertedNode, linkEndKnot, options)
 	}
 	if (commonRouteEnd instanceof NodeWidget) {
-		return await knotMerger.mergeKnotInto(linkEndKnot, commonRouteEnd)
+		return await knotMerger.mergeKnotInto(linkEndKnot, commonRouteEnd, options)
 	}
 }
 
@@ -320,8 +319,8 @@ async function bundleLinkEndIntoCommonRoute(linkEnd: LinkEnd, end: 'from'|'to', 
 		await calculateBundleNodePosition(linkEnd.getReferenceLink(), commonEndLink, commonEndNode)
 	)
 	if (insertion.addedLink[end].getTargetNodeId() === insertion.insertedNode.getId()) {
-		if ((commonRoute as any)?.links?.length !== 1) {
-			console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(...) expected commonRoute to consist of exactly one link at this state, but are ${(commonRoute as any)?.links?.length}`)
+		if (commonRoute.links.length !== 1) {
+			console.warn(`linkBundler.bundleLinkEndIntoCommonRoute(linkEnd: ${linkEnd.getId()}, end: '${end}', commonRoute: [${commonRoute.links.map(link => link.getId())}]) expected commonRoute to consist of exactly one link at this state, but are ${commonRoute.links.length}`)
 		}
 		const otherEnd: 'from'|'to' = end === 'to' ? 'from' : 'to'
 		commonRoute.addLink(otherEnd, insertion.addedLink)
@@ -365,7 +364,7 @@ async function calculateBundleNodePosition(link: Link, otherLink: Link, box: Box
 
 	const intersections: ClientPosition[] = boxRect.calculateIntersectionsWithLine(averageLine)
 	if (intersections.length !== 1) {
-		console.warn(`linkBundler.calculateBundleNodePosition(..) expected exactly one intersection but are ${intersections.length}`)
+		console.warn(`linkBundler.calculateBundleNodePosition(.., box: ${box.getSrcPath()}) expected exactly one intersection between boxRect ${JSON.stringify(boxRect)} and averageLine ${JSON.stringify(averageLine)} but are ${intersections.length}`)
 	}
 	return intersections.at(0) ?? boxRect.getMidPosition()
 }

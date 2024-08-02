@@ -19,7 +19,7 @@ test('bundleLink, nothing to bundle', async () => {
 	const fileB = boxFactory.fileOf({idOrData: 'fileB', parent: root, addToParent: true, rendered: true})
 	const link = await root.links.add({from: fileA, to: fileB, save: true})
 
-	await linkBundler.bundleLink(link)
+	await linkBundler.bundleLink(link, {entangleLinks: true})
 
 	expect(link.getData().from.path.map(waypoint => waypoint.boxId)).toEqual(['fileA'])
 	expect(link.getData().to.path.map(waypoint => waypoint.boxId)).toEqual(['fileB'])
@@ -48,7 +48,7 @@ async function testBundleLinkInsertOneNode(options: {toBoxHasOutgoingLinks: bool
 		? [await root.links.add({from: rightFile, to: root, save: true}), await root.links.add({from: rightFile, to: root, save: true})]
 		: undefined
 	
-	await linkBundler.bundleLink(topLink)
+	await linkBundler.bundleLink(topLink, {entangleLinks: true})
 	await verifyEndResult(bottomLink)
 
 	await testBundleDuplicateLink('bundleDuplicateLink')
@@ -62,7 +62,7 @@ async function testBundleLinkInsertOneNode(options: {toBoxHasOutgoingLinks: bool
 	
 		const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation()
 		try {
-			await linkBundler.bundleLink(mode === 'bundleDuplicateLink' ? duplicateLink : bottomLink)
+			await linkBundler.bundleLink(mode === 'bundleDuplicateLink' ? duplicateLink : bottomLink, {entangleLinks: true})
 		
 			await verifyEndResult(mode === 'bundleDuplicateLink' ? bottomLink : duplicateLink)
 			expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(1)
@@ -117,7 +117,7 @@ test('bundleLink, insert two nodes', async () => {
 	const topLink = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
 	const bottomLink = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
 
-	await linkBundler.bundleLink(topLink)
+	await linkBundler.bundleLink(topLink, {entangleLinks: true})
 	await verifyEndResult(bottomLink)
 
 	await testBundleDuplicateLink('bundleDuplicateLink')
@@ -131,7 +131,7 @@ test('bundleLink, insert two nodes', async () => {
 	
 		const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation()
 		try {
-			await linkBundler.bundleLink(mode === 'bundleDuplicateLink' ? duplicateLink : bottomLink)
+			await linkBundler.bundleLink(mode === 'bundleDuplicateLink' ? duplicateLink : bottomLink, {entangleLinks: true})
 		
 			await verifyEndResult(mode === 'bundleDuplicateLink' ? bottomLink : duplicateLink)
 			expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(1)
@@ -191,7 +191,7 @@ async function testBundleLinkBothInsertsInFromPart(linkToBundle: 'longLink'|'sho
 	const longLink: Link = await root.links.add({from: leftFile, to: rightFile, save: true})
 	const shortLink: Link = await root.links.add({from: leftInnerFolder, to: root, save: true})
 
-	await linkBundler.bundleLink({longLink, shortLink}[linkToBundle])
+	await linkBundler.bundleLink({longLink, shortLink}[linkToBundle], {entangleLinks: true})
 	
 	const longRoute: Link[] = BoxLinks.findLinkRoute(leftFile, rightFile)!
 	expect(longRoute.length).toBe(3)
@@ -240,7 +240,7 @@ async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'short
 	let shortRouteTest: Link[] = BoxLinks.findLinkRoute(root, leftInnerFolder)!
 	expect(shortRouteTest.length).toBe(1) // two because start link is not in there because following link also starts from leftInnerFolder
 
-	await linkBundler.bundleLink({longLink, shortLink}[linkToBundle])
+	await linkBundler.bundleLink({longLink, shortLink}[linkToBundle], {entangleLinks: true})
 	
 	const longRoute: Link[] = BoxLinks.findLinkRoute(rightFile, leftFile)!
 	expect(longRoute.length).toBe(3)
@@ -282,7 +282,7 @@ test('bundleLink, commonRoute startLink starts at LinkNode', async () => {
 	]
 	const link: Link = await root.links.add({from: leftFolder, to: rightFile, save: true})
 
-	await linkBundler.bundleLink(link)
+	await linkBundler.bundleLink(link, {entangleLinks: true})
 	
 	const linkRouteFromLeftFolderFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile, rightFile)
 	expect(linkRouteFromLeftFolderFile?.map(link => link.getId())).toEqual(linkRoute.map(link => link.getId()))
@@ -322,7 +322,7 @@ test('bundleLink, commonRoute endLink ends at LinkNode', async () => {
 	]
 	const link: Link = await root.links.add({from: rightFile, to: leftFolder, save: true})
 
-	await linkBundler.bundleLink(link)
+	await linkBundler.bundleLink(link, {entangleLinks: true})
 	
 	const linkRouteToLeftFolderFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFile, leftFolderFile)
 	expect(linkRouteToLeftFolderFile?.map(link => link.getId())).toEqual(linkRoute.map(link => link.getId()))
@@ -362,7 +362,7 @@ test('bundleLink, commonRoute starts with LinkNode', async () => {
 	]
 	const link: Link = await root.links.add({from: leftFolderFile, to: root, save: true})
 
-	await linkBundler.bundleLink(link)
+	await linkBundler.bundleLink(link, {entangleLinks: true})
 	
 	const linkRouteToRightFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile, rightFile)
 	expect(linkRouteToRightFile?.map(link => link.getId())).toEqual(linkRoute.map(link => link.getId()))
@@ -402,7 +402,7 @@ test('bundleLink, commonRoute ends with LinkNode', async () => {
 	]
 	const link: Link = await root.links.add({from: root, to: leftFolderFile, save: true})
 
-	await linkBundler.bundleLink(link)
+	await linkBundler.bundleLink(link, {entangleLinks: true})
 	
 	const linkRouteFromRightFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFile, leftFolderFile)
 	expect(linkRouteFromRightFile?.map(link => link.getId())).toEqual(linkRoute.map(link => link.getId()))
@@ -438,7 +438,7 @@ test('bundleLink, linkToRootKnot', async () => {
 	const linkBetweenKnots: Link = await root.links.add({from: fileKnot, to: rootKnot, save: true})
 	const linkToRootKnot: Link = await root.links.add({from: file, to: rootKnot, save: true})
 
-	await linkBundler.bundleLink(linkToRootKnot)
+	await linkBundler.bundleLink(linkToRootKnot, {entangleLinks: true})
 
 	const linkRouteToRootKnot: Link[]|undefined = BoxLinks.findLinkRoute(file, rootKnot)
 	expect(linkRouteToRootKnot?.map(link => link.getId())).toEqual([linkToRootKnot, linkBetweenKnots].map(link => link.getId()))
@@ -466,7 +466,7 @@ test('bundleLink, linkFromRootKnot', async () => {
 	const linkBetweenKnots: Link = await root.links.add({from: rootKnot, to: fileKnot, save: true})
 	const linkFromRootKnot: Link = await root.links.add({from: rootKnot, to: file, save: true})
 
-	await linkBundler.bundleLink(linkFromRootKnot)
+	await linkBundler.bundleLink(linkFromRootKnot, {entangleLinks: true})
 
 	const linkRouteFromRootKnot: Link[]|undefined = BoxLinks.findLinkRoute(rootKnot, file)
 	expect(linkRouteFromRootKnot?.map(node => node.getId())).toEqual([linkBetweenKnots, linkFromRootKnot].map(node => node.getId()))
@@ -500,7 +500,7 @@ test('bundleLink, linkFromRootKnot', async () => {
 	const knotToRightTopFile: Link = await root.links.add({from: leftFolderKnot, to: rightFolderTopFile, save: true})
 	const topToRoot: Link = await root.links.add({from: leftFolderTopFile, to: root, save: true})
 
-	await linkBundler.bundleLink(topToRoot)
+	await linkBundler.bundleLink(topToRoot, {entangleLinks: true})
 
 	const topToRightRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
 	const bottomToRightRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
@@ -541,7 +541,7 @@ test('bundleLink, commonRoute and linkToBundle start with knots', async () => {
 	const otherKnotToRightBottomFile: Link = await root.links.add({from: otherLeftFolderKnot, to: rightFolderBottomFile, save: true})
 	HighlightPropagatingLink.addRoutes(otherKnotToRightBottomFile, ['topToBottom', 'bottomToBottom'])
 	
-	await linkBundler.bundleLink(otherKnotToRightBottomFile)
+	await linkBundler.bundleLink(otherKnotToRightBottomFile, {entangleLinks: true})
 
 	expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(1)
 	expect(leftFolderBottomFile.borderingLinks.getAll().length).toBe(1)
@@ -599,7 +599,7 @@ test('bundleLink, commonRoute and linkToBundle end with knots', async () => {
 	const otherKnotToBottom: Link = await leftFolder.links.add({from: otherLeftFolderKnot, to: leftFolderBottomFile, save: true})
 	HighlightPropagatingLink.addRoute(otherKnotToBottom, 'bottomToBottom')
 	
-	await linkBundler.bundleLink(rightBottomFileToOtherKnot)
+	await linkBundler.bundleLink(rightBottomFileToOtherKnot, {entangleLinks: true})
 
 	expect(leftFolderTopFile.borderingLinks.getAll().length).toBe(1)
 	expect(leftFolderBottomFile.borderingLinks.getAll().length).toBe(1)
@@ -650,7 +650,7 @@ test('bundleLink, linkToBundle is connected to knot on toSide, commonRoute is no
 	HighlightPropagatingLink.addRoute(rightFolderKnotToMidFile, 'toMid')
 	const leftToRightFolderBottomFile: Link = await root.links.add({from: leftFile, to: rightFolderBottomFile, save: true})
 
-	await linkBundler.bundleLink(leftToRightFolderKnot)
+	await linkBundler.bundleLink(leftToRightFolderKnot, {entangleLinks: true})
 
 	const routeToTopFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFile, rightFolderTopFile)
 	const routeToMidFile: Link[]|undefined = BoxLinks.findLinkRoute(leftFile, rightFolderMidFile)
@@ -691,7 +691,7 @@ test('bundleLink, linkToBundle is connected to knot on fromSide, commonRoute is 
 	HighlightPropagatingLink.addRoutes(knotToLeftFile, ['fromTop', 'fromMid'])
 	const bottomFileToLeftFile: Link = await root.links.add({from: rightFolderBottomFile, to: leftFile, save: true})
 
-	await linkBundler.bundleLink(knotToLeftFile)
+	await linkBundler.bundleLink(knotToLeftFile, {entangleLinks: true})
 
 	const routeFromTopFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderTopFile, leftFile)
 	const routeFromMidFile: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderMidFile, leftFile)
@@ -728,10 +728,10 @@ test('bundleLink, commonRoute with knots already exist', async () => {
 
 	const topLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
 	const midLink: Link = await root.links.add({from: leftFolderMidFile, to: rightFolderMidFile, save: true})
-	await linkBundler.bundleLink(topLink)
+	await linkBundler.bundleLink(topLink, {entangleLinks: true})
 
 	const bottomLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
-	await linkBundler.bundleLink(bottomLink)
+	await linkBundler.bundleLink(bottomLink, {entangleLinks: true})
 
 	const topRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
 	const midRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderMidFile, rightFolderMidFile)
@@ -763,7 +763,7 @@ test('bundleLink, linkToBundle starts with knot, knot on toSide needs to be inse
 
 	const topToTopLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
 	const bottomToTopLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFolderTopFile, save: true})
-	await linkBundler.bundleLink(topToTopLink)
+	await linkBundler.bundleLink(topToTopLink, {entangleLinks: true})
 
 	const tempTopToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
 	const tempBottomToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
@@ -773,7 +773,7 @@ test('bundleLink, linkToBundle starts with knot, knot on toSide needs to be inse
 	const bottomToTopRouteId: string = HighlightPropagatingLink.getRouteIds(tempBottomToTopRoute![0])[0]
 
 	const bottomToBottomLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
-	await linkBundler.bundleLink(bottomToTopLink)
+	await linkBundler.bundleLink(bottomToTopLink, {entangleLinks: true})
 
 	const topToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
 	const bottomToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderBottomFile, rightFolderTopFile)
@@ -804,7 +804,7 @@ test('bundleLink, linkToBundle ends with knot, knot on fromSide needs to be inse
 
 	const topToTopLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFolderTopFile, save: true})
 	const topToBottomLink: Link = await root.links.add({from: leftFolderTopFile, to: rightFolderBottomFile, save: true})
-	await linkBundler.bundleLink(topToTopLink)
+	await linkBundler.bundleLink(topToTopLink, {entangleLinks: true})
 
 	const tempTopToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
 	const tempTopToBottomRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderBottomFile)
@@ -814,7 +814,7 @@ test('bundleLink, linkToBundle ends with knot, knot on fromSide needs to be inse
 	const topToBottomRouteId: string = HighlightPropagatingLink.getRouteIds(tempTopToBottomRoute![1])[0]
 
 	const bottomToBottomLink: Link = await root.links.add({from: leftFolderBottomFile, to: rightFolderBottomFile, save: true})
-	await linkBundler.bundleLink(topToBottomLink)
+	await linkBundler.bundleLink(topToBottomLink, {entangleLinks: true})
 
 	const topToTopRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderTopFile)
 	const topToBottomRoute: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderTopFile, rightFolderBottomFile)
@@ -930,13 +930,13 @@ test('bundleLink, knots on from side need to be merged', async () => {
 	const link3: Link = await root.links.add({from: leftFolderFile3, to: rightFolderBottomFile, save: true})
 	const link4: Link = await root.links.add({from: leftFolderFile4, to: rightFolderBottomFile, save: true})
 
-	await linkBundler.bundleLink(link1)
-	await linkBundler.bundleLink(link3)
+	await linkBundler.bundleLink(link1, {entangleLinks: true})
+	await linkBundler.bundleLink(link3, {entangleLinks: true})
 
 	expect(BoxLinks.findLinkRoute(leftFolderFile1, rightFolderTopFile)?.at(1)?.getId()).toBe(link2.getId())
 	expect(BoxLinks.findLinkRoute(leftFolderFile3, rightFolderBottomFile)?.at(1)?.getId()).toBe(link4.getId())
 
-	await linkBundler.bundleLink(link2)
+	await linkBundler.bundleLink(link2, {entangleLinks: true})
 
 	const route1: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile1, rightFolderTopFile)
 	const route2: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile2, rightFolderTopFile)
@@ -978,13 +978,13 @@ test('bundleLink, knots on to side need to be merged', async () => {
 	const link3: Link = await root.links.add({from: rightFolderBottomFile, to: leftFolderFile3, save: true})
 	const link4: Link = await root.links.add({from: rightFolderBottomFile, to: leftFolderFile4, save: true})
 
-	await linkBundler.bundleLink(link1)
-	await linkBundler.bundleLink(link3)
+	await linkBundler.bundleLink(link1, {entangleLinks: true})
+	await linkBundler.bundleLink(link3, {entangleLinks: true})
 
 	expect(BoxLinks.findLinkRoute(rightFolderTopFile, leftFolderFile1)?.at(0)?.getId()).toBe(link2.getId())
 	expect(BoxLinks.findLinkRoute(rightFolderBottomFile, leftFolderFile3)?.at(0)?.getId()).toBe(link4.getId())
 
-	await linkBundler.bundleLink(link2)
+	await linkBundler.bundleLink(link2, {entangleLinks: true})
 
 	const route1: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderTopFile, leftFolderFile1)
 	const route2: Link[]|undefined = BoxLinks.findLinkRoute(rightFolderTopFile, leftFolderFile2)
@@ -1025,11 +1025,11 @@ test('bundleLink, knots on both sides need to be merged', async () => {
 
 	const link1: Link = await root.links.add({from: leftFolderFile1, to: rightFolderFile1, save: true})
 	const link2: Link = await root.links.add({from: leftFolderFile2, to: rightFolderFile2, save: true})
-	await linkBundler.bundleLink(link1)
+	await linkBundler.bundleLink(link1, {entangleLinks: true})
 	
 	const link3: Link = await root.links.add({from: leftFolderFile3, to: rightFolderFile3, save: true})
 	const link4: Link = await root.links.add({from: leftFolderFile4, to: rightFolderFile3, save: true})
-	await linkBundler.bundleLink(link3)
+	await linkBundler.bundleLink(link3, {entangleLinks: true})
 
 	const tempRoute1: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile1, rightFolderFile1)
 	const tempRoute3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)
@@ -1041,7 +1041,7 @@ test('bundleLink, knots on both sides need to be merged', async () => {
 	const route4Id: string = HighlightPropagatingLink.getRouteIds(tempRoute4![0])[0]
 	
 	const link5: Link = await root.links.add({from: leftFolderFile4, to: rightFolderFile4, save: true})
-	await linkBundler.bundleLink(link5)
+	await linkBundler.bundleLink(link5, {entangleLinks: true})
 
 	const temporaryRoute3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)
 	const temporaryRoute4: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile4, rightFolderFile3)
@@ -1082,7 +1082,7 @@ test('bundleLink, linkToBundle is part of route and ends with knots, multiple ti
 
 	const link1: Link = await root.links.add({from: leftFolderFile1, to: rightFolderFile1, save: true})
 	const link2: Link = await root.links.add({from: leftFolderFile2, to: rightFolderFile2, save: true})
-	await linkBundler.bundleLink(link1)
+	await linkBundler.bundleLink(link1, {entangleLinks: true})
 	const route1Step1: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile1, rightFolderFile1)
 	const route2Step1: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile2, rightFolderFile2)
 	expect(route1Step1?.map(link => link.getId())).toEqual([link1.getId(), link2.getId(), expect.anything()])
@@ -1095,7 +1095,7 @@ test('bundleLink, linkToBundle is part of route and ends with knots, multiple ti
 	expect(route2Step1?.map(link => HighlightPropagatingLink.getBundledWithIds(link))).toEqual([[route2Step1?.at(2)?.getId()], [], [route2Step1?.at(0)?.getId()]])
 	
 	const link3: Link = await root.links.add({from: leftFolderFile3, to: rightFolderFile3, save: true})
-	await linkBundler.bundleLink(link2)
+	await linkBundler.bundleLink(link2, {entangleLinks: true})
 	const route1Step2: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile1, rightFolderFile1)
 	const route2Step2: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile2, rightFolderFile2)
 	const route3Step2: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)
@@ -1111,7 +1111,7 @@ test('bundleLink, linkToBundle is part of route and ends with knots, multiple ti
 	const link3Duplicate: Link = await root.links.add({from: leftFolderFile3, to: rightFolderFile3, save: true})
 	const consoleWarnMock = jest.spyOn(console, 'warn').mockImplementation()
 	try {
-		await linkBundler.bundleLink(link3)
+		await linkBundler.bundleLink(link3, {entangleLinks: true})
 		const route1Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile1, rightFolderFile1)
 		const route2Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile2, rightFolderFile2)
 		const route3Step3: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)
@@ -1133,7 +1133,7 @@ test('bundleLink, linkToBundle is part of route and ends with knots, multiple ti
 	}
 
 	const link4: Link = await root.links.add({from: leftFolderFile4, to: rightFolderFile4, save: true})
-	await linkBundler.bundleLink(link3Duplicate)
+	await linkBundler.bundleLink(link3Duplicate, {entangleLinks: true})
 	const route1Step4: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile1, rightFolderFile1)
 	const route2Step4: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile2, rightFolderFile2)
 	const route3Step4: Link[]|undefined = BoxLinks.findLinkRoute(leftFolderFile3, rightFolderFile3)
