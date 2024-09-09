@@ -55,24 +55,24 @@ export class Layer {
 
 	public getSuggestions(): Suggestion[] {
 		if (this.top.nodes.length < this.right.nodes.length) {
-			this.top.setMaxPosition(100 - getNeededSpaceOfNode(this.right.nodes.at(0)?.node!).width)
+			this.top.setMaxPosition(100 - this.right.calculateThicknessAfterScale())
 		} else if (this.top.nodes.length > 0) {
-			this.right.setMinPosition(getNeededSpaceOfNode(this.top.nodes.at(-1)?.node!).height)
+			this.right.setMinPosition(this.top.calculateThicknessAfterScale())
 		}
 		if (this.top.nodes.length < this.left.nodes.length) {
-			this.top.setMinPosition(getNeededSpaceOfNode(this.left.nodes.at(0)?.node!).width)
+			this.top.setMinPosition(this.left.calculateThicknessAfterScale())
 		} else if (this.top.nodes.length > 0) {
-			this.left.setMinPosition(getNeededSpaceOfNode(this.top.nodes.at(0)?.node!).height)
+			this.left.setMinPosition(this.top.calculateThicknessAfterScale())
 		}
 		if (this.bottom.nodes.length < this.right.nodes.length) {
-			this.bottom.setMaxPosition(100 - getNeededSpaceOfNode(this.right.nodes.at(-1)?.node!).width)
+			this.bottom.setMaxPosition(100 - this.right.calculateThicknessAfterScale())
 		} else if (this.bottom.nodes.length > 0) {
-			this.right.setMaxPosition(100 - getNeededSpaceOfNode(this.bottom.nodes.at(-1)?.node!).height)
+			this.right.setMaxPosition(100 - this.bottom.calculateThicknessAfterScale())
 		}
 		if (this.bottom.nodes.length < this.left.nodes.length) {
-			this.bottom.setMinPosition(getNeededSpaceOfNode(this.left.nodes.at(-1)?.node!).width)
+			this.bottom.setMinPosition(this.left.calculateThicknessAfterScale())
 		} else if (this.bottom.nodes.length > 0) {
-			this.left.setMaxPosition(100 - getNeededSpaceOfNode(this.bottom.nodes.at(0)?.node!).height)
+			this.left.setMaxPosition(100 - this.bottom.calculateThicknessAfterScale())
 		}
 		return [
 			...this.top.getSuggestions(),
@@ -80,12 +80,5 @@ export class Layer {
 			...this.bottom.getSuggestions(),
 			...this.left.getSuggestions()
 		]
-
-		function getNeededSpaceOfNode(node: Box|NodeWidget): {width: number, height: number} {
-			if (node instanceof Box) {
-				return node.getLocalRectToSave()
-			}
-			return {width: 8, height: 8}
-		}
 	}
 }

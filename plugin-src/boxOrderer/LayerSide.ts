@@ -1,4 +1,5 @@
 import { Box } from '../../dist/core/box/Box'
+import { LocalRect } from '../../dist/core/LocalRect'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { LocalPosition } from '../../dist/core/shape/LocalPosition'
 import { NodeToOrder } from './NodeToOrder'
@@ -33,17 +34,23 @@ export class LayerSide {
 		this.maxPosition = maxPosition
 	}
 
+	public calculateThicknessAfterScale(): number {
+		return this.getNeededSpace().orthogonalToSide * (this.calculateScale()?? 1) + 8
+	}
+
 	public getSuggestions(): Suggestion[] {
-		const neededSpace: number = this.getNeededSpace()
-		const availableSpace: number = this.getAvailableSpace()
-		const scale: number|undefined = neededSpace > availableSpace ? availableSpace/neededSpace : undefined
+		const scale: number|undefined = this.calculateScale()
 		
 		const suggestions: Suggestion[] = []
 		let nextFreePosition: number = this.minPosition
 		for (const node of this.nodes) {
 			if (!(node.node instanceof Box)) {
-				suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition+4, 0)})
-				nextFreePosition += 8
+				let distance: number = 8
+				if (scale) {
+					distance = distance*scale
+				}
+				suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + distance/2, 0)})
+				nextFreePosition += distance
 				continue
 			}
 			let rect: {width: number, height: number} = node.node.getLocalRectToSave()
@@ -54,7 +61,7 @@ export class LayerSide {
 				}
 			}
 			const size: {alongSide: number, orthogonalToSide: number} = this.getSize(rect)
-			suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + size.alongSide*0.25, 8, rect), suggestedSize: scale ? rect : undefined})
+			suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + size.alongSide*0.5, 8, rect), suggestedSize: scale ? rect : undefined})
 			nextFreePosition += size.alongSide*1.5
 		}
 		return suggestions
@@ -83,25 +90,40 @@ export class LayerSide {
 		return {alongSide: rect.height, orthogonalToSide: rect.width}
 	}
 
-	private getNeededSpace(): number {
-		let sum: number = 0
+	private calculateScale(): number|undefined {
+		const neededSpace: number = this.getNeededSpace().alongSide
+		const availableSpace: number = this.getAvailableSpaceAlongSide()
+		return neededSpace > availableSpace ? availableSpace/neededSpace : undefined
+	}
+
+	private getNeededSpace(): {alongSide: number, orthogonalToSide: number} {
+		let sumAlongSide: number = 0
+		let maxOrthogonalToSide: number = 0
+		
 		for (const node of this.nodes) {
-			sum += this.getNeededSpaceForNode(node)
+			const neededSpace: {alongSide: number, orthogonalToSide: number} = this.getNeededSpaceForNode(node)
+			sumAlongSide += neededSpace.alongSide
+			if (neededSpace.orthogonalToSide > maxOrthogonalToSide) {
+				maxOrthogonalToSide = neededSpace.orthogonalToSide
+			}
 		}
-		return sum
+
+		return {alongSide: sumAlongSide, orthogonalToSide: maxOrthogonalToSide}
 	}
 
-	private getNeededSpaceForNode(node: NodeToOrder): number {
+	private getNeededSpaceForNode(node: NodeToOrder): {alongSide: number, orthogonalToSide: number} {
 		if (!(node.node instanceof Box)) {
-			return 8
+			return {alongSide: 8, orthogonalToSide: 8}
 		}
+
+		const rect: LocalRect = node.node.getLocalRectToSave()
 		if (this.side === 'top' || this.side === 'bottom') {
-			return node.node.getLocalRectToSave().height * 1.5
+			return {alongSide: rect.height*1.5, orthogonalToSide: rect.width}
 		}
-		return node.node.getLocalRectToSave().width * 1.5
+		return {alongSide: rect.width*1.5, orthogonalToSide: rect.height}
 	}
 
-	private getAvailableSpace(): number {
+	private getAvailableSpaceAlongSide(): number {
 		return 100 - this.minPosition - (100-this.maxPosition)
 	}
 }
