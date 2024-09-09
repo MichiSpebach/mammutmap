@@ -154,12 +154,12 @@ export class FolderBoxBody extends BoxBody {
     return boxPromises
   }
 
-  public async rearrangeBoxesWithoutMapData(grabbedBox: Box): Promise<void> {
+  public async rearrangeBoxesWithoutMapData(grabbedBox?: Box): Promise<void> {
     const boxesWithMapData: Box[] = this.boxes.filter(box => box.isMapDataFileExisting() || box === grabbedBox)
     const boxesWithoutMapData: Box[] = this.boxes.filter(box => !box.isMapDataFileExisting() && box !== grabbedBox)
 
     const occupiedSpaces: LocalRect[] = boxesWithMapData.map(box => box.getLocalRectToSave())
-    if (!boxesWithMapData.includes(grabbedBox)) {
+    if (grabbedBox && !boxesWithMapData.includes(grabbedBox)) {
        // in case grabbedBox is dragged from another parent
       occupiedSpaces.push(await this.referenceFolderBox.transform.clientToLocalRect(await grabbedBox.getClientRect()))
     }

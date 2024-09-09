@@ -104,6 +104,15 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         await this.render(priority)
     }
 
+    public async setPositionAndRenderAndSave(positionInManagingBoxCoords: LocalPosition, priority?: RenderPriority): Promise<void> {
+        this.mapData.setPosition(positionInManagingBoxCoords)
+        await Promise.all([
+            this.render(priority),
+            this.borderingLinks.renderAll(),
+            this.getParent().saveMapData()
+        ])
+    }
+
     public async render(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
         this.renderInProgress = true
         const pros: Promise<any>[] = []

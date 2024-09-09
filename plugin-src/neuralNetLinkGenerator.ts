@@ -25,7 +25,7 @@ Box.Sidebar.BasicToolkit.add({
 		if (box instanceof SourcelessBox) {
 			return undefined
 		}
-		console.warn(`neuralNetLinkGenerator::Box.Sidebar.BasicToolkit.addElement not implemented for BoxType ${box.constructor.name}.`)
+		console.warn(`neuralNetLinkGenerator::Box.Sidebar.BasicToolkit.add not implemented for BoxType ${box.constructor.name}.`)
 		return undefined
 	}
 })
