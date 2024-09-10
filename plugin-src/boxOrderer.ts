@@ -6,6 +6,7 @@ import { Layer } from './boxOrderer/Layer'
 import { Suggestion } from './boxOrderer/LayerSide'
 import { NodeToOrder } from './boxOrderer/NodeToOrder'
 import { EmptySpaceFinder } from '../dist/core/box/EmptySpaceFinder'
+import { LinkEnd } from '../dist/core/link/LinkEnd'
 
 contextMenu.addFolderBoxMenuItem((box: FolderBox) => new MenuItemFile({label: 'order boxes', click: () => orderBoxes(box)}))
 
@@ -42,10 +43,11 @@ Box.Sidebar.BasicToolkit.add({
 
 async function orderBoxes(box: FolderBox): Promise<void> {
 	console.log(`order boxes in '${box.getName()}'...`)
-	const childs: (Box|NodeWidget)[] = box.getChilds()
+	const children: (Box|NodeWidget)[] = [...box.getChilds()]
 	const borderingLinks: Link[] = box.borderingLinks.getAll()
 
 	const layer0Nodes: NodeToOrder[] = []
+	const layer1Nodes: NodeToOrder[] = []
 	for (const link of borderingLinks) {
 		const child: Box|NodeWidget|undefined = getEndThatIsInBox(link)
 		if (child) {
@@ -57,20 +59,62 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 			const intersections: LocalPosition[] = new LocalRect(0, 0, 100, 100).calculateIntersectionsWithLine(lineInLocalCoords)
 			if (intersections.length < 1) {
 				console.warn(`boxOrderer.orderBoxes(box: '${box.getName()}') intersections.length < 1`)
-				layer0Nodes.push({node: child, wishPosition: new LocalPosition(50, 50)})
+				if (child instanceof NodeWidget) {
+					layer0Nodes.push({node: child, wishPosition: new LocalPosition(50, 50)})
+				} else {
+					layer1Nodes.push({node: child, wishPosition: new LocalPosition(50, 50)})
+				}
+				children.splice(children.indexOf(child), 1)
 				continue
 			}
 			if (intersections.length > 1) {
 				console.warn(`boxOrderer.orderBoxes(box: '${box.getName()}') intersections.length > 1`)
 			}
-			layer0Nodes.push({node: child, wishPosition: intersections[0]})
+			if (child instanceof NodeWidget) {
+				layer0Nodes.push({node: child, wishPosition: intersections[0]})
+			} else {
+				layer1Nodes.push({node: child, wishPosition: intersections[0]})
+			}
+			children.splice(children.indexOf(child), 1)
 		} else {
 			console.warn(`boxOrderer.orderBoxes(box: '${box.getName()}') does not contain end of ${link.describe()}`)
 		}
 	}
 
+	for (const node of layer0Nodes) {
+		const borderingLinks = node.node.borderingLinks.getAll()
+		for (const borderingLink of borderingLinks) {
+			const otherEnd: LinkEnd = borderingLink.from.getTargetNodeId() === node.node.getId()
+				? borderingLink.to
+				: borderingLink.from
+			for (const child of children) {
+				if (otherEnd.isBoxInPath(child)) {
+					layer1Nodes.push({node: child, wishPosition: node.wishPosition})
+				}
+			}
+		}
+	}
+
 	const layer0 = new Layer(layer0Nodes)
-	await Promise.all(layer0.getSuggestions().map(async (suggestion: Suggestion) => {
+	await applySuggestions(layer0)
+
+	const layer1 = new Layer(layer1Nodes)
+	await applySuggestions(layer1)
+	
+	await box.rearrangeBoxesWithoutMapData()
+	console.log(`...ordered boxes in '${box.getName()}'`)
+
+	function getEndThatIsInBox(link: Link): Box|NodeWidget|undefined {
+		for (const child of children) {
+			if (link.from.isBoxInPath(child) || link.to.isBoxInPath(child)) {
+				return child
+			}
+		}
+	}
+}
+
+async function applySuggestions(layer: Layer): Promise<void> {
+	await Promise.all(layer.getSuggestions().map(async (suggestion: Suggestion) => {
 		if (suggestion.node instanceof Box) {
 			await suggestion.node.updateMeasuresAndBorderingLinks({
 				x: suggestion.suggestedPosition.percentX,
@@ -83,16 +127,6 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 			await suggestion.node.setPositionAndRenderAndSave(suggestion.suggestedPosition)
 		}
 	}))
-	await box.rearrangeBoxesWithoutMapData()
-	console.log(`...ordered boxes in '${box.getName()}'`)
-
-	function getEndThatIsInBox(link: Link): Box|NodeWidget|undefined {
-		for (const child of childs) {
-			if (link.from.isBoxInPath(child) || link.to.isBoxInPath(child)) {
-				return child
-			}
-		}
-	}
 }
 
 async function unorderBoxes(box: FolderBox): Promise<void> {

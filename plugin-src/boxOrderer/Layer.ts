@@ -1,5 +1,3 @@
-import { Box } from '../../dist/core/box/Box'
-import { NodeWidget } from '../../dist/pluginFacade'
 import { LayerSide, Suggestion } from './LayerSide'
 import { NodeToOrder } from './NodeToOrder'
 
