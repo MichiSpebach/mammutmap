@@ -268,7 +268,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     await Promise.all(borderingLinksToReorder.map(link => link.reorderAndSaveAndRender({movedWayPoint: this})))
   }
 
-  // TODO: extract this into another class?
+  /** TODO: extract this into another class? */
   public async openRenamePopupAndAwaitResolve(): Promise<void> {
     const newName: string|undefined = await TextInputPopup.buildAndRenderAndAwaitResolve(`Rename Box '${this.getName()}'`, this.getName())
     if (newName) {
@@ -300,18 +300,22 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
   }
 
-  public async getParentClientRect(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'?
+  /** TODO: rename, add suffix 'ToRender'? */
+  public async getParentClientRect(): Promise<ClientRect> {
     return this.getParent().getClientRect()
   }
 
-  public async getClientShape(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'?
+  /** TODO: rename, add suffix 'ToRender'? */
+  public async getClientShape(): Promise<ClientRect> {
     return this.getClientRect()
   }
-  public async getClientRect(): Promise<ClientRect> { // TODO: rename, add suffix 'ToRender'? // TODO: delegate into site?
+  /** TODO: rename, add suffix 'ToRender'? // TODO: delegate into site? */
+  public async getClientRect(): Promise<ClientRect> {
     return this.getParent().transform.localToClientRect(this.getLocalRect())
   }
 
-  public getLocalRect(): LocalRect { // TODO: rename to getLocalRectToRender|getRenderLocalRect?
+  /** TODO: rename to getLocalRectToRender|getRenderLocalRect? */
+  public getLocalRect(): LocalRect {
     return this.site.getLocalRectToRender()
   }
 

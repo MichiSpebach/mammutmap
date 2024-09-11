@@ -11,12 +11,11 @@ export type Suggestion = {
 }
 
 export class LayerSide {
-
-	private minPosition: number = 4
-	private maxPosition: number = 96
-
 	public constructor(
 		public side: 'top'|'right'|'bottom'|'left',
+		public distanceToSide: number,
+		public minPosition: number,
+		public maxPosition: number,
 		public nodes: NodeToOrder[]
 	) {
 		if (this.side === 'top' || this.side === 'bottom') {
@@ -26,16 +25,20 @@ export class LayerSide {
 		}
 	}
 
-	public setMinPosition(minPosition: number): void {
-		this.minPosition = minPosition
+	public increaseMinPosition(value: number): void {
+		this.minPosition += value
 	}
 
-	public setMaxPosition(maxPosition: number): void {
-		this.maxPosition = maxPosition
+	public decreaseMaxPosition(value: number): void {
+		this.maxPosition -= value
+	}
+
+	public calculateInnerDistanceToSide(): number {
+		return this.calculateThicknessAfterScale() + this.distanceToSide
 	}
 
 	public calculateThicknessAfterScale(): number {
-		return this.getNeededSpace().orthogonalToSide * (this.calculateScale()?? 1) + 8
+		return this.getNeededSpace().orthogonalToSide * (this.calculateScale()?? 1)
 	}
 
 	public getSuggestions(): Suggestion[] {
@@ -49,7 +52,7 @@ export class LayerSide {
 				if (scale) {
 					distance = distance*scale
 				}
-				suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + distance/2, 0)})
+				suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + distance/2)})
 				nextFreePosition += distance
 				continue
 			}
@@ -61,22 +64,22 @@ export class LayerSide {
 				}
 			}
 			const size: {alongSide: number, orthogonalToSide: number} = this.getSize(rect)
-			suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + size.alongSide*0.5, 8, rect), suggestedSize: scale ? rect : undefined})
+			suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + size.alongSide*0.5, rect), suggestedSize: scale ? rect : undefined})
 			nextFreePosition += size.alongSide*1.5
 		}
 		return suggestions
 	}
 
-	private getPosition(valueAlongSide: number, distanceToSide: number, rect?: {width: number, height: number}): LocalPosition {
+	private getPosition(valueAlongSide: number, rect?: {width: number, height: number}): LocalPosition {
 		switch (this.side) {
 			case 'top':
-				return new LocalPosition(valueAlongSide, distanceToSide)
+				return new LocalPosition(valueAlongSide, this.distanceToSide)
 			case 'right':
-				return new LocalPosition(100-distanceToSide-(rect?.width??0), valueAlongSide)
+				return new LocalPosition(100-this.distanceToSide-(rect?.width??0), valueAlongSide)
 			case 'bottom':
-				return new LocalPosition(valueAlongSide, 100-distanceToSide-(rect?.height??0))
+				return new LocalPosition(valueAlongSide, 100-this.distanceToSide-(rect?.height??0))
 			case 'left':
-				return new LocalPosition(distanceToSide, valueAlongSide)
+				return new LocalPosition(this.distanceToSide, valueAlongSide)
 			default:
 				console.warn(`side '${this.side}' is unknown, returning new LocalPosition(50, 50)`)
 				return new LocalPosition(50, 50)
@@ -118,9 +121,9 @@ export class LayerSide {
 
 		const rect: LocalRect = node.node.getLocalRectToSave()
 		if (this.side === 'top' || this.side === 'bottom') {
-			return {alongSide: rect.height*1.5, orthogonalToSide: rect.width}
+			return {alongSide: rect.width*1.5, orthogonalToSide: rect.height}
 		}
-		return {alongSide: rect.width*1.5, orthogonalToSide: rect.height}
+		return {alongSide: rect.height*1.5, orthogonalToSide: rect.width}
 	}
 
 	private getAvailableSpaceAlongSide(): number {

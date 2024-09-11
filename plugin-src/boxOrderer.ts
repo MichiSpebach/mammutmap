@@ -81,27 +81,62 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 		}
 	}
 
-	for (const node of layer0Nodes) {
-		const borderingLinks = node.node.borderingLinks.getAll()
-		for (const borderingLink of borderingLinks) {
-			const otherEnd: LinkEnd = borderingLink.from.getTargetNodeId() === node.node.getId()
-				? borderingLink.to
-				: borderingLink.from
-			for (const child of children) {
-				if (otherEnd.isBoxInPath(child)) {
-					layer1Nodes.push({node: child, wishPosition: node.wishPosition})
-				}
-			}
-		}
+	const connectedNodes = getNodesConnectedToLayerNodes(children, layer0Nodes)
+	layer1Nodes.push(...connectedNodes)
+	for (const connectedNode of connectedNodes) {
+		children.splice(children.indexOf(connectedNode.node), 1)
 	}
 
-	const layer0 = new Layer(layer0Nodes)
+	const layer0 = new Layer(layer0Nodes, {toTop: 0, toRight: 0, toBottom: 0, toLeft: 0})
 	await applySuggestions(layer0)
 
-	const layer1 = new Layer(layer1Nodes)
+	const layer1 = new Layer(layer1Nodes, {toTop: 8, toRight: 8, toBottom: 8, toLeft: 8})
 	await applySuggestions(layer1)
+
+	let innermostLayer: Layer = layer1
+	while (true) {
+		const nodes: NodeToOrder[] = getNodesConnectedToLayerNodes(children, innermostLayer.nodes)
+		if (nodes.length < 1) {
+			break
+		}
+		for (const node of nodes) {
+			children.splice(children.indexOf(node.node), 1)
+		}
+		const distances = innermostLayer.calculateInnerDistances()
+		innermostLayer = new Layer(nodes, {
+			toTop: distances.toTop + 4,
+			toRight: distances.toRight + 4,
+			toBottom: distances.toBottom + 4,
+			toLeft: distances.toLeft + 4
+		})
+		await applySuggestions(innermostLayer)
+	}
+
+	if (children.length > 0) {
+		const occupiedSpaces: LocalRect[] = box.getChilds().filter(child => !children.includes(child)).map(child => {
+			if (child instanceof Box) {
+				return child.getLocalRectToSave()
+			} else {
+				return new LocalRect(child.getSavePosition().percentX-4, child.getSavePosition().percentY-4, 8, 8)
+			}
+		})
+		const emptySpaces: LocalRect[] = new EmptySpaceFinder(occupiedSpaces).findEmptySpaces(children.length)
+		await Promise.all(children.filter(child => child.isMapDataFileExisting()).map(async (child, index) => {
+			if (child instanceof Box) {
+				await child.updateMeasuresAndBorderingLinks({
+					x: emptySpaces[index].x,
+					y: emptySpaces[index].y,
+					width: emptySpaces[index].width < child.getLocalRectToSave().width ? emptySpaces[index].width : undefined,
+					height: emptySpaces[index].height < child.getLocalRectToSave().height ? emptySpaces[index].height : undefined
+				})
+				await child.saveMapData()
+			} else {
+				await child.setPositionAndRenderAndSave(emptySpaces[index].getMidPosition())
+			}
+		}))
+		await box.rearrangeBoxesWithoutMapData()
+	}
 	
-	await box.rearrangeBoxesWithoutMapData()
 	console.log(`...ordered boxes in '${box.getName()}'`)
 
 	function getEndThatIsInBox(link: Link): Box|NodeWidget|undefined {
@@ -111,6 +146,24 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 			}
 		}
 	}
+}
+
+function getNodesConnectedToLayerNodes(nodes: (Box|NodeWidget)[], layerNodes: NodeToOrder[]): NodeToOrder[] {
+	const connectedNodes: NodeToOrder[] = []
+	for (const layerNode of layerNodes) {
+		const borderingLinks = layerNode.node.borderingLinks.getAll()
+		for (const borderingLink of borderingLinks) {
+			const otherEnd: LinkEnd = borderingLink.from.getTargetNodeId() === layerNode.node.getId()
+				? borderingLink.to
+				: borderingLink.from
+			for (const node of nodes) {
+				if (otherEnd.isBoxInPath(node)) {
+					connectedNodes.push({node: node, wishPosition: layerNode.wishPosition})
+				}
+			}
+		}
+	}
+	return connectedNodes
 }
 
 async function applySuggestions(layer: Layer): Promise<void> {
@@ -135,13 +188,11 @@ async function unorderBoxes(box: FolderBox): Promise<void> {
 	const spaces: LocalRect[] = new EmptySpaceFinder([]).findEmptySpaces(childs.length)
 	await Promise.all(childs.map(async (child, index) => {
 		if (child instanceof Box) {
-			await Promise.all([
-				child.updateMeasuresAndBorderingLinks({
-					x: spaces[index].x,
-					y: spaces[index].y
-				}),
-				child.saveMapData()
-			])
+			await child.updateMeasuresAndBorderingLinks({
+				x: spaces[index].x,
+				y: spaces[index].y
+			})
+			await child.saveMapData()
 		} else {
 			await child.setPositionAndRenderAndSave(spaces[index].getMidPosition())
 		}
