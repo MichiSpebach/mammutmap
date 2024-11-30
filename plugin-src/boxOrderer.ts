@@ -3,7 +3,7 @@ import { LocalRect } from '../dist/core/LocalRect'
 import { settings } from '../dist/core/settings/settings'
 import { Box, contextMenu, FileBox, FolderBox, Link, LocalPosition, MenuItemFile, NodeWidget } from '../dist/pluginFacade'
 import { Layer } from './boxOrderer/Layer'
-import { Suggestion } from './boxOrderer/LayerSide'
+import { LayerSide, Suggestion } from './boxOrderer/LayerSide'
 import { NodeToOrder } from './boxOrderer/NodeToOrder'
 import { EmptySpaceFinder } from '../dist/core/box/EmptySpaceFinder'
 import { LinkEnd } from '../dist/core/link/LinkEnd'
@@ -46,8 +46,8 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 	const children: (Box|NodeWidget)[] = [...box.getChilds()]
 	const borderingLinks: Link[] = box.borderingLinks.getAll()
 
-	const layer0Nodes: NodeToOrder[] = []
-	const layer1Nodes: NodeToOrder[] = []
+	const borderLayerNodes: NodeToOrder[] = []
+	const layerNodes: NodeToOrder[] = []
 	for (const link of borderingLinks) {
 		const child: Box|NodeWidget|undefined = getEndThatIsInBox(link)
 		if (child) {
@@ -60,9 +60,9 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 			if (intersections.length < 1) {
 				console.warn(`boxOrderer.orderBoxes(box: '${box.getName()}') intersections.length < 1`)
 				if (child instanceof NodeWidget) {
-					layer0Nodes.push({node: child, wishPosition: new LocalPosition(50, 50)})
+					borderLayerNodes.push({node: child, wishPosition: new LocalPosition(50, 50)})
 				} else {
-					layer1Nodes.push({node: child, wishPosition: new LocalPosition(50, 50)})
+					layerNodes.push({node: child, wishPosition: new LocalPosition(50, 50)})
 				}
 				children.splice(children.indexOf(child), 1)
 				continue
@@ -71,9 +71,9 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 				console.warn(`boxOrderer.orderBoxes(box: '${box.getName()}') intersections.length > 1`)
 			}
 			if (child instanceof NodeWidget) {
-				layer0Nodes.push({node: child, wishPosition: intersections[0]})
+				borderLayerNodes.push({node: child, wishPosition: intersections[0]})
 			} else {
-				layer1Nodes.push({node: child, wishPosition: intersections[0]})
+				layerNodes.push({node: child, wishPosition: intersections[0]})
 			}
 			children.splice(children.indexOf(child), 1)
 		} else {
@@ -81,19 +81,20 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 		}
 	}
 
-	const connectedNodes = getNodesConnectedToLayerNodes(children, layer0Nodes)
-	layer1Nodes.push(...connectedNodes)
+	const connectedNodes = getNodesConnectedToLayerNodes(children, borderLayerNodes)
+	layerNodes.push(...connectedNodes)
 	for (const connectedNode of connectedNodes) {
 		children.splice(children.indexOf(connectedNode.node), 1)
 	}
 
-	const layer0 = new Layer(layer0Nodes, {toTop: 0, toRight: 0, toBottom: 0, toLeft: 0})
-	await applySuggestions(layer0)
+	await applySuggestions(new Layer(borderLayerNodes, {toTop: 0, toRight: 0, toBottom: 0, toLeft: 0}))
+	const layers: Layer[] = [
+		new Layer(layerNodes, {toTop: 8, toRight: 8, toBottom: 8, toLeft: 8})
+	]
+	await applySuggestions(layers[0])
 
-	const layer1 = new Layer(layer1Nodes, {toTop: 8, toRight: 8, toBottom: 8, toLeft: 8})
-	await applySuggestions(layer1)
-
-	let innermostLayer: Layer = layer1
+	let innermostLayer: Layer = layers[0]
+	let distances = layers[0].getInnerDistances()
 	while (true) {
 		const nodes: NodeToOrder[] = getNodesConnectedToLayerNodes(children, innermostLayer.nodes)
 		if (nodes.length < 1) {
@@ -102,14 +103,19 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 		for (const node of nodes) {
 			children.splice(children.indexOf(node.node), 1)
 		}
-		const distances = innermostLayer.calculateInnerDistances()
 		innermostLayer = new Layer(nodes, {
-			toTop: distances.toTop + 4,
-			toRight: distances.toRight + 4,
-			toBottom: distances.toBottom + 4,
-			toLeft: distances.toLeft + 4
+			toTop: distances.toTop,
+			toRight: distances.toRight,
+			toBottom: distances.toBottom,
+			toLeft: distances.toLeft
 		})
-		await applySuggestions(innermostLayer)
+		distances = innermostLayer.getInnerDistances()
+		layers.push(innermostLayer)
+		if (scaleLayers(layers).scaled) {
+			await Promise.all(layers.map(applySuggestions))
+		} else {
+			await applySuggestions(innermostLayer)
+		}
 	}
 
 	if (children.length > 0) {
@@ -149,7 +155,7 @@ async function orderBoxes(box: FolderBox): Promise<void> {
 }
 
 function getNodesConnectedToLayerNodes(nodes: (Box|NodeWidget)[], layerNodes: NodeToOrder[]): NodeToOrder[] {
-	const connectedNodes: NodeToOrder[] = []
+	const connectedNodes: {node: Box|NodeWidget, wishPositions: LocalPosition[]}[] = []
 	for (const layerNode of layerNodes) {
 		const borderingLinks = layerNode.node.borderingLinks.getAll()
 		for (const borderingLink of borderingLinks) {
@@ -158,17 +164,114 @@ function getNodesConnectedToLayerNodes(nodes: (Box|NodeWidget)[], layerNodes: No
 				: borderingLink.from
 			for (const node of nodes) {
 				if (otherEnd.isBoxInPath(node)) {
-					connectedNodes.push({node: node, wishPosition: layerNode.wishPosition})
+					const connectedNode = connectedNodes.find(nodeToOrder => nodeToOrder.node === node)
+					if (connectedNode) {
+						connectedNode.wishPositions.push(layerNode.wishPosition/*TODO: calculateLinkEndPositionInBox(..)*/)
+					} else {
+						connectedNodes.push({node: node, wishPositions: [layerNode.wishPosition/*TODO: calculateLinkEndPositionInBox(..)*/]})
+					}
 				}
 			}
 		}
 	}
-	return connectedNodes
+	return connectedNodes.map(connectedNode => ({node: connectedNode.node, wishPosition: calculateAvaragePosition(connectedNode.wishPositions)}))
+}
+
+async function calculateLinkEndPositionInBox(box: Box, linkEnd: LinkEnd): Promise<LocalPosition> {
+	if (box === linkEnd.getManagingBox()) {
+		return await linkEnd.getTargetPositionInManagingBoxCoords()
+	}
+	return box.transform.outerCoordsRecursiveToLocal(linkEnd.getManagingBox(), await linkEnd.getTargetPositionInManagingBoxCoords())
+}
+
+function calculateAvaragePosition(positions: LocalPosition[]): LocalPosition {
+	let x = 0
+	let y = 0
+	for (const position of positions) {
+		x += position.percentX
+		y += position.percentY
+	}
+	return new LocalPosition(x/positions.length, y/positions.length)
+}
+
+function scaleLayers(layers: Layer[]): {scaled: boolean} {
+	let wishedWidth: number = 0
+	let wishedHeight: number = 0
+	for (const layer of layers) {
+		wishedWidth += layer.left.calculateThickness()
+		wishedWidth += layer.right.calculateThickness()
+		wishedHeight += layer.top.calculateThickness()
+		wishedHeight += layer.bottom.calculateThickness()
+	}
+	let toTop: number = layers[0].top.distanceToSide
+	let toLeft: number = layers[0].left.distanceToSide
+	let toRight: number = layers[0].right.distanceToSide
+	let toBottom: number = layers[0].bottom.distanceToSide
+	const availableWidth: number = 100-toLeft-toRight
+	const availableHeight: number = 100-toTop-toBottom
+	if (wishedWidth >= availableWidth && wishedHeight >= availableHeight) {
+		return {scaled: false}
+	}
+	
+	let newMaxHorizontalThickness: number = 100
+	if (wishedWidth < availableWidth) {
+		const effectiveHorizontalLayerSides: LayerSide[] = layers.map(layer => getEffectiveLayerSides(layer, 'horizontal')).flat()
+		newMaxHorizontalThickness = availableWidth / effectiveHorizontalLayerSides.length
+	}
+	let newMaxVerticalThickness: number = 100
+	if (wishedWidth < availableWidth) {
+		const effectiveVerticalLayerSides: LayerSide[] = layers.map(layer => getEffectiveLayerSides(layer, 'vertical')).flat()
+		newMaxVerticalThickness = availableWidth / effectiveVerticalLayerSides.length
+	}
+
+	for (const layer of layers) {
+		let innerToTop: number = toTop + Math.min(layer.top.getWishedSpace().orthogonalToSide, newMaxVerticalThickness)
+		let innerToRight: number = toRight + Math.min(layer.right.getWishedSpace().orthogonalToSide, newMaxHorizontalThickness)
+		let innerToBottom: number = toBottom + Math.min(layer.bottom.getWishedSpace().orthogonalToSide, newMaxVerticalThickness)
+		let innerToLeft: number = toLeft + Math.min(layer.left.getWishedSpace().orthogonalToSide, newMaxHorizontalThickness)
+		layer.setDistances({
+			toTop, innerToTop,
+			toRight, innerToRight,
+			toBottom, innerToBottom,
+			toLeft, innerToLeft
+		})
+		toTop = innerToTop
+		toRight = innerToRight
+		toBottom = innerToBottom
+		toLeft = innerToLeft
+	}
+
+	return {scaled: true}
+
+	function getEffectiveLayerSides(layer: Layer, direction: 'horizontal'|'vertical'): LayerSide[] {
+		const effectiveLayerSides: LayerSide[] = []
+		if (direction === 'horizontal') {
+			if (layer.left.nodes.length > 0) {
+				effectiveLayerSides.push(layer.left)
+			}
+			if (layer.right.nodes.length > 0) {
+				effectiveLayerSides.push(layer.right)
+			}
+		} else {
+			if (layer.top.nodes.length > 0) {
+				effectiveLayerSides.push(layer.top)
+			}
+			if (layer.bottom.nodes.length > 0) {
+				effectiveLayerSides.push(layer.bottom)
+			}
+		}
+		return effectiveLayerSides
+	}
 }
 
 async function applySuggestions(layer: Layer): Promise<void> {
 	await Promise.all(layer.getSuggestions().map(async (suggestion: Suggestion) => {
 		if (suggestion.node instanceof Box) {
+			if (((suggestion.suggestedSize?.width??1) <= 0) || ((suggestion.suggestedSize?.height??1) <= 0)) {
+				console.log(suggestion.node.getName())
+				console.log(JSON.stringify(suggestion.suggestedPosition))
+				console.log(JSON.stringify(suggestion.suggestedSize))
+			}
 			await suggestion.node.updateMeasuresAndBorderingLinks({
 				x: suggestion.suggestedPosition.percentX,
 				y: suggestion.suggestedPosition.percentY,

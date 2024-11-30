@@ -11,45 +11,53 @@ export type Suggestion = {
 }
 
 export class LayerSide {
-	public constructor(
-		public side: 'top'|'right'|'bottom'|'left',
-		public distanceToSide: number,
-		public minPosition: number,
-		public maxPosition: number,
-		public nodes: NodeToOrder[]
-	) {
+	public static marginFactor: number = 1.5
+
+	public side: 'top'|'right'|'bottom'|'left'
+	public nodes: NodeToOrder[]
+	public distanceToSide: number
+	public innerDistanceToSide: number
+	public minPositionAlongSide: number = 0
+	public maxPositionAlongSide: number = 100
+
+	public constructor(side: 'top'|'right'|'bottom'|'left', nodes: NodeToOrder[], distanceToSide: number) {
+		this.side = side
+		
+		this.nodes = nodes
 		if (this.side === 'top' || this.side === 'bottom') {
 			this.nodes.sort((a: NodeToOrder, b: NodeToOrder) => a.wishPosition.percentX - b.wishPosition.percentX)
 		} else {
 			this.nodes.sort((a: NodeToOrder, b: NodeToOrder) => a.wishPosition.percentY - b.wishPosition.percentY)
 		}
+		
+		this.distanceToSide = distanceToSide
+		this.innerDistanceToSide = this.distanceToSide + this.getWishedSpace().orthogonalToSide
 	}
 
-	public increaseMinPosition(value: number): void {
-		this.minPosition += value
+	public setDistances(options: {
+		distanceToSide: number
+		innerDistanceToSide: number
+		minPositionAlongSide: number
+		maxPositionAlongSide: number
+	}): void {
+		this.distanceToSide = options.distanceToSide
+		this.innerDistanceToSide = options.innerDistanceToSide
+		this.minPositionAlongSide = options.minPositionAlongSide
+		this.maxPositionAlongSide = options.maxPositionAlongSide
 	}
 
-	public decreaseMaxPosition(value: number): void {
-		this.maxPosition -= value
-	}
-
-	public calculateInnerDistanceToSide(): number {
-		return this.calculateThicknessAfterScale() + this.distanceToSide
-	}
-
-	public calculateThicknessAfterScale(): number {
-		return this.getNeededSpace().orthogonalToSide * (this.calculateScale()?? 1)
+	public calculateThickness(): number {
+		return Math.abs(this.innerDistanceToSide - this.distanceToSide)
 	}
 
 	public getSuggestions(): Suggestion[] {
-		const scale: number|undefined = this.calculateScale()
-		
 		const suggestions: Suggestion[] = []
-		let nextFreePosition: number = this.minPosition
+		let nextFreePosition: number = this.minPositionAlongSide
 		for (const node of this.nodes) {
+			const scale: number = this.calculateScaleForNode(node)
 			if (!(node.node instanceof Box)) {
 				let distance: number = 8
-				if (scale) {
+				if (scale !== 1) {
 					distance = distance*scale
 				}
 				suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + distance/2)})
@@ -57,14 +65,14 @@ export class LayerSide {
 				continue
 			}
 			let rect: {width: number, height: number} = node.node.getLocalRectToSave()
-			if (scale) {
+			if (scale !== 1) {
 				rect = {
 					width: rect.width*scale,
 					height: rect.height*scale
 				}
 			}
 			const size: {alongSide: number, orthogonalToSide: number} = this.getSize(rect)
-			suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + size.alongSide*0.5, rect), suggestedSize: scale ? rect : undefined})
+			suggestions.push({node: node.node, suggestedPosition: this.getPosition(nextFreePosition + size.alongSide*0.5, rect), suggestedSize: scale !== 1 ? rect : undefined})
 			nextFreePosition += size.alongSide*1.5
 		}
 		return suggestions
@@ -93,18 +101,35 @@ export class LayerSide {
 		return {alongSide: rect.height, orthogonalToSide: rect.width}
 	}
 
-	private calculateScale(): number|undefined {
-		const neededSpace: number = this.getNeededSpace().alongSide
-		const availableSpace: number = this.getAvailableSpaceAlongSide()
-		return neededSpace > availableSpace ? availableSpace/neededSpace : undefined
+	private calculateScaleForNode(node: NodeToOrder): number {
+		const wishedSpace = this.getWishedSpaceForNode(node)
+		const scales: number[] = [1]
+		
+		const availableSpaceAlongSide: number = this.getAvailableSpaceAlongSide()
+		if (availableSpaceAlongSide > 0 && wishedSpace.alongSide > 0) {
+			const scaleAlongSide: number = availableSpaceAlongSide/wishedSpace.alongSide
+			scales.push(scaleAlongSide)
+		}
+		
+		let availableSpaceOrthogonalToSide = this.innerDistanceToSide - this.distanceToSide
+		if (availableSpaceOrthogonalToSide <= 0) {
+			console.log('availableSpaceOrthogonalToSide <= 0')
+			availableSpaceOrthogonalToSide = -availableSpaceOrthogonalToSide
+		}
+		if (availableSpaceOrthogonalToSide > 0 && wishedSpace.orthogonalToSide > 0) {
+			const scaleOrthogonalToSide: number = availableSpaceOrthogonalToSide/wishedSpace.orthogonalToSide
+			scales.push(scaleOrthogonalToSide)
+		}
+
+		return Math.min(...scales)
 	}
 
-	private getNeededSpace(): {alongSide: number, orthogonalToSide: number} {
+	public getWishedSpace(): {alongSide: number, orthogonalToSide: number} {
 		let sumAlongSide: number = 0
 		let maxOrthogonalToSide: number = 0
 		
 		for (const node of this.nodes) {
-			const neededSpace: {alongSide: number, orthogonalToSide: number} = this.getNeededSpaceForNode(node)
+			const neededSpace: {alongSide: number, orthogonalToSide: number} = this.getWishedSpaceForNode(node)
 			sumAlongSide += neededSpace.alongSide
 			if (neededSpace.orthogonalToSide > maxOrthogonalToSide) {
 				maxOrthogonalToSide = neededSpace.orthogonalToSide
@@ -114,19 +139,19 @@ export class LayerSide {
 		return {alongSide: sumAlongSide, orthogonalToSide: maxOrthogonalToSide}
 	}
 
-	private getNeededSpaceForNode(node: NodeToOrder): {alongSide: number, orthogonalToSide: number} {
+	private getWishedSpaceForNode(node: NodeToOrder): {alongSide: number, orthogonalToSide: number} {
 		if (!(node.node instanceof Box)) {
 			return {alongSide: 8, orthogonalToSide: 8}
 		}
 
 		const rect: LocalRect = node.node.getLocalRectToSave()
 		if (this.side === 'top' || this.side === 'bottom') {
-			return {alongSide: rect.width*1.5, orthogonalToSide: rect.height}
+			return {alongSide: rect.width*LayerSide.marginFactor, orthogonalToSide: rect.height*LayerSide.marginFactor}
 		}
-		return {alongSide: rect.height*1.5, orthogonalToSide: rect.width}
+		return {alongSide: rect.height*LayerSide.marginFactor, orthogonalToSide: rect.width*LayerSide.marginFactor}
 	}
 
 	private getAvailableSpaceAlongSide(): number {
-		return 100 - this.minPosition - (100-this.maxPosition)
+		return 100 - this.minPositionAlongSide - (100-this.maxPositionAlongSide)
 	}
 }

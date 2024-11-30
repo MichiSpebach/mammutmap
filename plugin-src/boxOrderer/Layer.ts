@@ -11,10 +11,19 @@ export class Layer {
 	public constructor(nodes: NodeToOrder[], outerDistances: {toTop: number, toRight: number, toBottom: number, toLeft: number}) {
 		this.nodes = nodes
 		const classifiedNodes = this.classifyNodes()
-		this.top = new LayerSide('top', outerDistances.toTop, outerDistances.toLeft, 100-outerDistances.toRight, classifiedNodes.topNodes)
-		this.right = new LayerSide('right', outerDistances.toRight, outerDistances.toTop, 100-outerDistances.toBottom,  classifiedNodes.rightNodes)
-		this.bottom = new LayerSide('bottom', outerDistances.toBottom, outerDistances.toLeft, 100-outerDistances.toRight, classifiedNodes.bottomNodes)
-		this.left = new LayerSide('left', outerDistances.toLeft, outerDistances.toTop, 100-outerDistances.toBottom, classifiedNodes.leftNodes)
+		
+		this.top = new LayerSide('top', classifiedNodes.topNodes, outerDistances.toTop)
+		this.right = new LayerSide('right', classifiedNodes.rightNodes, outerDistances.toRight)
+		this.bottom = new LayerSide('bottom', classifiedNodes.bottomNodes, outerDistances.toBottom)
+		this.left = new LayerSide('left', classifiedNodes.leftNodes, outerDistances.toLeft)
+		
+		this.setDistances({
+			...outerDistances,
+			innerToTop: this.top.innerDistanceToSide,
+			innerToRight: this.right.innerDistanceToSide,
+			innerToBottom: this.bottom.innerDistanceToSide,
+			innerToLeft: this.left.innerDistanceToSide
+		})
 	}
 
 	private classifyNodes(): {topNodes: NodeToOrder[], rightNodes: NodeToOrder[], bottomNodes: NodeToOrder[], leftNodes: NodeToOrder[]} {
@@ -52,26 +61,6 @@ export class Layer {
 	}
 
 	public getSuggestions(): Suggestion[] {
-		if (this.top.nodes.length < this.right.nodes.length) {
-			this.top.decreaseMaxPosition(this.right.calculateThicknessAfterScale())
-		} else if (this.top.nodes.length > 0) {
-			this.right.increaseMinPosition(this.top.calculateThicknessAfterScale())
-		}
-		if (this.top.nodes.length < this.left.nodes.length) {
-			this.top.increaseMinPosition(this.left.calculateThicknessAfterScale())
-		} else if (this.top.nodes.length > 0) {
-			this.left.increaseMinPosition(this.top.calculateThicknessAfterScale())
-		}
-		if (this.bottom.nodes.length < this.right.nodes.length) {
-			this.bottom.decreaseMaxPosition(this.right.calculateThicknessAfterScale())
-		} else if (this.bottom.nodes.length > 0) {
-			this.right.decreaseMaxPosition(this.bottom.calculateThicknessAfterScale())
-		}
-		if (this.bottom.nodes.length < this.left.nodes.length) {
-			this.bottom.increaseMinPosition(this.left.calculateThicknessAfterScale())
-		} else if (this.bottom.nodes.length > 0) {
-			this.left.decreaseMaxPosition(this.bottom.calculateThicknessAfterScale())
-		}
 		return [
 			...this.top.getSuggestions(),
 			...this.right.getSuggestions(),
@@ -80,12 +69,79 @@ export class Layer {
 		]
 	}
 
-	public calculateInnerDistances(): {toTop: number, toRight: number, toBottom: number, toLeft: number} {
+	public getInnerDistances(): {toTop: number, toRight: number, toBottom: number, toLeft: number} {
 		return {
-			toTop: this.top.calculateInnerDistanceToSide(),
-			toRight: this.right.calculateInnerDistanceToSide(),
-			toBottom: this.bottom.calculateInnerDistanceToSide(),
-			toLeft: this.left.calculateInnerDistanceToSide()
+			toTop: this.top.innerDistanceToSide,
+			toRight: this.right.innerDistanceToSide,
+			toBottom: this.bottom.innerDistanceToSide,
+			toLeft: this.left.innerDistanceToSide
 		}
+	}
+
+	public setDistances(distances: {
+		toTop: number, innerToTop: number
+		toRight: number, innerToRight: number
+		toBottom: number, innerToBottom: number
+		toLeft: number, innerToLeft: number
+	}): void {
+		let topMinPosition: number = distances.toLeft
+		let topMaxPosition: number = 100-distances.toRight
+		let rightMinPosition: number = distances.toTop
+		let rightMaxPosition: number = 100-distances.toBottom
+		let bottomMinPosition: number = distances.toLeft
+		let bottomMaxPosition: number = 100-distances.toRight
+		let leftMinPosition: number = distances.toTop
+		let leftMaxPosition: number = 100-distances.toBottom
+
+		const rightThickness: number = distances.innerToRight-distances.toRight
+		const topThickness: number = distances.innerToTop-distances.toTop
+		const leftThickness: number = distances.innerToLeft-distances.toLeft
+		const bottomThickness: number = distances.innerToBottom-distances.toBottom
+
+		if (this.top.nodes.length < this.right.nodes.length) {
+			topMaxPosition -= rightThickness
+		} else if (this.top.nodes.length > 0) {
+			rightMinPosition += topThickness
+		}
+		if (this.top.nodes.length < this.left.nodes.length) {
+			topMinPosition += leftThickness
+		} else if (this.top.nodes.length > 0) {
+			leftMinPosition += topThickness
+		}
+		if (this.bottom.nodes.length < this.right.nodes.length) {
+			bottomMaxPosition -= rightThickness
+		} else if (this.bottom.nodes.length > 0) {
+			rightMaxPosition -= bottomThickness
+		}
+		if (this.bottom.nodes.length < this.left.nodes.length) {
+			bottomMinPosition += leftThickness
+		} else if (this.bottom.nodes.length > 0) {
+			leftMaxPosition -= bottomThickness
+		}
+
+		this.top.setDistances({
+			distanceToSide: distances.toTop,
+			innerDistanceToSide: distances.innerToTop,
+			minPositionAlongSide: topMinPosition,
+			maxPositionAlongSide: topMaxPosition
+		})
+		this.right.setDistances({
+			distanceToSide: distances.toRight,
+			innerDistanceToSide: distances.innerToRight,
+			minPositionAlongSide: rightMinPosition,
+			maxPositionAlongSide: rightMaxPosition
+		})
+		this.bottom.setDistances({
+			distanceToSide: distances.toBottom,
+			innerDistanceToSide: distances.innerToBottom,
+			minPositionAlongSide: bottomMinPosition,
+			maxPositionAlongSide: bottomMaxPosition
+		})
+		this.left.setDistances({
+			distanceToSide: distances.toLeft,
+			innerDistanceToSide: distances.innerToLeft,
+			minPositionAlongSide: leftMinPosition,
+			maxPositionAlongSide: leftMaxPosition
+		})
 	}
 }
