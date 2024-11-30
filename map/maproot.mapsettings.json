@@ -12,7 +12,7 @@
 		},
 		{
 			"name": "has",
-			"count": 46,
+			"count": 49,
 			"appearance": {
 				"mode": "visible",
 				"color": "lime"
@@ -48,6 +48,11 @@
 			"appearance": {
 				"mode": "notRendered"
 			}
+		},
+		{
+			"name": "autoMaintained",
+			"count": 3,
+			"appearance": {}
 		}
 	],
 	"id": "76koudrno8g",

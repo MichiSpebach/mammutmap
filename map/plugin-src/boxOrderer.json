@@ -1,0 +1,172 @@
+{
+	"id": "03vsppi144",
+	"x": 56,
+	"y": 68,
+	"width": 14,
+	"height": 14,
+	"links": [
+		{
+			"id": "linkmvb6m71sg7",
+			"from": {
+				"path": [
+					{
+						"boxId": "cnp3fqpioq8",
+						"boxName": "Layer.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "247bgn2s5l8",
+						"boxName": "Layer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "link51qat6odj98",
+			"from": {
+				"path": [
+					{
+						"boxId": "cnp3fqpioq8",
+						"boxName": "Layer.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "il7b772a0go",
+						"boxName": "NodeToOrder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkuotbo45bbt8",
+			"from": {
+				"path": [
+					{
+						"boxId": "247bgn2s5l8",
+						"boxName": "Layer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "il7b772a0go",
+						"boxName": "NodeToOrder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained",
+				"has"
+			]
+		},
+		{
+			"id": "linkpufdv27aeb8",
+			"from": {
+				"path": [
+					{
+						"boxId": "247bgn2s5l8",
+						"boxName": "Layer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "99ii8v9j4dg",
+						"boxName": "LayerSide.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained",
+				"has"
+			]
+		},
+		{
+			"id": "linkkvq61bsnk48",
+			"from": {
+				"path": [
+					{
+						"boxId": "99ii8v9j4dg",
+						"boxName": "LayerSide.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "il7b772a0go",
+						"boxName": "NodeToOrder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained",
+				"has"
+			]
+		},
+		{
+			"id": "linkkc8svoo8i9g",
+			"from": {
+				"path": [
+					{
+						"boxId": "9tsfja6b51",
+						"boxName": "9tsfja6b51",
+						"x": 78.787,
+						"y": 64.084
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "il7b772a0go",
+						"boxName": "NodeToOrder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		}
+	],
+	"nodes": [
+		{
+			"id": "9tsfja6b51",
+			"x": 72,
+			"y": 60
+		}
+	]
+}
