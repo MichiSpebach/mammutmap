@@ -41,10 +41,10 @@ function createLayerSide(
 	maxPosition: number,
 	nodes: NodeToOrder[]
 ): LayerSide {
-	const layer = new LayerSide(side, nodes, distanceToSide)
-	layer.minPositionAlongSide = minPosition
-	layer.maxPositionAlongSide = maxPosition
-	return layer
+	const layerSide = new LayerSide(side, distanceToSide)
+	layerSide.nodes = nodes
+	layerSide.setExtremesAlongSide(minPosition, maxPosition)
+	return layerSide
 }
 
 function toCompareData(suggestion: Suggestion): {

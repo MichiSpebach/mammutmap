@@ -14,24 +14,25 @@ export class LayerSide {
 	public static marginFactor: number = 1.5
 
 	public side: 'top'|'right'|'bottom'|'left'
-	public nodes: NodeToOrder[]
+	public nodes: NodeToOrder[] = []
 	public distanceToSide: number
-	public innerDistanceToSide: number
-	public minPositionAlongSide: number = 0
-	public maxPositionAlongSide: number = 100
+	public wishedThicknessWithoutNodes: number
+	public maxThickness: number|undefined
+	private minPositionAlongSide: number = 0
+	private maxPositionAlongSide: number = 100
 
-	public constructor(side: 'top'|'right'|'bottom'|'left', nodes: NodeToOrder[], distanceToSide: number) {
+	public constructor(side: 'top'|'right'|'bottom'|'left', distanceToSide: number, wishedThicknessWithoutNodes: number = 0) {
 		this.side = side
-		
-		this.nodes = nodes
-		if (this.side === 'top' || this.side === 'bottom') {
-			this.nodes.sort((a: NodeToOrder, b: NodeToOrder) => a.wishPosition.percentX - b.wishPosition.percentX)
-		} else {
-			this.nodes.sort((a: NodeToOrder, b: NodeToOrder) => a.wishPosition.percentY - b.wishPosition.percentY)
-		}
-		
 		this.distanceToSide = distanceToSide
-		this.innerDistanceToSide = this.distanceToSide + this.getWishedSpace().orthogonalToSide
+		this.wishedThicknessWithoutNodes = wishedThicknessWithoutNodes
+	}
+
+	public setExtremesAlongSide(min: number, max: number): void {
+		if (min > max) {
+			console.warn(`LayerSide::setExtremesAlongSide(min: number, max: number) min > max`)
+		}
+		this.minPositionAlongSide = min
+		this.maxPositionAlongSide = max
 	}
 
 	public setDistances(options: {
@@ -41,19 +42,34 @@ export class LayerSide {
 		maxPositionAlongSide: number
 	}): void {
 		this.distanceToSide = options.distanceToSide
-		this.innerDistanceToSide = options.innerDistanceToSide
+		this.maxThickness = options.innerDistanceToSide - options.distanceToSide
 		this.minPositionAlongSide = options.minPositionAlongSide
 		this.maxPositionAlongSide = options.maxPositionAlongSide
 	}
 
-	public calculateThickness(): number {
-		return Math.abs(this.innerDistanceToSide - this.distanceToSide)
+	public countConnectionsToNode(node: Box|NodeWidget): number {
+		let count: number = 0
+		for (const link of node.borderingLinks.getAll()) {
+			for (const layerSideNode of this.nodes) {
+				if (link.from.isBoxInPath(layerSideNode.node) || link.to.isBoxInPath(layerSideNode.node)) {
+					count++
+				}
+			}
+		}
+		return count
 	}
 
 	public getSuggestions(): Suggestion[] {
+		let sortedNodes: NodeToOrder[] = [...this.nodes]
+		if (this.side === 'top' || this.side === 'bottom') {
+			sortedNodes.sort((a: NodeToOrder, b: NodeToOrder) => a.wishPosition.percentX - b.wishPosition.percentX)
+		} else {
+			sortedNodes.sort((a: NodeToOrder, b: NodeToOrder) => a.wishPosition.percentY - b.wishPosition.percentY)
+		}
+
 		const suggestions: Suggestion[] = []
 		let nextFreePosition: number = this.minPositionAlongSide
-		for (const node of this.nodes) {
+		for (const node of sortedNodes) {
 			const scale: number = this.calculateScaleForNode(node)
 			if (!(node.node instanceof Box)) {
 				let distance: number = 8
@@ -89,7 +105,7 @@ export class LayerSide {
 			case 'left':
 				return new LocalPosition(this.distanceToSide, valueAlongSide)
 			default:
-				console.warn(`side '${this.side}' is unknown, returning new LocalPosition(50, 50)`)
+				console.warn(`LayerSide::getPosition() '${this.side}' is unknown, returning new LocalPosition(50, 50)`)
 				return new LocalPosition(50, 50)
 		}
 	}
@@ -111,22 +127,37 @@ export class LayerSide {
 			scales.push(scaleAlongSide)
 		}
 		
-		let availableSpaceOrthogonalToSide = this.innerDistanceToSide - this.distanceToSide
-		if (availableSpaceOrthogonalToSide <= 0) {
-			console.log('availableSpaceOrthogonalToSide <= 0')
-			availableSpaceOrthogonalToSide = -availableSpaceOrthogonalToSide
-		}
-		if (availableSpaceOrthogonalToSide > 0 && wishedSpace.orthogonalToSide > 0) {
-			const scaleOrthogonalToSide: number = availableSpaceOrthogonalToSide/wishedSpace.orthogonalToSide
+		const sideThickness = this.calculateThickness()
+		if (sideThickness > 0) {
+			const scaleOrthogonalToSide: number = sideThickness/wishedSpace.orthogonalToSide
 			scales.push(scaleOrthogonalToSide)
 		}
 
 		return Math.min(...scales)
 	}
 
+	public calculateInnerDistanceToSide(): number {
+		return this.distanceToSide + this.calculateThickness()
+	}
+
+	public calculateThickness(): number {
+		const wishedSpace = this.getWishedSpace()
+		const thickness: number = wishedSpace.orthogonalToSide
+		if (this.maxThickness && thickness > this.maxThickness) {
+			return this.maxThickness
+		}
+
+		const availableSpaceAlongSide = this.getAvailableSpaceAlongSide()
+		if (wishedSpace.alongSide > availableSpaceAlongSide) {
+			return thickness / (wishedSpace.alongSide/availableSpaceAlongSide)
+		}
+
+		return thickness
+	}
+
 	public getWishedSpace(): {alongSide: number, orthogonalToSide: number} {
 		let sumAlongSide: number = 0
-		let maxOrthogonalToSide: number = 0
+		let maxOrthogonalToSide: number = this.wishedThicknessWithoutNodes
 		
 		for (const node of this.nodes) {
 			const neededSpace: {alongSide: number, orthogonalToSide: number} = this.getWishedSpaceForNode(node)
@@ -152,6 +183,6 @@ export class LayerSide {
 	}
 
 	private getAvailableSpaceAlongSide(): number {
-		return 100 - this.minPositionAlongSide - (100-this.maxPositionAlongSide)
+		return this.maxPositionAlongSide - this.minPositionAlongSide
 	}
 }
