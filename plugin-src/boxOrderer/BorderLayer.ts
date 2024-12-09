@@ -54,7 +54,7 @@ export class BorderLayer extends Layer {
 				from: this.box.transform.outerCoordsRecursiveToLocal(link.getManagingBox(), line.from),
 				to: this.box.transform.outerCoordsRecursiveToLocal(link.getManagingBox(), line.to)
 			}
-			const intersections: LocalPosition[] = new LocalRect(0, 0, 100, 100).calculateIntersectionsWithLine(lineInLocalCoords)
+			const intersections: LocalPosition[] = new LocalRect(0, 0, 100, 100).calculateIntersectionsWithLine(lineInLocalCoords, {inclusiveEpsilon: 0.001})
 			if (intersections.length < 1) {
 				console.warn(`BorderLayer::assignBorderingLinksToSides() intersections.length < 1`)
 				continue

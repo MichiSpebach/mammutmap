@@ -73,3 +73,25 @@ test('BorderLayer two nodes on same side', async () => {
 		{node: otherNodeWidget.getId(), suggestedPosition: new LocalPosition(100, 12)}
 	])
 })
+
+test('intersection works for nodeWidget on border in rounded box', async () => {
+	testUtil.initServicesWithMocks({hideConsoleLog: false})
+	const rootFolder: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'rootFolder', rendered: true, bodyRendered: true})
+	const roundedFolder: FolderBox =  boxFactory.folderOf({idOrData: BoxData.buildNewWithId(`roundedFolder`, 100/3, 100/7, 100/3, 100/9), parent: rootFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const folderToOrder: FolderBox = boxFactory.folderOf({idOrData: 'folderToOrder', parent: roundedFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const nodeWidget: NodeWidget = await folderToOrder.nodes.add(NodeData.buildNew(0, 50))
+
+	await rootFolder.links.add({from: {node: rootFolder, positionInFromNodeCoords: new LocalPosition(0, 50)}, to: nodeWidget, save: true})
+
+	const layer = await BorderLayer.new(folderToOrder)
+
+	expect(layer.topBorderingLinks.length).toBe(0)
+	expect(layer.rightBorderingLinks.length).toBe(0)
+	expect(layer.bottomBorderingLinks.length).toBe(0)
+	expect(layer.leftBorderingLinks.length).toBe(1)
+	expect(layer.addNodeIfFitting(nodeWidget).added).toBe(true)
+
+	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
+		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(0, 4)}
+	])
+})

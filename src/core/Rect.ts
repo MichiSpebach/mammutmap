@@ -65,7 +65,7 @@ export abstract class Rect<POSITION extends Position<POSITION>> extends Shape<PO
       || other.isPositionInside(this.getBottomLeftPosition())
   }
 
-  public calculateIntersectionsWithLine(line: {from: POSITION, to: POSITION}): POSITION[] {
+  public calculateIntersectionsWithLine(line: {from: POSITION, to: POSITION}, options?: {inclusiveEpsilon?: number}): POSITION[] {
     const intersections: POSITION[] = []
     const fromX: number = line.from.getX()
     const fromY: number = line.from.getY()
@@ -96,6 +96,20 @@ export abstract class Rect<POSITION extends Position<POSITION>> extends Shape<PO
     if (this.isPositionInside(intersectionRight) && intersectionRight.isBetweenCoordinateWise(line)
     && !intersectionRight.equals(intersectionTop) && !intersectionRight.equals(intersectionBottom)) {
       intersections.push(intersectionRight)
+    }
+
+    if (intersections.length < 1 && options?.inclusiveEpsilon) {
+      const epsilon: number = options.inclusiveEpsilon
+      if ((Math.abs(this.y-fromY) < epsilon || Math.abs(this.y+this.height-fromY) < epsilon) && fromX > this.x-epsilon && fromX < this.x+this.width+epsilon
+       || (Math.abs(this.x-fromX) < epsilon || Math.abs(this.x+this.width-fromX) < epsilon) && fromY > this.y-epsilon && fromY < this.y+this.height+epsilon) {
+        intersections.push(line.from)
+      }
+      const toX: number = line.to.getX()
+      const toY: number = line.to.getY()
+      if ((Math.abs(this.y-toY) < epsilon || Math.abs(this.y+this.height-toY) < epsilon) && toX > this.x-epsilon && toX < this.x+this.width+epsilon
+       || (Math.abs(this.x-toX) < epsilon || Math.abs(this.x+this.width-toX) < epsilon) && toY > this.y-epsilon && toY < this.y+this.height+epsilon) {
+        intersections.push(line.to)
+      }
     }
 
     return intersections
