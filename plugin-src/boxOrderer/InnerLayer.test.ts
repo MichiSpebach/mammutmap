@@ -49,20 +49,20 @@ test('InnerLayer', async () => {
 	expect(leftFiles.map(file => layer.addNodeIfFitting(file).added)).toEqual([true, true, true])
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: topFiles[0].getId(), suggestedPosition: new LocalPosition(5+8, 0+8)},
-		{node: topFiles[3].getId(), suggestedPosition: new LocalPosition(20+8, 0+8)},
-		{node: topFiles[1].getId(), suggestedPosition: new LocalPosition(35+8, 0+8)},
-		{node: topFiles[2].getId(), suggestedPosition: new LocalPosition(50+8, 0+8)},
-		{node: rightFiles[0].getId(), suggestedPosition: new LocalPosition(90-8, 8 + 10*1.5 + 5)},
-		{node: rightFiles[1].getId(), suggestedPosition: new LocalPosition(90-8, 8 + 10*1.5 + 20)},
-		{node: rightFiles[2].getId(), suggestedPosition: new LocalPosition(90-8, 8 + 10*1.5 + 35)},
-		{node: bottomFiles[3].getId(), suggestedPosition: new LocalPosition(5+8, 90-8)},
-		{node: bottomFiles[2].getId(), suggestedPosition: new LocalPosition(20+8, 90-8)},
-		{node: bottomFiles[1].getId(), suggestedPosition: new LocalPosition(35+8, 90-8)},
-		{node: bottomFiles[0].getId(), suggestedPosition: new LocalPosition(50+8, 90-8)},
-		{node: leftFiles[2].getId(), suggestedPosition: new LocalPosition(0+8, 8 + 10*1.5 + 5)},
-		{node: leftFiles[1].getId(), suggestedPosition: new LocalPosition(0+8, 8 + 10*1.5 + 20)},
-		{node: leftFiles[0].getId(), suggestedPosition: new LocalPosition(0+8, 8 + 10*1.5 + 35)},
+		{node: topFiles[0].getId(), suggestedPosition: new LocalPosition(16.206896551724135, 0+8)},
+		{node: topFiles[3].getId(), suggestedPosition: new LocalPosition(31.206896551724135, 0+8)},
+		{node: topFiles[1].getId(), suggestedPosition: new LocalPosition(46.206896551724135, 0+8)},
+		{node: topFiles[2].getId(), suggestedPosition: new LocalPosition(72.58620689655173, 0+8)},
+		{node: rightFiles[0].getId(), suggestedPosition: new LocalPosition(90-8, 5.869565217391303)},
+		{node: rightFiles[1].getId(), suggestedPosition: new LocalPosition(90-8, 45)},
+		{node: rightFiles[2].getId(), suggestedPosition: new LocalPosition(90-8, 84.1304347826087)},
+		{node: bottomFiles[3].getId(), suggestedPosition: new LocalPosition(10.217391304347824, 90-8)},
+		{node: bottomFiles[2].getId(), suggestedPosition: new LocalPosition(45, 90-8)},
+		{node: bottomFiles[1].getId(), suggestedPosition: new LocalPosition(68.23463268365818, 90-8)},
+		{node: bottomFiles[0].getId(), suggestedPosition: new LocalPosition(83.23463268365818, 90-8)},
+		{node: leftFiles[2].getId(), suggestedPosition: new LocalPosition(0+8, 14.23076923076923)},
+		{node: leftFiles[1].getId(), suggestedPosition: new LocalPosition(0+8, 45)},
+		{node: leftFiles[0].getId(), suggestedPosition: new LocalPosition(0+8, 75.76923076923077)},
 	])
 })
 
@@ -81,14 +81,14 @@ test('two InnerLayers', async () => {
 	expect(layer.addNodeIfFitting(innerFile).added).toBe(false)
 	expect(layer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'file', wishPosition: new LocalPosition(0, 50)}])
 	expect(layer.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'file', wishPosition: new LocalPosition(0, 50)}])
-	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([{node: 'file', suggestedPosition: new LocalPosition(8, 8 + 10/2)}])
+	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([{node: 'file', suggestedPosition: new LocalPosition(8, 45)}])
 
 	const innerLayer = new InnerLayer(layer)
 	expect(innerLayer.addNodeIfFitting(innerFile).added).toBe(true)
 	expect(innerLayer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'innerFile', wishPosition: new LocalPosition(0, 50)}])
 	expect(innerLayer.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'innerFile', wishPosition: new LocalPosition(0, 50)}])
 
-	expect(innerLayer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([{node: 'innerFile', suggestedPosition: new LocalPosition(8 + 20*1.5, 8 + 10/2)}])
+	expect(innerLayer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([{node: 'innerFile', suggestedPosition: new LocalPosition(8 + 20*1.5, 45)}])
 })
 
 test('no overlaps of sides', async () => {
@@ -111,7 +111,7 @@ test('no overlaps of sides', async () => {
 		{node: 'leftFile', wishPosition: new LocalPosition(0, 20+5)}
 	])
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: 'topFile', suggestedPosition: new LocalPosition(8 + 20/2, 8)},
-		{node: 'leftFile', suggestedPosition: new LocalPosition(8, 8 + 10*1.5 + 10/2)}
+		{node: 'topFile', suggestedPosition: new LocalPosition(20, 8)},
+		{node: 'leftFile', suggestedPosition: new LocalPosition(8, 20)}
 	])
 })

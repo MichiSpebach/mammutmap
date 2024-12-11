@@ -46,7 +46,7 @@ test('addNodeIfFitting() adds NodeWidgets but not Boxes', async () => {
 	expect(layer.addNodeIfFitting(nodeWidget).added).toBe(true)
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(4, 0)}
+		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(50, 0)}
 	])
 })
 
@@ -69,8 +69,8 @@ test('BorderLayer two nodes on same side', async () => {
 	expect(layer.addNodeIfFitting(otherNodeWidget).added).toBe(true)
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(100, 4)},
-		{node: otherNodeWidget.getId(), suggestedPosition: new LocalPosition(100, 12)}
+		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(100, 21.874999999999996)},
+		{node: otherNodeWidget.getId(), suggestedPosition: new LocalPosition(100, 50)}
 	])
 })
 
@@ -92,6 +92,6 @@ test('intersection works for nodeWidget on border in rounded box', async () => {
 	expect(layer.addNodeIfFitting(nodeWidget).added).toBe(true)
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(0, 4)}
+		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(0, 50)}
 	])
 })

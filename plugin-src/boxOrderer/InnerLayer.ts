@@ -59,11 +59,11 @@ export class InnerLayer extends Layer {
 			const outerDistances = this.getOuterDistances()
 			const counts = {left: 0, right: 0, top: 0, bottom: 0}
 			for (const intersection of intersections) {
-				if (intersection.percentX < this.outerLayer.left.distanceToSide + 0.1) {
+				if (intersection.percentX < outerDistances.toLeft + 0.1) {
 					counts.left++
 					continue
 				}
-				if (intersection.percentX > 100-outerDistances.toLeft - 0.1) {
+				if (intersection.percentX > 100-outerDistances.toRight - 0.1) {
 					counts.right++
 					continue
 				}

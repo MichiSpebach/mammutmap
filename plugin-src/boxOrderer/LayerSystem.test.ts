@@ -22,10 +22,9 @@ test('too thick layers are scaled', async () => {
 	const wishedWidthForBoxes: number = (50+50)*1.5
 	const availableWidthForBoxes: number = 100-8-8
 	const expectedScalingFactor: number = availableWidthForBoxes / wishedWidthForBoxes
-	const expectedYPosition: number = 8 + (20/2)*expectedScalingFactor
 	const expectedWidth: number = 50*expectedScalingFactor
-	expect(leftFile.getMapData().getRect()).toEqual(new LocalRect(8, expectedYPosition, expectedWidth, 20*expectedScalingFactor))
-	expect(rightFile.getMapData().getRect()).toEqual(new LocalRect(100-8 - expectedWidth, expectedYPosition, expectedWidth, 20*expectedScalingFactor))
+	expect(leftFile.getMapData().getRect()).toEqual(new LocalRect(8, 34.64390243902439, expectedWidth, 20*expectedScalingFactor))
+	expect(rightFile.getMapData().getRect()).toEqual(new LocalRect(100-8 - expectedWidth, 54.15609756097561, expectedWidth, 20*expectedScalingFactor))
 })
 
 test('scale two InnerLayers', async () => {
@@ -45,7 +44,6 @@ test('scale two InnerLayers', async () => {
 	const wishedWidthForBoxes: number = (50+50+50)*1.5
 	const availableWidthForBoxes: number = 100-8-8
 	const expectedScalingFactor: number = availableWidthForBoxes / wishedWidthForBoxes
-	const expectedYPosition: number = 8 + (20/2)*expectedScalingFactor
 	const expectedWidth: number = 50*expectedScalingFactor
 
 	expect(layerSystem.layers.length).toBe(3)
@@ -56,9 +54,9 @@ test('scale two InnerLayers', async () => {
 	expect(round(layerSystem.layers[2].left.calculateThickness())).toEqual(round(expectedWidth*1.5))
 	expect(layerSystem.layers[2].right.calculateThickness()).toEqual(0)
 
-	expect(roundRect(leftFile.getMapData().getRect())).toEqual(roundRect(new LocalRect(8, expectedYPosition, expectedWidth, 20*expectedScalingFactor)))
-	expect(leftInnerFile.getMapData().getRect()).toEqual(new LocalRect(8 + expectedWidth*1.5, expectedYPosition, expectedWidth, 20*expectedScalingFactor))
-	expect(roundRect(rightFile.getMapData().getRect())).toEqual(roundRect(new LocalRect(100-8 - expectedWidth, expectedYPosition, expectedWidth, 20*expectedScalingFactor)))
+	expect(roundRect(leftFile.getMapData().getRect())).toEqual(roundRect(new LocalRect(8, 36.51, expectedWidth, 20*expectedScalingFactor)))
+	expect(roundRect(leftInnerFile.getMapData().getRect())).toEqual(roundRect(new LocalRect(8 + expectedWidth*1.5, 36.51, expectedWidth, 20*expectedScalingFactor)))
+	expect(roundRect(rightFile.getMapData().getRect())).toEqual(roundRect(new LocalRect(100-8 - expectedWidth, 56.02, expectedWidth, 20*expectedScalingFactor)))
 })
 
 function roundRect(rect: LocalRect): LocalRect {

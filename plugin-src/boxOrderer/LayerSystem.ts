@@ -1,13 +1,12 @@
 import { Box } from '../../dist/core/box/Box'
 import { EmptySpaceFinder } from '../../dist/core/box/EmptySpaceFinder'
 import { FolderBox } from '../../dist/core/box/FolderBox'
-import { Link } from '../../dist/core/link/Link'
 import { LocalRect } from '../../dist/core/LocalRect'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { BorderLayer } from './BorderLayer'
 import { InnerLayer } from './InnerLayer'
 import { Layer } from './Layer'
-import { LayerSide, Suggestion } from './LayerSide'
+import { Suggestion } from './LayerSide'
 
 export class LayerSystem {
 	public readonly box: FolderBox

@@ -8,29 +8,29 @@ test('getSuggestions', () => {
 	expect(createLayerSide('top', 0, 0, 100, [
 		createNodeToOrder('box', new LocalRect(40, 45, 20, 10))
 	]).getSuggestions().map(toCompareData)).toEqual([
-		{nodeName: 'box', suggestedPosition: new LocalPosition( 10, 0)}
+		{nodeName: 'box', suggestedPosition: new LocalPosition( 40, 0)}
 	])
 
 	expect(createLayerSide('top', 20, 20, 80, [
 		createNodeToOrder('box', new LocalRect(40, 45, 20, 10))
 	]).getSuggestions().map(toCompareData)).toEqual([
-		{nodeName: 'box', suggestedPosition: new LocalPosition( 30, 20)}
+		{nodeName: 'box', suggestedPosition: new LocalPosition( 40, 20)}
 	])
 
 	expect(createLayerSide('top', 0, 0, 100, [
 		createNodeToOrder('leftBox', new LocalRect(20, 45, 20, 10)),
 		createNodeToOrder('rightBox', new LocalRect(60, 45, 20, 10))
 	]).getSuggestions().map(toCompareData)).toEqual([
-		{nodeName: 'leftBox', suggestedPosition: new LocalPosition( 10, 0)},
-		{nodeName: 'rightBox', suggestedPosition: new LocalPosition( 40, 0)}
+		{nodeName: 'leftBox', suggestedPosition: new LocalPosition( 20, 0)},
+		{nodeName: 'rightBox', suggestedPosition: new LocalPosition( 60, 0)}
 	])
 
 	expect(createLayerSide('bottom', 0, 0, 100, [
 		createNodeToOrder('rightBox', new LocalRect(60, 45, 20, 10)),
 		createNodeToOrder('leftBox', new LocalRect(20, 45, 20, 10))
 	]).getSuggestions().map(toCompareData)).toEqual([
-		{nodeName: 'leftBox', suggestedPosition: new LocalPosition( 10, 90)},
-		{nodeName: 'rightBox', suggestedPosition: new LocalPosition( 40, 90)}
+		{nodeName: 'leftBox', suggestedPosition: new LocalPosition( 20, 90)},
+		{nodeName: 'rightBox', suggestedPosition: new LocalPosition( 60, 90)}
 	])
 })
 
