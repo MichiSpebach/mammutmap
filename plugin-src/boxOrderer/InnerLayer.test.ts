@@ -49,8 +49,8 @@ test('InnerLayer', async () => {
 	expect(leftFiles.map(file => layer.addNodeIfFitting(file).added)).toEqual([true, true, true])
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: topFiles[0].getId(), suggestedPosition: new LocalPosition(16.206896551724135, 0+8)},
-		{node: topFiles[3].getId(), suggestedPosition: new LocalPosition(31.206896551724135, 0+8)},
+		{node: topFiles[0].getId(), suggestedPosition: new LocalPosition(12.278325123152708, 0+8)},
+		{node: topFiles[3].getId(), suggestedPosition: new LocalPosition(27.278325123152708, 0+8)},
 		{node: topFiles[1].getId(), suggestedPosition: new LocalPosition(46.206896551724135, 0+8)},
 		{node: topFiles[2].getId(), suggestedPosition: new LocalPosition(72.58620689655173, 0+8)},
 		{node: rightFiles[0].getId(), suggestedPosition: new LocalPosition(90-8, 5.869565217391303)},

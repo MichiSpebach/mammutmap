@@ -19,11 +19,14 @@ export class Sorting {
 	}
 
 	public sort(): void {
-		this.items.sort((a: Item, b: Item) => a.position - b.position)
-		for (let i = 0; i < this.items.length; i++) {
-			this.pushDown(i, 0)
-			this.pushUp(i, 0)
+		if (this.items.length < 1) {
+			return
 		}
+
+		this.items.sort((a: Item, b: Item) => a.position - b.position)
+		
+		this.pushUp(0, 0)
+		this.pushDown(this.items.length-1, 0)
 	}
 
 	private pushDown(index: number, amount: number): void {
@@ -34,12 +37,12 @@ export class Sorting {
 		}
 		const nextItem: Item = this.items[index-1]
 		const distance: number = item.position - (nextItem.position+nextItem.size)
-		if (distance >= amount) {
-			item.position -= amount/2
-			return
+		
+		item.position -= amount/2
+		this.pushDown(index-1, Math.max(amount-distance, 0))
+		if (nextItem.position+nextItem.size > item.position) {
+			item.position = nextItem.position+nextItem.size
 		}
-		this.pushDown(index-1, amount-distance)
-		item.position = nextItem.position+nextItem.size
 	}
 
 	private pushUp(index: number, amount: number): void {
@@ -50,11 +53,11 @@ export class Sorting {
 		}
 		const nextItem: Item = this.items[index+1]
 		const distance: number = nextItem.position - (item.position+item.size)
-		if (distance >= amount) {
-			item.position += amount/2
-			return
+		
+		item.position += amount/2
+		this.pushUp(index+1, Math.max(amount-distance, 0))
+		if (nextItem.position < item.position+item.size) {
+			item.position = nextItem.position-item.size
 		}
-		this.pushUp(index+1, amount-distance)
-		item.position = nextItem.position-item.size
 	}
 }
