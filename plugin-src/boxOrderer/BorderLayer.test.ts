@@ -42,8 +42,8 @@ test('addNodeIfFitting() adds NodeWidgets but not Boxes', async () => {
 	expect(layer.rightBorderingLinks.length).toBe(0)
 	expect(layer.bottomBorderingLinks.length).toBe(0)
 	expect(layer.leftBorderingLinks.length).toBe(0)
-	expect(layer.addNodeIfFitting(file).added).toBe(false)
-	expect(layer.addNodeIfFitting(nodeWidget).added).toBe(true)
+	expect((await layer.addNodeIfFitting(file)).added).toBe(false)
+	expect((await layer.addNodeIfFitting(nodeWidget)).added).toBe(true)
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
 		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(50, 0)}
@@ -65,12 +65,12 @@ test('BorderLayer two nodes on same side', async () => {
 	expect(layer.rightBorderingLinks.length).toBe(2)
 	expect(layer.bottomBorderingLinks.length).toBe(0)
 	expect(layer.leftBorderingLinks.length).toBe(0)
-	expect(layer.addNodeIfFitting(nodeWidget).added).toBe(true)
-	expect(layer.addNodeIfFitting(otherNodeWidget).added).toBe(true)
+	expect((await layer.addNodeIfFitting(nodeWidget)).added).toBe(true)
+	expect((await layer.addNodeIfFitting(otherNodeWidget)).added).toBe(true)
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(100, 21.874999999999996)},
-		{node: otherNodeWidget.getId(), suggestedPosition: new LocalPosition(100, 50)}
+		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(100, 46)},
+		{node: otherNodeWidget.getId(), suggestedPosition: new LocalPosition(100, 54)}
 	])
 })
 
@@ -89,9 +89,9 @@ test('intersection works for nodeWidget on border in rounded box', async () => {
 	expect(layer.rightBorderingLinks.length).toBe(0)
 	expect(layer.bottomBorderingLinks.length).toBe(0)
 	expect(layer.leftBorderingLinks.length).toBe(1)
-	expect(layer.addNodeIfFitting(nodeWidget).added).toBe(true)
+	expect((await layer.addNodeIfFitting(nodeWidget)).added).toBe(true)
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(0, 50)}
+		{node: nodeWidget.getId(), suggestedPosition: new LocalPosition(0, 96)}
 	])
 })

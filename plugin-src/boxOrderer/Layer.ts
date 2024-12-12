@@ -1,4 +1,5 @@
 import { Box } from '../../dist/core/box/Box'
+import { LinkEnd } from '../../dist/core/link/LinkEnd'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { LocalPosition } from '../../dist/core/shape/LocalPosition'
 import { LayerSide, Suggestion } from './LayerSide'
@@ -23,7 +24,28 @@ export abstract class Layer {
 		}
 	}
 
-	public abstract addNodeIfFitting(node: Box|NodeWidget): {added: boolean}
+	public abstract addNodeIfFitting(node: Box|NodeWidget): Promise<{added: boolean}>
+
+	public async getTargetPositionsOfNodeLinks(node: Box|NodeWidget): Promise<LocalPosition[]> {
+		const positions: LocalPosition[] = []
+		for (const linkEnd of node.borderingLinks.getAllEnds()) {
+			for (const layerNode of this.nodes) {
+				const otherEnd: LinkEnd = linkEnd.getOtherEnd()
+				if (otherEnd.isBoxInPath(layerNode.node)) {
+					positions.push(await otherEnd.getTargetPositionInManagingBoxCoords())
+				}
+			}
+		}
+		return positions
+	}
+
+	/** TODO: move into AbstractNodeWidget|Vertex|Node? */
+	protected getMidPositionOfNode(node: Box|NodeWidget): LocalPosition {
+		if (node instanceof Box) {
+			return node.getLocalRectToSave().getMidPosition()
+		}
+		return node.getSavePosition()
+	}
 
 	public getIntersectionsOfNodeLinks(node: Box|NodeWidget): LocalPosition[] {
 		const intersections: LocalPosition[] = []

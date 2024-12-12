@@ -47,7 +47,7 @@ export class LayerSystem {
 	private async assignUnassignedChildrenToLayer(layer: Layer): Promise<void> {
 		for (let i = this.unassignedChildren.length-1; i >= 0; i--) { // counting down because elements are removed
 			const child: Box|NodeWidget = this.unassignedChildren[i]
-			if (layer.addNodeIfFitting(child).added) {
+			if ((await layer.addNodeIfFitting(child)).added) {
 				this.unassignedChildren.splice(i, 1)
 			}
 		}

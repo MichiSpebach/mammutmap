@@ -43,26 +43,26 @@ test('InnerLayer', async () => {
 	
 	const layer = new InnerLayer(await BorderLayer.new(folderToOrder))
 
-	expect(topFiles.map(file => layer.addNodeIfFitting(file).added)).toEqual([true, true, true, true])
-	expect(rightFiles.map(file => layer.addNodeIfFitting(file).added)).toEqual([true, true, true])
-	expect(bottomFiles.map(file => layer.addNodeIfFitting(file).added)).toEqual([true, true, true, true])
-	expect(leftFiles.map(file => layer.addNodeIfFitting(file).added)).toEqual([true, true, true])
+	expect(await Promise.all(topFiles.map(async file => (await layer.addNodeIfFitting(file)).added))).toEqual([true, true, true, true])
+	expect(await Promise.all(rightFiles.map(async file => (await layer.addNodeIfFitting(file)).added))).toEqual([true, true, true])
+	expect(await Promise.all(bottomFiles.map(async file => (await layer.addNodeIfFitting(file)).added))).toEqual([true, true, true, true])
+	expect(await Promise.all(leftFiles.map(async file => (await layer.addNodeIfFitting(file)).added))).toEqual([true, true, true])
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: topFiles[0].getId(), suggestedPosition: new LocalPosition(12.278325123152708, 0+8)},
-		{node: topFiles[3].getId(), suggestedPosition: new LocalPosition(27.278325123152708, 0+8)},
-		{node: topFiles[1].getId(), suggestedPosition: new LocalPosition(46.206896551724135, 0+8)},
-		{node: topFiles[2].getId(), suggestedPosition: new LocalPosition(72.58620689655173, 0+8)},
-		{node: rightFiles[0].getId(), suggestedPosition: new LocalPosition(90-8, 5.869565217391303)},
+		{node: topFiles[0].getId(), suggestedPosition: new LocalPosition(22.5, 0+8)},
+		{node: topFiles[1].getId(), suggestedPosition: new LocalPosition(37.5, 0+8)},
+		{node: topFiles[2].getId(), suggestedPosition: new LocalPosition(52.5, 0+8)},
+		{node: topFiles[3].getId(), suggestedPosition: new LocalPosition(67.5, 0+8)},
+		{node: rightFiles[0].getId(), suggestedPosition: new LocalPosition(90-8, 30)},
 		{node: rightFiles[1].getId(), suggestedPosition: new LocalPosition(90-8, 45)},
-		{node: rightFiles[2].getId(), suggestedPosition: new LocalPosition(90-8, 84.1304347826087)},
-		{node: bottomFiles[3].getId(), suggestedPosition: new LocalPosition(10.217391304347824, 90-8)},
-		{node: bottomFiles[2].getId(), suggestedPosition: new LocalPosition(45, 90-8)},
-		{node: bottomFiles[1].getId(), suggestedPosition: new LocalPosition(68.23463268365818, 90-8)},
-		{node: bottomFiles[0].getId(), suggestedPosition: new LocalPosition(83.23463268365818, 90-8)},
-		{node: leftFiles[2].getId(), suggestedPosition: new LocalPosition(0+8, 14.23076923076923)},
+		{node: rightFiles[2].getId(), suggestedPosition: new LocalPosition(90-8, 60)},
+		{node: bottomFiles[0].getId(), suggestedPosition: new LocalPosition(22.5, 90-8)},
+		{node: bottomFiles[1].getId(), suggestedPosition: new LocalPosition(37.5, 90-8)},
+		{node: bottomFiles[2].getId(), suggestedPosition: new LocalPosition(52.5, 90-8)},
+		{node: bottomFiles[3].getId(), suggestedPosition: new LocalPosition(67.5, 90-8)},
+		{node: leftFiles[0].getId(), suggestedPosition: new LocalPosition(0+8, 30)},
 		{node: leftFiles[1].getId(), suggestedPosition: new LocalPosition(0+8, 45)},
-		{node: leftFiles[0].getId(), suggestedPosition: new LocalPosition(0+8, 75.76923076923077)},
+		{node: leftFiles[2].getId(), suggestedPosition: new LocalPosition(0+8, 60)},
 	])
 })
 
@@ -73,20 +73,20 @@ test('two InnerLayers', async () => {
 	const file: FileBox = boxFactory.fileOf({idOrData: BoxData.buildNewWithId('file', 10, 45, 20, 10), parent: folderToOrder, addToParent: true, rendered: true})
 	const innerFile: FileBox = boxFactory.fileOf({idOrData: BoxData.buildNewWithId('innerFile', 40, 45, 20, 10), parent: folderToOrder, addToParent: true, rendered: true})
 
-	await rootFolder.links.add({from: {node: rootFolder, positionInFromNodeCoords: new LocalPosition(0, 50)}, to: file, save: true})
+	await rootFolder.links.add({from: {node: rootFolder, positionInFromNodeCoords: new LocalPosition(5, 50)}, to: file, save: true})
 	await folderToOrder.links.add({from: file, to: innerFile, save: true})
 
 	const layer = new InnerLayer(await BorderLayer.new(folderToOrder))
-	expect(layer.addNodeIfFitting(file).added).toBe(true)
-	expect(layer.addNodeIfFitting(innerFile).added).toBe(false)
-	expect(layer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'file', wishPosition: new LocalPosition(0, 50)}])
-	expect(layer.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'file', wishPosition: new LocalPosition(0, 50)}])
+	expect((await layer.addNodeIfFitting(file)).added).toBe(true)
+	expect((await layer.addNodeIfFitting(innerFile)).added).toBe(false)
+	expect(layer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'file', wishPosition: new LocalPosition(-25, 50)}])
+	expect(layer.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'file', wishPosition: new LocalPosition(-25, 50)}])
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([{node: 'file', suggestedPosition: new LocalPosition(8, 45)}])
 
 	const innerLayer = new InnerLayer(layer)
-	expect(innerLayer.addNodeIfFitting(innerFile).added).toBe(true)
-	expect(innerLayer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'innerFile', wishPosition: new LocalPosition(0, 50)}])
-	expect(innerLayer.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'innerFile', wishPosition: new LocalPosition(0, 50)}])
+	expect((await innerLayer.addNodeIfFitting(innerFile)).added).toBe(true)
+	expect(innerLayer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'innerFile', wishPosition: new LocalPosition(20, 50)}])
+	expect(innerLayer.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'innerFile', wishPosition: new LocalPosition(20, 50)}])
 
 	expect(innerLayer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([{node: 'innerFile', suggestedPosition: new LocalPosition(8 + 20*1.5, 45)}])
 })
@@ -102,13 +102,13 @@ test('no overlaps of sides', async () => {
 	await rootFolder.links.add({from: {node: rootFolder, positionInFromNodeCoords: new LocalPosition(0, 10 + (20+5)/2)}, to: leftFile, save: true})
 
 	const layer = new InnerLayer(await BorderLayer.new(folderToOrder))
-	expect(layer.addNodeIfFitting(topFile).added).toBe(true)
-	expect(layer.addNodeIfFitting(leftFile).added).toBe(true)
-	expect(layer.top.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'topFile', wishPosition: new LocalPosition(20+10, 0)}])
-	expect(layer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'leftFile', wishPosition: new LocalPosition(0, 20+5)}])
+	expect((await layer.addNodeIfFitting(topFile)).added).toBe(true)
+	expect((await layer.addNodeIfFitting(leftFile)).added).toBe(true)
+	expect(layer.top.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'topFile', wishPosition: new LocalPosition(20+10, -20)}])
+	expect(layer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'leftFile', wishPosition: new LocalPosition(-20, 20+5)}])
 	expect(layer.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([
-		{node: 'topFile', wishPosition: new LocalPosition(20+10, 0)},
-		{node: 'leftFile', wishPosition: new LocalPosition(0, 20+5)}
+		{node: 'topFile', wishPosition: new LocalPosition(20+10, -20)},
+		{node: 'leftFile', wishPosition: new LocalPosition(-20, 20+5)}
 	])
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
 		{node: 'topFile', suggestedPosition: new LocalPosition(20, 8)},

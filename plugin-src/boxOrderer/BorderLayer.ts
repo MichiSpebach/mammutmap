@@ -1,5 +1,6 @@
 import { Box } from '../../dist/core/box/Box'
 import { Link } from '../../dist/core/link/Link'
+import { LinkEnd } from '../../dist/core/link/LinkEnd'
 import { LocalRect } from '../../dist/core/LocalRect'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { LocalPosition } from '../../dist/core/shape/LocalPosition'
@@ -83,13 +84,13 @@ export class BorderLayer extends Layer {
 		}
 	}
 
-	public addNodeIfFitting(node: Box|NodeWidget): {added: boolean} {
+	public async addNodeIfFitting(node: Box|NodeWidget): Promise<{added: boolean}> {
 		if (!(node instanceof NodeWidget)) {
 			return {added: false}
 		}
 		let best: {intersections: LocalPosition[], side: {side: LayerSide, borderingLinks: {link: Link, intersection: LocalPosition}[]}} | undefined
 		for (const side of this.sides) {
-			const intersections: LocalPosition[] = this.getIntersectionsOfNodeLinksToBorderingLinks(node, side.borderingLinks)
+			const intersections: LocalPosition[] = await this.getTargetPositionsOfNodeLinksToBorderingLinks(node, side.borderingLinks.map(linkWithIntersection => linkWithIntersection.link))
 			if (intersections.length > (best?.intersections.length?? 0)) {
 				best = {intersections, side}
 			}
@@ -100,6 +101,38 @@ export class BorderLayer extends Layer {
 			this.nodes.push(nodeToOrder)
 		}
 		return {added: !!best}
+	}
+
+	public override async getTargetPositionsOfNodeLinks(node: Box|NodeWidget): Promise<LocalPosition[]> {
+		return [
+			...await super.getTargetPositionsOfNodeLinks(node),
+			...await this.getTargetPositionsOfNodeLinksToBorderingLinks(node, this.box.borderingLinks.getAll())
+		]
+	}
+
+	private async getTargetPositionsOfNodeLinksToBorderingLinks(node: Box|NodeWidget, borderingLinks: Link[]): Promise<LocalPosition[]> {
+		const positions: LocalPosition[] = []
+
+		for (const link of borderingLinks) {
+			let otherLinkEnd: LinkEnd
+			if (link.from.isBoxInPath(node)) {
+				otherLinkEnd = link.to
+			} else if (link.to.isBoxInPath(node)) {
+				otherLinkEnd = link.from
+			} else {
+				continue
+			}
+			if (otherLinkEnd.getManagingBox() === this.box) {
+				positions.push(await otherLinkEnd.getTargetPositionInManagingBoxCoords())
+			} else {
+				positions.push(this.box.transform.outerCoordsRecursiveToLocal(otherLinkEnd.getManagingBox(), await otherLinkEnd.getTargetPositionInManagingBoxCoords()))
+			}
+			/*const otherNode: Box|NodeWidget = otherLinkEnd.getDeepestRenderedWayPoint().linkable
+			const positionInParentCoords: LocalPosition = this.box.getParent().transform.innerCoordsRecursiveToLocal(otherNode.getParent(), this.getMidPositionOfNode(otherNode))
+			positions.push(this.box.transform.fromParentPosition(positionInParentCoords))*/
+		}
+
+		return positions
 	}
 
 	public override getIntersectionsOfNodeLinks(node: Box|NodeWidget): LocalPosition[] {
