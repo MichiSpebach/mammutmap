@@ -39,28 +39,6 @@ export abstract class Layer {
 		return positions
 	}
 
-	/** TODO: move into AbstractNodeWidget|Vertex|Node? */
-	protected getMidPositionOfNode(node: Box|NodeWidget): LocalPosition {
-		if (node instanceof Box) {
-			return node.getLocalRectToSave().getMidPosition()
-		}
-		return node.getSavePosition()
-	}
-
-	public getIntersectionsOfNodeLinks(node: Box|NodeWidget): LocalPosition[] {
-		const intersections: LocalPosition[] = []
-		
-		for (const linkEnd of node.borderingLinks.getAllEnds()) {
-			for (const layerNode of this.nodes) {
-				if (linkEnd.getOtherEnd().isBoxInPath(layerNode.node)) {
-					intersections.push(layerNode.wishPosition/*TODO: calculateLinkEndPositionInBox(..)*/)
-				}
-			}
-		}
-
-		return intersections
-	}
-
 	public getSuggestions(): Suggestion[] {
 		return [
 			...this.top.getSuggestions(),

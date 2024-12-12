@@ -29,7 +29,7 @@ export class InnerLayer extends Layer {
 		}
 	}
 
-	public override async addNodeIfFitting(node: Box|NodeWidget, options?: {mode?: 'count'|'average'}): Promise<{ added: boolean} > {
+	public override async addNodeIfFitting(node: Box|NodeWidget, options?: {mode?: 'count'|'average'}): Promise<{added: boolean}> {
 		const intersections: LocalPosition[] = await this.outerLayer.getTargetPositionsOfNodeLinks(node)
 		if (intersections.length < 1) {
 			return {added: false}

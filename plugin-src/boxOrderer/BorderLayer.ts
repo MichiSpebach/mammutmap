@@ -88,15 +88,15 @@ export class BorderLayer extends Layer {
 		if (!(node instanceof NodeWidget)) {
 			return {added: false}
 		}
-		let best: {intersections: LocalPosition[], side: {side: LayerSide, borderingLinks: {link: Link, intersection: LocalPosition}[]}} | undefined
+		let best: {positions: LocalPosition[], side: {side: LayerSide, borderingLinks: {link: Link, intersection: LocalPosition}[]}} | undefined
 		for (const side of this.sides) {
 			const intersections: LocalPosition[] = await this.getTargetPositionsOfNodeLinksToBorderingLinks(node, side.borderingLinks.map(linkWithIntersection => linkWithIntersection.link))
-			if (intersections.length > (best?.intersections.length?? 0)) {
-				best = {intersections, side}
+			if (intersections.length > (best?.positions.length?? 0)) {
+				best = {positions: intersections, side}
 			}
 		}
 		if (best) {
-			const nodeToOrder: NodeToOrder = {node: node, wishPosition: this.calculateAvaragePosition(best.intersections)}
+			const nodeToOrder: NodeToOrder = {node: node, wishPosition: this.calculateAvaragePosition(best.positions)}
 			best.side.side.nodes.push(nodeToOrder)
 			this.nodes.push(nodeToOrder)
 		}
@@ -127,29 +127,8 @@ export class BorderLayer extends Layer {
 			} else {
 				positions.push(this.box.transform.outerCoordsRecursiveToLocal(otherLinkEnd.getManagingBox(), await otherLinkEnd.getTargetPositionInManagingBoxCoords()))
 			}
-			/*const otherNode: Box|NodeWidget = otherLinkEnd.getDeepestRenderedWayPoint().linkable
-			const positionInParentCoords: LocalPosition = this.box.getParent().transform.innerCoordsRecursiveToLocal(otherNode.getParent(), this.getMidPositionOfNode(otherNode))
-			positions.push(this.box.transform.fromParentPosition(positionInParentCoords))*/
 		}
 
 		return positions
-	}
-
-	public override getIntersectionsOfNodeLinks(node: Box|NodeWidget): LocalPosition[] {
-		const borderingLinksWithIntersections = [...this.topBorderingLinks, ...this.rightBorderingLinks, ...this.bottomBorderingLinks, ...this.leftBorderingLinks]
-		return [
-			...super.getIntersectionsOfNodeLinks(node),
-			...this.getIntersectionsOfNodeLinksToBorderingLinks(node, borderingLinksWithIntersections)
-		]
-	}
-
-	private getIntersectionsOfNodeLinksToBorderingLinks(node: Box|NodeWidget, borderingLinks: {link: Link, intersection: LocalPosition}[]): LocalPosition[] {
-		const intersections: LocalPosition[] = []
-		for (const borderingLink of borderingLinks) {
-			if (borderingLink.link.from.isBoxInPath(node) || borderingLink.link.to.isBoxInPath(node)) {
-				intersections.push(borderingLink.intersection)
-			}
-		}
-		return intersections
 	}
 }
