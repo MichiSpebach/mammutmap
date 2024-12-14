@@ -61,6 +61,19 @@ export class LayerSide {
 		return count
 	}
 
+	public getRect(): LocalRect {
+		switch (this.side) {
+			case 'left':
+				return new LocalRect(this.distanceToSide, this.minPositionAlongSide, this.calculateThickness(), this.maxPositionAlongSide-this.minPositionAlongSide)
+			case 'right':
+				return new LocalRect(100-this.calculateInnerDistanceToSide(), this.minPositionAlongSide, this.calculateThickness(), this.maxPositionAlongSide-this.minPositionAlongSide)
+			case 'top':
+				return new LocalRect(this.minPositionAlongSide, this.distanceToSide, this.maxPositionAlongSide-this.minPositionAlongSide, this.calculateThickness())
+			case 'bottom':
+				return new LocalRect(this.minPositionAlongSide, 100-this.calculateInnerDistanceToSide(), this.maxPositionAlongSide-this.minPositionAlongSide, this.calculateThickness())
+		}
+	}
+
 	public getSuggestions(): Suggestion[] {
 		const sorting = new Sorting()
 		for (const node of this.nodes) {

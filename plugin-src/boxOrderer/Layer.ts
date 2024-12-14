@@ -24,20 +24,75 @@ export abstract class Layer {
 		}
 	}
 
-	public abstract addNodeIfFitting(node: Box|NodeWidget): Promise<{added: boolean}>
+	public async addNodeIfFitting(node: Box|NodeWidget, options?: {mode?: 'count'|'average'}): Promise<{added: boolean}> {
+		const targets: {side: LayerSide, position: LocalPosition}[] = await this.getOuterTargetsOfNodeLinks(node)
+		if (targets.length < 1) {
+			return {added: false}
+		}
+		
+		const wishPosition: LocalPosition = this.calculateAvaragePosition(targets.map(target => target.position))
+		let bestSide: LayerSide
+		if (options?.mode === 'average') {
+			bestSide = this.left
+			let distanceToBestSide: number = wishPosition.percentX - this.left.distanceToSide
+			const distanceToRight: number = 100-this.right.distanceToSide - wishPosition.percentX
+			if (distanceToRight < distanceToBestSide) {
+				bestSide = this.right
+				distanceToBestSide =  distanceToRight
+			}
+			const distanceToTop: number = wishPosition.percentY - this.top.distanceToSide
+			if (distanceToTop < distanceToBestSide) {
+				bestSide = this.top
+				distanceToBestSide = distanceToTop
+			}
+			const distanceToBottom: number = 100-this.bottom.distanceToSide - wishPosition.percentY
+			if (distanceToBottom < distanceToBestSide) {
+				bestSide = this.bottom
+				distanceToBestSide = distanceToBottom
+			}
+		} else {
+			const counts = {left: 0, right: 0, top: 0, bottom: 0}
+			for (const target of targets) {
+				counts[target.side.side]++
+			}
+			bestSide = this.left
+			let bestCount: number = counts.left
+			for (const side of ['right', 'top', 'bottom']) {
+				if (counts[side] > bestCount) {
+					bestSide = this[side]
+					bestCount = counts[side]
+				}
+			}
+			if (bestCount < 1) {
+				console.warn(`Layer::addNodeIfFitting() bestCount < 1, defaulting to this.left`)
+			}
+		}
 
-	public async getTargetPositionsOfNodeLinks(node: Box|NodeWidget): Promise<LocalPosition[]> {
-		const positions: LocalPosition[] = []
+		const nodeToOrder: NodeToOrder = {node, wishPosition}
+		bestSide.nodes.push(nodeToOrder)
+		this.nodes.push(nodeToOrder)
+		this.updateExtremePositionsAlongSides()
+		return {added: true}
+	}
+
+	public abstract getOuterTargetsOfNodeLinks(node: Box|NodeWidget): Promise<{side: LayerSide, position: LocalPosition}[]>
+
+	public async getTargetsOfNodeLinks(node: Box|NodeWidget): Promise<{side: LayerSide, position: LocalPosition}[]> {
+		const targets: {side: LayerSide, position: LocalPosition}[] = []
 		for (const linkEnd of node.borderingLinks.getAllEnds()) {
-			for (const layerNode of this.nodes) {
-				const otherEnd: LinkEnd = linkEnd.getOtherEnd()
-				if (otherEnd.isBoxInPath(layerNode.node)) {
-					positions.push(await otherEnd.getTargetPositionInManagingBoxCoords())
+			for (const side of [this.top, this.right, this.bottom, this.left]) {
+				for (const sideNode of side.nodes) {
+					const otherEnd: LinkEnd = linkEnd.getOtherEnd()
+					if (otherEnd.isBoxInPath(sideNode.node)) {
+						targets.push({side, position: await otherEnd.getTargetPositionInManagingBoxCoords()})
+					}
 				}
 			}
 		}
-		return positions
+		return targets
 	}
+
+	protected abstract updateExtremePositionsAlongSides(): void
 
 	public getSuggestions(): Suggestion[] {
 		return [

@@ -3,7 +3,6 @@ import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { LocalPosition } from '../../dist/core/shape/LocalPosition'
 import { Layer } from './Layer'
 import { LayerSide } from './LayerSide'
-import { NodeToOrder } from './NodeToOrder'
 
 export class InnerLayer extends Layer {
 	public outerLayer: Layer
@@ -29,77 +28,8 @@ export class InnerLayer extends Layer {
 		}
 	}
 
-	public override async addNodeIfFitting(node: Box|NodeWidget, options?: {mode?: 'count'|'average'}): Promise<{added: boolean}> {
-		const intersections: LocalPosition[] = await this.outerLayer.getTargetPositionsOfNodeLinks(node)
-		if (intersections.length < 1) {
-			return {added: false}
-		}
-		
-		const intersection: LocalPosition = this.calculateAvaragePosition(intersections)
-		let bestSide: LayerSide
-		if (options?.mode === 'average') {
-			bestSide = this.left
-			let distanceToBestSide: number = intersection.percentX - this.left.distanceToSide
-			const distanceToRight: number = 100-this.right.distanceToSide - intersection.percentX
-			if (distanceToRight < distanceToBestSide) {
-				bestSide = this.right
-				distanceToBestSide =  distanceToRight
-			}
-			const distanceToTop: number = intersection.percentY - this.top.distanceToSide
-			if (distanceToTop < distanceToBestSide) {
-				bestSide = this.top
-				distanceToBestSide = distanceToTop
-			}
-			const distanceToBottom: number = 100-this.bottom.distanceToSide - intersection.percentY
-			if (distanceToBottom < distanceToBestSide) {
-				bestSide = this.bottom
-				distanceToBestSide = distanceToBottom
-			}
-		} else {
-			const outerDistances = this.getOuterDistances()
-			const counts = {left: 0, right: 0, top: 0, bottom: 0}
-			for (const intersection of intersections) {
-				if (intersection.percentX < outerDistances.toLeft + 0.1) {
-					counts.left++
-					continue
-				}
-				if (intersection.percentX > 100-outerDistances.toRight - 0.1) {
-					counts.right++
-					continue
-				}
-				if (intersection.percentY < outerDistances.toTop + 0.1) {
-					counts.top++
-					continue
-				}
-				if (intersection.percentY > 100-outerDistances.toBottom - 0.1) {
-					counts.bottom++
-					continue
-				}
-			}
-			bestSide = this.left
-			let bestCount: number = counts.left
-			if (counts.right > bestCount) {
-				bestSide = this.right
-				bestCount = counts.right
-			}
-			if (counts.top > bestCount) {
-				bestSide = this.top
-				bestCount = counts.top
-			}
-			if (counts.bottom > bestCount) {
-				bestSide = this.bottom
-				bestCount = counts.bottom
-			}
-			if (bestCount < 1) {
-				console.warn(`InnerLayer::addNodeIfFitting() bestCount < 1, defaulting to this.left`)
-			}
-		}
-
-		const nodeToOrder: NodeToOrder = {node, wishPosition: intersection}
-		bestSide.nodes.push(nodeToOrder)
-		this.nodes.push(nodeToOrder)
-		this.updateExtremePositionsAlongSides()
-		return {added: true}
+	public override async getOuterTargetsOfNodeLinks(node: Box|NodeWidget): Promise<{side: LayerSide, position: LocalPosition}[]> {
+		return this.outerLayer.getTargetsOfNodeLinks(node)
 	}
 
 	public updateDimensions(): void {
@@ -110,7 +40,7 @@ export class InnerLayer extends Layer {
 		this.updateExtremePositionsAlongSides()
 	}
 
-	private updateExtremePositionsAlongSides(): void {
+	protected override updateExtremePositionsAlongSides(): void {
 		let topMinPosition: number = this.left.distanceToSide
 		let topMaxPosition: number = 100-this.right.distanceToSide
 		let rightMinPosition: number = this.top.distanceToSide

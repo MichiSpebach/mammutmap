@@ -6,7 +6,6 @@ import { NodeWidget } from '../../dist/core/node/NodeWidget'
 import { LocalPosition } from '../../dist/core/shape/LocalPosition'
 import { Layer } from './Layer'
 import { LayerSide } from './LayerSide'
-import { NodeToOrder } from './NodeToOrder'
 
 export class BorderLayer extends Layer {
 	public readonly box: Box
@@ -92,51 +91,48 @@ export class BorderLayer extends Layer {
 		}
 	}
 
-	public async addNodeIfFitting(node: Box|NodeWidget): Promise<{added: boolean}> {
+	public override async addNodeIfFitting(node: Box|NodeWidget): Promise<{added: boolean}> {
 		if (!(node instanceof NodeWidget)) {
 			return {added: false}
 		}
-		let best: {positions: LocalPosition[], side: {side: LayerSide, borderingLinks: {link: Link, intersection: LocalPosition}[]}} | undefined
-		for (const side of this.sides) {
-			const positions: LocalPosition[] = await this.getTargetPositionsOfNodeLinksToBorderingLinks(node, side.borderingLinks.map(linkWithIntersection => linkWithIntersection.link))
-			if (positions.length > (best?.positions.length?? 0)) {
-				best = {positions: positions, side}
-			}
-		}
-		if (best) {
-			const nodeToOrder: NodeToOrder = {node: node, wishPosition: this.calculateAvaragePosition(best.positions)}
-			best.side.side.nodes.push(nodeToOrder)
-			this.nodes.push(nodeToOrder)
-		}
-		return {added: !!best}
+		return super.addNodeIfFitting(node)
 	}
 
-	public override async getTargetPositionsOfNodeLinks(node: Box|NodeWidget): Promise<LocalPosition[]> {
+	public override async getTargetsOfNodeLinks(node: Box|NodeWidget): Promise<{side: LayerSide, position: LocalPosition}[]> {
 		return [
-			...await super.getTargetPositionsOfNodeLinks(node),
-			...await this.getTargetPositionsOfNodeLinksToBorderingLinks(node, this.box.borderingLinks.getAll())
+			...await super.getTargetsOfNodeLinks(node),
+			...await this.getOuterTargetsOfNodeLinks(node)
 		]
 	}
 
-	private async getTargetPositionsOfNodeLinksToBorderingLinks(node: Box|NodeWidget, borderingLinks: Link[]): Promise<LocalPosition[]> {
-		const positions: LocalPosition[] = []
+	public override async getOuterTargetsOfNodeLinks(node: Box|NodeWidget): Promise<{side: LayerSide, position: LocalPosition}[]> {
+		const targets: {side: LayerSide, position: LocalPosition}[] = []
 
-		for (const link of borderingLinks) {
-			let otherLinkEnd: LinkEnd
-			if (link.from.isBoxInPath(node)) {
-				otherLinkEnd = link.to
-			} else if (link.to.isBoxInPath(node)) {
-				otherLinkEnd = link.from
-			} else {
-				continue
-			}
-			if (otherLinkEnd.getManagingBox() === this.box) {
-				positions.push(await otherLinkEnd.getTargetPositionInManagingBoxCoords())
-			} else {
-				positions.push(this.box.transform.outerCoordsRecursiveToLocal(otherLinkEnd.getManagingBox(), await otherLinkEnd.getTargetPositionInManagingBoxCoords()))
+		for (const side of this.sides) {
+			for (const linkWithIntersection of side.borderingLinks) {
+				const link = linkWithIntersection.link
+				let outsideEnd: LinkEnd
+				if (link.from.isBoxInPath(node)) {
+					outsideEnd = link.to
+				} else if (link.to.isBoxInPath(node)) {
+					outsideEnd = link.from
+				} else {
+					continue
+				}
+				
+				let position: LocalPosition = await outsideEnd.getTargetPositionInManagingBoxCoords()
+				if (outsideEnd.getManagingBox() !== this.box) {
+					position = this.box.transform.outerCoordsRecursiveToLocal(outsideEnd.getManagingBox(), position)
+				}
+				
+				targets.push({side: side.side, position})
 			}
 		}
 
-		return positions
+		return targets
+	}
+
+	protected override updateExtremePositionsAlongSides(): void {
+		// nothing yet
 	}
 }

@@ -14,6 +14,8 @@ export abstract class Position<POSITION extends Position<POSITION>> {
 
     public abstract getY(): number
 
+    public abstract calculateDistanceTo(other: POSITION): number
+
     public isBetweenCoordinateWise(line: { from: POSITION, to: POSITION }): boolean {
         const leftLineEnd: number = Math.min(line.from.getX(), line.to.getX())
         const rightLineEnd: number = Math.max(line.from.getX(), line.to.getX())

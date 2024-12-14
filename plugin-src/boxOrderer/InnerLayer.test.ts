@@ -115,3 +115,31 @@ test('no overlaps of sides', async () => {
 		{node: 'leftFile', suggestedPosition: new LocalPosition(8, 20)}
 	])
 })
+
+test('files are assigned to correct side', async () => {
+	testUtil.initServicesWithMocks({hideConsoleLog: false})
+	const rootFolder: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'rootFolder', rendered: true, bodyRendered: true})
+	const folderToOrder: FolderBox = boxFactory.folderOf({idOrData: 'folderToOrder', parent: rootFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const leftFile: FileBox = boxFactory.fileOf({idOrData: BoxData.buildNewWithId('leftFile', 10, 80, 20, 10), parent: folderToOrder, addToParent: true, rendered: true})
+	const rightFile: FileBox = boxFactory.fileOf({idOrData: BoxData.buildNewWithId('rightFile', 70, 80, 20, 10), parent: folderToOrder, addToParent: true, rendered: true})
+
+	await rootFolder.links.add({from: {node: rootFolder, positionInFromNodeCoords: new LocalPosition(90, 95)}, to: leftFile, save: true})
+	await rootFolder.links.add({from: {node: rootFolder, positionInFromNodeCoords: new LocalPosition(90, 95)}, to: rightFile, save: true})
+
+	const layer = new InnerLayer(await BorderLayer.new(folderToOrder))
+	expect((await layer.addNodeIfFitting(leftFile)).added).toBe(true)
+	expect((await layer.addNodeIfFitting(rightFile)).added).toBe(true)
+
+	expect(layer.top.nodes.length).toBe(0)
+	expect(layer.left.nodes.length).toBe(0)
+	expect(layer.right.nodes.length).toBe(0)
+	expect(layer.bottom.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId(), wishPosition: nodeToOrder.wishPosition.newRounded(3)}))).toEqual([
+		{node: 'leftFile', wishPosition: new LocalPosition(117, 125)},
+		{node: 'rightFile', wishPosition: new LocalPosition(117, 125)}
+	])
+
+	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
+		{node: 'leftFile', suggestedPosition: new LocalPosition(45, 82)},
+		{node: 'rightFile', suggestedPosition: new LocalPosition(75, 82)}
+	])
+})
