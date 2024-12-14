@@ -60,10 +60,18 @@ export class BorderLayer extends Layer {
 				console.warn(`BorderLayer::assignBorderingLinksToSides() intersections.length < 1`)
 				continue
 			}
+			let intersection: LocalPosition = intersections[0]
 			if (intersections.length > 1) {
-				console.warn(`BorderLayer::assignBorderingLinksToSides() intersections.length > 1`)
+				const outsideEnd: LocalPosition = new LocalRect(0, 0, 100, 100).isPositionInside(lineInLocalCoords.to, 0.001)
+					? lineInLocalCoords.from
+					: lineInLocalCoords.to
+				if (outsideEnd.calculateDistanceTo(intersections[1]) < outsideEnd.calculateDistanceTo(intersection)) {
+					intersection = intersections[1]
+				}
+				if (intersections.length > 2) {
+					console.warn(`BorderLayer::assignBorderingLinksToSides() intersections.length > 2`)
+				}
 			}
-			const intersection: LocalPosition = intersections[0]
 			if (intersection.percentX < 0.1) {
 				this.leftBorderingLinks.push({link, intersection})
 				continue
@@ -90,9 +98,9 @@ export class BorderLayer extends Layer {
 		}
 		let best: {positions: LocalPosition[], side: {side: LayerSide, borderingLinks: {link: Link, intersection: LocalPosition}[]}} | undefined
 		for (const side of this.sides) {
-			const intersections: LocalPosition[] = await this.getTargetPositionsOfNodeLinksToBorderingLinks(node, side.borderingLinks.map(linkWithIntersection => linkWithIntersection.link))
-			if (intersections.length > (best?.positions.length?? 0)) {
-				best = {positions: intersections, side}
+			const positions: LocalPosition[] = await this.getTargetPositionsOfNodeLinksToBorderingLinks(node, side.borderingLinks.map(linkWithIntersection => linkWithIntersection.link))
+			if (positions.length > (best?.positions.length?? 0)) {
+				best = {positions: positions, side}
 			}
 		}
 		if (best) {

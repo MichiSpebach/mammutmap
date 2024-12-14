@@ -21,4 +21,9 @@ export class LocalPosition extends Position<LocalPosition> {
     public override getY(): number {
         return this.percentY
     }
+
+    public calculateDistanceTo(other: LocalPosition): number {
+        return Math.sqrt((this.percentX-other.percentX)**2 + (this.percentY-other.percentY)**2)
+    }
+
 }
