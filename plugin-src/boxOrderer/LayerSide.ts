@@ -75,7 +75,7 @@ export class LayerSide {
 	}
 
 	public getSuggestions(): Suggestion[] {
-		const sorting = new Sorting()
+		const sorting = new Sorting(this.minPositionAlongSide, this.maxPositionAlongSide)
 		for (const node of this.nodes) {
 			const positionAlongSide: number = this.getPositionAlongSide(node.wishPosition)
 			const spaceAlongSide: number = this.getWishedSpaceForNode(node.node).alongSide * this.calculateScaleForNode(node.node)

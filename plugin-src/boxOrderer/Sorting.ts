@@ -8,11 +8,12 @@ export type Item = {
 }
 
 export class Sorting {
-	public readonly items: Item[]
 
-	public constructor(items: Item[] = []) {
-		this.items = items
-	}
+	public constructor(
+		public readonly minimum: number = 0,
+		public readonly maximum: number = 100,
+		public readonly items: Item[] = []
+	) {}
 
 	public addItem(item: Item) {
 		this.items.push(item)
@@ -32,7 +33,7 @@ export class Sorting {
 	private pushDown(index: number, amount: number): void {
 		const item: Item = this.items[index]
 		if (index === 0) {
-			item.position = Math.max(item.position - amount/2, 0)
+			item.position = Math.max(item.position - amount/2, this.minimum)
 			return
 		}
 		const nextItem: Item = this.items[index-1]
@@ -48,7 +49,7 @@ export class Sorting {
 	private pushUp(index: number, amount: number): void {
 		const item: Item = this.items[index]
 		if (index === this.items.length-1) {
-			item.position = Math.min(item.position + amount/2, 100-item.size)
+			item.position = Math.min(item.position + amount/2, this.maximum-item.size)
 			return
 		}
 		const nextItem: Item = this.items[index+1]

@@ -2,7 +2,7 @@ import { Box } from '../../dist/core/box/Box'
 import { Sorting } from './Sorting'
 
 test('enough space between items', () => {
-	const sorting = new Sorting([
+	const sorting = new Sorting(0, 100, [
 		{node: {} as Box, position: 10, size: 10},
 		{node: {} as Box, position: 80, size: 10}
 	])
@@ -16,7 +16,7 @@ test('enough space between items', () => {
 })
 
 test('position too small', () => {
-	const sorting = new Sorting([
+	const sorting = new Sorting(0, 100, [
 		{node: {} as Box, position: -10, size: 20}
 	])
 	sorting.sort()
@@ -26,7 +26,7 @@ test('position too small', () => {
 })
 
 test('position too big', () => {
-	const sorting = new Sorting([
+	const sorting = new Sorting(0, 100, [
 		{node: {} as Box, position: 90, size: 20}
 	])
 	sorting.sort()
@@ -36,7 +36,7 @@ test('position too big', () => {
 })
 
 test('two items are overlapping', () => {
-	const sorting = new Sorting([
+	const sorting = new Sorting(0, 100, [
 		{node: {} as Box, position: 45, size: 20},
 		{node: {} as Box, position: 55, size: 20}
 	])
@@ -50,7 +50,7 @@ test('two items are overlapping', () => {
 })
 
 test('5 items with overlappings', () => {
-	const sorting = new Sorting([
+	const sorting = new Sorting(0, 100, [
 		{node: {} as Box, position: 35, size: 10},
 		{node: {} as Box, position: 40, size: 10},
 		{node: {} as Box, position: 45, size: 10},
@@ -70,7 +70,7 @@ test('5 items with overlappings', () => {
 })
 
 test('10 items with overlappings', () => {
-	const sorting = new Sorting([
+	const sorting = new Sorting(0, 100, [
 		{node: {} as Box, position: 25, size: 10},
 		{node: {} as Box, position: 30, size: 10},
 		{node: {} as Box, position: 35, size: 10},

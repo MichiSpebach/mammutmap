@@ -7,6 +7,7 @@ import { RootFolderBox } from '../../dist/core/box/RootFolderBox'
 import { FolderBox } from '../../dist/core/box/FolderBox'
 import { FileBox } from '../../dist/core/box/FileBox'
 import { BoxData } from '../../dist/core/mapData/BoxData'
+import { LocalRect } from '../../dist/core/LocalRect'
 
 test('InnerLayer', async () => {
 	testUtil.initServicesWithMocks({hideConsoleLog: false})
@@ -104,15 +105,19 @@ test('no overlaps of sides', async () => {
 	const layer = new InnerLayer(await BorderLayer.new(folderToOrder))
 	expect((await layer.addNodeIfFitting(topFile)).added).toBe(true)
 	expect((await layer.addNodeIfFitting(leftFile)).added).toBe(true)
+
 	expect(layer.top.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'topFile', wishPosition: new LocalPosition(20+10, -20)}])
 	expect(layer.left.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([{node: 'leftFile', wishPosition: new LocalPosition(-20, 20+5)}])
 	expect(layer.nodes.map(nodeToOrder => ({...nodeToOrder, node: nodeToOrder.node.getId()}))).toEqual([
 		{node: 'topFile', wishPosition: new LocalPosition(20+10, -20)},
 		{node: 'leftFile', wishPosition: new LocalPosition(-20, 20+5)}
 	])
+	expect(layer.top.getRect()).toEqual(new LocalRect(8, 8, 84, 15))
+	expect(layer.left.getRect()).toEqual(new LocalRect(8, 8+15, 30, 69))
+
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
 		{node: 'topFile', suggestedPosition: new LocalPosition(20, 8)},
-		{node: 'leftFile', suggestedPosition: new LocalPosition(8, 20)}
+		{node: 'leftFile', suggestedPosition: new LocalPosition(8, 8 + 10*1.5 + 5/2)}
 	])
 })
 
@@ -137,9 +142,10 @@ test('files are assigned to correct side', async () => {
 		{node: 'leftFile', wishPosition: new LocalPosition(117, 125)},
 		{node: 'rightFile', wishPosition: new LocalPosition(117, 125)}
 	])
+	expect(layer.bottom.getRect()).toEqual(new LocalRect(8, 77, 84, 15))
 
 	expect(layer.getSuggestions().map(suggestion => ({...suggestion, node: suggestion.node.getId()}))).toEqual([
-		{node: 'leftFile', suggestedPosition: new LocalPosition(45, 82)},
-		{node: 'rightFile', suggestedPosition: new LocalPosition(75, 82)}
+		{node: 'leftFile', suggestedPosition: new LocalPosition(37, 82)},
+		{node: 'rightFile', suggestedPosition: new LocalPosition(67, 82)}
 	])
 })
