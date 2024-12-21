@@ -214,7 +214,24 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             ...assignableElementFields
         } = element // otherwise TypeError: Cannot set property children of #<Element> which has only a getter
 
-        const node: HTMLElement = document.createElement(elementType)
+        let node: HTMLElement|SVGElement
+        if (element.type === 'svg' || element.type === 'polyline') {
+            node = document.createElementNS('http://www.w3.org/2000/svg', elementType)
+            if (assignableElementFields.viewBox) {
+                node.setAttribute('viewBox', assignableElementFields.viewBox)
+                delete assignableElementFields.viewBox
+            }
+            if (assignableElementFields.preserveAspectRatio) {
+                node.setAttribute('preserveAspectRatio', assignableElementFields.preserveAspectRatio)
+                delete assignableElementFields.preserveAspectRatio
+            }
+            if (assignableElementFields.points) {
+                node.setAttribute('points', assignableElementFields.points)
+                delete assignableElementFields.points
+            }
+        } else {
+            node = document.createElement(elementType)
+        }
 
         Object.assign(node, assignableElementFields)
         if (element.style) {
@@ -241,11 +258,11 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         return node
     }
 
-    private setHtmlElementOnClick(node: HTMLElement, onclick: (clientX: number, clientY: number, ctrlPressed: boolean) => void) {
+    private setHtmlElementOnClick(node: HTMLElement|SVGElement, onclick: (clientX: number, clientY: number, ctrlPressed: boolean) => void) {
         node.onclick = (event) => onclick(event.clientX, event.clientY, event.ctrlKey)
     }
 
-    private setHtmlElementOnChangeValue(node: HTMLElement, onchangeValue: (value: string) => void): void {
+    private setHtmlElementOnChangeValue(node: HTMLElement|SVGElement, onchangeValue: (value: string) => void): void {
         node.onchange = (event) => {
             if (!event.target) {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to process onchange event on element with id '${node.id}'`
@@ -266,7 +283,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         }
     }
 
-    private setHtmlElementOnChangeChecked(node: HTMLElement, onchangeChecked: (checked: boolean) => void): void {
+    private setHtmlElementOnChangeChecked(node: HTMLElement|SVGElement, onchangeChecked: (checked: boolean) => void): void {
         node.onchange = (event) => {
             if (!event.target) {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to process onchange event on element with id '${node.id}'`
@@ -448,7 +465,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         element.scrollBy(0, 1000*1000) // things like Number.MAX_SAFE_INTEGER don't work on all browsers
     }
 
-    public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
+    public async addKeydownListenerTo(id: string, key: 'Enter'|'Escape', callback: (value: string) => void): Promise<void> {
         this.addAndRegisterEventListener(id, {
             type: 'keydown', 
             listener: callback, 
