@@ -209,8 +209,10 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
         return `const ${elementJsName} = document.createTextNode("${element.replaceAll('"', '\\"')}");`
       }
   
-      // TODO: find way to pass object directly to renderer thread and merge attributes into domElement
-      let js = `const ${elementJsName} = document.createElement("${element.type}");`
+      // TODO: find way to pass object directly to render thread and merge attributes into domElement
+      let js = element.type === 'svg' || element.type === 'polyline'
+        ? `const ${elementJsName} = document.createElementNS("http://www.w3.org/2000/svg","${element.type}");`
+        : `const ${elementJsName} = document.createElement("${element.type}");`
   
       element = this.interceptEventHandlersWithJsAndAddIpcChannelListeners(element)
   
@@ -234,7 +236,11 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
             js += `${elementJsName}.innerHTML='${fieldValue}';`
           }
         } else if (typeof fieldValue === 'string' && !field.startsWith('on')) { // event handlers where parsed to js string in intercept method above
-          js += `${elementJsName}.${field}="${fieldValue}";`
+          if (field === 'className') {
+            js += `${elementJsName}.setAttribute("class","${fieldValue}");`
+          } else {
+            js += `${elementJsName}.setAttribute("${field}","${fieldValue}");`
+          }
         } else {
           js += `${elementJsName}.${field}=${fieldValue};`
         }
@@ -398,7 +404,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return this.executeJsOnElementSuppressingErrors(id, "scrollTop = Number.MAX_SAFE_INTEGER")
     }
   
-    public async addKeydownListenerTo(id: string, key: 'Enter', callback: (value: string) => void): Promise<void> {
+    public async addKeydownListenerTo(id: string, key: 'Enter'|'Escape', callback: (value: string) => void): Promise<void> {
       const ipcChannelName: string = this.ipcChannelRegister.addEventListener(id, 'keydown', callback, (_: IpcMainEvent, value: string) => callback(value))
   
       let rendererFunction: string = '(event) => {'
