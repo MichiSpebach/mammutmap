@@ -84,9 +84,13 @@ export class TerminalWidget extends UltimateWidget {
 			await util.wait(0) // TODO implement 'await this.mounting' instead
 			//await this.mounting TODO implement and use instead of 'await util.wait(0)'
 			renderManager.scrollToBottom('bottomBar'/* TODO replace with this.id as soon as scrollbar is correctly implemented*/)
-			renderManager.addKeydownListenerTo(this.getCommandLineId(), 'Enter', (value: string) => {
+			renderManager.addKeydownListenerTo(this.getCommandLineId(), 'Enter', (targetValue: string|undefined) => {
+				if (!targetValue) {
+					log.warning('TerminalWidget::render() keydownListener callback targetValue is undefined.')
+					return
+				}
 				renderManager.setValueTo(this.getCommandLineId(), '')
-				commandLine.processCommand(value)
+				commandLine.processCommand(targetValue)
 			})
 		}
 	}

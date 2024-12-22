@@ -71,7 +71,7 @@ export interface DocumentObjectModelAdapter {
 
   scrollToBottom(id: string): Promise<void>
 
-  addKeydownListenerTo(id: string, key: 'Enter'|'Escape', callback: (value: string) => void): Promise<void>
+  addKeydownListenerTo(id: string, key: 'Enter'|'Escape', callback: (targetValue: string|undefined) => void): Promise<void>
 
   addChangeListenerTo<RETURN_TYPE>(
     id: string,

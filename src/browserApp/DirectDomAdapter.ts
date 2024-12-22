@@ -465,7 +465,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         element.scrollBy(0, 1000*1000) // things like Number.MAX_SAFE_INTEGER don't work on all browsers
     }
 
-    public async addKeydownListenerTo(id: string, key: 'Enter'|'Escape', callback: (value: string) => void): Promise<void> {
+    public async addKeydownListenerTo(id: string, key: 'Enter'|'Escape', callback: (targetValue: string|undefined) => void): Promise<void> {
         this.addAndRegisterEventListener(id, {
             type: 'keydown', 
             listener: callback, 
@@ -477,10 +477,6 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                         return
                     }
                     const eventTarget: any = event.target // TODO: cast to any because value does not exist on all types of EventTarget, find better solution
-                    if (!eventTarget.value) {
-                        util.logWarning('DirectDomAdapter::addKeydownListenerTo(..) event.target.value is not defined')
-                        return
-                    }
                     callback(eventTarget.value)
                 }
             }

@@ -404,8 +404,8 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return this.executeJsOnElementSuppressingErrors(id, "scrollTop = Number.MAX_SAFE_INTEGER")
     }
   
-    public async addKeydownListenerTo(id: string, key: 'Enter'|'Escape', callback: (value: string) => void): Promise<void> {
-      const ipcChannelName: string = this.ipcChannelRegister.addEventListener(id, 'keydown', callback, (_: IpcMainEvent, value: string) => callback(value))
+    public async addKeydownListenerTo(id: string, key: 'Enter'|'Escape', callback: (targetValue: string|undefined) => void): Promise<void> {
+      const ipcChannelName: string = this.ipcChannelRegister.addEventListener(id, 'keydown', callback, (_: IpcMainEvent, targetValue: string) => callback(targetValue))
   
       let rendererFunction: string = '(event) => {'
       //rendererFunction += 'console.log(event);'

@@ -220,7 +220,7 @@ export class RenderManager {
   public addKeydownListenerTo(
     id: string,
     key: 'Enter'|'Escape',
-    callback: (value: string) => void,
+    callback: (targetValue: string|undefined) => void,
     priority: RenderPriority = RenderPriority.NORMAL
   ): Promise<void> {
     return this.runOrSchedule(new Command({
