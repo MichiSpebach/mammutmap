@@ -210,9 +210,24 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       }
   
       // TODO: find way to pass object directly to render thread and merge attributes into domElement
-      let js = element.type === 'svg' || element.type === 'polyline'
-        ? `const ${elementJsName} = document.createElementNS("http://www.w3.org/2000/svg","${element.type}");`
-        : `const ${elementJsName} = document.createElement("${element.type}");`
+      let js: string
+      if (element.type === 'svg' || element.type === 'polyline') {
+        js = `const ${elementJsName} = document.createElementNS("http://www.w3.org/2000/svg","${element.type}");`
+        if (element.viewBox) {
+          js += `${elementJsName}.setAttribute("viewBox","${element.viewBox}");`
+          delete element.viewBox
+        }
+        if (element.preserveAspectRatio) {
+          js += `${elementJsName}.setAttribute("preserveAspectRatio","${element.preserveAspectRatio}");`
+          delete element.preserveAspectRatio
+        }
+        if (element.points) {
+          js += `${elementJsName}.setAttribute("points","${element.points}");`
+          delete element.points
+        }
+      } else {
+        js = `const ${elementJsName} = document.createElement("${element.type}");`
+      }
   
       element = this.interceptEventHandlersWithJsAndAddIpcChannelListeners(element)
   
@@ -236,11 +251,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
             js += `${elementJsName}.innerHTML='${fieldValue}';`
           }
         } else if (typeof fieldValue === 'string' && !field.startsWith('on')) { // event handlers where parsed to js string in intercept method above
-          if (field === 'className') {
-            js += `${elementJsName}.setAttribute("class","${fieldValue}");`
-          } else {
-            js += `${elementJsName}.setAttribute("${field}","${fieldValue}");`
-          }
+          js += `${elementJsName}.${field}="${fieldValue}";`
         } else {
           js += `${elementJsName}.${field}=${fieldValue};`
         }
