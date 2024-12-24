@@ -36,27 +36,38 @@ export class LinkLine {
         return this.id+'Target'
     }
 
+    private getHoverAreaId(): string {
+        return this.id+'Hover'
+    }
+
     public async formInnerHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean): Promise<string> {
-        // TODO: use css for color, thickness, pointer-events (also change pointer-events to stroke if possible)
-        // TODO: move coordinates to svg element, svg element only as big as needed?
-        let lineHtml: string = this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress)
+        // TODO: move coordinates to svg element, svg element only as big as needed, or draw all lines of a box into one svg?
+        let lineHtml: string = this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords)
         if ((draggingInProgress || hoveringOver) /*&& (this.from.isFloatToBorder() || this.to.isFloatToBorder())*/) { // TODO: activate floatToBorder option
-            lineHtml = await this.formTargetLineHtml(draggingInProgress) + lineHtml
+            lineHtml += await this.formTargetLineHtml()
+        }
+        if (!draggingInProgress) {
+            lineHtml += this.formHoverAreaHtml(fromInManagingBoxCoords, toInManagingBoxCoords, hoveringOver)
         }
         return lineHtml
     }
     
-    private formMainLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean): string {
+    private formMainLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition): string {
         const positionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
-        return `<line id="${this.getMainLineId()}" ${positionHtml} ${this.formLineClassHtml()} ${this.formLineStyleHtml(draggingInProgress)}/>`
+        return `<line id="${this.getMainLineId()}" ${positionHtml} ${this.formLineClassHtml()} ${this.formLineStyleHtml()}/>`
     }
     
-    private async formTargetLineHtml(draggingInProgress: boolean): Promise<string> {
+    private async formTargetLineHtml(): Promise<string> {
         const fromTargetInManagingBoxCoordsPromise: Promise<LocalPosition> = this.referenceLink.from.getTargetPositionInManagingBoxCoords()
         const toTargetInManagingBoxCoords: LocalPosition = await this.referenceLink.to.getTargetPositionInManagingBoxCoords()
         const fromTargetInManagingBoxCoords: LocalPosition = await fromTargetInManagingBoxCoordsPromise
         const positionHtml: string = 'x1="'+fromTargetInManagingBoxCoords.percentX+'%" y1="'+fromTargetInManagingBoxCoords.percentY+'%" x2="'+toTargetInManagingBoxCoords.percentX+'%" y2="'+toTargetInManagingBoxCoords.percentY+'%"'
-        return `<line id="${this.getTargetLineId()}" ${positionHtml} ${this.formLineClassHtml()} ${this.formLineStyleHtml(draggingInProgress)} stroke-dasharray="5"/>`
+        return `<line id="${this.getTargetLineId()}" ${positionHtml} ${this.formLineClassHtml()} ${this.formLineStyleHtml()} stroke-dasharray="5"/>`
+    }
+
+    private formHoverAreaHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, hoveringOver: boolean): string {
+        const positionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
+        return `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke-width:${hoveringOver ? 8 : 4}px;pointer-events:stroke;"/>`
     }
     
     private formLineClassHtml(): string {
@@ -64,9 +75,8 @@ export class LinkLine {
         return `class="${style.getHighlightTransitionClass()}${highlightClass}"`
     }
     
-    private formLineStyleHtml(draggingInProgress: boolean): string {
-        const pointerEventsStyle: string = draggingInProgress ? '' : 'pointer-events:auto;'
-        return 'style="stroke:'+this.referenceLink.getColor()+';stroke-width:2px;'+pointerEventsStyle+'"'
+    private formLineStyleHtml(): string {
+        return 'style="stroke:'+this.referenceLink.getColor()+';stroke-width:2px;"'
     }
 }
 
