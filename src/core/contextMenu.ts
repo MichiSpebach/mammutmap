@@ -142,6 +142,7 @@ export function openForLinkNode(linkNode: NodeWidget, position: ClientPosition):
 
 export function openForLink(link: Link, position: ClientPosition): void {
   const items: MenuItem[] = [
+    buildInsertNodeLinkItem(link, position),
     buildTagLinkItemFolder(link),
     buildRemoveLinkItem(link)
   ]
@@ -211,6 +212,27 @@ function buildRemoveLinkNodeItem(linkNode: NodeWidget): MenuItemFile {
       }
     ]})
   }})
+}
+
+function buildInsertNodeLinkItem(link: Link, position: ClientPosition): MenuItemFile {
+  return new MenuItemFile({label: '⇴ insert node', click: async () => {
+    const boxAtPosition: Box =
+      await getDeepestBoxWithPositionInside(link.from.getRenderedPathWithoutManagingBox(), position)??
+      await getDeepestBoxWithPositionInside(link.to.getRenderedPathWithoutManagingBox(), position)??
+      link.getManagingBox()
+    
+    await link.getManagingBoxLinks().insertNodeIntoLink(link, boxAtPosition, position)
+  }})
+
+  async function getDeepestBoxWithPositionInside(path: (Box|NodeWidget)[], position: ClientPosition): Promise<Box|undefined> {
+    for (let i = path.length-1; i >= 0; i--) {
+      const node: Box|NodeWidget = path[i]
+      if (node instanceof Box && (await node.getClientShape()).isPositionInside(position)) {
+        return node
+      }
+    }
+    return undefined
+  }
 }
 
 function buildTagLinkItemFolder(link: Link): MenuItemFolder {
