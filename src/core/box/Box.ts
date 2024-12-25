@@ -378,6 +378,9 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
 
     pros.push(this.renderAdditional())
+    if (grid.getIdRenderedInto() === this.getGridPlaceHolderId()) {
+      pros.push(grid.updateActiveLayers(await this.getClientRect()))
+    }
 
     await Promise.all(pros)
     this.renderState.setRenderFinished()
@@ -620,7 +623,10 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       util.logWarning('prevented attaching grid to box that gets unrendered') // TODO: only to check that this gets triggered, remove
       return
     }
-    await grid.renderInto(this.getGridPlaceHolderId(), priority)
+    await Promise.all([
+      grid.renderInto(this.getGridPlaceHolderId(), priority),
+      grid.updateActiveLayers(await this.getClientRect())
+    ])
   }
 
   public async detachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
