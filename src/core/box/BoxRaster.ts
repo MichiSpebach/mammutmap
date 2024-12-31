@@ -51,4 +51,14 @@ export class BoxRaster {
 		return childAtSnapPosition.raster.getSnapTargetAt(position)
 	}
 
+	public async getSnapBoxAt(position: ClientPosition): Promise<{snapTarget: Box, snapPosition: ClientPosition}> {
+		const snapPosition: LocalPosition = Grid.roundToGridPosition(await this.referenceBox.transform.clientToLocalPosition(position), await this.referenceBox.getClientRect(), true)
+		const clientPositionSnapped: ClientPosition = await this.referenceBox.transform.localToClientPosition(snapPosition)
+		const childAtSnapPosition: Box|NodeWidget|undefined = await this.referenceBox.findChildAtClientPosition(clientPositionSnapped)
+		if (!childAtSnapPosition || !(childAtSnapPosition instanceof Box)) {
+			return {snapTarget: this.referenceBox, snapPosition: clientPositionSnapped}
+		}
+		return childAtSnapPosition.raster.getSnapBoxAt(position)
+	}
+
 }
