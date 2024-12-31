@@ -5,13 +5,13 @@ import { Box, contextMenu, FileBox, FolderBox, MenuItemFile, NodeWidget } from '
 import { EmptySpaceFinder } from '../dist/core/box/EmptySpaceFinder'
 import { LayerSystem } from './boxOrderer/LayerSystem'
 
-contextMenu.addFolderBoxMenuItem((box: FolderBox) => new MenuItemFile({label: 'order boxes', click: () => orderBoxes(box)}))
+contextMenu.addFolderBoxMenuItem((box: FolderBox) => new MenuItemFile({label: 'order boxes (experimental)', click: () => orderBoxes(box)}))
 
 Box.Sidebar.BasicToolkit.add({
 	topic: 'childs' as any,
 	build: (box: Box) => {
 		if (box instanceof FolderBox) {
-			return Box.Sidebar.BasicToolkit.buildButton('order boxes', () => orderBoxes(box))
+			return Box.Sidebar.BasicToolkit.buildButton('order boxes (experimental)', () => orderBoxes(box))
 		}
 		if (box instanceof FileBox || box instanceof SourcelessBox) {
 			return undefined
