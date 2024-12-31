@@ -73,7 +73,7 @@ export class BoxHeaderDraggable implements Draggable<FolderBox> {
     ]);
   }
 
-  public async dragEnd(dropTarget: FolderBox): Promise<void> {
+  public async dragEnd(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
     const pros: Promise<void>[] = [];
 
     pros.push(renderManager.removeClassFrom(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE));

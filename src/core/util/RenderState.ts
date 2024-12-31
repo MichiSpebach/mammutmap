@@ -1,7 +1,15 @@
 import { util } from './util'
 
-// TODO: introduce interface RenderStateReadonly|RenderStateReader to have public getRenderStateReader(): RenderStateReader in Widgets?
-export class RenderState {
+export interface RenderStateReader {
+    isRendered(): boolean
+    isUnrendered(): boolean
+    isRenderInProgress(): boolean
+    isUnrenderInProgress(): boolean
+    isBeingRendered(): boolean
+    isBeingUnrendered(): boolean
+}
+
+export class RenderState implements RenderStateReader {
     private rendered: boolean = false
     private renderInProgress: boolean = false
     private unrenderInProgress: boolean = false

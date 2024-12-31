@@ -105,7 +105,7 @@ export class ScaleTool {
       return
     }
     if (!this.boxRenderedInto.isRoot()) {
-      await this.boxRenderedInto.getParent().attachGrid(RenderPriority.RESPONSIVE)
+      await this.boxRenderedInto.getParent().raster.attachGrid(RenderPriority.RESPONSIVE)
     }
   }
 
@@ -124,7 +124,7 @@ export class ScaleTool {
     }
     const proms: Promise<any>[] = []
     if (!this.boxRenderedInto.isRoot()) {
-      proms.push(this.boxRenderedInto.getParent().detachGrid(RenderPriority.RESPONSIVE))
+      proms.push(this.boxRenderedInto.getParent().raster.detachGrid(RenderPriority.RESPONSIVE))
     }
     proms.push(this.boxRenderedInto.saveMapData())
     await Promise.all(proms)

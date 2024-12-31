@@ -12,11 +12,12 @@ export let relocationDragManager: RelocationDragManager // = new RelocationDragM
 
 export function init(object: RelocationDragManager): void {
     relocationDragManager = object
-  }
+}
 
 type State = {
     dragging: Draggable<DropTarget>
     draggingOver: DropTarget
+    deactivateHandlingDragOver: boolean
     clickToDropMode: boolean
     watcherOfManagingBoxToPreventUnrenderWhileDragging: Promise<BoxWatcher>
 }
@@ -53,7 +54,7 @@ export class RelocationDragManager {
     }
 
     private handleDraggingOverStateChange(newState: State | null) {
-        if (this.state?.draggingOver === newState?.draggingOver) {
+        if (newState?.deactivateHandlingDragOver || this.state?.draggingOver === newState?.draggingOver) {
             return
         }
 
@@ -80,7 +81,13 @@ export class RelocationDragManager {
         util.setHint(util.hintToDeactivateSnapToGrid, false)
     }
 
-    public async addDraggable(elementToDrag: Draggable<DropTarget>, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    /**
+     * 
+     * @param elementToDrag 
+     * @param deactivateHandlingDragOver if true onDragEnter() and onDragLeave() are not fired on DropTarget
+     * @param priority 
+     */
+    public async addDraggable(elementToDrag: Draggable<DropTarget>, deactivateHandlingDragOver?: boolean, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
         const draggableId: string = elementToDrag.getId()
 
         await Promise.all([
@@ -88,9 +95,9 @@ export class RelocationDragManager {
             this.dragManager.addDraggable({
                 elementId: elementToDrag.getId(),
                 movementNeededToStartDrag: true,
-                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, !eventResult.ctrlPressed, false),
+                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, !eventResult.ctrlPressed, !!deactivateHandlingDragOver, false),
                 onDrag: async (position: ClientPosition, ctrlPressed: boolean) => this.onDrag(position.x, position.y, !ctrlPressed),
-                onDragEnd: async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd()
+                onDragEnd: async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd(position.x, position.y, !ctrlPressed)
             })
         ])
 
@@ -106,7 +113,14 @@ export class RelocationDragManager {
         ])
     }
 
-    private async onDragStart(elementToDrag: Draggable<DropTarget>, clientX: number, clientY: number, snapToGrid: boolean, clickToDropMode: boolean): Promise<void> {
+    private async onDragStart(
+        elementToDrag: Draggable<DropTarget>,
+        clientX: number,
+        clientY: number,
+        snapToGrid: boolean,
+        deactivateHandlingDragOver: boolean,
+        clickToDropMode: boolean
+    ): Promise<void> {
         if (this.state) {
             util.logWarning('Expected state to be not set onDragstart.')
         }
@@ -114,7 +128,8 @@ export class RelocationDragManager {
         this.setState({
             dragging: elementToDrag,
             draggingOver: elementToDrag.getDropTargetAtDragStart(),
-            clickToDropMode: clickToDropMode,
+            deactivateHandlingDragOver,
+            clickToDropMode,
             watcherOfManagingBoxToPreventUnrenderWhileDragging: BoxWatcher.newAndWatch(elementToDrag.getManagingBox())
         })
         await this.state?.watcherOfManagingBoxToPreventUnrenderWhileDragging
@@ -132,12 +147,12 @@ export class RelocationDragManager {
         util.setHint(util.hintToDeactivateSnapToGrid, snapToGrid)
     }
 
-    private async onDragEnd(): Promise<void> {
+    private async onDragEnd(clientX: number, clientY: number, snapToGrid: boolean): Promise<void> {
         const state: State = this.getState()
         await state.watcherOfManagingBoxToPreventUnrenderWhileDragging
 
         renderManager.removeClassFrom(state.dragging.getId(), this.draggingInProgressStyleClass, RenderPriority.RESPONSIVE)
-        state.dragging.dragEnd(state.draggingOver)
+        state.dragging.dragEnd(clientX, clientY, state.draggingOver, snapToGrid)
         this.setState(null)
         util.setHint(util.hintToDeactivateSnapToGrid, false)
     }
@@ -145,12 +160,16 @@ export class RelocationDragManager {
     // TODO: remove and do this instead in addDropTarget (for each dropTarget)?
     /** removes forbidden cursor */
     public async addDropZone(elementId: string): Promise<void> {
-        await renderManager.addDragListenerTo(elementId, 'dragover', () => { })
+        if (this.dragManager.isUsingNativeDragEvents()) {
+            await renderManager.addDragListenerTo(elementId, 'dragover', () => { })
+        }
     }
 
     // TODO: remove and do this instead in removeDropTarget (for each dropTarget)?
     public async removeDropZone(elementId: string): Promise<void> {
-        await renderManager.removeEventListenerFrom(elementId, 'dragover') // TODO: call with specific listener
+        if (this.dragManager.isUsingNativeDragEvents()) {
+            await renderManager.removeEventListenerFrom(elementId, 'dragover') // TODO: call with specific listener
+        }
     }
 
     public async addDropTarget(dropTarget: DropTarget): Promise<void> {
@@ -203,25 +222,23 @@ export class RelocationDragManager {
             return
         }
         this.setState({
-            dragging: this.state.dragging,
-            draggingOver: dropTarget,
-            clickToDropMode: this.state.clickToDropMode,
-            watcherOfManagingBoxToPreventUnrenderWhileDragging: this.state.watcherOfManagingBoxToPreventUnrenderWhileDragging
+            ...this.state,
+            draggingOver: dropTarget
         })
     }
 
-    public async startDragWithClickToDropMode(elementToDrag: Draggable<DropTarget>): Promise<void> {
+    public async startDragWithClickToDropMode(elementToDrag: Draggable<DropTarget>, deactivateHandlingDragOver?: boolean): Promise<void> {
         const cursorClientPosition: { x: number, y: number } = renderManager.getCursorClientPosition();
         
         await Promise.all([
-            this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, false/*TODO?: check if ctrl is pressed*/, true),
+            this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, false/*TODO?: check if ctrl is pressed*/, !!deactivateHandlingDragOver, true),
             renderManager.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
                 this.onDrag(clientX, clientY, !ctrlPressed)
             }, RenderPriority.RESPONSIVE),
-            renderManager.addEventListenerTo('content', 'click', (_) => {
+            renderManager.addEventListenerTo('content', 'click', (clientX: number, clientY: number, ctrlPressed: boolean) => {
                 renderManager.removeEventListenerFrom('content', 'mousemove', { priority: RenderPriority.RESPONSIVE })
                 renderManager.removeEventListenerFrom('content', 'click', { priority: RenderPriority.RESPONSIVE })
-                this.onDragEnd()
+                this.onDragEnd(clientX, clientY, !ctrlPressed)
             }, RenderPriority.RESPONSIVE)
         ])
     }

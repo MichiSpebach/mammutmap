@@ -97,13 +97,17 @@ export class Grid {
   }
 
   public async updateActiveLayers(renderedIntoElementSizeInPixels: {width: number, height: number}) {
-    await this.setActiveLayers({
-      columns: this.getActiveLayersForSize((renderedIntoElementSizeInPixels.width*2 + renderedIntoElementSizeInPixels.height) / 3),
-      rows: this.getActiveLayersForSize((renderedIntoElementSizeInPixels.height*2 + renderedIntoElementSizeInPixels.width) / 3)
-    })
+    await this.setActiveLayers(Grid.getActiveLayersForSize(renderedIntoElementSizeInPixels))
   }
 
-  private getActiveLayersForSize(sizeInPixels: number): 0|1|2|3|4|5 {
+  private static getActiveLayersForSize(sizeInPixels: {width: number, height: number}): {columns: 0|1|2|3|4|5, rows: 0|1|2|3|4|5} {
+    return {
+      columns: Grid.getActiveLayersForScalar((sizeInPixels.width*2 + sizeInPixels.height) / 3),
+      rows: Grid.getActiveLayersForScalar((sizeInPixels.height*2 + sizeInPixels.width) / 3)
+    }
+  }
+
+  private static getActiveLayersForScalar(sizeInPixels: number): 0|1|2|3|4|5 {
     if (sizeInPixels > 2500) {
       return 5
     }
@@ -139,6 +143,14 @@ export class Grid {
     )
   }
 
+  public static roundToGridPosition(position: LocalPosition, sizeInPixels: {width: number, height: number}, clipOverflow: boolean): LocalPosition {
+    const activeLayers: {columns: 0|1|2|3|4|5, rows: 0|1|2|3|4|5} = Grid.getActiveLayersForSize(sizeInPixels)
+    return new LocalPosition(
+      Grid.roundToLayerGridScalar(position.percentX, activeLayers.columns, clipOverflow),
+      Grid.roundToLayerGridScalar(position.percentY, activeLayers.rows, clipOverflow)
+    )
+  }
+
   public roundToGridPositionX(positionX: number): number {
     return Grid.roundToLayerGridScalar(positionX, this.activeLayers.columns)
   }
@@ -147,7 +159,7 @@ export class Grid {
     return Grid.roundToLayerGridScalar(positionY, this.activeLayers.rows)
   }
 
-  private static roundToLayerGridScalar(position: number, layer: 0|1|2|3|4|5): number {
+  private static roundToLayerGridScalar(position: number, layer: 0|1|2|3|4|5, clipOverflow?: boolean): number {
     let nearestGridPosition: number = 50
 
     const stepSize: number = this.getStepSizeOfLayer(layer)
@@ -166,6 +178,10 @@ export class Grid {
     }
     if (Math.abs(position-gridPosition) < Math.abs(position-nearestGridPosition)) {
       nearestGridPosition = gridPosition
+    }
+    if (clipOverflow) {
+      nearestGridPosition = Math.min(nearestGridPosition, 100)
+      nearestGridPosition = Math.max(nearestGridPosition, 0)
     }
 
     return nearestGridPosition

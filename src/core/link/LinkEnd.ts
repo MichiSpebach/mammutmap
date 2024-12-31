@@ -29,7 +29,6 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box|NodeWidget
-    snapToGrid: boolean
   } | null = null
 
   public constructor(id: string, data: LinkEndData, referenceLink: Link, shape: 'square'|'arrow') {
@@ -89,38 +88,74 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   public async startDragWithClickToDropMode(): Promise<void> {
-    await relocationDragManager.startDragWithClickToDropMode(this)
+    await relocationDragManager.startDragWithClickToDropMode(this, true)
   }
 
   public async dragStart(clientX: number, clientY: number, dropTarget: Box|NodeWidget, snapToGrid: boolean): Promise<void> {
-    this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget, snapToGrid}
-    return this.referenceLink.renderWithOptions({priority: RenderPriority.RESPONSIVE, draggingInProgress: true})
+    const snappedDropTarget = await this.getSnappedDropTarget(new ClientPosition(clientX, clientY), dropTarget, snapToGrid)
+    this.dragState = {clientPosition: snappedDropTarget.position, dropTarget: snappedDropTarget.target}
+    await Promise.all([
+      this.referenceLink.renderWithOptions({priority: RenderPriority.RESPONSIVE, draggingInProgress: true}),
+      snappedDropTarget.target.onDragEnter()
+    ])
   }
 
   public async drag(clientX: number, clientY: number, dropTarget: Box|NodeWidget, snapToGrid: boolean): Promise<void> {
-    this.dragState = {clientPosition: new ClientPosition(clientX, clientY), dropTarget: dropTarget, snapToGrid: snapToGrid}
-    return this.referenceLink.render(RenderPriority.RESPONSIVE)
+    if (!this.dragState) {
+      util.logWarning('dragState is null while calling drag(..) on LinkEnd, this should never happen')
+    }
+    const snappedDropTarget = await this.getSnappedDropTarget(new ClientPosition(clientX, clientY), dropTarget, snapToGrid)
+    const dropTargetBefore: Box|NodeWidget|undefined = this.dragState?.dropTarget
+    this.dragState = {clientPosition: snappedDropTarget.position, dropTarget: snappedDropTarget.target}
+    const pros: Promise<void>[] = [
+      this.referenceLink.render(RenderPriority.RESPONSIVE)
+    ]
+    if (dropTargetBefore !== snappedDropTarget.target) {
+      if (dropTargetBefore) {
+        pros.push(dropTargetBefore.onDragLeave())
+      }
+      pros.push(snappedDropTarget.target.onDragEnter())
+    }
+    await Promise.all(pros)
   }
 
   public async dragCancel(): Promise<void> {
-    await this.referenceLink.renderWithOptions({priority: RenderPriority.RESPONSIVE, draggingInProgress: false})
+    if (!this.dragState) {
+      util.logWarning('dragState is null while calling dragCancel(..) on LinkEnd, this should never happen')
+    }
+    await Promise.all([
+      this.referenceLink.renderWithOptions({priority: RenderPriority.RESPONSIVE, draggingInProgress: false}),
+      this.dragState?.dropTarget.onDragLeave()
+    ])
     this.dragState = null
   }
 
-  public async dragEnd(dropTarget: Box|NodeWidget): Promise<void> {
+  public async dragEnd(clientX: number, clientY: number, dropTarget: Box|NodeWidget, snapToGrid: boolean): Promise<void> {
     if (!this.dragState) {
       util.logWarning('dragState is null while calling dragEnd(..) on LinkEnd, this should never happen')
-    } else {
-      this.dragState.dropTarget = dropTarget
     }
-    await this.referenceLink.reorderAndSaveAndRender({movedWayPoint: dropTarget, movedLinkEnd: this, priority: RenderPriority.RESPONSIVE, draggingInProgress: false})
+    const snappedDropTarget = await this.getSnappedDropTarget(new ClientPosition(clientX, clientY), dropTarget, snapToGrid)
+    const dropTargetBefore: Box|NodeWidget|undefined = this.dragState?.dropTarget
+    this.dragState = {clientPosition: snappedDropTarget.position, dropTarget: snappedDropTarget.target} // used transitively in referenceLink.reorderAndSaveAndRender(..) below
+    await Promise.all([
+      this.referenceLink.reorderAndSaveAndRender({movedWayPoint: snappedDropTarget.target, movedLinkEnd: this, priority: RenderPriority.RESPONSIVE, draggingInProgress: false}),
+      dropTargetBefore?.onDragLeave()
+    ])
     this.dragState = null
   }
 
   /** TODO: offer dragAndDrop(..) in LocalPositions because ClientPositions may not work well when zoomed far away */
   public async dragAndDrop(options: {dropTarget: Box|NodeWidget, clientPosition: ClientPosition, snapToGrid?: boolean}): Promise<void> {
-    this.dragState = {snapToGrid: false, ...options}
-    return this.dragEnd(options.dropTarget)
+    this.dragState = {snapToGrid: !!options.snapToGrid, ...options}
+    return this.dragEnd(options.clientPosition.x, options.clientPosition.y, options.dropTarget, !!options.snapToGrid)
+  }
+
+  private async getSnappedDropTarget(clientPosition: ClientPosition, dropTarget: Box|NodeWidget, snapToGrid: boolean): Promise<{target: Box|NodeWidget, position: ClientPosition}> {
+    if (!snapToGrid || !(dropTarget instanceof Box)) {
+      return {target: dropTarget, position: clientPosition} // TODO: if NodeWidget: should snap to center of NodeWidget?
+    }
+    const snapTarget = await dropTarget.raster.getSnapTargetAt(clientPosition)
+    return {target: snapTarget.snapTarget, position: snapTarget.snapPosition}
   }
 
   public async reorderMapDataPathWithoutRender(options: {
@@ -216,7 +251,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   
     if (!this.renderState.isRendered()) {
       this.saveBorderingBoxesWithoutMapFile() // TODO: add missing await? but could take longer and block rerenders
-      pros.push(relocationDragManager.addDraggable(this))
+      pros.push(relocationDragManager.addDraggable(this, true))
     }
 
     await Promise.all(pros)
@@ -311,11 +346,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public async getTargetPositionInManagingBoxCoords(): Promise<LocalPosition> {
     if (this.dragState) {
-      if (this.dragState.snapToGrid && this.dragState.dropTarget instanceof Box) {
-        return this.getManagingBox().transform.getNearestGridPositionOfOtherTransform(this.dragState.clientPosition, this.dragState.dropTarget.transform)
-      } else {
-        return this.getManagingBox().transform.clientToLocalPosition(this.dragState.clientPosition)
-      }
+      return this.getManagingBox().transform.clientToLocalPosition(this.dragState.clientPosition)
     } else {
       return this.getDeepestRenderedWayPointPositionInManagingBoxCoords()
     }
@@ -323,11 +354,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public async getTargetPositionInClientCoords(): Promise<ClientPosition> {
     if (this.dragState) {
-      if (this.dragState.snapToGrid && this.dragState.dropTarget instanceof Box) {
-        return this.dragState.dropTarget.transform.getNearestGridPositionInClientCoords(this.dragState.clientPosition)
-      } else {
-        return this.dragState.clientPosition // TODO: should snap to center of NodeWidget
-      }
+      return this.dragState.clientPosition
     } else {
       return this.getManagingBox().transform.localToClientPosition(this.getDeepestRenderedWayPointPositionInManagingBoxCoords())
     }

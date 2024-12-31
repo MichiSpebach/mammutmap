@@ -61,6 +61,7 @@ export class RootFolderBox extends FolderBox {
 
   public override async getClientRect(): Promise<ClientRect> {
     if (!this.cachedClientRect) {
+      // TODO: set cachedClientRect in constructor? then simple ClientRect can be returned without Promise
       this.cachedClientRect = await renderManager.getClientRectOf(this.getId(), RenderPriority.RESPONSIVE)
     } else {
       // in case of some weird window changes, fault is fixed asynchronously and is not permanent

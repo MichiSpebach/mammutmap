@@ -134,7 +134,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         if (!this.rendered) {
             pros.push(this.borderingLinks.renderAll())
             pros.push(relocationDragManager.addDropTarget(this))
-            pros.push(relocationDragManager.addDraggable(this, priority))
+            pros.push(relocationDragManager.addDraggable(this, false, priority))
             pros.push(HoverManager.addHoverable(this, () => this.onHoverOver(), () => this.onHoverOut()))
             pros.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLinkNode(this, new ClientPosition(clientX, clientY))))
         }
@@ -217,7 +217,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         await this.borderingLinks.renderAll()
     }
 
-    public async dragEnd(dropTarget: Box): Promise<void> {
+    public async dragEnd(clientX: number, clientY: number, dropTarget: Box, snapToGrid: boolean): Promise<void> {
         if (!this.dragState) {
             util.logWarning('NodeWidget.dragEnd(..) called although dragState is null => drag operation cannot be saved and is canceled, this should never happed')
             return this.dragCancel()

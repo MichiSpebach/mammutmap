@@ -17,12 +17,12 @@ import { Hoverable } from '../Hoverable'
 import { HoverManager } from '../HoverManager'
 import { BoxWatcher } from './BoxWatcher'
 import { Transform } from './Transform'
-import { grid } from './Grid'
+import { BoxRaster } from './BoxRaster'
 import { BoxNodesWidget } from './BoxNodesWidget'
 import { NodeData } from '../mapData/NodeData'
 import { BorderingLinks } from '../link/BorderingLinks'
 import { ProjectSettings } from '../ProjectSettings'
-import { RenderState } from '../util/RenderState'
+import { RenderState, RenderStateReader } from '../util/RenderState'
 import { SkipToNewestScheduler } from '../util/SkipToNewestScheduler'
 import { SizeAndPosition } from './SizeAndPosition'
 import { NodeWidget } from '../node/NodeWidget'
@@ -37,6 +37,8 @@ import { BoxSidebar } from './BoxSidebar'
 import { settings } from '../settings/settings'
 import { TextInputPopup } from '../TextInputPopup'
 import { ToggleSidebarWidget } from '../ToggleSidebarWidget'
+import { ClientPosition } from '../shape/ClientPosition'
+import { LocalPosition } from '../shape/LocalPosition'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   public static readonly Tabs: typeof BoxTabs = BoxTabs
@@ -48,6 +50,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   public readonly context: BoxContext
   public readonly transform: Transform
   public readonly site: SizeAndPosition
+  public readonly raster: BoxRaster
   public readonly header: BoxHeader
   private readonly tabs: BoxTabs
   private sidebar: BoxSidebar|undefined
@@ -56,8 +59,8 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   // TODO: move links into BoxBody? then header is rendered in front of links
   public readonly links: BoxLinks // TODO: rename to managedLinks?
   public readonly borderingLinks: BorderingLinks
-  private renderState: RenderState = new RenderState()
-  private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
+  private readonly renderState: RenderState = new RenderState()
+  private readonly renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private watchers: BoxWatcher[] = []
   private unsavedChanges: boolean = false
   private focusState: { // TODO: move sidebar in here or introduce BoxFocusManager|BoxHoverManager
@@ -80,6 +83,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
     this.transform = new Transform(this)
     this.site = new SizeAndPosition(this, this.mapData)
+    this.raster = new BoxRaster(this)
     this.header = this.createHeader()
     this.tabs = new BoxTabs(this)
     this.nodes = new BoxNodesWidget(this)
@@ -101,10 +105,6 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
   public getId(): string {
     return this.mapData.id
-  }
-
-  private getGridPlaceHolderId(): string {
-    return this.getId()+'Grid'
   }
 
   private getBorderId(): string {
@@ -182,6 +182,21 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return renderedChildBoxes[0]
   }
 
+  public async findChildAtClientPosition(position: ClientPosition, inclusiveEpsilon: number = 0.1): Promise<Box|NodeWidget|undefined> {
+    const localPostion: LocalPosition = await this.transform.clientToLocalPosition(position)
+    for (const child of this.getChilds()) {
+      if (child instanceof Box) {
+        if (child.getLocalRect().isPositionInside(localPostion, inclusiveEpsilon)) {
+          return child
+        }
+      } else {
+        if ((await child.getClientShape()).isPositionInside(position, inclusiveEpsilon)) {
+          return child
+        }
+      }
+    }
+  }
+
   // TODO: introduce NodeWatcher or Watcher<AbsctractNodeWidget> and join node & watcher, but then node needs to be watched, not the parent of node?
   public async findChildByIdAndRenderIfNecessary(id: string): Promise<{node: Box|NodeWidget, watcher: BoxWatcher}|undefined>  {
     const watcher: BoxWatcher = await BoxWatcher.newAndWatch(this)
@@ -224,10 +239,16 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return descendant
   }
 
+  public getRenderState(): RenderStateReader {
+    return this.renderState
+  }
+
+  /** @deprecated use get getRenderState().isRendered() instead */
   public isRendered(): boolean {
     return this.renderState.isRendered()
   }
 
+  /** @deprecated use get getRenderState().isBeingRendered() instead */
   public isBeingRendered(): boolean {
     return this.renderState.isBeingRendered()
   }
@@ -356,7 +377,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
       // TODO: introduce <div id="content"> that contains everything but border and scaleToolPlaceholder? would make sense for detaching mechanism to leave borderFrame at savedPosition
       const backgroundHtml = `<div style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
-      const gridPlaceHolderHtml = `<div id="${this.getGridPlaceHolderId()}" style="${styleAbsoluteAndStretched}"></div>`
+      const gridPlaceHolderHtml = `<div id="${this.raster.getId()}" style="${styleAbsoluteAndStretched}"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}" style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};"></div>`
       const headerHtml = `<div id="${this.header.getId()}" style="position:absolute;overflow:hidden;width:100%;max-height:100%;"></div>`
       const borderHtml = `<div id="${this.getBorderId()}" class="${style.getBoxBorderClass()} ${style.getAdditionalBoxBorderClass(this.mapDataFileExists)}"></div>`
@@ -378,9 +399,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
 
     pros.push(this.renderAdditional())
-    if (grid.getIdRenderedInto() === this.getGridPlaceHolderId()) {
-      pros.push(grid.updateActiveLayers(await this.getClientRect()))
-    }
+    pros.push(this.raster.updateGridIfAttached())
 
     await Promise.all(pros)
     this.renderState.setRenderFinished()
@@ -408,7 +427,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       relocationDragManager.removeDropTarget(this),
       HoverManager.removeHoverable(this, false),
       this.removeFocusElements({priority: RenderPriority.NORMAL, awaitAnimations: false}),
-      this.detachGrid(),
+      this.raster.detachGrid(),
       this.header.unrender(),
       this.unrenderAdditional(),
       this.borderingLinks.renderAllThatShouldBe() // otherwise borderingLinks would not float back to border of parent
@@ -611,26 +630,11 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   }
 
   public async onDragEnter(): Promise<void> {
-    await this.attachGrid(RenderPriority.RESPONSIVE)
+    await this.raster.attachGrid(RenderPriority.RESPONSIVE)
   }
 
   public async onDragLeave(): Promise<void> {
-    await this.detachGrid(RenderPriority.RESPONSIVE)
-  }
-
-  public async attachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    if (this.renderState.isUnrenderInProgress()) {
-      util.logWarning('prevented attaching grid to box that gets unrendered') // TODO: only to check that this gets triggered, remove
-      return
-    }
-    await Promise.all([
-      grid.renderInto(this.getGridPlaceHolderId(), priority),
-      grid.updateActiveLayers(await this.getClientRect())
-    ])
-  }
-
-  public async detachGrid(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-    await grid.unrenderFrom(this.getGridPlaceHolderId(), priority)
+    await this.raster.detachGrid(RenderPriority.RESPONSIVE)
   }
 
   public async renderStyleWithRerender(options?: {
