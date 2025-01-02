@@ -15,7 +15,6 @@ import * as linkEndFactory from './factories/linkEndFactory'
 import { LinkData } from '../../../src/core/mapData/LinkData'
 import { ClientRect } from '../../../src/core/ClientRect'
 import { HoverManager } from '../../../src/core/HoverManager'
-import { grid } from '../../../src/core/box/Grid'
 
 const actualLogWarning: (message: string) => void = util.logWarning
 
@@ -31,8 +30,6 @@ beforeAll(async () => {
     domAdapterMock.addEventListenerTo = () => Promise.resolve()
     domAdapterMock.addEventListenerAdvancedTo = () => Promise.resolve()
     initDocumentObjectModelAdapter(domAdapterMock)
-
-    await grid.setActiveLayers({columns: 0, rows: 0})
 })
 
 beforeEach(() => {
@@ -116,15 +113,19 @@ test('reorderMapDataPathWithoutRender deep, change only position, while dragging
         {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
+    expect(await scene.rootBox.getClientRect()).toEqual({x: 320, y: 160, width: 960, height: 480})
+    expect(await scene.outerBox.getClientRect()).toEqual({x: 512, y: 256, width: 576, height: 288})
+    expect(await scene.innerBox.getClientRect()).toEqual({x: 627.2, y: 313.6, width: expect.closeTo(345.6), height: expect.closeTo(172.8)})
+    expect(await scene.deepBox.getClientRect()).toEqual({x: 696.32, y: 348.16, width: 207.36, height: 103.68})
     scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
 
-    await scene.linkEnd.drag(850, 420, scene.deepBox, true)
+    await scene.linkEnd.dragStart(900, 450, scene.deepBox, true)
     await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.outerBox, movedWayPoint: scene.deepBox})
 
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
-        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 65.6, y: 60.8},
-        {boxId: 'deepBoxId', boxName: 'deepBoxIdName', x: 76, y: 68}
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 80, y: 80},
+        {boxId: 'deepBoxId', boxName: 'deepBoxIdName', x: 100, y: 100}
     ])
 })
 
@@ -135,16 +136,17 @@ test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag node
         {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
-    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
-
+    expect(await scene.rootBox.getClientRect()).toEqual({x: 320, y: 160, width: 960, height: 480})
     expect(await scene.outerBox.getClientRect()).toEqual({x: 512, y: 256, width: 576, height: 288})
     expect(await scene.innerBox.getClientRect()).toEqual({x: 627.2, y: 313.6, width: expect.closeTo(345.6), height: expect.closeTo(172.8)})
+    expect(await scene.deepBox.getClientRect()).toEqual({x: 696.32, y: 348.16, width: 207.36, height: 103.68})
     const nodeClientRect: ClientRect = await scene.node.getClientShape()
     expect(nodeClientRect).toEqual({x: expect.closeTo(627.2+345.6*0.75 - 14/2), y: 313.6+172.8*0.25 - 14/2, width: 14, height: 14})
     expect(scene.node.getRenderPosition()).toEqual({percentX: 75, percentY: 25})
+    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
 
     // drag linkEnd to nodeWidget
-    await scene.linkEnd.drag(nodeClientRect.x + 14/2, nodeClientRect.y + 14/2, scene.node, false)
+    await scene.linkEnd.dragStart(nodeClientRect.x + 14/2, nodeClientRect.y + 14/2, scene.node, false)
     await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.outerBox, movedWayPoint: scene.node})
 
     expect(scene.linkEndData.path.length).toBe(2)
@@ -155,8 +157,8 @@ test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag node
 
     // drag nodeWidget into parentBox
     scene.linkEnd.getReferenceLink().reorderAndSaveAndRender = async () => await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.outerBox, movedWayPoint: scene.node})
-    await scene.node.drag(512, 256, scene.outerBox, false)
-    await scene.node.dragEnd(scene.outerBox)
+    await scene.node.dragStart(512, 256, scene.outerBox, false)
+    await scene.node.dragEnd(512, 256, scene.outerBox, false)
 
     expect(scene.linkEndData.path).toEqual([
         {boxId: 'nodeId', boxName: 'nodenodeId', x: 50, y: 50}
@@ -164,8 +166,8 @@ test('reorderMapDataPathWithoutRender deep, drag into nodeWidget; then drag node
 
     // drag nodeWidget back
     scene.linkEnd.getReferenceLink().reorderAndSaveAndRender = async () => await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.outerBox, movedWayPoint: scene.node})
-    await scene.node.drag(nodeClientRect.x + 14/2, nodeClientRect.y + 14/2, scene.innerBox, false)
-    await scene.node.dragEnd(scene.innerBox)
+    await scene.node.dragStart(nodeClientRect.x + 14/2, nodeClientRect.y + 14/2, scene.innerBox, false)
+    await scene.node.dragEnd(nodeClientRect.x + 14/2, nodeClientRect.y + 14/2, scene.innerBox, false)
 
     expect(scene.linkEndData.path.length).toBe(2)
     expect(scene.linkEndData.path).toEqual([
@@ -183,7 +185,7 @@ test('reorderMapDataPathWithoutRender deep, drag into parentBox', async () => {
     ])
     scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
 
-    await scene.linkEnd.drag(627.2+345.6*0.25, 313.6+172.8*0.31, scene.innerBox, false)
+    await scene.linkEnd.dragStart(627.2+345.6*0.25, 313.6+172.8*0.31, scene.innerBox, false)
     await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.outerBox, movedWayPoint: scene.innerBox})
 
     expect(scene.linkEndData.path.length).toBe(1)
@@ -199,52 +201,56 @@ test('reorderMapDataPathWithoutRender deep, drag into parentBox with snapToGrid'
         {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
         {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
     ])
+    expect(await scene.rootBox.getClientRect()).toEqual({x: 320, y: 160, width: 960, height: 480})
+    expect(await scene.outerBox.getClientRect()).toEqual({x: 512, y: 256, width: 576, height: 288})
+    expect(await scene.innerBox.getClientRect()).toEqual({x: 627.2, y: 313.6, width: expect.closeTo(345.6), height: expect.closeTo(172.8)})
+    expect(await scene.deepBox.getClientRect()).toEqual({x: 696.32, y: 348.16, width: 207.36, height: 103.68})
     scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
 
-    await scene.linkEnd.drag(627.2+345.6*0.25, 313.6+172.8*0.31, scene.innerBox, true)
+    await scene.linkEnd.dragStart(670, 313.6+172.8*0.31, scene.innerBox, true)
     await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.outerBox, movedWayPoint: scene.innerBox})
 
     expect(scene.linkEndData.path.length).toBe(1)
     expect(scene.linkEndData.path).toEqual([
-        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 24, y: 32}
+        {boxId: 'innerBoxId', boxName: 'innerBoxIdName', x: 0, y: 50}
     ])
 })
 
 test('reorderMapDataPathWithoutRender deep, drag into managingBox', async () => {
-  const scene = setupRenderedScenarioWithDepth()
-  expect(scene.linkEndData.path.length).toBe(2)
-  expect(scene.linkEndData.path).toEqual([
-      {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
-      {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
-  ])
-  scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+    const scene = setupRenderedScenarioWithDepth()
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+        {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+    ])
+    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
 
-  await scene.linkEnd.drag(512+576*0.75, 256+288*0.25, scene.outerBox, false)
-  await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.outerBox, movedWayPoint: scene.outerBox})
+    await scene.linkEnd.dragStart(512+576*0.75, 256+288*0.25, scene.outerBox, false)
+    await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.outerBox, movedWayPoint: scene.outerBox})
 
-  expect(scene.linkEndData.path.length).toBe(1)
-  expect(scene.linkEndData.path).toEqual([
-      {boxId: 'outerBoxId', boxName: 'outerBoxIdName', x: 75, y: 25}
-  ])
+    expect(scene.linkEndData.path.length).toBe(1)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'outerBoxId', boxName: 'outerBoxIdName', x: 75, y: 25}
+    ])
 })
 
 test('reorderMapDataPathWithoutRender deep, drag into rootBox', async () => {
-  const scene = setupRenderedScenarioWithDepth()
-  expect(scene.linkEndData.path.length).toBe(2)
-  expect(scene.linkEndData.path).toEqual([
-      {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
-      {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
-  ])
-  scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
-  scene.linkEnd.getManagingBox = () => scene.rootBox
+    const scene = setupRenderedScenarioWithDepth()
+    expect(scene.linkEndData.path.length).toBe(2)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'innerBoxId', boxName: 'innerBoxName', x: 50, y: 50},
+        {boxId: 'deepBoxId', boxName: 'deepBoxName', x: 50, y: 50}
+    ])
+    scene.linkEnd.getReferenceLink().render = () => Promise.resolve()
+    scene.linkEnd.getManagingBox = () => scene.rootBox
 
-  await scene.linkEnd.drag(320+960*0.9, 160+480*0.6, scene.rootBox, false)
-  await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.rootBox, movedWayPoint: scene.rootBox})
+    await scene.linkEnd.dragStart(320+960*0.9, 160+480*0.6, scene.rootBox, false)
+    await scene.linkEnd.reorderMapDataPathWithoutRender({newManagingBoxForValidation: scene.rootBox, movedWayPoint: scene.rootBox})
 
-  expect(scene.linkEndData.path.length).toBe(1)
-  expect(scene.linkEndData.path).toEqual([
-      {boxId: 'rootBoxId', boxName: 'fakeProjectSettingsFilePath/fakeSrcRootPath', x: 90, y: 60}
-  ])
+    expect(scene.linkEndData.path.length).toBe(1)
+    expect(scene.linkEndData.path).toEqual([
+        {boxId: 'rootBoxId', boxName: 'fakeProjectSettingsFilePath/fakeSrcRootPath', x: 90, y: 60}
+    ])
 })
 
 test('reorderMapDataPathWithoutRender deep, move managingBox inside', async () => {
