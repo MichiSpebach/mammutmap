@@ -238,7 +238,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
             return this.dragCancel()
         }
         const snappedDropTarget = await this.getSnappedDropTarget(new ClientPosition(clientX, clientY), dropTarget, snapToGrid)
-        const dropTargetBefore = this.dragState?.dropTarget
+        const dropTargetBefore = this.dragState.dropTarget
         if (this.getParent() === snappedDropTarget.target) {
             this.mapData.setPosition(await this.getParent().transform.clientToLocalPosition(snappedDropTarget.position))
             await Promise.all([

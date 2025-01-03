@@ -20,6 +20,7 @@ import { log } from '../logService'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { LinkEndData } from '../mapData/LinkEndData'
 import { WayPointData } from '../mapData/WayPointData'
+import { selectManager } from '../selectManager'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -38,7 +39,8 @@ export class Link implements Hoverable {
   private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
   private highlight: boolean = false
   private draggingInProgress: boolean = false
-  private hoveringOver: boolean = false
+  private hoveringOver: boolean = false // TODO: rename to focused?
+  private selected: boolean = false
 
   public static async newOfEnds(options: {
     from: Box|NodeWidget | {node: Box|NodeWidget, positionInFromNodeCoords?: LocalPosition}
@@ -133,6 +135,7 @@ export class Link implements Hoverable {
     highlight?: boolean
     draggingInProgress?: boolean
     hoveringOver?: boolean
+    selected?: boolean
   }): Promise<void> {
     if (options.highlight !== undefined) {
       this.highlight = options.highlight
@@ -142,6 +145,9 @@ export class Link implements Hoverable {
     }
     if (options.hoveringOver !== undefined) {
       this.hoveringOver = options.hoveringOver
+    }
+    if (options.selected !== undefined) {
+      this.selected = options.selected
     }
 
     return this.render(options.priority)
@@ -164,7 +170,7 @@ export class Link implements Hoverable {
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
 
-    const lineInnerHtml: string = await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver)
+    const lineInnerHtml: string = await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver, this.selected)
 
     const proms: Promise<any>[] = []
 
@@ -229,17 +235,19 @@ export class Link implements Hoverable {
   }
 
   private async addEventListeners(): Promise<void> {
-    const proms: Promise<any>[] = []
-    proms.push(renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, new ClientPosition(clientX, clientY))))
-    proms.push(HoverManager.addHoverable(this, () => this.handleHoverOver(),() => this.handleHoverOut()))
-    await Promise.all(proms)
+    await Promise.all([
+      HoverManager.addHoverable(this, () => this.handleHoverOver(),() => this.handleHoverOut()),
+      selectManager.addSelectable({elementId: this.getId(), onSelect: () => this.handleSelect(), onDeselct: () => this.handleDeselct()}),
+      renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, new ClientPosition(clientX, clientY)))
+    ])
   }
 
   private async removeEventListeners(): Promise<void> {
-    const proms: Promise<any>[] = []
-    proms.push(HoverManager.removeHoverable(this))
-    proms.push(renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'))
-    await Promise.all(proms)
+    await Promise.all([
+      renderManager.removeEventListenerFrom(this.getId(), 'contextmenu'),
+      selectManager.removeSelectable(this.getId()),
+      HoverManager.removeHoverable(this)
+    ])
   }
 
   private async handleHoverOver(): Promise<void> {
@@ -258,6 +266,22 @@ export class Link implements Hoverable {
       return
     }
     await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: false, hoveringOver: false})
+  }
+
+  private async handleSelect(): Promise<void> {
+    if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
+      this.selected = true
+      return
+    }
+    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, selected: true})
+  }
+
+  private async handleDeselct(): Promise<void> {
+    if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
+      this.selected = false
+      return
+    }
+    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, selected: false})
   }
 
   public isHighlight(): boolean {

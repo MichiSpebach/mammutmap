@@ -5512,6 +5512,35 @@
 			"tags": [
 				"hidden"
 			]
+		},
+		{
+			"id": "link0dehsk9mqk",
+			"from": {
+				"path": [
+					{
+						"boxId": "9681r2mjsk8",
+						"boxName": "link",
+						"x": 32,
+						"y": 72
+					},
+					{
+						"boxId": "mb7anqagfeg",
+						"boxName": "Link.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "s5f6cqg4h08",
+						"boxName": "selectManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
 		}
 	],
 	"nodes": [

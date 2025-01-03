@@ -40,15 +40,23 @@ export class LinkLine {
         return this.id+'Hover'
     }
 
-    public async formInnerHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean): Promise<string> {
+    private getSelectedId(): string {
+        return this.id+'Selected'
+    }
+
+    public async formInnerHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean, selected: boolean): Promise<string> {
         // TODO: move coordinates to svg element, svg element only as big as needed, or draw all lines of a box into one svg?
-        let lineHtml: string = this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords)
-        if ((draggingInProgress || hoveringOver) /*&& (this.from.isFloatToBorder() || this.to.isFloatToBorder())*/) { // TODO: activate floatToBorder option
-            lineHtml += await this.formTargetLineHtml()
-        }
+        let lineHtml: string = ''
         if (!draggingInProgress) {
             lineHtml += this.formHoverAreaHtml(fromInManagingBoxCoords, toInManagingBoxCoords, hoveringOver)
         }
+        if (selected) {
+            lineHtml += this.formSelectedHtml(fromInManagingBoxCoords, toInManagingBoxCoords, hoveringOver)
+        }
+        if ((draggingInProgress || hoveringOver) /*&& (this.from.isFloatToBorder() || this.to.isFloatToBorder())*/) { // TODO: activate floatToBorder option
+            lineHtml += await this.formTargetLineHtml()
+        }
+        lineHtml += this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords)
         return lineHtml
     }
     
@@ -68,6 +76,14 @@ export class LinkLine {
     private formHoverAreaHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, hoveringOver: boolean): string {
         const positionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
         return `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke-width:${hoveringOver ? 8 : 4}px;pointer-events:stroke;"/>`
+    }
+
+    private formSelectedHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, hoveringOver: boolean): string {
+        const positionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
+        //let html = `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke:#fff;stroke-dasharray:3px;stroke-width:1px;"/>`
+        //html += `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke:#444;stroke-dasharray:3px,9px;stroke-dashoffset:3px;stroke-width:1px;"/>`
+        const width: number = hoveringOver || this.referenceLink.isHighlight() ? 6 : 4
+        return `<line id="${this.getSelectedId()}" ${positionHtml} style="stroke:#abc;stroke-dasharray:4px;stroke-width:${width}px;"/>`
     }
     
     private formLineClassHtml(): string {
