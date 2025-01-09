@@ -12,6 +12,8 @@ interface Style {
   getFolderBoxBackgroundClass(): string
   getSourcelessBoxBackgroundClass(): string
 
+  getBoxSiteDetachedClass(): string
+
   getBoxBorderClass(): string
   getAdditionalBoxBorderClass(mapDataFileExisting: boolean): string
 
@@ -60,6 +62,10 @@ class DarkTheme implements Style {
   }
   public getSourcelessBoxBackgroundClass(): string {
     return 'sourcelessBoxBackground'
+  }
+
+  public getBoxSiteDetachedClass(): string {
+    return 'boxSiteDetached'
   }
 
   public getBoxBorderClass(): string {

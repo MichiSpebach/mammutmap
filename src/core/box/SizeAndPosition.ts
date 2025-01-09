@@ -7,6 +7,7 @@ import { ClientRect } from '../ClientRect'
 import { RootFolderBox } from './RootFolderBox'
 import { log } from '../logService'
 import { ClientPosition } from '../shape/ClientPosition'
+import { style } from '../styleAdapter'
 
 export class SizeAndPosition {
     /** html elements which width, height, left, top is too big fail to render */
@@ -133,7 +134,7 @@ export class SizeAndPosition {
         await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE})
     }
 
-    public async detachToFitClientRect(clientRect: ClientRect, options?: {transitionDurationInMS?: number, priority?: RenderPriority}): Promise<void> {
+    public async detachToFitClientRect(clientRect: ClientRect, options?: {transitionDurationInMS?: number, renderStylePriority?: RenderPriority}): Promise<void> {
         const rect: LocalRect = await this.referenceNode.getParent().transform.clientToLocalRect(clientRect)
         const savedRect: LocalRect = this.getLocalRectToSave()
         const zoom: number = Math.min(rect.width/savedRect.width, rect.height/savedRect.height)
@@ -148,12 +149,16 @@ export class SizeAndPosition {
             zoomY: zoom
         }
 
+        const addingStyle: Promise<void> = renderManager.addClassTo(this.referenceNode.getId(), style.getBoxSiteDetachedClass(), options?.renderStylePriority)
         const {transitionAndRerender} = await this.referenceNode.renderStyleWithRerender(options)
         await transitionAndRerender
-        await this.referenceNode.borderingLinks.renderAllThatShouldBe()
+        await Promise.all([
+            this.referenceNode.borderingLinks.renderAllThatShouldBe(),
+            addingStyle
+        ])
     }
 
-    public async releaseIfDetached(options?: {transitionDurationInMS?: number, priority?: RenderPriority}): Promise<void> {
+    public async releaseIfDetached(options?: {transitionDurationInMS?: number, renderStylePriority?: RenderPriority}): Promise<void> {
         if (!this.detached) {
             return
         }
@@ -163,7 +168,8 @@ export class SizeAndPosition {
         const {transitionAndRerender} = await this.referenceNode.renderStyleWithRerender(options)
         await Promise.all([
             transitionAndRerender,
-            this.referenceNode.borderingLinks.renderAllThatShouldBe()
+            this.referenceNode.borderingLinks.renderAllThatShouldBe(),
+            renderManager.removeClassFrom(this.referenceNode.getId(), style.getBoxSiteDetachedClass(), options?.renderStylePriority)
         ])
     }
 

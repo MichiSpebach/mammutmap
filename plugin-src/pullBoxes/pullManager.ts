@@ -13,7 +13,7 @@ export async function pull(box: Box, wishRect: ClientRect, reason: {link: Link, 
 	} else {
 		pulledBoxes.push({box, reasons: [reason]})
 	}
-	await box.site.detachToFitClientRect(wishRect, {transitionDurationInMS: 200, priority: RenderPriority.RESPONSIVE})
+	await box.site.detachToFitClientRect(wishRect, {transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE})
 }
 
 export async function releaseForLink(link: Link): Promise<void> {
@@ -42,7 +42,7 @@ export async function release(box: Box, link: Link): Promise<void> {
 	
 	if (pulledBox.reasons.length < 1) {
 		pulledBoxes.splice(pulledBoxIndex, 1)
-		await box.site.releaseIfDetached({transitionDurationInMS: 200, priority: RenderPriority.RESPONSIVE}) // await because in some cases important that box is still watched
+		await box.site.releaseIfDetached({transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}) // await because in some cases important that box is still watched
 	}
 	await Promise.all(reasons.map(reason => reason.watcher.unwatch()))
 }

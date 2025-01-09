@@ -224,6 +224,10 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
     const child: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = await this.findChildByIdAndRenderIfNecessary(path[0].id)
     if (!child) {
+      if (path[0].id === this.getId()) {
+        log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) called on wrong box or unnormalized path detected, path '${JSON.stringify(path)}' starts unnecessarily with box.`)
+        return await this.getDescendantByPathAndRenderIfNecessary(path.slice(1))
+      }
       log.warning(`Box::getDescendantByPathAndRenderIfNecessary(..) failed to find child with id '${path[0].id}' defaulting to this.`)
       return {node: this, watcher: await BoxWatcher.newAndWatch(this)}
     }
