@@ -33,16 +33,16 @@ export async function release(box: Box, link: Link): Promise<void> {
 		return
 	}
 
-	const pros: Promise<void>[] = []
+	const reasons: {link: Link, watcher: BoxWatcher}[] = []
 	for (let i = pulledBox.reasons.length-1; i >= 0; i--) {
 		if (pulledBox.reasons[i].link === link) {
-			pros.push(...pulledBox.reasons.splice(i, 1).map(reason => reason.watcher.unwatch()))
+			reasons.push(...pulledBox.reasons.splice(i, 1))
 		}
 	}
 	
 	if (pulledBox.reasons.length < 1) {
 		pulledBoxes.splice(pulledBoxIndex, 1)
-		pros.push(box.site.releaseIfDetached({transitionDurationInMS: 200, priority: RenderPriority.RESPONSIVE}))
+		await box.site.releaseIfDetached({transitionDurationInMS: 200, priority: RenderPriority.RESPONSIVE}) // await because in some cases important that box is still watched
 	}
-	await Promise.all(pros)
+	await Promise.all(reasons.map(reason => reason.watcher.unwatch()))
 }
