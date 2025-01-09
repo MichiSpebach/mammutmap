@@ -10,13 +10,13 @@ class SelectManager {
 	private selection: {
 		elementId: string
 		onSelect(): Promise<void>
-		onDeselct(): Promise<void>
+		onDeselect(): Promise<void>
 	}[] = []
 
 	private async select(selectable: {
 		elementId: string
 		onSelect(): Promise<void>
-		onDeselct(): Promise<void>
+		onDeselect(): Promise<void>
 	}): Promise<void> {
 		this.selection.push(selectable)
 		await selectable.onSelect()
@@ -28,19 +28,19 @@ class SelectManager {
 			return
 		}
 		const [element] = this.selection.splice(index, 1)
-		await element.onDeselct()
+		await element.onDeselect()
 	}
 
 	private async deselectAll(): Promise<void> {
 		const selection = this.selection
 		this.selection = []
-		await Promise.all(selection.map(selectable => selectable.onDeselct()))
+		await Promise.all(selection.map(selectable => selectable.onDeselect()))
 	}
 
 	public async addSelectable(options: {
 		elementId: string
 		onSelect(): Promise<void>
-		onDeselct(): Promise<void>
+		onDeselect(): Promise<void>
 		priority?: RenderPriority
 	}): Promise<void> {
 		const pros: Promise<unknown>[] = []

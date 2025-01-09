@@ -21,6 +21,7 @@ import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { LinkEndData } from '../mapData/LinkEndData'
 import { WayPointData } from '../mapData/WayPointData'
 import { selectManager } from '../selectManager'
+import { Subscribers } from '../util/Subscribers'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -30,6 +31,10 @@ export let LinkImplementation: typeof Link /*= Link*/ // assigned after declarat
 
 // important: always extend from LinkImplementation (important for plugins)
 export class Link implements Hoverable {
+
+  public static readonly onSelect = new Subscribers<Link>()
+  public static readonly onDeselect = new Subscribers<Link>()
+
   private readonly data: LinkData
   private managingBox: Box
   public readonly line: LinkLine
@@ -237,7 +242,7 @@ export class Link implements Hoverable {
   private async addEventListeners(): Promise<void> {
     await Promise.all([
       HoverManager.addHoverable(this, () => this.handleHoverOver(),() => this.handleHoverOut()),
-      selectManager.addSelectable({elementId: this.getId(), onSelect: () => this.handleSelect(), onDeselct: () => this.handleDeselct()}),
+      selectManager.addSelectable({elementId: this.getId(), onSelect: () => this.handleSelect(), onDeselect: () => this.handleDeselect()}),
       renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, new ClientPosition(clientX, clientY)))
     ])
   }
@@ -273,15 +278,21 @@ export class Link implements Hoverable {
       this.selected = true
       return
     }
-    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, selected: true})
+    await Promise.all([
+      this.renderWithOptions({priority: RenderPriority.RESPONSIVE, selected: true}),
+      Link.onSelect.callSubscribers(this)
+    ])
   }
 
-  private async handleDeselct(): Promise<void> {
+  private async handleDeselect(): Promise<void> {
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
       this.selected = false
       return
     }
-    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, selected: false})
+    await Promise.all([
+      this.renderWithOptions({priority: RenderPriority.RESPONSIVE, selected: false}),
+      Link.onDeselect.callSubscribers(this)
+    ])
   }
 
   public isHighlight(): boolean {

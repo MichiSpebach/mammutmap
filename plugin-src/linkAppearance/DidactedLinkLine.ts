@@ -10,9 +10,9 @@ export class DidactedLinkLine extends LinkLineImplementation {
         return Object.getPrototypeOf(DidactedLinkLine.prototype).constructor
     }
 
-    public override formInnerHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean): Promise<string> {
+    public override formInnerHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean, selected: boolean): Promise<string> {
         if (this.shouldBeVisible()) {
-            return super.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver)
+            return super.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver, selected)
         }
         return Promise.resolve('')
     }

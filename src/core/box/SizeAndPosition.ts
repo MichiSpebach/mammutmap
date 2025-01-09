@@ -133,6 +133,40 @@ export class SizeAndPosition {
         await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE})
     }
 
+    public async detachToFitClientRect(clientRect: ClientRect, options?: {transitionDurationInMS?: number, priority?: RenderPriority}): Promise<void> {
+        const rect: LocalRect = await this.referenceNode.getParent().transform.clientToLocalRect(clientRect)
+        const savedRect: LocalRect = this.getLocalRectToSave()
+        const zoom: number = Math.min(rect.width/savedRect.width, rect.height/savedRect.height)
+        const fittedWidth: number = savedRect.width*zoom
+        const fittedHeight: number = savedRect.height*zoom
+        const rectMid: LocalPosition = rect.getMidPosition()
+
+        this.detached = {
+            shiftX: rectMid.percentX-fittedWidth/2 - savedRect.x,
+            shiftY: rectMid.percentY-fittedHeight/2 - savedRect.y,
+            zoomX: zoom,
+            zoomY: zoom
+        }
+
+        const {transitionAndRerender} = await this.referenceNode.renderStyleWithRerender(options)
+        await transitionAndRerender
+        await this.referenceNode.borderingLinks.renderAllThatShouldBe()
+    }
+
+    public async releaseIfDetached(options?: {transitionDurationInMS?: number, priority?: RenderPriority}): Promise<void> {
+        if (!this.detached) {
+            return
+        }
+
+        this.detached = undefined
+
+        const {transitionAndRerender} = await this.referenceNode.renderStyleWithRerender(options)
+        await Promise.all([
+            transitionAndRerender,
+            this.referenceNode.borderingLinks.renderAllThatShouldBe()
+        ])
+    }
+
     public zoomToFit(options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
         return this.zoomToFitRectIntern(new LocalRect(-5, -5, 110, 110), options)
     }

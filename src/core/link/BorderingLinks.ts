@@ -40,6 +40,7 @@ export class BorderingLinks {
     })
   }
 
+  /** TODO: remove and just use renderAllThatShouldBe()? */
   public async renderAll(): Promise<void> {
     await Promise.all(this.getAll().map(link => link.render()))
   }

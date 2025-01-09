@@ -306,18 +306,36 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   public async getRenderPositionInManagingBoxCoords(): Promise<LocalPosition> {
     //if (this.data.floatToBorder) { // TODO: activate or rename to renderInsideBox|renderInsideTargetBox
-      let clientShape: Promise<Shape<ClientPosition>>
-      if (this.dragState) {
-        clientShape = this.dragState.dropTarget.getClientShape()
-      } else {
-        clientShape = this.getDeepestRenderedWayPoint().linkable.getClientShape() // TODO: IMPORTANT this might be a bug when called from outside
-      }
-      const intersectionWithRect: ClientPosition|undefined = await this.calculateFloatToBorderPositionRegardingClientShape(clientShape)
-      if (intersectionWithRect) {
-        return this.getManagingBox().transform.clientToLocalPosition(intersectionWithRect)
+      const floatToBorderPosition: ClientPosition|undefined = await this.calculateFloatToBorderClientPosition()
+      if (floatToBorderPosition) {
+        return this.getManagingBox().transform.clientToLocalPosition(floatToBorderPosition)
       }
     //}
     return this.getTargetPositionInManagingBoxCoords()
+  }
+  
+  public async getRenderPositionInClientCoords(): Promise<ClientPosition> {
+    //if (this.data.floatToBorder) { // TODO: activate or rename to renderInsideBox|renderInsideTargetBox
+      const floatToBorderPosition: ClientPosition|undefined = await this.calculateFloatToBorderClientPosition()
+      if (floatToBorderPosition) {
+        return floatToBorderPosition
+      }
+    //}
+    return this.getTargetPositionInClientCoords()
+  }
+
+  private async calculateFloatToBorderClientPosition(): Promise<ClientPosition|undefined> {
+    let clientShape: Promise<Shape<ClientPosition>>
+    if (this.dragState) {
+      clientShape = this.dragState.dropTarget.getClientShape()
+    } else {
+      clientShape = this.getDeepestRenderedWayPoint().linkable.getClientShape() // TODO: IMPORTANT this might be a bug when called from outside
+    }
+    const intersectionWithRect: ClientPosition|undefined = await this.calculateFloatToBorderPositionRegardingClientShape(clientShape)
+    /*if (!intersectionWithRect) { // TODO: figure out why this happens
+      log.warning(`LinkEnd::getRenderPositionInClientCoords() no intersection with rect ${JSON.stringify(await clientShape)} in ${this.referenceLink.describe()}.`)
+    }*/
+    return intersectionWithRect
   }
 
   private async calculateFloatToBorderPositionRegardingClientShape(shapeInClientCoords: Promise<Shape<ClientPosition>>): Promise<ClientPosition|undefined> {
