@@ -13,6 +13,7 @@ import { LocalPosition } from '../shape/LocalPosition'
 import { ClientPosition } from '../shape/ClientPosition'
 import { NodeData } from '../mapData/NodeData'
 import { BoxWatcher } from './BoxWatcher'
+import { LinkEnd } from '../link/LinkEnd'
 
 export class BoxLinks extends Widget {
     private readonly referenceBox: Box
@@ -134,21 +135,26 @@ export class BoxLinks extends Widget {
       const insertedNodePosition: ClientPosition = (await insertedNode.getClientShape()).getMidPosition()
     	const addedLink: Link = await link.getManagingBoxLinks().addCopy(link)
 
+      let heavierEnd: LinkEnd|undefined
+      let lighterEnd: LinkEnd|undefined
       if (link.from.isBoxInPath(waypoint)) { // ensures that managingBox of link gets heavier part and is not changed
-        await Promise.all([
-          link.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition}),
-          addedLink.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
-        ])
-        return {insertedNode, addedLink}
+        heavierEnd = link.from
+        lighterEnd = addedLink.to
+      } else if (link.to.isBoxInPath(waypoint)) { // ensures that managingBox of link gets heavier part and is not changed
+        heavierEnd = link.to
+        lighterEnd = addedLink.from
+      } else if (waypoint === this.referenceBox) {
+        heavierEnd = link.from
+        lighterEnd = addedLink.to
       }
-      if (link.to.isBoxInPath(waypoint)) { // ensures that managingBox of link gets heavier part and is not changed
+      if (heavierEnd && lighterEnd) {
         await Promise.all([
-          link.to.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition}),
-          addedLink.from.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
+          heavierEnd.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition}),
+          lighterEnd.dragAndDrop({dropTarget: insertedNode, clientPosition: insertedNodePosition})
         ])
-        return {insertedNode, addedLink}
+      } else {
+        log.warning(`BoxLinks::insertNodeIntoLink(link, waypoint, ..) waypoint is not in link.`)
       }
-      log.warning(`BoxLinks::insertNodeIntoLink(link, waypoint, ..) waypoint is not in link.`)
       return {insertedNode, addedLink}
     }
 
