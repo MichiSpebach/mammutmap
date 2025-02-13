@@ -1,7 +1,7 @@
 import { mock, MockProxy } from 'jest-mock-extended'
 import { init as initDomAdapter, BatchMethod, DocumentObjectModelAdapter } from '../../src/core/renderEngine/domAdapter'
 import { RenderManager, RenderPriority, SchedulablePromise, Command } from '../../src/core/renderEngine/renderManager'
-import { RenderElements } from '../../src/core/util/RenderElement'
+import { RenderElements } from '../../src/core/renderEngine/RenderElement'
 
 test('SchedulablePromise simple call', async () => {
   const schedulablePromise = new SchedulablePromise(() => 'test is working')

@@ -1,7 +1,7 @@
 import { renderManager } from '../../renderEngine/renderManager'
 import { Widget } from '../../Widget'
 import { log } from '../../logService'
-import { RenderElements } from '../../util/RenderElement'
+import { RenderElements } from '../../renderEngine/RenderElement'
 import { Box } from '../Box'
 import { BoxTab } from './BoxTab'
 import { BoxTabBarWidget } from './BoxTabBarWidget'

@@ -6,7 +6,7 @@ import { settings } from '../../settings/settings'
 import { BoxHeaderDraggable } from './BoxHeaderDraggable'
 import { Widget } from '../../Widget'
 import * as styles from './BoxHeaderStyle'
-import { Style } from '../../util/RenderElement'
+import { Style } from '../../renderEngine/RenderElement'
 import { log } from '../../../core/logService'
 import { util } from '../../../core/util/util'
 

@@ -1,7 +1,7 @@
 import * as indexHtmlIds from './indexHtmlIds'
 import { renderManager } from './renderEngine/renderManager'
 import { style } from './styleAdapter'
-import { RenderElement, RenderElements } from './util/RenderElement'
+import { RenderElement, RenderElements } from './renderEngine/RenderElement'
 import { util } from './util/util'
 import { Widget } from './Widget'
 

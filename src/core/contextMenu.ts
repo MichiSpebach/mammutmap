@@ -15,7 +15,7 @@ import { NodeWidget } from './node/NodeWidget'
 import { MenuItem } from './applicationMenu/MenuItem'
 import { MenuItemFolder } from './applicationMenu/MenuItemFolder'
 import { MenuItemFile } from './applicationMenu/MenuItemFile'
-import { RenderElements } from './util/RenderElement'
+import { RenderElements } from './renderEngine/RenderElement'
 import { environment } from './environmentAdapter'
 
 let contextMenuPopup: ContextMenuPopup

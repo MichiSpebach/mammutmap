@@ -1,7 +1,7 @@
 import { renderManager, RenderPriority } from '../renderEngine/renderManager'
 import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
-import { RenderElement, Style } from './RenderElement'
+import { RenderElement, Style } from '../renderEngine/RenderElement'
 import * as stacktraceUtil from './stacktraceUtil'
 import { log } from '../logService'
 

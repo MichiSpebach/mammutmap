@@ -1,6 +1,6 @@
 import { RenderPriority, renderManager } from '../renderEngine/renderManager'
 import { ToolbarWidget } from '../toolbars/ToolbarWidget'
-import { RenderElement, Style } from '../util/RenderElement'
+import { RenderElement, Style } from '../renderEngine/RenderElement'
 import { util } from '../util/util'
 import { log } from '../logService'
 import { BoxToolkitWidget } from './BoxToolkitWidget'

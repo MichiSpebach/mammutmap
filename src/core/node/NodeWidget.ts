@@ -13,7 +13,7 @@ import { ClientRect } from '../ClientRect'
 import * as contextMenu from '../contextMenu'
 import { AbstractNodeWidget } from '../AbstractNodeWidget'
 import { Link } from '../link/Link'
-import { Style } from '../util/RenderElement'
+import { Style } from '../renderEngine/RenderElement'
 import { HoverManager } from '../HoverManager'
 import { Hoverable } from '../Hoverable'
 

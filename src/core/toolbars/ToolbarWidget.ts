@@ -1,7 +1,7 @@
 import { renderManager } from '../renderEngine/renderManager'
 import { Widget } from '../Widget'
 import { log } from '../logService'
-import { RenderElement, RenderElements, Style } from '../util/RenderElement'
+import { RenderElement, RenderElements, Style } from '../renderEngine/RenderElement'
 import { ToolbarView } from './ToolbarView'
 
 export class ToolbarWidget extends Widget {

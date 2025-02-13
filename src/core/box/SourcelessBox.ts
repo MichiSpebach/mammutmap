@@ -9,7 +9,7 @@ import { BoxData } from '../mapData/BoxData'
 import { BoxLinks } from './BoxLinks'
 import { ClientPosition } from '../shape/ClientPosition'
 import { BoxContext } from './BoxContext'
-import { RenderElements } from '../util/RenderElement'
+import { RenderElements } from '../renderEngine/RenderElement'
 import { log } from '../logService'
 
 type SourcelessBoxType = 'source not found'|'unknown source type'

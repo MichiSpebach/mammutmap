@@ -1,5 +1,5 @@
 import { BooleanSetting, settings } from './settings';
-import { RenderElement } from '../util/RenderElement';
+import { RenderElement } from '../renderEngine/RenderElement';
 
 export class BooleanSettingWidget /*extends ?Widget TODO*/ {
 

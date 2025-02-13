@@ -27,6 +27,52 @@
 					}
 				]
 			}
+		},
+		{
+			"id": "linkv44qkv3mir8",
+			"from": {
+				"path": [
+					{
+						"boxId": "5da77t8c1t8",
+						"boxName": "domAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "i20ugc3f1e8",
+						"boxName": "RenderElement.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "linkd815o89c0go",
+			"from": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "renderManager.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "i20ugc3f1e8",
+						"boxName": "RenderElement.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
 		}
 	],
 	"nodes": []

@@ -1,5 +1,5 @@
 import { renderManager } from '../renderEngine/renderManager'
-import { RenderElement, Style } from './RenderElement'
+import { RenderElement, Style } from '../renderEngine/RenderElement'
 import { util } from './util'
 
 export class ProgressBarWidget /*extends Widget*/ {

@@ -1,6 +1,6 @@
 import * as indexHtmlIds from './indexHtmlIds'
 import { MouseEventResultAdvanced, renderManager, RenderPriority } from './renderEngine/renderManager'
-import { Style } from './util/RenderElement'
+import { Style } from './renderEngine/RenderElement'
 import { util } from './util/util'
 
 const id: string = 'htmlCursor'

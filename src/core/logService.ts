@@ -1,7 +1,7 @@
 import { RenderPriority } from './renderEngine/renderManager'
 import { util } from './util/util'
 import { ConsoleDecorator } from './ConsoleDecorator'
-import { RenderElement } from './util/RenderElement'
+import { RenderElement } from './renderEngine/RenderElement'
 import { Subscribers } from './util/Subscribers'
 
 export let log: LogService // = new LogService() // initialized at end of file

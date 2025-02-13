@@ -3,9 +3,8 @@ import {
   EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback
 } from './domAdapter'
 import { ClientRect } from '../ClientRect'
-import { RenderElement, RenderElements, Style } from '../util/RenderElement'
+import { RenderElement, RenderElements, Style } from './RenderElement'
 import { ClientPosition } from '../shape/ClientPosition'
-import { log } from '../logService'
 
 export { EventType, MouseEventType, DragEventType, WheelEventType, InputEventType, KeyboardEventType }
 export { EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback }
@@ -389,11 +388,11 @@ export class RenderManager {
       return undefined
     }
     if (command.batchParameters?.method !== 'setStyleTo') {
-      log.warning(`RenderManager::tryToCombineSetStyleToCommand(..) expected command.batchParameters?.method to be 'setStyleTo' but is '${command.batchParameters?.method}'.`)
+      console.warn(`RenderManager::tryToCombineSetStyleToCommand(..) expected command.batchParameters?.method to be 'setStyleTo' but is '${command.batchParameters?.method}'.`)
       return undefined
     }
     if (command.batchParameters.elementId !== commandScheduledBefore.batchParameters.elementId) {
-      log.warning(`RenderManager::tryToCombineSetStyleToCommand(..) command..elementId ('${command.batchParameters.elementId}') differs from commandScheduledBefore..elementId ('${commandScheduledBefore.batchParameters.elementId}').`)
+      console.warn(`RenderManager::tryToCombineSetStyleToCommand(..) command..elementId ('${command.batchParameters.elementId}') differs from commandScheduledBefore..elementId ('${commandScheduledBefore.batchParameters.elementId}').`)
       return undefined
     }
 
@@ -410,11 +409,11 @@ export class RenderManager {
       return undefined
     }
     if (command.batchParameters?.method !== 'addStyleTo') {
-      log.warning(`RenderManager::tryToCombineAddStyleToCommand(..) expected command.batchParameters?.method to be 'addStyleTo' but is '${command.batchParameters?.method}'.`)
+      console.warn(`RenderManager::tryToCombineAddStyleToCommand(..) expected command.batchParameters?.method to be 'addStyleTo' but is '${command.batchParameters?.method}'.`)
       return undefined
     }
     if (command.batchParameters.elementId !== commandScheduledBefore.batchParameters.elementId) {
-      log.warning(`RenderManager::tryToCombineAddStyleToCommand(..) command..elementId ('${command.batchParameters.elementId}') differs from commandScheduledBefore..elementId ('${commandScheduledBefore.batchParameters.elementId}').`)
+      console.warn(`RenderManager::tryToCombineAddStyleToCommand(..) command..elementId ('${command.batchParameters.elementId}') differs from commandScheduledBefore..elementId ('${commandScheduledBefore.batchParameters.elementId}').`)
       return undefined
     }
     if (typeof commandScheduledBefore.batchParameters.value === 'string') {

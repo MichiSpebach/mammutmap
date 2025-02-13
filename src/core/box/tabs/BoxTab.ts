@@ -1,5 +1,5 @@
 import { Widget } from '../../Widget';
-import { RenderElements } from '../../util/RenderElement';
+import { RenderElements } from '../../renderEngine/RenderElement';
 import { Box } from '../Box';
 
 export type BoxTab = {

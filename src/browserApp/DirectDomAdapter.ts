@@ -2,7 +2,7 @@ import { ClientRect } from '../core/ClientRect';
 import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/renderEngine/domAdapter'
 import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
-import { RenderElements, RenderElement, Style } from '../core/util/RenderElement';
+import { RenderElements, RenderElement, Style } from '../core/renderEngine/RenderElement';
 import * as indexHtmlIds from '../core/indexHtmlIds'
 import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister';
 import { MessagePopup } from '../core/MessagePopup';

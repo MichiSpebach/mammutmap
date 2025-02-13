@@ -2,7 +2,7 @@ import { PopupWidget } from './PopupWidget'
 import { RenderPriority, renderManager } from './renderEngine/renderManager'
 import { RenderElementWithId, UltimateWidget } from './Widget'
 import { LogEntry, log } from './logService'
-import { RenderElement, RenderElements } from './util/RenderElement'
+import { RenderElement, RenderElements } from './renderEngine/RenderElement'
 import * as commandLine from './commandRegister'
 import { util } from './util/util'
 

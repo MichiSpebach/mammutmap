@@ -2,7 +2,7 @@ import { renderManager } from './renderEngine/renderManager';
 import { Widget } from './Widget'
 import { log } from './logService';
 import { settings } from './settings/settings';
-import { RenderElement, RenderElements, Style } from './util/RenderElement';
+import { RenderElement, RenderElements, Style } from './renderEngine/RenderElement';
 
 export class ToggleSidebarWidget /*extends Widget*/ {
 

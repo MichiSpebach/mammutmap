@@ -28,7 +28,7 @@ import { NodeWidget } from './core/node/NodeWidget'
 import { LinkTagData } from './core/mapData/LinkTagData'
 import { ToolbarView } from './core/toolbars/ToolbarView'
 import { Widget } from './core/Widget'
-import { ElementType, RenderElement, RenderElements, Style } from './core/util/RenderElement'
+import { ElementType, RenderElement, RenderElements, Style } from './core/renderEngine/RenderElement'
 import { PopupWidget } from './core/PopupWidget'
 import { TextInputPopup } from './core/TextInputPopup';
 import { settings } from './core/settings/settings'

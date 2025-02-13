@@ -1,4 +1,4 @@
-import { RenderElement, RenderElements } from './RenderElement'
+import { RenderElement, RenderElements } from '../renderEngine/RenderElement'
 
 export abstract class SimpleWidget {
     public abstract form(): RenderElement

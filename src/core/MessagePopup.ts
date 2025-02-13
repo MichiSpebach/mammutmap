@@ -1,5 +1,5 @@
 import { PopupWidget } from './PopupWidget'
-import { RenderElements } from './util/RenderElement'
+import { RenderElements } from './renderEngine/RenderElement'
 import { util } from './util/util'
 
 export class MessagePopup extends PopupWidget {

@@ -1,5 +1,5 @@
 import { SchedulablePromise, renderManager } from './renderEngine/renderManager'
-import { ElementType, RenderElement, RenderElements, Style } from './util/RenderElement'
+import { ElementType, RenderElement, RenderElements, Style } from './renderEngine/RenderElement'
 
 export type RenderElementWithId = RenderElement & {id: string} // TODO: required at all?
 

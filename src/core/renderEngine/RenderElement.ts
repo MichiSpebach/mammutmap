@@ -1,5 +1,7 @@
-// TODO: create folder/module rendering and move RenderElement.ts, renderManager.ts, domAdapter.ts into there
 
+/**
+ * @deprecated simply call elementList.flat()
+*/
 export function concatRenderElements(elementsList: RenderElements[]): RenderElements {
   return elementsList.flat()
 }
