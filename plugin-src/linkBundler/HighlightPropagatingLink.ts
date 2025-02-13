@@ -8,36 +8,43 @@ import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
 import { RenderPriority } from '../../dist/core/RenderManager'
 import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link, LinkImplementation } from '../../dist/core/link/Link'
+import { LinkData } from '../../dist/core/mapData/LinkData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
 
 export class HighlightPropagatingLink extends LinkImplementation {
 
 	public static getRouteIds(link: Link): string[] {
-		return link.getData()['routes']?? []
+		return link.getData().routes?? []
 	}
 
 	public static addRoutes(link: Link, routeIds: string[]): void {
-		if (!link.getData()['routes']) {
-			link.getData()['routes'] = []
+		const linkData: LinkData = link.getData()
+		if (!linkData.routes) {
+			linkData.routes = []
 		}
-		(link.getData()['routes'] as string[]).push(...routeIds)
+		linkData.routes.push(...routeIds)
 	}
 
 	public static addRoute(link: Link, routeId: string): void {
-		if (!link.getData()['routes']) {
-			link.getData()['routes'] = []
+		const linkData: LinkData = link.getData()
+		if (!linkData.routes) {
+			linkData.routes = []
 		}
-		(link.getData()['routes'] as string[]).push(routeId)
+		linkData.routes.push(routeId)
 	}
 
 	public static removeRoute(link: Link, routeId: string): void {
-		const routeIds: string[] = this.getRouteIds(link)
-		const index: number = routeIds.indexOf(routeId)
-		if (index < 0) {
-			console.warn(`HighlightPropagatingLink.removeRoute(link: '${link.describe()}', routeId: '${routeId}) routeIds does not contain routeId`)
+		const linkData: LinkData = link.getData()
+		if (!linkData.routes) {
+			console.warn(`HighlightPropagatingLink.removeRoute(link: '${link.describe()}', routeId: '${routeId}) no routes for link.`)
 			return
 		}
-		routeIds.splice(index, 1)
+		const index: number = linkData.routes.indexOf(routeId)
+		if (index < 0) {
+			console.warn(`HighlightPropagatingLink.removeRoute(link: '${link.describe()}', routeId: '${routeId}) routes do not contain routeId.`)
+			return
+		}
+		linkData.routes.splice(index, 1)
 	}
 
 	public static getBundledWithIds(link: Link): string[] {

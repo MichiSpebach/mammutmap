@@ -4,6 +4,7 @@ export class LinkData {
   public readonly id: string
   public from: LinkEndData
   public to: LinkEndData
+  public routes: string[]|undefined
   public tags: string[]|undefined
 
   public static buildFromRawObject(object: any): LinkData {
@@ -26,10 +27,11 @@ export class LinkData {
     return linkData
   }
 
-  public constructor(id: string, from: LinkEndData, to: LinkEndData, tags?: string[]) {
+  public constructor(id: string, from: LinkEndData, to: LinkEndData, routes?: string[], tags?: string[]) {
     this.id = id
     this.from = from
     this.to = to
+    this.routes = routes
     this.tags = tags
   }
 
