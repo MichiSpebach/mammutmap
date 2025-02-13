@@ -1,5 +1,5 @@
 import { util } from '../util/util'
-import { renderManager, RenderPriority } from '../RenderManager'
+import { renderManager, RenderPriority } from '../renderEngine/renderManager'
 import { style } from '../styleAdapter'
 import { Draggable } from '../Draggable'
 import { DropTarget } from '../DropTarget'

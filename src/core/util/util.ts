@@ -1,4 +1,4 @@
-import { renderManager, RenderPriority } from '../RenderManager'
+import { renderManager, RenderPriority } from '../renderEngine/renderManager'
 import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
 import { RenderElement, Style } from './RenderElement'

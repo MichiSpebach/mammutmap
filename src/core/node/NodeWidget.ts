@@ -1,4 +1,4 @@
-import { renderManager, RenderPriority } from '../RenderManager'
+import { renderManager, RenderPriority } from '../renderEngine/renderManager'
 import { NodeData } from '../mapData/NodeData'
 import { Draggable } from '../Draggable'
 import { Box } from '../box/Box'
@@ -239,6 +239,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         }
         const snappedDropTarget = await this.getSnappedDropTarget(new ClientPosition(clientX, clientY), dropTarget, snapToGrid)
         const dropTargetBefore = this.dragState.dropTarget
+        this.highlight = false
         if (this.getParent() === snappedDropTarget.target) {
             this.mapData.setPosition(await this.getParent().transform.clientToLocalPosition(snappedDropTarget.position))
             await Promise.all([

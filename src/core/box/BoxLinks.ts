@@ -1,5 +1,5 @@
 import { util } from '../util/util'
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { Box } from './Box'
 import { Link } from '../link/Link'
 import { LinkData } from '../mapData/LinkData'

@@ -1,7 +1,7 @@
 import { mock, MockProxy } from 'jest-mock-extended'
 import { HoverManager } from '../../src/core/HoverManager'
 import { Hoverable } from '../../src/core/Hoverable'
-import { RenderManager, init as initRenderManager } from '../../src/core/RenderManager'
+import { RenderManager, init as initRenderManager } from '../../src/core/renderEngine/renderManager'
 
 afterEach(() => {
     (HoverManager as any).hoverables = new Map() // otherwise "WARNING: HoverManager::addHoverable(..) hoverable with id 'elementId' already exists."

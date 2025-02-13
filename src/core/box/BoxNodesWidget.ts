@@ -1,4 +1,4 @@
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { NodeWidget } from '../node/NodeWidget'
 import { Widget } from '../Widget'
 import { NodeData } from '../mapData/NodeData'

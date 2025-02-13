@@ -4,7 +4,7 @@ import { RenderElement, RenderElements, Style } from '../core/util/RenderElement
 import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain, shell } from 'electron'
 import { ClientRect } from '../core/ClientRect'
 import { ClientPosition } from '../core/shape/ClientPosition'
-import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/domAdapter'
+import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/renderEngine/domAdapter'
 import { IpcChannelRegister, IpcEventListenerHandle } from './IpcChannelRegister'
 
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {

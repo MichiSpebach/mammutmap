@@ -1,6 +1,6 @@
 import { util } from './util/util'
 import { style } from './styleAdapter'
-import { MouseEventResultAdvanced, renderManager, RenderPriority } from './RenderManager'
+import { MouseEventResultAdvanced, renderManager, RenderPriority } from './renderEngine/renderManager'
 import { ScaleTool } from './box/ScaleTool'
 import { ClientRect } from './ClientRect'
 import { mouseDownDragManager } from './mouseDownDragManager'

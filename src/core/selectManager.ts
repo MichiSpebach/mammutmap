@@ -1,4 +1,4 @@
-import { renderManager, RenderPriority } from './RenderManager'
+import { renderManager, RenderPriority } from './renderEngine/renderManager'
 import * as indexHtmlIds from './indexHtmlIds'
 
 export let selectManager: SelectManager // = new SelectManager() // initialized at end of file

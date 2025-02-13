@@ -4,7 +4,7 @@
  * TODO: find better solution
  */
 import { MockProxy, mock } from 'jest-mock-extended'
-import { RenderManager, init as initRenderManager } from '../../../dist/core/RenderManager'
+import { RenderManager, init as initRenderManager } from '../../../dist/core/renderEngine/renderManager'
 import { BoxManager, init as initBoxManager } from '../../../dist/core/box/BoxManager'
 import * as settings from '../../../dist/core/settings/settings'
 import * as fileSystem from '../../../dist/core/fileSystemAdapter'

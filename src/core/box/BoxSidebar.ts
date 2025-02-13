@@ -1,4 +1,4 @@
-import { RenderPriority, renderManager } from '../RenderManager'
+import { RenderPriority, renderManager } from '../renderEngine/renderManager'
 import { ToolbarWidget } from '../toolbars/ToolbarWidget'
 import { RenderElement, Style } from '../util/RenderElement'
 import { util } from '../util/util'

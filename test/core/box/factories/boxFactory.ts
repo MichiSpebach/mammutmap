@@ -11,8 +11,8 @@ import { BoxContext } from '../../../../src/core/box/BoxContext'
 import { FileBox } from '../../../../src/core/box/FileBox'
 import { MapSettingsData } from '../../../../src/core/mapData/MapSettingsData'
 import { BoxBody } from '../../../../src/core/box/BoxBody'
-import { dom } from '../../../../src/core/domAdapter'
-import { RenderManager, renderManager } from '../../../../src/core/RenderManager'
+import { dom } from '../../../../src/core/renderEngine/domAdapter'
+import { RenderManager, renderManager } from '../../../../src/core/renderEngine/renderManager'
 
 export function rootFolderOf(options: {
     idOrSettings: string|MapSettingsData|ProjectSettings, 

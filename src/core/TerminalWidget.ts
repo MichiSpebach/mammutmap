@@ -1,5 +1,5 @@
 import { PopupWidget } from './PopupWidget'
-import { RenderPriority, renderManager } from './RenderManager'
+import { RenderPriority, renderManager } from './renderEngine/renderManager'
 import { RenderElementWithId, UltimateWidget } from './Widget'
 import { LogEntry, log } from './logService'
 import { RenderElement, RenderElements } from './util/RenderElement'

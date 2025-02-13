@@ -1,7 +1,7 @@
 import { LocalPosition } from '../shape/LocalPosition'
 import { LocalRect } from '../LocalRect'
 import { Box } from './Box'
-import { RenderPriority, renderManager } from '../RenderManager'
+import { RenderPriority, renderManager } from '../renderEngine/renderManager'
 import { util } from '../util/util'
 import { ClientRect } from '../ClientRect'
 import { RootFolderBox } from './RootFolderBox'

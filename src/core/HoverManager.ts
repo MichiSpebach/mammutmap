@@ -1,4 +1,4 @@
-import { EventListenerCallback, MouseEventListenerCallback, renderManager } from './RenderManager'
+import { EventListenerCallback, MouseEventListenerCallback, renderManager } from './renderEngine/renderManager'
 import { Hoverable } from './Hoverable'
 import { relocationDragManager } from './RelocationDragManager'
 import { ScaleManager } from './ScaleManager'

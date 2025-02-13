@@ -1,5 +1,5 @@
 import { DragManager } from './DragManager'
-import { RenderPriority, renderManager, MouseEventResultAdvanced } from './RenderManager';
+import { RenderPriority, renderManager, MouseEventResultAdvanced } from './renderEngine/renderManager';
 import { ClientPosition } from './shape/ClientPosition';
 
 export class DragEventDragManager implements DragManager {

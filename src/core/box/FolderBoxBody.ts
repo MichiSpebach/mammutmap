@@ -1,6 +1,6 @@
 import { util } from '../util/util'
 import { fileSystem, Dirent } from '../fileSystemAdapter'
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { BoxBody } from './BoxBody'
 import { Box } from './Box'
 import { FileBox } from './FileBox'

@@ -1,5 +1,5 @@
 import { IpcMainEvent, ipcMain } from 'electron'
-import { EventListenerCallback, EventType } from '../core/domAdapter'
+import { EventListenerCallback, EventType } from '../core/renderEngine/domAdapter'
 import { util } from '../core/util/util'
 
 export class IpcEventListenerHandle {

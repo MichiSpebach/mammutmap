@@ -1,4 +1,4 @@
-import { renderManager, RenderPriority } from '../../RenderManager';
+import { renderManager, RenderPriority } from '../../renderEngine/renderManager';
 import { Draggable } from '../../Draggable';
 import { DropTarget } from '../../DropTarget';
 import { relocationDragManager } from '../../RelocationDragManager';

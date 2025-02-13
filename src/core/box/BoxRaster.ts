@@ -1,5 +1,5 @@
 import { NodeWidget } from '../node/NodeWidget'
-import { RenderPriority } from '../RenderManager'
+import { RenderPriority } from '../renderEngine/renderManager'
 import { ClientPosition } from '../shape/ClientPosition'
 import { LocalPosition } from '../shape/LocalPosition'
 import { util } from '../util/util'

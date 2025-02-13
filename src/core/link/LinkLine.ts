@@ -2,7 +2,7 @@ import { style } from '../styleAdapter'
 import { LocalPosition } from '../shape/LocalPosition'
 import { Link } from './Link'
 import { util } from '../util/util'
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 
 export function override(implementation: typeof LinkLineImplementation): void {
     LinkLineImplementation = implementation

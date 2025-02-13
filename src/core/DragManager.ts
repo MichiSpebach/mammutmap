@@ -1,5 +1,5 @@
-import { RenderPriority } from './RenderManager'
-import { MouseEventResultAdvanced } from './domAdapter'
+import { RenderPriority } from './renderEngine/renderManager'
+import { MouseEventResultAdvanced } from './renderEngine/domAdapter'
 import { ClientPosition } from './shape/ClientPosition'
 
 export interface DragManager {

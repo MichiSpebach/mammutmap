@@ -1,5 +1,5 @@
 import { style } from '../styleAdapter'
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { MenuItemFile } from './MenuItemFile'
 import { MenuItemWidget } from './MenuItemWidget'
 

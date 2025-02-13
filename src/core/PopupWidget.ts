@@ -1,5 +1,5 @@
 import * as indexHtmlIds from './indexHtmlIds'
-import { renderManager } from './RenderManager'
+import { renderManager } from './renderEngine/renderManager'
 import { style } from './styleAdapter'
 import { RenderElement, RenderElements } from './util/RenderElement'
 import { util } from './util/util'

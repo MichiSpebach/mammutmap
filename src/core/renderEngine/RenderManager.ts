@@ -2,10 +2,10 @@ import {
   dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced, EventType, KeyboardEventType, 
   EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback
 } from './domAdapter'
-import { ClientRect } from './ClientRect'
-import { RenderElement, RenderElements, Style } from './util/RenderElement'
-import { ClientPosition } from './shape/ClientPosition'
-import { log } from './logService'
+import { ClientRect } from '../ClientRect'
+import { RenderElement, RenderElements, Style } from '../util/RenderElement'
+import { ClientPosition } from '../shape/ClientPosition'
+import { log } from '../logService'
 
 export { EventType, MouseEventType, DragEventType, WheelEventType, InputEventType, KeyboardEventType }
 export { EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback }

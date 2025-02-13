@@ -1,6 +1,6 @@
-import { RenderElement, RenderElements, Style } from './util/RenderElement'
-import { ClientRect } from './ClientRect'
-import { ClientPosition } from './shape/ClientPosition'
+import { RenderElement, RenderElements, Style } from '../util/RenderElement'
+import { ClientRect } from '../ClientRect'
+import { ClientPosition } from '../shape/ClientPosition'
 
 export type MouseEventType = 'click'|'dblclick'|'contextmenu'|'mousedown'|'mouseup'|'mousemove'|'mouseover'|'mouseout'|'mouseenter'|'mouseleave'
 export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'|'dragover'

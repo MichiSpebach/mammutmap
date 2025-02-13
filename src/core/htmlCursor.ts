@@ -1,5 +1,5 @@
 import * as indexHtmlIds from './indexHtmlIds'
-import { MouseEventResultAdvanced, renderManager, RenderPriority } from './RenderManager'
+import { MouseEventResultAdvanced, renderManager, RenderPriority } from './renderEngine/renderManager'
 import { Style } from './util/RenderElement'
 import { util } from './util/util'
 

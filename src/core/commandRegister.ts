@@ -1,4 +1,4 @@
-import { renderManager, RenderPriority } from './RenderManager'
+import { renderManager, RenderPriority } from './renderEngine/renderManager'
 import * as map from './Map'
 import * as commandLinePluginFacade from './commandRegisterPluginFacade'
 import * as htmlCursor from './htmlCursor'

@@ -1,5 +1,5 @@
 import { PopupWidget } from './PopupWidget'
-import { renderManager } from './RenderManager'
+import { renderManager } from './renderEngine/renderManager'
 import { util } from './util/util'
 
 export class TextInputPopup extends PopupWidget {

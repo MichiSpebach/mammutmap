@@ -1,5 +1,5 @@
 import * as indexHtmlIds from './indexHtmlIds'
-import { renderManager } from './RenderManager'
+import { renderManager } from './renderEngine/renderManager'
 
 interface Style {
   getClass(name: 'disableUserSelect'|'draggingInProgress'): string

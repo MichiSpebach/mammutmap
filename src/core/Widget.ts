@@ -1,4 +1,4 @@
-import { SchedulablePromise, renderManager } from './RenderManager'
+import { SchedulablePromise, renderManager } from './renderEngine/renderManager'
 import { ElementType, RenderElement, RenderElements, Style } from './util/RenderElement'
 
 export type RenderElementWithId = RenderElement & {id: string} // TODO: required at all?
@@ -80,4 +80,49 @@ export abstract class SuperWidget extends Widget {
 
 export abstract class ShapeWidget { // TODO: rename to Widget
 	public abstract shape(): RenderElement & {onMount?: () => void}
+}
+
+class ExampleSuperWidget extends SuperWidget {
+	private rendering: SchedulablePromise<Promise<void>> = new SchedulablePromise(async () => {'hold'})
+	public override getId(): string {
+		throw new Error('Method not implemented.')
+	}
+	public override shape(): RenderElement & { onMount: SchedulablePromise<Promise<void>> } {
+		this.rendering.setCommand = () => this.render()
+		return {
+			type: 'div',
+			//onMount: new SchedulablePromise(() => this.render())
+			onMount: this.rendering
+		}
+	}
+	public override render(): Promise<void> {
+		throw new Error('Method not implemented.')
+	}
+	public override unrender(): Promise<void> {
+		throw new Error('Method not implemented.')
+	}
+}
+
+const exampleSuperWidget = new ExampleSuperWidget()
+//const shape = exampleSuperWidget.shape()
+//await shape.onMount.promise
+
+const parentShape: RenderElement & { onMount?: SchedulablePromise<Promise<void>> } = {
+	type: 'div',
+	children: [
+		exampleSuperWidget.shape()
+	],
+	onMount: new SchedulablePromise(async () => {
+		if (Array.isArray(parentShape.children)) {
+			await Promise.all(parentShape.children.map(child => (child as RenderElement & { onMount?: SchedulablePromise<Promise<void>> }).onMount ))
+		}
+	})
+}
+
+const parentShapeImproved: RenderElement & { onMount?: SchedulablePromise<Promise<void>>, children: RenderElement[] } = {
+	type: 'div',
+	children: [
+		exampleSuperWidget.shape()
+	],
+	onMount: new SchedulablePromise(async () => {await Promise.all(parentShapeImproved.children.map((child: any) => child.onMount ))})
 }

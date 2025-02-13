@@ -1,4 +1,4 @@
-import * as domAdapter from '../core/domAdapter'
+import * as domAdapter from '../core/renderEngine/domAdapter'
 import * as applicationMenu from '../core/applicationMenu/applicationMenu'
 import * as pluginLoader from '../core/pluginLoader'
 import { mainWidget } from '../core/mainWidget'

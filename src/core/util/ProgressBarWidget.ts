@@ -1,4 +1,4 @@
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { RenderElement, Style } from './RenderElement'
 import { util } from './util'
 

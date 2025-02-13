@@ -1,6 +1,6 @@
 import { applicationMenu, MenuItemFile } from '../dist/pluginFacade'
 import { coreUtil } from '../dist/pluginFacade'
-import { dom } from '../dist/core/domAdapter'
+import { dom } from '../dist/core/renderEngine/domAdapter'
 import { style } from '../dist/pluginFacade'
 import { BorderingLinks } from '../dist/pluginFacade'
 

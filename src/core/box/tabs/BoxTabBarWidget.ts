@@ -1,4 +1,4 @@
-import { renderManager } from '../../RenderManager';
+import { renderManager } from '../../renderEngine/renderManager';
 import { Widget } from '../../Widget';
 import { log } from '../../logService';
 import { RenderElement, Style } from '../../util/RenderElement';

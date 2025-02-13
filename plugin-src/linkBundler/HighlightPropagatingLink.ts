@@ -5,7 +5,7 @@
  * TODO fix this!
  */
 import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { RenderPriority } from '../../dist/core/RenderManager'
+import { RenderPriority } from '../../dist/core/renderEngine/renderManager'
 import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link, LinkImplementation } from '../../dist/core/link/Link'
 import { LinkData } from '../../dist/core/mapData/LinkData'

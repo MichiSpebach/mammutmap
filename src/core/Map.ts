@@ -1,6 +1,6 @@
 import { util } from './util/util'
-import { dom, MouseEventResultAdvanced } from './domAdapter'
-import { renderManager, RenderPriority } from './RenderManager'
+import { dom, MouseEventResultAdvanced } from './renderEngine/domAdapter'
+import { renderManager, RenderPriority } from './renderEngine/renderManager'
 import { settings } from './settings/settings'
 import { relocationDragManager } from './RelocationDragManager'
 import { ScaleManager } from './ScaleManager'

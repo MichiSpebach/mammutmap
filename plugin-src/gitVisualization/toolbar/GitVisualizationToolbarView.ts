@@ -1,6 +1,6 @@
 import { UltimateWidget } from '../../../dist/core/Widget'
 import { Map, Message, ToolbarView, getMap, onMapRendered } from '../../../dist/pluginFacade'
-import { GitClient } from '../GitClient'
+import { GitClient, GitClientMessage } from '../GitClient'
 import { GitRepositoryNotFoundWidget } from './GitRepositoryNotFoundWidget'
 import { GitRepositoryWidget } from './GitRepositoryWidget'
 
@@ -13,8 +13,8 @@ export class GitVisualizationToolbarView implements ToolbarView {
 	) {
 		onMapRendered.subscribe(async (map) => {
 			const rootFolderSrcPath: string = map.getRootFolder().getSrcPath()
-			const gitClient: GitClient | Message = await GitClient.new(rootFolderSrcPath)
-			if (gitClient instanceof Message) {
+			const gitClient: GitClient | GitClientMessage = await GitClient.new(rootFolderSrcPath)
+			if (gitClient instanceof GitClientMessage) {
 				this.widget = new GitRepositoryNotFoundWidget(this.id, gitClient.message)
 			} else {
 				this.widget = new GitRepositoryWidget(this.id, gitClient)

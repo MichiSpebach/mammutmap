@@ -1,7 +1,7 @@
 import { mock } from 'jest-mock-extended'
 import { FileBox } from '../../../src/core/box/FileBox'
 import { FileBoxBody } from '../../../src/core/box/FileBoxBody'
-import { renderManager } from '../../../src/core/RenderManager'
+import { renderManager } from '../../../src/core/renderEngine/renderManager'
 
 test('executeRender image with windows (backslash) path', async () => {
   const scenario = setupScenarioForExecuteRender('image.png', 'C:\\\\backslashPath\\image.png')

@@ -1,7 +1,7 @@
 import { MenuItem } from './MenuItem'
 import { MenuItemFolder } from './MenuItemFolder'
 import * as indexHtmlIds from '../indexHtmlIds'
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { HtmlApplicationMenuWidget } from './HtmlApplicationMenuWidget'
 import { AbstractApplicationMenu, ApplicationMenuOptions } from './applicationMenu'
 

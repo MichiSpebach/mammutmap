@@ -1,4 +1,4 @@
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { Widget } from '../Widget'
 import { MenuItemFolder } from './MenuItemFolder'
 import { MenuItemWidget } from './MenuItemWidget'

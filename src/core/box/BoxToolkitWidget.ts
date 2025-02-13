@@ -1,6 +1,6 @@
 import { RenderElement, RenderElements, Style } from '../util/RenderElement'
 import { RenderElementWithId, UltimateWidget } from '../Widget'
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { Box } from './Box'
 
 export class ToolkitTemplate {

@@ -1,6 +1,5 @@
 import { DefaultLogFields, ListLogLine, LogResult, simpleGit, SimpleGit } from 'simple-git'
 import { util as coreUtil } from '../../dist/core/util/util'
-import { Message } from '../../dist/pluginFacade'
 
 export type Commit = {
 	changedFiles: ChangedFile[]
@@ -17,17 +16,24 @@ export type ChangedFile = {
 	refs?: string[]
 }
 
+// `import { Message } from '../../dist/pluginFacade'` would lead to `TypeError: Class extends value undefined is not a constructor or null` because of cycle
+export class GitClientMessage {
+	public constructor(
+		public message: string
+	) { }
+}
+
 export class GitClient {
 
 	private readonly git: SimpleGit
 	private readonly rootFolderSrcPath: string
 
-	public static async new(rootFolderSrcPath: string): Promise<GitClient | Message> {
+	public static async new(rootFolderSrcPath: string): Promise<GitClient | GitClientMessage> {
 		const gitClient = new GitClient(rootFolderSrcPath)
 		try {
 			await gitClient.git.log()
 		} catch (error) {
-			return new Message('No git commits found.')
+			return new GitClientMessage('No git commits found.')
 		}
 		return gitClient
 	}

@@ -1,5 +1,5 @@
 import { util } from './util/util'
-import { EventListenerCallback, MouseEventListenerCallback, MouseEventResultAdvanced, renderManager, RenderPriority } from './RenderManager'
+import { EventListenerCallback, MouseEventListenerCallback, MouseEventResultAdvanced, renderManager, RenderPriority } from './renderEngine/renderManager'
 import { Draggable } from './Draggable'
 import { DropTarget } from './DropTarget'
 import { BoxWatcher } from './box/BoxWatcher'

@@ -1,7 +1,7 @@
 import { ContextMenuPopup } from '../core/contextMenu'
 import { MenuItem } from '../core/applicationMenu/MenuItem'
 import { MenuItemFolderContainerWidget } from '../core/applicationMenu/MenuItemFolderContainerWidget'
-import { MouseEventResultAdvanced, renderManager, RenderPriority } from '../core/RenderManager'
+import { MouseEventResultAdvanced, renderManager, RenderPriority } from '../core/renderEngine/renderManager'
 import * as indexHtmlIds from '../core/indexHtmlIds'
 import { RenderElement } from '../core/util/RenderElement'
 import { ClientPosition } from '../core/shape/ClientPosition'

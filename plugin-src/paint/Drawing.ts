@@ -1,5 +1,5 @@
 import { Box } from '../../dist/core/box/Box'
-import { renderManager } from '../../dist/core/RenderManager'
+import { renderManager } from '../../dist/core/renderEngine/renderManager'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import { LocalPosition } from '../../dist/core/shape/LocalPosition'
 import { util } from '../../dist/core/util/util'

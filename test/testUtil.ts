@@ -1,5 +1,5 @@
 import { MockProxy, mock } from 'jest-mock-extended'
-import { RenderManager, init as initRenderManager } from '../src/core/RenderManager'
+import { RenderManager, init as initRenderManager } from '../src/core/renderEngine/renderManager'
 import { BoxManager, init as initBoxManager } from '../src/core/box/BoxManager'
 
 export function initGeneralServicesWithMocks(): {

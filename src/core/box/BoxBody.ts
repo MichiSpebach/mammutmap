@@ -1,4 +1,4 @@
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { settings } from '../settings/settings'
 import { ClientRect } from '../ClientRect'
 import { Box } from './Box'

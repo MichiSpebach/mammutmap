@@ -3,7 +3,7 @@ import { Box } from '../../../src/core/box/Box'
 import { BoxData } from '../../../src/core/mapData/BoxData'
 import { FolderBox } from '../../../src/core/box/FolderBox'
 import { FolderBoxBody } from '../../../src/core/box/FolderBoxBody'
-import { renderManager } from '../../../src/core/RenderManager'
+import { renderManager } from '../../../src/core/renderEngine/renderManager'
 import { BoxContext } from '../../../src/core/box/BoxContext'
 import * as testUtil from '../../testUtil'
 

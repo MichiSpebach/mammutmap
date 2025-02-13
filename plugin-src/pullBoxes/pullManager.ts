@@ -2,7 +2,7 @@ import { Box } from '../../dist/core/box/Box'
 import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link } from '../../dist/core/link/Link'
 import { ClientRect } from '../../dist/core/ClientRect'
-import { RenderPriority } from '../../dist/core/RenderManager'
+import { RenderPriority } from '../../dist/core/renderEngine/renderManager'
 
 const pulledBoxes: {box: Box, reasons: {link: Link, watcher: BoxWatcher}[]}[] = []
 

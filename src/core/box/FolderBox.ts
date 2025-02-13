@@ -1,5 +1,5 @@
 import { util } from '../util/util'
-import { renderManager } from '../RenderManager'
+import { renderManager } from '../renderEngine/renderManager'
 import { style } from '../styleAdapter'
 import * as contextMenu from '../contextMenu'
 import { Box } from './Box'

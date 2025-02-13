@@ -1,4 +1,4 @@
-import { RenderPriority } from './RenderManager'
+import { RenderPriority } from './renderEngine/renderManager'
 import { util } from './util/util'
 import { ConsoleDecorator } from './ConsoleDecorator'
 import { RenderElement } from './util/RenderElement'

@@ -1,5 +1,5 @@
 import { util } from '../core/util/util'
-import { EventListenerCallback, EventType } from '../core/domAdapter'
+import { EventListenerCallback, EventType } from '../core/renderEngine/domAdapter'
 
 export type EventListenerHandle = {
     type: EventType,

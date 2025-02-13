@@ -1,4 +1,4 @@
-import { MouseEventResultAdvanced, renderManager, RenderPriority } from './RenderManager'
+import { MouseEventResultAdvanced, renderManager, RenderPriority } from './renderEngine/renderManager'
 import * as indexHtmlIds from './indexHtmlIds'
 import { util } from './util/util'
 import { ClientPosition } from './shape/ClientPosition'

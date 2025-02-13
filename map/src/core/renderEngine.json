@@ -1,0 +1,33 @@
+{
+	"id": "erkrj9lt6q",
+	"x": 74,
+	"y": 6,
+	"width": 26,
+	"height": 16,
+	"links": [
+		{
+			"id": "6ooau7blmfg",
+			"from": {
+				"path": [
+					{
+						"boxId": "p0d1i1vr268",
+						"boxName": "RenderManager.ts",
+						"x": 50,
+						"y": 0
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5da77t8c1t8",
+						"boxName": "domAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		}
+	],
+	"nodes": []
+}

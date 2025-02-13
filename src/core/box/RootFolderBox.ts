@@ -1,7 +1,7 @@
 import { FolderBox } from './FolderBox'
 import { ProjectSettings } from '../ProjectSettings'
 import { ClientRect } from '../ClientRect'
-import { renderManager, RenderPriority } from '../RenderManager'
+import { renderManager, RenderPriority } from '../renderEngine/renderManager'
 import { BoxContext } from './BoxContext'
 
 export class RootFolderBox extends FolderBox {

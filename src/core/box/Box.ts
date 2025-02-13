@@ -1,6 +1,6 @@
 import { util } from '../util/util'
 import { fileSystem } from '../fileSystemAdapter'
-import { renderManager, RenderPriority } from '../RenderManager'
+import { renderManager, RenderPriority } from '../renderEngine/renderManager'
 import { style } from '../styleAdapter'
 import { boxManager } from './BoxManager'
 import { BoxData } from '../mapData/BoxData'

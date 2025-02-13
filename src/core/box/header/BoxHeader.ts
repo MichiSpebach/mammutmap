@@ -1,4 +1,4 @@
-import { renderManager } from '../../RenderManager'
+import { renderManager } from '../../renderEngine/renderManager'
 import { relocationDragManager } from '../../RelocationDragManager'
 import { Box } from '../Box'
 import { style } from '../../styleAdapter'
