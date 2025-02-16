@@ -4,6 +4,7 @@ import { RenderElement, RenderElements, Style } from '../core/renderEngine/Rende
 import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain, shell } from 'electron'
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/renderEngine/domAdapter'
 import { IpcChannelRegister, IpcEventListenerHandle } from './IpcChannelRegister'
+import { stylesToCssText } from '../core/renderEngine/util'
 
 export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     private renderWindow: BrowserWindow
@@ -371,7 +372,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
     public async addStyleSheet(styleSheet: {[ruleName: string]: Style}): Promise<void> {
       let jsToExecute: string = `
       const cssStyleSheet = new CSSStyleSheet()
-      cssStyleSheet.replace("${util.stylesToCssText(styleSheet)}")
+      cssStyleSheet.replace("${stylesToCssText(styleSheet)}")
       document.adoptedStyleSheets.push(cssStyleSheet)
       `
       return this.executeJavaScriptSuppressingErrors(jsToExecute)

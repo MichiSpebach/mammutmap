@@ -311,8 +311,8 @@
 					{
 						"boxId": "960p1g3mgs",
 						"boxName": "electronApp",
-						"x": 54,
-						"y": 18
+						"x": 86,
+						"y": 34
 					},
 					{
 						"boxId": "9crc7egp018",
@@ -396,8 +396,8 @@
 					{
 						"boxId": "960p1g3mgs",
 						"boxName": "electronApp",
-						"x": 54,
-						"y": 18
+						"x": 86,
+						"y": 34
 					},
 					{
 						"boxId": "9crc7egp018",
@@ -412,17 +412,17 @@
 					{
 						"boxId": "2cnbfh46bf8",
 						"boxName": "core",
-						"x": 82.88,
-						"y": 40
+						"x": 82.32,
+						"y": 13.2
 					},
 					{
-						"boxId": "72ker0hveuo",
-						"boxName": "util",
-						"x": 18,
-						"y": 50
+						"boxId": "erkrj9lt6q",
+						"boxName": "renderEngine",
+						"x": 32,
+						"y": 45
 					},
 					{
-						"boxId": "l84ccd69v6g",
+						"boxId": "pgglen80f2o",
 						"boxName": "util.ts",
 						"x": 50,
 						"y": 50
@@ -1660,8 +1660,8 @@
 					{
 						"boxId": "sgho0rk14so",
 						"boxName": "browserApp",
-						"x": 18,
-						"y": 50
+						"x": 80,
+						"y": 40
 					},
 					{
 						"boxId": "v2paij4pdmo",
@@ -1676,17 +1676,17 @@
 					{
 						"boxId": "2cnbfh46bf8",
 						"boxName": "core",
-						"x": 82.88,
-						"y": 40
+						"x": 82.32,
+						"y": 13.2
 					},
 					{
-						"boxId": "72ker0hveuo",
-						"boxName": "util",
-						"x": 18,
-						"y": 50
+						"boxId": "erkrj9lt6q",
+						"boxName": "renderEngine",
+						"x": 32,
+						"y": 45
 					},
 					{
-						"boxId": "l84ccd69v6g",
+						"boxId": "pgglen80f2o",
 						"boxName": "util.ts",
 						"x": 50,
 						"y": 50
@@ -1778,7 +1778,7 @@
 						"boxId": "sgho0rk14so",
 						"boxName": "browserApp",
 						"x": 80,
-						"y": 48
+						"y": 40
 					},
 					{
 						"boxId": "v2paij4pdmo",

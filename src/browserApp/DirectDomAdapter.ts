@@ -1,9 +1,8 @@
 import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/renderEngine/domAdapter'
-import { util } from '../core/util/util';
-import { RenderElements, RenderElement, Style } from '../core/renderEngine/RenderElement';
+import { RenderElements, RenderElement, Style } from '../core/renderEngine/RenderElement'
 import * as indexHtmlIds from '../core/indexHtmlIds'
-import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister';
-import { MessagePopup } from '../core/MessagePopup';
+import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister'
+import { stylesToCssText } from '../core/renderEngine/util'
 
 // TODO: reschedule all methods that return a Promise so that they are queued and priorized on heavy load to prevent lags
 export class DirectDomAdapter implements DocumentObjectModelAdapter {
@@ -18,9 +17,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     }
 
     public openDevTools(): void {
-        const message = 'DirectDomAdapter::openDevTools() not implemented, simply open it with browser. F12 or ctrl+shift+i on most browsers.'
-        MessagePopup.buildAndRender('Open DevTools', message)
-        util.logInfo(message)
+        console.warn('DirectDomAdapter::openDevTools() not implemented, simply open it with browser. F12 or ctrl+shift+i on most browsers.')
     }
 
     public openWebLink(webLink: string): void {
@@ -33,7 +30,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     
     public getCursorClientPosition(): { x: number; y: number; } {
         if (!this.latestCursorClientPosition) {
-            util.logWarning(`DirectDomAdapter::getCursorClientPosition() latestCursorClientPosition is undefined, defaulting to {x: 0, y: 0}.`)
+            console.warn(`DirectDomAdapter::getCursorClientPosition() latestCursorClientPosition is undefined, defaulting to {x: 0, y: 0}.`)
             return {x: 0, y: 0}
         }
         return this.latestCursorClientPosition
@@ -42,8 +39,9 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public getElementOrFail(id: string): HTMLElement|never {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            // TODO: improve, util.logError(..) and util.logWarning(..) can go very wrong when getting elements to log message fails (cycle)
-            util.logError(`DirectDomAdapter::getElementOrFail(id: string) failed to get element with id '${id}'.`)
+            const message: string = `DirectDomAdapter::getElementOrFail(id: string) failed to get element with id '${id}'.`
+            console.error(message)
+            throw new Error(`DirectDomAdapter::getElementOrFail(id: string) failed to get element with id '${id}'.`)
         }
         return element
     }
@@ -55,7 +53,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async isElementHovered(id: string): Promise<boolean> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::isElementHovered(..) failed to get element with id '${id}', defaulting to false.`)
+            console.warn(`DirectDomAdapter::isElementHovered(..) failed to get element with id '${id}', defaulting to false.`)
             return false
         }
         return element.matches(":hover")
@@ -105,8 +103,8 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                     return this.removeClassFromSync(command.elementId, command.value as string)
         
                 default:
-                  util.logWarning(`Method of batchCommand '${command.method}' not known.`)
-                  return
+                    console.warn(`Method of batchCommand '${command.method}' not known.`)
+                    return
             }
         })
         await Promise.all(pros)
@@ -119,11 +117,11 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         const parent: HTMLElement|null = this.getElement(parentId)
         const child: HTMLElement|null = this.getElement(childId)
         if (!parent) {
-            util.logWarning(`DirectDomAdapter::appendChildTo(..) failed to get parent element with id '${parentId}'.`)
+            console.warn(`DirectDomAdapter::appendChildTo(..) failed to get parent element with id '${parentId}'.`)
             return
         }
         if (!child) {
-            util.logWarning(`DirectDomAdapter::appendChildTo(..) failed to get child element with id '${childId}'.`)
+            console.warn(`DirectDomAdapter::appendChildTo(..) failed to get child element with id '${childId}'.`)
             return
         }
         parent.appendChild(child)
@@ -135,7 +133,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public addContentToSync(id: string, content: string): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::addContentTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::addContentTo(..) failed to get element with id '${id}'.`)
             return
         }
         const temp = document.createElement("template")
@@ -149,7 +147,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     private addElementsToSync(id: string, elements: RenderElements): void {
         const parent: HTMLElement|null = this.getElement(id)
         if (!parent) {
-            util.logWarning(`DirectDomAdapter::addElementsTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::addElementsTo(..) failed to get element with id '${id}'.`)
             return
         }
         parent.append(...this.createHtmlElementsFrom(elements))
@@ -161,7 +159,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     private addElementToSync(id: string, element: RenderElement): void {
         const parent: HTMLElement|null = this.getElement(id)
         if (!parent) {
-            util.logWarning(`DirectDomAdapter::addElementTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::addElementTo(..) failed to get element with id '${id}'.`)
             return
         }
         parent.append(...this.createHtmlElementsFrom(element))
@@ -173,7 +171,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public setElementsToSync(id: string, elements: RenderElements): void {
         const elementToSetInto: HTMLElement|null = this.getElement(id)
         if (!elementToSetInto) {
-            util.logWarning(`DirectDomAdapter::setElementsTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::setElementsTo(..) failed to get element with id '${id}'.`)
             return
         }
         elementToSetInto.innerHTML="" // TODO: is there no set(element) method?
@@ -186,7 +184,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public setElementToSync(id: string, element: RenderElement): void {
         const elementToSetInto: HTMLElement|null = this.getElement(id)
         if (!elementToSetInto) {
-            util.logWarning(`DirectDomAdapter::setElementTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::setElementTo(..) failed to get element with id '${id}'.`)
             return
         }
         elementToSetInto.innerHTML="" // TODO: is there no set(element) method?
@@ -238,7 +236,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             this.setHtmlElementOnClick(node, element.onclick)
         }
         if (element.onchangeValue && element.onchangeChecked) {
-            util.logWarning(`DirectDomAdapter::createHtmlElementFrom(..) multiple onchange event handlers for element with id '${element.id}', only one will work.`)
+            console.warn(`DirectDomAdapter::createHtmlElementFrom(..) multiple onchange event handlers for element with id '${element.id}', only one will work.`)
         }
         if (element.onchangeValue) {
             this.setHtmlElementOnChangeValue(node, element.onchangeValue)
@@ -264,7 +262,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             if (!event.target) {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target is undefined, defaulting to empty string.'
-                util.logWarning(message)
+                console.warn(message)
                 onchangeValue('')
                 return
             }
@@ -272,7 +270,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             if (!value) {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeValue(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target.value is undefined, defaulting to empty string.'
-                util.logWarning(message)
+                console.warn(message)
                 onchangeValue('')
                 return
             }
@@ -285,7 +283,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             if (!event.target) {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target is undefined, defaulting to false.'
-                util.logWarning(message)
+                console.warn(message)
                 onchangeChecked(false)
                 return
             }
@@ -293,7 +291,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             if (checked === undefined) {
                 let message: string = `DirectDomAdapter::setHtmlElementOnChangeChecked(..) failed to process onchange event on element with id '${node.id}'`
                 message += ', event.target.checked is undefined, defaulting to false.'
-                util.logWarning(message)
+                console.warn(message)
                 onchangeChecked(false)
                 return
             }
@@ -307,7 +305,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public setContentToSync(id: string, content: string): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::setContentTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::setContentTo(..) failed to get element with id '${id}'.`)
             return
         }
         element.innerHTML=content
@@ -316,7 +314,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async clearContentOf(id: string): Promise<void> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::clearContentOf(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::clearContentOf(..) failed to get element with id '${id}'.`)
             return
         }
         element.innerHTML = ''
@@ -328,7 +326,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public removeSync(id: string): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::remove(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::remove(..) failed to get element with id '${id}'.`)
             return
         }
         element.remove()
@@ -340,7 +338,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public setStyleToSync(id: string, style: string|Style): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::setStyleTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::setStyleTo(..) failed to get element with id '${id}'.`)
             return
         }
         if (typeof style === 'string') {
@@ -357,7 +355,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public addStyleToSync(id: string, style: Style): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::addStyleTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::addStyleTo(..) failed to get element with id '${id}'.`)
             return
         }
         Object.assign(element.style, style)
@@ -369,7 +367,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public addClassToSync(id: string, className: string): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::addClassTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::addClassTo(..) failed to get element with id '${id}'.`)
             return
         }
         element.classList.add(className)
@@ -381,7 +379,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public removeClassFromSync(id: string, className: string): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::removeClassFrom(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::removeClassFrom(..) failed to get element with id '${id}'.`)
             return
         }
         element.classList.remove(className)
@@ -390,7 +388,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async containsClass(id: string, className: string): Promise<boolean> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::containsClass(..) failed to get element with id '${id}', defaulting to false.`)
+            console.warn(`DirectDomAdapter::containsClass(..) failed to get element with id '${id}', defaulting to false.`)
             return false
         }
         return element.classList.contains(className)
@@ -399,7 +397,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async getClassesOf(id: string): Promise<string[]> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::getClassesOf(..) failed to get element with id '${id}', defaulting to empty list.`)
+            console.warn(`DirectDomAdapter::getClassesOf(..) failed to get element with id '${id}', defaulting to empty list.`)
             return []
         }
         const classNames: string[] = []
@@ -409,7 +407,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
 
     public async addStyleSheet(styleSheet: {[ruleName: string]: Style}): Promise<void> {
         const cssStyleSheet = new CSSStyleSheet()
-        cssStyleSheet.replace(util.stylesToCssText(styleSheet))
+        cssStyleSheet.replace(stylesToCssText(styleSheet))
         document.adoptedStyleSheets.push(cssStyleSheet)
     }
 
@@ -420,7 +418,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async getValueOf(id: string): Promise<string> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::getValueOf(..) failed to get element with id '${id}', defaulting to empty string.`)
+            console.warn(`DirectDomAdapter::getValueOf(..) failed to get element with id '${id}', defaulting to empty string.`)
             return ''
         }
         return (element as any).value // TODO: cast to any because value does not exist on all types of HTMLElement, find better solution
@@ -429,7 +427,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async setValueTo(id: string, value: string): Promise<void> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::setValueTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::setValueTo(..) failed to get element with id '${id}'.`)
             return
         }
         (element as any).value = value // TODO: cast to any because value does not exist on all types of HTMLElement, find better solution
@@ -438,7 +436,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async getCheckedOf(id: string): Promise<boolean> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::getCheckedOf(..) failed to get element with id '${id}', defaulting to false.`)
+            console.warn(`DirectDomAdapter::getCheckedOf(..) failed to get element with id '${id}', defaulting to false.`)
             return false
         }
         return (element as any).checked // TODO: cast to any because checked does not exist on all types of HTMLElement, find better solution
@@ -447,7 +445,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async setCheckedTo(id: string, checked: boolean): Promise<void> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::setCheckedTo(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::setCheckedTo(..) failed to get element with id '${id}'.`)
             return
         }
         (element as any).checked = checked // TODO: cast to any because checked does not exist on all types of HTMLElement, find better solution
@@ -456,7 +454,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async scrollToBottom(id: string): Promise<void> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::scrollToBottom(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::scrollToBottom(..) failed to get element with id '${id}'.`)
             return
         }
         element.scrollBy(0, 1000*1000) // things like Number.MAX_SAFE_INTEGER don't work on all browsers
@@ -470,7 +468,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                 //console.log(event)
                 if (event.key === key) {
                     if (!event.target) {
-                        util.logWarning('DirectDomAdapter::addKeydownListenerTo(..) event.target is null')
+                        console.warn('DirectDomAdapter::addKeydownListenerTo(..) event.target is null')
                         return
                     }
                     const eventTarget: any = event.target // TODO: cast to any because value does not exist on all types of EventTarget, find better solution
@@ -487,12 +485,12 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
             nativeListener: (event: Event) => {
                 //console.log(event)
                 if (!event.target) {
-                    util.logWarning('DirectDomAdapter::addChangeListenerTo(..) event.target is null')
+                    console.warn('DirectDomAdapter::addChangeListenerTo(..) event.target is null')
                     return
                 }
                 const eventTarget: any = event.target // TODO: cast to any because returnField does not exist on all types of EventTarget, find better solution
                 if (returnField === 'value' && !eventTarget.value) {
-                    util.logWarning(`DirectDomAdapter::addChangeListenerTo(..) event.target.value is not defined`)
+                    console.warn(`DirectDomAdapter::addChangeListenerTo(..) event.target.value is not defined`)
                     return
                 }
                 callback(eventTarget[returnField]);
@@ -530,16 +528,16 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                     event.preventDefault()
                 }
                 if (!event.target) {
-                    util.logWarning('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is null')
+                    console.warn('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is null')
                     return
                 }
                 if (!(event.target instanceof Element)) {
-                    util.logWarning('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is not instance of Element')
+                    console.warn('DirectDomAdapter::addEventListenerAdvancedTo(..) event.target is not instance of Element')
                     return
                 }
                 const cursor: string = window.getComputedStyle(event.target)["cursor"]
                 if (!cursorStyles.includes(cursor as CursorStyle)) {
-                    util.logWarning(`DirectDomAdapter::addEventListenerAdvancedTo(..) cursor '${cursor}' is not known`)
+                    console.warn(`DirectDomAdapter::addEventListenerAdvancedTo(..) cursor '${cursor}' is not known`)
                 }
                 const targetPathElementIds: string [] = []
                 for (let targetPathElement: Element|null = event.target; targetPathElement; targetPathElement = targetPathElement.parentElement) {
@@ -583,7 +581,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                 event.stopPropagation()
                 if (eventType === 'dragstart') {
                     if (!event.dataTransfer) {
-                        util.logWarning(`DirectDomAdapter::addDragListenerTo(..) event.dataTransfer is null, cannot setDragImage to not appear.`)
+                        console.warn(`DirectDomAdapter::addDragListenerTo(..) event.dataTransfer is null, cannot setDragImage to not appear.`)
                     } else {
                         event.dataTransfer.setDragImage(new Image(), 0, 0)
                     }
@@ -606,7 +604,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     private addAndRegisterEventListener(id: string, listener: EventListenerHandle): void {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::addAndRegisterEventListener(..) failed to get element with id '${id}', eventType is '${listener.type}'.`)
+            console.warn(`DirectDomAdapter::addAndRegisterEventListener(..) failed to get element with id '${id}', eventType is '${listener.type}'.`)
             return
         }
         this.eventListeners.add(id, listener)
@@ -616,7 +614,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public async removeEventListenerFrom(id: string, eventType: EventType, listener?: EventListenerCallback): Promise<void> {
         const element: HTMLElement|null = this.getElement(id)
         if (!element) {
-            util.logWarning(`DirectDomAdapter::removeEventListenerFrom(..) failed to get element with id '${id}'.`)
+            console.warn(`DirectDomAdapter::removeEventListenerFrom(..) failed to get element with id '${id}'.`)
             return
         }
         const handle: EventListenerHandle = this.eventListeners.pop(id, eventType, listener)

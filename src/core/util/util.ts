@@ -1,7 +1,7 @@
 import { renderManager, RenderPriority } from '../renderEngine/renderManager'
 import { style } from '../styleAdapter'
 import * as indexHtmlIds from '../indexHtmlIds'
-import { RenderElement, Style } from '../renderEngine/RenderElement'
+import { RenderElement } from '../renderEngine/RenderElement'
 import * as stacktraceUtil from './stacktraceUtil'
 import { log } from '../logService'
 
@@ -272,18 +272,6 @@ class Util {
 
   public toFormattedJson(object: any) {
     return JSON.stringify(object, null, '\t')
-  }
-
-  public stylesToCssText(styles: {[key: string]: Style}): string {
-    let cssText: string = ''
-    for (const [styleRuleName, style] of Object.entries(styles)) {
-        cssText += `.${styleRuleName}{`
-        for (const [key, value] of Object.entries(style)) {
-            cssText += `${key.replaceAll(/[A-Z]/g, match => '-'+match)}:${value};`
-        }
-        cssText += '}'
-    }
-    return cssText
   }
   
   public generateId(): string {

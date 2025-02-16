@@ -1,4 +1,3 @@
-import { util } from '../core/util/util'
 import { EventListenerCallback, EventType } from '../core/renderEngine/domAdapter'
 
 export type EventListenerHandle = {
@@ -32,7 +31,7 @@ export class EventListenerRegister {
     public find(elementId: string, type: EventType, listener?: EventListenerCallback): EventListenerHandle {
         const listenersForElement: EventListenerHandle[] | undefined = this.eventListeners.get(elementId)
         if (!listenersForElement) {
-            util.logWarning(`EventListenerRegister::find(..) no listeners are registered for elementId '${elementId}', defaulting to '() => {}'.`)
+            console.warn(`EventListenerRegister::find(..) no listeners are registered for elementId '${elementId}', defaulting to '() => {}'.`)
             return {type, capture: false, listener: () => {}, nativeListener: () => {}}
         }
         const matchingListeners: EventListenerHandle[] = listenersForElement.filter(value => {
@@ -45,11 +44,11 @@ export class EventListenerRegister {
             let message: string = `EventListenerRegister::find(..) no listeners are registered`
             message += ` for elementId '${elementId}', type '${type}' and if set listener '${listener}', defaulting to '() => {}'.`
             message += ` By the way there are ${listenersForElement.length} listeners registered for this element.`
-            util.logWarning(message)
+            console.warn(message)
             return {type, capture: false, listener: () => {}, nativeListener: () => {}}
         }
         if (matchingListeners.length > 1) {
-            util.logWarning(`EventListenerRegister::find(..) multiple listeners are registered for elementId '${elementId}', type '${type}' and if set listener '${listener}', defaulting to first.`)
+            console.warn(`EventListenerRegister::find(..) multiple listeners are registered for elementId '${elementId}', type '${type}' and if set listener '${listener}', defaulting to first.`)
         }
         return matchingListeners[0]
     }
@@ -62,12 +61,12 @@ export class EventListenerRegister {
     public remove(elementId: string, listener: EventListenerCallback): void {
         const listenersForElement: EventListenerHandle[] | undefined = this.eventListeners.get(elementId)
         if (!listenersForElement) {
-            util.logWarning(`EventListenerRegister::remove(..) no listeners are registered for elementId '${elementId}'.`)
+            console.warn(`EventListenerRegister::remove(..) no listeners are registered for elementId '${elementId}'.`)
             return
         }
         const index: number = listenersForElement.findIndex(value => value.listener === listener)
         if (index < 0) {
-            util.logWarning(`EventListenerRegister::remove(..) listener for elementId '${elementId}' not found.`)
+            console.warn(`EventListenerRegister::remove(..) listener for elementId '${elementId}' not found.`)
             return
         }
         listenersForElement.splice(index, 1)
