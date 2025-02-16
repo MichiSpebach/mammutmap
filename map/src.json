@@ -346,82 +346,6 @@
 			}
 		},
 		{
-			"id": "er26v0pros",
-			"from": {
-				"path": [
-					{
-						"boxId": "960p1g3mgs",
-						"boxName": "electronApp",
-						"x": 54,
-						"y": 18
-					},
-					{
-						"boxId": "9crc7egp018",
-						"boxName": "ElectronIpcDomAdapter.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "core",
-						"x": 78,
-						"y": 52
-					},
-					{
-						"boxId": "1a5e3kn3reo",
-						"boxName": "ClientRect.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "86agkanj4fo",
-			"from": {
-				"path": [
-					{
-						"boxId": "960p1g3mgs",
-						"boxName": "electronApp",
-						"x": 54,
-						"y": 18
-					},
-					{
-						"boxId": "9crc7egp018",
-						"boxName": "ElectronIpcDomAdapter.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "core",
-						"x": 70.48,
-						"y": 39.44
-					},
-					{
-						"boxId": "nsm4nes02ig",
-						"boxName": "shape",
-						"x": 62,
-						"y": 86
-					},
-					{
-						"boxId": "3aafpp0mpt",
-						"boxName": "ClientPosition.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "gap2iqu6lro",
 			"from": {
 				"path": [
@@ -1686,41 +1610,6 @@
 			}
 		},
 		{
-			"id": "a8j8lkf1boo",
-			"from": {
-				"path": [
-					{
-						"boxId": "sgho0rk14so",
-						"boxName": "browserApp",
-						"x": 18,
-						"y": 50
-					},
-					{
-						"boxId": "v2paij4pdmo",
-						"boxName": "DirectDomAdapter.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "core",
-						"x": 78,
-						"y": 52
-					},
-					{
-						"boxId": "1a5e3kn3reo",
-						"boxName": "ClientRect.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "mkdcllhbaog",
 			"from": {
 				"path": [
@@ -1763,47 +1652,6 @@
 			"tags": [
 				"isA"
 			]
-		},
-		{
-			"id": "0jl07htcc3g",
-			"from": {
-				"path": [
-					{
-						"boxId": "sgho0rk14so",
-						"boxName": "browserApp",
-						"x": 18,
-						"y": 50
-					},
-					{
-						"boxId": "v2paij4pdmo",
-						"boxName": "DirectDomAdapter.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "core",
-						"x": 70.48,
-						"y": 39.44
-					},
-					{
-						"boxId": "nsm4nes02ig",
-						"boxName": "shape",
-						"x": 62,
-						"y": 86
-					},
-					{
-						"boxId": "3aafpp0mpt",
-						"boxName": "ClientPosition.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
 		},
 		{
 			"id": "suhm8t2ms58",
