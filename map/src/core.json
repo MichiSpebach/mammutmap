@@ -6,38 +6,6 @@
 	"height": 52,
 	"links": [
 		{
-			"id": "vjlb3hs7fo",
-			"from": {
-				"path": [
-					{
-						"boxId": "erkrj9lt6q",
-						"boxName": "renderEngine",
-						"x": 34.714,
-						"y": 39.529
-					},
-					{
-						"boxId": "5da77t8c1t8",
-						"boxName": "domAdapter.ts",
-						"x": 25.000368345832534,
-						"y": 100
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "1a5e3kn3reo",
-						"boxName": "ClientRect.ts",
-						"x": 50,
-						"y": 56.000000000000014
-					}
-				]
-			},
-			"tags": [
-				"hidden"
-			]
-		},
-		{
 			"id": "kngmr4gvmpo",
 			"from": {
 				"path": [

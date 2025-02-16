@@ -72,7 +72,7 @@ class MouseDownDragManager implements DragManager {
         this.dragState = {
             elementId: options.elementId,
             draggingStarted: false,
-            latest: {mousePosition: options.eventResult.position, ctrlPressed: options.eventResult.ctrlPressed},
+            latest: {mousePosition: ClientPosition.of(options.eventResult.clientPosition), ctrlPressed: options.eventResult.ctrlPressed},
             onDragEnd: options.onDragEnd
         }
 

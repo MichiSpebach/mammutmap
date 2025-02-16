@@ -2,9 +2,7 @@ import {
   dom, BatchMethod, MouseEventType, DragEventType, WheelEventType, InputEventType, MouseEventResultAdvanced, EventType, KeyboardEventType, 
   EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback
 } from './domAdapter'
-import { ClientRect } from '../ClientRect'
 import { RenderElement, RenderElements, Style } from './RenderElement'
-import { ClientPosition } from '../shape/ClientPosition'
 
 export { EventType, MouseEventType, DragEventType, WheelEventType, InputEventType, KeyboardEventType }
 export { EventListenerCallback, MouseEventListenerAdvancedCallback, MouseEventListenerCallback, WheelEventListenerCallback, ChangeEventListenerCallback }
@@ -33,16 +31,15 @@ export class RenderManager {
     return dom.getClientSize()
   }
 
-  public getCursorClientPosition(): ClientPosition {
-    const position: {x: number, y: number} = dom.getCursorClientPosition()
-    return new ClientPosition(position.x, position.y)
+  public getCursorClientPosition(): {x: number, y: number} {
+    return dom.getCursorClientPosition()
   }
 
   public isElementHovered(id: string): Promise<boolean> {
     return dom.isElementHovered(id)
   }
 
-  public getClientRectOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<ClientRect> {
+  public getClientRectOf(id: string, priority: RenderPriority = RenderPriority.NORMAL): Promise<{x: number, y: number, width: number, height: number}> {
     return this.runOrSchedule(new Command({
       priority: priority,
       squashableWith: 'getClientRectOf'+id,

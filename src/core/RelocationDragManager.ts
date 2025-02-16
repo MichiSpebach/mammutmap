@@ -95,7 +95,7 @@ export class RelocationDragManager {
             this.dragManager.addDraggable({
                 elementId: elementToDrag.getId(),
                 movementNeededToStartDrag: true,
-                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.position.x, eventResult.position.y, !eventResult.ctrlPressed, !!deactivateHandlingDragOver, false),
+                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.clientPosition.x, eventResult.clientPosition.y, !eventResult.ctrlPressed, !!deactivateHandlingDragOver, false),
                 onDrag: async (position: ClientPosition, ctrlPressed: boolean) => this.onDrag(position.x, position.y, !ctrlPressed),
                 onDragEnd: async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd(position.x, position.y, !ctrlPressed)
             })

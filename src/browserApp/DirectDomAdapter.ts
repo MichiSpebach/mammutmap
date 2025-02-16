@@ -1,6 +1,4 @@
-import { ClientRect } from '../core/ClientRect';
 import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/renderEngine/domAdapter'
-import { ClientPosition } from '../core/shape/ClientPosition';
 import { util } from '../core/util/util';
 import { RenderElements, RenderElement, Style } from '../core/renderEngine/RenderElement';
 import * as indexHtmlIds from '../core/indexHtmlIds'
@@ -15,7 +13,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     public constructor() {
         //this.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', {stopPropagation: false}, (clientX: number, clientY: number) => { TODO: implement removing of specific eventListeners and use indexHtmlIds.htmlId instead
         this.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousemove', {stopPropagation: false}, (result: MouseEventResultAdvanced) => {
-            this.latestCursorClientPosition = {x: result.position.x, y: result.position.y}
+            this.latestCursorClientPosition = result.clientPosition
         })
     }
 
@@ -63,9 +61,8 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
         return element.matches(":hover")
     }
 
-    public async getClientRectOf(id: string): Promise<ClientRect> {
-        const rect: DOMRect = this.getElementOrFail(id).getBoundingClientRect()
-        return new ClientRect(rect.x, rect.y, rect.width, rect.height)
+    public async getClientRectOf(id: string): Promise<DOMRect> {
+        return this.getElementOrFail(id).getBoundingClientRect()
     }
 
     public async batch(batch: { elementId: string; method: BatchMethod; value: RenderElements; }[]): Promise<void> {
@@ -549,7 +546,7 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
                     targetPathElementIds.unshift(targetPathElement.id)
                 }
                 callback({
-                    position: new ClientPosition(event.clientX, event.clientY), 
+                    clientPosition: {x: event.clientX, y: event.clientY}, 
                     ctrlPressed: event.ctrlKey, 
                     cursor: cursor as CursorStyle,
                     targetPathElementIds

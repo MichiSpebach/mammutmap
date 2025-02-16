@@ -20,7 +20,7 @@ export class DragEventDragManager implements DragManager {
                 /* only to catch mousedown, because mouseDownDragManager would be disturbed by it */
             }, options.priority),
             renderManager.addDragListenerTo(options.elementId, 'dragstart', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-                options.onDragStart({position: new ClientPosition(clientX, clientY), ctrlPressed, cursor:'auto', targetPathElementIds: []})
+                options.onDragStart({clientPosition: {x: clientX, y: clientY}, ctrlPressed, cursor:'auto', targetPathElementIds: []})
             }, options.priority),
             renderManager.addDragListenerTo(options.elementId, 'drag', (clientX: number, clientY: number, ctrlPressed: boolean) => {
                 options.onDrag(new ClientPosition(clientX, clientY), ctrlPressed)

@@ -222,20 +222,20 @@ export class Map {
 
   private async getMapClientRect(): Promise<ClientRect> {
     if (!this.cachedMapClientRect) {
-      this.cachedMapClientRect = await renderManager.getClientRectOf(this.mapId, RenderPriority.RESPONSIVE)
+      this.cachedMapClientRect = ClientRect.of(await renderManager.getClientRectOf(this.mapId, RenderPriority.RESPONSIVE))
     } else {
       // in case of some weird window changes, fault is fixed asynchronously and is not permanent
-      renderManager.getClientRectOf(this.mapId, RenderPriority.NORMAL).then(rect => this.cachedMapClientRect = rect)
+      renderManager.getClientRectOf(this.mapId, RenderPriority.NORMAL).then(rect => this.cachedMapClientRect = ClientRect.of(rect))
     }
     return this.cachedMapClientRect
   }
 
   private async getMapRatioAdjusterClientRect(): Promise<ClientRect> {
     if (!this.cachedMapRatioAdjusterClientRect) {
-      this.cachedMapRatioAdjusterClientRect = await renderManager.getClientRectOf(this.mapRatioAdjusterId, RenderPriority.RESPONSIVE)
+      this.cachedMapRatioAdjusterClientRect = ClientRect.of(await renderManager.getClientRectOf(this.mapRatioAdjusterId, RenderPriority.RESPONSIVE))
     } else {
       // in case of some weird window changes, fault is fixed asynchronously and is not permanent
-      renderManager.getClientRectOf(this.mapRatioAdjusterId, RenderPriority.NORMAL).then(rect => this.cachedMapRatioAdjusterClientRect = rect)
+      renderManager.getClientRectOf(this.mapRatioAdjusterId, RenderPriority.NORMAL).then(rect => this.cachedMapRatioAdjusterClientRect = ClientRect.of(rect))
     }
     return this.cachedMapRatioAdjusterClientRect
   }
@@ -321,7 +321,7 @@ export class Map {
     }
 
     this.moveState = {
-      latestMousePosition: eventResult.position,
+      latestMousePosition: ClientPosition.of(eventResult.clientPosition),
       prevented: eventResult.cursor !== 'auto' && eventResult.cursor !== 'default' || eventResult.ctrlPressed,
       movingStarted: false
     }

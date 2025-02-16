@@ -5,6 +5,7 @@ import { util } from '../../dist/core/util/util'
 import { RenderElementWithId, UltimateWidget } from '../../dist/core/Widget'
 import { Box, RenderElement, renderManager, RenderPriority, ToolbarView } from '../../dist/pluginFacade'
 import { Drawing } from './Drawing'
+import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 
 export class PaintToolbarView implements ToolbarView {
 
@@ -110,7 +111,7 @@ export class PaintToolbarViewWidget extends UltimateWidget {
 				}
 				const focusedBox = (HoverManager as any).state.hovering
 				if (focusedBox instanceof Box) {
-					this.active.drawing = await Drawing.new(focusedBox, this.active.color, eventResult.position)
+					this.active.drawing = await Drawing.new(focusedBox, this.active.color, ClientPosition.of(eventResult.clientPosition))
 					await this.setHintToEscapeDrawMode(false)
 					await this.setHintToCancelStroke(true)
 				}

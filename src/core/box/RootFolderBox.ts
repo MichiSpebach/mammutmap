@@ -56,16 +56,16 @@ export class RootFolderBox extends FolderBox {
   }
 
   public override async getParentClientRect(): Promise<ClientRect> {
-    return renderManager.getClientRectOf(this.idRenderedInto, RenderPriority.RESPONSIVE)
+    return ClientRect.of(await renderManager.getClientRectOf(this.idRenderedInto, RenderPriority.RESPONSIVE))
   }
 
   public override async getClientRect(): Promise<ClientRect> {
     if (!this.cachedClientRect) {
       // TODO: set cachedClientRect in constructor? then simple ClientRect can be returned without Promise
-      this.cachedClientRect = await renderManager.getClientRectOf(this.getId(), RenderPriority.RESPONSIVE)
+      this.cachedClientRect = ClientRect.of(await renderManager.getClientRectOf(this.getId(), RenderPriority.RESPONSIVE))
     } else {
       // in case of some weird window changes, fault is fixed asynchronously and is not permanent
-      renderManager.getClientRectOf(this.getId(), RenderPriority.NORMAL).then(rect => this.cachedClientRect = rect)
+      renderManager.getClientRectOf(this.getId(), RenderPriority.NORMAL).then(rect => this.cachedClientRect = ClientRect.of(rect))
     }
     return this.cachedClientRect
   }

@@ -58,8 +58,8 @@ function getStyle(): Style {
 
 async function setPosition(eventResult: MouseEventResultAdvanced): Promise<void> {
   const style: Style = getStyle()
-  style.left = eventResult.position.x+'px'
-  style.top = `${eventResult.position.y}px`
+  style.left = eventResult.clientPosition.x+'px'
+  style.top = `${eventResult.clientPosition.y}px`
   await renderManager.addStyleTo(id, style, RenderPriority.RESPONSIVE)
 }
 

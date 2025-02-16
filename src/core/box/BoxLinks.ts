@@ -61,7 +61,7 @@ export class BoxLinks extends Widget {
     }): Promise<void> {
       const fromNode: Box|NodeWidget = options?.fromNode ?? this.referenceBox
       let fromPosition: LocalPosition|ClientPosition = options?.fromPosition ?? new LocalPosition(50, 50)
-      let toPositionAtStart: LocalPosition|ClientPosition = options?.toPositionAtStart ?? renderManager.getCursorClientPosition()
+      let toPositionAtStart: LocalPosition|ClientPosition = options?.toPositionAtStart ?? ClientPosition.of(renderManager.getCursorClientPosition())
 
       if (fromPosition instanceof ClientPosition) {
         fromPosition = await this.referenceBox.transform.clientToLocalPosition(fromPosition)

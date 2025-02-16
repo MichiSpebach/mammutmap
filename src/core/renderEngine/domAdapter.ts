@@ -1,6 +1,4 @@
 import { RenderElement, RenderElements, Style } from './RenderElement'
-import { ClientRect } from '../ClientRect'
-import { ClientPosition } from '../shape/ClientPosition'
 
 export type MouseEventType = 'click'|'dblclick'|'contextmenu'|'mousedown'|'mouseup'|'mousemove'|'mouseover'|'mouseout'|'mouseenter'|'mouseleave'
 export type DragEventType = 'dragstart'|'drag'|'dragend'|'dragenter'|'dragover'
@@ -19,7 +17,7 @@ export const cursorStyles = ['auto','default', 'text','pointer','grab','ns-resiz
 export type CursorStyle = typeof cursorStyles[number]
 
 export type MouseEventResultAdvanced = {
-  position: ClientPosition,
+  clientPosition: {x: number, y: number},
   ctrlPressed: boolean,
   cursor: CursorStyle,
   targetPathElementIds: string[]
@@ -41,7 +39,7 @@ export interface DocumentObjectModelAdapter {
   getClientSize(): {width: number, height: number}
   getCursorClientPosition(): {x: number, y: number}
   isElementHovered(id: string): Promise<boolean>
-  getClientRectOf(id: string): Promise<ClientRect>
+  getClientRectOf(id: string): Promise<{x: number, y: number, width: number, height: number}>
 
   batch(batch: {elementId: string, method: BatchMethod, value: string|Style|RenderElement|RenderElements}[]): Promise<void>
 

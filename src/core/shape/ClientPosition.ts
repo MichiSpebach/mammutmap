@@ -4,6 +4,10 @@ export class ClientPosition extends Position<ClientPosition> {
     public readonly x: number
     public readonly y: number
 
+    public static of(clientPosition: {x: number, y: number}): ClientPosition {
+        return new ClientPosition(clientPosition.x, clientPosition.y)
+    }
+
     protected /*static*/ override new(x: number, y: number): ClientPosition {
         return new ClientPosition(x, y)
     }

@@ -2,8 +2,6 @@ import * as JSON5 from 'json5'
 import { util } from '../core/util/util'
 import { RenderElement, RenderElements, Style } from '../core/renderEngine/RenderElement'
 import { BrowserWindow, WebContents, Point, Rectangle, screen, IpcMainEvent, ipcMain, shell } from 'electron'
-import { ClientRect } from '../core/ClientRect'
-import { ClientPosition } from '../core/shape/ClientPosition'
 import { BatchMethod, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, InputEventType, MouseEventResultAdvanced, MouseEventType, WheelEventType } from '../core/renderEngine/domAdapter'
 import { IpcChannelRegister, IpcEventListenerHandle } from './IpcChannelRegister'
 
@@ -67,7 +65,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       return this.executeJsOnElement(id, 'matches(":hover")')
     }
   
-    public async getClientRectOf(id: string): Promise<ClientRect> {
+    public async getClientRectOf(id: string): Promise<{x: number, y: number, width: number, height: number}> {
       // implemented workaround because following line doesn't work, because 'Error: An object could not be cloned.'
       //return await executeJsOnElement(id, "getBoundingClientRect()").catch(reason => util.logError(reason))
   
@@ -75,9 +73,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       js += 'return {x: rect.x, y: rect.y, width: rect.width, height: rect.height};' // manual copy because DOMRect could not be cloned
   
       // not executeJavaScript because of "UnhandledPromiseRejectionWarning: Unhandled promise rejection."
-      const rect = await this.executeJavaScriptInFunction(js)
-  
-      return new ClientRect(rect.x, rect.y, rect.width, rect.height) // manual copy because object from renderer has no functions
+      return this.executeJavaScriptInFunction(js)
     }
   
     public batch(batch: {elementId: string, method: BatchMethod, value: string|RenderElement|RenderElements}[]): Promise<void> {
@@ -462,7 +458,7 @@ export class ElectronIpcDomAdapter implements DocumentObjectModelAdapter {
       const ipcChannelName: string = this.ipcChannelRegister.addEventListener(
         id, eventType, callback,
         (_: IpcMainEvent, clientX: number, clientY: number, ctrlPressed: boolean, cursor: any, targetPathElementIds: string[]) => callback({
-          position: new ClientPosition(clientX, clientY), ctrlPressed, cursor, targetPathElementIds
+          clientPosition: {x: clientX, y: clientY}, ctrlPressed, cursor, targetPathElementIds
         }),
         options.capture
       )

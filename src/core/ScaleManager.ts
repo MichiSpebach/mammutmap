@@ -55,7 +55,7 @@ export class ScaleManager {
 
   private static addListenersForSide(scalable: ScaleTool, id: string, drag: (clientX: number, clientY:number, snapToGrid: boolean) => Promise<void>): void {
     function onDragStart(eventResult: MouseEventResultAdvanced): Promise<void> {
-      return ScaleManager.dragstart(scalable, eventResult.position.x, eventResult.position.y)
+      return ScaleManager.dragstart(scalable, eventResult.clientPosition.x, eventResult.clientPosition.y)
     }
     async function onDrag(position: ClientPosition, ctrlPressed: boolean): Promise<void> {
       await Promise.all([

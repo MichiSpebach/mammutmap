@@ -158,7 +158,7 @@ class MainWidget extends Widget {
 			})
 		}
 
-		const cursorPosition: ClientPosition = renderManager.getCursorClientPosition()
+		const cursorPosition: {x: number, y: number} = renderManager.getCursorClientPosition()
 		await renderManager.setElementsTo(devStatsId, [
 			{type: 'div', children: `clientX = ${cursorPosition.x}`},
 			{type: 'div', children: `clientY = ${cursorPosition.y}`}
