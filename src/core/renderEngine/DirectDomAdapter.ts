@@ -1,7 +1,7 @@
-import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/renderEngine/domAdapter'
-import { RenderElements, RenderElement, Style } from '../core/renderEngine/RenderElement'
+import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from './domAdapter'
+import { RenderElements, RenderElement, Style } from './RenderElement'
 import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister'
-import { stylesToCssText } from '../core/renderEngine/util'
+import { stylesToCssText } from './util'
 
 // TODO: reschedule all methods that return a Promise so that they are queued and priorized on heavy load to prevent lags
 export class DirectDomAdapter implements DocumentObjectModelAdapter {

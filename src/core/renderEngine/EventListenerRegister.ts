@@ -1,4 +1,4 @@
-import { EventListenerCallback, EventType } from '../core/renderEngine/domAdapter'
+import { EventListenerCallback, EventType } from './domAdapter'
 
 export type EventListenerHandle = {
     type: EventType,

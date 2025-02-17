@@ -32,29 +32,6 @@
 			]
 		},
 		{
-			"id": "r5btjocb6bg",
-			"from": {
-				"path": [
-					{
-						"boxId": "dpd3jokqmm",
-						"boxName": "index.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "v2paij4pdmo",
-						"boxName": "DirectDomAdapter.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "slekhi9i22",
 			"from": {
 				"path": [
@@ -145,29 +122,6 @@
 					{
 						"boxId": "7omti4pnmgo",
 						"boxName": "HtmlContextMenuPopup.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
-			"id": "52d4tv3nch",
-			"from": {
-				"path": [
-					{
-						"boxId": "v2paij4pdmo",
-						"boxName": "DirectDomAdapter.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "g4vp8f1986",
-						"boxName": "EventListenerRegister.ts",
 						"x": 50,
 						"y": 50
 					}

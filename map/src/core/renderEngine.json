@@ -99,6 +99,104 @@
 			"tags": [
 				"autoMaintained"
 			]
+		},
+		{
+			"id": "mkdcllhbaog",
+			"from": {
+				"path": [
+					{
+						"boxId": "v2paij4pdmo",
+						"boxName": "DirectDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5da77t8c1t8",
+						"boxName": "domAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"isA"
+			]
+		},
+		{
+			"id": "suhm8t2ms58",
+			"from": {
+				"path": [
+					{
+						"boxId": "v2paij4pdmo",
+						"boxName": "DirectDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "pgglen80f2o",
+						"boxName": "util.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "fmctksr92s",
+			"from": {
+				"path": [
+					{
+						"boxId": "v2paij4pdmo",
+						"boxName": "DirectDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "i20ugc3f1e8",
+						"boxName": "RenderElement.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "52d4tv3nch",
+			"from": {
+				"path": [
+					{
+						"boxId": "v2paij4pdmo",
+						"boxName": "DirectDomAdapter.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "g4vp8f1986",
+						"boxName": "EventListenerRegister.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
 		}
 	],
 	"nodes": []
