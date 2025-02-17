@@ -1,6 +1,5 @@
 import { BatchMethod, CursorStyle, cursorStyles, DocumentObjectModelAdapter, DragEventType, EventListenerCallback, EventType, MouseEventResultAdvanced, MouseEventType } from '../core/renderEngine/domAdapter'
 import { RenderElements, RenderElement, Style } from '../core/renderEngine/RenderElement'
-import * as indexHtmlIds from '../core/indexHtmlIds'
 import { EventListenerHandle, EventListenerRegister } from './EventListenerRegister'
 import { stylesToCssText } from '../core/renderEngine/util'
 
@@ -10,10 +9,11 @@ export class DirectDomAdapter implements DocumentObjectModelAdapter {
     private eventListeners: EventListenerRegister = new EventListenerRegister()
 
     public constructor() {
-        //this.addEventListenerTo(indexHtmlIds.htmlId, 'mousemove', {stopPropagation: false}, (clientX: number, clientY: number) => { TODO: implement removing of specific eventListeners and use indexHtmlIds.htmlId instead
-        this.addEventListenerAdvancedTo(indexHtmlIds.bodyId, 'mousemove', {stopPropagation: false}, (result: MouseEventResultAdvanced) => {
-            this.latestCursorClientPosition = result.clientPosition
-        })
+        document.addEventListener(
+            'mousemove',
+            (event: MouseEvent) => this.latestCursorClientPosition = {x: event.clientX, y: event.clientY},
+            {capture: true} // capture instead of bubble phase to prevent event from being stopPropagated before updating latestCursorClientPosition
+        )
     }
 
     public openDevTools(): void {

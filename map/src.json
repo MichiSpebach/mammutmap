@@ -1853,41 +1853,6 @@
 			}
 		},
 		{
-			"id": "4h1cgthbsno",
-			"from": {
-				"path": [
-					{
-						"boxId": "sgho0rk14so",
-						"boxName": "browserApp",
-						"x": 80,
-						"y": 40
-					},
-					{
-						"boxId": "v2paij4pdmo",
-						"boxName": "DirectDomAdapter.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			},
-			"to": {
-				"path": [
-					{
-						"boxId": "2cnbfh46bf8",
-						"boxName": "core",
-						"x": 20,
-						"y": 10
-					},
-					{
-						"boxId": "cr2q48p1plg",
-						"boxName": "indexHtmlIds.ts",
-						"x": 50,
-						"y": 50
-					}
-				]
-			}
-		},
-		{
 			"id": "fhcapdhppr",
 			"from": {
 				"path": [
