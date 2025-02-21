@@ -1,6 +1,6 @@
-# renderEngine
-A library that renders TypeScript objects as HTML.\
-There is no JavaScript syntax extension or other syntactic sugar involved, just TypeScript.
+# WidgetCraft
+A frontend library that renders TypeScript objects to HTML.\
+There is no JavaScript syntax extension or other syntactic sugar, just TypeScript.
 
 ## Examples
 ### Hello World:
@@ -19,13 +19,11 @@ index.html:
 
 index.ts:
 ```TypeScript
-import * as domAdapter from 'renderEngine/domAdapter'
-import { DirectDomAdapter } from 'renderEngine/DirectDomAdapter'
-import { renderManager } from 'renderEngine/renderManager'
+import { initWidgetCraft, DirectDomAdapter, renderManager } from 'widgetcraft'
 
-domAdapter.init(new DirectDomAdapter()) // when running directly in a browser
-//domAdapter.init(new ElectronIpcDomAdapter(browserWindow)) // to render from Electron main thread in render thread
-//domAdapter.init(new UnrealEngineAdapter()) // something like this could also be implemented
+initWidgetCraft(new DirectDomAdapter()) // when running directly in a browser
+//initWidgetCraft(new ElectronIpcDomAdapter(browserWindow)) // to render from Electron main thread in render thread
+//initWidgetCraft(new UnrealEngineAdapter()) // something like this could also be implemented
 
 renderManager.addElementTo('body', {
 	type: 'div',
@@ -40,12 +38,9 @@ renderManager.addElementTo('body', {
 ### Element Nesting, Style Spreading, Events:
 index.ts:
 ```TypeScript
-import * as domAdapter from 'renderEngine/domAdapter'
-import { DirectDomAdapter } from 'renderEngine/DirectDomAdapter'
-import { renderManager } from 'renderEngine/renderManager'
-import { RenderElement, Style } from 'renderEngine/RenderElement'
+import { initWidgetCraft, DirectDomAdapter, renderManager, RenderElement, Style } from 'widgetcraft'
 
-domAdapter.init(new DirectDomAdapter())
+initWidgetCraft(new DirectDomAdapter())
 
 const buttonStyle: Style = {
 	margin: '4px',

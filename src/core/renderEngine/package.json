@@ -1,0 +1,14 @@
+{
+	"name": "widgetcraft",
+	"version": "0.4.0",
+	"license": "MIT",
+	"main": "./index.js",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/MichiSpebach/mammutmap/tree/main/src/core/renderEngine"
+	},
+	"bugs": {
+		"url": "https://github.com/MichiSpebach/mammutmap/issues"
+	},
+	"homepage": "https://github.com/MichiSpebach/mammutmap/tree/main/src/core/renderEngine#readme"
+}
