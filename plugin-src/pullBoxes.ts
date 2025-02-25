@@ -8,33 +8,72 @@ import { ClientPosition } from '../dist/core/shape/ClientPosition'
 import { AbstractNodeWidget } from '../dist/core/AbstractNodeWidget'
 import * as pullManager from './pullBoxes/pullManager'
 import { map } from '../dist/core/Map'
+import { LinkRoute } from '../dist/core/link/LinkRoute'
 
 Link.onSelect.subscribe(async (link: Link) => {
 	await Promise.all([
-		pullInLinkEndTargetIfNecessary(link.from),
-		pullInLinkEndTargetIfNecessary(link.to)
+		pullInOriginsIfNecessary(link),
+		pullInDestinationsIfNecessary(link)
 	])
 })
 
 Link.onDeselect.subscribe(async (link: Link) => await pullManager.releaseForLink(link))
 
-async function pullInLinkEndTargetIfNecessary(linkEnd: LinkEnd): Promise<void> {
+async function pullInOriginsIfNecessary(link: Link): Promise<void> {
+	const routeIds: string[]|undefined = link.getData().routes
+	const originRoutes: LinkRoute[] = routeIds && routeIds.length > 0
+		? routeIds.map(routeId => new LinkRoute(routeId, link))
+		: [new LinkRoute(undefined, link)]
+	const originBoxes: Box[] = []
+	await Promise.all(originRoutes.map(async route => {
+		const origin: AbstractNodeWidget = await route.followOriginAndWatch()
+		const originBox: Box = origin instanceof Box ? origin : origin.getParent() as Box
+		if (originBoxes.includes(originBox)) {
+			// prevents pulling same box multiple times what would lead to "warning: pullBoxes: intersections.length < 1"
+			await route.unwatch()
+			return
+		}
+		originBoxes.push(originBox)
+		await pullInLinkEndTargetIfNecessary(route.links[0].from, originBox, {link, route})
+	}))
+}
+
+async function pullInDestinationsIfNecessary(link: Link): Promise<void> {
+	const routeIds: string[]|undefined = link.getData().routes
+	const destinationRoutes: LinkRoute[] = routeIds && routeIds.length > 0
+		? routeIds.map(routeId => new LinkRoute(routeId, link))
+		: [new LinkRoute(undefined, link)]
+	const destinationBoxes: Box[] = []
+	await Promise.all(destinationRoutes.map(async route => {
+		const destination: AbstractNodeWidget = await route.followDestinationAndWatch()
+		const destinationBox: Box = destination instanceof Box ? destination : destination.getParent() as Box
+		if (destinationBoxes.includes(destinationBox)) {
+			// prevents pulling same box multiple times what would lead to "warning: pullBoxes: intersections.length < 1"
+			await route.unwatch()
+			return
+		}
+		destinationBoxes.push(destinationBox)
+		await pullInLinkEndTargetIfNecessary(route.links[route.links.length-1].to, destinationBox, {link, route})
+	}))
+}
+
+async function pullInLinkEndTargetIfNecessary(linkEnd: LinkEnd, targetBox: Box, reason: {link: Link, route: LinkRoute}): Promise<void> {
 	if (await isLinkEndOutsideScreen(linkEnd)) {
-		const pullPosition: Promise<ClientPosition> = calculatePullPosition(linkEnd)
-		const target: {box: Box, watcher: BoxWatcher} = await getTargetBoxAndRenderIfNecessary(linkEnd)
-		if (target.box.isAncestorOf(linkEnd.getOtherEnd().getDeepestRenderedWayPoint().linkable)) {
+		const pullPosition: Promise<ClientPosition> = calculatePullPositionOfRoute(reason.route, linkEnd === linkEnd.getReferenceLink().to ? 'to' : 'from')
+		if (targetBox.isAncestorOf(linkEnd.getOtherEnd().getDeepestRenderedWayPoint().linkable)) {
 			console.info('pullBoxes: target box to pull is an ancestor (outer box of the same path)')
 			return
 		}
-		await pullManager.pull(target.box, createPullRect(await pullPosition), {link: linkEnd.getReferenceLink(), watcher: target.watcher})
+		await pullManager.pull(targetBox, createPullRect(await pullPosition), reason)
 	} else if (!await isTargetRenderedAndLargeEnough(linkEnd)) {
-		const target: {box: Box, watcher: BoxWatcher} = await getTargetBoxAndRenderIfNecessary(linkEnd)
-		const targetBoxRect: ClientRect = await target.box.getClientRect()
+		const targetBoxRect: ClientRect = await targetBox.getClientRect()
 		let pullRect: ClientRect = createPullRect(targetBoxRect.getMidPosition())
 		if (pullRect.width < targetBoxRect.width || pullRect.height < targetBoxRect.height) {
 			pullRect = targetBoxRect
 		}
-		await pullManager.pull(target.box, pullRect, {link: linkEnd.getReferenceLink(), watcher: target.watcher})
+		await pullManager.pull(targetBox, pullRect, reason)
+	} else {
+		await reason.route.unwatch()
 	}
 }
 
@@ -72,20 +111,30 @@ function createPullRect(midPosition: ClientPosition): ClientRect {
 	return new ClientRect(midPosition.x-100, midPosition.y-50, 200, 100)
 }
 
-async function calculatePullPosition(linkEnd: LinkEnd): Promise<ClientPosition> {
-	const link: Link = linkEnd.getReferenceLink()
-	const linkLine = await link.getLineInClientCoords()
+async function calculatePullPositionOfRoute(linkRoute: LinkRoute, direction: 'from'|'to'): Promise<ClientPosition> {
+	for (const link of linkRoute.links) {
+		const pullPosition: ClientPosition|undefined = await calculatePullPositionOfLink(link[direction])
+		if (pullPosition) {
+			return pullPosition
+		}
+	}
+	console.warn('pullBoxes: intersections.length < 1')
+	return (await getIntersectionRect()).getMidPosition()
+}
+
+async function calculatePullPositionOfLink(linkEnd: LinkEnd): Promise<ClientPosition|undefined> {
+	const linkEndPosition: Promise<ClientPosition> = linkEnd.getRenderPositionInClientCoords()
+	const otherLinkEndPosition: Promise<ClientPosition> = linkEnd.getOtherEnd().getRenderPositionInClientCoords()
+	const linkLine = {from: await linkEndPosition, to: await otherLinkEndPosition}
 	const intersectionRect: ClientRect = await getIntersectionRect()
 	const intersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLine)
 	if (intersections.length < 1) {
-		console.warn('pullBoxes: intersections.length < 1')
-		intersections.push(intersectionRect.getMidPosition())
+		return undefined
 	}
 	let intersection: ClientPosition = intersections[0]
 	if (intersections.length > 1) {
-		const linkEndPosition: ClientPosition = await linkEnd.getRenderPositionInClientCoords()
 		for (let i = 1; i < intersections.length; i++) {
-			if (intersections[i].calculateDistanceTo(linkEndPosition) < intersection.calculateDistanceTo(linkEndPosition)) {
+			if (intersections[i].calculateDistanceTo(await linkEndPosition) < intersection.calculateDistanceTo(await linkEndPosition)) {
 				intersection = intersections[i]
 			}
 		}

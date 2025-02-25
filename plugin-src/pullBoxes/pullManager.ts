@@ -1,12 +1,12 @@
 import { Box } from '../../dist/core/box/Box'
-import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link } from '../../dist/core/link/Link'
 import { ClientRect } from '../../dist/core/ClientRect'
 import { RenderPriority } from '../../dist/core/renderEngine/renderManager'
+import { LinkRoute } from '../../dist/core/link/LinkRoute'
 
-const pulledBoxes: {box: Box, reasons: {link: Link, watcher: BoxWatcher}[]}[] = []
+const pulledBoxes: {box: Box, reasons: {link: Link, route: LinkRoute}[]}[] = []
 
-export async function pull(box: Box, wishRect: ClientRect, reason: {link: Link, watcher: BoxWatcher}): Promise<void> {
+export async function pull(box: Box, wishRect: ClientRect, reason: {link: Link, route: LinkRoute}): Promise<void> {
 	const pulledBox = pulledBoxes.find(pulledBox => pulledBox.box === box)
 	if (pulledBox) {
 		pulledBox.reasons.push(reason)
@@ -33,7 +33,7 @@ export async function release(box: Box, link: Link): Promise<void> {
 		return
 	}
 
-	const reasons: {link: Link, watcher: BoxWatcher}[] = []
+	const reasons: {link: Link, route: LinkRoute}[] = []
 	for (let i = pulledBox.reasons.length-1; i >= 0; i--) {
 		if (pulledBox.reasons[i].link === link) {
 			reasons.push(...pulledBox.reasons.splice(i, 1))
@@ -44,5 +44,5 @@ export async function release(box: Box, link: Link): Promise<void> {
 		pulledBoxes.splice(pulledBoxIndex, 1)
 		await box.site.releaseIfDetached({transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}) // await because in some cases important that box is still watched
 	}
-	await Promise.all(reasons.map(reason => reason.watcher.unwatch()))
+	await Promise.all(reasons.map(reason => reason.route.unwatch()))
 }
