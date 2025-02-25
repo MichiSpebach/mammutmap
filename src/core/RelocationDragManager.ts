@@ -229,17 +229,18 @@ export class RelocationDragManager {
 
     public async startDragWithClickToDropMode(elementToDrag: Draggable<DropTarget>, deactivateHandlingDragOver?: boolean): Promise<void> {
         const cursorClientPosition: { x: number, y: number } = renderManager.getCursorClientPosition();
-        
+        const onMouseMove: MouseEventListenerCallback = (clientX: number, clientY: number, ctrlPressed: boolean) => {
+            this.onDrag(clientX, clientY, !ctrlPressed)
+        }
+        const onClick: MouseEventListenerCallback = (clientX: number, clientY: number, ctrlPressed: boolean) => {
+            renderManager.removeEventListenerFrom('content', 'mousemove', { priority: RenderPriority.RESPONSIVE, listenerCallback: onMouseMove })
+            renderManager.removeEventListenerFrom('content', 'click', { priority: RenderPriority.RESPONSIVE, listenerCallback: onClick })
+            this.onDragEnd(clientX, clientY, !ctrlPressed)
+        }
         await Promise.all([
             this.onDragStart(elementToDrag, cursorClientPosition.x, cursorClientPosition.y, false/*TODO?: check if ctrl is pressed*/, !!deactivateHandlingDragOver, true),
-            renderManager.addEventListenerTo('content', 'mousemove', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-                this.onDrag(clientX, clientY, !ctrlPressed)
-            }, RenderPriority.RESPONSIVE),
-            renderManager.addEventListenerTo('content', 'click', (clientX: number, clientY: number, ctrlPressed: boolean) => {
-                renderManager.removeEventListenerFrom('content', 'mousemove', { priority: RenderPriority.RESPONSIVE })
-                renderManager.removeEventListenerFrom('content', 'click', { priority: RenderPriority.RESPONSIVE })
-                this.onDragEnd(clientX, clientY, !ctrlPressed)
-            }, RenderPriority.RESPONSIVE)
+            renderManager.addEventListenerTo('content', 'mousemove', onMouseMove, RenderPriority.RESPONSIVE),
+            renderManager.addEventListenerTo('content', 'click', onClick, RenderPriority.RESPONSIVE)
         ])
     }
 
