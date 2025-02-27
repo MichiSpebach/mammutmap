@@ -244,13 +244,13 @@ export class Map {
     const transitionDurationInMS = 500
     const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(await this.getInnerMapClientRect())
     const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
-    const zoomedTo: Box = zoomedInPath[zoomedInPath.length-1]
     const renderedTarget: Box = renderedTargetPath[renderedTargetPath.length-1]
 
+    const mapClientRect = await this.getMapClientRect()
     let zoomingOut: Promise<void> = Promise.resolve()
     let latestZoomTo: {box: Box, promise: Promise<void>} | 'did not zoom' = 'did not zoom'
-    if (!(await renderedTarget.getClientRect()).isInsideOrEqual(await this.getMapClientRect())) {
-      zoomingOut = this.zoomToFitBoxes([zoomedTo, renderedTarget], {transitionDurationInMS})
+    if (!(await renderedTarget.getClientRect()).isInsideOrEqual(mapClientRect)) {
+      zoomingOut = this.zoomToFit([mapClientRect, renderedTarget], {transitionDurationInMS})
       latestZoomTo = {box: Box.getCommonAncestorOfPaths(zoomedInPath, renderedTargetPath), promise: zoomingOut}
       zoomingOut = util.wait(transitionDurationInMS*0.9) // looks more fluent to not stop while flying to await until everything is rendered
     }
@@ -286,12 +286,26 @@ export class Map {
     return new ClientRect(mapRect.x+paddingX, mapRect.y+paddingY, mapRect.width-paddingX*2, mapRect.height-paddingY*2)
   }
 
+  /** @deprecated use zoomToFit(items) instead */
   public async zoomToFitBoxes(boxes: Box[], options?: {transitionDurationInMS?: number}): Promise<void> {
-    if (boxes.length < 1) {
-      log.warning('boxes are empty')
+    return this.zoomToFit(boxes, options)
+  }
+  
+  public async zoomToFit(items: (Box|ClientRect)[], options?: {transitionDurationInMS?: number}): Promise<void> {
+    if (items.length < 1) {
+      log.warning('Map::zoomToFit(items) items are empty')
       return
     }
-    const rectsToFit: LocalRect[] = boxes.map(box => this.rootFolder.transform.innerRectRecursiveToLocal(box, new LocalRect(0, 0, 100, 100)))
+    const rectsToFit: LocalRect[] = await Promise.all(items.map(item => {
+      if (item instanceof Box) {
+        return this.rootFolder.transform.innerRectRecursiveToLocal(item, new LocalRect(0, 0, 100, 100))
+      }
+      if (item instanceof ClientRect) {
+        return this.rootFolder.transform.clientToLocalRect(item)
+      }
+      console.warn(`Map::zoomToFit(items) item is neither Box nor ClientRect`)
+      return this.getRootFolder().getLocalRect()
+    }))
     return this.rootFolder.site.zoomToFitRect(LocalRect.createEnclosing(rectsToFit), options)
   }
 
