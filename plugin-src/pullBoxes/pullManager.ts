@@ -1,10 +1,47 @@
 import { Box } from '../../dist/core/box/Box'
 import { Link } from '../../dist/core/link/Link'
 import { ClientRect } from '../../dist/core/ClientRect'
-import { RenderPriority } from '../../dist/core/renderEngine/renderManager'
+import { renderManager, RenderPriority } from '../../dist/core/renderEngine/renderManager'
 import { LinkRoute } from '../../dist/core/link/LinkRoute'
+import { map } from '../../dist/core/Map'
 
 const pulledBoxes: {box: Box, reasons: {link: Link, route: LinkRoute}[]}[] = []
+
+Box.onFocus.subscribe(async (box: Box) => {
+	if (pulledBoxes.find(pulledBox => pulledBox.box === box)) {
+		await addFlyToButtonTo(box)
+	}
+})
+
+Box.onUnfocus.subscribe(async (box: Box) => {
+	if (pulledBoxes.find(pulledBox => pulledBox.box === box)) {
+		await removeFlyToButtonFrom(box)
+	}
+})
+
+async function addFlyToButtonTo(box: Box): Promise<void> {
+	await renderManager.addElementTo(box.getId(), {
+		type: 'button',
+		id: box.getId()+'-flyToButton',
+		style: {position: 'absolute', top: '4px', right: '60px', cursor: 'pointer'},
+		onclick: async () => {
+			if (!map) {
+				console.warn(`pullBoxes: !map`)
+				return
+			}
+			await Promise.all([
+				removeFlyToButtonFrom(box),
+				releaseAll(),
+				map.flyTo(box.getParent().getSrcPath())
+			])
+		},
+		children: 'Fly to'
+	}, RenderPriority.RESPONSIVE)
+}
+
+async function removeFlyToButtonFrom(box: Box): Promise<void> {
+	await renderManager.remove(box.getId()+'-flyToButton', RenderPriority.RESPONSIVE)
+}
 
 export async function pull(box: Box, wishRect: ClientRect, reason: {link: Link, route: LinkRoute}): Promise<void> {
 	const pulledBox = pulledBoxes.find(pulledBox => pulledBox.box === box)
@@ -16,17 +53,25 @@ export async function pull(box: Box, wishRect: ClientRect, reason: {link: Link, 
 	await box.site.detachToFitClientRect(wishRect, {transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE})
 }
 
+async function releaseAll(): Promise<void> {
+	const pros: Promise<void>[] = []
+	for (let i = pulledBoxes.length-1; i >= 0; i--) { // i-- because release(..) removes elements
+		pros.push(release(pulledBoxes[i].box, 'all', {transitionDurationInMS: 1000}))
+	}
+	await Promise.all(pros)
+}
+
 export async function releaseForLink(link: Link): Promise<void> {
 	const pros: Promise<void>[] = []
-	for (let i = pulledBoxes.length-1; i >= 0; i--) {
+	for (let i = pulledBoxes.length-1; i >= 0; i--) { // i-- because release(..) removes elements
 		if (pulledBoxes[i].reasons.find(reason => reason.link === link)) {
-			pros.push(release(pulledBoxes[i].box, link))
+			pros.push(release(pulledBoxes[i].box, link, {transitionDurationInMS: 200}))
 		}
 	}
 	await Promise.all(pros)
 }
 
-export async function release(box: Box, link: Link): Promise<void> {
+export async function release(box: Box, link: Link|'all', options: {transitionDurationInMS: number}): Promise<void> {
 	const pulledBoxIndex = pulledBoxes.findIndex(pulledBox => pulledBox.box === box)
 	const pulledBox = pulledBoxes[pulledBoxIndex]
 	if (!pulledBox) {
@@ -35,14 +80,21 @@ export async function release(box: Box, link: Link): Promise<void> {
 
 	const reasons: {link: Link, route: LinkRoute}[] = []
 	for (let i = pulledBox.reasons.length-1; i >= 0; i--) {
-		if (pulledBox.reasons[i].link === link) {
+		if (link === 'all' || pulledBox.reasons[i].link === link) {
 			reasons.push(...pulledBox.reasons.splice(i, 1))
 		}
 	}
 	
 	if (pulledBox.reasons.length < 1) {
 		pulledBoxes.splice(pulledBoxIndex, 1)
-		await box.site.releaseIfDetached({transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}) // await because in some cases important that box is still watched
+		await box.site.releaseIfDetached({ // await because in some cases important that box is still watched
+			transitionDurationInMS: options.transitionDurationInMS,
+			renderStylePriority: RenderPriority.RESPONSIVE
+		})
 	}
 	await Promise.all(reasons.map(reason => reason.route.unwatch()))
 }
+/*
+function getBoxesToPull(route: LinkRoute): Box[] {
+	
+}*/

@@ -39,10 +39,15 @@ import { TextInputPopup } from '../TextInputPopup'
 import { ToggleSidebarWidget } from '../ToggleSidebarWidget'
 import { ClientPosition } from '../shape/ClientPosition'
 import { LocalPosition } from '../shape/LocalPosition'
+import { Subscribers } from '../util/Subscribers'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
+  
   public static readonly Tabs: typeof BoxTabs = BoxTabs
   public static readonly Sidebar: typeof BoxSidebar = BoxSidebar
+  public static readonly onFocus = new Subscribers<Box>()
+  public static readonly onUnfocus = new Subscribers<Box>()
+  
   private name: string
   private parent: FolderBox|null
   private mapData: BoxData
@@ -498,7 +503,8 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       this.tabs.renderBar(),
       this.addOpenButtonIfFile(options.priority),
       renderManager.addElementTo(this.getId(), this.focusState.toggleSidebarButton.shape({position: 'absolute', top: '28px', right: '4px'}), options.priority),
-      this.addSidebar(options.priority)
+      this.addSidebar(options.priority),
+      Box.onFocus.callSubscribers(this)
     ])
   }
 
@@ -517,7 +523,8 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       this.tabs.unrenderBar(),
       this.removeOpenButtonIfFile(options.priority),
       renderManager.remove(toggleSidebarButton.id, options.priority),
-      this.removeSidebar({priority: options.priority, awaitSlideAnimation: options.awaitAnimations})
+      this.removeSidebar({priority: options.priority, awaitSlideAnimation: options.awaitAnimations}),
+      Box.onUnfocus.callSubscribers(this)
     ])
   }
 
