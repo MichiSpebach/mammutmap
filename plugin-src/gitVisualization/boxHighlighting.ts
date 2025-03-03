@@ -67,7 +67,7 @@ export async function highlightBoxes(changedFiles: ChangedFile[]): Promise<void>
 
 async function highlightBox(box: Box, changedFileOrFolder: ChangedFile): Promise<void> {
 	const borderGradient: string = createBorderGradient(changedFileOrFolder)
-	await renderManager.addStyleTo(`${box.getId()}Border`, {
+	await renderManager.addStyleTo(box.getBorderId(), {
 		borderWidth: BORDER_WIDTH,
 		borderImageSlice: '1',
 		borderImageSource: borderGradient
@@ -95,7 +95,7 @@ function createBorderGradient(changedFile: ChangedFile): string {
 }
 
 async function removeCurrentHighlighting(box: Box): Promise<void> {
-	await renderManager.addStyleTo(`${box.getId()}Border`, {
+	await renderManager.addStyleTo(box.getBorderId(), {
 		borderImageSlice: '0',
 		borderImageSource: 'none',
 		borderWidth: null

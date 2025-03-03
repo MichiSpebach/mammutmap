@@ -50,7 +50,13 @@ export async function pull(box: Box, wishRect: ClientRect, reason: {link: Link, 
 	} else {
 		pulledBoxes.push({box, reasons: [reason]})
 	}
-	await box.site.detachToFitClientRect(wishRect, {transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE})
+	await Promise.all([
+		box.site.detachToFitClientRect(wishRect, {transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}),
+		renderManager.addStyleTo(box.getBorderId(), {
+			boxShadow: 'blueviolet 0 0 10px, blueviolet 0 0 10px',
+			transition: 'box-shadow 1s'
+		})
+	])
 }
 
 async function releaseAll(): Promise<void> {
@@ -90,6 +96,9 @@ export async function release(box: Box, link: Link|'all', options: {transitionDu
 		await box.site.releaseIfDetached({ // await because in some cases important that box is still watched
 			transitionDurationInMS: options.transitionDurationInMS,
 			renderStylePriority: RenderPriority.RESPONSIVE
+		})
+		await renderManager.addStyleTo(box.getBorderId(), {
+			boxShadow: null
 		})
 	}
 	await Promise.all(reasons.map(reason => reason.route.unwatch()))

@@ -112,7 +112,11 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     return this.mapData.id
   }
 
-  private getBorderId(): string {
+  public getBackgroundId(): string {
+    return this.getId()+'Background'
+  }
+
+  public getBorderId(): string {
     return this.getId()+'Border'
   }
 
@@ -385,7 +389,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
       const styleAbsoluteAndStretched: string = 'position:absolute;width:100%;height:100%;'
       // TODO: introduce <div id="content"> that contains everything but border and scaleToolPlaceholder? would make sense for detaching mechanism to leave borderFrame at savedPosition
-      const backgroundHtml = `<div style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
+      const backgroundHtml = `<div id="${this.getBackgroundId()}" style="${styleAbsoluteAndStretched}z-index:-1;" class="${this.getBackgroundStyleClass()}"></div>`
       const gridPlaceHolderHtml = `<div id="${this.raster.getId()}" style="${styleAbsoluteAndStretched}"></div>`
       const bodyHtml = `<div id="${this.getBodyId()}" style="${styleAbsoluteAndStretched}overflow:${this.getBodyOverflowStyle()};"></div>`
       const headerHtml = `<div id="${this.header.getId()}" style="position:absolute;overflow:hidden;width:100%;max-height:100%;"></div>`
