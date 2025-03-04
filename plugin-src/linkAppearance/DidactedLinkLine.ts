@@ -18,7 +18,7 @@ export class DidactedLinkLine extends LinkLineImplementation {
     }
 
     private shouldBeVisible(): boolean {
-        if (this.referenceLink.isHighlight()) {
+        if (this.referenceLink.isHighlight() || this.referenceLink.isSelected()) {
             return true
         }
 

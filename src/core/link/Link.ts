@@ -303,6 +303,10 @@ export class Link implements Hoverable {
     return style.getHighlightLinkClass()
   }
 
+  public isSelected(): boolean {
+    return this.selected
+  }
+
   public async reorderAndSaveAndRender(options: {
     movedWayPoint: Box|NodeWidget
     movedLinkEnd?: LinkEnd

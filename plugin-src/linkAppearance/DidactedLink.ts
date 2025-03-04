@@ -64,7 +64,7 @@ export class DidactedLink extends LinkImplementation {
         const hideTransitionDurationInMs = 1000
         let startDisplayNoneTimer: boolean = false
         if (this.getMode() === 'hidden') {
-          if (this.isHighlight()) {
+          if (this.isHighlight() || this.isSelected()) {
             style = 'opacity:0.5;'
           } else if (firstCall) {
             style = 'display:none;'
