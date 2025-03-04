@@ -175,8 +175,6 @@ export class Link implements Hoverable {
     const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
     const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
 
-    const lineInnerHtml: string = await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver, this.selected)
-
     const proms: Promise<any>[] = []
 
     if (!this.renderState.isRendered()) {
@@ -184,7 +182,7 @@ export class Link implements Hoverable {
       const fromHtml: string = `<div id="${this.from.getId()}" ${draggableHtml} class="${style.getHighlightTransitionClass()}"></div>`
       const toHtml: string = `<div id="${this.to.getId()}" ${draggableHtml} class="${style.getHighlightTransitionClass()}"></div>`
       const lineStyle: string = 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'
-      const lineHtml: string = `<svg id="${this.line.getId()}" style="${lineStyle}">${lineInnerHtml}</svg>`
+      const lineHtml: string = await this.line.formHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver, this.selected, lineStyle)
       if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRenderedAndLogIfNot('checkpoint0')) {
         return
       }
@@ -197,7 +195,7 @@ export class Link implements Hoverable {
       if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRenderedAndLogIfNot('checkpoint2')) {
         return
       }
-      proms.push(renderManager.setContentTo(this.line.getId(), lineInnerHtml, priority))
+      proms.push(renderManager.setContentTo(this.line.getId(), await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver, this.selected), priority))
     }
 
     // TODO: too many awaits, optimize

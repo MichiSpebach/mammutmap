@@ -44,6 +44,10 @@ export class LinkLine {
         return this.id+'Selected'
     }
 
+    public async formHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean, selected: boolean, additionalStyle: string): Promise<string> {
+        return `<svg id="${this.id}" style="${additionalStyle}">${await this.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver, selected)}</svg>`
+    }
+
     public async formInnerHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean, selected: boolean): Promise<string> {
         // TODO: move coordinates to svg element, svg element only as big as needed, or draw all lines of a box into one svg?
         let lineHtml: string = ''
