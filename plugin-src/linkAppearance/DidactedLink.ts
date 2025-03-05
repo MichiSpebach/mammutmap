@@ -3,6 +3,7 @@ import { LinkAppearanceMode } from '../../dist/pluginFacade'
 import { NodeWidget } from '../../dist/pluginFacade'
 import { Box, LinkImplementation } from '../../dist/pluginFacade'
 import { renderManager, RenderPriority } from '../../dist/pluginFacade'
+import { DidactedLinkLine } from './DidactedLinkLine'
 import * as linkAppearanceSettings from './linkAppearanceSettings'
 
 export class DidactedLink extends LinkImplementation {
@@ -20,12 +21,14 @@ export class DidactedLink extends LinkImplementation {
 
         await Promise.all([
             this.updateStyle(priority), // called before super.render() to avoid rendering for short time if hidden
+            (this.line as DidactedLinkLine).updateStyle(this.getMode(), priority), // called before super.render() to avoid rendering for short time if visibleEnds
             super.render(priority)
         ])
     }
 
     public override async unrender(): Promise<void> {
         this.clearStyleTimer()
+        ;(this.line as DidactedLinkLine).clearStyleTimer()
         await super.unrender()
     }
 
@@ -58,26 +61,26 @@ export class DidactedLink extends LinkImplementation {
     }
 
     private async updateStyle(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
-        let style: string = '';
+        let newStyle: string = '';
     
-        const firstCall: boolean = !this.currentStyle
+        const firstCall: boolean = this.currentStyle === null
         const hideTransitionDurationInMs = 1000
         let startDisplayNoneTimer: boolean = false
         if (this.getMode() === 'hidden') {
           if (this.isHighlight() || this.isSelected()) {
-            style = 'opacity:0.5;'
+            newStyle = 'opacity:0.5;'
           } else if (firstCall) {
-            style = 'display:none;'
+            newStyle = 'display:none;'
           } else {
             startDisplayNoneTimer = true
-            style = 'transition-duration:'+hideTransitionDurationInMs+'ms;opacity:0;'
+            newStyle = 'transition-duration:'+hideTransitionDurationInMs+'ms;opacity:0;'
           }
         }
     
-        if (this.currentStyle === style) {
+        if (this.currentStyle === newStyle) {
           return
         }
-        this.currentStyle = style
+        this.currentStyle = newStyle
     
         this.clearStyleTimer()
         if (startDisplayNoneTimer) {
@@ -87,9 +90,7 @@ export class DidactedLink extends LinkImplementation {
           }, hideTransitionDurationInMs)
         }
     
-        if (!firstCall || style !== '') {
-          await renderManager.setStyleTo(this.getId(), style, priority)
-        }
+        await renderManager.setStyleTo(this.getId(), newStyle, priority)
     }
 
     private clearStyleTimer() {
