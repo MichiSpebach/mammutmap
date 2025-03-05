@@ -9,6 +9,8 @@ import { LinkTagData } from '../../../dist/pluginFacade'
 import { LinkAppearanceMode, linkAppearanceModes } from '../../../dist/pluginFacade'
 import { RenderElementWithId, UltimateWidget } from '../../../dist/core/Widget'
 import { util } from '../../../dist/core/util/util'
+import { BooleanSettingWidget } from '../../../dist/core/settings/BooleanSettingWidget'
+import { noSmoothDisappearingSettingName } from '../linkAppearanceSettings'
 
 export class LinkAppearanceToolbarViewWidget extends UltimateWidget {
 
@@ -75,13 +77,36 @@ export class LinkAppearanceToolbarViewWidget extends UltimateWidget {
     public formInner(): RenderElements {
         const mapOrMessage: Map|Message = pluginFacade.getMap()
         if (mapOrMessage instanceof Message) {
-            return mapOrMessage.message
+            return [
+                mapOrMessage.message,
+                this.formSettings()
+            ]
         }
         
         return [
             this.formHeader(mapOrMessage.getRootFolder().getName()),
-            this.formBody()
+            this.formBody(),
+            this.formSettings()
         ].flat()
+    }
+
+    private formSettings(): RenderElement {
+        return {
+            type: 'div',
+            style: {marginTop: '8px'},
+            children: [
+                {
+                    type: 'div',
+                    children: 'Settings:'
+                },
+                {
+                    type: 'table',
+                    children: [
+                        new BooleanSettingWidget(`${this.id}-noSmoothDisappearing`, noSmoothDisappearingSettingName).shape()
+                    ]
+                }
+            ]
+        }
     }
 
     private formHeader(projectName: string): RenderElement {

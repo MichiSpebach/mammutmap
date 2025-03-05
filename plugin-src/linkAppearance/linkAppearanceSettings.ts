@@ -1,9 +1,12 @@
+import { BooleanSetting } from '../../dist/core/settings/settings'
 import * as pluginFacade from '../../dist/pluginFacade'
 import { Message, Map, onMapLoaded, onMapUnload, Subscribers } from '../../dist/pluginFacade'
 import { coreUtil } from '../../dist/pluginFacade'
 import { LinkAppearanceData, LinkAppearanceMode } from '../../dist/pluginFacade'
 import { LinkTagData } from '../../dist/pluginFacade'
 import { style } from '../../dist/pluginFacade'
+
+export const noSmoothDisappearingSettingName: BooleanSetting = 'linkAppearanceNoSmoothDisappearing' as BooleanSetting
 
 export const linkColors: string[] = ['red', 'green', 'blue', 'yellow', 'orange', 'magenta', 'aqua', 'lime', 'purple', 'teal', style.getLinkColor()]
 export const boxIdHashColorName = 'boxId hash'

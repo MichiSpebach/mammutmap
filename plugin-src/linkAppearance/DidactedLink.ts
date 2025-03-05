@@ -4,6 +4,7 @@ import { NodeWidget } from '../../dist/pluginFacade'
 import { Box, LinkImplementation } from '../../dist/pluginFacade'
 import { renderManager, RenderPriority } from '../../dist/pluginFacade'
 import { DidactedLinkLine } from './DidactedLinkLine'
+import { settings } from '../../dist/core/settings/settings'
 import * as linkAppearanceSettings from './linkAppearanceSettings'
 
 export class DidactedLink extends LinkImplementation {
@@ -69,7 +70,7 @@ export class DidactedLink extends LinkImplementation {
         if (this.getMode() === 'hidden') {
           if (this.isHighlight() || this.isSelected()) {
             newStyle = 'opacity:0.5;'
-          } else if (firstCall) {
+          } else if (firstCall || settings.getBoolean(linkAppearanceSettings.noSmoothDisappearingSettingName)) {
             newStyle = 'display:none;'
           } else {
             startDisplayNoneTimer = true
