@@ -15,7 +15,7 @@ export class FolderBoxHeader extends BoxHeader {
   }
 
   public override formTitleHtml(): string {
-    return '📁'+super.formTitleHtml()
+    return super.formTitleHtml()+' 🗀'
   }
 
 }
