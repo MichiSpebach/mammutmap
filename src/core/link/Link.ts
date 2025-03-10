@@ -240,7 +240,7 @@ export class Link implements Hoverable {
   private async addEventListeners(): Promise<void> {
     await Promise.all([
       HoverManager.addHoverable(this, () => this.handleHoverOver(),() => this.handleHoverOut()),
-      selectManager.addSelectable({elementId: this.getId(), onSelect: () => this.handleSelect(), onDeselect: () => this.handleDeselect()}),
+      selectManager.addSelectable({elementId: this.getId(), type: 'link', onSelect: () => this.handleSelect(), onDeselect: () => this.handleDeselect()}),
       renderManager.addEventListenerTo(this.getId(), 'contextmenu', (clientX: number, clientY: number) => contextMenu.openForLink(this, new ClientPosition(clientX, clientY)))
     ])
   }

@@ -1,5 +1,6 @@
 import { renderManager, RenderPriority } from './renderEngine/renderManager'
 import * as indexHtmlIds from './indexHtmlIds'
+import { settings } from './settings/settings'
 
 export let selectManager: SelectManager // = new SelectManager() // initialized at end of file
 
@@ -18,6 +19,10 @@ class SelectManager {
 		onSelect(): Promise<void>
 		onDeselect(): Promise<void>
 	}): Promise<void> {
+		if (this.selection.find(selected => selected.elementId === selectable.elementId)) {
+			await this.deselectIfSelected(selectable.elementId)
+			return
+		}
 		this.selection.push(selectable)
 		await selectable.onSelect()
 	}
@@ -39,13 +44,18 @@ class SelectManager {
 
 	public async addSelectable(options: {
 		elementId: string
+		type: 'box'|'link'
 		onSelect(): Promise<void>
 		onDeselect(): Promise<void>
 		priority?: RenderPriority
 	}): Promise<void> {
 		const pros: Promise<unknown>[] = []
 		
-		pros.push(renderManager.addEventListenerTo(options.elementId, 'click', (clientX:number, clientY: number, ctrlPressed: boolean) => {
+		pros.push(renderManager.addEventListenerTo(options.elementId, 'click', (clientX: number, clientY: number, ctrlPressed: boolean) => {
+			if (!ctrlPressed && options.type === 'box' && settings.getBoolean('selectBoxesWithCtrlOnly')) {
+				this.deselectAll()
+				return
+			}
 			this.select(options)
 		}, options.priority))
 
@@ -59,11 +69,13 @@ class SelectManager {
 		await Promise.all(pros)
 	}
 
-	public async removeSelectable(elementId: string, priority?: RenderPriority): Promise<void> {
-		await Promise.all([
-			renderManager.removeEventListenerFrom(elementId, 'click', {priority}),
-			this.deselectIfSelected(elementId)
-		])
+	public async removeSelectable(elementId: string, callOnDeselectIfSelected: boolean = false, priority?: RenderPriority): Promise<void> {
+		const pros: Promise<void>[] = []
+		pros.push(renderManager.removeEventListenerFrom(elementId, 'click', {priority}))
+		if (callOnDeselectIfSelected) {
+			pros.push(this.deselectIfSelected(elementId))
+		}
+		await Promise.all(pros)
 	}
 }
 

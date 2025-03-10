@@ -28,7 +28,8 @@ class SettingsWidget extends PopupWidget {
       this.buildBooleanSettingWidget('experimentalFeatures'),
       this.buildBooleanSettingWidget('htmlApplicationMenu'),
       this.buildBooleanSettingWidget('sidebar'),
-      this.buildBooleanSettingWidget('transparentBottomBar')
+      this.buildBooleanSettingWidget('transparentBottomBar'),
+      this.buildBooleanSettingWidget('selectBoxesWithCtrlOnly')
     ]
   }
 

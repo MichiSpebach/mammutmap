@@ -5,7 +5,7 @@ import { log } from '../logService'
 export type NumberSetting = 'zoomSpeed'|'boxMinSizeToRender'
 export type BooleanSetting = 
   'boxesDraggableIntoOtherBoxes'|'developerMode'|'notRethrowUnhandledErrors'|'experimentalFeatures'|
-  'htmlApplicationMenu'|'sidebar'|'boxSidebar'|'transparentBottomBar'|'positionMapOnTopLeft'
+  'htmlApplicationMenu'|'sidebar'|'boxSidebar'|'transparentBottomBar'|'positionMapOnTopLeft'|'selectBoxesWithCtrlOnly'
 
 export let settings: Settings
 
@@ -50,6 +50,7 @@ class Settings {
   private boxSidebar: boolean = Settings.defaults.boxSidebar
   private transparentBottomBar: boolean = Settings.defaults.transparentBottomBar
   private positionMapOnTopLeft: boolean|undefined = undefined // only needed for old e2e tests, TODO: update e2e tests and remove this option
+  private selectBoxesWithCtrlOnly: boolean|undefined = undefined
 
   private booleanSubscribers: {setting: BooleanSetting, onSet: (newValue: boolean) => Promise<void>}[] = []
 

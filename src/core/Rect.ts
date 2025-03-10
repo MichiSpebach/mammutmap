@@ -50,6 +50,10 @@ export abstract class Rect<POSITION extends Position<POSITION>> extends Shape<PO
       return this.buildPosition(this.x, this.getBottomY())
   }
 
+  public getArea(): number {
+    return this.width * this.height
+  }
+
   public isInsideOrEqual(other: Rect<POSITION>): boolean {
     const maxX: number = this.width + this.x
     const maxY: number = this.height + this.y

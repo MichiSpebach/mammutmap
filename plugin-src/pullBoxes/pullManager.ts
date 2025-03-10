@@ -5,7 +5,9 @@ import { renderManager, RenderPriority } from '../../dist/core/renderEngine/rend
 import { LinkRoute } from '../../dist/core/link/LinkRoute'
 import { map } from '../../dist/core/Map'
 
-const pulledBoxes: {box: Box, reasons: {link: Link, route: LinkRoute}[]}[] = []
+export type PullReason = {reason: Link|Box, route: LinkRoute}
+
+const pulledBoxes: {box: Box, reasons: PullReason[]}[] = []
 
 Box.onFocus.subscribe(async (box: Box) => {
 	if (pulledBoxes.find(pulledBox => pulledBox.box === box)) {
@@ -43,7 +45,7 @@ async function removeFlyToButtonFrom(box: Box): Promise<void> {
 	await renderManager.remove(box.getId()+'-flyToButton', RenderPriority.RESPONSIVE)
 }
 
-export async function pull(box: Box, wishRect: ClientRect, reason: {link: Link, route: LinkRoute}): Promise<void> {
+export async function pull(box: Box, wishRect: ClientRect, reason: PullReason): Promise<void> {
 	const pulledBox = pulledBoxes.find(pulledBox => pulledBox.box === box)
 	if (pulledBox) {
 		pulledBox.reasons.push(reason)
@@ -67,26 +69,26 @@ async function releaseAll(): Promise<void> {
 	await Promise.all(pros)
 }
 
-export async function releaseForLink(link: Link): Promise<void> {
+export async function releaseForReason(reason: Link|Box): Promise<void> {
 	const pros: Promise<void>[] = []
 	for (let i = pulledBoxes.length-1; i >= 0; i--) { // i-- because release(..) removes elements
-		if (pulledBoxes[i].reasons.find(reason => reason.link === link)) {
-			pros.push(release(pulledBoxes[i].box, link, {transitionDurationInMS: 200}))
+		if (pulledBoxes[i].reasons.find(pullReason => pullReason.reason === reason)) {
+			pros.push(release(pulledBoxes[i].box, reason, {transitionDurationInMS: 200}))
 		}
 	}
 	await Promise.all(pros)
 }
 
-export async function release(box: Box, link: Link|'all', options: {transitionDurationInMS: number}): Promise<void> {
+async function release(box: Box, reason: Link|Box|'all', options: {transitionDurationInMS: number}): Promise<void> {
 	const pulledBoxIndex = pulledBoxes.findIndex(pulledBox => pulledBox.box === box)
 	const pulledBox = pulledBoxes[pulledBoxIndex]
 	if (!pulledBox) {
 		return
 	}
 
-	const reasons: {link: Link, route: LinkRoute}[] = []
+	const reasons: PullReason[] = []
 	for (let i = pulledBox.reasons.length-1; i >= 0; i--) {
-		if (link === 'all' || pulledBox.reasons[i].link === link) {
+		if (reason === 'all' || pulledBox.reasons[i].reason === reason) {
 			reasons.push(...pulledBox.reasons.splice(i, 1))
 		}
 	}

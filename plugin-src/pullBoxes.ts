@@ -9,17 +9,46 @@ import { AbstractNodeWidget } from '../dist/core/AbstractNodeWidget'
 import * as pullManager from './pullBoxes/pullManager'
 import { map } from '../dist/core/Map'
 import { LinkRoute } from '../dist/core/link/LinkRoute'
+import { PullReason } from './pullBoxes/pullManager'
+
+const pullingInReasonsInProgress: (Link|Box)[] = []
 
 Link.onSelect.subscribe(async (link: Link) => {
+	pullingInReasonsInProgress.push(link)
 	await Promise.all([
-		pullInOriginsIfNecessary(link),
-		pullInDestinationsIfNecessary(link)
+		pullInOriginsIfNecessary(link, link),
+		pullInDestinationsIfNecessary(link, link)
 	])
+	removePullingInReasonIfInProgress(link)
 })
 
-Link.onDeselect.subscribe(async (link: Link) => await pullManager.releaseForLink(link))
+Link.onDeselect.subscribe(async (link: Link) => {
+	removePullingInReasonIfInProgress(link)
+	await pullManager.releaseForReason(link)
+})
 
-async function pullInOriginsIfNecessary(link: Link): Promise<void> {
+Box.onSelect.subscribe(async (box: Box) => {
+	pullingInReasonsInProgress.push(box)
+	await Promise.all([
+		...box.borderingLinks.getIngoing().map(link => pullInOriginsIfNecessary(link, box)),
+		...box.borderingLinks.getOutgoing().map(link => pullInDestinationsIfNecessary(link, box))
+	])
+	removePullingInReasonIfInProgress(box)
+})
+
+Box.onDeselect.subscribe(async (box: Box) => {
+	removePullingInReasonIfInProgress(box)
+	await pullManager.releaseForReason(box)
+})
+
+function removePullingInReasonIfInProgress(removePullingInReason: Link|Box): void {
+	const index: number = pullingInReasonsInProgress.indexOf(removePullingInReason)
+	if (index > -1) {
+		pullingInReasonsInProgress.splice(index, 1)
+	}
+}
+
+async function pullInOriginsIfNecessary(link: Link, reason: Link|Box): Promise<void> {
 	const routeIds: string[]|undefined = link.getData().routes
 	const originRoutes: LinkRoute[] = routeIds && routeIds.length > 0
 		? routeIds.map(routeId => new LinkRoute(routeId, link))
@@ -34,11 +63,11 @@ async function pullInOriginsIfNecessary(link: Link): Promise<void> {
 			return
 		}
 		originBoxes.push(originBox)
-		await pullInLinkEndTargetIfNecessary(route.links[0].from, originBox, {link, route})
+		await pullInLinkEndTargetIfNecessary(route.links[0].from, originBox, {reason, route})
 	}))
 }
 
-async function pullInDestinationsIfNecessary(link: Link): Promise<void> {
+async function pullInDestinationsIfNecessary(link: Link, reason: Link|Box): Promise<void> {
 	const routeIds: string[]|undefined = link.getData().routes
 	const destinationRoutes: LinkRoute[] = routeIds && routeIds.length > 0
 		? routeIds.map(routeId => new LinkRoute(routeId, link))
@@ -53,25 +82,35 @@ async function pullInDestinationsIfNecessary(link: Link): Promise<void> {
 			return
 		}
 		destinationBoxes.push(destinationBox)
-		await pullInLinkEndTargetIfNecessary(route.links[route.links.length-1].to, destinationBox, {link, route})
+		await pullInLinkEndTargetIfNecessary(route.links[route.links.length-1].to, destinationBox, {reason, route})
 	}))
 }
 
-async function pullInLinkEndTargetIfNecessary(linkEnd: LinkEnd, targetBox: Box, reason: {link: Link, route: LinkRoute}): Promise<void> {
+async function pullInLinkEndTargetIfNecessary(linkEnd: LinkEnd, targetBox: Box, reason: PullReason): Promise<void> {
 	if (await isLinkEndOutsideScreen(linkEnd)) {
-		const pullPosition: Promise<ClientPosition> = calculatePullPositionOfRoute(reason.route, linkEnd === linkEnd.getReferenceLink().to ? 'to' : 'from')
+		const pullPosition: ClientPosition = await calculatePullPositionOfRoute(reason.route, linkEnd === linkEnd.getReferenceLink().to ? 'to' : 'from')
 		if (targetBox.isAncestorOf(linkEnd.getOtherEnd().getDeepestRenderedWayPoint().linkable)) {
 			console.info('pullBoxes: target box to pull is an ancestor (outer box of the same path)')
 			return
 		}
-		await pullManager.pull(targetBox, createPullRect(await pullPosition), reason)
+		if (pullingInReasonsInProgress.includes(reason.reason)) {
+			await pullManager.pull(targetBox, createPullRect(pullPosition), reason)
+		} else {
+			// already deselected in meantime
+			await reason.route.unwatch()
+		}
 	} else if (!await isTargetRenderedAndLargeEnough(linkEnd)) {
 		const targetBoxRect: ClientRect = await targetBox.getClientRect()
 		let pullRect: ClientRect = createPullRect(targetBoxRect.getMidPosition())
 		if (pullRect.width < targetBoxRect.width || pullRect.height < targetBoxRect.height) {
 			pullRect = targetBoxRect
 		}
-		await pullManager.pull(targetBox, pullRect, reason)
+		if (pullingInReasonsInProgress.includes(reason.reason)) {
+			await pullManager.pull(targetBox, pullRect, reason)
+		} else {
+			// already deselected in meantime
+			await reason.route.unwatch()
+		}
 	} else {
 		await reason.route.unwatch()
 	}

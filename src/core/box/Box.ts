@@ -40,6 +40,7 @@ import { ToggleSidebarWidget } from '../ToggleSidebarWidget'
 import { ClientPosition } from '../shape/ClientPosition'
 import { LocalPosition } from '../shape/LocalPosition'
 import { Subscribers } from '../util/Subscribers'
+import { selectManager } from '../selectManager'
 
 export abstract class Box extends AbstractNodeWidget implements DropTarget, Hoverable {
   
@@ -47,6 +48,8 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   public static readonly Sidebar: typeof BoxSidebar = BoxSidebar
   public static readonly onFocus = new Subscribers<Box>()
   public static readonly onUnfocus = new Subscribers<Box>()
+  public static readonly onSelect = new Subscribers<Box>()
+  public static readonly onDeselect = new Subscribers<Box>()
   
   private name: string
   private parent: FolderBox|null
@@ -72,6 +75,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     toggleSidebarButton: ToggleSidebarWidget
     onBoxSidebarSettingChange: (newValue: boolean) => Promise<void>
   } | undefined
+  private selectable: boolean = false
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context?: BoxContext) {
     super()
@@ -158,24 +162,22 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   public abstract isSourceless(): boolean
 
   // TODO: belongs more into map, move?
-  public async getZoomedInPath(clientRect?: ClientRect): Promise<Box[]> {
-    const zoomedInChild: Box|undefined = await this.getZoomedInChild(clientRect)
+  public async getZoomedInPath(mapClientRect?: ClientRect): Promise<Box[]> {
+    const zoomedInChild: Box|undefined = await this.getZoomedInChild(mapClientRect)
     if (!zoomedInChild) {
         return [this]
     }
-    return [this, ...await zoomedInChild.getZoomedInPath(clientRect)]
+    return [this, ...await zoomedInChild.getZoomedInPath(mapClientRect)]
   }
 
-  public async getZoomedInChild(clientRect?: ClientRect): Promise<Box | undefined> {
-    if (!clientRect) {
-      clientRect = await this.context.getMapClientRect()
+  public async getZoomedInChild(mapClientRect?: ClientRect): Promise<Box | undefined> {
+    if (!mapClientRect) {
+      mapClientRect = await this.context.getMapClientRect()
     }
     let renderedChildBoxes: Box[] = []
     for (const child of this.getChilds()) { // filter does not support promises
-      if (child instanceof Box && child.isBodyBeingRendered()) {
-        if ((await child.getClientRect()).isPositionInside(clientRect.getMidPosition())) {
-          renderedChildBoxes.push(child)
-        }
+      if (child instanceof Box && await child.isZoomedIn(mapClientRect)) {
+        renderedChildBoxes.push(child)
       }
     }
 
@@ -189,6 +191,17 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       log.warning(message)
     }
     return renderedChildBoxes[0]
+  }
+
+  public async isZoomedIn(mapClientRect?: ClientRect): Promise<boolean> {
+    if (!this.isBodyBeingRendered()) {
+      return false
+    }
+    if (!mapClientRect) {
+      mapClientRect = await this.context.getMapClientRect()
+    }
+    const clientRect: ClientRect = await this.getClientRect()
+    return clientRect.isPositionInside(mapClientRect.getMidPosition()) && clientRect.getArea() > mapClientRect.getArea()/2
   }
 
   public async findChildAtClientPosition(position: ClientPosition, inclusiveEpsilon: number = 0.1): Promise<Box|NodeWidget|undefined> {
@@ -411,6 +424,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       pros.push(renderManager.addEventListenerTo(this.getId(), 'dblclick', () => this.site.zoomToFit({animationIfAlreadyFitting: true})))
     }
 
+    pros.push(this.addSelectableIfAppropriateOrRemove())
     pros.push(this.renderAdditional())
     pros.push(this.raster.updateGridIfAttached())
 
@@ -438,6 +452,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
     await Promise.all([
       relocationDragManager.removeDropTarget(this),
+      this.removeSelectable(),
       HoverManager.removeHoverable(this, false),
       this.removeFocusElements({priority: RenderPriority.NORMAL, awaitAnimations: false}),
       this.raster.detachGrid(),
@@ -590,6 +605,41 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
       sidebar.mounted = false
       await renderManager.remove(sidebar.getId(), options.priority)
     }
+  }
+
+  private async addSelectableIfAppropriateOrRemove(): Promise<void> {
+    if (await this.isZoomedIn()) {
+      await this.removeSelectable()
+      return
+    }
+    if (!this.selectable) {
+      this.selectable = true
+      await selectManager.addSelectable({elementId: this.getId(), type: 'box', onSelect: () => this.onSelect(), onDeselect: () => this.onDeselect()})
+    }
+  }
+
+  private async removeSelectable(): Promise<void> {
+    if (!this.selectable) {
+      return
+    }
+    this.selectable = false
+    await selectManager.removeSelectable(this.getId())
+  }
+
+  private async onSelect(): Promise<void> {
+    await Promise.all([
+      renderManager.addStyleTo(this.getBorderId(), {border: '2px solid #4488ff'}, RenderPriority.RESPONSIVE),
+      renderManager.addStyleTo(this.getBackgroundId(), {backgroundColor: '#00448888', transition: 'background-color 200ms'}, RenderPriority.RESPONSIVE),
+      Box.onSelect.callSubscribers(this)
+    ])
+  }
+
+  private async onDeselect(): Promise<void> {
+    await Promise.all([
+      renderManager.addStyleTo(this.getBorderId(), {border: null}, RenderPriority.RESPONSIVE),
+      renderManager.addStyleTo(this.getBackgroundId(), {backgroundColor: null}, RenderPriority.RESPONSIVE),
+      Box.onDeselect.callSubscribers(this)
+    ])
   }
 
   public isMapDataFileExisting(): boolean {
