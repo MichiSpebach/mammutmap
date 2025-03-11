@@ -1,4 +1,4 @@
-import { WayPointData } from '../../dist/pluginFacade'
+import { Link, WayPointData } from '../../dist/pluginFacade'
 import { LinkAppearanceMode } from '../../dist/pluginFacade'
 import { NodeWidget } from '../../dist/pluginFacade'
 import { Box, LinkImplementation } from '../../dist/pluginFacade'
@@ -6,6 +6,7 @@ import { renderManager, RenderPriority } from '../../dist/pluginFacade'
 import { DidactedLinkLine } from './DidactedLinkLine'
 import { settings } from '../../dist/core/settings/settings'
 import * as linkAppearanceSettings from './linkAppearanceSettings'
+import { LinkEnd } from '../../dist/core/link/LinkEnd'
 
 export class DidactedLink extends LinkImplementation {
     private currentStyle: string|null = null
@@ -68,7 +69,7 @@ export class DidactedLink extends LinkImplementation {
         const hideTransitionDurationInMs = 1000
         let startDisplayNoneTimer: boolean = false
         if (this.getMode() === 'hidden') {
-          if (this.isHighlight() || this.isSelected()) {
+          if (this.isHighlight() || DidactedLink.isSelectedOrConnectedToSelected(this)) {
             newStyle = 'opacity:0.5;'
           } else if (firstCall || settings.getBoolean(linkAppearanceSettings.noSmoothDisappearingSettingName)) {
             newStyle = 'display:none;'
@@ -92,6 +93,20 @@ export class DidactedLink extends LinkImplementation {
         }
     
         await renderManager.setStyleTo(this.getId(), newStyle, priority)
+    }
+
+    public static isSelectedOrConnectedToSelected(link: Link): boolean {
+        return link.isSelected() || this.isRenderedTargetSelected(link.from) || this.isRenderedTargetSelected(link.to)
+    }
+
+    private static isRenderedTargetSelected(linkEnd: LinkEnd): boolean {
+        const renderedTargets: (Box|NodeWidget)[] = linkEnd.getRenderedPathWithoutManagingBox()
+        for (const renderedTarget of renderedTargets) {
+            if (renderedTarget instanceof Box && renderedTarget.isSelected()) {
+                return true
+            }
+        }
+        return false
     }
 
     private clearStyleTimer() {

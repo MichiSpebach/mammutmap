@@ -3,6 +3,7 @@ import { LinkLineImplementation } from '../../dist/pluginFacade'
 import { LinkAppearanceMode } from '../../dist/pluginFacade'
 import { settings } from '../../dist/core/settings/settings'
 import { noSmoothDisappearingSettingName } from './linkAppearanceSettings'
+import { DidactedLink } from './DidactedLink'
 
 export class DidactedLinkLine extends LinkLineImplementation {
     private additionalStyleAsString: string|null = null
@@ -23,7 +24,7 @@ export class DidactedLinkLine extends LinkLineImplementation {
         const firstCall: boolean = this.additionalStyleAsString === null
         const hideTransitionDurationInMs = 1000
         let startDisplayNoneTimer: boolean = false
-        if (mode !== 'visibleEnds' || this.referenceLink.isHighlight() || this.referenceLink.isSelected()) {
+        if (mode !== 'visibleEnds' || this.referenceLink.isHighlight() || DidactedLink.isSelectedOrConnectedToSelected(this.referenceLink)) {
             newAdditionalStyle = {display: null, opacity: null, transitionDuration: null}
             newAdditionalStyleAsString = ''
         } else {

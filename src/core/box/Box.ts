@@ -76,6 +76,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     onBoxSidebarSettingChange: (newValue: boolean) => Promise<void>
   } | undefined
   private selectable: boolean = false
+  private selected: boolean = false
 
   public constructor(name: string, parent: FolderBox|null, mapData: BoxData, mapDataFileExists: boolean, context?: BoxContext) {
     super()
@@ -627,19 +628,27 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   }
 
   private async onSelect(): Promise<void> {
+    this.selected = true
     await Promise.all([
       renderManager.addStyleTo(this.getBorderId(), {border: '2px solid #4488ff'}, RenderPriority.RESPONSIVE),
       renderManager.addStyleTo(this.getBackgroundId(), {backgroundColor: '#00448888', transition: 'background-color 200ms'}, RenderPriority.RESPONSIVE),
+      this.borderingLinks.renderAllThatShouldBe(), // linkAppearance may change // TODO call this.borderingLinks.renderRoutesThatShouldBe() instead
       Box.onSelect.callSubscribers(this)
     ])
   }
 
   private async onDeselect(): Promise<void> {
+    this.selected = false
     await Promise.all([
       renderManager.addStyleTo(this.getBorderId(), {border: null}, RenderPriority.RESPONSIVE),
       renderManager.addStyleTo(this.getBackgroundId(), {backgroundColor: null}, RenderPriority.RESPONSIVE),
+      this.borderingLinks.renderAllThatShouldBe(), // linkAppearance may change // TODO call this.borderingLinks.renderRoutesThatShouldBe() instead
       Box.onDeselect.callSubscribers(this)
     ])
+  }
+
+  public isSelected(): boolean {
+    return this.selected
   }
 
   public isMapDataFileExisting(): boolean {
