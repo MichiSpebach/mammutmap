@@ -220,7 +220,21 @@ export class Map {
     return this.rootFolder.getBoxBySourcePathAndRenderIfNecessary(path, options)
   }
 
-  private async getMapClientRect(): Promise<ClientRect> {
+  /**
+   * @returns mapClientRect that is not covered by e.g. transparentBottomBar or htmlApplicationMenu
+   */
+  public async getUncoveredMapClientRect(): Promise<ClientRect> {
+    let mapRect: ClientRect = await this.getMapClientRect()
+    if (settings.getBoolean('transparentBottomBar')) {
+      mapRect = new ClientRect(mapRect.x, mapRect.y, mapRect.width, mapRect.height*0.85) // TODO: get actual height of bottomBar
+    }
+    if (settings.getBoolean('htmlApplicationMenu')) {
+      mapRect = new ClientRect(mapRect.x, mapRect.y+35, mapRect.width, mapRect.height-35) // TODO: get actual height of htmlApplicationMenu
+    }
+    return mapRect
+  }
+
+  public async getMapClientRect(): Promise<ClientRect> {
     if (!this.cachedMapClientRect) {
       this.cachedMapClientRect = ClientRect.of(await renderManager.getClientRectOf(this.mapId, RenderPriority.RESPONSIVE))
     } else {
@@ -242,7 +256,7 @@ export class Map {
 
   public async flyTo(path: string): Promise<void> {
     const transitionDurationInMS = 500
-    const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath(await this.getInnerMapClientRect())
+    const zoomedInPath: Box[] = await this.rootFolder.getZoomedInPath()
     const renderedTargetPath: Box[] = this.rootFolder.getRenderedBoxesInPath(path)
     const renderedTarget: Box = renderedTargetPath[renderedTargetPath.length-1]
 
@@ -277,13 +291,6 @@ export class Map {
     await latestZoomTo.promise
     await this.zoom(0, 0, 0) // TODO otherwise lots of "has path with no rendered boxes. This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn't." warnings, fix and remove this line
     await renderTargetReport.boxWatcher!.unwatch()
-  }
-
-  private async getInnerMapClientRect(): Promise<ClientRect> {
-    const mapRect: ClientRect = await this.getMapClientRect()
-    const paddingX: number = mapRect.width/2.5
-    const paddingY: number = mapRect.height/2.5
-    return new ClientRect(mapRect.x+paddingX, mapRect.y+paddingY, mapRect.width-paddingX*2, mapRect.height-paddingY*2)
   }
 
   /** @deprecated use zoomToFit(items) instead */

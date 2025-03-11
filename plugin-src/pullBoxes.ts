@@ -185,6 +185,6 @@ async function getIntersectionRect(): Promise<ClientRect> {
 	if (!map) {
 		throw new Error('pullBoxes: !map')
 	}
-	const mapRect: ClientRect = await map.getRootFolder().context.getMapClientRect()
+	const mapRect: ClientRect = await map.getUncoveredMapClientRect()
 	return new ClientRect(mapRect.x+120, mapRect.y+60, mapRect.width-240, mapRect.height-140)
 }
