@@ -14,6 +14,7 @@ class MouseDownDragManager implements DragManager {
     private dragState: {
         elementId: string,
         draggingStarted: boolean,
+        noopToPreventOnClick?: () => void,
         latest: {mousePosition: ClientPosition, ctrlPressed: boolean},
         onDragEnd: (position: ClientPosition, ctrlPressed: boolean) => Promise<void>
     } | null = null
@@ -80,6 +81,10 @@ class MouseDownDragManager implements DragManager {
             if (!this.dragState) {
                 return // this happens when mouseup was already fired but mousemove listener is not yet removed
             }
+            if (!this.dragState.noopToPreventOnClick) {
+                this.dragState.noopToPreventOnClick = () => {}
+                renderManager.addEventListenerAdvancedTo(indexHtmlIds.htmlId, 'click', {capture: true, stopPropagation: true, priority: RenderPriority.RESPONSIVE}, this.dragState.noopToPreventOnClick)
+            }
             if (!this.dragState.draggingStarted && options.movementNeededToStartDrag) {
                 this.dragState.draggingStarted = true
                 await options.onDragStart(options.eventResult)
@@ -113,6 +118,9 @@ class MouseDownDragManager implements DragManager {
         
         const pros: Promise<void>[] = []
 
+        if (this.dragState.noopToPreventOnClick) {
+            pros.push(renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'click', {listenerCallback: this.dragState.noopToPreventOnClick, priority: RenderPriority.RESPONSIVE}))
+        }
         pros.push(renderManager.removeEventListenerFrom(indexHtmlIds.htmlId, 'mousemove', {priority: RenderPriority.RESPONSIVE}))
         pros.push(renderManager.removeClassFrom(indexHtmlIds.htmlId, style.getClass('disableUserSelect'), RenderPriority.RESPONSIVE))
         

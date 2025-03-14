@@ -54,7 +54,7 @@ export abstract  class BoxHeader extends Widget {
 
     if (!this.rendered) {
       if (!this.referenceBox.isRoot()) {
-        proms.push(relocationDragManager.addDraggable(this.draggable))
+        proms.push(relocationDragManager.addDraggable(this.draggable, () => this.referenceBox.site.isDetached()))
       }
       this.rendered = true
     }

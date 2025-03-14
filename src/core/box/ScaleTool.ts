@@ -85,6 +85,9 @@ export class ScaleTool {
 
   public roundToParentGridPositionX(localPositionX: number): number {
     const boxRenderedInto: Box = this.getBoxRenderedIntoOrFail()
+    if (boxRenderedInto.site.isDetached() && !boxRenderedInto.isRoot()) {
+      return localPositionX
+    }
     if (boxRenderedInto.isRoot()) {
       return boxRenderedInto.transform.roundToGridPositionX(localPositionX)
     }
@@ -93,6 +96,9 @@ export class ScaleTool {
 
   public roundToParentGridPositionY(localPositionY: number): number {
     const boxRenderedInto: Box = this.getBoxRenderedIntoOrFail()
+    if (boxRenderedInto.site.isDetached() && !boxRenderedInto.isRoot()) {
+      return localPositionY
+    }
     if (boxRenderedInto.isRoot()) {
       return boxRenderedInto.transform.roundToGridPositionY(localPositionY)
     }
@@ -104,22 +110,27 @@ export class ScaleTool {
       util.logWarning('scaleStart is called altough ScaleTool is not rendered into a box => cannot start scaling.')
       return
     }
-    if (!this.boxRenderedInto.isRoot()) {
-      await this.boxRenderedInto.getParent().raster.attachGrid(RenderPriority.RESPONSIVE)
+    if (this.boxRenderedInto.site.isDetached() || this.boxRenderedInto.isRoot()) {
+      return
     }
+    await this.boxRenderedInto.getParent().raster.attachGrid(RenderPriority.RESPONSIVE)
   }
 
   public async scale(measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number}): Promise<void> {
     const boxRenderedInto: Box = this.getBoxRenderedIntoOrFail()
     await boxRenderedInto.updateMeasuresAndBorderingLinks(measuresInPercentIfChanged, RenderPriority.RESPONSIVE)
-    if (!boxRenderedInto.isRoot()) {
-      await boxRenderedInto.getParent().rearrangeBoxesWithoutMapData(boxRenderedInto)
+    if (boxRenderedInto.site.isDetached() || boxRenderedInto.isRoot()) {
+      return
     }
+    await boxRenderedInto.getParent().rearrangeBoxesWithoutMapData(boxRenderedInto)
   }
 
   public async scaleEnd(): Promise<void> {
     if (!this.boxRenderedInto) {
       util.logWarning('scaleEnd is called altough ScaleTool is not rendered into a box => cannot end scaling.')
+      return
+    }
+    if (this.boxRenderedInto.site.isDetached() && !this.boxRenderedInto.isRoot()) {
       return
     }
     const proms: Promise<any>[] = []

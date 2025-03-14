@@ -14,7 +14,7 @@ export class SizeAndPosition {
     public static readonly delegateZoomToChildInPixels: number = 1000*1000 // TODO: can still be increased by magnitude when implementation is improved, worth it?
 
     public readonly referenceNode: Box // TODO: simply rename to parent?
-    public readonly referenceNodeMapSiteData: {x: number, y: number, width: number, height: number}
+    public readonly referenceNodeMapSiteData: {x: number, y: number, width: number, height: number} // reference to referenceNode.mapData TODO? simply call referenceNode.getMapData() every time?
     private detached: { // TODO: rename to unhinged or unpinned?
         shiftX: number
         shiftY: number
@@ -70,25 +70,35 @@ export class SizeAndPosition {
         measuresInPercentIfChanged: {x?: number, y?: number, width?: number, height?: number},
         priority: RenderPriority = RenderPriority.NORMAL
     ): Promise<void> {
-        if (this.detached) {
-            if (!this.referenceNode.isRoot()) {
-                util.logWarning(`SizeAndPosition::updateMeasures(..) not implemented on detached box "${this.referenceNode.getName()}".`)
-                return
+        if (this.detached && !this.referenceNode.isRoot()) {
+            if (measuresInPercentIfChanged.x) {
+                this.detached.shiftX = measuresInPercentIfChanged.x - this.referenceNodeMapSiteData.x
             }
-            measuresInPercentIfChanged = this.transformDetachedMeasuresToMeasuresToSave(measuresInPercentIfChanged)
-        }
-    
-        if (measuresInPercentIfChanged.x != null) {
-            this.referenceNodeMapSiteData.x = measuresInPercentIfChanged.x
-        }
-        if (measuresInPercentIfChanged.y != null) {
-            this.referenceNodeMapSiteData.y = measuresInPercentIfChanged.y
-        }
-        if (measuresInPercentIfChanged.width != null) {
-            this.referenceNodeMapSiteData.width = measuresInPercentIfChanged.width
-        }
-        if (measuresInPercentIfChanged.height != null) {
-            this.referenceNodeMapSiteData.height = measuresInPercentIfChanged.height
+            if (measuresInPercentIfChanged.y) {
+                this.detached.shiftY = measuresInPercentIfChanged.y - this.referenceNodeMapSiteData.y
+            }
+            if (measuresInPercentIfChanged.width) {
+                this.detached.zoomX = measuresInPercentIfChanged.width / this.referenceNodeMapSiteData.width
+            }
+            if (measuresInPercentIfChanged.height) {
+                this.detached.zoomY = measuresInPercentIfChanged.height / this.referenceNodeMapSiteData.height
+            }
+        } else {
+            if (this.detached && this.referenceNode.isRoot()) {
+                measuresInPercentIfChanged = this.transformDetachedMeasuresToMeasuresToSave(measuresInPercentIfChanged)
+            }
+            if (measuresInPercentIfChanged.x != null) {
+                this.referenceNodeMapSiteData.x = measuresInPercentIfChanged.x
+            }
+            if (measuresInPercentIfChanged.y != null) {
+                this.referenceNodeMapSiteData.y = measuresInPercentIfChanged.y
+            }
+            if (measuresInPercentIfChanged.width != null) {
+                this.referenceNodeMapSiteData.width = measuresInPercentIfChanged.width
+            }
+            if (measuresInPercentIfChanged.height != null) {
+                this.referenceNodeMapSiteData.height = measuresInPercentIfChanged.height
+            }
         }
     
         await this.referenceNode.renderStyleWithRerender({renderStylePriority: priority}) // TODO: add 'rerenderPriority: RenderPriority.LOW' with very low priority and

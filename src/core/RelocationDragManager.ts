@@ -87,7 +87,7 @@ export class RelocationDragManager {
      * @param deactivateHandlingDragOver if true onDragEnter() and onDragLeave() are not fired on DropTarget
      * @param priority 
      */
-    public async addDraggable(elementToDrag: Draggable<DropTarget>, deactivateHandlingDragOver?: boolean, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    public async addDraggable(elementToDrag: Draggable<DropTarget>, deactivateHandlingDragOver?: boolean|(() => boolean), priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
         const draggableId: string = elementToDrag.getId()
 
         await Promise.all([
@@ -95,7 +95,14 @@ export class RelocationDragManager {
             this.dragManager.addDraggable({
                 elementId: elementToDrag.getId(),
                 movementNeededToStartDrag: true,
-                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(elementToDrag, eventResult.clientPosition.x, eventResult.clientPosition.y, !eventResult.ctrlPressed, !!deactivateHandlingDragOver, false),
+                onDragStart: async (eventResult: MouseEventResultAdvanced) => this.onDragStart(
+                    elementToDrag,
+                    eventResult.clientPosition.x,
+                    eventResult.clientPosition.y,
+                    !eventResult.ctrlPressed,
+                    typeof deactivateHandlingDragOver === 'boolean' && deactivateHandlingDragOver || typeof deactivateHandlingDragOver === 'function' && deactivateHandlingDragOver(),
+                    false
+                ),
                 onDrag: async (position: ClientPosition, ctrlPressed: boolean) => this.onDrag(position.x, position.y, !ctrlPressed),
                 onDragEnd: async (position: ClientPosition, ctrlPressed: boolean) => this.onDragEnd(position.x, position.y, !ctrlPressed)
             })

@@ -38,13 +38,8 @@ export class BoxHeaderDraggable implements Draggable<FolderBox> {
   }
 
   public async dragStart(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
-    if (this.referenceBox.site.isDetached()) {
-      util.logWarning(`BoxHeader::dragStart(..) called on detached box "${this.referenceBox.getName()}".`);
-    }
-
-    let clientRect: ClientRect = await this.referenceBox.getClientRect();
+    const clientRect: ClientRect = await this.referenceBox.getClientRect();
     this.dragOffset = { x: clientX - clientRect.x, y: clientY - clientRect.y };
-
     await renderManager.addClassTo(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE);
   }
 
@@ -56,27 +51,39 @@ export class BoxHeaderDraggable implements Draggable<FolderBox> {
     const clientPosition = new ClientPosition(clientX - this.dragOffset.x, clientY - this.dragOffset.y);
 
     let positionInParentBoxCoords: LocalPosition;
-    if (!snapToGrid) {
+    const boxDetached: boolean = this.referenceBox.site.isDetached()
+    if (!snapToGrid || boxDetached) {
       positionInParentBoxCoords = await this.referenceBox.getParent().transform.clientToLocalPosition(clientPosition);
     } else {
       positionInParentBoxCoords = await this.referenceBox.getParent().transform.getNearestGridPositionOfOtherTransform(clientPosition, dropTarget.transform);
     }
 
     await this.referenceBox.updateMeasuresAndBorderingLinks({ x: positionInParentBoxCoords.percentX, y: positionInParentBoxCoords.percentY }, RenderPriority.RESPONSIVE);
-    await dropTarget.rearrangeBoxesWithoutMapData(this.referenceBox);
+    if (!boxDetached) {
+      await dropTarget.rearrangeBoxesWithoutMapData(this.referenceBox);
+    }
   }
 
   public async dragCancel(): Promise<void> {
-    await Promise.all([
-      renderManager.removeClassFrom(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE),
-      this.referenceBox.restoreMapData()
-    ]);
+    const pros: Promise<void>[] = []
+
+    pros.push(renderManager.removeClassFrom(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE))
+    if (!this.referenceBox.site.isDetached()) {
+      pros.push(this.referenceBox.restoreMapData())
+    }
+    
+    await Promise.all(pros)
   }
 
   public async dragEnd(clientX: number, clientY: number, dropTarget: FolderBox, snapToGrid: boolean): Promise<void> {
     const pros: Promise<void>[] = [];
 
     pros.push(renderManager.removeClassFrom(this.referenceBox.getId(), relocationDragManager.draggingInProgressStyleClass, RenderPriority.RESPONSIVE));
+
+    if (this.referenceBox.site.isDetached()) {
+      await Promise.all(pros)
+      return
+    }
 
     if (!this.referenceBox.isRoot() && this.referenceBox.getParent() != dropTarget) {
       pros.push(this.referenceBox.setParentAndFlawlesslyResizeAndSave(dropTarget));
