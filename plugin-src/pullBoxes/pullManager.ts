@@ -2,12 +2,10 @@ import { Box } from '../../dist/core/box/Box'
 import { Link } from '../../dist/core/link/Link'
 import { ClientRect } from '../../dist/core/ClientRect'
 import { renderManager, RenderPriority } from '../../dist/core/renderEngine/renderManager'
-import { LinkRoute } from '../../dist/core/link/LinkRoute'
 import { map } from '../../dist/core/Map'
+import { PulledBox, PullReason } from './PulledBox'
 
-export type PullReason = {reason: Link|Box, route: LinkRoute}
-
-const pulledBoxes: {box: Box, reasons: PullReason[]}[] = []
+const pulledBoxes: PulledBox[] = []
 
 Box.onFocus.subscribe(async (box: Box) => {
 	if (pulledBoxes.find(pulledBox => pulledBox.box === box)) {
@@ -46,19 +44,14 @@ async function removeFlyToButtonFrom(box: Box): Promise<void> {
 }
 
 export async function pull(box: Box, wishRect: ClientRect, reason: PullReason): Promise<void> {
-	const pulledBox = pulledBoxes.find(pulledBox => pulledBox.box === box)
+	const pulledBox: PulledBox|undefined = pulledBoxes.find(pulledBox => pulledBox.box === box)
 	if (pulledBox) {
-		pulledBox.reasons.push(reason)
+		await pulledBox.addReasonAndUpdatePull(reason, wishRect)
 	} else {
-		pulledBoxes.push({box, reasons: [reason]})
+		const boxPulling: {pulledBox: PulledBox, pulling: Promise<void>} = PulledBox.newAndPull(box, [reason], wishRect)
+		pulledBoxes.push(boxPulling.pulledBox)
+		await boxPulling.pulling
 	}
-	await Promise.all([
-		box.site.detachToFitClientRect(wishRect, {transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}),
-		renderManager.addStyleTo(box.getBorderId(), {
-			boxShadow: 'blueviolet 0 0 10px, blueviolet 0 0 10px',
-			transition: 'box-shadow 1s'
-		})
-	])
 }
 
 async function releaseAll(): Promise<void> {
@@ -80,32 +73,14 @@ export async function releaseForReason(reason: Link|Box): Promise<void> {
 }
 
 async function release(box: Box, reason: Link|Box|'all', options: {transitionDurationInMS: number}): Promise<void> {
-	const pulledBoxIndex = pulledBoxes.findIndex(pulledBox => pulledBox.box === box)
-	const pulledBox = pulledBoxes[pulledBoxIndex]
+	const pulledBox: PulledBox|undefined = pulledBoxes.find(pulledBox => pulledBox.box === box)
 	if (!pulledBox) {
 		return
 	}
 
-	const reasons: PullReason[] = []
-	for (let i = pulledBox.reasons.length-1; i >= 0; i--) {
-		if (reason === 'all' || pulledBox.reasons[i].reason === reason) {
-			reasons.push(...pulledBox.reasons.splice(i, 1))
-		}
+	const removingReason: {stillPulled: boolean, releasing: Promise<void>} = pulledBox.removeReasonAndUpdatePull(reason, options)
+	if (!removingReason.stillPulled) {
+		pulledBoxes.splice(pulledBoxes.indexOf(pulledBox), 1)
 	}
-	
-	if (pulledBox.reasons.length < 1) {
-		pulledBoxes.splice(pulledBoxIndex, 1)
-		await box.site.releaseIfDetached({ // await because in some cases important that box is still watched
-			transitionDurationInMS: options.transitionDurationInMS,
-			renderStylePriority: RenderPriority.RESPONSIVE
-		})
-		await renderManager.addStyleTo(box.getBorderId(), {
-			boxShadow: null
-		})
-	}
-	await Promise.all(reasons.map(reason => reason.route.unwatch()))
+	await removingReason.releasing
 }
-/*
-function getBoxesToPull(route: LinkRoute): Box[] {
-	
-}*/
