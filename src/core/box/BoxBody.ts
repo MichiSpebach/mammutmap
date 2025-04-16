@@ -37,6 +37,7 @@ export abstract class BoxBody {
     if (! await this.shouldBeRendered()) {
       if (this.renderState.isRendered() && await this.shouldBeUnrendered()) {
         await this.runUnrenderIfPossible()
+        await this.renderZoomInToRenderHint()
         return
       }
       if (this.renderState.isUnrendered()) {
@@ -48,7 +49,7 @@ export abstract class BoxBody {
 
     this.renderState.setRenderStarted()
 
-    await this.unrenderZoomInToRenderHint(),
+    await this.unrenderZoomInToRenderHint()
     await Promise.all([
       this.executeRender(),
       this.referenceBox.nodes.render()
@@ -74,7 +75,6 @@ export abstract class BoxBody {
     if (!anyChildStillRendered) { // TODO: remove condition and unrender as much as possible?
       await this.referenceBox.links.unrender() // TODO: move above executeUnrenderIfPossible, but then also unrenders links that are connected to childs that are not unrendered?
       await this.referenceBox.nodes.unrender()
-      await this.renderZoomInToRenderHint()
       this.renderState.setUnrenderFinished()
     } else {
       this.renderState.setUnrenderFinishedStillRendered()
