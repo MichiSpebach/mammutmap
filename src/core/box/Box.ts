@@ -714,7 +714,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
   public async renderStyleWithRerender(options?: {
     renderStylePriority?: RenderPriority,
     transitionDurationInMS?: number
-  }): Promise<{transitionAndRerender: Promise<void>} > {
+  }): Promise<{transitionAndRerender: Promise<void>}> {
     await this.renderStyle(options?.renderStylePriority, options?.transitionDurationInMS)
     const rendered: Promise<void> = this.render()
     if (!options?.transitionDurationInMS) {

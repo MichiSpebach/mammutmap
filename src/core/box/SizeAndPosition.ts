@@ -144,28 +144,36 @@ export class SizeAndPosition {
         await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE})
     }
 
-    public async detachToFitClientRect(clientRect: ClientRect, options?: {transitionDurationInMS?: number, renderStylePriority?: RenderPriority}): Promise<void> {
+    public async detachToFitClientRect(
+        clientRect: ClientRect,
+        options: {preserveAspectRatio: boolean, transitionDurationInMS?: number, renderStylePriority?: RenderPriority}
+    ): Promise<{transitionAndRerender: Promise<void>}> {
         const rect: LocalRect = await this.referenceNode.getParent().transform.clientToLocalRect(clientRect)
         const savedRect: LocalRect = this.getLocalRectToSave()
-        const zoom: number = Math.min(rect.width/savedRect.width, rect.height/savedRect.height)
-        const fittedWidth: number = savedRect.width*zoom
-        const fittedHeight: number = savedRect.height*zoom
+        let zoomX: number = rect.width/savedRect.width
+        let zoomY: number = rect.height/savedRect.height
+        if (options.preserveAspectRatio) {
+            zoomX = Math.min(zoomX, zoomY)
+            zoomY = zoomX
+        }
+        const fittedWidth: number = savedRect.width*zoomX
+        const fittedHeight: number = savedRect.height*zoomY
         const rectMid: LocalPosition = rect.getMidPosition()
 
         this.detached = {
             shiftX: rectMid.percentX-fittedWidth/2 - savedRect.x,
             shiftY: rectMid.percentY-fittedHeight/2 - savedRect.y,
-            zoomX: zoom,
-            zoomY: zoom
+            zoomX,
+            zoomY
         }
 
-        const addingStyle: Promise<void> = renderManager.addClassTo(this.referenceNode.getId(), style.getBoxSiteDetachedClass(), options?.renderStylePriority)
+        const addingStyle: Promise<void> = renderManager.addClassTo(this.referenceNode.getId(), style.getBoxSiteDetachedClass(), options.renderStylePriority)
         const {transitionAndRerender} = await this.referenceNode.renderStyleWithRerender(options)
-        await transitionAndRerender
-        await Promise.all([
-            this.referenceNode.borderingLinks.renderAllThatShouldBe(),
-            addingStyle
-        ])
+        return {transitionAndRerender: (async () => {
+            await transitionAndRerender
+            await this.referenceNode.borderingLinks.renderAllThatShouldBe(),
+            await addingStyle
+        })()}
     }
 
     public async releaseIfDetached(options?: {transitionDurationInMS?: number, renderStylePriority?: RenderPriority}): Promise<void> {

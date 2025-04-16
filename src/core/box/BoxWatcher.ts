@@ -1,7 +1,7 @@
 import { Box } from './Box';
 import { boxManager } from './BoxManager'
-import { util } from '../util/util'
 import { map } from '../Map'
+import { log } from '../logService'
 
 export class BoxWatcher {
   private box: Box|null
@@ -36,12 +36,13 @@ export class BoxWatcher {
       this.box = box
       return this.box
     }*/
-    util.logError('failed to load box '+this.boxSrcPath)
+    log.errorAndThrow('BoxWatcher::get() failed to load box '+this.boxSrcPath)
   }
 
   public async unwatch(): Promise<void> {
     if (!this.box) {
-      util.logError('trying to unwatch unwatched box '+this.boxSrcPath)
+      log.warning('BoxWatcher::unwatch() trying to unwatch unwatched box '+this.boxSrcPath)
+      return
     }
     await this.box.removeWatcherAndUpdateRender(this)
     this.boxSrcPath = this.box.getSrcPath()
