@@ -4,6 +4,7 @@ import { Link } from '../../dist/core/link/Link'
 import { LinkRoute } from '../../dist/core/link/LinkRoute'
 import { ClientRect } from '../../dist/core/ClientRect'
 import { renderManager, RenderPriority } from '../../dist/core/renderEngine/renderManager'
+import { LocalRect } from '../../dist/core/LocalRect'
 
 export type PullReason = {reason: Link|Box, route: LinkRoute}
 
@@ -14,15 +15,34 @@ export class PulledBox {
 	public parent: PulledBox|null
 	public pulledChildren: PulledBox[] = []
 
-	public static newAndPull(box: Box, reasons: PullReason[], rect: ClientRect, parent: PulledBox|null): {pulledBox: PulledBox, pulling: Promise<void>} {
-		const pulledBox = new PulledBox(box, reasons, parent)
-		return {pulledBox, pulling: pulledBox.pull(rect)}
-	}
-
-	private constructor(box: Box, reasons: PullReason[], parent: PulledBox|null) {
+	public constructor(box: Box, reasons: PullReason[], parent: PulledBox|null) {
 		this.box = box
 		this.reasons = reasons
 		this.parent = parent
+	}
+
+	public async pullAncestors(biggestAncestorToConnect: PulledBox) {
+		if (this.parent) {
+			console.warn(`PulledBox::pullAncestors this.parent`)
+		}
+		let biggestAncestorSoFar: PulledBox = this
+		while (biggestAncestorSoFar.box !== biggestAncestorToConnect.box) {
+			if (biggestAncestorSoFar.box.isRoot()) {
+				console.warn(`PulledBox::pullAncestors biggestAncestorSoFar.box.isRoot()`)
+				return
+			}
+			const parent: PulledBox = biggestAncestorSoFar.box.getParent() !== biggestAncestorToConnect.box
+				? new PulledBox(biggestAncestorSoFar.box.getParent(), this.reasons, null)
+				: biggestAncestorToConnect
+			parent.pulledChildren.push(biggestAncestorSoFar)
+			biggestAncestorSoFar.parent = parent
+			biggestAncestorSoFar = parent
+		}
+		if (!this.parent) {
+			console.warn(`PulledBox::pullAncestors !this.parent this only happens if biggestAncestorToConnect === this.box`)
+			return
+		}
+		await this.parent.updateSizeToEncloseChilds()
 	}
 
 	public async pullPath(path: Box[], wishRect: ClientRect, reason: PullReason): Promise<void> {
@@ -30,11 +50,14 @@ export class PulledBox {
 			console.warn('PulledBox::pullPath(..) !this.box.getChilds().includes(path[0])')
 		}
 		let pulledChild: PulledBox|undefined = this.pulledChildren.find(pulledBox => pulledBox.box === path[0])
-		if (!pulledChild) {
-			const boxPulling: {pulledBox: PulledBox, pulling: Promise<void>} = PulledBox.newAndPull(path[0], [reason], wishRect, this)
-			pulledChild = boxPulling.pulledBox
+		if (pulledChild) {
+			if (!pulledChild.reasons.includes(reason)) {
+				pulledChild.reasons.push(reason)
+			}
+		} else {
+			pulledChild = new PulledBox(path[0], [reason], this)
 			this.pulledChildren.push(pulledChild)
-			await boxPulling.pulling
+			await pulledChild.pull(wishRect, true)
 		}
 		if (path.length > 1) {
 			await pulledChild.pullPath(path.slice(1), wishRect, reason)
@@ -44,6 +67,10 @@ export class PulledBox {
 	}
 
 	private async updateSizeToEncloseChilds(): Promise<void> { await this.updateSizeScheduler.schedule(async () => {
+		if (this.pulledChildren.length === 0) {
+			console.warn(`PulledBox::updateSizeToEncloseChilds() called but this.pulledChildren.length === 0`)
+			return
+		}
 		const margin: number = 8
 		const marginForHeader: number = 32
 		const rect: ClientRect = await this.box.getClientRect()
@@ -53,21 +80,12 @@ export class PulledBox {
 		if (enclosingRect.isInsideOrEqual(rectWithoutMargin)) {
 			return
 		}
-		await this.box.site.detachToFitClientRect(new ClientRect(enclosingRect.x-margin, enclosingRect.y-marginForHeader, enclosingRect.width+margin*2, enclosingRect.height+margin+marginForHeader), {preserveAspectRatio: false, transitionDurationInMS: 200}),
-		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.box.site.detachToFitClientRect(childWithRect.rect, {preserveAspectRatio: false, transitionDurationInMS: 200})))
+		await this.pull(new ClientRect(enclosingRect.x-margin, enclosingRect.y-marginForHeader, enclosingRect.width+margin*2, enclosingRect.height+margin+marginForHeader), false)
+		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.pull(childWithRect.rect, false)))
 		if (this.parent) {
 			await this.parent.updateSizeToEncloseChilds()
 		}
 	})}
-
-	public async addReasonAndUpdatePull(reason: PullReason, rect: ClientRect): Promise<void> {
-		if (this.reasons.includes(reason)) {
-			console.warn('PulledBox::addReasonAndUpdatePull(..) already includes reason')
-		} else {
-			this.reasons.push(reason)
-		}
-		await this.pull(rect)
-	}
 
 	public removeReasonAndUpdatePull(reason: Link|Box|'all', options: {transitionDurationInMS: number, notUnwatchReasonRoute?: boolean}): {stillPulled: boolean, releasing: Promise<void>} {
 		let childrenStillPulled: boolean = false
@@ -104,9 +122,12 @@ export class PulledBox {
 		})()}
 	}
 
-	private async pull(rect: ClientRect): Promise<void> {
+	public async pull(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
+		if (preserveAspectRatio) {
+			rect = this.fitRectPreservingAspectRatio(rect, this.calculateSavedAspectRatio())
+		}
 		await Promise.all([
-			this.box.site.detachToFitClientRect(rect, {preserveAspectRatio: true, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}),
+			this.box.site.detachToFitClientRect(rect, {preserveAspectRatio: false, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}),
 			renderManager.addStyleTo(this.box.getBorderId(), {
 				boxShadow: 'blueviolet 0 0 10px, blueviolet 0 0 10px',
 				transition: 'box-shadow 1s'
@@ -140,20 +161,25 @@ export class PulledBox {
 		return undefined
 	}
 
-	public addDescendantIfPossible(descendant: PulledBox): {added: boolean} {
-		if (!this.box.isAncestorOf(descendant.box)) {
-			return {added: false}
+	public fitRectPreservingAspectRatio(rect: ClientRect, aspectRatio: number): ClientRect {
+		if (rect.width/rect.height > aspectRatio) {
+			const fittedWidth: number = rect.height*aspectRatio
+			return new ClientRect(rect.x + (rect.width-fittedWidth)/2, rect.y, fittedWidth, rect.height)
+		} else {
+			const fittedHeight: number = rect.width/aspectRatio
+			return new ClientRect(rect.x, rect.y + (rect.height-fittedHeight)/2, rect.width, fittedHeight)
 		}
-		if (descendant.box.getParent() === this.box) {
-			this.pulledChildren.push(descendant)
-			return {added: true}
-		}
-		for (const child of this.pulledChildren) {
-			if (child.addDescendantIfPossible(descendant)) {
-				return {added: true}
+	}
+
+	public calculateSavedAspectRatio(): number {
+		let savedAspectRatio: number = 1
+		for (let currentBox = this.box; ; currentBox = currentBox.getParent()) {
+			const savedRect: LocalRect = currentBox.getLocalRectToSave()
+			savedAspectRatio *= savedRect.width/savedRect.height
+			if (currentBox.isRoot()) {
+				break
 			}
 		}
-		console.warn(`PulledBox::addDescendantIfPossible(..) failed`)
-		return {added: false}
+		return savedAspectRatio
 	}
 }

@@ -2,13 +2,11 @@ import { Box } from '../dist/core/box/Box'
 import { ClientRect } from '../dist/core/ClientRect'
 import { Link } from '../dist/core/link/Link'
 import { LinkEnd } from '../dist/core/link/LinkEnd'
-import { NodeWidget } from '../dist/core/node/NodeWidget'
-import { BoxWatcher } from '../dist/core/box/BoxWatcher'
 import { ClientPosition } from '../dist/core/shape/ClientPosition'
 import { AbstractNodeWidget } from '../dist/core/AbstractNodeWidget'
 import { map } from '../dist/core/Map'
 import { LinkRoute } from '../dist/core/link/LinkRoute'
-import { PulledBox, PullReason } from './pullBoxes/PulledBox'
+import { PullReason } from './pullBoxes/PulledBox'
 import { DebugWidget } from './pullBoxes/DebugWidget'
 import { PulledBoxes } from './pullBoxes/PulledBoxes'
 import { renderManager, RenderPriority } from '../dist/core/renderEngine/renderManager'
@@ -196,75 +194,10 @@ async function shouldNotPullBox(box: Box): Promise<boolean> {
 	return boxRect.isInsideOrEqual(mapRect) && (await box.getClientRect()).getArea() > 100*100
 }
 
-async function pullInLinkEndTargetIfNecessary(linkEnd: LinkEnd, targetBox: Box, reason: PullReason): Promise<void> {
-	if (await isLinkEndOutsideScreen(linkEnd)) {
-		const pullPosition: ClientPosition = await calculatePullPositionOfRoute(reason.route, linkEnd === linkEnd.getReferenceLink().to ? 'to' : 'from')
-		if (targetBox.isAncestorOf(linkEnd.getOtherEnd().getDeepestRenderedWayPoint().linkable)) {
-			console.info('pullBoxes: target box to pull is an ancestor (outer box of the same path)')
-			return
-		}
-		if (pullingInReasonsInProgress.includes(reason.reason)) {
-			await pull(targetBox, createPullRect(pullPosition), reason)
-		} else {
-			// already deselected in meantime
-			await reason.route.unwatch()
-		}
-	} else if (!await isTargetRenderedAndLargeEnough(linkEnd)) {
-		const targetBoxRect: ClientRect = await targetBox.getClientRect()
-		let pullRect: ClientRect = createPullRect(targetBoxRect.getMidPosition())
-		if (pullRect.width < targetBoxRect.width || pullRect.height < targetBoxRect.height) {
-			pullRect = targetBoxRect
-		}
-		if (pullingInReasonsInProgress.includes(reason.reason)) {
-			await pull(targetBox, pullRect, reason)
-		} else {
-			// already deselected in meantime
-			await reason.route.unwatch()
-		}
-	} else {
-		await reason.route.unwatch()
-	}
-}
-
-async function pull(box: Box, wishRect: ClientRect, reason: PullReason): Promise<void> {
-	const pulledBox: PulledBox|undefined = pulledBoxes.find(box)
-	if (pulledBox) {
-		await pulledBox.addReasonAndUpdatePull(reason, wishRect)
-	} else {
-		const boxPulling: {pulledBox: PulledBox, pulling: Promise<void>} = PulledBox.newAndPull(box, [reason], wishRect, null)
-		pulledBoxes.add(boxPulling.pulledBox)
-		await boxPulling.pulling
-	}
-}
-
 async function isLinkEndOutsideScreen(linkEnd: LinkEnd): Promise<boolean> {
 	const position: ClientPosition = await linkEnd.getRenderPositionInClientCoords()
 	const rect: ClientRect = await getIntersectionRect()
 	return !rect.isPositionInside(position)
-}
-
-async function isTargetBoxOutsideScreen(linkEnd: LinkEnd): Promise<boolean> {
-	const target: Box|NodeWidget = linkEnd.getDeepestRenderedWayPoint().linkable
-	const targetBox: Box = target instanceof Box ? target : target.getParent()
-	const mapClientRect: ClientRect = await linkEnd.getManagingBox().context.getMapClientRect()
-	const targetBoxRect: ClientRect = await targetBox.getClientRect()
-	return !targetBoxRect.isInsideOrEqual(mapClientRect) && !targetBoxRect.isOverlappingWith(mapClientRect)
-}
-
-async function isTargetRenderedAndLargeEnough(linkEnd: LinkEnd): Promise<boolean> {
-	const target: Box|NodeWidget = linkEnd.getDeepestRenderedWayPoint().linkable
-	if (target.getId() !== linkEnd.getTargetNodeId()) {
-		return false
-	}
-	const targetBox: Box = target instanceof Box ? target : target.getParent()
-	const rect: ClientRect = await targetBox.getClientRect()
-	return rect.width + rect.height > 200
-}
-
-async function getTargetBoxAndRenderIfNecessary(linkEnd: LinkEnd): Promise<{box: Box, watcher: BoxWatcher}> {
-	const target: {node: AbstractNodeWidget, watcher: BoxWatcher} = await linkEnd.getTargetAndRenderIfNecessary()
-	const box: Box = target.node instanceof Box ? target.node : target.node.getParent() as Box
-	return {box, watcher: target.watcher}
 }
 
 function createPullRect(midPosition: ClientPosition): ClientRect {

@@ -8,21 +8,48 @@ export class PulledBoxes {
 
 	public async pullPath(path: Box[], wishRect: ClientRect, reason: PullReason): Promise<void> {
 		let pulledBox: PulledBox|undefined = this.find(path[0])
-		if (!pulledBox && !path[0].isRoot()) {	// TODO while, seek root
-			pulledBox = this.find(path[0].getParent())
-			if (pulledBox) {
-				path = [path[0].getParent(), ...path]
+		if (!pulledBox) {
+			let foundPath: Box[] = path
+			while (!foundPath[0].isRoot()) {
+				pulledBox = this.find(foundPath[0].getParent())
+				foundPath = [foundPath[0].getParent(), ...foundPath]
+				if (pulledBox) {
+					path = foundPath
+					break
+				}
 			}
 		}
-		if (!pulledBox) {
-			const boxPulling: {pulledBox: PulledBox, pulling: Promise<void>} = PulledBox.newAndPull(path[0], [reason], wishRect, null)
-			pulledBox = boxPulling.pulledBox
-			this.pulledBoxes.push(pulledBox)
-			await boxPulling.pulling
+		if (pulledBox) {
+			if (!pulledBox.reasons.includes(reason)) {
+				pulledBox.reasons.push(reason)
+			}
+		} else {
+			pulledBox = new PulledBox(path[0], [reason], null)
+			await this.addPulledBoxAndUpdateDescendants(pulledBox)
 		}
 		if (path.length > 1) {
 			await pulledBox.pullPath(path.slice(1), wishRect, reason)
+		} else {
+			await pulledBox.pull(wishRect, true)
 		}
+	}
+
+	private async addPulledBoxAndUpdateDescendants(pulledBox: PulledBox): Promise<void> {
+		const pros: Promise<void>[] = []
+		for (let i = this.pulledBoxes.length-1; i >= 0; i--) { // i-- because removes elements
+			const otherPulledBox: PulledBox = this.pulledBoxes[i]
+			if (pulledBox.box.isAncestorOf(otherPulledBox.box)) {
+				pros.push(otherPulledBox.pullAncestors(pulledBox))
+				this.pulledBoxes.splice(i, 1)
+				for (const reason of otherPulledBox.reasons) {
+					if (!pulledBox.reasons.includes(reason)) {
+						pulledBox.reasons.push(reason)
+					}
+				}
+			}
+		}
+		this.pulledBoxes.push(pulledBox)
+		await Promise.all(pros)
 	}
 
 	public async releaseAll(): Promise<void> {
@@ -66,14 +93,5 @@ export class PulledBoxes {
 			}
 		}
 		return undefined
-	}
-
-	public add(box: PulledBox): void {
-		for (const pulledBox of this.pulledBoxes) {
-			if (pulledBox.addDescendantIfPossible(box).added) {
-				return
-			}
-		}
-		this.pulledBoxes.push(box)
 	}
 }

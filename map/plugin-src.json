@@ -391,6 +391,102 @@
 			"tags": [
 				"autoMaintained"
 			]
+		},
+		{
+			"id": "link1mn1l2969kg",
+			"from": {
+				"path": [
+					{
+						"boxId": "6d218c8t9s8",
+						"boxName": "pullBoxes.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rifp9tbpqmg",
+						"boxName": "pullBoxes",
+						"x": 68,
+						"y": 28
+					},
+					{
+						"boxId": "cqto44ntiqo",
+						"boxName": "PulledBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linke15im93gad",
+			"from": {
+				"path": [
+					{
+						"boxId": "6d218c8t9s8",
+						"boxName": "pullBoxes.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rifp9tbpqmg",
+						"boxName": "pullBoxes",
+						"x": 28,
+						"y": 28
+					},
+					{
+						"boxId": "oi8eiqno6do",
+						"boxName": "DebugWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkfku0fr2d6j8",
+			"from": {
+				"path": [
+					{
+						"boxId": "6d218c8t9s8",
+						"boxName": "pullBoxes.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "rifp9tbpqmg",
+						"boxName": "pullBoxes",
+						"x": 28,
+						"y": 68
+					},
+					{
+						"boxId": "9ghcbn0jvt8",
+						"boxName": "PulledBoxes.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
 		}
 	],
 	"nodes": [

@@ -1,0 +1,89 @@
+{
+	"id": "rifp9tbpqmg",
+	"x": 20,
+	"y": 32,
+	"width": 12,
+	"height": 12,
+	"links": [
+		{
+			"id": "linkvje6i539efg",
+			"from": {
+				"path": [
+					{
+						"boxId": "oi8eiqno6do",
+						"boxName": "DebugWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cqto44ntiqo",
+						"boxName": "PulledBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkcol5npeaijg",
+			"from": {
+				"path": [
+					{
+						"boxId": "oi8eiqno6do",
+						"boxName": "DebugWidget.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "9ghcbn0jvt8",
+						"boxName": "PulledBoxes.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkabqnb8ovguo",
+			"from": {
+				"path": [
+					{
+						"boxId": "9ghcbn0jvt8",
+						"boxName": "PulledBoxes.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cqto44ntiqo",
+						"boxName": "PulledBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained",
+				"has"
+			]
+		}
+	],
+	"nodes": []
+}

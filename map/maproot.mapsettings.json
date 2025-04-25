@@ -12,7 +12,7 @@
 		},
 		{
 			"name": "has",
-			"count": 50,
+			"count": 51,
 			"appearance": {
 				"mode": "visible",
 				"color": "lime"
@@ -51,7 +51,7 @@
 		},
 		{
 			"name": "autoMaintained",
-			"count": 3,
+			"count": 9,
 			"appearance": {}
 		}
 	],
