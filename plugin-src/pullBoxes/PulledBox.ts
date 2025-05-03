@@ -1,12 +1,14 @@
 import { Box } from '../../dist/core/box/Box'
 import { SkipToNewestScheduler } from '../../dist/core/util/SkipToNewestScheduler'
 import { Link } from '../../dist/core/link/Link'
-import { LinkRoute } from '../../dist/core/link/LinkRoute'
 import { ClientRect } from '../../dist/core/ClientRect'
 import { renderManager, RenderPriority } from '../../dist/core/renderEngine/renderManager'
 import { LocalRect } from '../../dist/core/LocalRect'
-
-export type PullReason = {reason: Link|Box, route: LinkRoute}
+import { NodeWidget } from '../../dist/core/node/NodeWidget'
+import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
+import { PullReason } from './PullReason'
+import { LinkEnd } from '../../dist/core/link/LinkEnd'
+import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 
 export class PulledBox {
 	public readonly box: Box
@@ -21,7 +23,7 @@ export class PulledBox {
 		this.parent = parent
 	}
 
-	public async pullAncestors(biggestAncestorToConnect: PulledBox) {
+	public async pullAncestors(biggestAncestorToConnect: PulledBox): Promise<void> {
 		if (this.parent) {
 			console.warn(`PulledBox::pullAncestors this.parent`)
 		}
@@ -43,6 +45,44 @@ export class PulledBox {
 			return
 		}
 		await this.parent.updateSizeToEncloseChilds()
+	}
+
+	public static async pullPathIfNecessary(pathIds: string[], reason: PullReason, parent: Box|PulledBox): Promise<{biggestPulledBox: PulledBox|undefined}> {
+		let biggestPulledBox: PulledBox|undefined = parent instanceof PulledBox ? parent : undefined
+		
+		for (const id of pathIds) {
+			const parentBox: Box = parent instanceof PulledBox ? parent.box : parent
+			const child: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = await parentBox.findChildByIdAndRenderIfNecessary(id)
+			if (!child) {
+				console.warn(`PulledBox::pullPathIfNecessary(pathIds=${pathIds}) !child`)
+				break
+			}
+			if (!(child.node instanceof Box)) {
+				console.warn(`PulledBox::pullPathIfNecessary(pathIds=${pathIds}) !(child.node instanceof Box)`)
+				break
+			}
+
+			let pulledChild: PulledBox|undefined = undefined
+			if (parent instanceof PulledBox) {
+				pulledChild = parent.pulledChildren.find(pulledBox => pulledBox.box === child.node)
+				if (pulledChild) {
+					if (!pulledChild.reasons.includes(reason)) {
+						pulledChild.reasons.push(reason)
+					}
+				}
+			} else if (!await reason.shouldNotPullBox(child.node)) {
+				pulledChild = new PulledBox(child.node, [reason], parent instanceof PulledBox ? parent : null)
+				if (!biggestPulledBox) {
+					biggestPulledBox = pulledChild
+				}
+			}
+			if (pulledChild) {
+				pulledChild.pullForReason(reason) // TODO await or return pulling: Promise<void>
+			}
+			parent = pulledChild?? child.node
+		}
+
+		return {biggestPulledBox}
 	}
 
 	public async pullPath(path: Box[], wishRect: ClientRect, reason: PullReason): Promise<void> {
@@ -120,6 +160,24 @@ export class PulledBox {
 				await Promise.all(removedReasons.map(reason => reason.route.unwatch()))
 			}
 		})()}
+	}
+
+	private async pullForReason(reason: PullReason): Promise<void> {
+		const borderingLinkEnd: LinkEnd|undefined = reason.route.findLinkEndBorderingNode(this.box)
+		if (!borderingLinkEnd) {
+			console.warn('PulledBox::pullForReason(..) !borderingLinkEnd')
+			return
+		}
+		const direction: 'from'|'to' = borderingLinkEnd.getReferenceLink().from === borderingLinkEnd ? 'to' : 'from'
+		const pullPosition: ClientPosition = await reason.calculatePullPositionOfRoute(reason.route, direction)
+		await this.pull(reason.createPullRect(pullPosition), this.pulledChildren.length < 1)
+	}
+
+	public async pullAndUpdateAncestors(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
+		await this.pull(rect, preserveAspectRatio)
+		if (this.parent) {
+			await this.parent.updateSizeToEncloseChilds()
+		}
 	}
 
 	public async pull(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {

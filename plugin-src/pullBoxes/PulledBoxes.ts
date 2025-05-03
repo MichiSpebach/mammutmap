@@ -1,10 +1,41 @@
 import { Box } from '../../dist/core/box/Box'
 import { Link } from '../../dist/core/link/Link'
 import { ClientRect } from '../../dist/core/ClientRect'
-import { PulledBox, PullReason } from './PulledBox'
+import { PulledBox } from './PulledBox'
+import { PullReason } from './PullReason'
+import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 
 export class PulledBoxes {
 	public pulledBoxes: PulledBox[] = []
+
+	public async pullBoxIfNecessary(box: Box, reason: PullReason): Promise<{pulled: boolean}> {
+		if (box.isRoot()) {
+			console.warn(`PulledBoxes::pullBoxIfNecessary(box: ${box.getName()}) cannot pull root`)
+			return {pulled: false}
+		}
+
+		const pros: Promise<void>[] = []
+		let pulledBox: PulledBox|undefined = this.find(box)
+		if (pulledBox) {
+			if (!pulledBox.reasons.includes(reason)) {
+				pulledBox.reasons.push(reason)
+			}
+		} else {
+			if (await reason.shouldNotPullBox(box)) {
+				return {pulled: false}
+			}
+			pulledBox = new PulledBox(box, [reason], null)
+			await this.pullAncestorsOf(pulledBox)
+			await this.updateDescendantsOf(pulledBox)
+			if (!pulledBox.parent) {
+				this.pulledBoxes.push(pulledBox)
+			}
+		}
+		
+		const pullPosition: ClientPosition = await reason.calculatePullPositionFor(box)
+		await pulledBox.pullAndUpdateAncestors(reason.createPullRect(pullPosition), pulledBox.pulledChildren.length < 1)
+		return {pulled: true}
+	}
 
 	public async pullPath(path: Box[], wishRect: ClientRect, reason: PullReason): Promise<void> {
 		let pulledBox: PulledBox|undefined = this.find(path[0])
@@ -35,6 +66,21 @@ export class PulledBoxes {
 	}
 
 	private async addPulledBoxAndUpdateDescendants(pulledBox: PulledBox): Promise<void> {
+		const updatingDescendants: Promise<void> = this.updateDescendantsOf(pulledBox)
+		this.pulledBoxes.push(pulledBox)
+		await updatingDescendants
+	}
+
+	private async pullAncestorsOf(pulledBox: PulledBox): Promise<void> {
+		for (const otherPulledBox of this.pulledBoxes) {
+			if (otherPulledBox.box.isAncestorOf(pulledBox.box)) {
+				await pulledBox.pullAncestors(otherPulledBox)
+				break
+			}
+		}
+	}
+	
+	private async updateDescendantsOf(pulledBox: PulledBox): Promise<void> {
 		const pros: Promise<void>[] = []
 		for (let i = this.pulledBoxes.length-1; i >= 0; i--) { // i-- because removes elements
 			const otherPulledBox: PulledBox = this.pulledBoxes[i]
@@ -48,7 +94,6 @@ export class PulledBoxes {
 				}
 			}
 		}
-		this.pulledBoxes.push(pulledBox)
 		await Promise.all(pros)
 	}
 

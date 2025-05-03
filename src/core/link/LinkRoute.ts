@@ -3,6 +3,7 @@ import { Box } from '../box/Box'
 import { BoxWatcher } from '../box/BoxWatcher'
 import { log } from '../logService'
 import { Link } from './Link'
+import { LinkEnd } from './LinkEnd'
 
 export class LinkRoute {
 
@@ -95,5 +96,17 @@ export class LinkRoute {
 			log.warning(`LinkRoute::getFollowUpLink() there is more than one followUpLink for route with id '${routeId}' at node '${node.getName()}'`)
 		}
 		return followUpLinks[0]
+	}
+
+	public findLinkEndBorderingNode(node: AbstractNodeWidget): LinkEnd|undefined {
+		for (const link of this.links) {
+			if (link.from.isBoxInPath(node)) {
+				return link.from
+			}
+			if (link.to.isBoxInPath(node)) {
+				return link.to
+			}
+		}
+		return undefined
 	}
 }
