@@ -12,7 +12,7 @@
 		},
 		{
 			"name": "has",
-			"count": 51,
+			"count": 55,
 			"appearance": {
 				"mode": "visible",
 				"color": "lime"
@@ -20,7 +20,7 @@
 		},
 		{
 			"name": "isA",
-			"count": 33,
+			"count": 35,
 			"appearance": {
 				"mode": "visible",
 				"color": "aqua"
@@ -51,7 +51,7 @@
 		},
 		{
 			"name": "autoMaintained",
-			"count": 9,
+			"count": 22,
 			"appearance": {}
 		}
 	],

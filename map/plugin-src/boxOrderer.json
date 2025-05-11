@@ -6,12 +6,12 @@
 	"height": 14,
 	"links": [
 		{
-			"id": "linkmvb6m71sg7",
+			"id": "linkejl6vh0hkbo",
 			"from": {
 				"path": [
 					{
-						"boxId": "cnp3fqpioq8",
-						"boxName": "Layer.test.ts",
+						"boxId": "u2qbn2e8ki8",
+						"boxName": "LayerSystem.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -20,8 +20,8 @@
 			"to": {
 				"path": [
 					{
-						"boxId": "247bgn2s5l8",
-						"boxName": "Layer.ts",
+						"boxId": "5svfk8p48ng",
+						"boxName": "BorderLayer.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -32,12 +32,12 @@
 			]
 		},
 		{
-			"id": "link51qat6odj98",
+			"id": "link3jfo67l06c",
 			"from": {
 				"path": [
 					{
-						"boxId": "cnp3fqpioq8",
-						"boxName": "Layer.test.ts",
+						"boxId": "u2qbn2e8ki8",
+						"boxName": "LayerSystem.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -46,8 +46,8 @@
 			"to": {
 				"path": [
 					{
-						"boxId": "il7b772a0go",
-						"boxName": "NodeToOrder.ts",
+						"boxId": "99ii8v9j4dg",
+						"boxName": "LayerSide.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -58,12 +58,12 @@
 			]
 		},
 		{
-			"id": "linkuotbo45bbt8",
+			"id": "link13r03tfgiu",
 			"from": {
 				"path": [
 					{
-						"boxId": "247bgn2s5l8",
-						"boxName": "Layer.ts",
+						"boxId": "u2qbn2e8ki8",
+						"boxName": "LayerSystem.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -72,8 +72,34 @@
 			"to": {
 				"path": [
 					{
-						"boxId": "il7b772a0go",
-						"boxName": "NodeToOrder.ts",
+						"boxId": "7q2oot5gvgg",
+						"boxName": "InnerLayer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "link965mp2ul6c8",
+			"from": {
+				"path": [
+					{
+						"boxId": "u2qbn2e8ki8",
+						"boxName": "LayerSystem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "247bgn2s5l8",
+						"boxName": "Layer.ts",
 						"x": 50,
 						"y": 50
 					}
@@ -85,7 +111,191 @@
 			]
 		},
 		{
-			"id": "linkpufdv27aeb8",
+			"id": "linksp3qsc12e3g",
+			"from": {
+				"path": [
+					{
+						"boxId": "2l6cj486e98",
+						"boxName": "BorderLayer.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5svfk8p48ng",
+						"boxName": "BorderLayer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "link5knpkns0gp8",
+			"from": {
+				"path": [
+					{
+						"boxId": "5svfk8p48ng",
+						"boxName": "BorderLayer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "247bgn2s5l8",
+						"boxName": "Layer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained",
+				"isA"
+			]
+		},
+		{
+			"id": "linkm9qv4im90io",
+			"from": {
+				"path": [
+					{
+						"boxId": "5svfk8p48ng",
+						"boxName": "BorderLayer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "99ii8v9j4dg",
+						"boxName": "LayerSide.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "link3pivra92mro",
+			"from": {
+				"path": [
+					{
+						"boxId": "5fhgk8p295",
+						"boxName": "InnerLayer.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "5svfk8p48ng",
+						"boxName": "BorderLayer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkellvmak3n2o",
+			"from": {
+				"path": [
+					{
+						"boxId": "5fhgk8p295",
+						"boxName": "InnerLayer.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "7q2oot5gvgg",
+						"boxName": "InnerLayer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkked6nvej238",
+			"from": {
+				"path": [
+					{
+						"boxId": "7q2oot5gvgg",
+						"boxName": "InnerLayer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "247bgn2s5l8",
+						"boxName": "Layer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained",
+				"isA"
+			]
+		},
+		{
+			"id": "link0tktp48e7jo",
+			"from": {
+				"path": [
+					{
+						"boxId": "7q2oot5gvgg",
+						"boxName": "InnerLayer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "99ii8v9j4dg",
+						"boxName": "LayerSide.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkc6a0vdbk5g",
 			"from": {
 				"path": [
 					{
@@ -112,7 +322,86 @@
 			]
 		},
 		{
-			"id": "linkkvq61bsnk48",
+			"id": "linkc9sv4lurbho",
+			"from": {
+				"path": [
+					{
+						"boxId": "247bgn2s5l8",
+						"boxName": "Layer.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "il7b772a0go",
+						"boxName": "NodeToOrder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained",
+				"has"
+			]
+		},
+		{
+			"id": "link9a0f2afnvb",
+			"from": {
+				"path": [
+					{
+						"boxId": "s789ls84nmo",
+						"boxName": "LayerSide.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "99ii8v9j4dg",
+						"boxName": "LayerSide.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkdkpda2q9ql8",
+			"from": {
+				"path": [
+					{
+						"boxId": "s789ls84nmo",
+						"boxName": "LayerSide.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "il7b772a0go",
+						"boxName": "NodeToOrder.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "link2djgsvv2hd",
 			"from": {
 				"path": [
 					{
@@ -139,34 +428,83 @@
 			]
 		},
 		{
-			"id": "linkkc8svoo8i9g",
+			"id": "linkan80k2n2sjo",
 			"from": {
 				"path": [
 					{
-						"boxId": "9tsfja6b51",
-						"boxName": "9tsfja6b51",
-						"x": 78.787,
-						"y": 64.084
+						"boxId": "99ii8v9j4dg",
+						"boxName": "LayerSide.ts",
+						"x": 50,
+						"y": 50
 					}
 				]
 			},
 			"to": {
 				"path": [
 					{
-						"boxId": "il7b772a0go",
-						"boxName": "NodeToOrder.ts",
+						"boxId": "i625doc7mhg",
+						"boxName": "Sorting.ts",
 						"x": 50,
 						"y": 50
 					}
 				]
-			}
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkvvq7a9doq9o",
+			"from": {
+				"path": [
+					{
+						"boxId": "f8kh0hu4nuo",
+						"boxName": "LayerSystem.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "u2qbn2e8ki8",
+						"boxName": "LayerSystem.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "link2hgqbmm7jj",
+			"from": {
+				"path": [
+					{
+						"boxId": "o5kcqdmtg88",
+						"boxName": "Sorting.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "i625doc7mhg",
+						"boxName": "Sorting.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
 		}
 	],
-	"nodes": [
-		{
-			"id": "9tsfja6b51",
-			"x": 72,
-			"y": 60
-		}
-	]
+	"nodes": []
 }
