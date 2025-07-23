@@ -23,7 +23,8 @@ export async function initServicesWithMocks(options?: {hideConsoleLog?: boolean}
 	fileSystem: MockProxy<FileSystemAdapter>
 }> {
 	const generalMocks = initGeneralServicesWithMocks()
-	generalMocks.renderManager.getClientSize.mockReturnValue({width: 1600, height: 800})
+	//generalMocks.renderManager.getClientSize.mockReturnValue({width: 1600, height: 800}) // TypeError: Cannot read properties of undefined (reading 'width')
+	generalMocks.renderManager.getClientSize = mock(() => ({width: 1600, height: 800}))
 
 	const relocationDragManagerMock: MockProxy<RelocationDragManager> = mock<RelocationDragManager>()
 	relocationDragManager.init(relocationDragManagerMock)

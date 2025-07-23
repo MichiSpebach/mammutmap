@@ -83,6 +83,133 @@
 				"autoMaintained",
 				"has"
 			]
+		},
+		{
+			"id": "linkke9g2g23avg",
+			"from": {
+				"path": [
+					{
+						"boxId": "9ghcbn0jvt8",
+						"boxName": "PulledBoxes.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "s9jui8g61h",
+						"boxName": "PullReason.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			}
+		},
+		{
+			"id": "link4pri35682c8",
+			"from": {
+				"path": [
+					{
+						"boxId": "cqto44ntiqo",
+						"boxName": "PulledBox.ts",
+						"x": 50,
+						"y": 60
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "s9jui8g61h",
+						"boxName": "PullReason.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"has"
+			]
+		},
+		{
+			"id": "link667l53o1h9",
+			"from": {
+				"path": [
+					{
+						"boxId": "lnl0eefh958",
+						"boxName": "PulledBox.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "cqto44ntiqo",
+						"boxName": "PulledBox.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "linkmd0vo3kt08o",
+			"from": {
+				"path": [
+					{
+						"boxId": "jl65q3bjtvg",
+						"boxName": "PulledBoxes.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "s9jui8g61h",
+						"boxName": "PullReason.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
+		},
+		{
+			"id": "links98bvircvo",
+			"from": {
+				"path": [
+					{
+						"boxId": "jl65q3bjtvg",
+						"boxName": "PulledBoxes.test.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"to": {
+				"path": [
+					{
+						"boxId": "9ghcbn0jvt8",
+						"boxName": "PulledBoxes.ts",
+						"x": 50,
+						"y": 50
+					}
+				]
+			},
+			"tags": [
+				"autoMaintained"
+			]
 		}
 	],
 	"nodes": []

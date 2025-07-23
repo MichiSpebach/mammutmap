@@ -4,10 +4,8 @@ import { Link } from '../../dist/core/link/Link'
 import { ClientRect } from '../../dist/core/ClientRect'
 import { renderManager, RenderPriority } from '../../dist/core/renderEngine/renderManager'
 import { LocalRect } from '../../dist/core/LocalRect'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
-import { PullReason } from './PullReason'
-import { LinkEnd } from '../../dist/core/link/LinkEnd'
+import { getIntersectionRect, PullReason } from './PullReason'
+import { Item, Sorting } from '../boxOrderer/Sorting'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 
 export class PulledBox {
@@ -47,44 +45,6 @@ export class PulledBox {
 		await this.parent.updateSizeToEncloseChilds()
 	}
 
-	public static async pullPathIfNecessary(pathIds: string[], reason: PullReason, parent: Box|PulledBox): Promise<{biggestPulledBox: PulledBox|undefined}> {
-		let biggestPulledBox: PulledBox|undefined = parent instanceof PulledBox ? parent : undefined
-		
-		for (const id of pathIds) {
-			const parentBox: Box = parent instanceof PulledBox ? parent.box : parent
-			const child: {node: Box|NodeWidget, watcher: BoxWatcher} | undefined = await parentBox.findChildByIdAndRenderIfNecessary(id)
-			if (!child) {
-				console.warn(`PulledBox::pullPathIfNecessary(pathIds=${pathIds}) !child`)
-				break
-			}
-			if (!(child.node instanceof Box)) {
-				console.warn(`PulledBox::pullPathIfNecessary(pathIds=${pathIds}) !(child.node instanceof Box)`)
-				break
-			}
-
-			let pulledChild: PulledBox|undefined = undefined
-			if (parent instanceof PulledBox) {
-				pulledChild = parent.pulledChildren.find(pulledBox => pulledBox.box === child.node)
-				if (pulledChild) {
-					if (!pulledChild.reasons.includes(reason)) {
-						pulledChild.reasons.push(reason)
-					}
-				}
-			} else if (!await reason.shouldNotPullBox(child.node)) {
-				pulledChild = new PulledBox(child.node, [reason], parent instanceof PulledBox ? parent : null)
-				if (!biggestPulledBox) {
-					biggestPulledBox = pulledChild
-				}
-			}
-			if (pulledChild) {
-				pulledChild.pullForReason(reason) // TODO await or return pulling: Promise<void>
-			}
-			parent = pulledChild?? child.node
-		}
-
-		return {biggestPulledBox}
-	}
-
 	public async pullPath(path: Box[], wishRect: ClientRect, reason: PullReason): Promise<void> {
 		if (!this.box.getChilds().includes(path[0])) {
 			console.warn('PulledBox::pullPath(..) !this.box.getChilds().includes(path[0])')
@@ -97,7 +57,7 @@ export class PulledBox {
 		} else {
 			pulledChild = new PulledBox(path[0], [reason], this)
 			this.pulledChildren.push(pulledChild)
-			await pulledChild.pull(wishRect, true)
+			await pulledChild.detachToFitClientRect(wishRect, true)
 		}
 		if (path.length > 1) {
 			await pulledChild.pullPath(path.slice(1), wishRect, reason)
@@ -111,21 +71,36 @@ export class PulledBox {
 			console.warn(`PulledBox::updateSizeToEncloseChilds() called but this.pulledChildren.length === 0`)
 			return
 		}
-		const margin: number = 8
-		const marginForHeader: number = 32
-		const rect: ClientRect = await this.box.getClientRect()
-		const rectWithoutMargin: ClientRect = new ClientRect(rect.x+margin, rect.y+marginForHeader, rect.width-margin*2, rect.height-margin-marginForHeader)
-		const childsWithRects: {child: PulledBox, rect: ClientRect}[] = await Promise.all(this.pulledChildren.map(async child => ({child, rect: await child.box.getClientRect()})))
-		const enclosingRect: ClientRect = ClientRect.createEnclosing(childsWithRects.map(childWithRect => childWithRect.rect))
-		if (enclosingRect.isInsideOrEqual(rectWithoutMargin)) {
+		const {boxEnclosesChilds, childsWithRects, enclosingRectWithMargin} = await PulledBox.calculateIfBoxEnclosesChilds(this.box, this.pulledChildren)
+		if (boxEnclosesChilds) {
 			return
 		}
-		await this.pull(new ClientRect(enclosingRect.x-margin, enclosingRect.y-marginForHeader, enclosingRect.width+margin*2, enclosingRect.height+margin+marginForHeader), false)
-		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.pull(childWithRect.rect, false)))
+		await this.detachToFitClientRect(enclosingRectWithMargin, false)
+		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.detachToFitClientRect(childWithRect.rect, false)))
+		await this.order()
 		if (this.parent) {
 			await this.parent.updateSizeToEncloseChilds()
 		}
 	})}
+
+	public static async calculateIfBoxEnclosesChilds(box: Box, childs: PulledBox[]): Promise<{
+		boxEnclosesChilds: boolean
+		childsWithRects: {child: PulledBox, rect: ClientRect}[]
+		enclosingRectWithMargin: ClientRect
+	}> {
+		const margin: number = 8
+		const marginForHeader: number = 32
+		const rect: ClientRect = await box.getClientRect()
+		const rectWithoutMargin: ClientRect = new ClientRect(rect.x+margin, rect.y+marginForHeader, rect.width-margin*2, rect.height-margin-marginForHeader)
+		const childsWithRects: {child: PulledBox, rect: ClientRect}[] = await Promise.all(childs.map(async child => ({child, rect: await child.box.getClientRect()})))
+		const enclosingRect: ClientRect = ClientRect.createEnclosing(childsWithRects.map(childWithRect => childWithRect.rect))
+		const enclosingRectWithMargin = new ClientRect(enclosingRect.x-margin, enclosingRect.y-marginForHeader, enclosingRect.width+margin*2, enclosingRect.height+margin+marginForHeader)
+		return {
+			boxEnclosesChilds: enclosingRect.isInsideOrEqual(rectWithoutMargin),
+			childsWithRects,
+			enclosingRectWithMargin: ClientRect.createEnclosing([enclosingRectWithMargin, rect])
+		}
+	}
 
 	public removeReasonAndUpdatePull(reason: Link|Box|'all', options: {transitionDurationInMS: number, notUnwatchReasonRoute?: boolean}): {stillPulled: boolean, releasing: Promise<void>} {
 		let childrenStillPulled: boolean = false
@@ -162,25 +137,19 @@ export class PulledBox {
 		})()}
 	}
 
-	private async pullForReason(reason: PullReason): Promise<void> {
-		const borderingLinkEnd: LinkEnd|undefined = reason.route.findLinkEndBorderingNode(this.box)
-		if (!borderingLinkEnd) {
-			console.warn('PulledBox::pullForReason(..) !borderingLinkEnd')
+	public async pull(wishRect: ClientRect): Promise<void> {
+		if (this.pulledChildren.length > 0) {
+			await this.updateSizeToEncloseChilds()
 			return
 		}
-		const direction: 'from'|'to' = borderingLinkEnd.getReferenceLink().from === borderingLinkEnd ? 'to' : 'from'
-		const pullPosition: ClientPosition = await reason.calculatePullPositionOfRoute(reason.route, direction)
-		await this.pull(reason.createPullRect(pullPosition), this.pulledChildren.length < 1)
-	}
-
-	public async pullAndUpdateAncestors(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
-		await this.pull(rect, preserveAspectRatio)
+		await this.detachToFitClientRect(wishRect, this.pulledChildren.length < 1)
+		await this.order()
 		if (this.parent) {
 			await this.parent.updateSizeToEncloseChilds()
 		}
 	}
 
-	public async pull(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
+	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
 		if (preserveAspectRatio) {
 			rect = this.fitRectPreservingAspectRatio(rect, this.calculateSavedAspectRatio())
 		}
@@ -239,5 +208,45 @@ export class PulledBox {
 			}
 		}
 		return savedAspectRatio
+	}
+
+	private async order(): Promise<void> {
+		return // TODO
+		if (this.pulledChildren.length === 0) {
+			return
+		}
+		const childsWithRects: {child: PulledBox, rect: ClientRect}[] = await Promise.all(this.pulledChildren.map(async child => ({child, rect: await child.box.getClientRect()})))
+		let smallestMidPosX: number = Math.min(...childsWithRects.map(child => child.rect.getMidPosition().x))
+		let smallestMidPosY: number = Math.min(...childsWithRects.map(child => child.rect.getMidPosition().y))
+		let biggestMidPosX: number = Math.max(...childsWithRects.map(child => child.rect.getMidPosition().x))
+		let biggestMidPosY: number = Math.max(...childsWithRects.map(child => child.rect.getMidPosition().y))
+		
+		const spread: 'horizontal'|'vertical' = biggestMidPosX-smallestMidPosX > biggestMidPosY-smallestMidPosY ? 'horizontal' : 'vertical'
+
+		const items: Item[] = childsWithRects.map(childWithRect => ({
+			node: childWithRect.child.box,
+			position: spread === 'horizontal' ? childWithRect.rect.x : childWithRect.rect.y,
+			size: spread === 'horizontal' ? childWithRect.rect.width : childWithRect.rect.height
+		}))
+		const mapRect: ClientRect = await getIntersectionRect()
+		const sorting = new Sorting(
+			spread === 'horizontal' ? mapRect.x : mapRect.y,
+			spread === 'horizontal' ? mapRect.getRightX() : mapRect.getBottomY(),
+			items
+		)
+		sorting.sort()
+
+		await Promise.all(sorting.items.map(async item => {
+			if (!(item.node instanceof Box)) {
+				console.warn(`PulledBox::order !(item.node instanceof Box)`)
+				return
+			}
+			const box: Box = item.node
+			const boxRect: ClientRect = await box.getClientRect()
+			const rect: ClientRect = spread === 'horizontal'
+				? new ClientRect(item.position, boxRect.y, item.size, boxRect.height)
+				: new ClientRect(boxRect.x, item.position, boxRect.x, item.size)
+			await box.site.detachToFitClientRect(rect, {preserveAspectRatio: false/*TODO call PulledBox::pull instead*/, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE})
+		}))
 	}
 }

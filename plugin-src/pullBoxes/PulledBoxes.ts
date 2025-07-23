@@ -21,19 +21,27 @@ export class PulledBoxes {
 				pulledBox.reasons.push(reason)
 			}
 		} else {
-			if (await reason.shouldNotPullBox(box)) {
+			const pullingUnnecessaryRegardingSizeAndPosition: Promise<boolean> = reason.shouldNotPullBox(box)
+			const pulledChildren: PulledBox[] = this.getPulledChildrenOf(box)
+			const pullingUnnecessaryBecauseChildrenEnclosed = pulledChildren.length < 1 || (await PulledBox.calculateIfBoxEnclosesChilds(box, pulledChildren)).boxEnclosesChilds
+			if (await pullingUnnecessaryRegardingSizeAndPosition && pullingUnnecessaryBecauseChildrenEnclosed) {
 				return {pulled: false}
 			}
-			pulledBox = new PulledBox(box, [reason], null)
-			await this.pullAncestorsOf(pulledBox)
+			//pulledBox = new PulledBox(box, [reason], this.find(box.getParent())?? null) // TODO: activate
+			pulledBox = new PulledBox(box, [reason], null) // TODO: remove
+			await this.pullAncestorsOf(pulledBox) // TODO: remove
 			await this.updateDescendantsOf(pulledBox)
 			if (!pulledBox.parent) {
 				this.pulledBoxes.push(pulledBox)
 			}
 		}
 		
-		const pullPosition: ClientPosition = await reason.calculatePullPositionFor(box)
-		await pulledBox.pullAndUpdateAncestors(reason.createPullRect(pullPosition), pulledBox.pulledChildren.length < 1)
+		const pullPosition: ClientPosition = await reason.calculatePullPositionFor(box) // move into PulledBox::pull?
+		const pullRect: ClientRect = reason.createPullRect(pullPosition) // move into PulledBox::pull?
+		await pulledBox.pull(pullRect)
+		if (!pulledBox.parent && !pulledBox.box.getParent().isRoot()) {
+			await this.pullBoxIfNecessary(pulledBox.box.getParent(), reason)
+		}
 		return {pulled: true}
 	}
 
@@ -61,7 +69,7 @@ export class PulledBoxes {
 		if (path.length > 1) {
 			await pulledBox.pullPath(path.slice(1), wishRect, reason)
 		} else {
-			await pulledBox.pull(wishRect, true)
+			await pulledBox.detachToFitClientRect(wishRect, true)
 		}
 	}
 
@@ -138,5 +146,9 @@ export class PulledBoxes {
 			}
 		}
 		return undefined
+	}
+
+	private getPulledChildrenOf(box: Box): PulledBox[] {
+		return this.pulledBoxes.filter(child => child.box.getParent() === box)
 	}
 }
