@@ -100,7 +100,7 @@ async function pullInOriginsIfNecessary(link: Link, reason: Link|Box): Promise<v
 			return
 		}
 		originBoxes.push(originBox)
-		await pullInBoxPathIfNecessary(originBox, new PullReason(reason, route))
+		await pullBoxIfNecessary(originBox, new PullReason(reason, route))
 	}))
 }
 
@@ -119,24 +119,12 @@ async function pullInDestinationsIfNecessary(link: Link, reason: Link|Box): Prom
 			return
 		}
 		destinationBoxes.push(destinationBox)
-		await pullInBoxPathIfNecessary(destinationBox, new PullReason(reason, route))
+		await pullBoxIfNecessary(destinationBox, new PullReason(reason, route))
 	}))
 }
 
-async function pullInBoxPathIfNecessary(box: Box, reason: PullReason): Promise<void> {
-	const path: Box[] = []
-	while (!box.isRoot()) {
-		path.unshift(box)
-		box = box.getParent()
-	}
-
-	let pulled: boolean = false
-	for (const box of path) {
-		if (await pulledBoxes.pullBoxIfNecessary(box, reason)) {
-			pulled = true
-		}
-	}
-
+async function pullBoxIfNecessary(box: Box, reason: PullReason): Promise<void> {
+	const pulled: boolean = (await pulledBoxes.pullBoxIfNecessary(box, reason)).pulled
 	if (!pulled || !pullingInReasonsInProgress.includes(reason.reason)/*already deselected in meantime*/) {
 		await reason.route.unwatch()
 	}

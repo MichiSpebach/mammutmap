@@ -4,7 +4,7 @@ import { Link } from '../../dist/core/link/Link'
 import { ClientRect } from '../../dist/core/ClientRect'
 import { renderManager, RenderPriority } from '../../dist/core/renderEngine/renderManager'
 import { LocalRect } from '../../dist/core/LocalRect'
-import { getIntersectionRect, PullReason } from './PullReason'
+import { getIntersectionRect, getUncoveredMapClientRect, PullReason } from './PullReason'
 import { Item, Sorting } from '../boxOrderer/Sorting'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 
@@ -75,7 +75,15 @@ export class PulledBox {
 		if (boxEnclosesChilds) {
 			return
 		}
-		await this.detachToFitClientRect(enclosingRectWithMargin, false)
+		let rect: ClientRect = ClientRect.createEnclosing([enclosingRectWithMargin, await this.box.getClientRect()])
+		const mapRect: ClientRect = await getUncoveredMapClientRect()
+		if (rect.isOverlappingWith(mapRect)) {
+			rect = ClientRect.fromPositions(
+				new ClientPosition(Math.max(rect.x, mapRect.x), Math.max(rect.y, mapRect.y)),
+				new ClientPosition(Math.min(rect.getRightX(), mapRect.getRightX()), Math.min(rect.getBottomY(), mapRect.getBottomY()))
+			)
+		}
+		await this.detachToFitClientRect(rect, false)
 		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.detachToFitClientRect(childWithRect.rect, false)))
 		await this.order()
 		if (this.parent) {
@@ -94,11 +102,10 @@ export class PulledBox {
 		const rectWithoutMargin: ClientRect = new ClientRect(rect.x+margin, rect.y+marginForHeader, rect.width-margin*2, rect.height-margin-marginForHeader)
 		const childsWithRects: {child: PulledBox, rect: ClientRect}[] = await Promise.all(childs.map(async child => ({child, rect: await child.box.getClientRect()})))
 		const enclosingRect: ClientRect = ClientRect.createEnclosing(childsWithRects.map(childWithRect => childWithRect.rect))
-		const enclosingRectWithMargin = new ClientRect(enclosingRect.x-margin, enclosingRect.y-marginForHeader, enclosingRect.width+margin*2, enclosingRect.height+margin+marginForHeader)
 		return {
 			boxEnclosesChilds: enclosingRect.isInsideOrEqual(rectWithoutMargin),
 			childsWithRects,
-			enclosingRectWithMargin: ClientRect.createEnclosing([enclosingRectWithMargin, rect])
+			enclosingRectWithMargin: new ClientRect(enclosingRect.x-margin, enclosingRect.y-marginForHeader, enclosingRect.width+margin*2, enclosingRect.height+margin+marginForHeader)
 		}
 	}
 
