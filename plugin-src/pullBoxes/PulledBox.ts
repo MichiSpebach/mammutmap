@@ -75,15 +75,19 @@ export class PulledBox {
 		if (boxEnclosesChilds) {
 			return
 		}
-		let rect: ClientRect = ClientRect.createEnclosing([enclosingRectWithMargin, await this.box.getClientRect()])
+		const rect: ClientRect = await this.box.getClientRect()
 		const mapRect: ClientRect = await getUncoveredMapClientRect()
-		if (rect.isOverlappingWith(mapRect)) {
-			rect = ClientRect.fromPositions(
+		let updatedRect: ClientRect
+		if (rect.isInsideOrEqual(mapRect)) {
+			updatedRect = ClientRect.createEnclosing([rect, enclosingRectWithMargin])
+		} else {
+			updatedRect = PulledBox.calculateLeastTransformedRectToSurround(rect, enclosingRectWithMargin)
+			updatedRect = ClientRect.fromPositions(
 				new ClientPosition(Math.max(rect.x, mapRect.x), Math.max(rect.y, mapRect.y)),
 				new ClientPosition(Math.min(rect.getRightX(), mapRect.getRightX()), Math.min(rect.getBottomY(), mapRect.getBottomY()))
 			)
 		}
-		await this.detachToFitClientRect(rect, false)
+		await this.detachToFitClientRect(updatedRect, false)
 		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.detachToFitClientRect(childWithRect.rect, false)))
 		await this.order()
 		if (this.parent) {
@@ -107,6 +111,33 @@ export class PulledBox {
 			childsWithRects,
 			enclosingRectWithMargin: new ClientRect(enclosingRect.x-margin, enclosingRect.y-marginForHeader, enclosingRect.width+margin*2, enclosingRect.height+margin+marginForHeader)
 		}
+	}
+
+	/** public for test */
+	public static calculateLeastTransformedRectToSurround(rect: ClientRect, toSurround: ClientRect): ClientRect {
+		let x: number
+		let y: number
+		const width: number = Math.max(rect.width, toSurround.width)
+		const height: number = Math.max(rect.height, toSurround.height)
+		if (rect.x < toSurround.x) {
+			if (rect.getRightX() < toSurround.getRightX()) {
+				x = toSurround.getRightX() - width
+			} else {
+				x = rect.x
+			}
+		} else {
+			x = toSurround.x
+		}
+		if (rect.y < toSurround.y) {
+			if (rect.getBottomY() < toSurround.getBottomY()) {
+				y = toSurround.getBottomY() - height
+			} else {
+				y = rect.y
+			}
+		} else {
+			y = toSurround.y
+		}
+		return new ClientRect(x, y, width, height)
 	}
 
 	public removeReasonAndUpdatePull(reason: Link|Box|'all', options: {transitionDurationInMS: number, notUnwatchReasonRoute?: boolean}): {stillPulled: boolean, releasing: Promise<void>} {

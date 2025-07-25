@@ -4,11 +4,12 @@ import * as boxFactory from '../linkBundler/testUtil/boxFactory'
 import { RootFolderBox } from '../../dist/core/box/RootFolderBox'
 import { FolderBox } from '../../dist/core/box/FolderBox'
 import { BoxData } from '../../dist/core/mapData/BoxData'
-import { FileBox } from '../../dist/pluginFacade'
+import { FileBox } from '../../dist/core/box/FileBox'
 import { PulledBoxes } from './PulledBoxes'
 import { PullReason } from './PullReason'
 import { LinkRoute } from '../../dist/core/link/LinkRoute'
 import * as map from '../../dist/core/Map'
+import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 
 test('pullBoxIfNecessary, files to pull inside screen', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: false})
@@ -69,7 +70,9 @@ test('pullBoxIfNecessary, files to pull outside screen', async () => {
 	const selectedFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('selectedFolder', 40, 45, 20, 10, [], []), parent: rootFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const pulledFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('pulledFolder', 80, 45, 20, 10, [], []), parent: rootFolder, addToParent: true, rendered: true, bodyRendered: true})
 	const upperPulledFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('upperPulledFile', 40, 25, 20, 20, [], []), parent: pulledFolder, addToParent: true, rendered: true, bodyRendered: true})
+	await BoxWatcher.newAndWatch(upperPulledFile) // prevent unrender, TODO: add to factory?
 	const lowerPulledFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('lowerPulledFile', 40, 55, 20, 20, [], []), parent: pulledFolder, addToParent: true, rendered: true, bodyRendered: true})
+	await BoxWatcher.newAndWatch(lowerPulledFile) // prevent unrender, TODO: add to factory?
 	const upperLink = await rootFolder.links.add({from: selectedFolder, to: upperPulledFile, save: true})
 	const lowerLink = await rootFolder.links.add({from: selectedFolder, to: lowerPulledFile, save: true})
 	expect(await rootFolder.getClientRect()).toEqual({x: -400, y: -400, width: 1600, height: 1600})
