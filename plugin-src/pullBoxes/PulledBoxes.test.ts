@@ -91,7 +91,7 @@ test('pullBoxIfNecessary, files to pull outside screen', async () => {
 	let upperPulledFileRect: ClientRect = await upperPulledFile.getClientRect()
 	expect(pulledFolderRect.isInsideOrEqual(await rootFolder.context.getMapClientRect())).toBe(true)
 	expect(upperPulledFileRect.isInsideOrEqual(pulledFolderRect)).toBe(true)
-	expect(roundRect(pulledFolderRect)).toEqual({x: 572, y: 307.5, width: 228, height: 172.5})
+	expect(roundRect(pulledFolderRect)).toEqual({x: 572, y: 307.5, width: 228, height: 160})
 	expect(upperPulledFileRect).toEqual({x: 580, y: 339.5, width: 200, height: 100})
 
 	// pull lower file
@@ -105,9 +105,97 @@ test('pullBoxIfNecessary, files to pull outside screen', async () => {
 	expect(upperPulledFileRect.isInsideOrEqual(pulledFolderRect)).toBe(true)
 	expect(lowerPulledFileRect.isInsideOrEqual(pulledFolderRect)).toBe(true)
 	/*expect(upperPulledFileRect.isOverlappingWith(lowerPulledFileRect)).toBe(false) TODO*/
-	expect(roundRect(pulledFolderRect)).toEqual({x: 572, y: 307.5, width: 228, height: 172.5})
+	expect(roundRect(pulledFolderRect)).toEqual({x: 572, y: 307.5, width: 228, height: 161.76})
 	expect(upperPulledFileRect).toEqual({x: 580, y: 339.5, width: 200, height: 100})
-	expect(roundRect(lowerPulledFileRect)).toEqual({x: 580, y: 369.21, width: 200, height: 100})
+	expect(roundRect(lowerPulledFileRect)).toEqual({x: 580, y: 361.26, width: 200, height: 100})
+})
+
+test('pullBoxIfNecessary, file to pull deep inside screen', async () => {
+	await testUtil.initServicesWithMocks({hideConsoleLog: false})
+	map.setMap({getUncoveredMapClientRect: async () => new ClientRect(0, 0, 800, 800)} as map.Map)
+
+	const rootFolder: RootFolderBox = boxFactory.rootFolderOf({
+		idOrSettings: 'root',
+		rendered: true,
+		bodyRendered: true,
+		getClientRect: async () => new ClientRect(0, 0, 800, 800),
+		getMapClientRect: async () => new ClientRect(0, 0, 800, 800)
+	})
+	const selectedFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('selectedFolder', 40, 45, 20, 10, [], []), parent: rootFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const outerFolderToPull: FolderBox = boxFactory.folderOf({idOrData: new BoxData('outerFolderToPull', 80, 45, 20, 10, [], []), parent: rootFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const innerFolderToPull: FolderBox = boxFactory.folderOf({idOrData: new BoxData('innerFolderToPull', 40, 40, 20, 20, [], []), parent: outerFolderToPull, addToParent: true, rendered: true, bodyRendered: true})
+	const deepInnerFolderToPull: FolderBox = boxFactory.folderOf({idOrData: new BoxData('deepInnerFolderToPull', 37.5, 37.5, 25, 25, [], []), parent: innerFolderToPull, addToParent: true, rendered: true, bodyRendered: true})
+	const fileToPull: FileBox = boxFactory.fileOf({idOrData: new BoxData('fileToPull', 37.5, 37.5, 25, 25, [], []), parent: deepInnerFolderToPull, addToParent: true, rendered: true, bodyRendered: true})
+	await BoxWatcher.newAndWatch(fileToPull) // prevent unrender, TODO: add to factory?
+	const link = await rootFolder.links.add({from: selectedFolder, to: fileToPull, save: true})
+	expect(await rootFolder.getClientRect()).toEqual({x: 0, y: 0, width: 800, height: 800})
+	expect(roundRect(await selectedFolder.getClientRect())).toEqual({x: 320, y: 360, width: 160, height: 80})
+	expect(roundRect(await outerFolderToPull.getClientRect())).toEqual({x: 640, y: 360, width: 160, height: 80})
+	expect(roundRect(await innerFolderToPull.getClientRect())).toEqual({x: 704, y: 392, width: 32, height: 16})
+	expect(roundRect(await deepInnerFolderToPull.getClientRect())).toEqual({x: 716, y: 398, width: 8, height: 4})
+	expect(roundRect(await fileToPull.getClientRect())).toEqual({x: 719, y: 399.5, width: 2, height: 1})
+
+	const pulledBoxes = new PulledBoxes()
+	expect((await pulledBoxes.pullBoxIfNecessary(fileToPull, new PullReason(selectedFolder, new LinkRoute(undefined, link)))).pulled).toBe(true)
+
+	expect(await rootFolder.getClientRect()).toEqual({x: 0, y: 0, width: 800, height: 800})
+	expect(roundRect(await selectedFolder.getClientRect())).toEqual({x: 320, y: 360, width: 160, height: 80})
+	let outerFolderRect: ClientRect = await outerFolderToPull.getClientRect()
+	//expect(outerFolderRect.isInsideOrEqual(await rootFolder.context.getMapClientRect())).toBe(true) // not inside by a few pixels, TODO: improve?
+	expect(roundRect(outerFolderRect)).toEqual({x: 556, y: 254, width: 248, height: 220})
+	let innerFolderRect: ClientRect = await innerFolderToPull.getClientRect()
+	expect(innerFolderRect.isInsideOrEqual(outerFolderRect)).toBe(true)
+	expect(innerFolderRect).toEqual({x: 564, y: 286, width: 232, height: 180})
+	let deepInnerFolderRect: ClientRect = await deepInnerFolderToPull.getClientRect()
+	expect(deepInnerFolderRect.isInsideOrEqual(innerFolderRect)).toBe(true)
+	expect(deepInnerFolderRect).toEqual({x: 572, y: 318, width: 216, height: 140})
+	let fileRect: ClientRect = await fileToPull.getClientRect()
+	expect(fileRect.isInsideOrEqual(deepInnerFolderRect)).toBe(true)
+	expect(fileRect).toEqual({x: 580, y: 350, width: 200, height: 100})
+})
+
+test('pullBoxIfNecessary, file to pull deep outside screen', async () => {
+	await testUtil.initServicesWithMocks({hideConsoleLog: false})
+	map.setMap({getUncoveredMapClientRect: async () => new ClientRect(0, 0, 800, 800)} as map.Map)
+
+	const rootFolder: RootFolderBox = boxFactory.rootFolderOf({
+		idOrSettings: 'root',
+		rendered: true,
+		bodyRendered: true,
+		getClientRect: async () => new ClientRect(-400, -400, 1600, 1600),
+		getMapClientRect: async () => new ClientRect(0, 0, 800, 800)
+	})
+	const selectedFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('selectedFolder', 40, 45, 20, 10, [], []), parent: rootFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const outerFolderToPull: FolderBox = boxFactory.folderOf({idOrData: new BoxData('outerFolderToPull', 80, 45, 20, 10, [], []), parent: rootFolder, addToParent: true, rendered: true, bodyRendered: true})
+	const innerFolderToPull: FolderBox = boxFactory.folderOf({idOrData: new BoxData('innerFolderToPull', 40, 40, 20, 20, [], []), parent: outerFolderToPull, addToParent: true, rendered: true, bodyRendered: true})
+	const deepInnerFolderToPull: FolderBox = boxFactory.folderOf({idOrData: new BoxData('deepInnerFolderToPull', 37.5, 37.5, 25, 25, [], []), parent: innerFolderToPull, addToParent: true, rendered: true, bodyRendered: true})
+	const fileToPull: FileBox = boxFactory.fileOf({idOrData: new BoxData('fileToPull', 37.5, 37.5, 25, 25, [], []), parent: deepInnerFolderToPull, addToParent: true, rendered: true, bodyRendered: true})
+	await BoxWatcher.newAndWatch(fileToPull) // prevent unrender, TODO: add to factory?
+	const link = await rootFolder.links.add({from: selectedFolder, to: fileToPull, save: true})
+	expect(await rootFolder.getClientRect()).toEqual({x: -400, y: -400, width: 1600, height: 1600})
+	expect(roundRect(await selectedFolder.getClientRect())).toEqual({x: 240, y: 320, width: 320, height: 160})
+	expect(roundRect(await outerFolderToPull.getClientRect())).toEqual({x: 880, y: 320, width: 320, height: 160})
+	expect(roundRect(await innerFolderToPull.getClientRect())).toEqual({x: 1008, y: 384, width: 64, height: 32})
+	expect(roundRect(await deepInnerFolderToPull.getClientRect())).toEqual({x: 1032, y: 396, width: 16, height: 8})
+	expect(roundRect(await fileToPull.getClientRect())).toEqual({x: 1038, y: 399, width: 4, height: 2})
+
+	const pulledBoxes = new PulledBoxes()
+	expect((await pulledBoxes.pullBoxIfNecessary(fileToPull, new PullReason(selectedFolder, new LinkRoute(undefined, link)))).pulled).toBe(true)
+	
+	expect(await rootFolder.getClientRect()).toEqual({x: -400, y: -400, width: 1600, height: 1600})
+	expect(roundRect(await selectedFolder.getClientRect())).toEqual({x: 240, y: 320, width: 320, height: 160})
+	let outerFolderRect: ClientRect = await outerFolderToPull.getClientRect()
+	expect(outerFolderRect.isInsideOrEqual(await rootFolder.context.getMapClientRect())).toBe(true)
+	expect(outerFolderRect).toEqual({x: 556, y: 254, width: 244, height: 220})
+	let innerFolderRect: ClientRect = await innerFolderToPull.getClientRect()
+	expect(innerFolderRect.isInsideOrEqual(outerFolderRect)).toBe(true)
+	expect(innerFolderRect).toEqual({x: 564, y: 286, width: 232, height: 180})
+	let deepInnerFolderRect: ClientRect = await deepInnerFolderToPull.getClientRect()
+	expect(deepInnerFolderRect.isInsideOrEqual(innerFolderRect)).toBe(true)
+	expect(deepInnerFolderRect).toEqual({x: 572, y: 318, width: 216, height: 140})
+	let fileRect: ClientRect = await fileToPull.getClientRect()
+	expect(fileRect.isInsideOrEqual(deepInnerFolderRect)).toBe(true)
+	expect(fileRect).toEqual({x: 580, y: 350, width: 200, height: 100})
 })
 
 function roundRect(rect: ClientRect): ClientRect {

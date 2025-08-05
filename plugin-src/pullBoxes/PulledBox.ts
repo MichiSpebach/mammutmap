@@ -21,51 +21,6 @@ export class PulledBox {
 		this.parent = parent
 	}
 
-	public async pullAncestors(biggestAncestorToConnect: PulledBox): Promise<void> {
-		if (this.parent) {
-			console.warn(`PulledBox::pullAncestors this.parent`)
-		}
-		let biggestAncestorSoFar: PulledBox = this
-		while (biggestAncestorSoFar.box !== biggestAncestorToConnect.box) {
-			if (biggestAncestorSoFar.box.isRoot()) {
-				console.warn(`PulledBox::pullAncestors biggestAncestorSoFar.box.isRoot()`)
-				return
-			}
-			const parent: PulledBox = biggestAncestorSoFar.box.getParent() !== biggestAncestorToConnect.box
-				? new PulledBox(biggestAncestorSoFar.box.getParent(), this.reasons, null)
-				: biggestAncestorToConnect
-			parent.pulledChildren.push(biggestAncestorSoFar)
-			biggestAncestorSoFar.parent = parent
-			biggestAncestorSoFar = parent
-		}
-		if (!this.parent) {
-			console.warn(`PulledBox::pullAncestors !this.parent this only happens if biggestAncestorToConnect === this.box`)
-			return
-		}
-		await this.parent.updateSizeToEncloseChilds()
-	}
-
-	public async pullPath(path: Box[], wishRect: ClientRect, reason: PullReason): Promise<void> {
-		if (!this.box.getChilds().includes(path[0])) {
-			console.warn('PulledBox::pullPath(..) !this.box.getChilds().includes(path[0])')
-		}
-		let pulledChild: PulledBox|undefined = this.pulledChildren.find(pulledBox => pulledBox.box === path[0])
-		if (pulledChild) {
-			if (!pulledChild.reasons.includes(reason)) {
-				pulledChild.reasons.push(reason)
-			}
-		} else {
-			pulledChild = new PulledBox(path[0], [reason], this)
-			this.pulledChildren.push(pulledChild)
-			await pulledChild.detachToFitClientRect(wishRect, true)
-		}
-		if (path.length > 1) {
-			await pulledChild.pullPath(path.slice(1), wishRect, reason)
-		} else {
-			await this.updateSizeToEncloseChilds()
-		}
-	}
-
 	private async updateSizeToEncloseChilds(): Promise<void> { await this.updateSizeScheduler.schedule(async () => {
 		if (this.pulledChildren.length === 0) {
 			console.warn(`PulledBox::updateSizeToEncloseChilds() called but this.pulledChildren.length === 0`)
@@ -83,16 +38,16 @@ export class PulledBox {
 		} else {
 			updatedRect = PulledBox.calculateLeastTransformedRectToSurround(rect, enclosingRectWithMargin)
 			updatedRect = ClientRect.fromPositions(
-				new ClientPosition(Math.max(rect.x, mapRect.x), Math.max(rect.y, mapRect.y)),
-				new ClientPosition(Math.min(rect.getRightX(), mapRect.getRightX()), Math.min(rect.getBottomY(), mapRect.getBottomY()))
+				new ClientPosition(Math.max(updatedRect.x, mapRect.x), Math.max(updatedRect.y, mapRect.y)),
+				new ClientPosition(Math.min(updatedRect.getRightX(), mapRect.getRightX()), Math.min(updatedRect.getBottomY(), mapRect.getBottomY()))
 			)
 		}
 		await this.detachToFitClientRect(updatedRect, false)
 		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.detachToFitClientRect(childWithRect.rect, false)))
 		await this.order()
-		if (this.parent) {
+		/*if (this.parent) {
 			await this.parent.updateSizeToEncloseChilds()
-		}
+		}*/
 	})}
 
 	public static async calculateIfBoxEnclosesChilds(box: Box, childs: PulledBox[]): Promise<{
@@ -182,9 +137,9 @@ export class PulledBox {
 		}
 		await this.detachToFitClientRect(wishRect, this.pulledChildren.length < 1)
 		await this.order()
-		if (this.parent) {
+		/*if (this.parent) {
 			await this.parent.updateSizeToEncloseChilds()
-		}
+		}*/
 	}
 
 	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
