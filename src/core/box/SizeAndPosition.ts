@@ -195,12 +195,13 @@ export class SizeAndPosition {
         return this.zoomToFitRectIntern(new LocalRect(-5, -5, 110, 110), options)
     }
 
-    public zoomToFitRect(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+    public zoomToFitRect(rect: LocalRect, options?: {marginInPercent?: number, animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+        const margin: number = (options?.marginInPercent?? 5) / 100
         const rectWithMargin = new LocalRect(
-            rect.x - rect.width*0.05,
-            rect.y - rect.height*0.05,
-            rect.width*1.1,
-            rect.height*1.1
+            rect.x - rect.width*margin,
+            rect.y - rect.height*margin,
+            rect.width * (1 + margin*2),
+            rect.height * (1 + margin*2)
         )
         return this.zoomToFitRectIntern(rectWithMargin, options)
     }

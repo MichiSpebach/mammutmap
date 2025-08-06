@@ -298,7 +298,7 @@ export class Map {
     return this.zoomToFit(boxes, options)
   }
   
-  public async zoomToFit(items: (Box|ClientRect)[], options?: {transitionDurationInMS?: number}): Promise<void> {
+  public async zoomToFit(items: (Box|ClientRect)[], options?: {marginInPercent?: number, transitionDurationInMS?: number}): Promise<void> {
     if (items.length < 1) {
       log.warning('Map::zoomToFit(items) items are empty')
       return

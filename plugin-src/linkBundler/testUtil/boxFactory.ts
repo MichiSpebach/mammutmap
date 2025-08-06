@@ -108,7 +108,7 @@ export function fileOf(options: {
     return box
 }
 
-function setRenderStateToBox(box: Box, rendered?: boolean): void {
+export function setRenderStateToBox(box: Box, rendered?: boolean): void {
     if (rendered) {
         const renderState: RenderState = (box as any).renderState
         renderState.setRenderStarted()
@@ -116,7 +116,7 @@ function setRenderStateToBox(box: Box, rendered?: boolean): void {
     }
 }
 
-function setRenderStateToBoxBody(boxBody: BoxBody, rendered?: boolean): void {
+export function setRenderStateToBoxBody(boxBody: BoxBody, rendered?: boolean): void {
     if (rendered) {
         const renderState: RenderState = (boxBody as any).renderState
         renderState.setRenderStarted()

@@ -4,7 +4,8 @@ import { Link } from '../../dist/core/link/Link'
 import { ClientRect } from '../../dist/core/ClientRect'
 import { renderManager, RenderPriority } from '../../dist/core/renderEngine/renderManager'
 import { LocalRect } from '../../dist/core/LocalRect'
-import { getIntersectionRect, getUncoveredMapClientRect, PullReason } from './PullReason'
+import * as pullUtil from './pullUtil'
+import { PullReason } from './PullReason'
 import { Item, Sorting } from '../boxOrderer/Sorting'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 
@@ -31,7 +32,7 @@ export class PulledBox {
 			return
 		}
 		const rect: ClientRect = await this.box.getClientRect()
-		const mapRect: ClientRect = await getUncoveredMapClientRect()
+		const mapRect: ClientRect = await pullUtil.getUncoveredMapClientRect()
 		let updatedRect: ClientRect
 		if (rect.isInsideOrEqual(mapRect)) {
 			updatedRect = ClientRect.createEnclosing([rect, enclosingRectWithMargin])
@@ -144,7 +145,7 @@ export class PulledBox {
 
 	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
 		if (preserveAspectRatio) {
-			rect = this.fitRectPreservingAspectRatio(rect, this.calculateSavedAspectRatio())
+			rect = pullUtil.shrinkRectToAspectRatio(rect, this.calculateSavedAspectRatio())
 		}
 		await Promise.all([
 			this.box.site.detachToFitClientRect(rect, {preserveAspectRatio: false, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}),
@@ -181,16 +182,6 @@ export class PulledBox {
 		return undefined
 	}
 
-	public fitRectPreservingAspectRatio(rect: ClientRect, aspectRatio: number): ClientRect {
-		if (rect.width/rect.height > aspectRatio) {
-			const fittedWidth: number = rect.height*aspectRatio
-			return new ClientRect(rect.x + (rect.width-fittedWidth)/2, rect.y, fittedWidth, rect.height)
-		} else {
-			const fittedHeight: number = rect.width/aspectRatio
-			return new ClientRect(rect.x, rect.y + (rect.height-fittedHeight)/2, rect.width, fittedHeight)
-		}
-	}
-
 	public calculateSavedAspectRatio(): number {
 		let savedAspectRatio: number = 1
 		for (let currentBox = this.box; ; currentBox = currentBox.getParent()) {
@@ -201,6 +192,18 @@ export class PulledBox {
 			}
 		}
 		return savedAspectRatio
+	}
+
+	public async getSide(): Promise<'left'|'top'|'right'|'bottom'|undefined> {
+		const sides: ('left'|'top'|'right'|'bottom')[] = ['left', 'top', 'right', 'bottom']
+		const sideRects = sides.map(side => ({side, rect: pullUtil.getSideRect(side)}))
+		const boxPosition: ClientPosition = (await this.box.getClientRect()).getMidPosition()
+		for (const sideRect of sideRects) {
+			if ((await sideRect.rect).isPositionInside(boxPosition)) {
+				return sideRect.side
+			}
+		}
+		return undefined
 	}
 
 	private async order(): Promise<void> {
@@ -221,7 +224,7 @@ export class PulledBox {
 			position: spread === 'horizontal' ? childWithRect.rect.x : childWithRect.rect.y,
 			size: spread === 'horizontal' ? childWithRect.rect.width : childWithRect.rect.height
 		}))
-		const mapRect: ClientRect = await getIntersectionRect()
+		const mapRect: ClientRect = await pullUtil.getIntersectionRect()
 		const sorting = new Sorting(
 			spread === 'horizontal' ? mapRect.x : mapRect.y,
 			spread === 'horizontal' ? mapRect.getRightX() : mapRect.getBottomY(),

@@ -2,7 +2,7 @@ import { Link } from '../../dist/core/link/Link'
 import { Box } from '../../dist/core/box/Box'
 import { LinkRoute } from '../../dist/core/link/LinkRoute'
 import { ClientRect } from '../../dist/core/ClientRect'
-import { map } from '../../dist/core/Map'
+import * as pullUtil from './pullUtil'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import { LinkEnd } from '../../dist/core/link/LinkEnd'
 import { Line } from '../../dist/core/shape/Line'
@@ -18,13 +18,13 @@ export class PullReason {
 			return true
 		}
 		const boxRect: ClientRect = await box.getClientRect()
-		const mapRect: ClientRect = await getUncoveredMapClientRect()
+		const mapRect: ClientRect = await pullUtil.getUncoveredMapClientRect()
 		return boxRect.isInsideOrEqual(mapRect) && (await box.getClientRect()).getArea() > 100*100
 	}
 	
 	public async isLinkEndOutsideScreen(linkEnd: LinkEnd): Promise<boolean> {
 		const position: ClientPosition = await linkEnd.getRenderPositionInClientCoords()
-		const rect: ClientRect = await getIntersectionRect()
+		const rect: ClientRect = await pullUtil.getIntersectionRect()
 		return !rect.isPositionInside(position)
 	}
 	
@@ -36,7 +36,7 @@ export class PullReason {
 		const linkEndBorderingBox: LinkEnd|undefined = this.route.findLinkEndBorderingNode(box)
 		if (!linkEndBorderingBox) {
 			console.warn(`PulledBoxes::pullBoxIfNecessary(box: ${box.getName()}) !linkEndBorderingBox`)
-			return (await getIntersectionRect()).getMidPosition()
+			return (await pullUtil.getIntersectionRect()).getMidPosition()
 		}
 		const direction: 'from'|'to' = linkEndBorderingBox.getReferenceLink().from === linkEndBorderingBox ? 'to' : 'from'
 
@@ -45,7 +45,7 @@ export class PullReason {
 		}
 		
 		let pullPosition = (await box.getClientRect()).getMidPosition()
-		const intersectionRect: ClientRect = await getIntersectionRect()
+		const intersectionRect: ClientRect = await pullUtil.getIntersectionRect()
 		if (!intersectionRect.isPositionInside(pullPosition)) {	// TODO: hack only, improve
 			const position: ClientPosition|undefined = await this.calculatePullPositionOfLink(linkEndBorderingBox, {elongationInPixels: 10000})
 			if (position) {
@@ -67,8 +67,12 @@ export class PullReason {
 				return pullPosition
 			}
 		}
+		const pullPosition: ClientPosition|undefined = await this.calculatePullPositionOfLink(linkRoute.links[startIndex][direction], {elongationInPixels: 10000}) // TODO: hack only, improve
+		if (pullPosition) {
+			return pullPosition
+		}
 		console.warn(`pullBoxes: intersections.length < 1 for linkRoute [${linkRoute.nodes.map(node => node.node.getName())}]`)
-		return (await getIntersectionRect()).getMidPosition()
+		return (await pullUtil.getIntersectionRect()).getMidPosition()
 	}
 	
 	public async calculatePullPositionOfLink(linkEnd: LinkEnd, options?: {elongationInPixels?: number}): Promise<ClientPosition|undefined> {
@@ -78,7 +82,7 @@ export class PullReason {
 		if (options?.elongationInPixels) {
 			linkLine = linkLine.elongate(options.elongationInPixels)
 		}
-		const intersectionRect: ClientRect = await getIntersectionRect()
+		const intersectionRect: ClientRect = await pullUtil.getIntersectionRect()
 		const intersections: ClientPosition[] = intersectionRect.calculateIntersectionsWithLine(linkLine)
 		if (intersections.length < 1) {
 			return undefined
@@ -93,16 +97,4 @@ export class PullReason {
 		}
 		return intersection
 	}
-}
-
-export async function getIntersectionRect(): Promise<ClientRect> {
-	const mapRect: ClientRect = await getUncoveredMapClientRect()
-	return new ClientRect(mapRect.x+120, mapRect.y+60, mapRect.width-240, mapRect.height-140)
-}
-
-async function getUncoveredMapClientRect(): Promise<ClientRect> {
-	if (!map) {
-		throw new Error('pullBoxes: !map, no folder opened')
-	}
-	return await map.getUncoveredMapClientRect()
 }
