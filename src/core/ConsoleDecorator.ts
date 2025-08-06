@@ -5,9 +5,11 @@ export class ConsoleDecorator implements Console {
 
     public constructor(
         private readonly originalConsole: Console
-    ) {}
+    ) {
+        this.Console = this.originalConsole.Console
+    }
 
-    Console: console.ConsoleConstructor = this.originalConsole.Console
+    Console: console.ConsoleConstructor
 
     assert(value?: any, message?: string, ...optionalParams: any[]): void {
         this.originalConsole.assert(value, message, ...optionalParams)
