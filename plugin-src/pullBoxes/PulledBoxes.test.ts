@@ -200,7 +200,7 @@ test('pullBoxIfNecessary, file to pull deep outside screen', async () => {
 	expect(fileRect).toEqual({x: 580, y: 350, width: 200, height: 100})
 })
 
-test('pullBoxIfNecessary, pulledBox overlapping selectedBox, selctedBox moves aside', async () => {
+test('pullBoxIfNecessary, pulledBox overlapping selectedBox, selectedBox moves aside', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: false})
 	map.setMap(mapFactory.mapOf({
 		overrideRenderManager: {getClientRectOf: {

@@ -5,11 +5,19 @@ import { PulledBox } from './PulledBox'
 import { PullReason } from './PullReason'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import * as pullUtil from './pullUtil'
+import { SkipToNewestScheduler } from '../../dist/core/util/SkipToNewestScheduler'
 
 export class PulledBoxes {
 	public pulledBoxes: PulledBox[] = []
+	private readonly zoomOutToDisjoinBoxesScheduler = new SkipToNewestScheduler()
 
 	public async pullBoxIfNecessary(box: Box, reason: PullReason): Promise<{pulled: boolean}> {
+		const {pulled} = await this.pullBoxIfNecessaryWithoutOrdering(box, reason)
+		await this.zoomOutToDisjoinReasonBoxes()
+		return {pulled}
+	}
+
+	private async pullBoxIfNecessaryWithoutOrdering(box: Box, reason: PullReason): Promise<{pulled: boolean}> {
 		if (box.isRoot()) {
 			console.warn(`PulledBoxes::pullBoxIfNecessary(box: ${box.getName()}) cannot pull root`)
 			return {pulled: false}
@@ -41,9 +49,8 @@ export class PulledBoxes {
 		const pullRect: ClientRect = reason.createPullRect(pullPosition) // move into PulledBox::pull?
 		await pulledBox.pull(pullRect)
 		if (!pulledBox.box.getParent().isRoot()) {
-			await this.pullBoxIfNecessary(pulledBox.box.getParent(), reason)
+			await this.pullBoxIfNecessaryWithoutOrdering(pulledBox.box.getParent(), reason)
 		}
-		await this.zoomOutToDisjoinReasonBoxes() // TODO: only call once
 		return {pulled: true}
 	}
 	
@@ -110,7 +117,7 @@ export class PulledBoxes {
 		return this.pulledBoxes.filter(child => child.box.getParent() === box)
 	}
 
-	private async zoomOutToDisjoinReasonBoxes(): Promise<void> {
+	private async zoomOutToDisjoinReasonBoxes(): Promise<void> { await this.zoomOutToDisjoinBoxesScheduler.schedule(async () => {
 		const reasonBoxes: Box[] = []
 		for (const pulledBox of this.pulledBoxes) {
 			for (const reason of pulledBox.reasons) {
@@ -120,7 +127,7 @@ export class PulledBoxes {
 			}
 		}
 		await Promise.all(reasonBoxes.map(reasonBox => this.zoomOutToDisjoinBox(reasonBox)))
-	}
+	})}
 
 	/** TODO: improve and cleanup or rewrite */
 	private async zoomOutToDisjoinBox(box: Box): Promise<void> {

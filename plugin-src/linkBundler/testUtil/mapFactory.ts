@@ -6,6 +6,7 @@ import { ClientRect } from '../../../dist/core/ClientRect'
 import { renderManager } from '../../../dist/core/renderEngine/renderManager'
 import * as boxFactory from './boxFactory'
 import { Style } from '../../../dist/core/renderEngine/RenderElement'
+import { MapSettingsData } from '../../../dist/core/mapData/MapSettingsData'
 
 export function mapOf(options: {
 	projectSettings?: ProjectSettings,
@@ -16,15 +17,22 @@ export function mapOf(options: {
 		clientRect?: ClientRect
 	}
 }): Map {
-	const map = new Map('content', options.projectSettings?? projectSettingsFactory.of({data: mapSettingsDataFactory.of({id: 'root'})}))
-	
 	const mapRatioAdjusterRect: ClientRect = options.overrideRenderManager.getClientRectOf.mapRatioAdjuster
 	const rootFolderRect: ClientRect = options.rootFolder.clientRect?? mapRatioAdjusterRect
+	const mapSettingsData: MapSettingsData = mapSettingsDataFactory.of({
+		id: 'root',
+		x: ((rootFolderRect.x-mapRatioAdjusterRect.x)/mapRatioAdjusterRect.width)*100,
+		y: ((rootFolderRect.y-mapRatioAdjusterRect.y)/mapRatioAdjusterRect.height)*100,
+		width: (rootFolderRect.width/mapRatioAdjusterRect.width)*100,
+		height: (rootFolderRect.height/mapRatioAdjusterRect.height)*100
+	})
+	const map = new Map('content', options.projectSettings?? projectSettingsFactory.of({data: mapSettingsData}))
+	
 	let rootFolderStyle: Style =  {
-		left: `${((rootFolderRect.x-mapRatioAdjusterRect.x)/mapRatioAdjusterRect.width)*100}%`,
-		top: `${((rootFolderRect.y-mapRatioAdjusterRect.y)/mapRatioAdjusterRect.height)*100}%`,
-		width: `${(rootFolderRect.width/mapRatioAdjusterRect.width)*100}%`,
-		height: `${(rootFolderRect.height/mapRatioAdjusterRect.height)*100}%`
+		left: `${mapSettingsData.x}%`,
+		top: `${mapSettingsData.y}%`,
+		width: `${mapSettingsData.width}%`,
+		height: `${mapSettingsData.height}%`
 	}
 	const renderManagerBackup = {
 		getClientRectOf: renderManager.getClientRectOf,

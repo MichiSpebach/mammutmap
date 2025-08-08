@@ -261,17 +261,17 @@ export class Map {
     const renderedTarget: Box = renderedTargetPath[renderedTargetPath.length-1]
 
     const mapClientRect = await this.getMapClientRect()
-    let zoomingOut: Promise<void> = Promise.resolve()
-    let latestZoomTo: {box: Box, promise: Promise<void>} | 'did not zoom' = 'did not zoom'
+    let zoomingOut: Promise<{transitionAndRerender: Promise<void>}> = Promise.resolve({transitionAndRerender: Promise.resolve()})
+    let latestZoomTo: {box: Box, promise: Promise<{transitionAndRerender: Promise<void>}>} | 'did not zoom' = 'did not zoom'
     if (!(await renderedTarget.getClientRect()).isInsideOrEqual(mapClientRect)) {
       zoomingOut = this.zoomToFit([mapClientRect, renderedTarget], {transitionDurationInMS})
       latestZoomTo = {box: Box.getCommonAncestorOfPaths(zoomedInPath, renderedTargetPath), promise: zoomingOut}
-      zoomingOut = util.wait(transitionDurationInMS*0.9) // looks more fluent to not stop while flying to await until everything is rendered
+      zoomingOut = Promise.resolve({transitionAndRerender: util.wait(transitionDurationInMS*0.9)}) // looks more fluent to not stop while flying to await until everything is rendered
     }
 
     const renderTargetReport: {boxWatcher?: BoxWatcher, warnings?: string[]} = await this.getBoxBySourcePathAndRenderIfNecessary(path, {foreachBoxInPath: async (box: Box) => {
-      await zoomingOut
-      if (!zoomedInPath.includes(box)) {
+      await (await zoomingOut).transitionAndRerender
+      if (!zoomedInPath.includes(box) && !renderedTarget.isDescendantOf(box) && (latestZoomTo === 'did not zoom' || !latestZoomTo.box.isDescendantOf(box))) { // !isDescendantOf is not always equal to isAncestorOf 
         latestZoomTo = {box, promise: box.site.zoomToFit({transitionDurationInMS})}
       }
     }})
@@ -284,24 +284,30 @@ export class Map {
     }
     const targetBox: Box = await renderTargetReport.boxWatcher.get()
 
-    await zoomingOut
+    await (await zoomingOut).transitionAndRerender
     if (latestZoomTo === 'did not zoom' || targetBox !== latestZoomTo.box) {
       latestZoomTo = {box: targetBox, promise: targetBox.site.zoomToFit({animationIfAlreadyFitting: true, transitionDurationInMS})}
     }
-    await latestZoomTo.promise
+    await (await latestZoomTo.promise).transitionAndRerender
     await this.zoom(0, 0, 0) // TODO otherwise lots of "has path with no rendered boxes. This only happens when mapData is corrupted or LinkEnd::getRenderedPath() is called when it shouldn't." warnings, fix and remove this line
     await renderTargetReport.boxWatcher!.unwatch()
   }
 
   /** @deprecated use zoomToFit(items) instead */
-  public async zoomToFitBoxes(boxes: Box[], options?: {transitionDurationInMS?: number}): Promise<void> {
+  public async zoomToFitBoxes(
+    boxes: Box[],
+    options?: {transitionDurationInMS?: number}
+  ): Promise<{transitionAndRerender: Promise<void>}> {
     return this.zoomToFit(boxes, options)
   }
   
-  public async zoomToFit(items: (Box|ClientRect)[], options?: {marginInPercent?: number, transitionDurationInMS?: number}): Promise<void> {
+  public async zoomToFit(
+    items: (Box|ClientRect)[],
+    options?: {marginInPercent?: number, transitionDurationInMS?: number}
+  ): Promise<{transitionAndRerender: Promise<void>}> {
     if (items.length < 1) {
       log.warning('Map::zoomToFit(items) items are empty')
-      return
+      return {transitionAndRerender: Promise.resolve()}
     }
     const rectsToFit: LocalRect[] = await Promise.all(items.map(item => {
       if (item instanceof Box) {

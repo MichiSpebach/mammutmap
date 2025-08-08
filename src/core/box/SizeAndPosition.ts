@@ -191,11 +191,16 @@ export class SizeAndPosition {
         ])
     }
 
-    public zoomToFit(options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+    public zoomToFit(
+        options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}
+    ): Promise<{transitionAndRerender: Promise<void>}> {
         return this.zoomToFitRectIntern(new LocalRect(-5, -5, 110, 110), options)
     }
 
-    public zoomToFitRect(rect: LocalRect, options?: {marginInPercent?: number, animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+    public zoomToFitRect(
+        rect: LocalRect,
+        options?: {marginInPercent?: number, animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}
+    ): Promise<{transitionAndRerender: Promise<void>}> {
         const margin: number = (options?.marginInPercent?? 5) / 100
         const rectWithMargin = new LocalRect(
             rect.x - rect.width*margin,
@@ -206,7 +211,10 @@ export class SizeAndPosition {
         return this.zoomToFitRectIntern(rectWithMargin, options)
     }
 
-    private async zoomToFitRectIntern(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+    private async zoomToFitRectIntern(
+        rect: LocalRect,
+        options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}
+    ): Promise<{transitionAndRerender: Promise<void>}> {
         if (!this.detached) {
             if (!this.referenceNode.isRoot()) {
                 return this.referenceNode.getParent().site.zoomToFitRectIntern(this.referenceNode.transform.toParentRect(rect), options)
@@ -255,9 +263,10 @@ export class SizeAndPosition {
         if (options?.animationIfAlreadyFitting && Math.abs(shiftIncreaseX) < 1 && Math.abs(shiftIncreaseY) < 1 && Math.abs(factor-1) < 0.01) {
             const deltaX = rect.width/100
             const deltaY = rect.height/100
-            await this.zoomToFitRectIntern(new LocalRect(rect.x - deltaX, rect.y - deltaY, rect.width + deltaX*2, rect.height + deltaY*2), {transitionDurationInMS: transitionDurationInMS/2})
-            await this.zoomToFitRectIntern(rect, {transitionDurationInMS: transitionDurationInMS/2})
-            return
+            return (async () => {
+                await (await this.zoomToFitRectIntern(new LocalRect(rect.x - deltaX, rect.y - deltaY, rect.width + deltaX*2, rect.height + deltaY*2), {transitionDurationInMS: transitionDurationInMS/2})).transitionAndRerender
+                return this.zoomToFitRectIntern(rect, {transitionDurationInMS: transitionDurationInMS/2})
+            })()
         }
 
         this.detached.shiftX += shiftIncreaseX
@@ -265,15 +274,17 @@ export class SizeAndPosition {
         this.detached.zoomX *= factor
         this.detached.zoomY *= factor
 
-        const renderStyleWithRerender = await this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
-        await renderStyleWithRerender.transitionAndRerender
+        return this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
     }
 
-    private async delegateZoomToFitRectToChild(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+    private async delegateZoomToFitRectToChild(
+        rect: LocalRect,
+        options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}
+    ): Promise<{transitionAndRerender: Promise<void>}> {
         const childSite: SizeAndPosition|undefined = await this.findChildSiteToDelegateZoom()
         if (!childSite) {
             log.warning(`SizeAndPosition::delegateZoomToFitRectToChild(..) Deeper zoom not implemented for '${this.referenceNode.getName()}'.`)
-            return
+            return {transitionAndRerender: Promise.resolve()}
         }
 
         log.info(`Site::zoomToFitRect(..) delegating zoom to child '${childSite.referenceNode.getName()}'.`)
@@ -307,15 +318,21 @@ export class SizeAndPosition {
         //}
     }
 
-    private async delegateZoomToFitRectToParent(rect: LocalRect, options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}): Promise<void> {
+    private async delegateZoomToFitRectToParent(
+        rect: LocalRect,
+        options?: {animationIfAlreadyFitting?: boolean, transitionDurationInMS?: number}
+    ): Promise<{transitionAndRerender: Promise<void>}> {
         log.info(`Site::zoomToFitRect(..) delegating zoom from '${this.referenceNode.getName()}' to parent.`)
         this.detached = undefined // important to unset unpinning before calling 'transform.toParentRect(rect)' because it should calculate with updated site
         const transitionDurationInMS: number|undefined = options?.transitionDurationInMS
         const rendering = this.referenceNode.renderStyleWithRerender({renderStylePriority: RenderPriority.RESPONSIVE, transitionDurationInMS})
         const zoomingParent = this.referenceNode.getParent().site.zoomToFitRectIntern(this.referenceNode.transform.toParentRect(rect), options)
-        await (await rendering).transitionAndRerender
+        await rendering
         await zoomingParent
-        return
+        return {transitionAndRerender: (async () => {
+            (await rendering).transitionAndRerender
+            ;(await zoomingParent).transitionAndRerender
+        })()}
     }
 
     public async zoom(factor: number, position: LocalPosition): Promise<void> {
