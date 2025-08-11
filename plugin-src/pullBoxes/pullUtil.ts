@@ -31,21 +31,24 @@ export function getMap(): Map {
 	}
 }*/
 
-export async function getNearestSideOfPosition(position: ClientPosition): Promise<{nearestSide: 'left'|'top'|'right'|'bottom', distanceToNearestSide: number}> {
-	const mapRect: ClientRect = await getUncoveredMapClientRect()
+export async function getNearestMapSideOfPosition(position: ClientPosition): Promise<{nearestSide: 'left'|'top'|'right'|'bottom', distanceToNearestSide: number}> {
+	return getNearestRectSideOfPosition(position, await getUncoveredMapClientRect())
+}
+
+export function getNearestRectSideOfPosition(position: ClientPosition, rect: ClientRect): {nearestSide: 'left'|'top'|'right'|'bottom', distanceToNearestSide: number} {
 	let nearestSide: 'left'|'top'|'right'|'bottom' = 'right'
-	let distanceToNearestSide: number = mapRect.getRightX() - position.x
-	if (distanceToNearestSide > position.x - mapRect.x) {
+	let distanceToNearestSide: number = rect.getRightX() - position.x
+	if (distanceToNearestSide > position.x - rect.x) {
 		nearestSide = 'left'
-		distanceToNearestSide = position.x - mapRect.x
+		distanceToNearestSide = position.x - rect.x
 	}
-	if (distanceToNearestSide > position.y - mapRect.y) {
+	if (distanceToNearestSide > position.y - rect.y) {
 		nearestSide = 'top'
-		distanceToNearestSide = position.y - mapRect.y
+		distanceToNearestSide = position.y - rect.y
 	}
-	if (distanceToNearestSide > mapRect.getBottomY() - position.y) {
+	if (distanceToNearestSide > rect.getBottomY() - position.y) {
 		nearestSide = 'bottom'
-		distanceToNearestSide = mapRect.getBottomY() - position.y
+		distanceToNearestSide = rect.getBottomY() - position.y
 	}
 	return {nearestSide, distanceToNearestSide}
 }

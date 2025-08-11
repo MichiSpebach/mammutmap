@@ -45,7 +45,6 @@ export class PulledBox {
 		}
 		await this.detachToFitClientRect(updatedRect, false)
 		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.detachToFitClientRect(childWithRect.rect, false)))
-		await this.order()
 		/*if (this.parent) {
 			await this.parent.updateSizeToEncloseChilds()
 		}*/
@@ -133,11 +132,11 @@ export class PulledBox {
 
 	public async pull(wishRect: ClientRect): Promise<void> {
 		if (this.pulledChildren.length > 0) {
+			await this.order()
 			await this.updateSizeToEncloseChilds()
 			return
 		}
 		await this.detachToFitClientRect(wishRect, this.pulledChildren.length < 1)
-		await this.order()
 		/*if (this.parent) {
 			await this.parent.updateSizeToEncloseChilds()
 		}*/
@@ -207,28 +206,25 @@ export class PulledBox {
 	}
 
 	private async order(): Promise<void> {
-		return // TODO
-		if (this.pulledChildren.length === 0) {
+		if (this.pulledChildren.length < 2) {
 			return
 		}
-		const childsWithRects: {child: PulledBox, rect: ClientRect}[] = await Promise.all(this.pulledChildren.map(async child => ({child, rect: await child.box.getClientRect()})))
-		let smallestMidPosX: number = Math.min(...childsWithRects.map(child => child.rect.getMidPosition().x))
-		let smallestMidPosY: number = Math.min(...childsWithRects.map(child => child.rect.getMidPosition().y))
-		let biggestMidPosX: number = Math.max(...childsWithRects.map(child => child.rect.getMidPosition().x))
-		let biggestMidPosY: number = Math.max(...childsWithRects.map(child => child.rect.getMidPosition().y))
-		
-		const spread: 'horizontal'|'vertical' = biggestMidPosX-smallestMidPosX > biggestMidPosY-smallestMidPosY ? 'horizontal' : 'vertical'
 
-		const items: Item[] = childsWithRects.map(childWithRect => ({
-			node: childWithRect.child.box,
-			position: spread === 'horizontal' ? childWithRect.rect.x : childWithRect.rect.y,
-			size: spread === 'horizontal' ? childWithRect.rect.width : childWithRect.rect.height
+		const direction: 'horizontal'|'vertical' = await this.calculateOrderDirection()
+		const items: Item[] = await Promise.all(this.pulledChildren.map(async pulledChild => {
+			const pulledChildRect: ClientRect = await pulledChild.box.getClientRect()
+			return {
+				node: pulledChild.box,
+				position: direction === 'horizontal' ? pulledChildRect.x : pulledChildRect.y,
+				size: direction === 'horizontal' ? pulledChildRect.width : pulledChildRect.height
+			}
 		}))
-		const mapRect: ClientRect = await pullUtil.getIntersectionRect()
+		const uncoveredMapRect: ClientRect = await pullUtil.getUncoveredMapClientRect()
 		const sorting = new Sorting(
-			spread === 'horizontal' ? mapRect.x : mapRect.y,
-			spread === 'horizontal' ? mapRect.getRightX() : mapRect.getBottomY(),
-			items
+			direction === 'horizontal' ? uncoveredMapRect.x : uncoveredMapRect.y,
+			direction === 'horizontal' ? uncoveredMapRect.getRightX() : uncoveredMapRect.getBottomY(),
+			items,
+			8
 		)
 		sorting.sort()
 
@@ -239,10 +235,36 @@ export class PulledBox {
 			}
 			const box: Box = item.node
 			const boxRect: ClientRect = await box.getClientRect()
-			const rect: ClientRect = spread === 'horizontal'
+			const rect: ClientRect = direction === 'horizontal'
 				? new ClientRect(item.position, boxRect.y, item.size, boxRect.height)
-				: new ClientRect(boxRect.x, item.position, boxRect.x, item.size)
+				: new ClientRect(boxRect.x, item.position, boxRect.width, item.size)
 			await box.site.detachToFitClientRect(rect, {preserveAspectRatio: false/*TODO call PulledBox::pull instead*/, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE})
 		}))
+	}
+
+	private async calculateOrderDirection(): Promise<'horizontal'|'vertical'> {
+		const boxRect: ClientRect = await this.box.getClientRect()
+		let horizontalIntersections: number = 0
+		let verticalIntersections: number = 0
+		
+		await Promise.all(this.reasons.map(async reason => {
+			const intersection: ClientPosition|undefined = await reason.calculateIntersectionOfRouteWithRect(boxRect, {warnIfMultipleIntersectionsWithOneLink: true})
+			if (!intersection) {
+				console.warn(`PulledBox::calculateOrderDirection() !intersection`)
+				return
+			}
+			const intersectionSide = pullUtil.getNearestRectSideOfPosition(intersection, boxRect).nearestSide
+			if (intersectionSide === 'left' || intersectionSide === 'right') {
+				verticalIntersections++
+			} else {
+				horizontalIntersections++
+			}
+		}))
+
+		if (horizontalIntersections < verticalIntersections) {
+			return 'vertical'
+		} else {
+			return 'horizontal'
+		}
 	}
 }

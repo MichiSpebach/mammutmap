@@ -12,7 +12,8 @@ export class Sorting {
 	public constructor(
 		public readonly minimum: number = 0,
 		public readonly maximum: number = 100,
-		public readonly items: Item[] = []
+		public readonly items: Item[] = [],
+		public readonly marginBetweenItems: number = 0
 	) {}
 
 	public addItem(item: Item) {
@@ -40,9 +41,9 @@ export class Sorting {
 		const distance: number = item.position - (nextItem.position+nextItem.size)
 		
 		item.position -= amount/2
-		this.pushDown(index-1, Math.max(amount-distance, 0))
-		if (nextItem.position+nextItem.size > item.position) {
-			item.position = nextItem.position+nextItem.size
+		this.pushDown(index-1, Math.max(amount-distance+this.marginBetweenItems, 0))
+		if (nextItem.position+nextItem.size+this.marginBetweenItems > item.position) {
+			item.position = nextItem.position+nextItem.size+this.marginBetweenItems
 		}
 	}
 
@@ -56,9 +57,9 @@ export class Sorting {
 		const distance: number = nextItem.position - (item.position+item.size)
 		
 		item.position += amount/2
-		this.pushUp(index+1, Math.max(amount-distance, 0))
-		if (nextItem.position < item.position+item.size) {
-			item.position = nextItem.position-item.size
+		this.pushUp(index+1, Math.max(amount-distance+this.marginBetweenItems, 0))
+		if (nextItem.position < item.position+item.size+this.marginBetweenItems) {
+			item.position = nextItem.position-item.size-this.marginBetweenItems
 		}
 	}
 }
