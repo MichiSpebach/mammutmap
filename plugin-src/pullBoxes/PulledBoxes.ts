@@ -23,7 +23,6 @@ export class PulledBoxes {
 			return {pulled: false}
 		}
 
-		const pros: Promise<void>[] = []
 		let pulledBox: PulledBox|undefined = this.find(box)
 		if (pulledBox) {
 			if (!pulledBox.reasons.includes(reason)) {
@@ -33,16 +32,24 @@ export class PulledBoxes {
 			const pullingUnnecessaryRegardingSizeAndPosition: Promise<boolean> = reason.shouldNotPullBox(box)
 			const pulledChildren: PulledBox[] = this.getPulledChildrenOf(box)
 			const pullingUnnecessaryBecauseChildrenEnclosed = pulledChildren.length < 1 || (await PulledBox.calculateIfBoxEnclosesChilds(box, pulledChildren)).boxEnclosesChilds
-			if (await pullingUnnecessaryRegardingSizeAndPosition && pullingUnnecessaryBecauseChildrenEnclosed) {
-				return {pulled: false}
-			}
-			pulledBox = new PulledBox(box, [reason], this.find(box.getParent())?? null)
-			if (pulledBox.parent) {
-				pulledBox.parent.pulledChildren.push(pulledBox)
+			const pullingUnnecessary: boolean = await pullingUnnecessaryRegardingSizeAndPosition && pullingUnnecessaryBecauseChildrenEnclosed
+			pulledBox = this.find(box) // refind, otherwise race condition because of awaits above, leads to two PulledBoxes refering the same Box
+			if (pulledBox) {
+				if (!pulledBox.reasons.includes(reason)) {
+					pulledBox.reasons.push(reason)
+				}
 			} else {
-				this.pulledBoxes.push(pulledBox)
+				if (pullingUnnecessary) {
+					return {pulled: false}
+				}
+				pulledBox = new PulledBox(box, [reason], this.find(box.getParent())?? null)
+				if (pulledBox.parent) {
+					pulledBox.parent.pulledChildren.push(pulledBox)
+				} else {
+					this.pulledBoxes.push(pulledBox)
+				}
+				this.addOrphanedDescendantsTo(pulledBox)
 			}
-			this.addOrphanedDescendantsTo(pulledBox)
 		}
 		
 		const pullPosition: ClientPosition = await reason.calculatePullPositionFor(box) // move into PulledBox::pull?

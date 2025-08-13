@@ -22,6 +22,29 @@ export class PulledBox {
 		this.parent = parent
 	}
 
+	public async pull(wishRect: ClientRect): Promise<void> {
+		if (this.pulledChildren.length > 0) {
+			await this.updateSizeToEncloseChilds()
+			await this.order()
+			await this.updateSizeToEncloseChilds()
+			return
+		}
+		await this.detachToFitClientRect(wishRect, this.pulledChildren.length < 1)
+	}
+
+	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
+		if (preserveAspectRatio) {
+			rect = pullUtil.shrinkRectToAspectRatio(rect, this.calculateSavedAspectRatio())
+		}
+		await Promise.all([
+			this.box.site.detachToFitClientRect(rect, {preserveAspectRatio: false, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}),
+			renderManager.addStyleTo(this.box.getBorderId(), {
+				boxShadow: 'blueviolet 0 0 10px, blueviolet 0 0 10px',
+				transition: 'box-shadow 1s'
+			})
+		])
+	}
+
 	private async updateSizeToEncloseChilds(): Promise<void> { await this.updateSizeScheduler.schedule(async () => {
 		if (this.pulledChildren.length === 0) {
 			console.warn(`PulledBox::updateSizeToEncloseChilds() called but this.pulledChildren.length === 0`)
@@ -45,9 +68,6 @@ export class PulledBox {
 		}
 		await this.detachToFitClientRect(updatedRect, false)
 		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.detachToFitClientRect(childWithRect.rect, false)))
-		/*if (this.parent) {
-			await this.parent.updateSizeToEncloseChilds()
-		}*/
 	})}
 
 	public static async calculateIfBoxEnclosesChilds(box: Box, childs: PulledBox[]): Promise<{
@@ -130,31 +150,6 @@ export class PulledBox {
 		})()}
 	}
 
-	public async pull(wishRect: ClientRect): Promise<void> {
-		if (this.pulledChildren.length > 0) {
-			await this.order()
-			await this.updateSizeToEncloseChilds()
-			return
-		}
-		await this.detachToFitClientRect(wishRect, this.pulledChildren.length < 1)
-		/*if (this.parent) {
-			await this.parent.updateSizeToEncloseChilds()
-		}*/
-	}
-
-	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
-		if (preserveAspectRatio) {
-			rect = pullUtil.shrinkRectToAspectRatio(rect, this.calculateSavedAspectRatio())
-		}
-		await Promise.all([
-			this.box.site.detachToFitClientRect(rect, {preserveAspectRatio: false, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE}),
-			renderManager.addStyleTo(this.box.getBorderId(), {
-				boxShadow: 'blueviolet 0 0 10px, blueviolet 0 0 10px',
-				transition: 'box-shadow 1s'
-			})
-		])
-	}
-
 	private async release(transitionDurationInMS: number): Promise<void> {
 		await this.box.site.releaseIfDetached({
 			transitionDurationInMS,
@@ -179,6 +174,10 @@ export class PulledBox {
 			}
 		}
 		return undefined
+	}
+
+	public findChild(box: Box): PulledBox|undefined {
+		return this.pulledChildren.find(child => child.box === box)
 	}
 
 	public calculateSavedAspectRatio(): number {
@@ -233,12 +232,16 @@ export class PulledBox {
 				console.warn(`PulledBox::order !(item.node instanceof Box)`)
 				return
 			}
-			const box: Box = item.node
-			const boxRect: ClientRect = await box.getClientRect()
+			const child: PulledBox|undefined = this.findChild(item.node)
+			if (!child) {
+				console.warn(`PulledBox::order !child`)
+				return
+			}
+			const boxRect: ClientRect = await child.box.getClientRect()
 			const rect: ClientRect = direction === 'horizontal'
 				? new ClientRect(item.position, boxRect.y, item.size, boxRect.height)
 				: new ClientRect(boxRect.x, item.position, boxRect.width, item.size)
-			await box.site.detachToFitClientRect(rect, {preserveAspectRatio: false/*TODO call PulledBox::pull instead*/, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE})
+			await child.detachToFitClientRect(rect, false)
 		}))
 	}
 
@@ -250,7 +253,7 @@ export class PulledBox {
 		await Promise.all(this.reasons.map(async reason => {
 			const intersection: ClientPosition|undefined = await reason.calculateIntersectionOfRouteWithRect(boxRect, {warnIfMultipleIntersectionsWithOneLink: true})
 			if (!intersection) {
-				console.warn(`PulledBox::calculateOrderDirection() !intersection`)
+				console.warn(`PulledBox::calculateOrderDirection() !intersection box.id=${this.box.getId()} boxRect=${JSON.stringify(boxRect)}`)
 				return
 			}
 			const intersectionSide = pullUtil.getNearestRectSideOfPosition(intersection, boxRect).nearestSide
