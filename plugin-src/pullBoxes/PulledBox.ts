@@ -11,7 +11,7 @@ import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 
 export class PulledBox {
 	public readonly box: Box
-	private readonly updateSizeScheduler = new SkipToNewestScheduler()
+	private readonly pullScheduler = new SkipToNewestScheduler()
 	public reasons: PullReason[]
 	public parent: PulledBox|null
 	public pulledChildren: PulledBox[] = []
@@ -22,7 +22,7 @@ export class PulledBox {
 		this.parent = parent
 	}
 
-	public async pull(wishRect: ClientRect): Promise<void> {
+	public async pull(wishRect: ClientRect): Promise<void> { await this.pullScheduler.schedule(async () => {
 		if (this.pulledChildren.length > 0) {
 			await this.updateSizeToEncloseChilds()
 			await this.order()
@@ -30,7 +30,7 @@ export class PulledBox {
 			return
 		}
 		await this.detachToFitClientRect(wishRect, this.pulledChildren.length < 1)
-	}
+	})}
 
 	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
 		if (preserveAspectRatio) {
@@ -45,7 +45,7 @@ export class PulledBox {
 		])
 	}
 
-	private async updateSizeToEncloseChilds(): Promise<void> { await this.updateSizeScheduler.schedule(async () => {
+	private async updateSizeToEncloseChilds(): Promise<void> {
 		if (this.pulledChildren.length === 0) {
 			console.warn(`PulledBox::updateSizeToEncloseChilds() called but this.pulledChildren.length === 0`)
 			return
@@ -68,7 +68,7 @@ export class PulledBox {
 		}
 		await this.detachToFitClientRect(updatedRect, false)
 		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.detachToFitClientRect(childWithRect.rect, false)))
-	})}
+	}
 
 	public static async calculateIfBoxEnclosesChilds(box: Box, childs: PulledBox[]): Promise<{
 		boxEnclosesChilds: boolean
