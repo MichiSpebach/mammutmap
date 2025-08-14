@@ -14,9 +14,6 @@ export class PullReason {
 	) {}
 
 	public async shouldNotPullBox(box: Box): Promise<boolean> {
-		if (await box.isZoomedIn()) {
-			return true
-		}
 		const boxRect: ClientRect = await box.getClientRect()
 		const mapRect: ClientRect = await pullUtil.getUncoveredMapClientRect()
 		return boxRect.isInsideOrEqual(mapRect) && (await box.getClientRect()).getArea() > 100*100
@@ -78,7 +75,7 @@ export class PullReason {
 		for (let i = startIndex; i < this.route.links.length && i >= 0; i += increment) {
 			const link: Link = this.route.links[i]
 			if (intersection) {
-				console.warn(`PullReason::calculateIntersectionOfRouteWithRect(rect: ${JSON.stringify(rect)}, options: ${JSON.stringify(options)}) multiple intersections`)
+				console.warn(`PullReason::calculateIntersectionOfRouteWithRect(rect: ${JSON.stringify(rect)}, options: ${JSON.stringify(options)}) multiple intersections in route with link ids [${this.route.links.map(link => `'${link.getId()}'`)}]`)
 			}
 			intersection = await this.calculateIntersectionOfLinkWithRect(link[direction], rect, {warnIfMultipleIntersections: options?.warnIfMultipleIntersectionsWithOneLink})
 		}

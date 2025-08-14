@@ -6,6 +6,7 @@ import { PullReason } from './PullReason'
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import * as pullUtil from './pullUtil'
 import { SkipToNewestScheduler } from '../../dist/core/util/SkipToNewestScheduler'
+import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
 
 export class PulledBoxes {
 	public pulledBoxes: PulledBox[] = []
@@ -55,9 +56,11 @@ export class PulledBoxes {
 		const pullPosition: ClientPosition = await reason.calculatePullPositionFor(box) // move into PulledBox::pull?
 		const pullRect: ClientRect = reason.createPullRect(pullPosition) // move into PulledBox::pull?
 		await pulledBox.pull(pullRect)
-		if (!pulledBox.box.getParent().isRoot()) {
-			await this.pullBoxIfNecessaryWithoutOrdering(pulledBox.box.getParent(), reason)
+		const parentBox: Box = pulledBox.box.getParent()
+		if (parentBox.isRoot() || parentBox.isAncestorOf(await reason.route.followOriginAndWatch()) && parentBox.isAncestorOf(await reason.route.followDestinationAndWatch())) {
+			return {pulled: true}
 		}
+		await this.pullBoxIfNecessaryWithoutOrdering(parentBox, reason)
 		return {pulled: true}
 	}
 	

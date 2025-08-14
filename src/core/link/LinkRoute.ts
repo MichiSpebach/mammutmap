@@ -32,7 +32,7 @@ export class LinkRoute {
 
 	public async followOriginAndWatch(leftHops = 100): Promise<AbstractNodeWidget> {
 		let origin = this.nodes.at(0)
-		if (!origin) {
+		if (!origin || !this.links[0].from.isBoxInPath(origin.node)) {
 			origin = await this.links[0].from.getTargetAndRenderIfNecessary()
 			this.nodes.unshift(origin)
 		}
@@ -57,7 +57,7 @@ export class LinkRoute {
 
 	public async followDestinationAndWatch(leftHops = 100): Promise<AbstractNodeWidget> {
 		let destination = this.nodes.at(-1)
-		if (!destination) {
+		if (!destination || !this.links[this.links.length-1].to.isBoxInPath(destination.node)) {
 			destination = await this.links[this.links.length-1].to.getTargetAndRenderIfNecessary()
 			this.nodes.push(destination)
 		}
