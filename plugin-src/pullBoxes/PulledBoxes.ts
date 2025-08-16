@@ -53,9 +53,7 @@ export class PulledBoxes {
 			}
 		}
 		
-		const pullPosition: ClientPosition = await reason.calculatePullPositionFor(box) // move into PulledBox::pull?
-		const pullRect: ClientRect = reason.createPullRect(pullPosition) // move into PulledBox::pull?
-		await pulledBox.pull(pullRect)
+		await pulledBox.pull(reason)
 		const parentBox: Box = pulledBox.box.getParent()
 		if (parentBox.isRoot() || parentBox.isAncestorOf(await reason.route.followOriginAndWatch()) && parentBox.isAncestorOf(await reason.route.followDestinationAndWatch())) {
 			return {pulled: true}

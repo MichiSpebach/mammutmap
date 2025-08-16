@@ -22,14 +22,16 @@ export class PulledBox {
 		this.parent = parent
 	}
 
-	public async pull(wishRect: ClientRect): Promise<void> { await this.pullScheduler.schedule(async () => {
+	public async pull(reason: PullReason): Promise<void> { await this.pullScheduler.schedule(async () => {
 		if (this.pulledChildren.length > 0) {
 			await this.updateSizeToEncloseChilds()
 			await this.order()
 			await this.updateSizeToEncloseChilds()
 			return
 		}
-		await this.detachToFitClientRect(wishRect, this.pulledChildren.length < 1)
+		const pullPosition: ClientPosition = await reason.calculatePullPositionFor(this.box)
+		const pullRect: ClientRect = reason.createPullRect(pullPosition)
+		await this.detachToFitClientRect(pullRect, this.pulledChildren.length < 1)
 	})}
 
 	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> { await pullUtil.detachScheduler.schedule('concurrent', async () => {
