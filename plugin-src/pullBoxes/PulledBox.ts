@@ -32,7 +32,7 @@ export class PulledBox {
 		await this.detachToFitClientRect(wishRect, this.pulledChildren.length < 1)
 	})}
 
-	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
+	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> { await pullUtil.detachScheduler.schedule('concurrent', async () => {
 		if (preserveAspectRatio) {
 			rect = pullUtil.shrinkRectToAspectRatio(rect, this.calculateSavedAspectRatio())
 		}
@@ -43,7 +43,7 @@ export class PulledBox {
 				transition: 'box-shadow 1s'
 			})
 		])
-	}
+	})}
 
 	private async updateSizeToEncloseChilds(): Promise<void> {
 		if (this.pulledChildren.length === 0) {

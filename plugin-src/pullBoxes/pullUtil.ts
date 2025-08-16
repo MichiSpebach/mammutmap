@@ -1,6 +1,9 @@
 import { ClientPosition } from '../../dist/core/shape/ClientPosition'
 import { ClientRect } from '../../dist/core/ClientRect'
 import { map, Map } from '../../dist/core/Map'
+import { AwaitBlockingScheduler } from './AwaitBlockingScheduler'
+
+export const detachScheduler = new AwaitBlockingScheduler()
 
 export async function getIntersectionRect(): Promise<ClientRect> {
 	const mapRect: ClientRect = await getUncoveredMapClientRect()
