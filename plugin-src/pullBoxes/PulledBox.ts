@@ -15,6 +15,7 @@ export class PulledBox {
 	public reasons: PullReason[]
 	public parent: PulledBox|null
 	public pulledChildren: PulledBox[] = []
+	private lastPullDirection: {x: number, y: number}|undefined = undefined
 
 	public constructor(box: Box, reasons: PullReason[], parent: PulledBox|null) {
 		this.box = box
@@ -29,12 +30,13 @@ export class PulledBox {
 			await this.updateSizeToEncloseChilds()
 			return
 		}
-		const pullPosition: ClientPosition = await reason.calculatePullPositionFor(this.box)
-		const pullRect: ClientRect = reason.createPullRect(pullPosition)
+		const pullPosition: {position: ClientPosition, direction: {x: number, y: number}} = await reason.calculatePullPositionFor(this.box)
+		this.lastPullDirection = pullPosition.direction
+		const pullRect: ClientRect = reason.createPullRect(pullPosition.position)
 		await this.detachToFitClientRect(pullRect, this.pulledChildren.length < 1)
 	})}
 
-	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> { await pullUtil.detachScheduler.schedule('concurrent', async () => {
+	public async detachToFitClientRect(rect: ClientRect, preserveAspectRatio: boolean): Promise<void> {
 		if (preserveAspectRatio) {
 			rect = pullUtil.shrinkRectToAspectRatio(rect, this.calculateSavedAspectRatio())
 		}
@@ -45,9 +47,9 @@ export class PulledBox {
 				transition: 'box-shadow 1s'
 			})
 		])
-	})}
+	}
 
-	private async updateSizeToEncloseChilds(): Promise<void> {
+	private async updateSizeToEncloseChilds(): Promise<void> { await pullUtil.detachScheduler.schedule('concurrent', async () => {
 		if (this.pulledChildren.length === 0) {
 			console.warn(`PulledBox::updateSizeToEncloseChilds() called but this.pulledChildren.length === 0`)
 			return
@@ -70,7 +72,7 @@ export class PulledBox {
 		}
 		await this.detachToFitClientRect(updatedRect, false)
 		await Promise.all(childsWithRects.map(childWithRect => childWithRect.child.detachToFitClientRect(childWithRect.rect, false)))
-	}
+	})}
 
 	public static async calculateIfBoxEnclosesChilds(box: Box, childs: PulledBox[]): Promise<{
 		boxEnclosesChilds: boolean
@@ -249,27 +251,33 @@ export class PulledBox {
 
 	private async calculateOrderDirection(): Promise<'horizontal'|'vertical'> {
 		const boxRect: ClientRect = await this.box.getClientRect()
-		let horizontalIntersections: number = 0
-		let verticalIntersections: number = 0
+		let horizontalCount: number = 0
+		let verticalCount: number = 0
 		
-		await Promise.all(this.reasons.map(async reason => {
-			const intersection: ClientPosition|undefined = await reason.calculateIntersectionOfRouteWithRect(boxRect, {warnIfMultipleIntersectionsWithOneLink: true})
-			if (!intersection) {
-				console.warn(`PulledBox::calculateOrderDirection() !intersection box.id=${this.box.getId()} boxRect=${JSON.stringify(boxRect)}`)
-				return
-			}
-			const intersectionSide = pullUtil.getNearestRectSideOfPosition(intersection, boxRect).nearestSide
-			if (intersectionSide === 'left' || intersectionSide === 'right') {
-				verticalIntersections++
-			} else {
-				horizontalIntersections++
-			}
+		await Promise.all(this.pulledChildren.map(async pulledChild => {
+			await Promise.all(pulledChild.reasons.map(async reason => {
+				const pullDirection: {x: number, y: number} = await pulledChild.calculatePullDirectionForRectAndReason(boxRect, reason)
+				Math.abs(pullDirection.x) > Math.abs(pullDirection.y) ? verticalCount++ : horizontalCount++
+			}))
 		}))
 
-		if (horizontalIntersections < verticalIntersections) {
+		if (horizontalCount < verticalCount) {
 			return 'vertical'
 		} else {
 			return 'horizontal'
 		}
+	}
+
+	private async calculatePullDirectionForRectAndReason(rect: ClientRect, reason: PullReason): Promise<{x: number, y: number}> {
+		const intersection: {position: ClientPosition, direction: {x: number, y: number}} | undefined = await reason.calculateIntersectionOfRouteWithRect(rect, {warnIfMultipleIntersectionsWithOneLink: true})
+		if (intersection) {
+			return intersection.direction
+		}
+		// !intersection happens if reasonBox overlaps rect before reasonBox is moved aside
+		if (this.lastPullDirection) {
+			return this.lastPullDirection
+		}
+		console.warn(`PulledBox::calculatePullDirectionForRectAndReason() !intersection and !this.pullDirection box.id=${this.box.getId()} rect=${JSON.stringify(rect)}`)
+		return {x: 0, y: 0}
 	}
 }

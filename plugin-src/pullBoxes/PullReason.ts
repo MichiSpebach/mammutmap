@@ -29,11 +29,11 @@ export class PullReason {
 		return new ClientRect(midPosition.x-100, midPosition.y-50, 200, 100)
 	}
 
-	public async calculatePullPositionFor(box: Box): Promise<ClientPosition> {
+	public async calculatePullPositionFor(box: Box): Promise<{position: ClientPosition, direction: {x: number, y: number}}> {
 		const linkEndBorderingBox: LinkEnd|undefined = this.route.findLinkEndBorderingNode(box)
 		if (!linkEndBorderingBox) {
 			console.warn(`PulledBoxes::pullBoxIfNecessary(box: ${box.getName()}) !linkEndBorderingBox`)
-			return (await pullUtil.getIntersectionRect()).getMidPosition()
+			return {position: (await pullUtil.getIntersectionRect()).getMidPosition(), direction: {x: 1, y: 0}}
 		}
 		const direction: 'from'|'to' = linkEndBorderingBox.getReferenceLink().from === linkEndBorderingBox ? 'to' : 'from'
 
@@ -41,10 +41,15 @@ export class PullReason {
 			return await this.calculatePullPositionOfRoute(direction)
 		}
 		
-		let pullPosition = (await box.getClientRect()).getMidPosition()
+		const otherLinkEndPosition: Promise<ClientPosition> = linkEndBorderingBox.getOtherEnd().getTargetPositionInClientCoords()
+		const linkEndPosition: Promise<ClientPosition> = linkEndBorderingBox.getTargetPositionInClientCoords()
+		const pullDirection: {x: number, y: number} = new Line(await otherLinkEndPosition, await linkEndPosition).getDirection()
+		
+		const boxPosition = (await box.getClientRect()).getMidPosition()
+		let pullPosition = {position: boxPosition, direction: pullDirection}
 		const intersectionRect: ClientRect = await pullUtil.getIntersectionRect()
-		if (!intersectionRect.isPositionInside(pullPosition)) {	// TODO: hack only, improve
-			const position: ClientPosition|undefined = await this.calculateIntersectionOfLinkWithRect(linkEndBorderingBox, intersectionRect, {elongationInPixels: 10000})
+		if (!intersectionRect.isPositionInside(boxPosition)) {	// TODO: hack only, improve
+			const position: {position: ClientPosition, direction: {x: number, y: number}} | undefined = await this.calculateIntersectionOfLinkWithRect(linkEndBorderingBox, intersectionRect, {elongationInPixels: 10000})
 			if (position) {
 				pullPosition = position
 			} else {
@@ -54,11 +59,11 @@ export class PullReason {
 		return pullPosition
 	}
 
-	public async calculatePullPositionOfRoute(direction: 'from'|'to'): Promise<ClientPosition> {
-		let intersection: ClientPosition|undefined = await this.calculateIntersectionOfRouteWithRect(await pullUtil.getIntersectionRect(), {direction, elongateInDirection: true})
+	public async calculatePullPositionOfRoute(direction: 'from'|'to'): Promise<{position: ClientPosition, direction: {x: number, y: number}}> {
+		let intersection: {position: ClientPosition, direction: {x: number, y: number}} | undefined = await this.calculateIntersectionOfRouteWithRect(await pullUtil.getIntersectionRect(), {direction, elongateInDirection: true})
 		if (!intersection) {
 			console.warn(`pullBoxes: intersections.length < 1 for linkRoute [${this.route.nodes.map(node => node.node.getName())}]`)
-			intersection = (await pullUtil.getIntersectionRect()).getMidPosition()
+			intersection = {position: (await pullUtil.getIntersectionRect()).getMidPosition(), direction: {x: 1, y: 0}}
 		}
 		return intersection
 	}
@@ -67,11 +72,11 @@ export class PullReason {
 		direction?: 'from'|'to'
 		elongateInDirection?: boolean
 		warnIfMultipleIntersectionsWithOneLink?: boolean}
-	): Promise<ClientPosition|undefined> {
+	): Promise<{position: ClientPosition, direction: {x: number, y: number}} | undefined> {
 		const direction: 'from'|'to' = options?.direction?? 'to'
 		const startIndex: number = direction === 'to' ? 0 : this.route.links.length-1
 		const increment: number = direction === 'to' ? 1 : -1
-		let intersection: ClientPosition|undefined = undefined
+		let intersection: {position: ClientPosition, direction: {x: number, y: number}} | undefined = undefined
 		for (let i = startIndex; i < this.route.links.length && i >= 0; i += increment) {
 			const link: Link = this.route.links[i]
 			if (intersection) {
@@ -85,7 +90,10 @@ export class PullReason {
 		return intersection
 	}
 	
-	private async calculateIntersectionOfLinkWithRect(linkEnd: LinkEnd, rect: ClientRect, options?: {elongationInPixels?: number, warnIfMultipleIntersections?: boolean}): Promise<ClientPosition|undefined> {
+	private async calculateIntersectionOfLinkWithRect(linkEnd: LinkEnd, rect: ClientRect, options?: {
+		elongationInPixels?: number,
+		warnIfMultipleIntersections?: boolean}
+	): Promise<{position: ClientPosition, direction: {x: number, y: number}} | undefined> {
 		const linkEndPosition: Promise<ClientPosition> = linkEnd.getTargetPositionInClientCoords()
 		const otherLinkEndPosition: Promise<ClientPosition> = linkEnd.getOtherEnd().getTargetPositionInClientCoords()
 		let linkLine = new Line(await linkEndPosition, await otherLinkEndPosition)
@@ -108,6 +116,6 @@ export class PullReason {
 				}
 			}
 		}
-		return intersection
+		return {position: intersection, direction: linkLine.getDirection()}
 	}
 }

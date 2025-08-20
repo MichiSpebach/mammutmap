@@ -284,7 +284,6 @@ export class PulledBoxes {
 			const pulledBoxesWithRects: {pulledBox: PulledBox, rect: ClientRect}[] = await Promise.all(this.pulledBoxes.map(async pulledBox => ({pulledBox, rect: await pulledBox.box.getClientRect()})))
 			const mapRect: ClientRect = await pullUtil.getMap().getMapClientRect()
 			await pullUtil.getMap().zoomToFit([new ClientRect(mapRect.x-move.x, mapRect.y-move.y, mapRect.width/move.zoom, mapRect.height/move.zoom)], {marginInPercent: 0, transitionDurationInMS: 200})
-			//await Promise.all(pulledBoxesWithRects.map(({pulledBox, rect}) => pulledBox.detachToFitClientRect(rect, false))) // would lead to deadlock
 			await Promise.all(pulledBoxesWithRects.map(({pulledBox, rect}) => pulledBox.box.site.detachToFitClientRect(rect, {preserveAspectRatio: false, transitionDurationInMS: 200, renderStylePriority: RenderPriority.RESPONSIVE})))
 		})
 	}
