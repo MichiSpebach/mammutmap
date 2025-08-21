@@ -32,7 +32,13 @@ export class PulledBox {
 		}
 		const pullPosition: {position: ClientPosition, direction: {x: number, y: number}} = await reason.calculatePullPositionFor(this.box)
 		this.lastPullDirection = pullPosition.direction
-		const pullRect: ClientRect = reason.createPullRect(pullPosition.position)
+		let pullRect: ClientRect = reason.createPullRect(pullPosition.position)
+		const boxRect: ClientRect = await this.box.getClientRect()
+		const mapRect: ClientRect = await pullUtil.getUncoveredMapClientRect()
+		const boxRectClippedInsideScreen: ClientRect|undefined = ClientRect.createIntersection([boxRect, mapRect])
+		if (boxRectClippedInsideScreen) {
+			pullRect = ClientRect.createEnclosing([boxRectClippedInsideScreen, pullRect])
+		}
 		await this.detachToFitClientRect(pullRect, this.pulledChildren.length < 1)
 	})}
 

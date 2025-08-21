@@ -28,6 +28,18 @@ export class ClientRect extends Rect<ClientPosition> {
         return new ClientRect(minX, minY, maxX - minX, maxY - minY)
     }
 
+    // TODO: works same as in LocalRect, make generic and move into Rect
+    public static createIntersection(rects: ClientRect[]): ClientRect|undefined {
+        const minX: number = Math.max(...rects.map(rect => rect.x))
+        const minY: number = Math.max(...rects.map(rect => rect.y))
+        const maxX: number = Math.min(...rects.map(rect => rect.x + rect.width))
+        const maxY: number = Math.min(...rects.map(rect => rect.y + rect.height))
+        if (minX > maxX || minY > maxY) {
+            return undefined
+        }
+        return new ClientRect(minX, minY, maxX - minX, maxY - minY)
+    }
+
     protected buildPosition(x: number, y: number): ClientPosition {
       return new ClientPosition(x, y)
     }
