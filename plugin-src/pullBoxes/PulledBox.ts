@@ -70,7 +70,7 @@ export class PulledBox {
 		if (rect.isInsideOrEqual(mapRect)) {
 			updatedRect = ClientRect.createEnclosing([rect, enclosingRectWithMargin])
 		} else {
-			updatedRect = PulledBox.calculateLeastTransformedRectToSurround(rect, enclosingRectWithMargin)
+			updatedRect = PulledBox.calculateLeastTransformedRectToSurround(rect, enclosingRectWithMargin, {preserveAspectRationIfPossible: true})
 			updatedRect = ClientRect.fromPositions(
 				new ClientPosition(Math.max(updatedRect.x, mapRect.x), Math.max(updatedRect.y, mapRect.y)),
 				new ClientPosition(Math.min(updatedRect.getRightX(), mapRect.getRightX()), Math.min(updatedRect.getBottomY(), mapRect.getBottomY()))
@@ -99,7 +99,16 @@ export class PulledBox {
 	}
 
 	/** public for test */
-	public static calculateLeastTransformedRectToSurround(rect: ClientRect, toSurround: ClientRect): ClientRect {
+	public static calculateLeastTransformedRectToSurround(rect: ClientRect, toSurround: ClientRect, options?: {preserveAspectRationIfPossible?: boolean}): ClientRect {
+		if (options?.preserveAspectRationIfPossible) {
+			const rectAspectRatio: number = rect.width/rect.height
+			const toSurroundAspectRatio: number = toSurround.width/toSurround.height
+			if (toSurroundAspectRatio > rectAspectRatio) {
+				rect = pullUtil.shrinkRectToAspectRatio(new ClientRect(rect.x, rect.y, toSurround.width, rect.height), rectAspectRatio)
+			} else {
+				rect = pullUtil.shrinkRectToAspectRatio(new ClientRect(rect.x, rect.y, rect.width, toSurround.height), rectAspectRatio)
+			}
+		}
 		let x: number
 		let y: number
 		const width: number = Math.max(rect.width, toSurround.width)

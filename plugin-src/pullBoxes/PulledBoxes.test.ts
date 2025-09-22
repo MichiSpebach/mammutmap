@@ -95,7 +95,7 @@ test('pullBoxIfNecessary, files to pull outside screen', async () => {
 	let upperPulledFileRect: ClientRect = await upperPulledFile.getClientRect()
 	expect(pulledFolderRect.isInsideOrEqual(await rootFolder.context.getMapClientRect())).toBe(true)
 	expect(upperPulledFileRect.isInsideOrEqual(pulledFolderRect)).toBe(true)
-	expect(roundRect(pulledFolderRect)).toEqual({x: 572, y: 306, width: 228, height: 160})
+	expect(roundRect(pulledFolderRect)).toEqual({x: 572, y: 306, width: 228, height: 140})
 	expect(upperPulledFileRect).toEqual({x: 580, y: 338, width: 200, height: 100})
 
 	// pull lower file
@@ -109,9 +109,9 @@ test('pullBoxIfNecessary, files to pull outside screen', async () => {
 	expect(upperPulledFileRect.isInsideOrEqual(pulledFolderRect)).toBe(true)
 	expect(lowerPulledFileRect.isInsideOrEqual(pulledFolderRect)).toBe(true)
 	expect(upperPulledFileRect.isOverlappingWith(lowerPulledFileRect)).toBe(false)
-	expect(roundRect(pulledFolderRect)).toEqual({x: 572, y: 262.92, width: 228, height: 248})
-	expect(roundRect(upperPulledFileRect)).toEqual({x: 580, y: 294.92, width: 200, height: 100})
-	expect(roundRect(lowerPulledFileRect)).toEqual({x: 580, y: 402.92, width: 200, height: 100})
+	expect(roundRect(pulledFolderRect)).toEqual({x: 572, y: 256.52, width: 228, height: 248})
+	expect(roundRect(upperPulledFileRect)).toEqual({x: 580, y: 288.52, width: 200, height: 100})
+	expect(roundRect(lowerPulledFileRect)).toEqual({x: 580, y: 396.52, width: 200, height: 100})
 })
 
 test('pullBoxIfNecessary, file to pull deep inside screen', async () => {
