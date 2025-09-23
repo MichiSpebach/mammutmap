@@ -3,6 +3,7 @@ import { coreUtil } from '../dist/pluginFacade'
 import { dom } from '../dist/core/renderEngine/domAdapter'
 import { style } from '../dist/pluginFacade'
 import { BorderingLinks } from '../dist/pluginFacade'
+import { LinkHighlight } from '../dist/core/link/LinkHighlights'
 
 const deactivateMenuItem: MenuItemFile = new MenuItemFile({label: 'deactivate', click: deactivate, enabled: false})
 const activateMenuItem: MenuItemFile = new MenuItemFile({label: 'activate', click: activate})
@@ -51,24 +52,37 @@ async function ensureActivation(): Promise<void> {
 
 class ToggableFancyBorderingLinks extends BorderingLinks {
 
-    private static setHighlightAllThatShouldBeRenderedBackup: (highlight: boolean) => Promise<void>
+    private static addHighlightToAllThatShouldBeRenderedBackup: (highlight: LinkHighlight) => Promise<void>
+    private static removeHighlightFromAllThatShouldBeRenderedBackup: (highlightHandle: string) => Promise<void>
 
     public static activateAndPlugin(): void {
-        this.setHighlightAllThatShouldBeRenderedBackup = BorderingLinks.prototype.setHighlightAllThatShouldBeRendered
-        BorderingLinks.prototype.setHighlightAllThatShouldBeRendered = ToggableFancyBorderingLinks.prototype.setHighlightAllThatShouldBeRendered
+        this.addHighlightToAllThatShouldBeRenderedBackup = BorderingLinks.prototype.addHighlightToAllThatShouldBeRendered
+        BorderingLinks.prototype.addHighlightToAllThatShouldBeRendered = ToggableFancyBorderingLinks.prototype.addHighlightToAllThatShouldBeRendered
+        this.removeHighlightFromAllThatShouldBeRenderedBackup = BorderingLinks.prototype.removeHighlightFromAllThatShouldBeRendered
+        BorderingLinks.prototype.removeHighlightFromAllThatShouldBeRendered = ToggableFancyBorderingLinks.prototype.removeHighlightFromAllThatShouldBeRendered
     }
 
     public static deactivateAndPlugout(): void {
-        BorderingLinks.prototype.setHighlightAllThatShouldBeRendered = ToggableFancyBorderingLinks.setHighlightAllThatShouldBeRenderedBackup
+        BorderingLinks.prototype.addHighlightToAllThatShouldBeRendered = ToggableFancyBorderingLinks.addHighlightToAllThatShouldBeRenderedBackup
+        BorderingLinks.prototype.addHighlightToAllThatShouldBeRendered = ToggableFancyBorderingLinks.addHighlightToAllThatShouldBeRenderedBackup
     }
 
-    public override async setHighlightAllThatShouldBeRendered(highlight: boolean): Promise<void> {
+    public override async addHighlightToAllThatShouldBeRendered(highlight: LinkHighlight): Promise<void> {
         if (this.getLinksThatShouldBeRendered().length > 15) {
             await ensureDeactivation()
         } else {
             await ensureActivation()
         }
-        return ToggableFancyBorderingLinks.setHighlightAllThatShouldBeRenderedBackup.call(this, highlight)
+        return ToggableFancyBorderingLinks.addHighlightToAllThatShouldBeRenderedBackup.call(this, highlight)
+    }
+
+    public override async removeHighlightFromAllThatShouldBeRendered(highlightHandle: string): Promise<void> {
+        if (this.getLinksThatShouldBeRendered().length > 15) {
+            await ensureDeactivation()
+        } else {
+            await ensureActivation()
+        }
+        return ToggableFancyBorderingLinks.removeHighlightFromAllThatShouldBeRenderedBackup.call(this, highlightHandle)
     }
 
 }

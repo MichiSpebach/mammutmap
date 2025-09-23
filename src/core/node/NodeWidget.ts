@@ -165,7 +165,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         this.highlight = true
         await Promise.all([
             this.render(RenderPriority.RESPONSIVE),
-            this.borderingLinks.setHighlightAllThatShouldBeRendered(true)
+            this.borderingLinks.addHighlightToAllThatShouldBeRendered({handle: `hover-${this.getId()}`, highlight: true, foreground: true})
         ])
     }
     
@@ -173,7 +173,7 @@ export class NodeWidget extends AbstractNodeWidget implements DropTarget, Dragga
         this.highlight = false
         await Promise.all([
             this.render(RenderPriority.RESPONSIVE),
-            this.borderingLinks.setHighlightAllThatShouldBeRendered(false)
+            this.borderingLinks.removeHighlightFromAllThatShouldBeRendered(`hover-${this.getId()}`)
         ])
     }
 

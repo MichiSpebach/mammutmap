@@ -297,7 +297,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
 
   private async setHighlight(): Promise<void> {
     const highlightClass: string = this.referenceLink.getHighlightClass()
-    if (this.referenceLink.isHighlight()) {
+    if (this.referenceLink.getHighlights().isHighlighted()) {
       await renderManager.addClassTo(this.getId(), highlightClass)
     } else {
       await renderManager.removeClassFrom(this.getId(), highlightClass)

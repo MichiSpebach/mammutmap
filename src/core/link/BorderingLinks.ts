@@ -4,6 +4,7 @@ import { Box } from "../box/Box"
 import { NodeWidget } from "../node/NodeWidget"
 import { LinkEnd } from "./LinkEnd"
 import { log } from "../logService"
+import { LinkHighlight } from './LinkHighlights'
 
 export class BorderingLinks {
   private readonly referenceBoxOrNode: Box|NodeWidget
@@ -49,8 +50,26 @@ export class BorderingLinks {
     await Promise.all(this.getLinksThatShouldBeRendered().map(link => link.render()))
   }
 
-  public async setHighlightAllThatShouldBeRendered(highlight: boolean): Promise<void> {
-    await Promise.all(this.getLinksThatShouldBeRendered().map(link => link.renderWithOptions({highlight})))
+  public async addHighlightToAllThatShouldBeRendered(highlight: LinkHighlight): Promise<void> {
+    await Promise.all(this.getLinksThatShouldBeRendered().map(link => link.renderWithOptions({
+      highlight: {mode: 'add', highlight, propagationDirection: this.getHighlightPropagationDirectionOf(link)}
+    })))
+  }
+
+  public async removeHighlightFromAllThatShouldBeRendered(highlightHandle: string): Promise<void> {
+    await Promise.all(this.getLinksThatShouldBeRendered().map(link => link.renderWithOptions({
+      highlight: {mode: 'remove', highlightHandle, propagationDirection: this.getHighlightPropagationDirectionOf(link)}
+    })))
+  }
+
+  private getHighlightPropagationDirectionOf(link: Link): 'from'|'to'|undefined {
+    if (this.referenceBoxOrNode.getId() === link.from.getTargetNodeId()) {
+      return 'to'
+    }
+    if (this.referenceBoxOrNode.getId() === link.to.getTargetNodeId()) {
+      return 'from'
+    }
+    return undefined
   }
 
   public getLinksThatShouldBeRendered(): Link[] {

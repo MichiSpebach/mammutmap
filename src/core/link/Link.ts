@@ -22,6 +22,7 @@ import { LinkEndData } from '../mapData/LinkEndData'
 import { WayPointData } from '../mapData/WayPointData'
 import { selectManager } from '../selectManager'
 import { Subscribers } from '../util/Subscribers'
+import { LinkHighlight, LinkHighlights, LinkHighlightsReadonly } from './LinkHighlights'
 
 export function override(implementation: typeof LinkImplementation): void {
   LinkImplementation = implementation
@@ -42,7 +43,7 @@ export class Link implements Hoverable {
   public readonly to: LinkEnd
   private renderState: RenderState = new RenderState()
   private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
-  private highlight: boolean = false
+  private highlights: LinkHighlights = new LinkHighlights()
   private draggingInProgress: boolean = false
   private hoveringOver: boolean = false // TODO: rename to focused?
   private selected: boolean = false
@@ -137,13 +138,21 @@ export class Link implements Hoverable {
 
   public async renderWithOptions(options: {
     priority?: RenderPriority
-    highlight?: boolean
+    highlight?: {
+      mode: 'add', highlight: LinkHighlight, propagationDirection?: 'from'|'to', skipIfAlreadyAdded?: boolean
+    } | {
+      mode: 'remove', highlightHandle: string, propagationDirection?: 'from'|'to', skipIfNotAdded?: boolean
+    }
     draggingInProgress?: boolean
     hoveringOver?: boolean
     selected?: boolean
   }): Promise<void> {
-    if (options.highlight !== undefined) {
-      this.highlight = options.highlight
+    if (options.highlight) {
+      if (options.highlight.mode === 'add') {
+        this.highlights.add(options.highlight.highlight, {skipIfAlreadyAdded: options.highlight.skipIfAlreadyAdded})
+      } else {
+        this.highlights.remove(options.highlight.highlightHandle, {skipIfNotAdded: options.highlight.skipIfNotAdded})
+      }
     }
     if (options.draggingInProgress !== undefined) {
       this.draggingInProgress = options.draggingInProgress
@@ -254,21 +263,22 @@ export class Link implements Hoverable {
   }
 
   private async handleHoverOver(): Promise<void> {
+    const highlight: LinkHighlight = {handle: 'hover', highlight: true, bold: true, foreground: true}
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
-      this.highlight = true
+      this.highlights.add(highlight)
       this.hoveringOver = true
       return
     }
-    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: true, hoveringOver: true})
+    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: {mode: 'add', highlight}, hoveringOver: true})
   }
 
   private async handleHoverOut(): Promise<void> {
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
-      this.highlight = false
+      this.highlights.remove('hover')
       this.hoveringOver = false
       return
     }
-    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: false, hoveringOver: false})
+    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: {mode: 'remove', highlightHandle: 'hover'}, hoveringOver: false})
   }
 
   private async handleSelect(): Promise<void> {
@@ -293,8 +303,8 @@ export class Link implements Hoverable {
     ])
   }
 
-  public isHighlight(): boolean {
-    return this.highlight
+  public getHighlights(): LinkHighlightsReadonly {
+    return this.highlights
   }
 
   public getHighlightClass(): string {
@@ -309,7 +319,11 @@ export class Link implements Hoverable {
     movedWayPoint: Box|NodeWidget
     movedLinkEnd?: LinkEnd
     priority?: RenderPriority
-    highlight?: boolean
+    highlight?: {
+      mode: 'add', highlight: LinkHighlight, propagationDirection?: 'from'|'to', skipIfAlreadyAdded?: boolean
+    } | {
+      mode: 'remove', highlightHandle: string, propagationDirection?: 'from'|'to', skipIfNotAdded?: boolean
+    }
     draggingInProgress?: boolean
     hoveringOver?: boolean
   }): Promise<void> {

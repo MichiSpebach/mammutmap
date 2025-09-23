@@ -480,7 +480,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
     await Promise.all([
       this.addFocusElements({priority: RenderPriority.RESPONSIVE, awaitAnimations: true}),
-      this.borderingLinks.setHighlightAllThatShouldBeRendered(true)
+      this.borderingLinks.addHighlightToAllThatShouldBeRendered({handle: `hover-${this.getId()}`, highlight: true, foreground: true})
     ])
   }
 
@@ -495,7 +495,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
     await Promise.all([
       this.removeFocusElements({priority: RenderPriority.RESPONSIVE, awaitAnimations: true}),
-      this.borderingLinks.setHighlightAllThatShouldBeRendered(false)
+      this.borderingLinks.removeHighlightFromAllThatShouldBeRendered(`hover-${this.getId()}`)
     ])
   }
 

@@ -114,7 +114,6 @@ pre {
 }
 
 .highlightLink {
-  stroke-width: 4px !important;
   filter: contrast(0.35) brightness(1.5);
 }
 

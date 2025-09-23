@@ -10,6 +10,7 @@ import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link, LinkImplementation } from '../../dist/core/link/Link'
 import { LinkData } from '../../dist/core/mapData/LinkData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
+import { LinkHighlight } from '../../dist/core/link/LinkHighlights'
 
 export class HighlightPropagatingLink extends LinkImplementation {
 
@@ -228,12 +229,15 @@ export class HighlightPropagatingLink extends LinkImplementation {
 
 	public override async renderWithOptions(options: {
 		priority?: RenderPriority|undefined
-		highlight?: boolean|undefined
+		highlight?: {
+			mode: 'add', highlight: LinkHighlight, propagationDirection?: 'from'|'to', skipIfAlreadyAdded?: boolean
+		} | {
+			mode: 'remove', highlightHandle: string, propagationDirection?: 'from'|'to', skipIfNotAdded?: boolean
+		}
 		highlightRouteIds?: string[]
 		draggingInProgress?: boolean|undefined
 		hoveringOver?: boolean|undefined
 		propagationStep?: number
-		propagationDirection?: 'from'|'to'
 		bundledWith?: string[]
 	}): Promise<void> {
 		const pros: Promise<void>[] = []
@@ -241,13 +245,13 @@ export class HighlightPropagatingLink extends LinkImplementation {
 
 		if (options.propagationStep && options.propagationStep > 8) {
 			console.warn(`HighlightPropagatingLink::renderWithOptions(...) max propagationStep of 8 exceeded`)
-		} else if (options.highlight !== undefined) {
+		} else if (options.highlight) {
 			const highlightRouteIds: string[] = options.highlightRouteIds?? HighlightPropagatingLink.getRouteIds(this)
-			if (!options.propagationDirection || options.propagationDirection === 'from') {
-				pros.push(this.propagateHighlight({...options, propagationDirection: 'from', highlight: options.highlight, highlightRouteIds}))
+			if (!options.highlight.propagationDirection || options.highlight.propagationDirection === 'from') {
+				pros.push(this.propagateHighlight({...options, highlight: {...options.highlight, propagationDirection: 'from'}, highlightRouteIds}))
 			}
-			if (!options.propagationDirection || options.propagationDirection === 'to') {
-				pros.push(this.propagateHighlight({...options, propagationDirection: 'to', highlight: options.highlight, highlightRouteIds}))
+			if (!options.highlight.propagationDirection || options.highlight.propagationDirection === 'to') {
+				pros.push(this.propagateHighlight({...options, highlight: {...options.highlight, propagationDirection: 'to'}, highlightRouteIds}))
 			}
 		}
 		
@@ -255,27 +259,30 @@ export class HighlightPropagatingLink extends LinkImplementation {
 	}
 
 	public override async render(priority?: RenderPriority | undefined): Promise<void> {
-		if (this['renderState'].isUnrendered() && this.getConnectedLinks().some(link => link.isHighlight())) { // TODO: this.getConnectedLinks() does not always return the correct links
+		if (this['renderState'].isUnrendered() && this.getConnectedLinks().some(link => link.getHighlights().hasHighlights())) { // TODO: this.getConnectedLinks() does not always return the correct links
 			this['highlight'] = true
 		}
 		await super.render(priority)
 	}
 
 	private async propagateHighlight(options: {
-		highlight: boolean
+		highlight: {
+			mode: 'add', highlight: LinkHighlight, propagationDirection: 'from'|'to', skipIfAlreadyAdded?: boolean
+		} | {
+			mode: 'remove', highlightHandle: string, propagationDirection: 'from'|'to', skipIfNotAdded?: boolean
+		}
 		highlightRouteIds: string[]
 		propagationStep?: number
-		propagationDirection: 'from'|'to'
 		bundledWith?: string[]
 	}): Promise<void> {
-		const endNode: AbstractNodeWidget = this[options.propagationDirection].getDeepestRenderedWayPoint().linkable
+		const endNode: AbstractNodeWidget = this[options.highlight.propagationDirection].getDeepestRenderedWayPoint().linkable
 		if (!(endNode instanceof NodeWidget)) {
 			return
 		}
 		const propagationStep: number = (options.propagationStep??0) + 1
 		const bundledWith: string[] = (options.bundledWith??[]).concat(this.getData()['bundledWith']??[])
 
-		const connectedLinks: Link[] = options.propagationDirection === 'to'
+		const connectedLinks: Link[] = options.highlight.propagationDirection === 'to'
 			? endNode.borderingLinks.getOutgoing()
 			: endNode.borderingLinks.getIngoing()
 		const bundledWithLinks: Link[] = connectedLinks.filter(link => bundledWith.includes(link.getId()))
@@ -293,8 +300,11 @@ export class HighlightPropagatingLink extends LinkImplementation {
 			}
 		}
 
+		const highlight = options.highlight.mode === 'add'
+			? {...options.highlight, skipIfAlreadyAdded: true}
+			: {...options.highlight, skipIfNotAdded: true}
 		await Promise.all(routedLinksToPropagateTo.filter(link => link.shouldBeRendered()).map(async link => {
-			await (link as HighlightPropagatingLink).renderWithOptions({...options, propagationStep, bundledWith})
+			await (link as HighlightPropagatingLink).renderWithOptions({...options, highlight, propagationStep, bundledWith})
 		}))
 	}
 

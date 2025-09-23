@@ -90,17 +90,17 @@ export class LinkLine {
         const positionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
         //let html = `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke:#fff;stroke-dasharray:3px;stroke-width:1px;"/>`
         //html += `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke:#444;stroke-dasharray:3px,9px;stroke-dashoffset:3px;stroke-width:1px;"/>`
-        const width: number = hoveringOver || this.referenceLink.isHighlight() ? 6 : 4
+        const width: number = hoveringOver || this.referenceLink.getHighlights().isBold() ? 6 : 4
         return `<line id="${this.getSelectedId()}" ${positionHtml} style="stroke:#abc;stroke-dasharray:4px;stroke-width:${width}px;"/>`
     }
     
     private formLineClassHtml(): string {
-        const highlightClass: string = this.referenceLink.isHighlight() ? ' '+this.referenceLink.getHighlightClass() : ''
+        const highlightClass: string = this.referenceLink.getHighlights().isHighlighted() ? ' '+this.referenceLink.getHighlightClass() : ''
         return `class="${style.getHighlightTransitionClass()}${highlightClass}"`
     }
     
     private formLineStyleHtml(): string {
-        return 'style="stroke:'+this.referenceLink.getColor()+';stroke-width:2px;"'
+        return `style="stroke:${this.referenceLink.getColor()};stroke-width:${this.referenceLink.getHighlights().isBold() ? '4px' : '2px'};"`
     }
 }
 
