@@ -180,18 +180,14 @@ export class Link implements Hoverable {
     }
     this.renderState.setRenderStarted()
 
-    const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
-    const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
-    const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
-
     const proms: Promise<any>[] = []
-
+    
     if (!this.renderState.isRendered()) {
       const draggableHtml: string = relocationDragManager.isUsingNativeDragEvents() ? 'draggable="true"' : ''
       const fromHtml: string = `<div id="${this.from.getId()}" ${draggableHtml} class="${style.getHighlightTransitionClass()}"></div>`
       const toHtml: string = `<div id="${this.to.getId()}" ${draggableHtml} class="${style.getHighlightTransitionClass()}"></div>`
       const lineStyle: string = 'position:absolute;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;'
-      const lineHtml: string = await this.line.formHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver, this.selected, lineStyle)
+      const lineHtml: string = await this.line.formOuterHtml(lineStyle)
       if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRenderedAndLogIfNot('checkpoint0')) {
         return
       }
@@ -200,16 +196,19 @@ export class Link implements Hoverable {
         return
       }
       proms.push(this.addEventListeners())
-    } else {
-      if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRenderedAndLogIfNot('checkpoint2')) {
-        return
-      }
-      proms.push(renderManager.setContentTo(this.line.getId(), await this.line.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver, this.selected), priority))
     }
 
-    // TODO: too many awaits, optimize
-    const fromClientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(fromInManagingBoxCoords)
+    const fromInManagingBoxCoordsPromise: Promise<LocalPosition> = this.from.getRenderPositionInManagingBoxCoords()
+    const toInManagingBoxCoords: LocalPosition = await this.to.getRenderPositionInManagingBoxCoords()
+    const fromInManagingBoxCoords: LocalPosition = await fromInManagingBoxCoordsPromise
+    if (/*!this.managingBox.isBodyBeingRendered()*/!this.shouldBeRenderedAndLogIfNot('checkpoint2')) {
+      return
+    }
+    proms.push(this.line.render(fromInManagingBoxCoords, toInManagingBoxCoords, this.draggingInProgress, this.hoveringOver, this.selected, priority))
+
+    const fromClientPositionPromise: Promise<ClientPosition> = this.managingBox.transform.localToClientPosition(fromInManagingBoxCoords)
     const toClientPosition: ClientPosition = await this.managingBox.transform.localToClientPosition(toInManagingBoxCoords)
+    const fromClientPosition: ClientPosition = await fromClientPositionPromise
     const distanceX: number = toClientPosition.x-fromClientPosition.x
     const distanceY: number = toClientPosition.y-fromClientPosition.y
     const angleInRadians: number = Math.atan2(distanceY, distanceX)
@@ -263,7 +262,7 @@ export class Link implements Hoverable {
   }
 
   private async handleHoverOver(): Promise<void> {
-    const highlight: LinkHighlight = {handle: 'hover', highlight: true, bold: true, foreground: true}
+    const highlight: LinkHighlight = {handle: 'hover', bright: true, foreground: true}
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
       this.highlights.add(highlight)
       this.hoveringOver = true
@@ -282,33 +281,32 @@ export class Link implements Hoverable {
   }
 
   private async handleSelect(): Promise<void> {
+    const highlight: LinkHighlight = {handle: 'select', foreground: true}
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
+      this.highlights.add(highlight)
       this.selected = true
       return
     }
     await Promise.all([
-      this.renderWithOptions({priority: RenderPriority.RESPONSIVE, selected: true}),
+      this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: {mode: 'add', highlight}, selected: true}),
       Link.onSelect.callSubscribers(this)
     ])
   }
 
   private async handleDeselect(): Promise<void> {
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
+      this.highlights.remove('select')
       this.selected = false
       return
     }
     await Promise.all([
-      this.renderWithOptions({priority: RenderPriority.RESPONSIVE, selected: false}),
+      this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: {mode: 'remove', highlightHandle: 'select'}, selected: false}),
       Link.onDeselect.callSubscribers(this)
     ])
   }
 
   public getHighlights(): LinkHighlightsReadonly {
     return this.highlights
-  }
-
-  public getHighlightClass(): string {
-    return style.getHighlightLinkClass()
   }
 
   public isSelected(): boolean {

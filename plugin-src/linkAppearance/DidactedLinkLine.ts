@@ -24,7 +24,7 @@ export class DidactedLinkLine extends LinkLineImplementation {
         const firstCall: boolean = this.additionalStyleAsString === null
         const hideTransitionDurationInMs = 1000
         let startDisplayNoneTimer: boolean = false
-        if (mode !== 'visibleEnds' || this.referenceLink.getHighlights().hasHighlights() || DidactedLink.isSelectedOrConnectedToSelected(this.referenceLink)) {
+        if (mode !== 'visibleEnds' || this.referenceLink.getHighlights().isHighlighted() || DidactedLink.isSelectedOrConnectedToSelected(this.referenceLink)) {
             newAdditionalStyle = {display: null, opacity: null, transitionDuration: null}
             newAdditionalStyleAsString = ''
         } else {

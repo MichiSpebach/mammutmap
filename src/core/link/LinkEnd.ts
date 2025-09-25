@@ -26,6 +26,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   private shape: 'square'|'arrow'
   private renderState: RenderState = new RenderState()
   private renderScheduler: SkipToNewestScheduler = new SkipToNewestScheduler()
+  private renderedHighlight: {bright: boolean, foregrounded: boolean} = {bright: false, foregrounded: false}
   private dragState: {
     clientPosition: ClientPosition
     dropTarget: Box|NodeWidget
@@ -241,17 +242,16 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
   }
 
   // TODO: remove parameter positionInManagingBoxCoords
-  // TODO: now more frequent called, add renderPriority
-  public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> { await this.renderScheduler.schedule(async () => {
+  public async render(positionInManagingBoxCoords: LocalPosition, angleInRadians: number, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> { await this.renderScheduler.schedule(async () => {
     this.renderState.setRenderStarted()
     const pros: Promise<void>[] = []
 
-    pros.push(this.renderShape(positionInManagingBoxCoords, angleInRadians))
-    pros.push(this.setHighlight())
+    pros.push(this.renderShape(positionInManagingBoxCoords, angleInRadians, priority))
+    pros.push(this.updateHighlight(priority))
   
     if (!this.renderState.isRendered()) {
       this.saveBorderingBoxesWithoutMapFile() // TODO: add missing await? but could take longer and block rerenders
-      pros.push(relocationDragManager.addDraggable(this, true))
+      pros.push(relocationDragManager.addDraggable(this, true, priority))
     }
 
     await Promise.all(pros)
@@ -272,7 +272,7 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
     this.renderState.setUnrenderFinished()
   })}
 
-  private async renderShape(positionInManagingBoxCoords: LocalPosition, angleInRadians: number): Promise<void> {
+  private async renderShape(positionInManagingBoxCoords: LocalPosition, angleInRadians: number, priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
     const positionStyle = 'position:absolute;left:'+positionInManagingBoxCoords.percentX+'%;top:'+positionInManagingBoxCoords.percentY+'%;'
     let shapeStyle: string
     let transformStyle: string
@@ -292,16 +292,37 @@ export class LinkEnd implements Draggable<Box|NodeWidget> {
         util.logWarning('Shape '+this.shape+' is not implemented.')
     }
 
-    await renderManager.setStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle)
+    await renderManager.setStyleTo(this.getId(), positionStyle + shapeStyle + transformStyle, priority)
   }
 
-  private async setHighlight(): Promise<void> {
-    const highlightClass: string = this.referenceLink.getHighlightClass()
-    if (this.referenceLink.getHighlights().isHighlighted()) {
-      await renderManager.addClassTo(this.getId(), highlightClass)
+  private async updateHighlight(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+    const pros: Promise<void>[] = []
+    
+    if (this.referenceLink.getHighlights().isBright()) {
+      if (!this.renderedHighlight.bright) {
+        this.renderedHighlight.bright = true
+        pros.push(renderManager.addClassTo(this.getId(), style.getHighlightLinkBrightClass(), priority))
+      }
     } else {
-      await renderManager.removeClassFrom(this.getId(), highlightClass)
+      if (this.renderedHighlight.bright) {
+        this.renderedHighlight.bright = false
+        pros.push(renderManager.removeClassFrom(this.getId(), style.getHighlightLinkBrightClass(), priority))
+      }
     }
+    
+    if (this.referenceLink.getHighlights().isForegrounded()) {
+      if (!this.renderedHighlight.foregrounded) {
+        this.renderedHighlight.foregrounded = true
+        pros.push(renderManager.addClassTo(this.getId(), style.getHighlightLinkForegroundClass(), priority))
+      }
+    } else {
+      if (this.renderedHighlight.foregrounded) {
+        this.renderedHighlight.foregrounded = false
+        pros.push(renderManager.removeClassFrom(this.getId(), style.getHighlightLinkForegroundClass(), priority))
+      }
+    }
+
+    await Promise.all(pros)
   }
 
   public async getRenderPositionInManagingBoxCoords(): Promise<LocalPosition> {

@@ -34,7 +34,7 @@ async function ensureDeactivation(): Promise<void> {
     if (!activated || !highlightLinkFilterPropertyValueBefore) {
         return
     }
-    await dom.modifyCssRule('.'+style.getHighlightLinkClass(), 'filter', highlightLinkFilterPropertyValueBefore)
+    await dom.modifyCssRule('.'+style.getHighlightLinkBrightClass(), 'filter', highlightLinkFilterPropertyValueBefore)
     highlightLinkFilterPropertyValueBefore = undefined
     activated = false
 }
@@ -43,7 +43,7 @@ async function ensureActivation(): Promise<void> {
     if (activated) {
         return
     }
-    const result = await dom.modifyCssRule('.'+style.getHighlightLinkClass(), 'filter', highlightLinkFilterPropertyValueFancy)
+    const result = await dom.modifyCssRule('.'+style.getHighlightLinkBrightClass(), 'filter', highlightLinkFilterPropertyValueFancy)
     if (!highlightLinkFilterPropertyValueBefore) {
         highlightLinkFilterPropertyValueBefore = result.propertyValueBefore
     }

@@ -480,7 +480,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
 
     await Promise.all([
       this.addFocusElements({priority: RenderPriority.RESPONSIVE, awaitAnimations: true}),
-      this.borderingLinks.addHighlightToAllThatShouldBeRendered({handle: `hover-${this.getId()}`, highlight: true, foreground: true})
+      this.borderingLinks.addHighlightToAllThatShouldBeRendered({handle: `hover-${this.getId()}`, bright: true, foreground: true})
     ])
   }
 
@@ -632,7 +632,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     await Promise.all([
       renderManager.addStyleTo(this.getBorderId(), {border: '2px solid #4488ff'}, RenderPriority.RESPONSIVE),
       renderManager.addStyleTo(this.getBackgroundId(), {backgroundColor: '#00448888', transition: 'background-color 200ms'}, RenderPriority.RESPONSIVE),
-      this.borderingLinks.renderAllThatShouldBe(), // linkAppearance may change // TODO call this.borderingLinks.renderRoutesThatShouldBe() instead
+      this.borderingLinks.addHighlightToAllThatShouldBeRendered({handle: `select-${this.getId()}`, foreground: true}),
       Box.onSelect.callSubscribers(this)
     ])
   }
@@ -642,7 +642,7 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     await Promise.all([
       renderManager.addStyleTo(this.getBorderId(), {border: null}, RenderPriority.RESPONSIVE),
       renderManager.addStyleTo(this.getBackgroundId(), {backgroundColor: null}, RenderPriority.RESPONSIVE),
-      this.borderingLinks.renderAllThatShouldBe(), // linkAppearance may change // TODO call this.borderingLinks.renderRoutesThatShouldBe() instead
+      this.borderingLinks.removeHighlightFromAllThatShouldBeRendered(`select-${this.getId()}`),
       Box.onDeselect.callSubscribers(this)
     ])
   }

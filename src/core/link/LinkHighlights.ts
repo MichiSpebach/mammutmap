@@ -1,11 +1,10 @@
 import { log } from '../logService'
 
-export type LinkHighlight = {handle: string, highlight?: true, bold?: true, foreground?: true}
+export type LinkHighlight = {handle: string, bright?: true, foreground?: true}
 
 export interface LinkHighlightsReadonly {
-	hasHighlights(): boolean
 	isHighlighted(): boolean
-	isBold(): boolean
+	isBright(): boolean
 	isForegrounded(): boolean
 }
 
@@ -33,16 +32,12 @@ export class LinkHighlights implements LinkHighlightsReadonly {
 		this.highlights.splice(highlightIndex, 1)
 	}
 
-	public hasHighlights(): boolean {
+	public isHighlighted(): boolean {
 		return this.highlights.length > 0
 	}
 
-	public isHighlighted(): boolean {
-		return this.highlights.some(highlight => highlight.highlight)
-	}
-
-	public isBold(): boolean {
-		return this.highlights.some(highlight => highlight.bold)
+	public isBright(): boolean {
+		return this.highlights.some(highlight => highlight.bright)
 	}
 
 	public isForegrounded(): boolean {

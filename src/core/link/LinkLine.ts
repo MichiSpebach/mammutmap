@@ -1,8 +1,7 @@
 import { style } from '../styleAdapter'
 import { LocalPosition } from '../shape/LocalPosition'
 import { Link } from './Link'
-import { util } from '../util/util'
-import { renderManager } from '../renderEngine/renderManager'
+import { renderManager, RenderPriority } from '../renderEngine/renderManager'
 
 export function override(implementation: typeof LinkLineImplementation): void {
     LinkLineImplementation = implementation
@@ -13,7 +12,7 @@ export let LinkLineImplementation: typeof LinkLine /*= LinkLine*/ // assigned af
 export class LinkLine {
     private readonly id: string
     protected readonly referenceLink: Link
-    private rendered: boolean = false
+    private renderedHighlight: {foregrounded: boolean} = {foregrounded: false}
 
     public static new(id: string, referenceLink: Link): LinkLine {
         return new LinkLineImplementation(id, referenceLink)
@@ -48,11 +47,18 @@ export class LinkLine {
         return ''
     }
 
-    public async formHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean, selected: boolean, additionalStyle: string): Promise<string> {
-        return `<svg id="${this.id}" style="${this.getStyleAsString()}${additionalStyle}">${await this.formInnerHtml(fromInManagingBoxCoords, toInManagingBoxCoords, draggingInProgress, hoveringOver, selected)}</svg>`
+    public async formOuterHtml(additionalStyle: string): Promise<string> {
+        return `<svg id="${this.id}" style="${this.getStyleAsString()}${additionalStyle}"></svg>`
     }
 
-    public async formInnerHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, draggingInProgress: boolean, hoveringOver: boolean, selected: boolean): Promise<string> {
+    public async render(
+        fromInManagingBoxCoords: LocalPosition,
+        toInManagingBoxCoords: LocalPosition,
+        draggingInProgress: boolean,
+        hoveringOver: boolean,
+        selected: boolean,
+        priority: RenderPriority = RenderPriority.NORMAL
+    ): Promise<void> {
         // TODO: move coordinates to svg element, svg element only as big as needed, or draw all lines of a box into one svg?
         let lineHtml: string = ''
         if (!draggingInProgress) {
@@ -65,7 +71,11 @@ export class LinkLine {
             lineHtml += await this.formTargetLineHtml()
         }
         lineHtml += this.formMainLineHtml(fromInManagingBoxCoords, toInManagingBoxCoords)
-        return lineHtml
+
+        await Promise.all([
+            renderManager.setContentTo(this.getId(), lineHtml, priority),
+            this.updateHighlightForegrounded(priority)
+        ])
     }
     
     private formMainLineHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition): string {
@@ -78,29 +88,46 @@ export class LinkLine {
         const toTargetInManagingBoxCoords: LocalPosition = await this.referenceLink.to.getTargetPositionInManagingBoxCoords()
         const fromTargetInManagingBoxCoords: LocalPosition = await fromTargetInManagingBoxCoordsPromise
         const positionHtml: string = 'x1="'+fromTargetInManagingBoxCoords.percentX+'%" y1="'+fromTargetInManagingBoxCoords.percentY+'%" x2="'+toTargetInManagingBoxCoords.percentX+'%" y2="'+toTargetInManagingBoxCoords.percentY+'%"'
-        return `<line id="${this.getTargetLineId()}" ${positionHtml} ${this.formLineClassHtml()} ${this.formLineStyleHtml()} stroke-dasharray="5"/>`
+        return `<line id="${this.getTargetLineId()}" ${positionHtml} ${this.formLineClassHtml()} ${this.formLineStyleHtml()} stroke-dasharray="4"/>`
     }
 
     private formHoverAreaHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, hoveringOver: boolean): string {
         const positionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
-        return `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke-width:${hoveringOver ? 8 : 4}px;pointer-events:stroke;"/>`
+        return `<line id="${this.getHoverAreaId()}" ${positionHtml} style="${hoveringOver ? 'stroke:#fff2;' : ''}stroke-width:${hoveringOver ? this.getLineWidthInPixel()+8 : this.getLineWidthInPixel()+2}px;pointer-events:stroke;"/>`
     }
 
     private formSelectedHtml(fromInManagingBoxCoords: LocalPosition, toInManagingBoxCoords: LocalPosition, hoveringOver: boolean): string {
         const positionHtml: string = 'x1="'+fromInManagingBoxCoords.percentX+'%" y1="'+fromInManagingBoxCoords.percentY+'%" x2="'+toInManagingBoxCoords.percentX+'%" y2="'+toInManagingBoxCoords.percentY+'%"'
         //let html = `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke:#fff;stroke-dasharray:3px;stroke-width:1px;"/>`
         //html += `<line id="${this.getHoverAreaId()}" ${positionHtml} style="stroke:#444;stroke-dasharray:3px,9px;stroke-dashoffset:3px;stroke-width:1px;"/>`
-        const width: number = hoveringOver || this.referenceLink.getHighlights().isBold() ? 6 : 4
-        return `<line id="${this.getSelectedId()}" ${positionHtml} style="stroke:#abc;stroke-dasharray:4px;stroke-width:${width}px;"/>`
+        return `<line id="${this.getSelectedId()}" ${positionHtml} style="stroke:#abc;stroke-dasharray:4px;stroke-width:${this.getLineWidthInPixel()+2}px;"/>`
     }
     
     private formLineClassHtml(): string {
-        const highlightClass: string = this.referenceLink.getHighlights().isHighlighted() ? ' '+this.referenceLink.getHighlightClass() : ''
+        const highlightClass: string = this.referenceLink.getHighlights().isBright() ? ' '+style.getHighlightLinkBrightClass() : ''
         return `class="${style.getHighlightTransitionClass()}${highlightClass}"`
     }
     
     private formLineStyleHtml(): string {
-        return `style="stroke:${this.referenceLink.getColor()};stroke-width:${this.referenceLink.getHighlights().isBold() ? '4px' : '2px'};"`
+        return `style="stroke:${this.referenceLink.getColor()};stroke-width:${this.getLineWidthInPixel()}px;"`
+    }
+
+    private getLineWidthInPixel(): number {
+        return 2
+    }
+
+    private async updateHighlightForegrounded(priority: RenderPriority = RenderPriority.NORMAL): Promise<void> {
+        if (this.referenceLink.getHighlights().isForegrounded()) {
+            if (!this.renderedHighlight.foregrounded) {
+                this.renderedHighlight.foregrounded = true
+                await renderManager.addClassTo(this.getId(), style.getHighlightLinkForegroundClass(), priority)
+            }
+        } else {
+            if (this.renderedHighlight.foregrounded) {
+                this.renderedHighlight.foregrounded = false
+                await renderManager.removeClassFrom(this.getId(), style.getHighlightLinkForegroundClass(), priority)
+            }
+        }
     }
 }
 

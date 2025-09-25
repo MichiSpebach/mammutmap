@@ -113,8 +113,12 @@ pre {
   stroke: white !important;
 }
 
-.highlightLink {
+.highlightLinkBright {
   filter: contrast(0.35) brightness(1.5);
+}
+
+.highlightLinkForeground {
+  z-index: 1;
 }
 
 .fileBoxBackground {

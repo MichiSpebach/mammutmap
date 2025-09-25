@@ -10,7 +10,7 @@ import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
 import { Link, LinkImplementation } from '../../dist/core/link/Link'
 import { LinkData } from '../../dist/core/mapData/LinkData'
 import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { LinkHighlight } from '../../dist/core/link/LinkHighlights'
+import { LinkHighlight, LinkHighlights } from '../../dist/core/link/LinkHighlights'
 
 export class HighlightPropagatingLink extends LinkImplementation {
 
@@ -248,10 +248,20 @@ export class HighlightPropagatingLink extends LinkImplementation {
 		} else if (options.highlight) {
 			const highlightRouteIds: string[] = options.highlightRouteIds?? HighlightPropagatingLink.getRouteIds(this)
 			if (!options.highlight.propagationDirection || options.highlight.propagationDirection === 'from') {
-				pros.push(this.propagateHighlight({...options, highlight: {...options.highlight, propagationDirection: 'from'}, highlightRouteIds}))
+				pros.push(this.propagateHighlight({ // ...options would also propagate hoveringOver
+					highlight: {...options.highlight, propagationDirection: 'from'},
+					highlightRouteIds,
+					propagationStep: options.propagationStep,
+					bundledWith: options.bundledWith
+				}))
 			}
 			if (!options.highlight.propagationDirection || options.highlight.propagationDirection === 'to') {
-				pros.push(this.propagateHighlight({...options, highlight: {...options.highlight, propagationDirection: 'to'}, highlightRouteIds}))
+				pros.push(this.propagateHighlight({ // ...options would also propagate hoveringOver
+					highlight: {...options.highlight, propagationDirection: 'to'},
+					highlightRouteIds,
+					propagationStep: options.propagationStep,
+					bundledWith: options.bundledWith
+				}))
 			}
 		}
 		
@@ -259,8 +269,13 @@ export class HighlightPropagatingLink extends LinkImplementation {
 	}
 
 	public override async render(priority?: RenderPriority | undefined): Promise<void> {
-		if (this['renderState'].isUnrendered() && this.getConnectedLinks().some(link => link.getHighlights().hasHighlights())) { // TODO: this.getConnectedLinks() does not always return the correct links
-			this['highlight'] = true
+		if (this['renderState'].isUnrendered()) {
+			// happens e.g. when zooming in when followUpLink is hovered
+			for (const followUpLink of this.getConnectedLinks()) { // TODO: this.getConnectedLinks() does not always return the correct links
+				for (const followUpHighlight of followUpLink.getHighlights()['highlights'] as LinkHighlight[]) {
+					(this.getHighlights() as LinkHighlights).add({...followUpHighlight}) // TODO: call propagateHighlight instead?
+				}
+			}
 		}
 		await super.render(priority)
 	}
