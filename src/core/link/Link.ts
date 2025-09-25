@@ -262,7 +262,7 @@ export class Link implements Hoverable {
   }
 
   private async handleHoverOver(): Promise<void> {
-    const highlight: LinkHighlight = {handle: 'hover', bright: true, foreground: true}
+    const highlight: LinkHighlight = {handle: `hover-${this.getId()}`, bright: true, foreground: true}
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
       this.highlights.add(highlight)
       this.hoveringOver = true
@@ -273,15 +273,15 @@ export class Link implements Hoverable {
 
   private async handleHoverOut(): Promise<void> {
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
-      this.highlights.remove('hover')
+      this.highlights.remove(`hover-${this.getId()}`)
       this.hoveringOver = false
       return
     }
-    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: {mode: 'remove', highlightHandle: 'hover'}, hoveringOver: false})
+    await this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: {mode: 'remove', highlightHandle: `hover-${this.getId()}`}, hoveringOver: false})
   }
 
   private async handleSelect(): Promise<void> {
-    const highlight: LinkHighlight = {handle: 'select', foreground: true}
+    const highlight: LinkHighlight = {handle: `select-${this.getId()}`, foreground: true}
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
       this.highlights.add(highlight)
       this.selected = true
@@ -295,12 +295,12 @@ export class Link implements Hoverable {
 
   private async handleDeselect(): Promise<void> {
     if (this.renderState.isBeingUnrendered() || !this.getManagingBox().isBodyBeingRendered()) {
-      this.highlights.remove('select')
+      this.highlights.remove(`select-${this.getId()}`)
       this.selected = false
       return
     }
     await Promise.all([
-      this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: {mode: 'remove', highlightHandle: 'select'}, selected: false}),
+      this.renderWithOptions({priority: RenderPriority.RESPONSIVE, highlight: {mode: 'remove', highlightHandle: `select-${this.getId()}`}, selected: false}),
       Link.onDeselect.callSubscribers(this)
     ])
   }
