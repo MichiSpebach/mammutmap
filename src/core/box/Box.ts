@@ -608,8 +608,15 @@ export abstract class Box extends AbstractNodeWidget implements DropTarget, Hove
     }
   }
 
+  private hasSelectedDescendants(): boolean {
+    if (this.links.getLinks().some(link => link.isSelected())) {
+      return true
+    }
+    return this.getChilds().some(child => child instanceof Box && (child.isSelected() || child.hasSelectedDescendants()))
+  }
+
   private async addSelectableIfAppropriateOrRemove(): Promise<void> {
-    if (await this.isZoomedIn()) {
+    if (await this.isZoomedIn() || this.hasSelectedDescendants()) {
       await this.removeSelectable()
       return
     }
