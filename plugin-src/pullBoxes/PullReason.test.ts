@@ -8,6 +8,7 @@ import { ClientRect } from '../../src/core/ClientRect'
 import { Link } from '../../src/core/link/Link'
 import { PullReason } from './PullReason'
 import { LinkRoute } from '../../src/core/link/LinkRoute'
+import { ClientPosition } from '../../src/core/shape/ClientPosition'
 
 test('calculatePullPositionFor box inside screen', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: false})
@@ -29,7 +30,7 @@ test('calculatePullPositionFor box inside screen', async () => {
 	expect(roundRect(await selectedFile.getClientRect())).toEqual({x: 160, y: 360, width: 160, height: 80})
 	expect(roundRect(await fileToPull.getClientRect())).toEqual({x: 480, y: 360, width: 160, height: 80})
 	
-	expect(await pullReason.calculatePullPositionFor(fileToPull)).toEqual({x: 560, y: 400})
+	expect(await pullReason.calculatePullPositionFor(fileToPull)).toEqual({position: new ClientPosition(560, 400), direction: {x: 1, y: 0}})
 })
 
 test('calculatePullPositionFor box outside screen', async () => {
@@ -52,7 +53,7 @@ test('calculatePullPositionFor box outside screen', async () => {
 	expect(roundRect(await selectedFile.getClientRect())).toEqual({x: 240, y: 320, width: 320, height: 160})
 	expect(roundRect(await fileToPull.getClientRect())).toEqual({x: 1120, y: 320, width: 320, height: 160})
 	
-	expect(await pullReason.calculatePullPositionFor(fileToPull)).toEqual({x: 680, y: 400})
+	expect(await pullReason.calculatePullPositionFor(fileToPull)).toEqual({position: new ClientPosition(680, 400), direction: {x: 1, y: 0}})
 })
 
 test('calculatePullPositionFor linkRoute starts outside screen', async () => {
@@ -75,7 +76,7 @@ test('calculatePullPositionFor linkRoute starts outside screen', async () => {
 	expect(roundRect(await selectedFile.getClientRect())).toEqual({x: 640, y: 320, width: 320, height: 160})
 	expect(roundRect(await fileToPull.getClientRect())).toEqual({x: 1120, y: 320, width: 320, height: 160})
 	
-	expect(await pullReason.calculatePullPositionFor(fileToPull)).toEqual({x: 680, y: 400})
+	expect(await pullReason.calculatePullPositionFor(fileToPull)).toEqual({position: new ClientPosition(680, 400), direction: {x: 1, y: 0}})
 })
 
 function roundRect(rect: ClientRect): ClientRect {
