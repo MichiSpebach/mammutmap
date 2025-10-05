@@ -1,5 +1,5 @@
-import { Box } from '../../dist/core/box/Box'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
+import { Box } from '../../src/core/box/Box'
+import { NodeWidget } from '../../src/core/node/NodeWidget'
 
 export type Item = {
 	node: Box|NodeWidget

@@ -1,13 +1,13 @@
-import { LocalPosition } from '../../dist/core/shape/LocalPosition'
+import { LocalPosition } from '../../src/core/shape/LocalPosition'
 import { BorderLayer } from './BorderLayer'
 import { InnerLayer } from './InnerLayer'
 import * as boxFactory from '../linkBundler/testUtil/boxFactory'
 import * as testUtil from '../linkBundler/testUtil/testUtil'
-import { RootFolderBox } from '../../dist/core/box/RootFolderBox'
-import { FolderBox } from '../../dist/core/box/FolderBox'
-import { FileBox } from '../../dist/core/box/FileBox'
-import { BoxData } from '../../dist/core/mapData/BoxData'
-import { LocalRect } from '../../dist/core/LocalRect'
+import { RootFolderBox } from '../../src/core/box/RootFolderBox'
+import { FolderBox } from '../../src/core/box/FolderBox'
+import { FileBox } from '../../src/core/box/FileBox'
+import { BoxData } from '../../src/core/mapData/BoxData'
+import { LocalRect } from '../../src/core/LocalRect'
 
 test('InnerLayer', async () => {
 	testUtil.initServicesWithMocks({hideConsoleLog: false})

@@ -1,6 +1,6 @@
-import { LocalPosition } from '../../dist/core/shape/LocalPosition'
-import { LocalRect } from '../../dist/core/LocalRect'
-import { Box } from '../../dist/core/box/Box'
+import { LocalPosition } from '../../src/core/shape/LocalPosition'
+import { LocalRect } from '../../src/core/LocalRect'
+import { Box } from '../../src/core/box/Box'
 import { LayerSide, Suggestion } from './LayerSide'
 import { NodeToOrder } from './NodeToOrder'
 

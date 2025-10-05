@@ -1,7 +1,7 @@
-import { Box } from '../../dist/core/box/Box'
-import { LocalRect } from '../../dist/core/LocalRect'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { LocalPosition } from '../../dist/core/shape/LocalPosition'
+import { Box } from '../../src/core/box/Box'
+import { LocalRect } from '../../src/core/LocalRect'
+import { NodeWidget } from '../../src/core/node/NodeWidget'
+import { LocalPosition } from '../../src/core/shape/LocalPosition'
 import { NodeToOrder } from './NodeToOrder'
 import { Sorting } from './Sorting'
 

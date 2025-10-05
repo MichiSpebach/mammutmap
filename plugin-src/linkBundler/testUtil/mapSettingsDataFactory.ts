@@ -3,7 +3,7 @@
  * importing from 'test' would lead to imports from 'src' and not from 'dist' which would result in other modules
  * TODO: find better solution
  */
-import { MapSettingsData } from '../../../dist/core/mapData/MapSettingsData'
+import { MapSettingsData } from '../../../src/core/mapData/MapSettingsData'
 
 export function of(options: {id: string, x?: number, y?: number, width?: number, height?: number, srcRootPath?: string, mapRootPath?: string}): MapSettingsData {
     return new MapSettingsData({

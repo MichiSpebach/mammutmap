@@ -4,19 +4,19 @@
  * "TypeError: Class extends value undefined is not a constructor or null"
  * TODO fix this!
  */
-import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { ClientRect } from '../../dist/core/ClientRect'
-import { LinkEnd } from '../../dist/core/link/LinkEnd'
-import { ClientPosition } from '../../dist/core/shape/ClientPosition'
-import { Box } from '../../dist/core/box/Box'
-import { Link } from '../../dist/core/link/Link'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
+import { AbstractNodeWidget } from '../../src/core/AbstractNodeWidget'
+import { ClientRect } from '../../src/core/ClientRect'
+import { LinkEnd } from '../../src/core/link/LinkEnd'
+import { ClientPosition } from '../../src/core/shape/ClientPosition'
+import { Box } from '../../src/core/box/Box'
+import { Link } from '../../src/core/link/Link'
+import { NodeWidget } from '../../src/core/node/NodeWidget'
 import * as commonRouteFinder from './commonRouteFinder'
 import * as knotMerger from './knotMerger'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 import { CommonRoute } from './CommonRoute'
-import { util } from '../../dist/core/util/util'
-import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
+import { util } from '../../src/core/util/util'
+import { BoxWatcher } from '../../src/core/box/BoxWatcher'
 
 export async function bundleLink(link: Link, options?: {
 	unwatchDelayInMs?: number

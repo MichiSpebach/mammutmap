@@ -1,7 +1,7 @@
-import { ClientRect } from '../../dist/core/ClientRect'
-import { PopupWidget } from '../../dist/core/PopupWidget'
-import { util } from '../../dist/core/util/util'
-import { Box, RenderElement, RenderElements, renderManager } from '../../dist/pluginFacade'
+import { ClientRect } from '../../src/core/ClientRect'
+import { PopupWidget } from '../../src/core/PopupWidget'
+import { util } from '../../src/core/util/util'
+import { Box, RenderElement, RenderElements, renderManager } from '../../src/pluginFacade'
 import { PulledBox } from './PulledBox'
 import { PulledBoxes } from './PulledBoxes'
 

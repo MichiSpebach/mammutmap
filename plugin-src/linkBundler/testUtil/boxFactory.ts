@@ -3,21 +3,21 @@
  * importing from 'test' would lead to imports from 'src' and not from 'dist' which would result in other modules
  * TODO: find better solution
  * */
-import { BoxData } from '../../../dist/core/mapData/BoxData'
-import { FolderBox } from '../../../dist/core/box/FolderBox'
-import { RootFolderBox } from '../../../dist/core/box/RootFolderBox'
-import { ClientRect } from '../../../dist/core/ClientRect'
-import { ProjectSettings } from '../../../dist/core/ProjectSettings'
-import { RenderState } from '../../../dist/core/util/RenderState'
-import { Box } from '../../../dist/core/box/Box'
+import { BoxData } from '../../../src/core/mapData/BoxData'
+import { FolderBox } from '../../../src/core/box/FolderBox'
+import { RootFolderBox } from '../../../src/core/box/RootFolderBox'
+import { ClientRect } from '../../../src/core/ClientRect'
+import { ProjectSettings } from '../../../src/core/ProjectSettings'
+import { RenderState } from '../../../src/core/util/RenderState'
+import { Box } from '../../../src/core/box/Box'
 import * as mapSettingsDataFactory from './mapSettingsDataFactory'
 import * as projectSettingsFactory from './projectSettingsFactory'
-import { BoxContext } from '../../../dist/core/box/BoxContext'
-import { FileBox } from '../../../dist/core/box/FileBox'
-import { MapSettingsData } from '../../../dist/core/mapData/MapSettingsData'
-import { BoxBody } from '../../../dist/core/box/BoxBody'
-import { dom } from '../../../dist/core/renderEngine/domAdapter'
-import { RenderManager, renderManager } from '../../../dist/core/renderEngine/renderManager'
+import { BoxContext } from '../../../src/core/box/BoxContext'
+import { FileBox } from '../../../src/core/box/FileBox'
+import { MapSettingsData } from '../../../src/core/mapData/MapSettingsData'
+import { BoxBody } from '../../../src/core/box/BoxBody'
+import { dom } from '../../../src/core/renderEngine/domAdapter'
+import { RenderManager, renderManager } from '../../../src/core/renderEngine/renderManager'
 
 export function rootFolderOf(options: {
     idOrSettings: string|MapSettingsData|ProjectSettings, 

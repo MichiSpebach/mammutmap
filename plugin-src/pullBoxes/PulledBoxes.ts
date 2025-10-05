@@ -1,12 +1,12 @@
-import { Box } from '../../dist/core/box/Box'
-import { Link } from '../../dist/core/link/Link'
-import { ClientRect } from '../../dist/core/ClientRect'
+import { Box } from '../../src/core/box/Box'
+import { Link } from '../../src/core/link/Link'
+import { ClientRect } from '../../src/core/ClientRect'
 import { PulledBox } from './PulledBox'
 import { PullReason } from './PullReason'
-import { ClientPosition } from '../../dist/core/shape/ClientPosition'
+import { ClientPosition } from '../../src/core/shape/ClientPosition'
 import * as pullUtil from './pullUtil'
-import { SkipToNewestScheduler } from '../../dist/core/util/SkipToNewestScheduler'
-import { RenderPriority } from '../../dist/core/renderEngine/renderManager'
+import { SkipToNewestScheduler } from '../../src/core/util/SkipToNewestScheduler'
+import { RenderPriority } from '../../src/core/renderEngine/renderManager'
 
 export class PulledBoxes {
 	public pulledBoxes: PulledBox[] = []

@@ -8,7 +8,9 @@
     "noImplicitAny": false,
     "noImplicitOverride": true,
     "outDir": "../plugin",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "paths": {"mammutmap/*": ["../src/*"]}
   },
-  "exclude": ["**/*.test.ts"]
+  "exclude": ["**/*.test.ts"],
+  "references": [{"path": "../"}] // referencing the parent project prevents the parent project from being compiled into outDir
 }

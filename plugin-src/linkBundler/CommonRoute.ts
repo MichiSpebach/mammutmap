@@ -4,10 +4,10 @@
  * "TypeError: Class extends value undefined is not a constructor or null"
  * TODO fix this!
  */
-import { Link } from '../../dist/core/link/Link'
-import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { Box } from '../../dist/core/box/Box'
-import { NodeWidget } from '../../dist/pluginFacade'
+import { Link } from '../../src/core/link/Link'
+import { AbstractNodeWidget } from '../../src/core/AbstractNodeWidget'
+import { Box } from '../../src/core/box/Box'
+import { NodeWidget } from '../../src/pluginFacade'
 
 export class CommonRoute {
 

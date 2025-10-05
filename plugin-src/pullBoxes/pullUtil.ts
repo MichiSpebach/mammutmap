@@ -1,6 +1,6 @@
-import { ClientPosition } from '../../dist/core/shape/ClientPosition'
-import { ClientRect } from '../../dist/core/ClientRect'
-import { map, Map } from '../../dist/core/Map'
+import { ClientPosition } from '../../src/core/shape/ClientPosition'
+import { ClientRect } from '../../src/core/ClientRect'
+import { map, Map } from '../../src/core/Map'
 import { AwaitBlockingScheduler } from './AwaitBlockingScheduler'
 
 export const detachScheduler = new AwaitBlockingScheduler()

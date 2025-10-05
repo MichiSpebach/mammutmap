@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
     "target": "es2022",
+    "module": "es2022", // overriden by buildAppForOlderElectron in package.json, TODO: cleanup as soon as electron supports es-modules
+    "composite": true, // needed to compile plugins to make 'references' from other tsconfig work
     "strict": true,
     "allowJs": false,
     "skipLibCheck": true,
-    "module": "es2022", // overriden by buildAppForOlderElectron in package.json, TODO: cleanup as soon as electron supports es-modules
     "noImplicitAny": true,
     "noImplicitOverride": true,
     "sourceMap": true,
     "declaration": true,
     "baseUrl": ".",
+    "rootDir": "src", // needed to compile plugins to lookup imports like '../src/file' not in '../dist/src/file.d.ts' but in '../dist/file.d.ts'
     "outDir": "dist",
     "moduleResolution": "node",
     "resolveJsonModule": true,

@@ -1,5 +1,5 @@
-import { Link, coreUtil } from '../../dist/pluginFacade'
-import * as pluginFacade from '../../dist/pluginFacade'
+import { Link, coreUtil } from '../../src/pluginFacade'
+import * as pluginFacade from '../../src/pluginFacade'
 import * as bundler from './bundler'
 
 const queue: {linkId: string, managingBoxSrcPath: string}[] = []

@@ -4,14 +4,14 @@
  * TODO: find better solution
  */
 import { MockProxy, mock } from 'jest-mock-extended'
-import { RenderManager, init as initRenderManager } from '../../../dist/core/renderEngine/renderManager'
-import { BoxManager, init as initBoxManager } from '../../../dist/core/box/BoxManager'
-import * as settings from '../../../dist/core/settings/settings'
-import * as fileSystem from '../../../dist/core/fileSystemAdapter'
-import { FileSystemAdapter } from '../../../dist/core/fileSystemAdapter'
-import { RelocationDragManager } from '../../../dist/core/RelocationDragManager'
-import * as relocationDragManager from '../../../dist/core/RelocationDragManager'
-import { override as overrideLink } from '../../../dist/core/link/Link'
+import { RenderManager, init as initRenderManager } from '../../../src/core/renderEngine/renderManager'
+import { BoxManager, init as initBoxManager } from '../../../src/core/box/BoxManager'
+import * as settings from '../../../src/core/settings/settings'
+import * as fileSystem from '../../../src/core/fileSystemAdapter'
+import { FileSystemAdapter } from '../../../src/core/fileSystemAdapter'
+import { RelocationDragManager } from '../../../src/core/RelocationDragManager'
+import * as relocationDragManager from '../../../src/core/RelocationDragManager'
+import { override as overrideLink } from '../../../src/core/link/Link'
 import { HighlightPropagatingLink } from '../HighlightPropagatingLink'
 
 const consoleLogBackup = console.log

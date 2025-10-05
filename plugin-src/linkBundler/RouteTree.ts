@@ -1,7 +1,7 @@
-import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
-import { Link } from '../../dist/core/link/Link'
-import { NodeWidget } from '../../dist/pluginFacade'
+import { AbstractNodeWidget } from '../../src/core/AbstractNodeWidget'
+import { BoxWatcher } from '../../src/core/box/BoxWatcher'
+import { Link } from '../../src/core/link/Link'
+import { NodeWidget } from '../../src/pluginFacade'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 
 export class RouteTree {

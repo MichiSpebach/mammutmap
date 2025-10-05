@@ -1,13 +1,13 @@
-import { Box } from '../../dist/core/box/Box'
-import { SkipToNewestScheduler } from '../../dist/core/util/SkipToNewestScheduler'
-import { Link } from '../../dist/core/link/Link'
-import { ClientRect } from '../../dist/core/ClientRect'
-import { renderManager, RenderPriority } from '../../dist/core/renderEngine/renderManager'
-import { LocalRect } from '../../dist/core/LocalRect'
+import { Box } from '../../src/core/box/Box'
+import { SkipToNewestScheduler } from '../../src/core/util/SkipToNewestScheduler'
+import { Link } from '../../src/core/link/Link'
+import { ClientRect } from '../../src/core/ClientRect'
+import { renderManager, RenderPriority } from '../../src/core/renderEngine/renderManager'
+import { LocalRect } from '../../src/core/LocalRect'
 import * as pullUtil from './pullUtil'
 import { PullReason } from './PullReason'
 import { Item, Sorting } from '../boxOrderer/Sorting'
-import { ClientPosition } from '../../dist/core/shape/ClientPosition'
+import { ClientPosition } from '../../src/core/shape/ClientPosition'
 
 export class PulledBox {
 	public readonly box: Box

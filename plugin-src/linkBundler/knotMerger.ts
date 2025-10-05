@@ -4,11 +4,11 @@
  * "TypeError: Class extends value undefined is not a constructor or null"
  * TODO fix this!
  */
-import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
-import { Link } from '../../dist/core/link/Link'
-import { LinkEnd } from '../../dist/core/link/LinkEnd'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { ClientPosition } from '../../dist/core/shape/ClientPosition'
+import { BoxWatcher } from '../../src/core/box/BoxWatcher'
+import { Link } from '../../src/core/link/Link'
+import { LinkEnd } from '../../src/core/link/LinkEnd'
+import { NodeWidget } from '../../src/core/node/NodeWidget'
+import { ClientPosition } from '../../src/core/shape/ClientPosition'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 import { RouteTree } from './RouteTree'
 

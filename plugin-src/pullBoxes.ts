@@ -1,11 +1,11 @@
-import { Box } from '../dist/core/box/Box'
-import { Link } from '../dist/core/link/Link'
-import { AbstractNodeWidget } from '../dist/core/AbstractNodeWidget'
-import { map } from '../dist/core/Map'
-import { LinkRoute } from '../dist/core/link/LinkRoute'
+import { Box } from 'mammutmap/core/box/Box'
+import { Link } from 'mammutmap/core/link/Link'
+import { AbstractNodeWidget } from 'mammutmap/core/AbstractNodeWidget'
+import { map } from 'mammutmap/core/Map'
+import { LinkRoute } from 'mammutmap/core/link/LinkRoute'
 import { DebugWidget } from './pullBoxes/DebugWidget'
 import { PulledBoxes } from './pullBoxes/PulledBoxes'
-import { renderManager, RenderPriority } from '../dist/core/renderEngine/renderManager'
+import { renderManager, RenderPriority } from 'mammutmap/core/renderEngine/renderManager'
 import { PullReason } from './pullBoxes/PullReason'
 
 const pulledBoxes = new PulledBoxes()

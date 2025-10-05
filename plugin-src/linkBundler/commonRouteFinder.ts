@@ -4,15 +4,15 @@
  * "TypeError: Class extends value undefined is not a constructor or null"
  * TODO fix this!
  */
-import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { LocalRect } from '../../dist/core/LocalRect'
-import { Box } from '../../dist/core/box/Box'
-import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
-import { Link } from '../../dist/core/link/Link'
-import { WayPointData } from '../../dist/core/mapData/WayPointData'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { LocalPosition } from '../../dist/core/shape/LocalPosition'
-import { Line } from '../../dist/core/shape/Line'
+import { AbstractNodeWidget } from '../../src/core/AbstractNodeWidget'
+import { LocalRect } from '../../src/core/LocalRect'
+import { Box } from '../../src/core/box/Box'
+import { BoxWatcher } from '../../src/core/box/BoxWatcher'
+import { Link } from '../../src/core/link/Link'
+import { WayPointData } from '../../src/core/mapData/WayPointData'
+import { NodeWidget } from '../../src/core/node/NodeWidget'
+import { LocalPosition } from '../../src/core/shape/LocalPosition'
+import { Line } from '../../src/core/shape/Line'
 import { CommonRoute } from './CommonRoute'
 
 export async function findLongestCommonRoute(link: Link): Promise<CommonRoute|undefined> {

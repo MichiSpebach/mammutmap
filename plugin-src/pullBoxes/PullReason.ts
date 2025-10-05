@@ -1,11 +1,11 @@
-import { Link } from '../../dist/core/link/Link'
-import { Box } from '../../dist/core/box/Box'
-import { LinkRoute } from '../../dist/core/link/LinkRoute'
-import { ClientRect } from '../../dist/core/ClientRect'
+import { Link } from '../../src/core/link/Link'
+import { Box } from '../../src/core/box/Box'
+import { LinkRoute } from '../../src/core/link/LinkRoute'
+import { ClientRect } from '../../src/core/ClientRect'
 import * as pullUtil from './pullUtil'
-import { ClientPosition } from '../../dist/core/shape/ClientPosition'
-import { LinkEnd } from '../../dist/core/link/LinkEnd'
-import { Line } from '../../dist/core/shape/Line'
+import { ClientPosition } from '../../src/core/shape/ClientPosition'
+import { LinkEnd } from '../../src/core/link/LinkEnd'
+import { Line } from '../../src/core/shape/Line'
 
 export class PullReason {
 	public constructor(

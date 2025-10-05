@@ -1,4 +1,4 @@
-import { Box, BoxDepthTreeIterator, FolderBox, Link, ProgressBarWidget, coreUtil } from '../../dist/pluginFacade'
+import { Box, BoxDepthTreeIterator, FolderBox, Link, ProgressBarWidget, coreUtil } from '../../src/pluginFacade'
 import * as bundler from './bundler'
 
 export async function bundleLinks(startBox: Box, options: {

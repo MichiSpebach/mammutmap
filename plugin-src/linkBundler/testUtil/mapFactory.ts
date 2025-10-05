@@ -1,12 +1,12 @@
-import { ProjectSettings } from '../../../dist/core/ProjectSettings'
-import { Map } from '../../../dist/core/Map'
+import { ProjectSettings } from '../../../src/core/ProjectSettings'
+import { Map } from '../../../src/core/Map'
 import * as projectSettingsFactory from './projectSettingsFactory'
 import * as mapSettingsDataFactory from './mapSettingsDataFactory'
-import { ClientRect } from '../../../dist/core/ClientRect'
-import { renderManager } from '../../../dist/core/renderEngine/renderManager'
+import { ClientRect } from '../../../src/core/ClientRect'
+import { renderManager } from '../../../src/core/renderEngine/renderManager'
 import * as boxFactory from './boxFactory'
-import { Style } from '../../../dist/core/renderEngine/RenderElement'
-import { MapSettingsData } from '../../../dist/core/mapData/MapSettingsData'
+import { Style } from '../../../src/core/renderEngine/RenderElement'
+import { MapSettingsData } from '../../../src/core/mapData/MapSettingsData'
 
 export function mapOf(options: {
 	projectSettings?: ProjectSettings,

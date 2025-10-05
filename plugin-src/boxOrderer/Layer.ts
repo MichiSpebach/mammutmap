@@ -1,7 +1,7 @@
-import { Box } from '../../dist/core/box/Box'
-import { LinkEnd } from '../../dist/core/link/LinkEnd'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { LocalPosition } from '../../dist/core/shape/LocalPosition'
+import { Box } from '../../src/core/box/Box'
+import { LinkEnd } from '../../src/core/link/LinkEnd'
+import { NodeWidget } from '../../src/core/node/NodeWidget'
+import { LocalPosition } from '../../src/core/shape/LocalPosition'
 import { LayerSide, Suggestion } from './LayerSide'
 import { NodeToOrder } from './NodeToOrder'
 

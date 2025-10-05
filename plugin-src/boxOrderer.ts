@@ -1,8 +1,8 @@
-import { SourcelessBox } from '../dist/core/box/SourcelessBox'
-import { LocalRect } from '../dist/core/LocalRect'
-import { settings } from '../dist/core/settings/settings'
-import { Box, contextMenu, FileBox, FolderBox, MenuItemFile, NodeWidget } from '../dist/pluginFacade'
-import { EmptySpaceFinder } from '../dist/core/box/EmptySpaceFinder'
+import { SourcelessBox } from '../src/core/box/SourcelessBox'
+import { LocalRect } from '../src/core/LocalRect'
+import { settings } from '../src/core/settings/settings'
+import { Box, contextMenu, FileBox, FolderBox, MenuItemFile, NodeWidget } from '../src/pluginFacade'
+import { EmptySpaceFinder } from '../src/core/box/EmptySpaceFinder'
 import { LayerSystem } from './boxOrderer/LayerSystem'
 
 contextMenu.addFolderBoxMenuItem((box: FolderBox) => new MenuItemFile({label: 'order boxes (experimental)', click: () => orderBoxes(box)}))

@@ -1,13 +1,13 @@
 import * as testUtil from '../linkBundler/testUtil/testUtil'
-import * as map from '../../dist/core/Map'
+import * as map from '../../src/core/Map'
 import * as boxFactory from '../linkBundler/testUtil/boxFactory'
-import { RootFolderBox } from '../../dist/core/box/RootFolderBox'
-import { FileBox } from '../../dist/core/box/FileBox'
-import { BoxData } from '../../dist/core/mapData/BoxData'
-import { ClientRect } from '../../dist/core/ClientRect'
-import { Link } from '../../dist/core/link/Link'
+import { RootFolderBox } from '../../src/core/box/RootFolderBox'
+import { FileBox } from '../../src/core/box/FileBox'
+import { BoxData } from '../../src/core/mapData/BoxData'
+import { ClientRect } from '../../src/core/ClientRect'
+import { Link } from '../../src/core/link/Link'
 import { PullReason } from './PullReason'
-import { LinkRoute } from '../../dist/core/link/LinkRoute'
+import { LinkRoute } from '../../src/core/link/LinkRoute'
 
 test('calculatePullPositionFor box inside screen', async () => {
 	await testUtil.initServicesWithMocks({hideConsoleLog: false})

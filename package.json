@@ -1,7 +1,7 @@
 {
   "name": "mammutmap",
   "productName": "mammutmap",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "TODO",
   "main": "dist/electronApp/index.js",
   "scripts": {
@@ -10,8 +10,8 @@
     "copyStaticFiles": "copyfiles -u 1 src/**/*.html src/**/*.css dist",
     "buildApp": "tsc && npm run copyStaticFiles",
     "buildAppForOlderElectron": "tsc --module commonjs && npm run copyStaticFiles",
-    "buildPlugins": "cd plugin-src && tsc",
-    "buildPluginsForOlderElectron": "cd plugin-src && tsc --module commonjs",
+    "buildPlugins": "cd plugin-src && tsc && cd ../ && node --disable-warning=ExperimentalWarning scripts/replacePluginSrcWithDistImports.mts",
+    "buildPluginsForOlderElectron": "cd plugin-src && tsc --module commonjs && cd ../ && node --disable-warning=ExperimentalWarning scripts/replacePluginSrcWithDistImports.mts",
     "startWeb": "npm run buildApp && npm run buildPlugins && http-server ../ --ext js -c no-cache",
     "start": "npm run buildAppForOlderElectron && npm run buildPluginsForOlderElectron && electron-forge start",
     "package": "electron-forge package",

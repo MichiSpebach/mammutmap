@@ -1,6 +1,6 @@
-import { Box } from '../../dist/core/box/Box'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { LocalPosition } from '../../dist/core/shape/LocalPosition'
+import { Box } from '../../src/core/box/Box'
+import { NodeWidget } from '../../src/core/node/NodeWidget'
+import { LocalPosition } from '../../src/core/shape/LocalPosition'
 import { Layer } from './Layer'
 import { LayerSide } from './LayerSide'
 

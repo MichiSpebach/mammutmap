@@ -1,4 +1,4 @@
-import { Box } from '../../dist/core/box/Box'
+import { Box } from '../../src/core/box/Box'
 import { Sorting } from './Sorting'
 
 test('enough space between items', () => {

@@ -4,13 +4,13 @@
  * "TypeError: Class extends value undefined is not a constructor or null"
  * TODO fix this!
  */
-import { AbstractNodeWidget } from '../../dist/core/AbstractNodeWidget'
-import { RenderPriority } from '../../dist/core/renderEngine/renderManager'
-import { BoxWatcher } from '../../dist/core/box/BoxWatcher'
-import { Link, LinkImplementation } from '../../dist/core/link/Link'
-import { LinkData } from '../../dist/core/mapData/LinkData'
-import { NodeWidget } from '../../dist/core/node/NodeWidget'
-import { LinkHighlight, LinkHighlights } from '../../dist/core/link/LinkHighlights'
+import { AbstractNodeWidget } from '../../src/core/AbstractNodeWidget'
+import { RenderPriority } from '../../src/core/renderEngine/renderManager'
+import { BoxWatcher } from '../../src/core/box/BoxWatcher'
+import { Link, LinkImplementation } from '../../src/core/link/Link'
+import { LinkData } from '../../src/core/mapData/LinkData'
+import { NodeWidget } from '../../src/core/node/NodeWidget'
+import { LinkHighlight, LinkHighlights } from '../../src/core/link/LinkHighlights'
 
 export class HighlightPropagatingLink extends LinkImplementation {
 

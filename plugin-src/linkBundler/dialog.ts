@@ -1,4 +1,4 @@
-import { Box, FolderBox, PopupWidget, RenderElement, coreUtil, renderManager } from '../../dist/pluginFacade'
+import { Box, FolderBox, PopupWidget, RenderElement, coreUtil, renderManager } from '../../src/pluginFacade'
 import * as boxIterator from './boxIterator'
 
 export async function openDialogForBundleLinks(box: Box): Promise<void> {

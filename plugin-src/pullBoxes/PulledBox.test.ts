@@ -1,4 +1,4 @@
-import { ClientRect } from '../../dist/core/ClientRect'
+import { ClientRect } from '../../src/core/ClientRect'
 import { PulledBox } from './PulledBox'
 
 test('calculateLeastTransformedRectToSurround', () => {

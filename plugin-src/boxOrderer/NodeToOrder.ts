@@ -1,4 +1,4 @@
-import { Box, LocalPosition, NodeWidget } from '../../dist/pluginFacade'
+import { Box, LocalPosition, NodeWidget } from '../../src/pluginFacade'
 
 export type NodeToOrder = {
 	node: Box|NodeWidget
