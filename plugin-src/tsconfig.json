@@ -11,6 +11,6 @@
     "moduleResolution": "node",
     "paths": {"mammutmap/*": ["../src/*"]}
   },
-  "exclude": ["**/*.test.ts"],
+  "include": ["./*"],
   "references": [{"path": "../"}] // referencing the parent project prevents the parent project from being compiled into outDir
 }
