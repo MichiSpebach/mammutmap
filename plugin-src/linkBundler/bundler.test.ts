@@ -1,7 +1,5 @@
-//import * as testUtil from '../../test/testUtil' // would result in other modules as they would be loaded from 'src' and not from 'dist'
-import * as testUtil from './testUtil/testUtil'
-//import * as boxFactory from '../../test/core/box/factories/boxFactory' // would result in other modules as they would be loaded from 'src' and not from 'dist'
-import * as boxFactory from './testUtil/boxFactory'
+import * as testUtil from './testUtil'
+import * as boxFactory from '../../test/core/box/factories/boxFactory'
 import * as linkBundler from './bundler'
 import { BoxLinks } from '../../src/core/box/BoxLinks'
 import { Link } from '../../src/core/link/Link'
@@ -12,7 +10,7 @@ import { BoxData } from '../../src/core/mapData/BoxData'
 import { HighlightPropagatingLink } from './HighlightPropagatingLink'
 
 test('bundleLink, nothing to bundle', async () => {
-	await testUtil.initServicesWithMocks()
+	await testUtil.initServicesWithMocksAndOverrideLink()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const fileA = boxFactory.fileOf({idOrData: 'fileA', parent: root, addToParent: true, rendered: true})
@@ -34,7 +32,7 @@ test('bundleLink, insert one node, to box has outgoing links', async () => {
 })
 
 async function testBundleLinkInsertOneNode(options: {toBoxHasOutgoingLinks: boolean}): Promise<void> {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rootFolderFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -104,7 +102,7 @@ async function testBundleLinkInsertOneNode(options: {toBoxHasOutgoingLinks: bool
 }
 
 test('bundleLink, insert two nodes', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -180,7 +178,7 @@ test('bundleLink, insert two nodes, both inserts in from part, bundling shortLin
 })
 
 async function testBundleLinkBothInsertsInFromPart(linkToBundle: 'longLink'|'shortLink'): Promise<void> {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -227,7 +225,7 @@ test('bundleLink, insert two nodes, both inserts in to part, bundling shortLink'
 })
 
 async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'shortLink'): Promise<void> {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -268,7 +266,7 @@ async function testBundleLinkBothInsertsInToPart(linkToBundle: 'longLink'|'short
 }
 
 test('bundleLink, commonRoute startLink starts at LinkNode', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -308,7 +306,7 @@ test('bundleLink, commonRoute startLink starts at LinkNode', async () => {
 })
 
 test('bundleLink, commonRoute endLink ends at LinkNode', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -348,7 +346,7 @@ test('bundleLink, commonRoute endLink ends at LinkNode', async () => {
 })
 
 test('bundleLink, commonRoute starts with LinkNode', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -388,7 +386,7 @@ test('bundleLink, commonRoute starts with LinkNode', async () => {
 })
 
 test('bundleLink, commonRoute ends with LinkNode', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const rightFile = boxFactory.fileOf({idOrData: new BoxData('rightFile', 60, 40, 20, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -428,7 +426,7 @@ test('bundleLink, commonRoute ends with LinkNode', async () => {
 })
 
 test('bundleLink, linkToRootKnot', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const file = boxFactory.fileOf({idOrData: new BoxData('file', 10, 40, 40, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -456,7 +454,7 @@ test('bundleLink, linkToRootKnot', async () => {
 })
 
 test('bundleLink, linkFromRootKnot', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const file = boxFactory.fileOf({idOrData: new BoxData('file', 10, 40, 40, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -484,7 +482,7 @@ test('bundleLink, linkFromRootKnot', async () => {
 })
 
 /*test('bundleLink, too short to bundle', async () => { // TODO this test should succeed
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -516,7 +514,7 @@ test('bundleLink, linkFromRootKnot', async () => {
 })*/
 
 test('bundleLink, commonRoute and linkToBundle start with knots', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -574,7 +572,7 @@ test('bundleLink, commonRoute and linkToBundle start with knots', async () => {
 })
 
 test('bundleLink, commonRoute and linkToBundle end with knots', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -632,7 +630,7 @@ test('bundleLink, commonRoute and linkToBundle end with knots', async () => {
 })
 
 test('bundleLink, linkToBundle is connected to knot on toSide, commonRoute is not', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFile = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 40, 30, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -673,7 +671,7 @@ test('bundleLink, linkToBundle is connected to knot on toSide, commonRoute is no
 })
 
 test('bundleLink, linkToBundle is connected to knot on fromSide, commonRoute is not', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFile = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 40, 30, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -714,7 +712,7 @@ test('bundleLink, linkToBundle is connected to knot on fromSide, commonRoute is 
 })
 
 test('bundleLink, commonRoute with knots already exist', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -751,7 +749,7 @@ test('bundleLink, commonRoute with knots already exist', async () => {
 })
 
 test('bundleLink, linkToBundle starts with knot, knot on toSide needs to be inserted', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -792,7 +790,7 @@ test('bundleLink, linkToBundle starts with knot, knot on toSide needs to be inse
 })
 
 test('bundleLink, linkToBundle ends with knot, knot on fromSide needs to be inserted', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -843,7 +841,7 @@ test('bundleLink, boxes are already connected with links of other routes, but no
 })
 
 async function testBundleLinkBoxesAreConnectedWithLinksButNoRoute(linkToBundle: 'simpleLink'|'linkPartOfRoute', options: {entangleLinks: boolean}): Promise<void> {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -913,7 +911,7 @@ async function testBundleLinkBoxesAreConnectedWithLinksButNoRoute(linkToBundle: 
 }
 
 test('bundleLink, knots on from side need to be merged', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -961,7 +959,7 @@ test('bundleLink, knots on from side need to be merged', async () => {
 })
 
 test('bundleLink, knots on to side need to be merged', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -1009,7 +1007,7 @@ test('bundleLink, knots on to side need to be merged', async () => {
 })
 
 test('bundleLink, knots on both sides need to be merged', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -1066,7 +1064,7 @@ test('bundleLink, knots on both sides need to be merged', async () => {
 })
 
 test('bundleLink, linkToBundle is part of route and ends with knots, multiple times', async () => {
-	await testUtil.initServicesWithMocks({hideConsoleLog: true})
+	await testUtil.initServicesWithMocksAndOverrideLink({hideConsoleLog: true})
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 30, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})

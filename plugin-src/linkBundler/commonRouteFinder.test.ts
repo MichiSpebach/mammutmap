@@ -1,7 +1,5 @@
-//import * as testUtil from '../../test/testUtil' // would result in other modules as they would be loaded from 'src' and not from 'dist'
-import * as testUtil from './testUtil/testUtil'
-//import * as boxFactory from '../../test/core/box/factories/boxFactory' // would result in other modules as they would be loaded from 'src' and not from 'dist'
-import * as boxFactory from './testUtil/boxFactory'
+import * as testUtil from './testUtil'
+import * as boxFactory from '../../test/core/box/factories/boxFactory'
 import * as commonRouteFinder from './commonRouteFinder'
 import { Link } from '../../src/core/link/Link'
 import { AbstractNodeWidget } from '../../src/core/AbstractNodeWidget'
@@ -17,7 +15,7 @@ import { CommonRoute } from './CommonRoute'
 import { LocalRect } from '../../src/core/LocalRect'
 
 test('findLongestCommonRoute', async () => {
-	await testUtil.initServicesWithMocks()
+	await testUtil.initServicesWithMocksAndOverrideLink()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -41,7 +39,7 @@ test('findLongestCommonRoute', async () => {
 })
 
 test('findLongestCommonRoute, different managingBoxes of links', async () => {
-	await testUtil.initServicesWithMocks()
+	await testUtil.initServicesWithMocksAndOverrideLink()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -89,7 +87,7 @@ test('findLongestCommonRoute, different managingBoxes of links', async () => {
 })
 
 /*test('findLongestCommonRoute, longer commonRoute', async () => {
-	await testUtil.initServicesWithMocks()
+	await testUtil.initServicesWithMocksAndOverrideLink()
 
 	const root = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -137,7 +135,7 @@ test('findLongestCommonRoute, different managingBoxes of links', async () => {
 })*/
 
 /*test('findLongestCommonRoute, node in commonRoute', async () => {
-	await testUtil.initServicesWithMocks()
+	await testUtil.initServicesWithMocksAndOverrideLink()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFolder: FolderBox = boxFactory.folderOf({idOrData: new BoxData('leftFolder', 10, 20, 40, 60, [], []), parent: root, addToParent: true, rendered: true, bodyRendered: true})
@@ -176,7 +174,7 @@ test('findLongestCommonRoute, different managingBoxes of links', async () => {
 })*/
 
 test('findLongestCommonRoute, two commonRoutes with same length, one ends already with a knot', async () => {
-	await testUtil.initServicesWithMocks()
+	await testUtil.initServicesWithMocksAndOverrideLink()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 40, 30, 20, [], []), parent: root, addToParent: true, rendered: true})
@@ -212,7 +210,7 @@ test('findLongestCommonRoute, links are on different sides, other link is on bot
 })
 
 async function testFindLongestCommonRouteLinksAreOnDifferentSides(otherFilePosition: LocalPosition): Promise<void> {
-	await testUtil.initServicesWithMocks()
+	await testUtil.initServicesWithMocksAndOverrideLink()
 	
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 45, 10, 10, [], []), parent: root, addToParent: true, rendered: true})
@@ -232,7 +230,7 @@ async function testFindLongestCommonRouteLinksAreOnDifferentSides(otherFilePosit
 }
 
 test('findLongestCommonRoute, longLink on other side, shortLink on same side', async () => {
-	await testUtil.initServicesWithMocks()
+	await testUtil.initServicesWithMocksAndOverrideLink()
 
 	const root: RootFolderBox = boxFactory.rootFolderOf({idOrSettings: 'root', rendered: true, bodyRendered: true})
 	const leftFile: FileBox = boxFactory.fileOf({idOrData: new BoxData('leftFile', 10, 45, 10, 10, [], []), parent: root, addToParent: true, rendered: true})

@@ -4,8 +4,8 @@ import { RootFolderBox } from '../../src/core/box/RootFolderBox'
 import { LocalRect } from '../../src/core/LocalRect'
 import { BoxData } from '../../src/core/mapData/BoxData'
 import { LocalPosition } from '../../src/core/shape/LocalPosition'
-import * as boxFactory from '../linkBundler/testUtil/boxFactory'
-import * as testUtil from '../linkBundler/testUtil/testUtil'
+import * as boxFactory from '../../test/core/box/factories/boxFactory'
+import * as testUtil from '../../test/testUtil'
 import {LayerSystem} from './LayerSystem'
 
 test('too thick layers are scaled', async () => {

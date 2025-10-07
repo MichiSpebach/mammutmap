@@ -1,6 +1,46 @@
 import { MockProxy, mock } from 'jest-mock-extended'
 import { RenderManager, init as initRenderManager } from '../src/core/renderEngine/renderManager'
 import { BoxManager, init as initBoxManager } from '../src/core/box/BoxManager'
+import * as settings from '../src/core/settings/settings'
+import * as fileSystem from '../src/core/fileSystemAdapter'
+import { FileSystemAdapter } from '../src/core/fileSystemAdapter'
+import { RelocationDragManager } from '../src/core/RelocationDragManager'
+import * as relocationDragManager from '../src/core/RelocationDragManager'
+
+const consoleLogBackup = console.log
+
+export async function initServicesWithMocks(options?: {hideConsoleLog?: boolean}): Promise<{
+	renderManager: MockProxy<RenderManager>
+	boxManager: MockProxy<BoxManager>
+	relocationDragManager: MockProxy<RelocationDragManager>
+	fileSystem: MockProxy<FileSystemAdapter>
+}> {
+	const generalMocks = initGeneralServicesWithMocks()
+	//generalMocks.renderManager.getClientSize.mockReturnValue({width: 1600, height: 800}) // TypeError: Cannot read properties of undefined (reading 'width')
+	generalMocks.renderManager.getClientSize = mock(() => ({width: 1600, height: 800}))
+
+	const relocationDragManagerMock: MockProxy<RelocationDragManager> = mock<RelocationDragManager>()
+	relocationDragManager.init(relocationDragManagerMock)
+
+	const fileSystemMock: MockProxy<FileSystemAdapter> = mock<FileSystemAdapter>()
+	fileSystem.init(fileSystemMock)
+	
+	fileSystemMock.doesDirentExistAndIsFile.calledWith('./settings.json').mockReturnValue(Promise.resolve(true))
+	fileSystemMock.readFile.calledWith('./settings.json').mockReturnValue(Promise.resolve('{"zoomSpeed": 3,"boxMinSizeToRender": 200,"sidebar": true}'))
+	await settings.init()
+
+	if (options?.hideConsoleLog) {
+		jest.spyOn(console, 'log').mockImplementation()
+	} else {
+		console.log = consoleLogBackup
+	}
+
+	return {
+		...generalMocks,
+		relocationDragManager: relocationDragManagerMock,
+		fileSystem: fileSystemMock
+	}
+}
 
 export function initGeneralServicesWithMocks(): {
 	renderManager: MockProxy<RenderManager>,

@@ -1,10 +1,10 @@
 import { ProjectSettings } from '../../../src/core/ProjectSettings'
 import { Map } from '../../../src/core/Map'
 import * as projectSettingsFactory from './projectSettingsFactory'
-import * as mapSettingsDataFactory from './mapSettingsDataFactory'
+import * as mapSettingsDataFactory from '../mapData/factories/mapSettingsDataFactory'
 import { ClientRect } from '../../../src/core/ClientRect'
 import { renderManager } from '../../../src/core/renderEngine/renderManager'
-import * as boxFactory from './boxFactory'
+import * as boxFactory from '../../../test/core/box/factories/boxFactory'
 import { Style } from '../../../src/core/renderEngine/RenderElement'
 import { MapSettingsData } from '../../../src/core/mapData/MapSettingsData'
 
@@ -77,7 +77,7 @@ export function mapOf(options: {
 						if (attributeParts.length !== 2) {
 							console.warn(`mapFactory renderManager.setStyleTo attributeKeyWithValue.length !== 2, attributeKeyWithValue='${attributeParts}'`)
 						}
-						rootFolderStyle[attributeParts[0]] = attributeParts[1]
+						rootFolderStyle[attributeParts[0] as any] = attributeParts[1]
 					}
 				}
 			} else {

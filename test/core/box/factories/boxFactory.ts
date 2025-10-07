@@ -17,7 +17,9 @@ import { RenderManager, renderManager } from '../../../../src/core/renderEngine/
 export function rootFolderOf(options: {
     idOrSettings: string|MapSettingsData|ProjectSettings, 
     rendered?: boolean,
-    bodyRendered?: boolean
+    bodyRendered?: boolean,
+    getClientRect?: () => Promise<ClientRect>,
+    getMapClientRect?: () => Promise<ClientRect>
 }): RootFolderBox {
     let projectSettings: ProjectSettings
     if (options.idOrSettings instanceof ProjectSettings) {
@@ -31,11 +33,15 @@ export function rootFolderOf(options: {
     }
     const context: BoxContext = {
         projectSettings,
-        getMapClientRect: () => Promise.resolve(new ClientRect(0, 0, 1600, 800))
+        getMapClientRect: options.getMapClientRect?? (() => Promise.resolve(new ClientRect(0, 0, 1600, 800)))
     }
 
     const box = new RootFolderBox(context, 'idRenderedInto')
-    box.getClientRect = () => Promise.resolve(new ClientRect(1600*0.2, 800*0.2, 1600*0.6, 800*0.6))
+    if (options.getClientRect) {
+        box.getClientRect = options.getClientRect
+    } else {
+        box.getClientRect = () => Promise.resolve(new ClientRect(1600*0.2, 800*0.2, 1600*0.6, 800*0.6)) // TODO: aspectRatio depending on mapData, normally square
+    }
     box.saveMapData = () => Promise.resolve()
     setRenderStateToBox(box, options.rendered)
     setRenderStateToBoxBody(box.body, options.bodyRendered)
@@ -97,7 +103,7 @@ export function fileOf(options: {
     return box
 }
 
-function setRenderStateToBox(box: Box, rendered?: boolean): void {
+export function setRenderStateToBox(box: Box, rendered?: boolean): void {
     if (rendered) {
         const renderState: RenderState = (box as any).renderState
         renderState.setRenderStarted()
@@ -105,7 +111,7 @@ function setRenderStateToBox(box: Box, rendered?: boolean): void {
     }
 }
 
-function setRenderStateToBoxBody(boxBody: BoxBody, rendered?: boolean): void {
+export function setRenderStateToBoxBody(boxBody: BoxBody, rendered?: boolean): void {
     if (rendered) {
         const renderState: RenderState = (boxBody as any).renderState
         renderState.setRenderStarted()

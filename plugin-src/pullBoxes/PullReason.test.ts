@@ -1,6 +1,6 @@
-import * as testUtil from '../linkBundler/testUtil/testUtil'
+import * as testUtil from '../../test/testUtil'
 import * as map from '../../src/core/Map'
-import * as boxFactory from '../linkBundler/testUtil/boxFactory'
+import * as boxFactory from '../../test/core/box/factories/boxFactory'
 import { RootFolderBox } from '../../src/core/box/RootFolderBox'
 import { FileBox } from '../../src/core/box/FileBox'
 import { BoxData } from '../../src/core/mapData/BoxData'
