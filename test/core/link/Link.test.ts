@@ -4,7 +4,7 @@ import { WayPointData } from '../../../src/core/mapData/WayPointData'
 import { Box } from '../../../src/core/box/Box'
 import { Link } from '../../../src/core/link/Link'
 import { ClientRect } from '../../../src/core/ClientRect'
-import { RenderManager } from '../../../src/core/renderEngine/renderManager'
+import { RenderManager, RenderPriority } from '../../../src/core/renderEngine/renderManager'
 import { Transform } from '../../../src/core/box/Transform'
 import { LinkEndData } from '../../../src/core/mapData/LinkEndData'
 import { BoxData } from '../../../src/core/mapData/BoxData'
@@ -29,9 +29,9 @@ test('render', async () => {
   expect(scenario.renderMan.setContentTo).toHaveBeenCalledWith('link', expect.anything(), 1)
   //expect(scenario.fromBox.registerBorderingLink).toHaveBeenCalledWith(scenario.link) // TODO: fix jest-mock-extended
   //expect(scenario.toBox.registerBorderingLink).toHaveBeenCalledWith(scenario.link)
-  expect(scenario.renderMan.setStyleTo).toHaveBeenCalledWith('linkfrom', 'position:absolute;left:15%;top:10%;width:10px;height:10px;background-color:#2060c0;transform:translate(-5px,-5px);')
+  expect(scenario.renderMan.setStyleTo).toHaveBeenCalledWith('linkfrom', 'position:absolute;left:15%;top:10%;width:10px;height:10px;background-color:#2060c0;transform:translate(-5px,-5px);', RenderPriority.NORMAL)
   //expect(dragManager.addDraggable).toHaveBeenCalledWith(to) // TODO: mock dragManager
-  expect(scenario.renderMan.setStyleTo).toHaveBeenCalledWith('linkto', 'position:absolute;left:85%;top:10%;width:28px;height:10px;background-color:#2060c0;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);transform:translate(-14px,-5px)rotate(0rad);')
+  expect(scenario.renderMan.setStyleTo).toHaveBeenCalledWith('linkto', 'position:absolute;left:85%;top:10%;width:28px;height:10px;background-color:#2060c0;clip-path:polygon(0% 0%, 55% 50%, 0% 100%);transform:translate(-14px,-5px)rotate(0rad);', RenderPriority.NORMAL)
   //expect(dragManager.addDraggable).toHaveBeenCalledWith(from) // TODO: mock dragManager
 })
 
